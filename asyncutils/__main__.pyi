@@ -1,0 +1,1 @@
+'''Importing this will cause an exception to be thrown, since this is meant to be run as a script to start the console.'''

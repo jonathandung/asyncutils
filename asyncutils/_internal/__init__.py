@@ -1,0 +1,3 @@
+def __getattr__(name, /, g=globals(), s=frozenset(__all__ := ('protocols', 'helpers', 'submodules', 'patch', 'running_console', 'log'))|{'parsed', 'unparsed', 'initialize'}, t='from .%s import __class__', m=__import__('sys').modules, p='asyncutils._internal.'):
+    if name not in s: raise AttributeError(f"module 'asyncutils._internal' has no attribute {name!r}")
+    exec(t%name, g); return m[p+name]

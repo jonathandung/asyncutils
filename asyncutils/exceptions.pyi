@@ -1,0 +1,133 @@
+from _collections_abc import Callable, Generator, Iterable
+from types import TracebackType
+from typing import overload, type_check_only, TypeGuard, Self, Literal, Any, NoReturn, ClassVar
+from asyncio.locks import Lock
+from weakref import ref
+from .locks import LocksmithBase
+from .channels import EventBus
+from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike
+from .queues import _Q
+__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType'
+CRITICAL: tuple[ValidExcType, ...]
+def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Yields exceptions nested in a BaseExceptionGroup. Use this when you must preserve the order. Raises an auditing event asyncutils.exceptions.unnest, which exposes the internal queue, subjecting it to additional processing from audit hooks.'''
+def unnest_reverse(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Yields exceptions nested in a BaseExceptionGroup in reverse order. More memory- and time-efficient than unnest.'''
+@overload
+def potent_derive(group: BaseExceptionGroup, /, *groups: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup: ...
+@overload
+def potent_derive(group: BaseException, /, *groups: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+@overload
+def potent_derive(group: BaseException, /, *groups: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
+@overload
+def potent_derive(group: BaseException, /, *groups: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> E: '''Attaches some info to an exception and returns that exception.'''
+@overload
+def raise_(exc_typ: ValidExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: '''Programmatically raise an exception.'''
+@overload
+def raise_(exc_val: BaseException, /, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: ...
+def wrap_exc[E: BaseException](exc: E) -> _ExceptionWrapper[E]: ...
+def unwrap_exc[E: BaseException](exc: _ExceptionWrapper[E]) -> E: ...
+def exception_occurred(obj: Any, /) -> TypeGuard[_ExceptionWrapper]: ...
+@type_check_only
+class _ExceptionWrapper[E: BaseException]:
+    @property
+    def exc(self) -> E: ...
+class Deadlock(BaseException):
+    '''Raised when a potential deadlock situation is noticed by this module.'''
+    def __init__(self, /, *args, noticer: Any=...): ...
+    @property
+    def noticer(self) -> Any: ...
+class StateCorrupted(BaseException):
+    def __init__(self, adjective: str, details: str, /): ...
+class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
+    '''Raised when a critical error is encountered by exception-handling middleware.'''
+    def __init__(self, exc: E|None=None): ...
+    @property
+    def exc(self) -> E: ...
+class BulkheadError(RuntimeError): '''Raised when there is an error in bulkhead processing.'''
+class BulkheadFull(BulkheadError): '''Raised when a bulkhead is full and a party requests it to execute a coroutine.'''
+class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut down and a party requests it to execute a coroutine.'''
+class PoolError(RuntimeError): '''Raised when a task pool encounters a miscellaneous error.'''
+class PoolFull(PoolError): '''Raised when the task queue in a task pool is filled.'''
+class PoolShutDown(PoolError): '''Raised when submissions are sent to a shutting down pool.'''
+class BusError(RuntimeError): '''Raised when an operation on an event bus fails.'''
+class BusTimeout(BusError): '''Raised when an event bus takes too long to publish an event.'''
+class BusShutDown(BusError): '''Raised when subscription or publishing operations are called on an event bus that is closing down.'''
+class BusStatsError(BusError): '''Raised when attempting to access publishing statistics on an event bus whose statistics are not tracked.'''
+class CircuitBreakerError(RuntimeError): '''Base class for circuit breaker errors.'''
+class CircuitHalfOpen(CircuitBreakerError): '''Raised when a circuit exceeds its maximum calls in the half-open state.'''
+class CircuitOpen(CircuitBreakerError): '''Raised when a circuit is open in a CircuitBreaker (but shouldn't be).'''
+class EventValueError(ValueError): '''Raised when a party attempts to get the value an event of which the value is not set.'''
+class FutureCorrupted(RuntimeError): '''Raised after an internal party discovers an external party has set the result of a future whose result is for it to set only.'''
+class MaxIterationsError(RuntimeError): '''Raised when a function has reached the specified maximum iterations.'''
+class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
+class BusPublishingError(BusError):
+    '''Raised when an event bus fails to publish an event.'''
+    def __init__(self, bus: EventBus, mw: Callable[[str, Any]], /): ...
+    @property
+    def bus(self) -> EventBus|None: '''May be None if the event bus was garbage-collected.'''
+    @property
+    def middleware(self) -> Callable[[str, Any]]|None: '''May be None if the middleware was garbage-collected.'''
+class LockForceRequest(BaseException):
+    @property
+    def requester(self) -> LocksmithBase: ...
+    @property
+    def lock(self) -> AsyncLockLike: ...
+    def fulfill(self, answer: Any, /) -> None: ...
+    @property
+    def args(self) -> tuple[str, Any]: ...
+class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the password_queue function.'''
+class PasswordRetrievalError(PasswordQueueError):
+    '''Raised when the password_queue function cannot find the password from the closure variables.'''
+    @property
+    def from_(self) -> str: ...
+    def __init__(self, from_: str): ...
+class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the get password from the closure variables.'''
+class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the put password from the closure variables.'''
+class ForbiddenOperation(PasswordQueueError, TypeError):
+    '''A forbidden operation was attempted on a password-protected queue.'''
+    @property
+    def op(self) -> str: ...
+    def __init__(self, op: str, *a): ...
+class PasswordError(PasswordQueueError):
+    '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
+    @property
+    def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be None if the wrong password has been garbage collected.'''
+    @property
+    def queue(self) -> _Q|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
+class WrongPassword(PasswordError, ValueError):
+    '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
+    def __init__(self, queue: _Q, pwd: Any, /): ...
+class WrongPasswordType[T](PasswordError, TypeError):
+    '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
+    def __init__(self, pwd: T, wrongtyp: type[T], queue: _Q|None, correcttyp: type, /): ...
+    @property
+    def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
+    @property
+    def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
+class IgnoreErrors:
+    @property
+    def exc(self) -> tuple[ValidExcType, ...]: ...
+    def __init__(self, /, *_: ValidExcType): ...
+    def __enter__(self) -> Self: ...
+    @overload
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> bool: ...
+    @overload
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]: ...
+    async def __aenter__(self) -> Self: ...
+    @overload
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> bool: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]: ...
+    @overload
+    def combined(self, *others: ValidExcType) -> Self: ...
+    @overload
+    def combined(self, *others: Self) -> Self: ...
+class WarningToError:
+    lock: ClassVar[Lock]
+    def __init__(self, /, *typs: type[Warning]): ...
+    async def __aenter__(self) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> bool: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]: ...
+ignore_all: IgnoreErrors
