@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: your-package-name
+Version: 0.1.0
+Summary: A short description of your package
+Home-page: https://github.com/pypa/asyncutils
+Author: Jonathan Dung
+Author-email: Jonathan Dung <jonathandung@yahoo.com>
+License: MIT
+Project-URL: Homepage, https://github.com/jonathandung/asyncutils
+Project-URL: Repository, https://github.com/jonathandung/asyncutils.git
+Keywords: keyword1,keyword2
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.14
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: home-page
+
+# asyncutils
