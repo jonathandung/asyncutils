@@ -1,2 +1,0 @@
-import setuptools as S
-with open('README.md') as f: S.setup(name='asyncutils', version='0.8.0', author='Jonathan Dung', author_email='jonathandung@yahoo.com', description='A compact, dependency-free package containing async programming tools.', long_description=f.read(), long_description_content_type='text/markdown', url='https://github.com/pypa/asyncutils', packages=S.find_packages(), classifiers=('Programming language :: Python :: 3', 'License :: OSI Approved :: MIT License', 'Operating System :: OS Independent'))
