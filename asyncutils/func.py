@@ -20,7 +20,7 @@ async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
 def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs={}, default=_NO_DEFAULT):
     if loop is None: loop = _get_loop_no_exit()
     def dec(f, /):
-        nonlocal stop_when; n = f.__name__
+        n = f.__name__
         if stop_when and stop_when.done(): log.warning(f'future to stop periodic coroutine {n} is already done')
         async def wrapper(*a, **k):
             log.debug('periodic task started; source: every'); q = default is _NO_DEFAULT; nonlocal stop_when

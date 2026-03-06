@@ -1,6 +1,6 @@
 N, __doc__ = type('Namespace', (dict,), {'__getattr__': dict.__getitem__, '__setattr__': dict.__setitem__, '__delattr__': dict.__delitem__})(log_to='STDERR', executor='thread', Q=0, V=0, quiet=False, basic_repl=False, max_memerrs=3, load_all=False, seed=None), '''usage: python [-m] asyncutils [-l [FILE] | -n] [-e ETYP | -c EXECUTOR | --thread | --process | --interpreter | --loky | --loky-reuse | --dask | --elib-flux-cluster | --elib-flux-job | --elib-slurm-cluster | --elib-slurm-job | --elib-single-node | --pebble-thread | --pebble-process] [-Q] [-V] [-q] [-b] [-m M] [-p] [-s SEED] [-v] [-?]
 
-A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier.
+A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.
 
 options:

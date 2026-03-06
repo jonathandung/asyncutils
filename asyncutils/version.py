@@ -69,7 +69,7 @@ def normalize(o, /, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__in
     elif f := dispatch_normalizer(o, t=type):
         try:
             if (o := f(o)) is None: return
-            if not c(o): raise TypeError(f'custom normalizer {f!r} for type {t.__qualname__!r} did not return an iterable of ints as expected when handling {o!r}')
+            if not c(o): raise TypeError(f'custom normalizer {f!r} for type {type(o).__qualname__!r} did not return an iterable of ints as expected when handling {o!r}')
         except: unregister_normalizer(o, t=type); raise
     elif not c(o): return
     try: return p(o)

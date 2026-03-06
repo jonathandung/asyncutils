@@ -205,15 +205,17 @@ class EventBus(LoopContextMixin):
             except KeyError: return False
     def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type))
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
+    async def _publish_helper(self, d, s, I, *_):
+        await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=False, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
         if chaperone is None: chaperone = f.append
-        async def g(f=lambda I, *_: gather(*((self._safe_callback(i, data, *_) for i in I) if safe else (i(data, *_) for i in I))), s=yield_to_event_loop):
+        async def g():
+            nonlocal data
             for m, F in self._middlewares.items():
                 try:
                     if F is not None and F.done(): continue
                     if iscoroutine(data := m(event_type, data)): data = await data
-                    else: await s
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: chaperone(e)
                 except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False)
@@ -221,7 +223,7 @@ class EventBus(LoopContextMixin):
             async with self._lock:
                 if self._tracking: self._published[event_type] += 1
                 s, w = map(lambda _: self._subscribers[_].copy(), (event_type, None))
-            await gather(f(s), f(w, event_type))
+            await gather((f := partial(type(self)._publish_helper, self, data, safe))(s), f(w, event_type))
         self._publisher = self.make(p := wait_for(g(), timeout))
         try:
             if wait: await p

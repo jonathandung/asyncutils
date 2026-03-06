@@ -1,5 +1,5 @@
 '''Defines interfaces and type aliases that don't actually exist and are only used in this module's stubs, any of which may be removed without notice.
-At runtime, accessing any name in this module returns None, so that inline type annotations are still possible.'''
+At runtime, accessing any name in this module returns None, so that inline type annotations are possible as well.'''
 from types import TracebackType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
 from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, overload, type_check_only

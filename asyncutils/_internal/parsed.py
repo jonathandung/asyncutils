@@ -1,6 +1,6 @@
 import argparse as A
 from .. import __version__ as V
-i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier.
+i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, suggest_on_error=True, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
 
 If using this module without exposing the command line, use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file.
