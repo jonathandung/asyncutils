@@ -2,7 +2,7 @@
 At runtime, accessing any name in this module returns None, so that inline type annotations are possible as well.'''
 from types import TracebackType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
-from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, overload, type_check_only
+from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
 from io import TextIOWrapper, _WrappedBuffer
 @type_check_only
 class SupportsLT(Protocol):
@@ -73,3 +73,4 @@ type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
 type Timer = Callable[[], float]
 type All = tuple[str, ...]
+type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
