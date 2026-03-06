@@ -12,11 +12,12 @@ exceptions_all = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive',
 func_all = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'rate_limit', 'measure', 'benchmark'
 futures_all = 'AsyncCallbacksFuture', 'AsyncCallbacksTask'
 io_all = 'double_ended_text_pipe', 'double_ended_binary_pipe', 'AsyncReadWriteCouple', 'MemoryMappedIOManager'
+iterclasses_all = 'apeekable', 'achain', 'abucket', 'OnlineSorter'
 iters_all = ('tee', 'aunzip', 'merge_async_iters', 'aflatten', 'batch', 'achunked', 'asideeffect', 'asliced', 'batch_buffer', 'buffer', 'asplitat', 'batch_process', 'window', 'aall', 'aany', 'amax', 'amin', 'azip', 'amap', 'afilter', 'arange', 'acount', 'acycle', 'arepeat', 'aaccumulate', 'acompress', 'adropwhile', 'afilterfalse', 'agroupby', 'aislice', 'aiterindex', 'asieve', 'apairwise', 'atriplewise',
             'aproduct', 'astarmap', 'atakewhile', 'atotient', 'asquaresum', 'aziplongest', 'asumprod', 'aconvolve', 'atabulate', 'asum', 'aprod', 'atail', 'amultinomial', 'to_tuple', 'anth', 'aconsume', 'aallequal', 'acombinations', 'acombinations_with_replacement', 'apermutations', 'apowerset', 'aquantify', 'apadnone', 'agrouper', 'aroundrobin', 'aroundrobin2', 'aunique_everseen', 'aunique_justseen',
             'aunique', 'ancycles', 'apartition', 'aiterexcept', 'ailen', 'aiterate', 'with_aiter', 'asorted', 'acanonical', 'adistinctpermutations', 'auniquetoeach', 'aderangements', 'aintersperse', 'ainterleave', 'ainterleaveevenly', 'ainterleaverandomly', 'aspy', 'acollapse', 'afirsttrue', 'aprepend', 'arandomproduct', 'arandomcombination', 'arandom_combination_with_replacement', 'afirst',
             'alast', 'anthorlast', 'abeforeandafter', 'anthcombination', 'arepeatfunc', 'asubslices', 'atranspose', 'apolynomialfromroots', 'apolynomialeval', 'apolynomialderivative', 'areshape', 'afactor', 'arunningmedian', 'arandomderangement', 'amatmul', 'mat_vec_mul', 'vecs_eq', 'afrievalds', 'basic_collect', 'asubstrings', 'asubstrindices', 'iter_future', 'agetitems_from_indices', 'aintersend',
-            'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'amatprod', 'anullcontext', 'apeekable', 'achain', 'abucket', 'OnlineSorter')
+            'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'amatprod', 'areversed', 'anullcontext')
 locks_all = 'AdvancedRateLimit', 'PrioritySemaphore', 'KeyedCondition', 'RLock', 'PriorityLock', 'PriorityRLock'
 misc_all = 'StateMachine', 'gather_with_limited_concurrency'
 mixins_all = 'EventualLoopMixin', 'LoopContextMixin', 'AwaitableMixin', 'AsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'EventMixin'
@@ -29,4 +30,4 @@ signals_all = 'wait_for_signal',
 tools_all = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format'
 util_all = 'get_future', 'new_tasks', 'to_sync', 'to_sync_from_loop', 'sync_await', 'semaphore', 'lockf', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'get_aiter_fromf', 'safe_cancel'
 version_all = 'VersionInfo', 'VersionDelta', 'normalize', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
-__all_submodules = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'
+__all_submodules = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'

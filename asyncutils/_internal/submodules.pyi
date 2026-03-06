@@ -13,6 +13,7 @@ exceptions_all: All
 func_all: All
 futures_all: All
 io_all: All
+iterclasses_all: All
 iters_all: All
 locks_all: All
 misc_all: All

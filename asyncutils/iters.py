@@ -1,7 +1,6 @@
 # type: ignore
-from .config import Executor, _NO_DEFAULT, RAISE, _randinst
+from .config import _NO_DEFAULT, RAISE, _randinst
 from .constants import RECIP_E
-from .mixins import LoopContextMixin, EventualLoopMixin
 from .exceptions import Critical, ItemsExhausted, FutureCorrupted, exception_occurred, wrap_exc, CRITICAL
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, aiter_to_iter, dummy_task
 from .util import safe_cancel, to_async, get_aiter_fromf
@@ -9,11 +8,11 @@ from .func import areduce
 from ._internal.log import debug
 from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods, pkgpref
 from collections import defaultdict, Counter, deque
-from functools import partial, singledispatchmethod, lru_cache
+from functools import partial, lru_cache
 from _operator import attrgetter, itemgetter, methodcaller, add, mul, not_, is_, is_not, sub, getitem, index
-from sys import audit, maxsize as INF
+from sys import audit
 from bisect import insort_right, bisect_left
-from heapq import heapify, heappushpop, heappush, heappop, heappush_max, heappushpop_max
+from heapq import heappush, heappush_max, heappushpop_max
 from math import isqrt, comb, gcd, ceil
 from asyncio.queues import Queue, QueueEmpty, QueueShutDown, LifoQueue
 from asyncio.locks import Lock, Event, Semaphore
@@ -26,12 +25,12 @@ if TYPE_CHECKING:
     from _collections_abc import Awaitable, Iterable, AsyncIterable, AsyncGenerator, AsyncIterator, Callable, Coroutine, Hashable, Sequence
     from asyncio.events import AbstractEventLoop
     from asyncio.futures import Future
-    from ._internal.protocols import SupportsIteration, Exceptable, SupportsRichComparison, AsyncContextManager, SupportsSlicing, ValidExcType
+    from ._internal.protocols import SupportsIteration, Exceptable, SupportsRichComparison, AsyncContextManager, SupportsSlicing
     __all__ = ('tee', 'aunzip', 'merge_async_iters', 'aflatten', 'batch', 'achunked', 'asideeffect', 'asliced', 'batch_buffer', 'buffer', 'asplitat', 'batch_process', 'window', 'aall', 'aany', 'amax', 'amin', 'azip', 'amap', 'afilter', 'arange', 'acount', 'acycle', 'arepeat', 'aaccumulate', 'acompress', 'adropwhile', 'afilterfalse', 'agroupby', 'aislice', 'aiterindex', 'asieve', 'apairwise', 'atriplewise',
         'aproduct', 'astarmap', 'atakewhile', 'atotient', 'asquaresum', 'aziplongest', 'asumprod', 'aconvolve', 'atabulate', 'asum', 'aprod', 'atail', 'amultinomial', 'to_tuple', 'anth', 'aconsume', 'aallequal', 'acombinations', 'acombinations_with_replacement', 'apermutations', 'apowerset', 'aquantify', 'apadnone', 'agrouper', 'aroundrobin', 'aroundrobin2', 'aunique_everseen', 'aunique_justseen',
         'aunique', 'ancycles', 'apartition', 'aiterexcept', 'ailen', 'aiterate', 'with_aiter', 'asorted', 'acanonical', 'adistinctpermutations', 'auniquetoeach', 'aderangements', 'aintersperse', 'ainterleave', 'ainterleaveevenly', 'ainterleaverandomly', 'aspy', 'acollapse', 'afirsttrue', 'aprepend', 'arandomproduct', 'arandomcombination', 'arandom_combination_with_replacement', 'afirst',
         'alast', 'anthorlast', 'abeforeandafter', 'anthcombination', 'arepeatfunc', 'asubslices', 'atranspose', 'apolynomialfromroots', 'apolynomialeval', 'apolynomialderivative', 'areshape', 'afactor', 'arunningmedian', 'arandomderangement', 'amatmul', 'mat_vec_mul', 'vecs_eq', 'afrievalds', 'basic_collect', 'asubstrings', 'asubstrindices', 'iter_future', 'agetitems_from_indices', 'aintersend',
-        'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amatprod', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'anullcontext', 'apeekable', 'achain', 'abucket', 'OnlineSorter')
+        'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amatprod', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'areversed')
 else: from ._internal.submodules import iters_all as __all__; Any, overload = None, lambda _, /: None
 async def fmap[T, **P](fs: SupportsIteration[Callable[P, Awaitable[T]]], *a: P.args, **k: P.kwargs): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential[T, **P](fs: SupportsIteration[Callable[P, Awaitable[T]]], *a: P.args, **k: P.kwargs):
@@ -986,83 +985,14 @@ async def aguessmin[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callab
 async def apowersoftwo(*, init: int=1, init_shift: int=0):
     init <<= init_shift
     while True: yield init; init <<= 1
+async def areversed(it):
+    try:
+        async for i in iter_to_aiter(reversed(it)): yield i
+    except TypeError:
+        f = (l := []).append
+        async for i in iter_to_aiter(it): f(i)
+        for i in reversed(l): yield i
 class anullcontext:
     async def __aenter__(self): ...
-    @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: 'TracebackType|None', /) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     async def __aexit__(*_): ...
-class achain[T]:
-    __slots__ = 'its'
-    @classmethod
-    def from_iterable(cls, it: SupportsIteration[SupportsIteration[T]]): return cls(*aiter_to_iter(it))
-    def __init__(self, *its: SupportsIteration[T]): self.its = its
-    async def __aiter__(self) -> AsyncGenerator[T, None]:
-        for i in self.its:
-            async for _ in iter_to_aiter(i): yield _
-class apeekable[T=Any](EventualLoopMixin):
-    def __init__(self, it: SupportsIteration[T]): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
-    def __aiter__(self): return self
-    def __bool__(self):
-        try: self.loop.run_until_complete(self.peek()); return True
-        except StopAsyncIteration: return False
-    async def peek(self, default: T=_NO_DEFAULT) -> T:
-        if not (c := self._cache):
-            try: c.append(await anext(self._it))
-            except StopAsyncIteration:
-                if default is _NO_DEFAULT: raise
-                return default
-        return c[0]
-    def prepend(self, *i): self._cache.extendleft(reversed(i))
-    async def __anext__(self) -> T:
-        if (c := self._cache): return c.popleft()
-        return await anext(self._it)
-    @singledispatchmethod
-    def __getitem__(self, idx): raise TypeError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
-    @__getitem__.register
-    def _(self, idx: slice) -> tuple[T, ...]:
-        if (c := 1 if (_ := idx.step) is None else _) > 0: a, b = 0 if (_ := idx.start) is None else _, INF if (_ := idx.stop) is None else _
-        elif c < 0: a, b = -1 if (_ := idx.start) is None else _, ~INF if (_ := idx.stop) is None else _
-        else: raise ValueError('slice step cannot be zero')
-        C = self._cache
-        if a < 0 or b < 0: C.extend(aiter_to_iter(self._it))
-        elif (d := min(max(a, b)+1, INF)-len(C)) >= 0: C.extend(aiter_to_iter(aislice(self._it, d)))
-        return tuple(C)[idx]
-    @__getitem__.register
-    def _(self, idx: int) -> T:
-        l = len(c := self._cache)
-        if idx < 0: c.extend(aiter_to_iter(self._it))
-        elif idx >= l: c.extend(aiter_to_iter(aislice(self._it, idx-l+1)))
-        return c[idx]
-class abucket[T, R](LoopContextMixin):
-    def __init__(self, it: SupportsIteration[T], key: Callable[[T], R], validator: Callable[[R], bool]): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict[R, deque[T]](deque), validator or (lambda _: True)
-    def __contains__(self, v: R):
-        if not self._validator(v): return False
-        try: self._cache[v].appendleft(self.loop.run_until_complete(anext(self[v]))); return True
-        except StopIteration: return False
-    async def __aiter__(self):
-        async for i in self._it:
-            if self._validator(v := self._key(i)): self._cache[v].append(i)
-        for k in self._cache: yield k
-    async def __getitem__(self, val: R, /):
-        if not self._validator(val): return
-        while True:
-            if (_ := self._cache[val]): yield _.popleft()
-            else:
-                while True:
-                    try: i = await anext(self._it)
-                    except StopAsyncIteration: return
-                    if (v := self._key(i)) == val: yield i; break
-                    elif self._validator(v): self._cache[v].append(i)
-class OnlineSorter:
-    __slots__ = '_it', '_runner', '_popper', '_pusher'
-    def __init__(self, it: SupportsIteration): self._it = aiter_to_iter(it); self._runner = partial(type(l := _get_loop_no_exit()).run_in_executor, l, Executor())
-    def __aiter__(self):
-        if not hasattr(self, 'popper'): h = list(self._it); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
-        return self
-    def __anext__(self): return self._runner(self._popper)
-    def asend(self, item): return self._runner(self._pusher, item)
-    def athrow(self, typ, val=None, tb=None): return self._runner(self._it.throw, typ, val, tb)
-    def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher; return r
 del _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, TYPE_CHECKING

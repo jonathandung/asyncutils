@@ -1,5 +1,5 @@
 '''asyncutils is a feature-rich asynchronous utilities library with CLI and REPL support.'''
-__all__ = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'
+__all__ = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'
 from .altlocks import *
 from .base import *
 from .buckets import *
@@ -14,6 +14,7 @@ from .exceptions import *
 from .func import *
 from .futures import *
 from .io import *
+from .iterclasses import *
 from .iters import *
 from .locks import *
 from .misc import *
