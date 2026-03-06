@@ -60,6 +60,10 @@ class PartialInterface(metaclass=PartialInterfaceMeta):
 @type_check_only
 class DumpType(Protocol):
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
+@type_check_only
+class CanWriteAndFlush[T](Protocol):
+    def flush(self) -> None: ...
+    def write(self, s: T, /) -> None: ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 type SupportsRichComparison = SupportsLT|SupportsGT

@@ -24,4 +24,6 @@ def argv_to_json(a, p, /, *, dump=json.dump, _=p.parse_args):
     if not p.endswith('.json'): raise ValueError('path should end with .json')
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=shlex.split, **k): argv_to_json(split(a), p, **k)
+def get_cfg_json_format(): return (__import__('importlib.resources', fromlist=('',)).files('asyncutils')/'format.jsonc').read_text()
+def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
 del p, shlex, json
