@@ -1,5 +1,5 @@
 from .mixins import LoopContextMixin
-from .base import event_loop, iter_to_aiter, safe_cancel_batch, dummy_task, yield_to_event_loop
+from .base import event_loop, iter_to_aiter, safe_cancel_batch, dummy_task
 from .util import safe_cancel, sync_await, to_async, to_sync, semaphore, _ignore_cancellation
 from .exceptions import IgnoreErrors, BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .config import Executor, _NO_DEFAULT

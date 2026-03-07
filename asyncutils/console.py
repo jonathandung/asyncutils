@@ -85,7 +85,7 @@ class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredC
     def __repr__(self): return f'{type(self).__qualname__}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
-    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=False, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False):
+    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(sys.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False):
         self.prehook(max_memerrs); sys.audit(f'{type(self).__qualname__}.run', self); l = self._loop
         if always_run_interactive or sys.stdin.isatty():
             sys.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = sys.stderr.write
