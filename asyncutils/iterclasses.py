@@ -30,27 +30,27 @@ class apeekable(EventualLoopMixin):
                 if default is _NO_DEFAULT: raise
                 return default
         return c[0]
-    def prepend(self, *i): self._cache.extendleft(reversed(i))
+    def prepend(self, /, *i): self._cache.extendleft(reversed(i))
     async def __anext__(self):
         if (c := self._cache): return c.popleft()
         return await anext(self._it)
     @singledispatchmethod
-    def __getitem__(self, idx): raise TypeError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
+    def __getitem__(self, idx, /): raise TypeError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
     @__getitem__.register(slice)
-    def _(self, idx, i=~INF):
-        if (c := 1 if (_ := idx.step) is None else _) > 0: a, b = 0 if (_ := idx.start) is None else _, INF if (_ := idx.stop) is None else _
-        elif c < 0: a, b = -1 if (_ := idx.start) is None else _, i if (_ := idx.stop) is None else _
+    def _(self, s, /, i=~INF):
+        if (c := 1 if (_ := s.step) is None else _) > 0: a, b = 0 if (_ := s.start) is None else _, INF if (_ := s.stop) is None else _
+        elif c < 0: a, b = -1 if (_ := s.start) is None else _, i if (_ := s.stop) is None else _
         else: raise ValueError('slice step cannot be zero')
         C = self._cache
         if a < 0 or b < 0: C.extend(aiter_to_iter(self._it))
         elif (d := min(max(a, b)+1, INF)-len(C)) >= 0: from .iters import aislice as s; C.extend(aiter_to_iter(s(self._it, d)))
-        return tuple(C)[idx]
+        return tuple(C)[s]
     @__getitem__.register(int)
-    def _(self, idx):
+    def _(self, i, /):
         l = len(c := self._cache)
-        if idx < 0: c.extend(aiter_to_iter(self._it))
-        elif idx >= l: from .iters import aislice as s; c.extend(aiter_to_iter(s(self._it, idx-l+1)))
-        return c[idx]
+        if i < 0: c.extend(aiter_to_iter(self._it))
+        elif i >= l: from .iters import aislice as s; c.extend(aiter_to_iter(s(self._it, i-l+1)))
+        return c[i]
 @subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict(deque), validator or (lambda _: True)
