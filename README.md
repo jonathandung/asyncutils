@@ -1,6 +1,6 @@
 # asyncutils (unfortunately py-asyncutils on pip)
 
-A python library abstracting common patterns that somehow always pop up in async code.
+A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
 Includes a wide range of submodules tailored for specific usages, though concrete implementations are lacking.
 
@@ -8,9 +8,15 @@ Prides in being as fast as can be in terms of import time, with detailed type ch
 
 Also has a well-equipped command line interface taking many flags and options.
 
+## Setup
+
+Essentially no setup required! Just install py-asyncutils from pip.
+
+## Usage
+
 A typical program that uses this module would look like this:
 
-\# demo.py
+`# demo.py`
 
     import asyncutils as autils
     with autils.event_loop() as loop: # this wraps the asyncio event loop implementation with proper cleanup
@@ -25,9 +31,21 @@ which prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 175 ms incl
 
 The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`), though considering how many submodules we provide (30 and ever-increasing!), it is acceptable. In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the -p/--load-all switch is passed.
 
+## Remarks
+
 It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related features.
 
 Other resources if you're new to the world of async: [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html#a-conceptual-overview-of-asyncio), [Real Python's Async IO Tutorial](https://realpython.com/async-io-python/), [Python Async Basics Video Guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
+
+## Contributing
+
+If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
+
+For more, check out the [Contributing Guide](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Jonathan Dung
 
 Have fun!
 
