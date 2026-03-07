@@ -2,6 +2,7 @@ N, __doc__ = type('Namespace', (dict,), {'__getattr__': dict.__getitem__, '__set
 
 A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.
+Install using pip: `python -m pip install py-asyncutils` or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails
 
 options:
     -l, --log-to [FILE]     This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
@@ -24,6 +25,7 @@ options:
                             loky: Use loky.process_executor.ProcessPoolExecutor.
                             loky_reuse: Reuse a loky.process_executor.ProcessPoolExecutor if possible.
                             dask: Use dask.distributed.Client. May have API incompatibilities.
+                            ipython: Use ipyparallel.ViewExecutor.
                             elib_flux_cluster: Use executorlib.executor.flux.FluxClusterExecutor.
                             elib_flux_job: Use executorlib.executor.flux.FluxJobExecutor.
                             elib_slurm_cluster: Use executorlib.executor.slurm.SlurmClusterExecutor.
@@ -41,6 +43,7 @@ options:
     --loky                  Equivalent to "-e loky".
     --loky-reuse            Equivalent to "-e loky_reuse".
     --dask                  Equivalent to "-e dask".
+    --ipython               Equivalent to "-e ipython".
     --elib-flux-cluster     Equivalent to "-e elib_flux_cluster".
     --elib-flux-job         Equivalent to "-e elib_flux_job".
     --elib-slurm-cluster    Equivalent to "-e elib_slurm_cluster".
@@ -79,7 +82,7 @@ metadata:
 Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
 
 If using this module without exposing the command line, use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file.
-Other json formats are not currently supported. See the possible keys in format.jsonc.
+Other json formats are not currently supported; see the possible keys in format.jsonc, which can be accessed using tools.get_cfg_json_format().
 
 Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio and trio.'''
 if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\''):

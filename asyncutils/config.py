@@ -22,6 +22,7 @@ def l(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
         elif e == d:
             try: (r := __import__('loky.reusable_executor', fromlist=_)._ReusablePoolExecutor).__new__ = lambda cls, *a, **k: cls.get_reusable_executor(*a, **k)[0]; return r
             except ImportError: ...
+        elif e == 'ipython': return __import__('ipyparallel.client.view', fromlist=_).ViewExecutor
         else:
             d, *a = e.split('_')
             if d == 'elib':

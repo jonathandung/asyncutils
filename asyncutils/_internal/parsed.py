@@ -1,12 +1,13 @@
 import argparse as A
 from .. import __version__ as V
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
-Has CLI and coloured REPL support for quick development.''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, suggest_on_error=True, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
+Has CLI and coloured REPL support for quick development.
+Install using pip: `python -m pip install py-asyncutils` or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, suggest_on_error=True, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
 
 If using this module without exposing the command line, use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file.
-Other json formats are not currently supported. See the possible keys in format.jsonc.
+Other json formats are not currently supported; see the possible keys in format.jsonc, which can be accessed using tools.get_cfg_json_format().
 
-Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio and trio.''')
+Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, tornado, vibora, fastapi and trio.''')
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', default='STDERR', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE is passed (interpreted as an integer file descriptor if possible), the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
@@ -19,7 +20,7 @@ If FILE is 'STDERR', logs to stderr (also the default behaviour and fallback if 
 a('-n', '--no-log', action=b, const='NULL', default=A.SUPPRESS, dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')
-(a := h())('-e', '--executor', choices=(c := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process')), default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
+(a := h())('-e', '--executor', choices=(c := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process')), default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
@@ -27,6 +28,7 @@ The below options are third-party; ThreadPoolExecutor will be used instead if th
 loky_noreuse: Use a new loky.process_executor.ProcessPoolExecutor every time.
 loky: Reuse a loky.process_executor.ProcessPoolExecutor if possible.
 dask: Use dask.distributed.Client. May have API incompatibilities.
+ipython: Use ipyparallel.ViewExecutor.
 elib_flux_cluster: Use executorlib.executor.flux.FluxClusterExecutor.
 elib_flux_job: Use executorlib.executor.flux.FluxJobExecutor.
 elib_slurm_cluster: Use executorlib.executor.slurm.SlurmClusterExecutor.
@@ -46,6 +48,6 @@ M defaults to 3.
 Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
-(a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit.')
+(a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', default=A.SUPPRESS, help='Print this help message and exit.')
 del a, b, c, d, e, f, g, h, i, A, V
