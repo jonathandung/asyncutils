@@ -7,6 +7,9 @@ from functools import partial, singledispatchmethod
 from collections import deque, defaultdict
 from heapq import heapify, heappop, heappushpop
 from ._internal.submodules import iterclasses_all as __all__
+class anullcontext:
+    async def __aenter__(self): ...
+    async def __aexit__(*_): ...
 @subscriptable
 class achain:
     __slots__ = 'its'

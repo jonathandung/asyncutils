@@ -33,4 +33,4 @@ else:
 a += ('submodules_map',)
 _l('all submodules initialized')
 _l('now loading: config')
-del sys, config, _l, _d, _k, _v, _a, _f, _s, _u, d, _
+del sys, config, P, R, _l, _d, _k, _v, _a, _f, _s, _u, d, _

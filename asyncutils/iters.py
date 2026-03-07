@@ -5,6 +5,7 @@ from .exceptions import Critical, ItemsExhausted, FutureCorrupted, exception_occ
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, aiter_to_iter, dummy_task
 from .util import safe_cancel, to_async, get_aiter_fromf
 from .func import areduce
+from .iterclasses import achain, anullcontext
 from ._internal.log import debug
 from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods, pkgpref
 from collections import defaultdict, Counter, deque
@@ -992,7 +993,4 @@ async def areversed(it):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-class anullcontext:
-    async def __aenter__(self): ...
-    async def __aexit__(*_): ...
 del _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, TYPE_CHECKING

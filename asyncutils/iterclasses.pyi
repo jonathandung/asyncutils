@@ -1,9 +1,16 @@
-from ._internal.protocols import SupportsIteration
+from ._internal.protocols import SupportsIteration, ValidExcType
 from .mixins import EventualLoopMixin, LoopContextMixin
+from types import TracebackType
 from typing import Self, Any, overload
 from asyncio.futures import Future
 from _collections_abc import AsyncGenerator, Callable
-__all__ = 'apeekable', 'achain', 'abucket', 'OnlineSorter'
+__all__ = 'anullcontext', 'apeekable', 'achain', 'abucket', 'OnlineSorter'
+class anullcontext:
+    async def __aenter__(self) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 class achain[T]:
     @classmethod
     def from_iterable(cls, it: SupportsIteration[SupportsIteration[T]]) -> Self: ...

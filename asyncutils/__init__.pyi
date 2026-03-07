@@ -34,4 +34,5 @@ __version__: Final[VersionInfo]
 __hexversion__: Final[int]
 '''0x123456 -> version 12.34.56'''
 __git_version__: Final[str]
+'''The git commit hash.'''
 submodules_map: Final[dict[str, ModuleType]]
