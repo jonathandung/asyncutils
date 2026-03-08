@@ -4,6 +4,7 @@ base_all: All
 buckets_all: All
 caches_all: All
 channels_all: All
+cli_all: All
 compete_all: All
 console_all: All
 config_all: All

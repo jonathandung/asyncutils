@@ -7,8 +7,6 @@ if not (g := globals()).get(k := '__package__'):
         for g in type(s).__mro__:
             if g.__module__ == a and g.__qualname__ == b == g.__name__: s.name = 'asyncutils.__main__'; break
     del a, b, s
-S._xoptions['asyncutils_run_as_main'] = True
 del k, S
-from ._internal import initialize
-from . import base, console
-with base.event_loop.from_flags(0) as g: raise SystemExit(console.AsyncUtilsConsole(g).run(suppress_asyncio_warnings=True, suppress_unawaited_coroutine_warnings=True))
+from .cli import run
+run()

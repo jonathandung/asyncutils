@@ -16,3 +16,7 @@ classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"
 Repository = "https://github.com/jonathandung/asyncutils.git"
+
+[project.scripts]
+asyncutils = 'asyncutils.cli:run'
+autils = 'asyncutils.cli:run'
