@@ -77,9 +77,9 @@ def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True
     elif not c(o): return
     try: return p(o)
     except TypeError, ValueError: return
-def register_normalizer(o, f, /, N=N, t=t): return N.setdefault(t(o), f) is f
-def unregister_normalizer(o, /, N=N, t=t): return N.pop(t(o), None)
-def dispatch_normalizer(o, /, N=N, t=t): return N.get(t(o))
+def register_normalizer(o, n, /, f=N.setdefault, t=t): return f(t(o), n) is n
+def unregister_normalizer(o, /, f=N.pop, t=t): return f(t(o), None)
+def dispatch_normalizer(o, /, f=N.get, t=t): return f(t(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): m(self.parts, other) if (other := normalize(other)) else NotImplemented)

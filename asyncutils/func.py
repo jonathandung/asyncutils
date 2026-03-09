@@ -4,7 +4,6 @@ from .config import RAISE, _NO_DEFAULT, _randinst
 from .base import iter_to_aiter
 from .util import safe_cancel, _ignore_cancellation
 from .exceptions import wrap_exc, CRITICAL, MaxIterationsError
-from .constants import getcontext
 from time import perf_counter
 from functools import wraps
 from sys import audit, maxsize as INF
@@ -96,7 +95,7 @@ def timer(f, /, *, precision=6, expected=Exception, log=True, timer=perf_counter
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=lambda *_: None, on_success=lambda *_: None, random=_randinst.random):
-    C = getcontext()
+    from .constants import getcontext as C; C = C()
     if tries is None: tries = C.RETRY_DEFAULT_TRIES
     if delay is None: delay = C.RETRY_DEFAULT_DELAY
     if backoff is None: backoff = C.RETRY_DEFAULT_BACKOFF
