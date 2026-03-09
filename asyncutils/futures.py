@@ -1,4 +1,4 @@
-from ._internal.helpers import copy_and_clear, pkgpref
+from ._internal.helpers import copy_and_clear
 from sys import audit
 from asyncio.tasks import eager_task_factory, _PyTask # type: ignore
 from asyncio.futures import _PyFuture # type: ignore
@@ -20,7 +20,7 @@ class AsyncCallbacksFuture(_PyFuture):
         if r := (len(self._async_callbacks)-len(l := [(f, c) for f, c in self._async_callbacks if f is not fn])): self._async_callbacks[:] = l
         return r
     def __schedule_callbacks(self):
-        audit(f'{pkgpref}futures.{type(self).__name__}.__schedule_callbacks', self); a, b, c, d, e, f = (l := self._loop).create_task, l.call_soon, *map(copy_and_clear, (self._async_callbacks, self._callbacks, self._noargs_async_callbacks, self._noargs_callbacks))
+        audit(f'asyncutils.futures.{(n := type(self).__name__)}._{n}__schedule_callbacks', self); a, b, c, d, e, f = (l := self._loop).create_task, l.call_soon, *map(copy_and_clear, (self._async_callbacks, self._callbacks, self._noargs_async_callbacks, self._noargs_callbacks))
         for g, _ in c: a(g(self), context=_)
         for g, _ in d: b(g, self, context=_)
         for g, _ in e: a(g(), context=_)

@@ -9,9 +9,8 @@ from asyncio.coroutines import iscoroutine
 from asyncio.staggered import staggered_race
 from sys import audit, exc_info
 from ._internal.submodules import compete_all as __all__
-f = H.pkgpref.__add__
-async def first_completed(*C, ret_exc=False, loop=None, ename=f('compete.first_completed')):
-    audit(ename, C); c = None
+async def first_completed(*C, ret_exc=False, loop=None):
+    audit('asyncutils.compete.first_completed', C); c = None
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     try:
         for _ in (await wait(t := tuple(loop.create_task(c) for c in C), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := _.exception()) else _.result()
@@ -25,9 +24,9 @@ async def race(*C, timeout=None, loop=None, _=_):
     finally:
         if c: c.__exit__(*exc_info())
         _('race ended'); await safe_cancel(t)
-async def race_with_callback(*C, winner=None, loser=None, timeout=None, ename=f('compete.race_with_callback')):
+async def race_with_callback(*C, winner=None, loser=None, timeout=None):
     if not C: raise TypeError('pass in at least one coroutine to race_with_callback')
-    audit(ename, C); d, p = await wait(_ := tuple(new_tasks(*C)), return_when='FIRST_COMPLETED', timeout=timeout)
+    audit('asyncutils.compete.race_with_callback', C); d, p = await wait(_ := tuple(new_tasks(*C)), return_when='FIRST_COMPLETED', timeout=timeout)
     if not d: return
     try:
         w = d.pop().result()
@@ -54,4 +53,4 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=iscoroutine, futwrap=
         async def wrapper(): return await i
         yield wrapper()
 def enhanced_staggered_race(cfs, delay, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs)), delay, loop=loop)
-del H, f, _
+del H, _

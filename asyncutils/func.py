@@ -1,4 +1,4 @@
-from ._internal.helpers import _get_loop_no_exit, copy_and_clear, pkgpref
+from ._internal.helpers import _get_loop_no_exit, copy_and_clear
 from ._internal import log
 from .config import RAISE, _NO_DEFAULT, _randinst
 from .base import iter_to_aiter
@@ -139,7 +139,7 @@ def rate_limit(calls, period, timer=perf_counter):
     def dec(f):
         async def wrapper(*a, _c_=deque(), _l_=Lock(), **k):
             async with _l_:
-                audit(f'{pkgpref}func.rate_limit', f, a, k, calls, period); n, C = timer(), copy_and_clear(_c_)
+                audit('asyncutils.func.rate_limit', f, a, k, calls, period); n, C = timer(), copy_and_clear(_c_)
                 for i in C:
                     if i > n-period: _c_.append(i)
                 if len(_c_) >= calls: await sleep(period-n+_c_.popleft())
@@ -148,6 +148,6 @@ def rate_limit(calls, period, timer=perf_counter):
         return wraps(f)(wrapper)
     return dec
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s
-async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module=pkgpref+'func')):
+async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
     for _ in range(warmup): await f()
-    g = measure.__get__(f); audit(f'{pkgpref}func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), (S := sum(t)), S/len(t), times+warmup)
+    g = measure.__get__(f); audit('asyncutils.func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), (S := sum(t)), S/len(t), times+warmup)

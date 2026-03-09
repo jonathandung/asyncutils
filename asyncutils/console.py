@@ -1,5 +1,4 @@
 from ._internal.submodules import console_all as __all__
-from ._internal.helpers import pkgpref
 from ._internal.running_console import _get_, _set_, _unset_, _should_write_load_all_
 from ._internal.patch import *
 from ._internal.log import debug
@@ -108,7 +107,7 @@ class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredC
         if suppress_unawaited_coroutine_warnings: patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode
     patch_method_signatures((interrupt, ''), (set_return_code, 'e'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
-class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as sync_await in this REPL, they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f: d.update(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or setattr(f := lambda m=m, /: m.update({k: v if (g := getattr(v, 'load', None)) is None else g() for k, v in m.items()}), '__qualname__', l := 'load_all') or setattr(f, '__name__', l) or d.update(__version__=v, load_all=f), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass {}console.ConsoleBase instead'.format(pkgpref)):
+class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as sync_await in this REPL, they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f: d.update(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or setattr(f := lambda m=m, /: m.update({k: v if (g := getattr(v, 'load', None)) is None else g() for k, v in m.items()}), '__qualname__', l := 'load_all') or setattr(f, '__name__', l) or d.update(__version__=v, load_all=f), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{'running' if self.is_running else 'idle'} asyncutils console at {id(self):#x}>'
     @property
     def is_running(self, _m='User tampered with console-internal state!\n'):
@@ -128,8 +127,8 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if (r := _get_()) is None: _set_(self)
         else: raise RuntimeError(_r if r is self else _a)
         super().prehook(_m if max_memerrs is None else max_memerrs)
-    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _n=pkgpref+'console'):
-        if _unset_() is not self: sys.stderr.write(_m); del sys.modules[_n]
+    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
+        if _unset_() is not self: sys.stderr.write(_m); del sys.modules[__name__]
         super().posthook()
     def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=31, _mn=sys.intern('__callback')):
         t, v, b = sys.exc_info()
@@ -140,4 +139,4 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))
-del _f, _s, pkgpref, getenv, C, debug, V
+del _f, _s, getenv, C, debug, V

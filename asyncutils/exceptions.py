@@ -1,11 +1,11 @@
 from sys import stderr, exception, audit
-from ._internal.helpers import subscriptable, pkgpref
+from ._internal.helpers import subscriptable
 from ._internal.submodules import exceptions_all as __all__
 from ._internal.patch import patch_function_signatures
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
 def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _a=audit):
-    _a(f'{pkgpref}exceptions.unnest{'_reverse' if isinstance(s, list) else ''}', s)
+    _a(f'asyncutils.exceptions.unnest{'_reverse' if isinstance(s, list) else ''}', s)
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
         elif raise_critical and isinstance(group, CRITICAL): raise Critical(group)
@@ -36,7 +36,7 @@ def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppres
 def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
     if isinstance(e, type): e = e(*a, **k)
     elif a or k: _s_.write('raise_: no additional arguments were expected\n')
-    _a_(f'{pkgpref}exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
+    _a_(f'asyncutils.exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 @subscriptable
 class _ExceptionWrapper:

@@ -5,7 +5,7 @@ from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, 
 from .util import safe_cancel, to_async, get_aiter_fromf
 from .iterclasses import achain, anullcontext
 from ._internal.log import debug
-from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods, pkgpref
+from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods
 from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache
 from sys import audit
@@ -101,7 +101,7 @@ async def aunzip[T, R](ait: SupportsIteration[tuple[T|R, ...]], *, fillvalue: R)
 @overload
 async def aunzip(ait: SupportsIteration[tuple[Any, ...]], put_batch: int=..., fillvalue: Any=...) -> tuple[AsyncIterator[Any], ...]: ...
 async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put):
-    audit(f'{pkgpref}iters.aunzip', ait, *_filter_out(fillvalue)); l = len(t := await anext(I := iter_to_aiter(ait), ()))
+    audit('asyncutils.iters.aunzip', ait, *_filter_out(fillvalue)); l = len(t := await anext(I := iter_to_aiter(ait), ()))
     class aunzip_consumer:
         def __init__(self): self.q = Queue()
         def __aiter__(self): return self
@@ -119,7 +119,7 @@ async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put):
         def close(self): self.q.shutdown()
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
 async def merge_async_iters[T](*I: SupportsIteration[T], reverse: bool=False) -> AsyncGenerator[T, None]:
-    audit(f'{pkgpref}iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)[T](), None, Event(), _get_loop_no_exit(), _NO_DEFAULT
+    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)[T](), None, Event(), _get_loop_no_exit(), _NO_DEFAULT
     async def drain(i: AsyncIterable[T], f=q.put):
         async for _ in i: await f(_)
     async def close():
@@ -943,7 +943,7 @@ def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIterati
         setatend.set_result(L.time()-s)
     c = L.create_task(consume())
     if setatend is not None: setatend.add_done_callback(lambda _: L.run_until_complete(gather(safe_cancel(c), safe_cancel_batch(r))))
-    audit(f'{pkgpref}iters.agetitems_from_indices', it, r); return r
+    audit(f'asyncutils.iters.agetitems_from_indices', it, r); return r
 async def aintersend[T, R](i1: AsyncGenerator[T, R], i2: AsyncGenerator[R, T]):
     debug('aintersend called'); a, b = await gather(anext(i1), anext(i2))
     while True: yield a, b; a, b = await gather(i1.asend(b), i2.asend(a))

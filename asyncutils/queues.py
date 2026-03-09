@@ -16,12 +16,12 @@ from .mixins import EventualLoopMixin
 from .base import aiter_to_iter, iter_to_aiter, collect
 from .util import sync_await, safe_cancel
 from .futures import AsyncCallbacksFuture
-from ._internal.helpers import _get_loop_no_exit, pkgpref
+from ._internal.helpers import _get_loop_no_exit
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
 ignore_qerrs, ignore_valerrs = f(*_), IgnoreErrors(ValueError)
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, wait=False, init_items=(), raising=True, strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, log=warning, auditf=audit, _heapq=__import__('heapq')):
-    auditf(f'{pkgpref}queues.password_queue', protect_get, protect_put, get_from, put_from)
+    auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
     if protect_get:
         try:
             if password_get is _NO_DEFAULT and (password_get := (F := _getframe(1)).f_locals.get(get_from := get_from.strip(), o := object())) is o is (password_get := F.f_globals.get(get_from, o)): raise GetPasswordRetrievalError(get_from)
@@ -146,7 +146,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     def sync_get(self, *, timeout=None, default): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
         try:
-            if self.full(): audit(f'{pkgpref}queues.{type(self).__qualname__}.push', item, self.get_nowait())
+            if self.full(): audit(f'asyncutils.queues.{type(self).__name__}.push', item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
     async def drain_persistent(self, max=None, timeout=None):
