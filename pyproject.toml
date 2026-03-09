@@ -20,3 +20,6 @@ Repository = "https://github.com/jonathandung/asyncutils.git"
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'
 autils = 'asyncutils.cli:run'
+
+[project.optional-dependencies]
+dev = ["black", "flake8"]
