@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,9 +9,9 @@ authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 description = "A library containing versatile and adaptable tools to well complement the asyncio framework. Not as performant as C extensions, but startup speed is great considering the features it provides."
 readme = "README.md"
 requires-python = ">=3.14"
-license = {text = "MIT"}
+license = "MIT"
 keywords = ["asynchronous", "convenient", "fast", "light", "feature-rich"]
-classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent"]
+classifiers = ["Programming Language :: Python :: 3", "Operating System :: OS Independent"]
 
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"
