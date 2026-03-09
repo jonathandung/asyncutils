@@ -1,5 +1,4 @@
 import sys as S, logging as L
-if S.version_info >= (3, 15) or not __package__: __package__ = 'asyncutils'
 from ._internal.submodules import config_all as __all__
 from ._internal import log, patch as P
 from atexit import register

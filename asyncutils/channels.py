@@ -4,7 +4,6 @@ from .util import safe_cancel, sync_await, to_async, to_sync, semaphore, _ignore
 from .exceptions import IgnoreErrors, BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _filter_out, _get_loop_no_exit, copy_and_clear, stop_and_closer, subscriptable
-from ._internal.patch import patch_method_signatures, patch_classmethod_signatures
 from . import constants
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
@@ -17,7 +16,7 @@ from asyncio.coroutines import iscoroutine
 from asyncio.tasks import wait_for, gather, sleep, shield
 from asyncio.timeouts import timeout as _timeout
 from ._internal.submodules import channels_all as __all__
-from ._internal import log
+from ._internal import log, patch as P
 @subscriptable
 class Observable(LoopContextMixin):
     __slots__ = '_data', '_lock', '_to_remove', '_queue', '_event'
@@ -281,7 +280,7 @@ class EventBus(LoopContextMixin):
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e)
     async def __setup__(self): super().__init__()
-    patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_putters', '_loop', '_lock', '_task'
@@ -336,4 +335,5 @@ class Rendezvous:
         async with self._lock: await gather(*map(_, (self._getters, self._putters)))
         self._task.cancel(); self._make_task()
     def _make_task(self): self._task = self._loop.create_task(self._maintainer())
-    patch_method_signatures((reset, ''), (state_snapshot, ''), (_maintainer, ''))
+    P.patch_method_signatures((reset, ''), (state_snapshot, ''), (_maintainer, ''))
+del P

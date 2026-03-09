@@ -7,7 +7,6 @@ from types import TracebackType
 from random import Random
 from threading import Lock
 __all__ = 'debugging', 'debug', 'sentinel_base', 'RAISE', 'SYNC_AWAIT', 'silent', 'Executor', 'set_logger_level', 'basic_repl', 'loaded_all', 'get_past_logs', 'logging_to'
-__package__: Final[str]
 class Executor(_, PartialInterface): '''A class that implements the PEP 3148 Executor interface. The exact class is determined at runtime by command-line arguments.'''
 class debugging:
     @property

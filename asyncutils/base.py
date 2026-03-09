@@ -36,7 +36,7 @@ class event_loop:
                 if not f&0x200: raise RuntimeError(f'{type(self).__name__}: exception occurred while calling __enter__ of associated event loop: {e}')
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
-    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError)):
+    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L):
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
             N = type(self).__name__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
@@ -49,33 +49,33 @@ class event_loop:
         if f&self._INNER_EXIT:
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
-                except CRITICAL as e: L.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
+                except CRITICAL as e: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
                 except RuntimeError as e:
-                    if not f&0x100: L.error('RuntimeError exiting associated event loop', exc_info=True)
+                    if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
                 except BaseException as e:
-                    if not f&0x200: L.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
-            elif not f&0x200: L.error('__enter__ already called but __exit__ is not present')
+                    if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
+            elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)):
                 try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b)) 
-                except CRITICAL as e: L.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
+                except CRITICAL as e: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError as e:
-                    if not f&0x100: L.error('RuntimeError exiting associated event loop', exc_info=True)
+                    if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
                 except BaseException as e:
-                    if not f&0x200: L.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
-            elif not f&0x200: L.error('__aenter__ already called but __aexit__ is not present')
+                    if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
+            elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
             with _i: l.close()
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
-    def __del__(self, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n'):
+    def __del__(self, _f=L.debug, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n'):
         b, n = not (f := self._flags)&2, type(self).__name__
         if f&self._ENTERED:
             if b: stderr.write(_m%n)
             if f&1: self._flags = f^0x400
             if self.__exit__(*exc_info()) and b: stderr.write(_w%n)
-        elif b: L.debug(f'destroyed {n} at {id(self):#x}')
+        elif b: _f(f'destroyed {n} at {id(self):#x}')
     def __reduce__(self, /): return self.from_flags.__func__, (self.__class__, self._flags)
     P.patch_method_signatures((__enter__, ''), (__exit__, 'typ, val, tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}'))
 def f(n):
@@ -88,7 +88,7 @@ def f(n):
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
 async def safe_cancel_batch(t, disembowel=False):
-    L.debug('safe_cancel_batch called'); l = []
+    audit('safe_cancel_batch', t); l = []
     async for _ in (adisembowel if disembowel else iter_to_aiter)(t):
         if not _.done(): _.cancel(); l.append(_)
     await gather(*l, return_exceptions=True)
@@ -135,13 +135,13 @@ def aiter_to_iter(ait, _s=Executor().submit, _i=IgnoreErrors(StopAsyncIteration)
                     while True: yield _s(_a, f()).result()
         return iterator()
     raise TypeError('cannot iterate over ait synchronously or asynchronously')
-async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False):
+async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False, _=L.error):
     r, i, n = [], 0, maxsize if n is None else n
     async for i, _ in aenumerate(it):
         if i == n: break
         r.append(_)
     else:
-        if default is RAISE: L.error('collect ran out of items')
+        if default is RAISE: _('collect ran out of items')
         elif default is not _NO_DEFAULT: r.extend(default for _ in range(n-i))
     return (r, n) if __retn else r
 async def take(it, n, default=_NO_DEFAULT):
@@ -168,4 +168,4 @@ P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
 _.__qualname__ = _.__name__ = 'dummy_task'
-del a, f, _
+del a, f, _, P, L

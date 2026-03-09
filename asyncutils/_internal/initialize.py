@@ -9,7 +9,7 @@ for _k, _v in d:
 for _k, _v in d: _u(dict.fromkeys(_v, _k[:-4]))
 class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
     __slots__ = '_name'
-    def __new__(cls, name, /, _d=_d, _a=_a, _s=s, _p=C.__package__):
+    def __new__(cls, name, /, _d=_d, _a=_a, _s=s, _p='asyncutils'):
         if name in _a: return _s[name]
         if name == '__git_version__':
             try: return __import__('subprocess').check_output(('git', 'rev-parse', 'HEAD'), text=True).strip()

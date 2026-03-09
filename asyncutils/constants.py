@@ -1,8 +1,7 @@
-from dataclasses import dataclass, replace
-from ._internal.patch import patch_function_signatures
+import dataclasses as D
+from ._internal.patch import patch_function_signatures as f
 from ._internal.submodules import constants_all as __all__
-RECIP_E = 0.3678794411714423
-@dataclass(kw_only=True, match_args=False, slots=True)
+@D.dataclass(kw_only=True, match_args=False, slots=True)
 class Context:
     CIRCUIT_BREAKER_DEFAULT_RESET: float = 30.0
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = 5
@@ -33,19 +32,19 @@ class Context:
     def __post_init__(self):
         if not (self.CIRCUIT_BREAKER_DEFAULT_RESET > 0 < self.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS and 0 < self.DYNAMIC_THROTTLE_DEFAULT_LBOUND < self.DYNAMIC_THROTTLE_DEFAULT_UBOUND < 1 and self.DYNAMIC_THROTTLE_DEFAULT_LFACTOR < 1.0 < self.DYNAMIC_THROTTLE_DEFAULT_UFACTOR and self.LEAKY_BUCKET_DEFAULT_MAXFACTOR > 1.0 > self.LEAKY_BUCKET_DEFAULT_MINFACTOR > 0.0 < self.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK and self.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH > 0.0 < self.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL and self.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE > 0 < self.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE and all(i is None or i > 0.0 for i in (self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT, self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT)) and self.EVENT_WITH_VALUE_DEFAULT_MAXHIST > 0 < self.EVENT_WITH_VALUE_DEFAULT_RECENT and self.RETRY_DEFAULT_TRIES > 0 < self.DYNAMIC_THROTTLE_DEFAULT_JITTER < 1.0 and self.RETRY_DEFAULT_BACKOFF > 1.0 > self.RETRY_DEFAULT_JITTER > 0.0 < self.RETRY_DEFAULT_DELAY <= self.RETRY_DEFAULT_MAX_DELAY): raise ValueError
     def __init_subclass__(cls): raise TypeError('cannot subclass Context')
-    copy = replace
-_cv = __import__('_contextvars').ContextVar('asyncutils_contextvar')
-def getcontext(_cv=_cv, _dc=Context()):
-    try: return _cv.get()
-    except LookupError: _cv.set(_dc); return _dc
-def setcontext(ctx, /, _cv=_cv):
+    copy = D.replace
+_, RECIP_E = __import__('_contextvars').ContextVar('asyncutils_contextvar'), 0.3678794411714423
+def getcontext(_=_, d=Context()):
+    try: return _.get()
+    except LookupError: _.set(d); return d
+def setcontext(ctx, /, _=_):
     if not isinstance(ctx, Context): raise TypeError
-    _cv.set(ctx)
-patch_function_signatures((getcontext, ''), (setcontext, 'ctx, /'))
+    _.set(ctx)
+f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:
     __slots__ = 'saved_ctx', 'new_ctx'
     def __init__(self, new_ctx): self.new_ctx = new_ctx.copy()
     def __enter__(self): self.saved_ctx = getcontext(); setcontext(self.new_ctx)
     def __exit__(self, /, *_): setcontext(self.saved_ctx)
 def __getattr__(name, /): return getattr(getcontext(), name)
-del _cv, replace
+del _, D, f
