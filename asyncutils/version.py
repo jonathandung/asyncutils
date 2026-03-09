@@ -31,12 +31,12 @@ class VersionInfo(str):
         except ValueError, TypeError, AttributeError: return False
     def replace_parts(self, *, _=s, **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
-    def get_current_version(cls, E=E.VersionCorrupted):
+    def get_current_version(cls, E=E):
         from . import __version__ as V
         if isinstance(V, cls):
             if V.is_valid: return V
-            raise E(V)
-        from .exceptions import StateCorrupted as S; raise S('module-internal', '__version__ is inconsistent with expectations')
+            raise E.VersionCorrupted(V)
+        raise E.StateCorrupted('module-internal', '__version__ is inconsistent with expectations')
     @classmethod
     def to_version(cls, o, /): return cls(*normalize(o))
     def __format__(self, s, /, a={'x': 'hex', 'b': 'bin', 'o': 'oct', 'd': 'dec', '0': 'major', '1': 'minor', '2': 'patch'}.get):
@@ -83,4 +83,4 @@ def dispatch_normalizer(o, /, f=N.get, t=t): return f(t(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): m(self.parts, other) if (other := normalize(other)) else NotImplemented)
-del _, N, t, P, p, s
+del _, N, t, P, p, s, E
