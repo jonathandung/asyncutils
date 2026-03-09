@@ -1,4 +1,4 @@
-from .. import config as C
+from .. import config as C, exceptions as E
 from .log import debug as l
 from .submodules import __dict__ as d
 from . import patch as P, running_console as R
@@ -31,8 +31,8 @@ if C.loaded_all:
 else:
     f = object.__new__
     for _ in a: r._name, s[_] = _, (r := f(module))
-    s['config'] = C; del f, r
+    s.update(config=C, exceptions=E); del f, r
 a += ('submodules_map',)
 l('all submodules initialized')
 l('now loading: config')
-del C, P, R, l, _d, _k, _v, _a, _f, _s, _u, d, _
+del C, P, R, E, l, _d, _k, _v, _a, _f, _s, _u, d, _

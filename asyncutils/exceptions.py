@@ -80,8 +80,18 @@ class IgnoreErrors:
     async def __aenter__(self): return self
     async def __aexit__(self, *_): return self.__exit__(*_)
     def combined(self, *others): return type(self)(*{*self.exc, *(others if isinstance(others[0], type) else (_.exc for _ in others))})
+class VersionError(Exception): ...
+class VersionConversionError(VersionError): ...
+class VersionValueError(VersionConversionError, ValueError): ...
+class VersionNormalizerTypeError(VersionConversionError, TypeError):
+    def __init__(self, f, o, /, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self.normalizer, self.obj = f, o; super().__init__(t(f, o))
+class VersionNormalizerFault(VersionConversionError):
+    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self.normalizer, self.obj, self.exc = a; super().__init__(t(*a))
+class VersionCorrupted(VersionError, RuntimeError):
+    def __init__(self, v, /, t='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self.victim = v; super().__init__(t%(type(v).__qualname__, id(v), getattr(v, 'parts', '<not present>')))
+    def __getattr__(self, name, /): return getattr(self.victim, name)
 class BulkheadError(RuntimeError): ...
-class BulkheadFull(BulkheadError): ...
+class BulkheadFull(BulkheadError): ...   
 class BulkheadShutDown(BulkheadError): ...
 class PoolError(RuntimeError): ...
 class PoolFull(PoolError): ...
@@ -91,7 +101,6 @@ class BusTimeout(BusError, TimeoutError): ...
 class BusShutDown(BusError): ...
 class BusStatsError(BusError): ...
 class BusPublishingError(BusError):
-    __slots__ = '_rb', '_rm'
     def __init__(self, /, *_, r=ref, f='{.name}: severe error in middleware {!r}'.format): self._rb, self._rm = map(r, _); super().__init__(f(*_))
     @property
     def bus(self): return self._rb()
@@ -108,15 +117,12 @@ class LockForceRequest(BaseException):
     def __init__(self, s, a, l, i, /): self.requester, self.fulfill, self.lock = s, a, l; super().__init__(f'request from {type(s).__qualname__} to release {type(l).__qualname__}', i)
 class PasswordQueueError(Exception): ...
 class PasswordRetrievalError(PasswordQueueError):
-    __slots__ = 'from_'
     def __init__(self, from_): self.from_ = from_; super().__init__('failed to retrieve correct password of password-protected queue from closure variable of name %r'%from_)
 class GetPasswordRetrievalError(PasswordRetrievalError): ...
 class PutPasswordRetrievalError(PasswordRetrievalError): ...
 class ForbiddenOperation(PasswordQueueError, TypeError):
-    __slots__ = 'op'
     def __init__(self, op, *a): self.op = op = op%a; super().__init__('cannot %s PasswordQueue'%op)
 class PasswordError(PasswordQueueError):
-    __slots__ = '_refp', '_refq'
     @property
     def wrongpass(self): return self._refp()
     @property
@@ -125,7 +131,6 @@ class WrongPassword(PasswordError, ValueError):
     def __init__(self, *_, ref=ref): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_)
 @subscriptable
 class WrongPasswordType(PasswordError, TypeError):
-    __slots__ = '_reft', '_refc' 
     def __init__(self, *_, ref=ref): self._refp, self._reft, self._refq, self._refc = map(ref, _); super().__init__('password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format(*_))
     @property
     def wrongtype(self): return self._reft()

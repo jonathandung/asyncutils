@@ -7,7 +7,8 @@ from .locks import LocksmithBase
 from .channels import EventBus
 from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike
 from .queues import _Q
-__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType'
+from .version import VersionInfo
+__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType'
 CRITICAL: tuple[ValidExcType, ...]
 def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Yields exceptions nested in a BaseExceptionGroup. Use this when you must preserve the order. Raises an auditing event asyncutils.exceptions.unnest, which exposes the internal queue, subjecting it to additional processing from audit hooks.'''
 def unnest_reverse(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Yields exceptions nested in a BaseExceptionGroup in reverse order. More memory- and time-efficient than unnest.'''
@@ -43,6 +44,30 @@ class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     def __init__(self, exc: E|None=None): ...
     @property
     def exc(self) -> E: ...
+class VersionError(Exception): '''Base class for all version-related errors.'''
+class VersionConversionError(VersionError): '''Base class for errors thrown when attempting to normalize an object to a version.'''
+class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the VersionInfo constructor is negative, for instance.'''
+class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
+    '''Raised when a custom normalizer returns anything but an iterable of integers.'''
+    def __init__(self, normalizer: Callable[[T]], obj: T, /): ...
+    @property
+    def normalizer(self) -> Callable[[T]]: ...
+    @property
+    def obj(self) -> T: ...
+class VersionNormalizerFault[T](VersionConversionError):
+    '''Wraps any errors thrown by a custom normalizer, intentionally or otherwise.'''
+    def __init__(self, normalizer: Callable[[T], Iterable[int]], obj: T, exc: BaseException, /): ...
+    @property
+    def normalizer(self) -> Callable[[T], Iterable[int]]: ...
+    @property
+    def obj(self) -> T: ...
+    @property
+    def exc(self) -> BaseException: ...
+class VersionCorrupted(VersionError, RuntimeError):
+    def __init__(self, victim: VersionInfo, /): ...
+    def __getattr__(self, name: str, /) -> Any: ...
+    @property
+    def victim(self) -> VersionInfo: ...
 class BulkheadError(RuntimeError): '''Raised when there is an error in bulkhead processing.'''
 class BulkheadFull(BulkheadError): '''Raised when a bulkhead is full and a party requests it to execute a coroutine.'''
 class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut down and a party requests it to execute a coroutine.'''

@@ -29,30 +29,32 @@ class VersionInfo(str):
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ...
     def __format__(self, format_spec: str, /) -> str: ...
-    def __int__(self) -> int: '''Assumes major, minor, and patch are all less than 256.'''
+    def __int__(self) -> int: '''Assumes minor and patch are less than 256.'''
     def __floor__(self) -> int: '''Returns the major version.'''
     def __ceil__(self) -> int: '''Returns the major version, adding one if there is a minor or patch version.'''
     def __bytes__(self) -> bytes: '''Assumes major, minor, and patch are all less than 256.'''
     def __float__(self) -> float: '''Assumes minor and patch are less than 100.'''
     def __complex__(self) -> complex: '''Loses the patch version.'''
-    def sanity_check(self) -> Literal[True]: '''If this returns False, the user must have messed something up intentionally.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: ...
     def change_sep(self, sep: str) -> str: ...
     def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: ...
     def next_patch(self) -> Self: ...
     def next_minor(self) -> Self: ...
     def next_major(self) -> Self: ...
-    def is_unstable(self) -> Literal[False]: '''True only in development, so should be considered always False.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
     @classmethod
     def to_version(cls, o: Any, /) -> Self: '''Builds an instance from any normalizable object; throws an exception if not possible.'''
     @property
+    def is_valid(self) -> Literal[True]: '''If this returns False, the user must have messed something up intentionally.'''
+    @property
     def representation(self) -> str:
         """>>> print(VersionInfo(4, 2).representation)
         asyncutils v4.2.0"""
     @property
-    def parts(self) -> tuple[int, int, int]: ...
+    def is_unstable(self) -> Literal[False]: '''True only in development, so should be considered always False.'''
+    @property
+    def parts(self) -> tuple[int, int, int]: '''The tuple (major, minor, patch); all integers.'''
     @property
     def major(self) -> int: ...
     @property
