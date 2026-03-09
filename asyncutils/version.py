@@ -2,14 +2,13 @@ from ._internal import patch as P
 from ._internal.submodules import version_all as __all__
 from . import exceptions as E
 from collections import namedtuple
-from _operator import itemgetter
-def p(I, /, f=0 .__gt__):
+def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     r = []
     for i, j in enumerate(I):
         r.append(int(j, 0) if isinstance(j, str) else int(j))
         if i == 2: break
     else: r.extend(0 for _ in range(2-i))
-    if any(map(f, r)): raise E.VersionValueError('major, minor and patch should all be positive')
+    if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
 s = 'major', 'minor', 'patch'
 class VersionInfo(str):
@@ -32,11 +31,11 @@ class VersionInfo(str):
         except ValueError, TypeError, AttributeError: return False
     def replace_parts(self, *, _=s, **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
-    def get_current_version(cls):
+    def get_current_version(cls, E=E.VersionCorrupted):
         from . import __version__ as V
         if isinstance(V, cls):
             if V.is_valid: return V
-            raise E.VersionCorrupted(V)
+            raise E(V)
         from .exceptions import StateCorrupted as S; raise S('module-internal', '__version__ is inconsistent with expectations')
     @classmethod
     def to_version(cls, o, /): return cls(*normalize(o))
@@ -59,9 +58,9 @@ class VersionInfo(str):
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation = property('asyncutils v'.__add__); major, minor, patch = map(lambda i: property(itemgetter(i)), range(3)); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; __trunc__ = __floor__ = major.fget; P.patch_classmethod_signatures((__new__, '/, *a'))
+    representation = property('asyncutils v'.__add__); major, minor, patch = map(property, map(__import__('_operator').itemgetter, range(3))); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; __trunc__ = __floor__ = major.fget; P.patch_classmethod_signatures((__new__, '/, *a'))
 VersionDelta, N, t = namedtuple('VersionDelta', s, module='asyncutils.version', defaults=(0,)*3), {}, lambda o, /: o if isinstance(o, type) else type(o)
-def normalize(o, /, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=-0x10000, n=0xFF00, l=0xFF):
+def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=-0x10000, n=0xFF00, l=0xFF):
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
     elif isinstance(o, complex): o = o.real, o.imag, 0
