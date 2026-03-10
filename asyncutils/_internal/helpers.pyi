@@ -2,7 +2,7 @@ from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from asyncio.futures import Future
 from _collections_abc import Generator, Coroutine, Iterable, Callable
-from typing import Any, Literal
+from typing import Any
 from .protocols import CanClearAndCopy
 def _filter_out(*a: Any, s: Any=...) -> Generator[Any, None, None]: ...
 def _get_loop_no_exit() -> AbstractEventLoop: ...

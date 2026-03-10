@@ -326,5 +326,7 @@ class UserPriorityQueue(SmartPriorityQueue):
     @property
     def _tiebreak(self): return next(self.__tiebreak)
     def put_nowait(self, item, priority=0): super().put_nowait((priority, self._tiebreak, item))
+    def put(self, item, priority=0): return super().put((priority, self._tiebreak, item))
     def get_nowait(self): return super().get_nowait()[-1]
+    async def get(self): return (await super().get())[-1]
 del f, _

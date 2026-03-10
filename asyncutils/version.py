@@ -1,7 +1,6 @@
 from ._internal import patch as P
 from ._internal.submodules import version_all as __all__
 from . import exceptions as E
-from collections import namedtuple
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     r = []
     for i, j in enumerate(I):
@@ -59,7 +58,7 @@ class VersionInfo(str):
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
     representation = property('asyncutils v'.__add__); major, minor, patch = map(property, map(__import__('_operator').itemgetter, range(3))); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; __trunc__ = __floor__ = major.fget; P.patch_classmethod_signatures((__new__, '/, *a'))
-VersionDelta, N, t = namedtuple('VersionDelta', s, module='asyncutils.version', defaults=(0,)*3), {}, lambda o, /: o if isinstance(o, type) else type(o)
+VersionDelta, N, t = __import__('collections').namedtuple('VersionDelta', s, module='asyncutils.version', defaults=(0,)*3), {}, lambda o, /: o if isinstance(o, type) else type(o)
 def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=-0x10000, n=0xFF00, l=0xFF):
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
