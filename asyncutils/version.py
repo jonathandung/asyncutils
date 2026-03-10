@@ -2,9 +2,9 @@ from ._internal import patch as P
 from ._internal.submodules import version_all as __all__
 from . import exceptions as E
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
-    r = []
+    a = (r := []).append
     for i, j in enumerate(I):
-        r.append(int(j, 0) if isinstance(j, str) else int(j))
+        a(int(j, 0) if isinstance(j, str) else int(j))
         if i == 2: break
     else: r.extend(0 for _ in range(2-i))
     if any(map(f, r)): raise e('major, minor and patch should all be positive')

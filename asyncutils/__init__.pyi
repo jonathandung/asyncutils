@@ -40,3 +40,4 @@ preloaded_submodules: Final[frozenset[str]]
 '''A frozenset containing all submodules that are inevitably preloaded on module startup, which also loads asyncio.
 This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
 submodules_map: Final[dict[str, ModuleType]]
+'''A dictionary mapping the submodule names to the submodule objects.'''

@@ -1,7 +1,6 @@
 from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMixin, LockWithOwnerMixin
 from .exceptions import Critical, LockForceRequest, CRITICAL
 from .base import safe_cancel_batch
-from _weakrefset import WeakSet
 from time import monotonic
 from collections import deque, defaultdict
 from heapq import heappush, heappop
@@ -130,7 +129,7 @@ class LocksmithBase:
         return register
     @property
     def currently_recognized(self): return frozenset(self._recognized)
-    def __init__(self, loop, ltyp=Lock): self._recognized, self._loop, self._lock = WeakSet(), loop, ltyp()
+    def __init__(self, loop, ltyp=Lock): self._recognized, self._loop, self._lock = __import__('_weakrefset').WeakSet(), loop, ltyp()
     async def recognize_lock(self, lock, /):
         if not self.preliminary_check_lock(lock): return False
         async with self._lock:

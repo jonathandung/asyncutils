@@ -1,7 +1,6 @@
 import sys
 from asyncio.tasks import eager_task_factory, gather
 from asyncio.locks import Lock
-from weakref import WeakSet
 from mmap import mmap
 from itertools import starmap
 from functools import partial
@@ -144,7 +143,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     __slots__ = '_factory'
     def __init__(self, executor=None, _=file):
         if executor is None: executor = Executor()
-        super().__init__(); self._factory = type('file', (_,), {}, m=WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, executor), e=self.exiter)
+        super().__init__(); self._factory = type('file', (_,), {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, executor), e=self.exiter)
     @property
     def open_mmaps(self): return self._factory.mgr
     @property
