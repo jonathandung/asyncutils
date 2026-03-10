@@ -1,6 +1,6 @@
 /* This file describes the intended format of the json files whose paths can be set as AUTILSCFGPATH to configure the behaviour of this module.
 The values associated with the keys are their defaults.
-Some keys can have various types, as detailed by the comments attached.*/
+Some keys can have various types, as detailed by the comments attached. */
 {
     "log_to": "STDERR",
     // string file path or integer file descriptor, to which the logging is dumped
