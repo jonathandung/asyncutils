@@ -36,4 +36,7 @@ __hexversion__: Final[int]
 '''0x123456 -> version 12.34.56'''
 __git_version__: Final[str]
 '''The git commit hash.'''
+preloaded_submodules: Final[frozenset[str]]
+'''A frozenset containing all submodules that are inevitably preloaded on module startup, which also loads asyncio.
+This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
 submodules_map: Final[dict[str, ModuleType]]
