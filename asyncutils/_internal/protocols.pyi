@@ -74,4 +74,5 @@ type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|No
 type Timer = Callable[[], float]
 type All = tuple[str, ...]
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
-type PatchEntry = tuple[FunctionType, str]
+class SigPatcher(Protocol):
+    def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...
