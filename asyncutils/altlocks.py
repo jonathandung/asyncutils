@@ -33,7 +33,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     @classmethod
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
 class UniqueResourceGuard(ResourceGuard):
-    _cache = {}
+    _cache, __slots__ = {}, ()
     @classmethod
     def guard(cls, obj, /, *, action='using'):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)

@@ -8,6 +8,13 @@ This project uses [Semantic Versioning](https://semver.org/).
 ## [0.8.4] - 2026-03-09: newest; [unstable](https://semver.org/#spec-item-4)
  
 ### Added
+Top level:
+- \_\_version__
+- \_\_hexversion__
+- \_\_git_version__
+- submodules_map
+- preloaded_submodules
+
 Submodules:
 - altlocks
     
