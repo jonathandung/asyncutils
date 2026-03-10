@@ -12,10 +12,13 @@ The creator of this project thinks it highly unlikely there will be any security
 but this is still included for compliance. Please report as described below.
 
 - **Method native to GitHub**
+  
   Go to the [Security tab](https://github.com/jonathandung/asyncutils/security) and click on "Report a vulnerability" in the upper right corner.
 - **Via email**
-  Send an email to `jonathandung@yahoo.com`. If possible, encrypt your message with PGP. The fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`
-  The key is shown below, which you should always check against the fingerprint first in case either was compromised.
+
+  Send an email to `jonathandung@yahoo.com`.
+  If possible, encrypt your message with PGP; the fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`, and the public key is shown below.
+  You should always check it against the fingerprint first in case either was compromised.
 
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -31,6 +34,7 @@ dTIsMi41KzEuMTEsMiwxAhsMBQmLMDvsAAoJECpZQ7ZLCZTeUssA+gOViN7xSKvA
 gNDYS8Hnxzw0EU/5LtxolGz2OXzUNJEfAQCfuMAmgPCcoN0bnrDAwDK+aU90J4tS
 O01JPuZoia5kAQ==
 =QBAY
+
 -----END PGP PUBLIC KEY BLOCK-----
 
 The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please state that in the email.
