@@ -8,7 +8,7 @@ from asyncio.events import _get_running_loop, set_event_loop, new_event_loop
 from asyncio.tasks import eager_task_factory, wait_for, ensure_future, run_coroutine_threadsafe
 from asyncio.locks import Semaphore, BoundedSemaphore, Lock
 from asyncio.timeouts import timeout as _timeout
-from ._internal.log import debug
+from sys import audit
 from ._internal.submodules import util_all as __all__
 _ignore_cancellation = IgnoreErrors(CancelledError)
 def get_future(aw, loop=None):
@@ -19,16 +19,16 @@ def get_future(aw, loop=None):
         except CRITICAL: raise Critical
         except BaseException as e: F.set_exception(e)
     loop.create_task(wrapper()); return F
-def new_tasks(*coro):
+def new_tasks(*C):
     (l := _get_loop_no_exit()).set_task_factory(eager_task_factory); f = l.create_task
-    for c in coro: yield f(c)
-def to_sync(f, timeout=None, loop=None):
-    debug('to_sync called')
+    for c in C: yield f(c)
+def to_sync(f, /, timeout=None, loop=None):
+    audit('asyncutils.util.to_sync', f)
     def wrapper(*a, **k): return sync_await(f(*a, **k), timeout=timeout, loop=loop)
     return wraps(f)(wrapper)
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
 def sync_await(aw, *, timeout=None, loop=None):
-    debug('sync_await called')
+    audit('asyncutils.util.sync_await')
     f = loop is None
     if (c := _get_()) and (f or loop is (l := c.loop) or getattr(loop, '_thread_id', None) == getattr(l, '_thread_id', NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
     try:
@@ -49,7 +49,7 @@ def lockf(f, /, lf=Lock, _lc={}):
     async def wrapped(*a, **k):
         async with l: return await f(*a, **k)
     wrapped.__del__ = partial(_lc.pop, i, None); return wraps(f)(wrapped)
-def sync_lock(l, timeout=None):
+def sync_lock(l, /, timeout=None):
     def dec(f):
         async def wrapper(*a, **k):
             try:
@@ -58,7 +58,7 @@ def sync_lock(l, timeout=None):
                 if l.locked(): l.release()
         return wraps(f)(to_sync(wrapper))
     return dec
-def sync_lock_from_binder(f, timeout=None):
+def sync_lock_from_binder(f, /, timeout=None):
     def dec(meth, /):
         async def wrapper(self, *a, **k):
             l = None
@@ -68,16 +68,16 @@ def sync_lock_from_binder(f, timeout=None):
                 if l and l.locked(): l.release()
         return wraps(meth)(to_sync(wrapper))
     return dec
-def to_async(func, loop=None):
-    debug('to_async called')
+def to_async(f, /, loop=None):
+    audit('asyncutils.util.to_async', f)
     if loop is None: loop = _get_loop_no_exit()
     async def wrapper(*a, **k):
         if (e := getattr(to_async, 'executor', None)) is None: to_async.executor = e = Executor()
-        return await loop.run_in_executor(e, partial(func, *a, **k))
-    return wraps(func)(wrapper), stop_and_closer(loop)
-async def get_aiter_fromf(f, sentinel=_NO_DEFAULT, /):
+        return await loop.run_in_executor(e, partial(f, *a, **k))
+    return wraps(f)(wrapper), stop_and_closer(loop)
+async def get_aiter_fromf(f, s=_NO_DEFAULT, /):
     while True:
-        if (r := await f()) is sentinel or r == sentinel: break
+        if (r := await f()) is s or r == s: break
         yield r
 async def safe_cancel(t):
     if not t.done(): t.cancel()

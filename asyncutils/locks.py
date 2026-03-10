@@ -126,6 +126,7 @@ class LocksmithBase:
             if not isinstance(t, type): raise TypeError('non-type cannot be registered')
             if shadow: H[t] = h
             elif h is not (h := H.setdefault(t, h)): raise KeyError('handler for type already registered', t, h)
+            return t
         return register
     @property
     def currently_recognized(self): return frozenset(self._recognized)

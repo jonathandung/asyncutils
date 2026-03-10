@@ -1,6 +1,6 @@
 '''Defines interfaces and type aliases that don't actually exist and are only used in this module's stubs, any of which may be removed without notice.
 At runtime, accessing any name in this module returns None, so that inline type annotations are possible as well.'''
-from types import TracebackType
+from types import TracebackType, FunctionType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
 from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
 from io import TextIOWrapper, _WrappedBuffer
@@ -74,3 +74,4 @@ type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|No
 type Timer = Callable[[], float]
 type All = tuple[str, ...]
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
+type PatchEntry = tuple[FunctionType, str]

@@ -4,7 +4,7 @@ from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _get_loop_no_exit, subscriptable
 from sys import maxsize as INF
 from functools import partial, singledispatchmethod
-from collections import deque, defaultdict
+from _collections import deque, defaultdict
 from heapq import heapify, heappop, heappushpop
 from ._internal.submodules import iterclasses_all as __all__
 class anullcontext:

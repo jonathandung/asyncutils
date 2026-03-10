@@ -8,11 +8,11 @@ from asyncio.exceptions import BrokenBarrierError
 from asyncio.tasks import wait_for, sleep
 from time import monotonic
 from functools import wraps
-from collections import deque
+from _collections import deque
 from itertools import count
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):
-    def __init__(self, value=1): super().__init__(value); self._waiters: deque = deque()
+    def __init__(self, value=1): super().__init__(value); self._waiters = deque()
     @property
     def bound(self): return self._bound_value
     @bound.setter

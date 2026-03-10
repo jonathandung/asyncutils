@@ -1,5 +1,5 @@
 # type: ignore
-from collections import deque
+from _collections import deque
 from itertools import count
 from abc import ABCMeta, abstractmethod
 from sys import _getframe, intern, audit

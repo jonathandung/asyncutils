@@ -1,15 +1,13 @@
 from asyncio.protocols import Protocol
-from asyncio.exceptions import InvalidStateError
 from asyncio.queues import Queue
 from asyncio.transports import Transport
 from socket import error, SHUT_WR
-from contextlib import contextmanager
 from .exceptions import IgnoreErrors
 from .util import _ignore_cancellation
 from .mixins import LoopContextMixin
 from ._internal.submodules import networking_all as __all__
 class LineProtocol(Protocol, LoopContextMixin):
-    NEWLINE, CARRIAGE_RETURN, _handler = b'\x0a', b'\x0d', _ignore_cancellation.combined(InvalidStateError); __slots__: tuple[str, ...] = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'
+    NEWLINE, CARRIAGE_RETURN, _handler = b'\x0a', b'\x0d', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__: tuple[str, ...] = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'
     def __setup__(self): self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter =None
     @property
     def connected_transport(self):
@@ -27,7 +25,7 @@ class LineProtocol(Protocol, LoopContextMixin):
         if t := self.transport:
             with self._handler: t.close(); self._closed = True
         return self._closed
-    def data_received(self, data, bufsize=0x2000): 
+    def data_received(self, data, bufsize=0x2000):
         (b := self._buffer).extend(data); n = self.NEWLINE
         if len(b) > bufsize: self.flush()
         while not self._closed and n in b: l, b = b.split(n, 1); self._put_line(l)
@@ -79,7 +77,7 @@ class SocketTransport(Transport):
         if (s := self._socket) is None: return
         with self._h: s.close()
         self.loop.remove_reader(s.fileno()); self._socket = None; self._reset_extra(); return s
-    @contextmanager
+    @__import__('contextlib').contextmanager
     def sock_context(self, sock):
         try: yield self.connect_sock(sock)
         finally: self.disconnect_sock()

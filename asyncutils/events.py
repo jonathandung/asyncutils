@@ -2,7 +2,7 @@ from .mixins import EventMixin
 from . import constants
 from .config import RAISE
 from .exceptions import EventValueError, ref
-from collections import deque
+from _collections import deque
 from asyncio.timeouts import timeout as _timeout
 from asyncio.tasks import wait_for, wait
 from asyncio.events import get_running_loop
