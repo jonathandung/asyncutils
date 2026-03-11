@@ -129,6 +129,9 @@ Submodules:
     - EventWithValue
 
 - exceptions
+
+    Refer to the IDE autocomplete
+
 - func
 
     Functions:
