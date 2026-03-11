@@ -3,7 +3,6 @@ from .constants import RECIP_E
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, aiter_to_iter, dummy_task
 from .util import safe_cancel, to_async, get_aiter_fromf
 from .iterclasses import achain, anullcontext
-from ._internal.log import debug
 from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods
 from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache
@@ -18,15 +17,14 @@ import _operator as O, math as M
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from typing import SupportsIndex, Any
-    from _collections_abc import Awaitable, AsyncIterable, AsyncGenerator, AsyncIterator, Callable, Hashable, Sequence
-    from asyncio.events import AbstractEventLoop
+    from _collections_abc import Awaitable, AsyncIterable, AsyncGenerator, Callable, Hashable, Sequence
     from asyncio.futures import Future
-    from ._internal.protocols import SupportsIteration, Exceptable, SupportsRichComparison, AsyncContextManager, SupportsSlicing
+    from ._internal.protocols import SupportsIteration, Exceptable, SupportsRichComparison
     __all__ = ('tee', 'aunzip', 'merge_async_iters', 'aflatten', 'batch', 'achunked', 'asideeffect', 'asliced', 'batch_buffer', 'buffer', 'asplitat', 'batch_process', 'window', 'aall', 'aany', 'amax', 'amin', 'azip', 'amap', 'afilter', 'arange', 'acount', 'acycle', 'arepeat', 'aaccumulate', 'acompress', 'adropwhile', 'afilterfalse', 'agroupby', 'aislice', 'aiterindex', 'asieve', 'apairwise', 'atriplewise',
-        'aproduct', 'astarmap', 'atakewhile', 'atotient', 'asquaresum', 'aziplongest', 'asumprod', 'aconvolve', 'atabulate', 'asum', 'aprod', 'atail', 'amultinomial', 'to_tuple', 'anth', 'aconsume', 'aallequal', 'acombinations', 'acombinations_with_replacement', 'apermutations', 'apowerset', 'aquantify', 'apadnone', 'agrouper', 'aroundrobin', 'aroundrobin2', 'aunique_everseen', 'aunique_justseen',
-        'aunique', 'ancycles', 'apartition', 'aiterexcept', 'ailen', 'aiterate', 'with_aiter', 'asorted', 'acanonical', 'adistinctpermutations', 'auniquetoeach', 'aderangements', 'aintersperse', 'ainterleave', 'ainterleaveevenly', 'ainterleaverandomly', 'aspy', 'acollapse', 'afirsttrue', 'aprepend', 'arandomproduct', 'arandomcombination', 'arandom_combination_with_replacement', 'afirst',
-        'alast', 'anthorlast', 'abeforeandafter', 'anthcombination', 'arepeatfunc', 'asubslices', 'atranspose', 'apolynomialfromroots', 'apolynomialeval', 'apolynomialderivative', 'areshape', 'afactor', 'arunningmedian', 'arandomderangement', 'amatmul', 'mat_vec_mul', 'vecs_eq', 'afrievalds', 'basic_collect', 'asubstrings', 'asubstrindices', 'iter_future', 'agetitems_from_indices', 'aintersend',
-        'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amatprod', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'areversed')
+            'aproduct', 'astarmap', 'atakewhile', 'atotient', 'asquaresum', 'aziplongest', 'asumprod', 'aconvolve', 'atabulate', 'asum', 'aprod', 'atail', 'amultinomial', 'to_tuple', 'anth', 'aconsume', 'aallequal', 'acombinations', 'acombinations_with_replacement', 'apermutations', 'apowerset', 'aquantify', 'apadnone', 'agrouper', 'aroundrobin', 'aroundrobin2', 'aunique_everseen', 'aunique_justseen',
+            'aunique', 'ancycles', 'apartition', 'aiterexcept', 'ailen', 'aiterate', 'with_aiter', 'asorted', 'acanonical', 'adistinctpermutations', 'auniquetoeach', 'aderangements', 'aintersperse', 'ainterleave_stopearly', 'ainterleave', 'ainterleaveevenly', 'ainterleaverandomly', 'aspy', 'acollapse', 'afirsttrue', 'aprepend', 'arandomproduct', 'arandomcombination', 'arandom_combination_with_replacement',
+            'arandompermutation', 'afirst', 'alast', 'anthorlast', 'abeforeandafter', 'anthcombination', 'arepeatfunc', 'asubslices', 'atranspose', 'apolynomialfromroots', 'apolynomialeval', 'apolynomialderivative', 'areshape', 'afactor', 'arunningmedian', 'arandomderangement', 'amatmul', 'mat_vec_mul', 'vecs_eq', 'afrievalds', 'basic_collect', 'asubstrings', 'asubstrindices', 'iter_future',
+            'agetitems_from_indices', 'aintersend', 'asendstream', 'acat', 'aforever', 'aguessmax', 'aguessmin', 'apowersoftwo', 'amapif', 'amultimapif', 'fmap', 'fmap_sequential', 'map_on_map', 'amatprod', 'areversed')
 else: from ._internal.submodules import iters_all as __all__; Any, overload = None, lambda _, /: None
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential(fs, /, *a, **k):
@@ -186,11 +184,11 @@ async def asplitat(it, pred, maxsplit=-1, keep_sep=False):
             b = []; maxsplit -= 1
         else: b.append(i)
     yield b
-async def batch_process[T, R](items: SupportsIteration[T], size: int, processor: Callable[[list[T]], Awaitable[R]]):
+async def batch_process(items, size, processor):
     async for b in batch(items, size): yield await processor(b)
-async def window[T](it: AsyncIterable[T], size: int, step: int=1):
+async def window(it, size, step):
     if not size >= 1 <= step: raise ValueError('size and step should both be >=1')
-    b, c = deque[T](maxlen=size), 0
+    b, c = deque(maxlen=size), 0
     async for i in it:
         b.append(i)
         if len(b) == size:
@@ -281,7 +279,7 @@ async def arepeat(elem, n: int|None=None):
         while True: yield elem
     else:
         while n > 0: yield elem; n -= 1
-async def aaccumulate[T](it: SupportsIteration[T], func: Callable[[T, T], T]=O.add, *, initial: T|None=None):
+async def aaccumulate[T](it: SupportsIteration[T], func: Callable[[T, T], T]=O.add, *, initial=None):
     it = iter_to_aiter(it)
     if initial is None:
         try: initial = await anext(it)
@@ -316,7 +314,7 @@ async def aislice[T](it: SupportsIteration[T], *a: int|None):
     I, n = acount() if y is None else range(max(x, y)), x
     async for i, j in azip(I, it):
         if i == n: yield j; n += z
-async def aiterindex[T](it: SupportsIteration[T], value: T, start: int=0, stop: int|None=None):
+async def aiterindex[T](it: SupportsIteration[T], value, start: int=0, stop: int|None=None):
     async for i, j in aenumerate(aislice(it, start, stop), start):
         if j is value or j == value: yield i
 async def asieve(n: int):
@@ -466,7 +464,7 @@ async def ailen(it: SupportsIteration):
     i = 0
     async for _ in iter_to_aiter(it): i += 1
     return i
-async def aiterate[T](f: Callable[[T], Awaitable[T]], start: T):
+async def aiterate[T](f: Callable[[T], Awaitable[T]], start):
     while True: yield start; start = await f(start)
 async def with_aiter(actxmgr):
     async with actxmgr as I:
@@ -516,11 +514,13 @@ def adistinctpermutations[T](it: SupportsIteration[T], r: int|None=None):
 async def auniquetoeach[H: Hashable](*its: SupportsIteration[H]):
     p = await to_tuple(amap(to_tuple, its, await_=True))
     async for _ in amap(partial(afilter, frozenset(i for i, j in Counter(aiter_to_iter(aflatten(map(frozenset, p)))).items() if j == 1).__contains__), p): yield _
-def aderangements[T](it: SupportsIteration[T], r: int|None=None): return acompress(apermutations(X := to_tuple(it), r), amap(aall, amap(amap, arepeat(O.is_not), arepeat(Y := tuple(range(len(X)))), apermutations(Y, r)), await_=True))
-def aintersperse[T](e: T, it: SupportsIteration[T], n: int=1):
+async def aderangements[T](it: SupportsIteration[T], r: int|None=None):
+    async for _ in acompress(apermutations(X := await to_tuple(it), r), amap(aall, amap(amap, arepeat(O.is_not), arepeat(Y := tuple(range(len(X)))), apermutations(Y, r)), await_=True)): yield _
+def aintersperse[T](e, it: SupportsIteration[T], n: int=1):
     if n <= 0: raise ValueError('n must be positive')
-    return aislice(ainterleave(arepeat(e), it), 1, None) if n == 1 else aflatten(aislice(ainterleave(arepeat((e,)), batch(it, n)), 1, None))
-def ainterleave[T](*it: SupportsIteration[T]): return aflatten(azip(*it))
+    return aislice(ainterleave_stopearly(arepeat(e), it), 1, None) if n == 1 else aflatten(aislice(ainterleave_stopearly(arepeat((e,)), batch(it, n)), 1, None))
+def ainterleave_stopearly[T](*it: SupportsIteration[T]): return aflatten(azip(*it))
+def ainterleave(*it): return afilter(O.is_not.__get__(_NO_DEFAULT), aflatten(aziplongest(*it, fillvalue=_NO_DEFAULT)))
 def aspy[T](it: SupportsIteration[T], n: int=1): p, q = tee(it); return take(q, n), p
 async def ainterleaveevenly[T](its: SupportsIteration[SupportsIteration[T]], lengths: SupportsIteration[int]|None=None):
     I = await to_tuple(its)
@@ -532,32 +532,34 @@ async def ainterleaveevenly[T](its: SupportsIteration[SupportsIteration[T]], len
         yield await anext(B); t -= 1; E = list[int](map(O.sub, E, a))
         for i, e in enumerate(E):
             if e < 0: yield await anext(b[i]); t -= 1; E[i] += A
-async def ainterleaverandomly[T](*its: SupportsIteration[T], _randrange=_randrange):
-    x = len(I := [iter_to_aiter(i) for i in its])
+async def ainterleaverandomly[T](its: SupportsIteration[T], _randrange=_randrange):
+    x = len(I := [iter_to_aiter(i) async for i in iter_to_aiter(its)])
     while x:
         i = _randrange(x)
         try: yield await anext(I[i])
         except StopAsyncIteration: I[i] = I[-1]; del I[-1]; x -= 1
 async def acollapse(it, base_typ=(str, bytes), levels=None):
-    (S := deque[tuple[int, AsyncIterator]]()).appendleft((0, arepeat(iter_to_aiter(it), 1))); L = levels or float('inf')
+    (S := deque()).appendleft((0, arepeat(iter_to_aiter(it), 1))); L, f, g = levels or float('inf'), S.popleft, S.extendleft
     while S:
-        l, n = N = S.popleft()
+        l, n = N = f()
         if l > L:
             async for i in n: yield i
             continue
         async for _ in n:
             if isinstance(_, base_typ): yield _
             else:
-                try: t = iter_to_aiter(_); S.extendleft(((l+1, t), N)); break
+                try: t = iter_to_aiter(_); g(((l+1, t), N)); break
                 except TypeError: yield _
 def afirsttrue(it, default=_NO_DEFAULT, pred=None): F = afilter(pred, it); return anext(F, *_filter_out(default, _NO_DEFAULT))
-def aprepend[T](val: T, it: SupportsIteration[T]): return achain((val,), it).__aiter__()
+def aprepend[T](val, it: SupportsIteration[T]): return achain((val,), it).__aiter__()
 async def arandomproduct[T](*a: SupportsIteration[T], n: int=1, _choice=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _choice(i)
 async def arandomcombination[T](it: SupportsIteration[T], r: int, _=_sample):
     for i in sorted(_(range(len(p := await to_tuple(it))), r)): yield p[i]
-def arandom_combination_with_replacement[T](it: SupportsIteration[T], r: int, _randrange=_randrange): n = len(p := to_tuple(it)); return amap(p.__getitem__, sorted(_randrange(n) for _ in range(r)))
-async def arandom_permutation[T](it: SupportsIteration[T], r: int|None=None, _=_sample):
+async def arandom_combination_with_replacement[T](it: SupportsIteration[T], r: int, _randrange=_randrange):
+    n = len(p := await to_tuple(it))
+    async for _ in amap(p.__getitem__, sorted(_randrange(n) for _ in range(r))): yield _
+async def arandompermutation[T](it: SupportsIteration[T], r: int|None=None, _=_sample):
     p = await to_tuple(it)
     if r is None: r = len(p)
     for _ in _(p, r): yield _
@@ -587,7 +589,7 @@ async def anthcombination(it, r, idx):
     while r:
         c, n, r = c*r//n, n-1, r-1
         while idx >= c: idx -= c; c, n = c*(n-r)//n, n-1
-        yield p[-1-n]
+        yield p[~n]
 async def asubslices(it):
     async for _ in astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2)))): yield _
 def arepeatfunc(f, times=None, *a): return astarmap(f, arepeat(a) if times is None else arepeat(a, times), True)
@@ -595,7 +597,8 @@ async def apolynomialfromroots(roots):
     p = arange(1, 2)
     async for r in iter_to_aiter(roots): p = aconvolve(p, (1, -r))
     async for _ in p: yield _
-def atranspose(it): return azip(*aiter_to_iter(it), strict=True)
+async def atranspose(it):
+    async for _ in azip(*await to_tuple(it), strict=True): yield _
 async def aflattentensor(tensor: SupportsIteration, base=(str, bytes), _c=_check_methods):
     I = iter_to_aiter(tensor)
     while True:
@@ -649,12 +652,12 @@ async def afactor(n: int, _littleprimes=_littleprimes, _aisprime=_aisprime, _fac
     for n in t:
         if n < 44521 or await _aisprime(n): yield n
         else: t += (f := await _factor_pollard(n), n//f)
-async def arunningmedian(it: SupportsIteration[float], *, maxlen: SupportsIndex|None=None):
+async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
-        r, l, h = iter_to_aiter(it).__aiter__().__anext__, list[float](), list[float](); from heapq import heappush_max as a, heappush as b, heappushpop_max as c
+        r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import heappush_max as a, heappush as b, heappushpop_max as c
         while True: a(l, await r()); yield l[0]; b(h, c(l, await r())); yield (l[0]+h[0])/2
     if (m := O.index(maxlen)) <= 0: raise ValueError('window size should be positiive')
-    w, o = deque[float](), list[float](); from bisect import bisect_left as b, insort_right as f
+    w, o = deque(), []; from bisect import bisect_left as b, insort_right as f
     async for i in iter_to_aiter(it):
         w.append(i); f(o, i)
         if (n := len(o)) > m: del o[b(o, w.popleft())]; n -= 1
@@ -676,8 +679,8 @@ async def mat_vec_mul(M: SupportsIteration[SupportsIteration[int]], V: SupportsI
     async for i in arange(n): yield await asum(p[i][j]*v[j] async for j in arange(n))
 def vecs_eq(u: SupportsIteration[int], v: SupportsIteration[int]): return aall(i == j async for i, j in azip(u, v))
 async def afrievalds(A: SupportsIteration[SupportsIteration[int]], B: SupportsIteration[SupportsIteration[int]], C: SupportsIteration[SupportsIteration[int]], k: int=2, _randint=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_randint(0, 1) for _ in range(n)))), mat_vec_mul(C, r)) async for _ in arange(k))
-async def basic_collect[T](it: SupportsIteration[T], n: int):
-    l = list[T]()
+async def basic_collect(it, n):
+    l = []
     async for _ in aislice(it, n): l.append(_)
     return l
 async def asubstrings[T](it: SupportsIteration[T]):
@@ -693,12 +696,7 @@ def asubstrindices(seq, reverse=False):
 def iter_future[T](it: SupportsIteration[T], summaryf: Callable[[SupportsIteration[T]], Awaitable]=aconsume):
     async def task(): t = L.time(); await summaryf(it); F.set_result(L.time()-t)
     F = (L := _get_loop_no_exit()).create_future(); L.create_task(task()); return F
-def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIteration[SupportsIndex], setatend: Future[float]|None=None, finish: bool=False):
-    '''Takes an (async) iterable and an (async) iterable of integers interpreted as indices, and immediately returns a list of futures whose eventual results represent
-    the items of that iterable at the index, beginning consumption of the iterable in the background. Exceptions will be set in the futures that are not done if results
-    are encountered during iteration or if the index is out of bounds. Supports negative indices. Do not set the result of any returned future; instead, if the result
-    is no longer relevant, cancel the future. The consumption stops as soon as all the required results are pushed into the respective futures. Pass in a Future for the
-    setatend parameter, which cancels the background consumption of the async iterable once it is done and cancels the undone futures.'''
+def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIteration[SupportsIndex], setatend: Future[float]|None=None, finish: bool=False, _='index %r beyond the ends of (async) iterable %r'):
     L, r, I = _get_loop_no_exit(), [], iter_to_aiter(it)
     async def consume():
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
@@ -709,23 +707,22 @@ def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIterati
                     if x < m: m = x
                 elif x > M: M = x
             d[x].append(F := L.create_future()); r.append(F)
-        async def helper(i: int, j: T, d=d):
+        async def helper(i: int, j, d=d):
             async for x, F in aenumerate(d.pop(i, ())):
                 if F.cancelled(): continue
                 if F.done(): raise E.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')
                 F.set_result(j)
         try:
             if M is None:
-                async def helper2(i: int, j: T): await helper(i, j); b.append(j)
+                async def helper2(i: int, j): await helper(i, j); b.append(j)
                 await aconsume(achain(astarmap(helper2, aenumerate(I)), amap(helper, acount(-1, -1), adisembowel(b := deque[T](maxlen=-m)), await_=True)))
             else: await aconsume(astarmap(helper, aenumerate(take(I, M)), True))
         except E.CRITICAL: raise E.Critical
         except BaseException as e:
             async for F in afilterfalse(O.methodcaller('done'), r): F.set_exception(e)
             raise
-        t = f'index {{!r}} beyond the ends of (async) iterable {it!r}'
         for i, l in d.items():
-            e = IndexError(t.format(i))
+            e = IndexError(_%(i, it))
             async for x, F in aenumerate(l):
                 if F.cancelled(): continue
                 if F.done(): raise ExceptionGroup('error while processing indices for which items were not successfully got', (e, E.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
@@ -736,20 +733,20 @@ def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIterati
         setatend.set_result(L.time()-s)
     c = L.create_task(consume())
     if setatend is not None: setatend.add_done_callback(lambda _: L.run_until_complete(gather(safe_cancel(c), safe_cancel_batch(r))))
-    audit(f'asyncutils.iters.agetitems_from_indices', it, r); return r
+    audit('asyncutils.iters.agetitems_from_indices', it, r); return r
 async def aintersend[T, R](i1: AsyncGenerator[T, R], i2: AsyncGenerator[R, T]):
-    debug('aintersend called'); a, b = await gather(anext(i1), anext(i2))
+    audit('asyncutils.iters.aintersend', i1, i2); a, b = await gather(anext(i1), anext(i2))
     while True: yield a, b; a, b = await gather(i1.asend(b), i2.asend(a))
 async def asendstream[T, R](i1: AsyncGenerator[T, R], i2: SupportsIteration[R]):
-    debug('asendstream called')
+    audit('asyncutils.iters.asendstream', i1, i2)
     async for v in iter_to_aiter(i2): yield await i1.asend(v)
 async def acat(first=None):
-    debug('acat called')
+    audit('asyncutils.iters.acat', first)
     while True: first = yield first
 async def aforever():
-    debug('aforever called')
+    audit('asyncutils.iters.aforever')
     while True: yield
-async def aguessmax[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]|None=None, default: T=_NO_DEFAULT, finish_event: Event|None=None, __cmp=_compare):
+async def aguessmax[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]|None=None, default=_NO_DEFAULT, finish_event: Event|None=None, __cmp=_compare):
     if (r := await amax(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
         if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
         return default
@@ -760,7 +757,7 @@ async def aguessmax[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callab
         return r
     finally:
         if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_no_exit()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
-async def aguessmin[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]|None=None, default: T=_NO_DEFAULT, finish_event: Event|None=None, __cmp=_compare):
+async def aguessmin[T=Any](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]|None=None, default=_NO_DEFAULT, finish_event: Event|None=None, __cmp=_compare):
     if (r := await amin(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
         if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
         return default
