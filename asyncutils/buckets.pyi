@@ -4,14 +4,28 @@ from typing import Self, overload
 from .mixins import AsyncContextMixin, EventualLoopMixin
 __all__ = 'TokenBucket', 'LeakyBucket'
 class TokenBucket:
-    def __init__(self, rate: float, capacity: float, timer: Timer=...): ...
-    async def consume(self, tokens: float=...) -> None: ...
+    '''A token bucket rate limiter that controls the rate of operations.
+    The bucket fills up with tokens at a fixed rate, with each operation consuming a certain amount of tokens.
+    If there are not enough tokens, the operation must wait until there are.'''
+    def __init__(self, rate: float, capacity: float, timer: Timer=...):
+        '''rate: The number of tokens the bucket gains per second
+        capacity: The maximum number of tokens the bucket can hold
+        timer (optional): A function such as `time.time` that returns the current time'''
+    async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if `tokens` is not passed can be set through constants.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS.'''
     @property
-    def capacity(self) -> float: ...
+    def capacity(self) -> float: '''The capacity of the bucket.'''
 class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
-    def __init__(self, capacity: float, leak: float, min_factor: float=..., max_factor: float=..., external_factor_settable: bool=..., timer: Timer=...): ...
-    async def acquire(self, amount: float=...) -> bool: ...
-    async def wait_for_tokens(self, amount: float=...) -> None: ...
+    '''A leaky bucket rate limiter with adaptive flow control. Use as a context manager.
+    In the context, tokens leak from the bucket at a constant rate. Operations can add tokens to the bucket.
+    The bucket includes an adaptive factor that adjusts based on current fill level to provide smoother rate limiting under varying loads.'''
+    def __init__(self, capacity: float, leak: float, min_factor: float=..., max_factor: float=..., external_factor_settable: bool=..., timer: Timer=...):
+        '''capacity: The maximum number of tokens the bucket can hold
+        leak: The rate at which tokens leak from the bucket
+        min_factor (optional): Minimum adaptive factor; default to constants.LEAKY_BUCKET_DEFAULT_MINFACTOR.
+        max_factor (optional): Maximum adaptive factor; default to constants.LEAKY_BUCKET_DEFAULT_MAXFACTOR.
+        external_factor_settable (optional): Whether the factor attribute can be modified; default to constants.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR.'''
+    async def acquire(self, amount: float=...) -> bool: '''Attempt to add `amount` tokens to the bucket immediately; return success.'''
+    async def wait_for_tokens(self, amount: float=...) -> float: '''Wait until `amount` tokens can be added to the bucket **at once**. Return the total wait time.'''
     @property
     def factor(self) -> float: ...
     @factor.setter

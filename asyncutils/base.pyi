@@ -7,7 +7,7 @@ from .config import _sentinel
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine
 __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'
 class event_loop:
-    '''A context manager to manage lifecycles of asyncio-native event loops. Initialization arguments are self-explanatory.'''
+    '''A context manager to manage lifecycles of asyncio-native event loops.'''
     _ENTERED: ClassVar[int]
     _SHOULD_CLOSE: ClassVar[int]
     _INNER_EXIT: ClassVar[int]
@@ -19,7 +19,7 @@ class event_loop:
     def copy_flags(self) -> Self: ...
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: ...
-    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: ...
+    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to False.'''
     def __enter__(self) -> AbstractEventLoop: ...
     @overload
     def __exit__(self, t: None, v: None, b: None, /) -> Literal[False]: ...

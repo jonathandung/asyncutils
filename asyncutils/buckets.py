@@ -44,7 +44,7 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
         else: raise ValueError('LeakyBucket.factor is read-only')
     @factor.deleter
     def factor(self): self._factor = 1
-    def _adjust(self): self._adjust_from_params(*((0.15, 1.1, 0.85, 0.9) if (c := self._capacity) > 256 else (0.23, 1.2, 0.77, 0.81) if c > 128 else (0.3, 1.4, 0.7, 0.73)))
+    def _adjust(self): self._adjust_from_params(*((0.15, 1.1, 0.85, 0.9) if (c := self._capacity) > 0x100 else (0.23, 1.2, 0.77, 0.81) if c > 0x80 else (0.3, 1.4, 0.7, 0.73)))
     def __enter__(self):
         if self._drainer is None: self._drainer = self.make(self._drain())
         return self

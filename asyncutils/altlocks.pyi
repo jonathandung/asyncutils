@@ -62,7 +62,7 @@ class StatefulBarrier[T=Any](AwaitableMixin):
         Here states is the deque of stored state and pos is the number of parties having arrived before this one.'''
     def _reset(self) -> None: ...
     def abort(self) -> None: '''Abort the barrier, throwing asyncio.BrokenBarrierError to present waiting parties.'''
-    def raise_for_abort(self) -> None: ...
+    def raise_for_abort(self) -> None: '''Throw asyncio.BrokenBarrierError if the barrier has been aborted.'''
     @property
     def parties(self) -> int: '''Total number of parties, arrived or not.'''
     @property
