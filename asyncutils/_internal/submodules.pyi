@@ -1,3 +1,4 @@
+'''Exports the __all__ attributes of all of asyncutils's public submodules.'''
 from .protocols import All
 altlocks_all: All
 base_all: All

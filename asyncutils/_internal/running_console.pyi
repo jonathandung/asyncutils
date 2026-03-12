@@ -1,3 +1,4 @@
+'''Ugly patch to manage the current running asyncutils console.'''
 from typing import Any
 from ..console import AsyncUtilsConsole as Console
 def _get_() -> Console|None: ...

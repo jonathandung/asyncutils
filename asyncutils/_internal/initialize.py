@@ -19,6 +19,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
     def __reduce__(self): return type(self), (self._name,)
     def __getattr__(self, name, /): return getattr(self.load(), name)
     def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass module')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R._get_, _f=_f, _l=l, _n=_s):
         if not isinstance(m := _s.get(n := self._name), type(self)): return m
         if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); m = __import__(_n, fromlist=_f)

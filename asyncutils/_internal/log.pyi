@@ -1,3 +1,4 @@
+'''This module reexports all the attributes of the logger used by asyncutils.'''
 from logging import LogRecord, Logger, Manager, Handler, RootLogger, _ExcInfoType, _SysExcInfoType, _ArgsType, _FilterType
 from _collections_abc import Mapping
 from typing import Final

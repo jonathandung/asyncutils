@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-asyncutils"
-version = "0.8.7"
+version = "0.8.8"
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 description = "A library containing versatile and adaptable tools to well complement the asyncio framework. Not as performant as C extensions, but startup speed is great considering the features it provides."
 readme = "README.md"

@@ -7,6 +7,7 @@ from .config import _sentinel
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine
 __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'
 class event_loop:
+    '''A context manager to manage lifecycles of asyncio-native event loops. Initialization arguments are self-explanatory.'''
     _ENTERED: ClassVar[int]
     _SHOULD_CLOSE: ClassVar[int]
     _INNER_EXIT: ClassVar[int]

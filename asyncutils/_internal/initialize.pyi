@@ -1,6 +1,8 @@
-from typing import Self, Any, overload
+'''A special module used to set up the asyncutils module namespace. Do not modify its contents.'''
+from typing import Self, Any, Final, final, overload
 from types import ModuleType
 from .protocols import All, Submodule
+@final
 class module:
     @overload
     def __new__(cls, name: Submodule, /) -> Self: ...
@@ -11,5 +13,5 @@ class module:
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: ...
     def load(self) -> ModuleType: ...
 def g() -> All: ...
-a: All
-s: dict[Submodule, module|ModuleType]
+a: Final[All]
+s: Final[dict[Submodule, module|ModuleType]]

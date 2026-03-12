@@ -1,4 +1,4 @@
-'''Defines interfaces and type aliases that don't actually exist and are only used in this module's stubs, any of which may be removed without notice.
+'''Defines interfaces and type aliases that don't actually exist and are only used in this module's stubs. Stable.
 At runtime, accessing any name in this module returns None, so that inline type annotations are possible as well.'''
 from types import TracebackType, FunctionType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
