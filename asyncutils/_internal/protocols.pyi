@@ -1,5 +1,6 @@
-'''Defines interfaces and type aliases that don't actually exist and are only used in this module's stubs. Stable.
-At runtime, accessing any name in this module returns None, so that inline type annotations are possible as well.'''
+'''Defines interfaces and type aliases used in this module's stubs. Pseudo-stable (deprecation periods will span at least 2 minor versions).
+This is a fake module in the sense that the names in this stub are all None at runtime, so do not inherit from its 'protocols'.
+This facilitates lightweight inline type annotations.'''
 from types import TracebackType, FunctionType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
 from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
@@ -23,17 +24,19 @@ class AsyncLockLike(AsyncContextManager, Protocol):
     def release(self) -> None|Awaitable[None]: ...
     def locked(self) -> bool: ...
 @type_check_only
-class SupportsSlicing[T](Protocol):
+class GenericSized[T](Protocol):
+    '''`typing.Sized` is not generic, so here is a generic version of it.'''
+    def __len__(self) -> int: ...
+    def __iter__(self) -> Iterator[T]: ...
+@type_check_only
+class SupportsSlicing[T](GenericSized[T], Protocol):
+    '''Protocol for iterables with size, index and slice access, length, which also makes them automatically reversible.'''
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> GenericSized[T]: ...
     @overload
     def __getitem__(self, idx: SupportsIndex, /) -> T: ...
     def __len__(self) -> int: ...
     def __reversed__(self) -> Iterator[T]: ...
-@type_check_only
-class GenericSized[T](Protocol):
-    def __len__(self) -> int: ...
-    def __iter__(self) -> Iterator[T]: ...
 @type_check_only
 class CanClearAndCopy[T](Protocol):
     def copy(self) -> Self: ...
@@ -49,30 +52,42 @@ class SupportsPop[T](Protocol):
 class SupportsPopLeft[T](Protocol):
     def popleft(self) -> T: ...
 @type_check_only
-class GeneratorCoroutine[Y, S, R](Coroutine[S, R, Y], Generator[Y, S, R]): ...
+class GeneratorCoroutine[Y, S, R](Coroutine[S, R, Y], Generator[Y, S, R]): '''Objects such as those returned by types.coroutine-decorated generator functions.'''
 @type_check_only
 class PartialInterfaceMeta(type):
+    '''Metaclass for 'partial interfaces', described below.'''
     def __getattr__(cls, name: str, /) -> Any: ...
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
+    '''Base class for partial interfaces.
+    If it is only known that a class implements an interface (e.g. the PEP 3148 Future interface), type checkers might throw errors on unrecognized attributes
+    that may actually exist on the object/class. This is a simplistic fix that assumes those attributes always exist, with type Any.'''
     def __init__(self, *a: Any, **k: Any): ...
     def __getattr__(self, name: str, /) -> Any: ...
 @type_check_only
 class DumpType(Protocol):
+    '''Represents the type of simple json-dumping functions accepted by tools.argv_to_json and tools.argstr_to_json.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
     def flush(self) -> None: ...
     def write(self, s: T, /) -> None: ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
+'''Objects accepted by the int constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
+'''Objects that support (async) iteration.'''
 type SupportsRichComparison = SupportsLT|SupportsGT
 type ValidExcType = type[BaseException]
 type Exceptable = ValidExcType|tuple[ValidExcType, ...]
+'''Objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
 type Timer = Callable[[], float]
+'''Type of functions that return the current time under some specification, such as time.monotonic, time.process_time and time.perf_counter.'''
 type All = tuple[str, ...]
+'''Type of the __all__ attributes of asyncutils' submodules.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
+'''Type of strings representing asyncutils submodule names.'''
 class SigPatcher(Protocol):
+    '''Type of functions used to alter function signatures, with a specific signature.'''
     def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...

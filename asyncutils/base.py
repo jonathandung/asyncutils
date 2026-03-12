@@ -136,14 +136,15 @@ def aiter_to_iter(ait, _s=Executor().submit, _i=IgnoreErrors(StopAsyncIteration)
                     while True: yield _s(_a, f()).result()
         return iterator()
     raise TypeError('cannot iterate over ait synchronously or asynchronously')
-async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False, _=L.error):
-    r, i, n = [], 0, maxsize if n is None else n
+async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False, _=L.warning, m='collect ran out of items'):
+    f, i, n = (r := []).append, 0, maxsize if n is None else n
     async for i, _ in aenumerate(it):
         if i == n: break
-        r.append(_)
+        f(_)
     else:
-        if default is RAISE: _('collect ran out of items')
-        elif default is not _NO_DEFAULT: r.extend(default for _ in range(n-i))
+        if default is RAISE: raise ItemsExhausted(m)
+        if default is _NO_DEFAULT: _(m)
+        else: r.extend(default for _ in range(n-i))
     return (r, n) if __retn else r
 async def take(it, n, default=_NO_DEFAULT):
     it = iter_to_aiter(it)

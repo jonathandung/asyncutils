@@ -29,6 +29,7 @@ from .signals import *
 from .tools import *
 from .util import *
 from .version import *
+from ._internal.protocols import Submodule
 from typing import Final
 from types import ModuleType
 __version__: Final[VersionInfo]
@@ -40,5 +41,5 @@ __git_version__: Final[str]
 preloaded_submodules: Final[frozenset[str]]
 '''A frozenset containing all submodules that are inevitably preloaded on module startup, which also loads asyncio.
 This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
-submodules_map: Final[dict[str, ModuleType]]
+submodules_map: Final[dict[Submodule, ModuleType]]
 '''A dictionary mapping the submodule names to the submodule objects.'''

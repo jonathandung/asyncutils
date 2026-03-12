@@ -133,4 +133,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, l, m, r, s, register, P
+del _, e, L, M, N, S, l, m, r, s, register, P, _sentinel
