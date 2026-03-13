@@ -1,6 +1,7 @@
 from .mixins import LoopContextMixin
 from ._internal.log import error
-from .util import safe_cancel
+from .base import yield_to_event_loop, event_loop
+from .util import safe_cancel, to_async
 from .exceptions import CRITICAL, Critical
 from . import constants
 from time import monotonic
@@ -17,7 +18,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
     def should_refresh(self, key): return self.time_past(key) > self._ttl-self._refresh if key in self else False
-    def time_past(self, key): return monotonic()-self._cache[key]['timestamp']
+    def time_past(self, key): return monotonic()-self._cache[key].timestamp
     def configure(self, ttl, refresh, processor=None, _d=lambda x, *_: error(x)): self._ttl, self._refresh, self._processor = *map(lambda f: f(ttl, refresh), (max, min)), processor or getattr(self, '_processor', _d)
     def get_loader(self, key):
         if (k := self._loaders[key]) is None: raise LookupError(f'no loader registered for key {key!r}')
@@ -27,21 +28,20 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
             if loader: self.register_loader(key, loader)
             if self.should_refresh(key): await self.refresh_item(key)
             if key not in self._cache or self.expired(key): await self.load_item(key)
-            return self._cache[key]['value']
+            return self._cache[key].value
     async def __setup__(self):
         if self._task is None: self._event.clear(); self._task = self.make(self.refresh_loop())
     async def __cleanup__(self):
         if self._task: self._event.set(); await safe_cancel(self._task); self._task = None
-    async def load_item(self, key): self._cache[key] = {'value': await self.get_loader(key)(), 'timestamp': monotonic(), 'loading': False}
+    async def load_item(self, key, _=__import__('collections').namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.caches')): self._cache[key] = _(await self.get_loader(key)(), monotonic(), False)
     async def refresh_item(self, key):
         e = None
         async with self._lock:
-            if key not in self._loaders or key not in self or self._cache[key]['loading']: return
-            self._cache[key]['loading'] = True
+            if key not in self._loaders or (t := self._cache.get(key)) is None or t.loading: return
+            t.loading = True
             try: await self.load_item(key)
             except CRITICAL: raise Critical
-            except BaseException as e:
-                if key in self._cache: self._cache[key]['loading'] = False
+            except BaseException as e: t.loading = False
         if e: self._processor(e, False)
     async def refresh_loop(self):
         r, t = self._refresh, []
@@ -51,31 +51,33 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
                 async with self._lock:
                     n = monotonic()
                     for k in self._cache:
-                        if not self._cache[k]['loading'] and n-self._cache[k]['timestamp'] > self._ttl-self._refresh: t.append(self.make(self.refresh_item(k)))
+                        if not self._cache[k].loading and n-self._cache[k].timestamps > self._ttl-self._refresh: t.append(self.make(self.refresh_item(k)))
                 if t: await gather(*t, return_exceptions=True)
             except CRITICAL: raise Critical
-            except CancelledError: break
+            except CancelledError: raise
             except BaseException as e: self._processor(e, True)
     async def invalidate(self, key):
         async with self._lock: return self._cache.pop(key, None)
     async def clear(self):
         async with self._lock: self._cache.clear()
 class AsyncLRUCache:
-    __slots__ = '_ttl', '_factory', '_timestamps', '_caches'
+    __slots__ = '_ttl', '_factory', '_timestamps', '_caches', '_make_key', '_loopctx'
     def __init__(self, maxsize=None, ttl=None, typed=False):
         if maxsize is None: maxsize = constants.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE
-        self._ttl, self._factory, self._timestamps, self._caches = ttl, lru_cache(maxsize, typed), {}, {}
-    def __call__(self, f):
+        self._ttl, self._factory, self._timestamps, self._caches, self._loopctx = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200)
+    def __call__(self, f, /, _=lambda f, a, k: id(f)<<0x80|hash(a)<<0x40|hash(frozenset(k.items()))):
         self._caches[f] = c = self._factory(f)
+        if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)
         async def wrapper(*a, **k):
-            K = self._make_key(f, a, k)
-            if self._ttl and monotonic()-self._timestamps.get(K, 0) > self._ttl: c.cache_clear(); del self._timestamps[K]
-            r = c(*a, **k)
-            if iscoroutine(r): r = await r
+            K = await self._make_key(f, a, k)
+            if self._ttl and monotonic()-self._timestamps.get(K, 0) > self._ttl: await c.cache_clear(); del self._timestamps[K]
+            if iscoroutine(r := c(*a, **k)): r = await r
             if self._ttl: self._timestamps[K] = monotonic()
             return r
         wrapper.__dict__.update({k: getattr(c, k) for k in ('cache_info', 'cache_clear')}); return wraps(f)(wrapper)
-    def _make_key(self, f, a, k): return (id(f), a, frozenset(k.items()))
-    def cache_clear(self):
+    async def cache_clear(self):
         self._timestamps.clear(); C = self._caches
-        while C: C.popitem()[1].cache_clear()
+        while C: C.popitem()[1].cache_clear(); await yield_to_event_loop
+    def __del__(self): self._loopctx.__exit__(None, None, None)
+    @property
+    def loop(self): return self._loopctx.__enter__()
