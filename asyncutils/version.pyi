@@ -33,8 +33,8 @@ class VersionInfo(str):
     def __sub__(self, delta: VersionDelta, /) -> Self: ...
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
-    def __setattr__(self, name: str, /) -> NoReturn: ...
-    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple'], /) -> str:
+    def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
+    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple'], /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
         o, oct: `'0o36602000'`
@@ -43,10 +43,10 @@ class VersionInfo(str):
         0, major: `'123'`
         1, minor: `'4'`
         2, patch: `'0'`
-        short: `'123.4'`
-        long: `'asyncutils version 123.4.0'`
-        chars: `'{\x04\x00'`
-        tuple: `'(123, 4, 0)'`
+        s, short: `'123.4'`
+        l, long: `'asyncutils version 123.4.0'`
+        c, chars: `'{\x04\x00'`
+        t, tuple: `'(123, 4, 0)'`
         <anything else>: `'123.4.0'`"""
     def __int__(self) -> int: '''Assumes minor and patch are less than 256.'''
     def __floor__(self) -> int: '''Returns the major version.'''
@@ -68,8 +68,8 @@ class VersionInfo(str):
     def is_valid(self) -> Literal[True]: '''If this returns False, the user must have messed something up intentionally.'''
     @property
     def representation(self) -> str:
-        """>>> print(VersionInfo(4, 2).representation)
-        asyncutils v4.2.0"""
+        '''>>> print(VersionInfo(4, 2).representation)
+        asyncutils v4.2.0'''
     @property
     def is_unstable(self) -> Literal[False]: '''True only in development, so should be considered always False.'''
     @property
@@ -85,11 +85,11 @@ class VersionDelta(tuple[int, int, int]):
     '''A named tuple representing the difference between versions. Can be taken by the + or - operators.'''
     def __new__(cls, major: int=..., minor: int=..., patch: int=...) -> Self: ...
     @property
-    def major(self) -> int: ...
+    def major(self) -> int: '''The major part of the version.'''
     @property
-    def minor(self) -> int: ...
+    def minor(self) -> int: '''The minor part of the version.'''
     @property
-    def patch(self) -> int: ...
+    def patch(self) -> int: '''The patch part of the version.'''
     def __neg__(self) -> Self: ...
 def normalize(o: Any, /) -> tuple[int, int, int]|None:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.
