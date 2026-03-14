@@ -13,10 +13,10 @@ class event_loop:
         if self._flags&0x800: return factory()
         pool = self.__reusable
         while pool:
-            if (l := pool.pop()).is_closed() or l.is_running(): continue
-            with _: l._ready.clear()
-            with _: l._scheduled.clear()
-            return l
+            if (L := pool.pop()).is_closed() or L.is_running(): continue
+            with _: L._ready.clear()
+            with _: L._scheduled.clear()
+            return L
         return factory()
     def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep|self._INTERNAL_MASK
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
@@ -50,19 +50,19 @@ class event_loop:
         if f&self._INNER_EXIT:
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
-                except CRITICAL as e: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
-                except RuntimeError as e:
+                except CRITICAL: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
+                except RuntimeError:
                     if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
-                except BaseException as e:
+                except BaseException:
                     if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
             elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)):
-                try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b)) 
-                except CRITICAL as e: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
-                except RuntimeError as e:
+                try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b))
+                except CRITICAL: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
+                except RuntimeError:
                     if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
-                except BaseException as e:
+                except BaseException:
                     if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
             elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
@@ -122,7 +122,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
 def a(coro):
     with event_loop.from_flags(4) as l: return l.run_until_complete(coro)
 def aiter_to_iter(ait, _s=Executor().submit, _i=IgnoreErrors(StopAsyncIteration), _a=a, _c=b):
-    audit(f'asyncutils.util.aiter_to_iter', ait)
+    audit('asyncutils.util.aiter_to_iter', ait)
     if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
         if _c(ait, 'asend', 'athrow', 'aclose'):
