@@ -12,7 +12,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
 @P.patch_properties
 class VersionInfo(str):
     __slots__ = 'parts'
-    def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a))), 'parts', p(a)); return s
+    def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionInfo')
     def __hash__(self, f=lambda x, y, /: y*y+x if x < y else x*x+x+y):
         if (x := f(f(*self[:2]), self[2]))&1: x = ~x
@@ -45,8 +45,6 @@ class VersionInfo(str):
             if V.is_valid: return V
             raise E.VersionCorrupted(V)
         raise E.StateCorrupted('module-internal', '__version__ is inconsistent with expectations')
-    @classmethod
-    def to_version(cls, o, /): return cls(*normalize(o))
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
@@ -76,11 +74,11 @@ class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
     def __neg__(self): return __class__(*map(int.__neg__, self))
-def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=-0x10000, n=0xFF00, l=0xFF):
+def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
     elif isinstance(o, complex): o = o.real, o.imag, 0
-    if isinstance(o, int): o = o&m, o&n, o&l
+    if isinstance(o, int): o = o>>16, (o>>8)&m, o&m
     elif isinstance(o, float):
         if (o := format(o, '.4f')) in s: return
         o = map(int, (o[:-4], o[-4:-2], o[-2:]))

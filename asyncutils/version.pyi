@@ -5,7 +5,10 @@ from ._internal.protocols import IntCompatible
 __all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
 @final
 class VersionInfo(str):
-    def __new__(cls, /, *a: IntCompatible) -> Self: ...
+    @overload
+    def __new__(cls, from_: Any, /) -> Self: ...
+    @overload
+    def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as (major, minor, patch), zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int: '''A perfect hash function for versions! May produce larger integers than __int__ in some cases, and may also produce negative integers.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
@@ -63,8 +66,6 @@ class VersionInfo(str):
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
-    @classmethod
-    def to_version(cls, o: Any, /) -> Self: '''Builds an instance from any normalizable object; throws an exception if not possible.'''
     @property
     def is_valid(self) -> Literal[True]: '''If this returns False, the user must have messed something up intentionally.'''
     @property
