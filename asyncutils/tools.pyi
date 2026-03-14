@@ -11,4 +11,6 @@ def json_to_argstr(path: Openable, /, *, json: str=..., json5: str=..., jsonc: s
 def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) -> None: '''Writes the sequence of strings, parsed as command-line arguments for this module, into `path` with .json format.'''
 def argstr_to_json(argstr: str, path: Openable, /, *, dump: DumpType=..., split: Callable[[str], Sequence[str]]=...) -> None: '''Parses the shell-escaped string representing the command-line arguments for this module and writes it into a .json path.'''
 def get_cfg_json_format() -> str: '''Get the format of .json configs this module takes, as a string.'''
-def print_cfg_json_format(file: CanWriteAndFlush[str]=...) -> None: '''Prints the above format into the specified file.'''
+def print_cfg_json_format(file: CanWriteAndFlush[str]=...) -> None: '''Prints the above format into the specified file (default stdout).'''
+def get_cmd_help() -> str: '''Get the command line help as a string containing ANSI escape sequences.'''
+def print_cmd_help(file: CanWriteAndFlush[str]=...) -> None: '''Prints the above help into the specified file (default stdout).'''

@@ -1,28 +1,23 @@
 from .base import event_loop, aiter_to_iter, collect, safe_cancel_batch
-from .util import safe_cancel, new_tasks
+from .util import new_tasks
 from .exceptions import CRITICAL, Critical
 from ._internal import helpers as H
 from asyncio.futures import wrap_future
-from asyncio.tasks import wait, wait_for
+from asyncio.tasks import wait
+from asyncio.timeouts import timeout
 from asyncio.coroutines import iscoroutine
 from asyncio.staggered import staggered_race
 from sys import audit, exc_info
 from ._internal.submodules import compete_all as __all__
-async def first_completed(*C, ret_exc=False, loop=None):
+async def first_completed(*C, ret_exc=False, timeout=None, loop=None, _=timeout):
     audit('asyncutils.compete.first_completed/start', C); c = None
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     try:
-        for _ in (await wait(t := tuple(loop.create_task(c) for c in C), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := _.exception()) else _.result()
+        async with _(timeout):
+            for _ in (await wait(t := tuple(loop.create_task(c) for c in C), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := _.exception()) else _.result()
     finally:
         if c: c.__exit__(*exc_info())
         audit('asyncutils.compete.first_completed/end'); await safe_cancel_batch(t)
-async def race(*C, timeout=None, loop=None):
-    audit('asyncutils.compete.race/start', C); c = None
-    if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
-    try: return await wait_for(t := loop.create_task(first_completed(*C, loop=loop)), timeout)
-    finally:
-        if c: c.__exit__(*exc_info())
-        audit('asyncutils.compete.race/end'); await safe_cancel(t)
 async def race_with_callback(*C, winner=None, loser=None, timeout=None):
     if not C: raise TypeError('pass in at least one coroutine to race_with_callback')
     audit('asyncutils.compete.race_with_callback/start', C); d, p = await wait(_ := tuple(new_tasks(*C)), return_when='FIRST_COMPLETED', timeout=timeout)
@@ -51,5 +46,5 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=iscoroutine, futwrap=
                 continue
         async def wrapper(): return await i
         yield wrapper()
-def enhanced_staggered_race(cfs, delay, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs)), delay, loop=loop)
-del H
+def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs)), delay, loop=loop)
+del H, timeout

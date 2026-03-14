@@ -1,4 +1,5 @@
 from .mixins import LoopContextMixin
+from ._internal.protocols import Middleware
 from _collections_abc import Callable, Generator, AsyncGenerator, Mapping, Awaitable, Iterable
 from _weakrefset import WeakSet
 from collections import defaultdict
@@ -59,7 +60,7 @@ class Observable[**P](LoopContextMixin):
     def merge(*obs: Self, ret_exc: bool=...) -> Self: ...
 class EventBus(LoopContextMixin):
     '''A class abstracting the communication between notable events and asynchronous callbacks (an async auditing system), that can optionally be hooked up to sys.audit.
-    Has extensive telemetry and middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers.
+    Has extensive telemetry and middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers. Subscribers must be hashable!
     A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.'''
     @type_check_only
@@ -83,7 +84,7 @@ class EventBus(LoopContextMixin):
     @staticmethod
     def is_valid_event_type(event_type: object) -> TypeGuard[str|_WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
     @overload
-    def is_subscribed(self, callback: Callable[[Any], Awaitable], event_type: str) -> bool: ...
+    def is_subscribed(self, callback: Callable[[Any], Awaitable], event_type: str) -> bool: '''Whether the callback is subscribed to the event type.'''
     @overload
     def is_subscribed(self, callback: Callable[[str, Any], Awaitable], event_type: _WildcardType) -> bool: ...
     @overload
@@ -114,10 +115,23 @@ class EventBus(LoopContextMixin):
     def auditor(self, event: str, args: tuple[Any, ...], /) -> None: '''The auditor of the event bus. I can't think of a use case where you would call this directly. Not an instance method at runtime, just a function attached to the instance.'''
     def start_audit(self) -> None: '''Connect the bus' audit hook to sys.audit, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the bus' audit hook. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
-    def add_middleware(self, middleware: Callable[[str, Any], Any]) -> None: ...
-    def remove_middleware(self, middleware: Callable[[str, Any], Any], *, result: Any=..., strict: bool=...) -> Any: ...
-    def add_middleware_once(self, middleware: Callable[[str, Any], Any], until: Future[Any]) -> None: ...
-    def audit_context(self) -> _GeneratorContextManager[None, None, None]: ...
+    def add_middleware(self, middleware: Callable[[str, Any], Any]) -> None:
+        '''Append a middleware to the back of the pipe of middlewares. The middleware must be a hashable callable taking the event type as the first argument and the associated data as the second.
+        If the middleware does not recognize the event type, it should simply return the data immediately. There is no protection in place against malicious malware besides the user's abstraction.
+        It is preferred that the middleware be a coroutine function. Each middleware should be extremely optimized, for example through C extensions, to avoid hindrance of the publishing.
+        When publishing occurs, the following is done asynchronously.
+        The first middleware takes the initial data, does some processing, and passes the modified data to the second middleware, and so on.
+        The output of the final middleware is passed to each subscriber concurrently. They cannot see the initial data.'''
+    def remove_middleware(self, middleware: Callable[[str, Any], Any], *, result: Any=..., strict: bool=...) -> Any:
+        '''Remove a previously added middleware, via `add_middleware` or `add_middleware_once`, and return its result. Runs in O(1) time.
+        If `strict` is True and the middleware was never added, throw a KeyError.
+        If the middleware has an associated future `add_middleware_once` and it is done, return its result. Otherwise, set its result to `result` and return it.'''
+    def add_middleware_once(self, middleware: Callable[[str, Any], Any], until: Future[Any]) -> bool:
+        '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
+        If the middleware has already been associated with another future, do nothing and return False.'''
+    def audit_context(self) -> _GeneratorContextManager[None, None, None]:
+        '''Start receiving publications from sys.audit upon entry and stop on exit. Use as a context manager.
+        Note that publish does not trigger sys.audit; it is the other way around to avoid infinite recursion.'''
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> _GeneratorContextManager[None, None, None]: ...
     def start_tracking(self) -> None: ...
     @overload

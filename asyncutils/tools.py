@@ -26,4 +26,6 @@ def argv_to_json(a, p, /, *, dump=json.dump, _=p.parse_args):
 def argstr_to_json(a, p, /, *, split=shlex.split, **k): argv_to_json(split(a), p, **k)
 def get_cfg_json_format(): return (__import__('importlib.resources', fromlist=('',)).files('asyncutils')/'format.jsonc').read_text()
 def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
+get_cmd_help = p.format_help
+def print_cmd_help(file=None): print(get_cmd_help(), file=file, flush=True)
 del p, shlex, json

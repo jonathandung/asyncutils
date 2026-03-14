@@ -7,12 +7,15 @@ from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, ove
 from io import TextIOWrapper, _WrappedBuffer
 @type_check_only
 class SupportsLT(Protocol):
+    '''An object that implements the < operator.'''
     def __lt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class SupportsGT(Protocol):
+    '''An object that implements the > operator.'''
     def __gt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class AsyncContextManager[T](Protocol):
+    '''An asynchronous context manager. contextlib.AbstractAsyncContextManager with overloads and as a protocol.'''
     async def __aenter__(self) -> T: ...
     @overload
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> bool|None: ...
@@ -20,6 +23,7 @@ class AsyncContextManager[T](Protocol):
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool|None: ...
 @type_check_only
 class AsyncLockLike(AsyncContextManager, Protocol):
+    '''An object that behaves like an asynchronous lock.'''
     async def acquire(self) -> bool|None: ...
     def release(self) -> None|Awaitable[None]: ...
     def locked(self) -> bool: ...
@@ -30,20 +34,22 @@ class GenericSized[T](Protocol):
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
 class SupportsSlicing[T](GenericSized[T], Protocol):
-    '''Protocol for iterables with size, index and slice access, length, which also makes them automatically reversible.'''
+    '''Protocol for iterables with size, and index and slice access.'''
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> GenericSized[T]: ...
     @overload
     def __getitem__(self, idx: SupportsIndex, /) -> T: ...
     def __len__(self) -> int: ...
-    def __reversed__(self) -> Iterator[T]: ...
+    def __reversed__(self) -> Iterator[T]: '''The requirements for this protocol makes its conformants automatically reversible.'''
 @type_check_only
 class CanClearAndCopy[T](Protocol):
+    '''An iterable that supports clearing and shallow copying.'''
     def copy(self) -> Self: ...
     def clear(self) -> None: ...
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
 class PathLike[T](Protocol):
+    '''An object that represents a path. Basically os.PathLike, but a Protocol.'''
     def __fspath__(self) -> T: ...
 @type_check_only
 class SupportsPop[T](Protocol):
@@ -70,24 +76,37 @@ class DumpType(Protocol):
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
+    '''A writable and flushable 'stream'.'''
     def flush(self) -> None: ...
     def write(self, s: T, /) -> None: ...
+@type_check_only
+class SigPatcher(Protocol):
+    '''Type of functions with a specific signature in the semi-public API of this module, used to alter function signatures.'''
+    def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...
+@type_check_only
+class Middleware(Protocol):
+    '''Represents a middleware accepted by channels.EventBus.
+    To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
+    See issue #2.
+    Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
+    def __call__(self, event_type: str, data: Any, /) -> Any: ...
+    def __hash__(self) -> int: ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the int constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 '''Objects that support (async) iteration.'''
 type SupportsRichComparison = SupportsLT|SupportsGT
 type ValidExcType = type[BaseException]
+'''The type of exc_typ in __exit__ and __aexit__ methods.'''
 type Exceptable = ValidExcType|tuple[ValidExcType, ...]
 '''Objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
+'''Anything that can normally be passed to the built-in open function.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
+'''A slice with start, stop and step being integers or None, representing a slice that typical sequences supporting slicing should accept.'''
 type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as time.monotonic, time.process_time and time.perf_counter.'''
 type All = tuple[str, ...]
 '''Type of the __all__ attributes of asyncutils' submodules.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
-class SigPatcher(Protocol):
-    '''Type of functions used to alter function signatures, with a specific signature.'''
-    def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...

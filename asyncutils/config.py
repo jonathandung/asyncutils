@@ -2,8 +2,8 @@ import sys as S, logging as L
 from ._internal.submodules import config_all as __all__
 from ._internal import log, patch as P
 from atexit import register
-if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N, __doc__ = p.parse_args(), p.format_help(); del p
-else: from ._internal.unparsed import N, __doc__
+if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N = p.parse_args(); del p
+else: from ._internal.unparsed import N
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     d, c, w = e.rpartition(c)
     if c:
@@ -71,7 +71,7 @@ _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s
 (set_logger_level := lambda level, h=_: log.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 get_past_logs.handler = _
 log.debug('hi')
-__import__('atexit').register(lambda s=s: log.debug('bye') or s.flush() or s.close())
+__import__('atexit').register(lambda s=s, d=log.debug: d('bye') or s.flush() or s.close())
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property

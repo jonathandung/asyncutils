@@ -34,7 +34,6 @@ dTIsMi41KzEuMTEsMiwxAhsMBQmLMDvsAAoJECpZQ7ZLCZTeUssA+gOViN7xSKvA
 gNDYS8Hnxzw0EU/5LtxolGz2OXzUNJEfAQCfuMAmgPCcoN0bnrDAwDK+aU90J4tS
 O01JPuZoia5kAQ==
 =QBAY
-
 -----END PGP PUBLIC KEY BLOCK-----
 
 The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please state that in the email.

@@ -2,7 +2,7 @@
 
 This file provides an overview of the direction this project is heading.
 
-Current version: 0.8.8
+Current version: 0.8.9
 
 ## 0.9
 - Create a test suite for the module

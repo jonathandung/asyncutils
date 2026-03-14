@@ -7,7 +7,7 @@ from ._internal.helpers import _filter_out, _get_loop_no_exit, copy_and_clear, s
 from . import constants
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
-from sys import addaudithook
+from sys import addaudithook, audit
 from contextlib import contextmanager
 from functools import partial, cached_property
 from asyncio.locks import Lock, Event, Semaphore
@@ -170,7 +170,7 @@ class EventBus(LoopContextMixin):
             if F.done(): return F.result()
             F.set_result(result)
         return result
-    def add_middleware_once(self, middleware, until): self._middlewares[middleware] = until
+    def add_middleware_once(self, middleware, until): return self._middlewares.setdefault(middleware, until) is until
     @contextmanager
     def audit_context(self):
         try:
@@ -202,9 +202,8 @@ class EventBus(LoopContextMixin):
             except KeyError: return False
     def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type))
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
-    async def _publish_helper(self, d, s, I, *_):
-        await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
-    async def publish(self, event_type, data=None, *, wait=True, safe=False, timeout=None, chaperone=None):
+    async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
+    async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
         if chaperone is None: chaperone = f.append
         async def g():
@@ -225,8 +224,8 @@ class EventBus(LoopContextMixin):
         try:
             if wait: await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
-            log.info(f'{self.name}: publishing succeeded')
-        except TimeoutError: raise BusTimeout(f'publishing in {self.name} took too long') from None
+            log.info(f'{self.name}: publishing of event {event_type!r} succeeded')
+        except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally:
             if p := self._publisher: self._publisher = None; await safe_cancel(p)
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
