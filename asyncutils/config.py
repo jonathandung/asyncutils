@@ -63,7 +63,7 @@ match logging_to:
     case str()|int()|bytes():
         try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to)
         except PermissionError as e: s.write(f'ERROR: insufficient permissions: {e}\n{M}')
-        except FileExistsError as e: s.write('ERROR: log file already exists\n'+M)
+        except FileExistsError: s.write('ERROR: log file already exists\n'+M)
         except OSError as e: s.write(f'ERROR: {e}\n{M}')
         except Exception as e: s.write(f'ERROR: unexpected error opening log file: {e}\n{M}')
 log.addHandler(_ := L.StreamHandler(s))

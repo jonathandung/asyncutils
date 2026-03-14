@@ -444,7 +444,7 @@ async def aunique_everseen(it, key=lambda _: _):
 def aunique_justseen(it, key=lambda _: _, _=O.itemgetter): return amap(_(0), agroupby(it)) if key is None else amap(anext, amap(_(1), agroupby(it, key)), await_=True)
 async def aunique(it, key=None, reverse=False):
     async for _ in aunique_justseen(await asorted(it, key=key, reverse=reverse), key): yield _
-async def ancycles(it, n): 
+async def ancycles(it, n):
     async for _ in achain.from_iterable(arepeat(await to_tuple(it), n)): yield _
 def apartition(pred, it):
     if pred is None: pred = bool

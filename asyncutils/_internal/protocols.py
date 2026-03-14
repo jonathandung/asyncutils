@@ -1,1 +1,1 @@
-__getattr__ = lambda _, /: None
+def __getattr__(_, /): return
