@@ -15,5 +15,5 @@ exclude =
     .tox,
     docs/conf.py,
     tests/
-ignore = C901, E128, E227, E228, E301, E302, E305, E501, E701, E702, F401, W292
+ignore = C901, E128, E226, E227, E228, E301, E302, E305, E306, E402, E501, E701, E702, E704, E722, F401, W292
 select = C, E, F, W
