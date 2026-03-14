@@ -293,14 +293,14 @@ class Rendezvous:
         except TimeoutError: return False
     async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
     async def get(self, default=_NO_DEFAULT, *, timeout=None):
-        p, f = self._putters, timeout is None and default is not _NO_DEFAULT
+        p = self._putters
         try:
             async with _timeout(timeout):
                 async with self._lock:
                     while p:
                         v, F = p.popleft()
                         if not F.done(): F.set_result(None); return v
-                    if f: return default
+                    if timeout is None and default is not _NO_DEFAULT: return default
                     else: self._getters.append(F := self._loop.create_future())
                 return await F
         except TimeoutError:
@@ -309,7 +309,7 @@ class Rendezvous:
     def __length_hint__(self): return len(self._getters)+len(self._putters)
     async def state_snapshot(self, _f=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')):
         await self.cleanup()
-        async with self._lock: t = len(self._getters), len(self._putters)
+        async with self._lock: t = map(len, (self._getters, self._putters))
         return _f(*t, sum(t), not any(t))
     async def cleanup(self):
         async with self._lock: self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())

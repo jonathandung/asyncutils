@@ -34,7 +34,7 @@ class VersionInfo(str):
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
-    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple'], /) -> str:
+    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash'], /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
         o, oct: `'0o36602000'`
@@ -47,6 +47,7 @@ class VersionInfo(str):
         l, long: `'asyncutils version 123.4.0'`
         c, chars: `'{\x04\x00'`
         t, tuple: `'(123, 4, 0)'`
+        h, hash: `'116380397'`
         <anything else>: `'123.4.0'`"""
     def __int__(self) -> int: '''Assumes minor and patch are less than 256.'''
     def __floor__(self) -> int: '''Returns the major version.'''

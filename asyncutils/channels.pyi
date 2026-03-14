@@ -194,16 +194,16 @@ class Rendezvous[T]:
     class StateSnapshot(tuple[int, int, int, bool]):
         '''Does not exist at runtime.'''
         @property
-        def num_getters(self) -> int: ...
+        def num_getters(self) -> int: '''Current number of slots waiting for values.'''
         @property
-        def num_putters(self) -> int: ...
+        def num_putters(self) -> int: '''Current number of values waiting for slots.'''
         @property
-        def num_ops(self) -> int: ...
+        def num_ops(self) -> int: '''num_getters+num_putters'''
         @property
-        def idle(self) -> bool: ...
+        def idle(self) -> bool: '''num_getters == num_putters == 0'''
         def __repr__(self) -> str: ...
     def __length_hint__(self) -> int: '''Approximate number of operations pending; for operator.length_hint.'''
-    async def state_snapshot(self) -> StateSnapshot: '''Return a snapshot of the current state of the object at the earliest convenience.'''
+    async def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
         '''Put in a value to the rendezvous and get a different one back, not necessarily in that order.
         If asap is True, don't wait for the put to complete.'''

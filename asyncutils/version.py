@@ -2,7 +2,7 @@ from ._internal import patch as P
 from ._internal.submodules import version_all as __all__
 from . import exceptions as E
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
-    a = (r := []).append
+    a, i = (r := []).append, 0
     for i, j in enumerate(I):
         a(int(j, 0) if isinstance(j, str) else int(j))
         if i == 2: break
@@ -16,9 +16,11 @@ class VersionInfo(str):
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionInfo')
     def __hash__(self, f=lambda x, y, /: y*y+x if x < y else x*x+x+y):
         if (x := f(f(*self[:2]), self[2]))&1: x = ~x
-        return x>>1
+        x >>= 1; return x+(x > -2)
     @classmethod
     def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y)):
+        if c == -1: raise ValueError('hash cannot be -1')
+        if c > -1: c -= 1
         c <<= 1
         b, c = f(~c if c < 0 else c)
         return cls(*f(b), c)
@@ -45,7 +47,7 @@ class VersionInfo(str):
         raise E.StateCorrupted('module-internal', '__version__ is inconsistent with expectations')
     @classmethod
     def to_version(cls, o, /): return cls(*normalize(o))
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t').get):
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return '.'.join(map(str, self[:2+bool(self[2])]))
@@ -53,6 +55,7 @@ class VersionInfo(str):
             case 'c': return bytes(self).decode('ascii')
             case 't': return str(self.parts)
             case 'd': return repr(int(self))
+            case 'h': return repr(hash(self))
             case 'hex'|'bin'|'oct': return __builtins__[s](int(self))
         return str(self)
     def __add__(self, o, /): return __class__(self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented

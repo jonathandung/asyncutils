@@ -170,7 +170,7 @@ class LocksmithBase:
         if await wait_for(f, timeout1): await a
         else:
             try: await wait_for(a, timeout2)
-            except TimeoutError: raise RuntimeError('failed to acquire lock on time') from None
+            except TimeoutError: raise TimeoutError(f'failed to acquire lock within {timeout2} seconds') from None
         self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), timeout3)
     async def _wait_on(self, task, lock, /):
         try: return await task
