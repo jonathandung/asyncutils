@@ -7,7 +7,7 @@ from os import getenv
 import sys
 _f, _s = ('',), object()
 class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredConsole):
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, default_local_exit, disallow_subclass_msg, _unsubclassable = __import__('collections').ChainMap(), (), (lambda self, f=sys._clear_internal_caches, g=__import__('gc').collect, d=debug: f() or self.write(f'MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), False, 'cannot subclass %r', False
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, default_local_exit, disallow_subclass_msg, _unsubclassable = __import__('collections').ChainMap(), (), (lambda self, f=sys._clear_internal_caches, g=__import__('gc').collect, d=debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), False, 'cannot subclass %r', False
     match '1' if C.basic_repl else getenv('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False
         case str() as s:

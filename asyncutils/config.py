@@ -4,7 +4,7 @@ from ._internal import log, patch as P
 from atexit import register
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N, __doc__ = p.parse_args(), p.format_help(); del p
 else: from ._internal.unparsed import N, __doc__
-def l(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
+def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     d, c, w = e.rpartition(c)
     if c:
         try: return getattr(__import__(d, fromlist=_), w)
@@ -32,7 +32,7 @@ def l(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, l(N.executor), lambda: '', 'x', 'Failed to create log file; falling back to stderr\n', __import__('os').name == 'posix'
+max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', 'Failed to create log file; falling back to stderr\n', __import__('os').name == 'posix'
 if isinstance(e, str):
     try: e = int(e, 0)
     except ValueError: ...
@@ -133,4 +133,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, l, m, r, s, register, P, _sentinel
+del _, e, L, M, N, S, f, m, r, s, register, P, _sentinel
