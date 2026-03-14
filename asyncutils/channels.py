@@ -1,6 +1,6 @@
 from .mixins import LoopContextMixin
-from .base import event_loop, iter_to_aiter, safe_cancel_batch, dummy_task
-from .util import safe_cancel, sync_await, to_async, to_sync, semaphore, _ignore_cancellation
+from .base import event_loop, iter_to_aiter, safe_cancel_batch
+from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
 from .exceptions import IgnoreErrors, BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _filter_out, _get_loop_no_exit, copy_and_clear, stop_and_closer, subscriptable
@@ -10,13 +10,13 @@ from collections import defaultdict, deque, namedtuple
 from sys import addaudithook
 from contextlib import contextmanager
 from functools import partial, cached_property
-from asyncio.locks import Lock, Event
+from asyncio.locks import Lock, Event, Semaphore
 from asyncio.queues import Queue, QueueEmpty, QueueShutDown
 from asyncio.coroutines import iscoroutine
 from asyncio.tasks import wait_for, gather, sleep, shield
 from asyncio.timeouts import timeout as _timeout
-from ._internal.submodules import channels_all as __all__
 from ._internal import log, patch as P
+from ._internal.submodules import channels_all as __all__
 @subscriptable
 class Observable(LoopContextMixin):
     __slots__ = '_data', '_lock', '_to_remove', '_queue', '_event'
@@ -124,7 +124,7 @@ class Observable(LoopContextMixin):
         for o in obs: o._data.add(p)
         return _
 class EventBus(LoopContextMixin):
-    def __init__(self, name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False, __fmt='{} {}'.format): self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self._publisher, s[None] = __fmt((t := type(self)).__qualname__, name or t._inc_cnt()), Lock(), False, handler or (lambda _: None), semaphore(bounded, max_concurrent), False, tracking_stats, None, WeakSet()
+    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False, __fmt='{} {}'.format): self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self._publisher, s[None] = __fmt((t := type(self)).__qualname__, name or t._inc_cnt()), Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, None, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -150,8 +150,6 @@ class EventBus(LoopContextMixin):
         return r
     @stream_queue.setter
     def stream_queue(self, val, /): self._stream_queue = val
-    @property
-    def dummy_task(self): return self.make(dummy_task)
     def is_auditing(self): return self._auditing
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
     @cached_property
@@ -235,14 +233,14 @@ class EventBus(LoopContextMixin):
         def handler(d):
             if not F.done() and condition(d): F.set_result(d)
         return await self.make(self.subscribe_until(F := self.loop.create_future(), lambda _: self._runner(handler, _), event_type, timeout))
-    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _h=_ignore_cancellation.combined(IgnoreErrors(TimeoutError))):
-        async def f(h=_h):
-            with h: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, *_filter_out(event_type)); return r
+    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(IgnoreErrors(TimeoutError))):
+        async def f():
+            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, *_filter_out(event_type)); return r
         await self.subscribe(callback, *_filter_out(event_type)); return self.make(f())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): log.warning('event stream buffer full')
         try: await wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
-        except QueueShutDown: log.info('event stream is closing')
+        except QueueShutDown: log.info('event stream is closing', exc_info=True)
         except TimeoutError:
             if q.full(): log.warning('event stream data lost'); q.get_nowait(); q.put_nowait(d)
     async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):

@@ -25,7 +25,7 @@ class CacheWithBackgroundRefresh[T=Any, R=Any](LoopContextMixin):
     async def refresh_item(self, key: T) -> None: '''Refresh an entry in the background.'''
     async def refresh_loop(self) -> NoReturn: '''This task runs continuously in the background, checking for entries requiring refresh and spawning tasks to do so.'''
     async def invalidate(self, key: T) -> R|None: '''Remove a key from the cache, returning the corresponding value if it was in the cache.'''
-    async def clear(self) -> None: '''Remove all entries from the cache.'''
+    async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., typed: bool=...):
@@ -36,4 +36,4 @@ class AsyncLRUCache(LoopContextMixin):
     def __call__[T: Coroutine, **P](self, f: Callable[P, T], /) -> Callable[P, T]: ...
     @overload
     def __call__[T, **P](self, f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
-    def cache_clear(self) -> None: ...
+    def cache_clear(self) -> None: '''Clear all cache entries.'''

@@ -8,10 +8,10 @@ from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
 from asyncio.coroutines import iscoroutine
 from ._internal.submodules import base_all as __all__
 class event_loop:
-    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, _reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []
+    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
-        pool = self._reusable
+        pool = self.__reusable
         while pool:
             if (l := pool.pop()).is_closed() or l.is_running(): continue
             with _: l._ready.clear()
@@ -43,7 +43,7 @@ class event_loop:
             N = type(self).__name__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
         f, l = f&~e, self._loop
         if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
-        if not f&0x400: self._reusable.append(l)
+        if not f&0x400: self.__reusable.append(l)
         if not ((c := f&self._SHOULD_CLOSE) and f&0x10):
             with _i: l.stop()
         q, r, self._flags = t is not None and issubclass(t, RuntimeError), False, f&~0xC0000
