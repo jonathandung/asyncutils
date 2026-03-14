@@ -69,7 +69,7 @@ class Critical(BaseException):
     @property
     def exc(self): return self.__cause__ or self.__context__
 class StateCorrupted(BaseException):
-    def __init__(self, a, d, /): super().__init__(f'asyncutils: user tampered with {a} state; {d}')
+    def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
 class Deadlock(BaseException):
     def __init__(self, /, *_, noticer=None): super().__init__(*_); self.noticer = noticer
 class IgnoreErrors:
@@ -81,15 +81,26 @@ class IgnoreErrors:
     async def __aexit__(self, *_): return self.__exit__(*_)
     def combined(self, *others): return type(self)(*{*self.exc, *(others if isinstance(others[0], type) else (_.exc for _ in others))})
 class VersionError(Exception): ...
+for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
+    def _(self, a=A, b=B):
+        if (r := getattr(self, b, None)) is None: raise AttributeError(f"object of type {type(self).__qualname__!r} has no attribute {a!r}")
+        if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
+        return r
+    _.__name__, _.__qualname__ = A, f'VersionError.{A}'; setattr(VersionError, A, property(_))
 class VersionConversionError(VersionError): ...
 class VersionValueError(VersionConversionError, ValueError): ...
+@subscriptable
+class VersionNormalizerMissing(VersionConversionError, TypeError):
+    def __init__(self, o, /, t='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._refo = ref(o); super().__init__(t(o))
+@subscriptable
 class VersionNormalizerTypeError(VersionConversionError, TypeError):
-    def __init__(self, f, o, /, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self.normalizer, self.obj = f, o; super().__init__(t(f, o))
+    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._refn, self._refo = map(ref, a); super().__init__(t(*a))
+@subscriptable
 class VersionNormalizerFault(VersionConversionError):
-    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self.normalizer, self.obj, self.exc = a; super().__init__(t(*a))
+    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(t(*a))
 class VersionCorrupted(VersionError, RuntimeError):
-    def __init__(self, v, /, t='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self.victim = v; super().__init__(t%(type(v).__qualname__, id(v), getattr(v, 'parts', '<not present>')))
-    def __getattr__(self, name, /): return getattr(self.victim, name)
+    def __init__(self, o, /, t='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._refo = ref(o); super().__init__(t%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
+    def __getattr__(self, name, /): return getattr(self.obj, name)
 class BulkheadError(RuntimeError): ...
 class BulkheadFull(BulkheadError): ...   
 class BulkheadShutDown(BulkheadError): ...
@@ -101,7 +112,7 @@ class BusTimeout(BusError, TimeoutError): ...
 class BusShutDown(BusError): ...
 class BusStatsError(BusError): ...
 class BusPublishingError(BusError):
-    def __init__(self, /, *_, r=ref, f='{.name}: severe error in middleware {!r}'.format): self._rb, self._rm = map(r, _); super().__init__(f(*_))
+    def __init__(self, /, *_, t='{.name}: severe error in middleware {!r}'.format): self._rb, self._rm = map(ref, _); super().__init__(t(*_))
     @property
     def bus(self): return self._rb()
     @property
@@ -128,10 +139,10 @@ class PasswordError(PasswordQueueError):
     @property
     def queue(self): return self._refq()
 class WrongPassword(PasswordError, ValueError):
-    def __init__(self, *_, ref=ref): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_)
+    def __init__(self, *_): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_)
 @subscriptable
 class WrongPasswordType(PasswordError, TypeError):
-    def __init__(self, *_, ref=ref): self._refp, self._reft, self._refq, self._refc = map(ref, _); super().__init__('password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format(*_))
+    def __init__(self, *_): self._refp, self._reft, self._refq, self._refc = map(ref, _); super().__init__('password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format(*_))
     @property
     def wrongtype(self): return self._reft()
     @property
@@ -151,4 +162,4 @@ def __getattr__(name, /):
             else: c.__exit__(t, *_)
             return issubclass(t or object, Warning)
     return WarningToError
-del t, a, s, stderr, _ExceptionWrapper, _unnest_helper, audit, exception
+del t, a, s, _, A, B, stderr, _ExceptionWrapper, _unnest_helper, audit, exception

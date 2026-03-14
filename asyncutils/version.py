@@ -18,13 +18,13 @@ class VersionInfo(str):
         if (x := f(f(*self[:2]), self[2]))&1: x = ~x
         x >>= 1; return x+(x > -2)
     @classmethod
-    def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y)):
-        if c == -1: raise ValueError('hash cannot be -1')
+    def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError):
+        if c == -1: raise e('hash cannot be -1')
         if c > -1: c -= 1
         c <<= 1
         b, c = f(~c if c < 0 else c)
         return cls(*f(b), c)
-    def __repr__(self): return f'VersionInfo{self.parts}'
+    def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
     def __bytes__(self): return bytes(self.parts)
@@ -35,7 +35,7 @@ class VersionInfo(str):
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
     @property
     def is_valid(self):
-        try: return isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j > 0 for i, j in zip(map(int, self.split('.')), p, strict=True))
+        try: return isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True))
         except ValueError, TypeError, AttributeError: return False
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
@@ -44,7 +44,7 @@ class VersionInfo(str):
         if isinstance(V, cls):
             if V.is_valid: return V
             raise E.VersionCorrupted(V)
-        raise E.StateCorrupted('module-internal', '__version__ is inconsistent with expectations')
+        raise E.StateCorrupted('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
@@ -66,7 +66,7 @@ class VersionInfo(str):
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation = property('asyncutils v'.__add__); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; P.patch_classmethod_signatures((__new__, '/, *a'))
+    representation = property('asyncutils v'.__add__); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
 VersionInfo.__trunc__ = VersionInfo.__floor__ = VersionInfo.major.fget
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
 @P.patch_properties
@@ -74,7 +74,7 @@ class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
     def __neg__(self): return __class__(*map(int.__neg__, self))
-def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
+def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
     elif isinstance(o, complex): o = o.real, o.imag, 0
@@ -91,10 +91,13 @@ def normalize(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True
     elif not c(o): return
     try: return p(o)
     except TypeError, ValueError: return
+def normalize(o, /, e=E.VersionNormalizerMissing):
+    if (r := normalize_allow_unimplemented(o)) is None: raise e(o)
+    return r
 def register_normalizer(o, n, /, f=N.setdefault, t=t): return f(t(o), n) is n
 def unregister_normalizer(o, /, f=N.pop, t=t): return f(t(o), None)
 def dispatch_normalizer(o, /, f=N.get, t=t): return f(t(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
-P.patch_function_signatures((normalize, t := 'o, /'), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
-for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): m(self.parts, other) if (other := normalize(other)) else NotImplemented)
+P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
+for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))
 del _, N, t, P, p, E
