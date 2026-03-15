@@ -12,7 +12,7 @@ def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter
         elif isinstance(group, keep):
             if isinstance(group, filter_out): ack1(group)
             elif not predicate(group): ack2(group)
-            elif y := (yield group): h(y)
+            elif (y := (yield group)) is not None: h(y)
         else: ack3(group)
 def unnest(g, *A, _d=__import__('_collections').deque, _h=_unnest_helper, **k): (s := _d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := _d(A)).appendleft(g); return _h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
 def unnest_reverse(g, *A, _h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return _h(s.pop, g, s.append, s, **k)

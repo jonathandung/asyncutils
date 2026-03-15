@@ -26,7 +26,7 @@ patch_function_signatures(*((_, s) for _ in t))
 @subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
     __slots__ = 'reader', 'writer', '_executor'
-    def __init__(self, r, w, /): super().__init__(); self.loop.set_task_factory(eager_task_factory); self.reader, self.writer, self._executor = r, w, Executor()
+    def __init__(self, r, w, /): sys.audit('asyncutils/create_executor', 'io.AsyncReadWriteCouple'); super().__init__(); self.loop.set_task_factory(eager_task_factory); self.reader, self.writer, self._executor = r, w, Executor()
     async def _run(self, f, *a): return await self.loop.run_in_executor(self._executor, f, *a)
     def read(self, n=-1, /): return self._run(self.reader.read, n)
     def readline(self, limit=-1, /): return self._run(self.reader.readline, limit)
@@ -142,7 +142,7 @@ class file(LoopContextMixin):
 class MemoryMappedIOManager(LoopContextMixin):
     __slots__ = '_factory'
     def __init__(self, executor=None, _=file):
-        if executor is None: executor = Executor()
+        if executor is None: sys.audit('asyncutils/create_executor', 'channels.MemoryMappedIOManager'); executor = Executor()
         super().__init__(); self._factory = type('file', (_,), {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, executor), e=self.exiter)
     @property
     def open_mmaps(self): return self._factory.mgr

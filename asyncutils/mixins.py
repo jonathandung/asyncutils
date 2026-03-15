@@ -22,7 +22,7 @@ class AwaitableMixin(metaclass=ABCMeta):
 @subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     @cached_property
-    def runner(self, _=_get_loop_no_exit): return partial(_().run_in_executor, Executor())
+    def runner(self, _=_get_loop_no_exit): __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin'); return partial(_().run_in_executor, Executor())
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

@@ -72,7 +72,7 @@ def to_async(f, /, loop=None):
     audit('asyncutils.util.to_async', f)
     if loop is None: loop = _get_loop_no_exit()
     async def wrapper(*a, **k):
-        if (e := getattr(to_async, 'executor', None)) is None: to_async.executor = e = Executor()
+        if (e := getattr(to_async, 'executor', None)) is None: audit('asyncutils/create_executor', 'util.to_async'); to_async.executor = e = Executor()
         return await loop.run_in_executor(e, partial(f, *a, **k))
     return wraps(f)(wrapper), stop_and_closer(loop)
 async def get_aiter_fromf(f, s=_NO_DEFAULT, /):

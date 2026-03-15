@@ -263,7 +263,7 @@ class EventBus(LoopContextMixin):
             if p := self._publisher: await safe_cancel(p)
             del self._lock, self._handler, self._sem, self._publisher
     @cached_property
-    def _runner(self): return partial(self.loop.run_in_executor, Executor())
+    def _runner(self): audit('asyncutils/create_executor', 'channels.EventBus'); return partial(self.loop.run_in_executor, Executor())
     async def handle_exception(self, e): await self._runner(self._handler, e)
     def clear(self, event_type=_NO_DEFAULT): return self.clear_all() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
     def clear_all(self): self._subscribers.clear(); self.clear_stats()

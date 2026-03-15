@@ -2,7 +2,7 @@ from .base import aiter_to_iter, iter_to_aiter
 from .mixins import EventualLoopMixin, LoopContextMixin
 from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _get_loop_no_exit, subscriptable
-from sys import maxsize as INF
+from sys import maxsize as INF, audit
 from functools import partial, singledispatchmethod
 from _collections import deque, defaultdict
 from heapq import heapify, heappop, heappushpop
@@ -78,7 +78,7 @@ class abucket(LoopContextMixin):
 @subscriptable
 class OnlineSorter:
     __slots__ = '_it', '_runner', '_popper', '_pusher'
-    def __init__(self, it): self._it, self._runner = aiter_to_iter(it), partial(type(l := _get_loop_no_exit()).run_in_executor, l, Executor())
+    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner = aiter_to_iter(it), partial(type(l := _get_loop_no_exit()).run_in_executor, l, Executor())
     def __aiter__(self):
         if not hasattr(self, '_popper'): h = list(self._it); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
         return self

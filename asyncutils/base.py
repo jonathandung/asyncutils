@@ -88,11 +88,15 @@ def f(n):
             async for i in iter_to_aiter(it): yield i
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
-async def safe_cancel_batch(t, disembowel=False):
+async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False):
     audit('safe_cancel_batch', t); l = []
     async for _ in (adisembowel if disembowel else iter_to_aiter)(t):
         if not _.done(): _.cancel(); l.append(_)
-    await gather(*l, return_exceptions=True)
+    r = await gather(*l, return_exceptions=True)
+    if callback is not None:
+        async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
+        r = await gather(*map(f, r), return_exceptions=True)
+        if raising and (E := tuple(unnest_reverse(filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
     audit('asyncutils.util.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
@@ -121,10 +125,11 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
     return iterator()
 def a(coro):
     with event_loop.from_flags(4) as l: return l.run_until_complete(coro)
-def aiter_to_iter(ait, _s=Executor().submit, _i=IgnoreErrors(StopAsyncIteration), _a=a, _c=b):
+def aiter_to_iter(ait, _i=IgnoreErrors(StopAsyncIteration), _a=a, _c=b):
     audit('asyncutils.util.aiter_to_iter', ait)
     if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
+        if (_s := getattr(aiter_to_iter, '_s', None)) is None: audit('asyncutils/create_executor', 'util.aiter_to_iter'); aiter_to_iter._s = _s = Executor().submit
         if _c(ait, 'asend', 'athrow', 'aclose'):
             def iterator(f=ait.asend):
                 x = None

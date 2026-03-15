@@ -78,7 +78,7 @@ class Bulkhead(LoopContextMixin):
     async def shutdown(self, timeout=None):
         self._shutdown_event.set(); r = []; self._queue.shutdown(False)
         try:
-            async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks.copy())
+            async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks)
         except TimeoutError:
             while True:
                 try: r.append(await self._queue.get())
