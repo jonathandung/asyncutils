@@ -1,6 +1,6 @@
-'''Implementation of an interactive console base class, inspired by asyncio/__main__.py. Highly adaptable.'''
+'''Implementation of an interactive console base class, as well as an AsyncUtilsConsole class derived from it.'''
 from ._internal.protocols import ValidExcType
-from typing import ClassVar, Any, Self, TypeGuard, final
+from typing import ClassVar, Any, Self, TypeGuard, final, overload
 from types import ModuleType, CodeType
 from collections import ChainMap
 from abc import ABCMeta, abstractmethod
@@ -12,13 +12,24 @@ from asyncio.tasks import Task
 from concurrent.futures import Future
 __all__ = 'ConsoleBase', 'AsyncUtilsConsole'
 class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
+    '''Inspired by asyncio/__main__.py. Highly adaptable.'''
     NAME: ClassVar[str]
+    '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
+    '''Whether _pyrepl enhancements are available and allowed.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict]]|None]]
+    '''module name -> (locals of console of corresponding type -> Any)
+    Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self]], ...]]
+    '''Functions called when KeyboardInterrupt occurs, in that order, besides essential hardcoded logic.
+    Add hooks using `additional_interrupt_hooks`.'''
     memerr_hooks: ClassVar[tuple[Callable[[Self]], ...]]
+    '''Functions called when MemoryError occurs, in that order, besides essential hardcoded logic.
+    Add hooks using `additional_memerr_hooks`.'''
     default_local_exit: ClassVar[bool]
+    '''Whether python should continue running after the console exits by default, as opposed to the console raising SystemExit directly.'''
     disallow_subclass_msg: ClassVar[str]
+    '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
     _unsubclassable: ClassVar[bool]
     @property
     def context(self) -> Context: ...
@@ -51,7 +62,10 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     def prehook(self, max_memerrs: int) -> None: '''Called by run_console before beginning the interaction logic; can raise errors. When implementing, call super().prehook(max_memerrs) before everything. Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
     def posthook(self) -> None: '''Called by run_console after the interaction has ended before writing the exit message; should not raise errors. When implementing, call super().posthook() after everything. Not really an abstract method, but implementing is highly recommended.'''
-    def set_return_code(self, exc: SystemExit, /) -> None: ...
+    @overload
+    def set_return_code(self, exc: SystemExit, /) -> None: '''Set the return code of this console from an instance of SystemExit or an integer return code and exit the console.'''
+    @overload
+    def set_return_code(self, code: int, /) -> None: ...
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters ps1 representing sys.ps1, kcolor, reset and fcolor representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
     def __repr__(self) -> str: ...
 @final

@@ -1,20 +1,21 @@
 from ._internal.submodules import console_all as __all__
-from ._internal.running_console import _get_, _set_, _unset_, _should_write_load_all_
 from ._internal.log import debug
-from ._internal import patch as P
+from ._internal import patch as P, running_console as R
 from . import __version__ as V, config as C
 from os import getenv
 import sys
+try: from _pyrepl.console import InteractiveColoredConsole as B
+except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()
-class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredConsole):
+class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, default_local_exit, disallow_subclass_msg, _unsubclassable = __import__('collections').ChainMap(), (), (lambda self, f=sys._clear_internal_caches, g=__import__('gc').collect, d=debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), False, 'cannot subclass %r', False
     match '1' if C.basic_repl else getenv('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False
         case str() as s:
-            if s != '0': sys.stderr.write(f'unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
+            if s != '0': sys.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
             from _pyrepl.main import CAN_USE_PYREPL
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
-        if type(self) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
+        if type(self) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
         def stop(p=None, /, _o=loop.stop, *, asap=False):
@@ -70,14 +71,14 @@ class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredC
         elif (x := __import__('_pyrepl.simple_interact', fromlist=_f)._get_reader().threading_hook): x.add('')
         self.refresh()
     def memoryerror(self):
-        if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(SystemExit(1))
+        if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(1)
         self.memory_errors = m+1
         for _ in self.memerr_hooks: _(self)
         self.refresh()
-    def set_return_code(self, e, /, _s=_s): self.retcode = e.code; self._loop.stop(_s)
+    def set_return_code(self, e, /, _s=_s): self.retcode = e if isinstance(e, int) else e.code; self._loop.stop(_s)
     def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template='%(name)s REPL (version %(version)s) running on {}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n'.format(sys.platform), **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%cls.__qualname__)
-        if name is None: name = cls.__qualname__[:-7].lower()
+        if name is None: name = cls.__qualname__.lower().removesuffix('console')
         if other_handlers is None: other_handlers = {}
         k['name'] = cls.NAME = name; (f := k.setdefault)('version', 'unknown'); f('description', 'Enjoy!'); cls.BANNER, cls.LOCALS_HANDLERS, cls.interrupt_hooks, cls.memerr_hooks, cls.default_local_exit, cls._unsubclassable, other_handlers[name] = template%k, cls.LOCALS_HANDLERS.new_child(other_handlers), (*cls.interrupt_hooks, *additional_interrupt_hooks), (*cls.memerr_hooks, *additional_memerr_hooks), default_local_exit, disallow_subclass_msg is not None, native_handler
         if disallow_subclass_msg: cls.disallow_subclass_msg = disallow_subclass_msg
@@ -106,29 +107,29 @@ class ConsoleBase(__import__('_pyrepl.console', fromlist=_f).InteractiveColoredC
         if suppress_asyncio_warnings: P.patch_asyncio_warnings()
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode
-    P.patch_method_signatures((interrupt, ''), (set_return_code, 'e'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
+    P.patch_method_signatures((interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as sync_await in this REPL, they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f: d.update(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or setattr(f := lambda m=m, /: m.update({k: v if (g := getattr(v, 'load', None)) is None else g() for k, v in m.items()}), '__qualname__', l := 'load_all') or setattr(f, '__name__', l) or d.update(__version__=v, load_all=f), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{'running' if self.is_running else 'idle'} asyncutils console at {id(self):#x}>'
     @property
     def is_running(self, _m='User tampered with console-internal state!\n'):
         if not self._loop.is_running(): self._internal_is_running = False; return False
-        if self._internal_is_running^(b := _get_() is self):
+        if self._internal_is_running^(b := R._get_() is self):
             if b: self._internal_is_running = True
-            else: self.set_return_code(SystemExit(1))
+            else: self.set_return_code(1)
             sys.stderr.write(_m); return False
         return b
     def _interact_hook(self, ps1, kcolor, reset, fcolor):
         super()._interact_hook(ps1, kcolor, reset, fcolor)
-        if _should_write_load_all_(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
+        if R._should_write_load_all_(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
     def write_special(self, msg, _=C.silent):
         if not _: self.write(msg)
     def prehook(self, max_memerrs, _m=C.max_memerrs, _r='this console is already running', _a='another console is running'):
         if self._internal_is_running: raise RuntimeError(_r)
-        if (r := _get_()) is None: _set_(self)
+        if (r := R._get_()) is None: R._set_(self)
         else: raise RuntimeError(_r if r is self else _a)
         super().prehook(_m if max_memerrs is None else max_memerrs)
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
-        if _unset_() is not self: sys.stderr.write(_m); del sys.modules[__name__]
+        if R._unset_() is not self: sys.stderr.write(_m); del sys.modules[__name__]
         super().posthook()
     def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=30, _mn=sys.intern('__callback')):
         t, v, b = sys.exc_info()
@@ -139,4 +140,4 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))
-del _f, _s, getenv, C, debug, V
+del _f, _s, getenv, C, debug, V, B

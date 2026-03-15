@@ -2,7 +2,7 @@
 from ._internal.protocols import ValidExcType, PartialInterface
 from _collections_abc import Callable
 from concurrent.futures._base import Executor as _
-from typing import Final, Self, NoReturn, Final, Literal, final, type_check_only, overload
+from typing import Final, Self, NoReturn, Final, final, type_check_only, overload
 from types import TracebackType
 from random import Random
 from threading import Lock
