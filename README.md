@@ -52,7 +52,7 @@ For more, check out the [Contributing Guide](CONTRIBUTING.md).
 Have fun!
 
 ![GitHub release](https://img.shields.io/github/v/release/jonathandung/asyncutils)
-![GitHub Release Date](https://img.shields.io/github/release-date/jonathandung/asyncutils)
+![GitHub release date](https://img.shields.io/github/release-date/jonathandung/asyncutils)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils)
 ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils)
@@ -64,3 +64,10 @@ Have fun!
 ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils)
 ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social)
+![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils)
+![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
+![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
