@@ -33,18 +33,17 @@ class VersionInfo(str):
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
-    @property
-    def is_valid(self):
-        try: return isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True))
-        except ValueError, TypeError, AttributeError: return False
+    def assert_valid(self, _=E.VersionCorrupted):
+        try:
+            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
+        except ValueError, TypeError, AttributeError: ...
+        raise _(self)
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
-    def get_current_version(cls, E=E):
+    def get_current_version(cls, _=E.StateCorrupted):
         from . import __version__ as V
-        if isinstance(V, cls):
-            if V.is_valid: return V
-            raise E.VersionCorrupted(V)
-        raise E.StateCorrupted('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
+        if isinstance(V, cls): V.assert_valid(); return V
+        raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])

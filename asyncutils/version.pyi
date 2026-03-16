@@ -66,8 +66,7 @@ class VersionInfo(str):
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
-    @property
-    def is_valid(self) -> Literal[True]: '''If this returns False, the user must have messed something up intentionally.'''
+    def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     @property
     def representation(self) -> str:
         '''>>> print(VersionInfo(4, 2).representation)

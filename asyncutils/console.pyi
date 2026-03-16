@@ -31,8 +31,6 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     disallow_subclass_msg: ClassVar[str]
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
     @property
-    def local_exit(self) -> bool: '''See typeshed #15518. Will remove from stub after resolution.'''
-    @property
     def context(self) -> Context: '''The contextvars.Context instance passed to methods of the underlying asyncio event loop.'''
     @property
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, it is 0.'''
