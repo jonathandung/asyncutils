@@ -11,12 +11,13 @@ If you've found a bug, please:
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
 2. If not, create a new issue
 3. Include:
-   - Python version (`python --version`)
-   - asyncutils version (`autils -v`)
-   - Operating system
-   - Package version (`pip show [package-name]` or `conda list [package-name]`)
-   - Minimal reproducible example
-   - Full error traceback
+
+    - Python version (`python --version`)
+    - asyncutils version (`autils -v`)
+    - Operating system
+    - Package version (`pip show [package-name]` or `conda list [package-name]`)
+    - Minimal reproducible example
+    - Full error traceback
 
 ## Feature Requests
 

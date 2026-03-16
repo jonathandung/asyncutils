@@ -21,3 +21,9 @@ Current version: 0.8.10
 - Enhance the test suite
 - Incorporate user feature requests
 - Increment major version once serious bugs are found in 3 functions or more that necessitate their removal
+
+## 2.0
+
+- Major feature additions, with more focus on low-level stuff
+- Comprehensive bugfixes
+- Possibly rework project structure and make use of lazy imports
