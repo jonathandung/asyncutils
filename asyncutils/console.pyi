@@ -30,27 +30,45 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     '''Whether python should continue running after the console exits by default, as opposed to the console raising SystemExit directly.'''
     disallow_subclass_msg: ClassVar[str]
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
-    _unsubclassable: ClassVar[bool]
     @property
-    def context(self) -> Context: ...
+    def local_exit(self) -> bool: '''See typeshed #15518. Will remove from stub after resolution.'''
     @property
-    def local_exit(self) -> bool: ...
+    def context(self) -> Context: '''The contextvars.Context instance passed to methods of the underlying asyncio event loop.'''
     @property
-    def retcode(self) -> int: ...
+    def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, it is 0.'''
     @final
     @property
-    def memory_errors(self) -> int: ...
+    def memory_errors(self) -> int: '''The number of `MemoryError`s that have occurred.'''
     @final
     @property
     def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in is_running for state consistency checks.'''
     @property
     def is_running(self) -> bool: '''Whether the console is running. Default implementation uses _internal_is_running only.'''
-    def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=..., importer: Callable[[str], ModuleType]=...): ...
-    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]]]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]]]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self]]]=..., additional_memerr_hooks: Iterable[Callable[[Self]]]=..., template: str=..., **k: Any) -> None: ...
+    def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=..., importer: Callable[[str], ModuleType]=...):
+        '''loop: Event loop used by console interaction.
+        mod (optional): The module to import within the console, determined by the subclass name by default.
+        modname (optional): The name of the above module.
+        context_factory (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.
+        importer (optional): A function used to import a module from a string.'''
+    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]]]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]]]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self]]]=..., additional_memerr_hooks: Iterable[Callable[[Self]]]=..., template: str=..., **k: Any) -> None:
+        '''name (optional): name of the module using the console
+        version (optional): version of the module using the console
+        description (optional): description of the module using the console
+        default_local_exit (optional): see above
+        disallow_subclass_msg (optional): see above
+        native_handler (optional): see above
+        other_handlers (optional): see above
+        additional_interrupt_hooks (optional): see above
+        additional_memerr_hooks (optional): see above
+        template (optional): the console banner to use, with %-placeholders for name, version and description'''
     def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[]]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None: ...
     def interact(self, banner: str=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.'''
-    def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int: '''Runs the console. The strings exitmsg and threadname should support formatting with %. Pass a negative value for max_memerrs to disable the stop after certain number of MemoryErrors behaviour. Pass always_run_interactive=True or use python -i so that the console acts like a console even when stdin is piped.'''
+    def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
+        '''Run the console and return the integer return code.
+        The strings exitmsg and threadname should support formatting with %.
+        Pass a negative value for max_memerrs to disable the stop after certain number of MemoryErrors behaviour.
+        Pass always_run_interactive=True or use start python with the -i flag so that the console acts like a console even when stdin is piped.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception.'''
     @final
     def interrupt(self) -> None: '''Pass additional_interrupt_hooks to the subclass constructor to change the behaviour when encountering a KeyboardInterrupt, instead of touching this method.'''
