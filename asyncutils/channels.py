@@ -1,13 +1,13 @@
 from .mixins import LoopContextMixin
 from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
-from .exceptions import IgnoreErrors, BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
-from .config import Executor, _NO_DEFAULT
+from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
+from .config import _NO_DEFAULT
 from ._internal.helpers import _filter_out, _get_loop_no_exit, copy_and_clear, stop_and_closer, subscriptable
 from . import constants
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
-from sys import addaudithook, audit
+from sys import addaudithook
 from contextlib import contextmanager
 from functools import partial, cached_property
 from asyncio.locks import Lock, Event, Semaphore
@@ -197,20 +197,22 @@ class EventBus(LoopContextMixin):
         async with self._lock: self._subscribers[event_type].add(callback)
         return callback
     async def unsubscribe(self, callback, /, event_type=None):
+        self.raise_for_shutdown()
         async with self._lock:
             try: self._subscribers[event_type].remove(callback); return True
             except KeyError: return False
-    def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type))
+    def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type), loop=self.loop)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
-        if chaperone is None: chaperone = f.append
+        if chaperone is None:
+            def chaperone(e, /, a=f.extend, b=f.append): a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
         async def g():
             nonlocal data
-            for m, F in self._middlewares.items():
+            for m, F in self._middlewares.copy().items():
+                if F is not None and F.done(): continue
                 try:
-                    if F is not None and F.done(): continue
                     if iscoroutine(data := m(event_type, data)): data = await data
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: chaperone(e)
@@ -219,29 +221,32 @@ class EventBus(LoopContextMixin):
             async with self._lock:
                 if self._tracking: self._published[event_type] += 1
                 s, w = map(lambda _: self._subscribers[_].copy(), (event_type, None))
-            await gather((f := partial(type(self)._publish_helper, self, data, safe))(s), f(w, event_type))
+            await gather((f := partial(self._publish_helper, data, safe))(s), f(w, event_type))
         self._publisher = self.make(p := wait_for(g(), timeout))
         try:
             if wait: await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
-            log.info(f'{self.name}: publishing of event {event_type!r} succeeded')
+            log.info(f'{self.name}: publishing of event {event_type!r} succeeded'); log.debug(f'data: {data!r}')
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally:
             if p := self._publisher: self._publisher = None; await safe_cancel(p)
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
-        def handler(d):
-            if not F.done() and condition(d): F.set_result(d)
-        return await self.make(self.subscribe_until(F := self.loop.create_future(), lambda _: self._runner(handler, _), event_type, timeout))
-    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(IgnoreErrors(TimeoutError))):
+        async def handler(d):
+            if F.done(): return
+            if iscoroutine(c := condition(d)): c = await c
+            if c: F.set_result(d)
+        return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
+    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)):
+        if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
-            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, *_filter_out(event_type)); return r
-        await self.subscribe(callback, *_filter_out(event_type)); return self.make(f())
+            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, event_type); return r
+        await self.subscribe(callback, event_type); return self.make(f())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): log.warning('event stream buffer full')
         try: await wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
         except QueueShutDown: log.info('event stream is closing', exc_info=True)
         except TimeoutError:
-            if q.full(): log.warning('event stream data lost'); q.get_nowait(); q.put_nowait(d)
+            if q.full(): log.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
     async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):
         self.raise_for_shutdown(); t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=constants.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(constants.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if item_timeout is _NO_DEFAULT: item_timeout = constants.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
@@ -253,6 +258,7 @@ class EventBus(LoopContextMixin):
     async def shutdown(self, immediate=False, timeout=None, preserve_stats=False):
         if self._is_shutdown: return
         self._is_shutdown, f = True, self._sem.acquire; self.stop_audit(); self._middlewares.clear()
+        async with self._lock: self.clear()
         if not preserve_stats: self.clear_stats()
         try:
             async with _timeout(timeout):
@@ -262,11 +268,10 @@ class EventBus(LoopContextMixin):
         finally:
             if p := self._publisher: await safe_cancel(p)
             del self._lock, self._handler, self._sem, self._publisher
-    @cached_property
-    def _runner(self): audit('asyncutils/create_executor', 'channels.EventBus'); return partial(self.loop.run_in_executor, Executor())
-    async def handle_exception(self, e): await self._runner(self._handler, e)
-    def clear(self, event_type=_NO_DEFAULT): return self.clear_all() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
-    def clear_all(self): self._subscribers.clear(); self.clear_stats()
+    async def handle_exception(self, e):
+        if iscoroutine(e := self._handler(e)): await e
+    def clear(self, event_type=_NO_DEFAULT): return self._subscribers.clear() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
+    def clear_all(self): self.clear(); self.clear_stats()
     def clear_wildcards(self): return self.clear(None)
     def clear_stats(self): self._published.clear()
     async def _safe_callback(self, callback, data, event_type=None, timeout=None):

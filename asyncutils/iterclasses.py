@@ -38,21 +38,27 @@ class apeekable(EventualLoopMixin):
         if (c := self._cache): return c.popleft()
         return await anext(self._it)
     @singledispatchmethod
-    def __getitem__(self, idx, /): raise TypeError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
+    async def __getitem__(self, idx, /): raise IndexError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
     @__getitem__.register(slice)
-    def _(self, s, /, i=~INF):
+    async def _(self, s, /, i=~INF):
         if (c := 1 if (_ := s.step) is None else _) > 0: a, b = 0 if (_ := s.start) is None else _, INF if (_ := s.stop) is None else _
         elif c < 0: a, b = -1 if (_ := s.start) is None else _, i if (_ := s.stop) is None else _
         else: raise ValueError('slice step cannot be zero')
-        C = self._cache
-        if a < 0 or b < 0: C.extend(aiter_to_iter(self._it))
-        elif (d := min(max(a, b)+1, INF)-len(C)) >= 0: from .iters import aislice as s; C.extend(aiter_to_iter(s(self._it, d)))
+        f = (C := self._cache).append
+        if a < 0 or b < 0:
+            async for _ in iter_to_aiter(self._it): f(_)
+        elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
+            from .iters import aislice as s
+            async for _ in s(self._it, d): f(_)
         return tuple(C)[s]
     @__getitem__.register(int)
-    def _(self, i, /):
-        l = len(c := self._cache)
-        if i < 0: c.extend(aiter_to_iter(self._it))
-        elif i >= l: from .iters import aislice as s; c.extend(aiter_to_iter(s(self._it, i-l+1)))
+    async def _(self, i, /):
+        l, f = len(c := self._cache), c.append
+        if i < 0:
+            async for _ in iter_to_aiter(self._it): f(_)
+        elif i >= l:
+            from .iters import aislice as s
+            async for _ in s(self._it, i-l+1): f(_)
         return c[i]
 @subscriptable
 class abucket(LoopContextMixin):
@@ -77,12 +83,13 @@ class abucket(LoopContextMixin):
                     elif self._validator(v): self._cache[v].append(i)
 @subscriptable
 class OnlineSorter:
-    __slots__ = '_it', '_runner', '_popper', '_pusher'
-    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner = aiter_to_iter(it), partial(type(l := _get_loop_no_exit()).run_in_executor, l, Executor())
+    __slots__ = '_it', '_runner', '_popper', '_pusher', '_loop'
+    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := _get_loop_no_exit()).run_in_executor, l, Executor()), l
     def __aiter__(self):
-        if not hasattr(self, '_popper'): h = list(self._it); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
+        from .iters import to_list
+        if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
         return self
     def __anext__(self): return self._runner(self._popper)
     def asend(self, item): return self._runner(self._pusher, item)
     def athrow(self, typ, val=None, tb=None): return self._runner(self._it.throw, typ, val, tb)
-    def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher; return r
+    def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher, self._loop; return r

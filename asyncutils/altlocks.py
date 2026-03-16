@@ -1,6 +1,6 @@
 from .mixins import AsyncContextMixin, AwaitableMixin
 from .config import _NO_DEFAULT, _randinst
-from .base import aiter_to_iter
+from .base import iter_to_aiter
 from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
 from .constants import getcontext
 from asyncio.locks import Lock, Event, BoundedSemaphore
@@ -72,13 +72,15 @@ class CircuitBreaker:
     @property
     def name(self): return self._name
 class StatefulBarrier(AwaitableMixin):
-    __slots__ = '_parties', '_exc', '_count', '_state', '_event', '_lock', '_gen'
-    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._event, self._lock, self._gen = parties, BrokenBarrierError(f'{type(self).__qualname__} {name} is broken'), 0, deque(aiter_to_iter(initstate), maxstate), Event(), Lock(), 0
+    __slots__ = '_parties', '_exc', '_count', '_state', '_event', '_lock', '_gen', '_initstate'
+    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._event, self._lock, self._gen, self._initstate = parties, BrokenBarrierError(f'{type(self).__qualname__} {name} is broken'), 0, deque(maxlen=maxstate), Event(), Lock(), 0, initstate
     async def wait(self, state=None, timeout=None):
-        self.raise_for_abort()
+        self.raise_for_abort(); S = self._state.append
+        if (s := self._initstate) is None:
+            async for _ in iter_to_aiter(s): S(_)
         async with self._lock:
             g = self._gen; self._count += 1
-            if state is not None: self._state.append(state)
+            if state is not None: S(state)
             if self._count == self._parties: self._event.set(); r = self._parties-1, self._state.copy(); self._reset(); return r
         try:
             await wait_for(self._event.wait(), timeout)

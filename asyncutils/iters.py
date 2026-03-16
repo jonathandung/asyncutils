@@ -364,7 +364,7 @@ async def aprod(it, start=1):
 async def amatprod(it, start):
     async for i in iter_to_aiter(it): start @= i
     return start
-def atail(n, it):
+def atail(n, it, /):
     try: return aislice(it, max(0, len(it)-n), None)
     except TypeError:
         async def f():
@@ -373,8 +373,8 @@ def atail(n, it):
             for _ in d: yield _
         return f()
 def amultinomial(*c): return aprod(amap(M.comb, aaccumulate(c), c))
-async def to_tuple(it): return tuple(await to_list(it))
-async def to_list(it):
+async def to_tuple(it, /): return tuple(await to_list(it))
+async def to_list(it, /):
     f = (r := []).append
     async for _ in iter_to_aiter(it): f(_)
     return r
@@ -765,7 +765,7 @@ async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
 async def apowersoftwo(*, init=1, init_shift=0):
     init <<= init_shift
     while True: yield init; init <<= 1
-async def areversed(it):
+async def areversed(it, /):
     try:
         async for i in iter_to_aiter(reversed(it)): yield i
     except TypeError:
