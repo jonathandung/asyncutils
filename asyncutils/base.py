@@ -98,7 +98,7 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         r = await gather(*map(f, r), return_exceptions=True)
         if raising and (E := tuple(unnest_reverse(filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
-    audit('asyncutils.util.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
+    audit('asyncutils.base.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
         if _c(it, 'asend', 'athrow', 'aclose'):
@@ -126,10 +126,10 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
 def a(coro):
     with event_loop.from_flags(4) as l: return l.run_until_complete(coro)
 def aiter_to_iter(ait, _i=IgnoreErrors(StopAsyncIteration), _a=a, _c=b):
-    audit('asyncutils.util.aiter_to_iter', ait)
+    audit('asyncutils.base.aiter_to_iter', ait)
     if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
-        if (_s := getattr(aiter_to_iter, '_s', None)) is None: audit('asyncutils/create_executor', 'util.aiter_to_iter'); aiter_to_iter._s = _s = Executor().submit
+        if (_s := getattr(aiter_to_iter, '_s', None)) is None: audit('asyncutils/create_executor', 'base.aiter_to_iter'); aiter_to_iter._s = _s = Executor().submit
         if _c(ait, 'asend', 'athrow', 'aclose'):
             def iterator(f=ait.asend):
                 x = None

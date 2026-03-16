@@ -1,6 +1,6 @@
 from .config import _NO_DEFAULT, RAISE, _randinst
 from .constants import RECIP_E
-from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, aiter_to_iter, dummy_task
+from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
 from .util import safe_cancel, get_aiter_fromf
 from .iterclasses import achain, anullcontext
 from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods
@@ -38,7 +38,7 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
             else: yield i
     async def feed():
         async def helper(i): await gather(*(q.put(i) for q in Q), return_exceptions=True)
-        try: await gather(*(helper(i) for i in aiter_to_iter(it)))
+        try: await gather(*to_list(amap(helper, it)))
         except E.CRITICAL: raise E.Critical
         except BaseException as e:
             if put_exc: await helper(E.wrap_exc(e))
@@ -611,7 +611,7 @@ async def apolynomialeval(coeff, x):
     return await asumprod(t, amap(pow, arepeat(x), range(n-1, -1)))
 async def areshape(mat, shape):
     if isinstance(shape, int): I = batch(aflatten(mat), shape, None)
-    else: d, *D = aiter_to_iter(shape); from .func import areduce as f; I = aislice(await f(batch, reversed(D), aflattentensor(mat), await_=False), d)
+    else: d = anext(shape := iter_to_aiter(shape)); from .func import areduce as f; I = aislice(await f(batch, areversed(shape), aflattentensor(mat), await_=False), d)
     async for i in I: yield i
 async def _factor_pollard(n):
     if n == 4: return 2
