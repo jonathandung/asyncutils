@@ -20,8 +20,8 @@ def json_to_argv(p, /, *, json='json', json5='json5', jsonc='commentjson', hjson
     if p('load_all', False): f('-p')
     f(f'-{'Q'*-l if (l := p('V', 0)-p('Q', 0)) < 0 else 'V'*l}'); return r
 def json_to_argstr(p, /, *, join=shlex.join, **k): return join(json_to_argv(p, **k))
-def argv_to_json(a, p, /, *, dump=json.dump, _=p.parse_args):
-    if not p.endswith('.json'): raise ValueError('path should end with .json')
+def argv_to_json(a, p, /, *, dump=json.dump, _=p.parse_args, A=('.json', '.jsonc', '.json5', '.jsonl')):
+    if not p.endswith(A): raise ValueError('path should end with .json, .jsonc, .json5 or .jsonl')
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=shlex.split, **k): argv_to_json(split(a), p, **k)
 def get_cfg_json_format(): return (__import__('importlib.resources', fromlist=('',)).files('asyncutils')/'format.jsonc').read_text()

@@ -94,6 +94,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     def drain_until_empty(self, max: int|None=...) -> Generator[T, None, None]: '''A synchronous generator that gets items from the queue until it is emptied and returns.'''
     def drain_retlist(self, max: int|None=...) -> list[T]: '''Return a list of the items in the queue and empty it.'''
     def empty(self) -> bool: '''Whether the queue is empty.'''
+    def __bool__(self) -> bool: '''Whether there are items in the queue.'''
     __iter__, __aiter__ = drain_until_empty, drain_persistent
     def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is True, pending gets raise immediately even if the queue is not empty.'''
     @property

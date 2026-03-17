@@ -269,7 +269,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(i) for i in self.peek_all())))
     def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(*i) for i in self.peek_all())))
     def filter_nowait(self, pred=bool, /):
-        k, r = [], []; f, g = k.append, r.append
+        f, g = (k := []).append, (r := []).append
         with ignore_qempty:
             while True: (f if pred(i := self.get_nowait()) else g)(i)
         h, j = self.put_nowait, len(r)
