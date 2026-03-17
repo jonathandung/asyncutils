@@ -160,11 +160,9 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             try: yield self.get_nowait(); c += 1
             except QueueEmpty, QueueShutDown: break
     def drain_retlist(self, max=None): return list(self.drain_until_empty(max))
-    def __iter__(self): return self.drain_until_empty()
-    def __aiter__(self): return self.drain_persistent()
+    __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)
     def __str__(self): return f'{type(self).__qualname__}({self.maxsize})'
-    __repr__ = object.__repr__
     @property
     def is_shutdown(self): return self._event.is_set()
     @is_shutdown.setter
@@ -206,13 +204,12 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
         with ignore_qempty:
             while True: self.get_nowait()
     @asynccontextmanager
-    async def transaction(self):
+    async def transaction(self, _=IgnoreErrors(TimeoutError)):
         audit(f'{type(self).__qualname__}.transaction', self); q = self.peek_all()
         try: yield self
         except:
             self.clear()
-            with ignore_qfull:
-                for i in q: self.put_nowait(i)
+            with _: await self.extend(q, 0.1)
             raise
     def __bool__(self): return not self.empty()
     def map(self, f, stop_when=None, *, lifo=False):
@@ -269,9 +266,9 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             with ignore_qempty:
                 while True: await q.smart_put((i, await self.get())); i += 1
         self.make(feed()); return q
-    def map_nowait(self, f): return self.loop.run_until_complete(gather(*(f(i) for i in self.peek_all())))
-    def starmap_nowait(self, f): return self.loop.run_until_complete(gather(*(f(*i) for i in self.peek_all())))
-    def filter_nowait(self, pred=bool):
+    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(i) for i in self.peek_all())))
+    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(*i) for i in self.peek_all())))
+    def filter_nowait(self, pred=bool, /):
         k, r = [], []; f, g = k.append, r.append
         with ignore_qempty:
             while True: (f if pred(i := self.get_nowait()) else g)(i)

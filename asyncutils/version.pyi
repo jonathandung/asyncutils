@@ -18,13 +18,13 @@ class VersionInfo(str):
         '''idx = 0 -> major
         idx = 1 -> minor
         idx = 2 -> patch'''
-    def __lt__(self, other: Any, /) -> bool: ...
-    def __le__(self, other: Any, /) -> bool: ...
-    def __gt__(self, other: Any, /) -> bool: ...
-    def __ge__(self, other: Any, /) -> bool: ...
-    def __eq__(self, other: Any, /) -> bool: ...
-    def __ne__(self, other: Any, /) -> bool: ...
-    def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Pickling support.'''
+    def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
+    def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
+    def __gt__(self, other: Any, /) -> bool: '''Whether self succeeds the other as a version.'''
+    def __ge__(self, other: Any, /) -> bool: '''Whether self succeeds or is equal to the other as a version.'''
+    def __eq__(self, other: Any, /) -> bool: '''Whether self is the same version as the other.'''
+    def __ne__(self, other: Any, /) -> bool: '''Whether self is not the same version as the other.'''
+    def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
     def __repr__(self) -> str: '''`version == eval(repr(version))` holds.'''
     @overload
     def __add__(self, n: int, /) -> Self: ...
@@ -91,7 +91,7 @@ class VersionDelta(tuple[int, int, int]):
     def minor(self) -> int: '''The minor part of the version.'''
     @property
     def patch(self) -> int: '''The patch part of the version.'''
-    def __neg__(self) -> Self: ...
+    def __neg__(self) -> Self: '''Negate the delta, such that additions and subtractions taking it are reversed.'''
 def normalize(o: Any, /) -> tuple[int, int, int]|None:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.
     Normalization is hardcoded for str, complex, int, float. For iterables, the default is to take the first three items and pad zeros behind if necessary.

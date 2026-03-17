@@ -151,4 +151,4 @@ def rate_limit(calls, period, timer=perf_counter):
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s
 async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
     for _ in range(warmup): await f()
-    g = measure.__get__(f); audit('asyncutils.func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), (S := sum(t)), S/len(t), times+warmup)
+    g = measure.__get__(f); audit('asyncutils.func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), S := sum(t), S/len(t), times+warmup)

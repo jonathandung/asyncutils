@@ -34,13 +34,13 @@ class event_loop:
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
-                if not f&0x200: raise RuntimeError(f'{type(self).__name__}: exception occurred while calling __enter__ of associated event loop: {e}')
+                if not f&0x200: raise RuntimeError(f'{type(self).__qualname__}: exception occurred while calling __enter__ of associated event loop: {e}')
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L):
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
-            N = type(self).__name__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
+            N = type(self).__qualname__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
         f, l = f&~e, self._loop
         if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
         if not f&0x400: self.__reusable.append(l)
@@ -50,20 +50,20 @@ class event_loop:
         if f&self._INNER_EXIT:
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
-                except CRITICAL: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
+                except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
                 except BaseException:
-                    if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
+                    if not f&0x200: _l.error(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
             elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)):
                 try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b))
-                except CRITICAL: _l.critical(f'{type(self).__name__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
+                except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
                 except BaseException:
-                    if not f&0x200: _l.error(f'{type(self).__name__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
+                    if not f&0x200: _l.error(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
             elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
             with _i: l.close()
@@ -71,7 +71,7 @@ class event_loop:
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
     def __del__(self, _f=L.debug, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n'):
-        b, n = not (f := self._flags)&2, type(self).__name__
+        b, n = not (f := self._flags)&2, type(self).__qualname__
         if f&self._ENTERED:
             if b: stderr.write(_m%n)
             if f&1: self._flags = f^0x400

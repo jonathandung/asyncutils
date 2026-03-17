@@ -42,7 +42,7 @@ class CircuitBreaker:
     __slots__ = '_name', '_max_fails', '_reset', '_exc', '_fails', '_opened', '_half_open_calls', '_max_half_open_calls', '_call_lock', '_state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, name, /, max_fails=3, reset=None, exc=Exception, max_half_open_calls=None, _fmt='#%d'):
         f = None
-        if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__name__', None)) is None is (name := getattr(f, '__qualname__', None)): name = _fmt%cls._inc_cnt()
+        if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__qualname__', None)) is None is (name := getattr(f, '__name__', None)): name = _fmt%cls._inc_cnt()
         self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls = name, max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls; self._set(0); self._init_lock(); return self if f is None else self(f)
     def _init_lock(self): self._call_lock = Lock()
     def __call__(self, f, /, timer=monotonic, default=_NO_DEFAULT):

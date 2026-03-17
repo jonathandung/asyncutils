@@ -12,4 +12,8 @@ async def wait_for_signal[T](processor: Callable[[Signals], Awaitable[T]], *S: i
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[True], loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T=..., logger: Logger=...) -> T: ...
 @overload
-async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T=..., logger: Logger=...) -> T|None: ...
+async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T=..., logger: Logger=...) -> T|None:
+    '''Wait for a signal to be signaled within `timeout`. `processor` is a function, preferrably returning an awaitable, that takes the signals specified by the variadic positional arguments.
+    If `raise_on_timeout` is True, throw TimeoutError on timeout. Otherwise, return None.
+    If `loop` was passed, the add_signal_handler and remove_signal_handler methods of that event loop will be used.
+    The return value of the processor is returned.'''
