@@ -92,7 +92,7 @@ def timer(f, /, *, precision=6, expected=Exception, should_log=True, timer=perf_
         except CRITICAL: raise Critical
         except expected as _:
             e = timer()-s
-            if should_log: log.warning(f'function {f.__qualname__} encountered {type(_).__qualname__}: {_}')
+            if should_log: log.warning(f'function {f.__qualname__} encountered {type(_).__qualname__} after {e:.{precision}f} {'nano'*ns}seconds: {_}')
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=lambda *_: None, on_success=lambda *_: None, random=_randinst.random):

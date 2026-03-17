@@ -19,28 +19,33 @@ def every[T](intvl: float, /, *, stop_when: Future[T]|None=..., count_f: bool=..
     When using the supplied_args and supplied_kwargs parameters, maintain a reference to them so that you can edit the args and kwargs fed to the function on the fly.
     Finally, the function returns `default` or None if it was not passed, unless `stop_on_exc` is True or `default` is `RAISE`.'''
 def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]]|None=..., count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R=...) -> Callable[[_everymethodft[T, R]], _everymethodrvrv[T, R]]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
-def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|_ExceptionWrapper, float]]]:
+def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|_ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
     `timer` is used to count `elapsed`, the time required to execute the function.
-    `res_or_exc` is the awaited result of the wrapped function or the exception thrown wrapped by `exceptions.wrap_exc`.'''
+    `res_or_exc` is the awaited result of the wrapped function or the exception thrown wrapped by `exceptions.wrap_exc`.
+    `precision` is the number of digits to keep in the time in logging, and `ns` whether the return value of the timer indicates time in nanoseconds.
+    Any exception the wrapped function emits whose type is not in `expected` is propagated directly.'''
 def retry(tries: int=..., delay: float=..., max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> _frv: ...
 def throttle(lim: float, timer: Timer=...) -> _frv: ...
 def debounce(wait: float) -> _frv: ...
 def rate_limit(calls: int, period: float, timer: Timer=...) -> _frv: ...
-async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: ...
+async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''
 class benchmark(tuple[float, float, float, float, int]):
     '''Actually a function at runtime.'''
-    def __new__(cls, f: Callable[[], Awaitable], /, times: int=..., warmup: int=...) -> Self: ...
+    def __new__(cls, f: Callable[[], Awaitable], /, times: int=..., warmup: int=...) -> Self:
+        '''`f` is the function to benchmark, which should take no arguments and return an awaitable.
+        `times` is how many times the function should be run, which defaults to 1.
+        `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results. Default 0.'''
     @property
-    def min(self) -> float: ...
+    def min(self) -> float: '''The minimum execution time among all non-warmup calls.'''
     @property
-    def max(self) -> float: ...
+    def max(self) -> float: '''The maximum execution time among all non-warmup calls.'''
     @property
-    def total(self) -> float: ...
+    def total(self) -> float: '''The total execution time.'''
     @property
-    def avg(self) -> float: ...
+    def avg(self) -> float: '''`total`/`iterations`.'''
     @property
-    def iterations(self) -> int: ...
+    def iterations(self) -> int: '''The `times` constructor parameter.'''
 @type_check_only
 class _everymethodrvrv[T, R](Protocol):
     async def __call__(_, self: T, /, *a: Any, **k: Any) -> R|None: ...
