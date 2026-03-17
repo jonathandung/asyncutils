@@ -43,15 +43,18 @@ class benchmark(tuple[float, float, float, float, int]):
     @property
     def total(self) -> float: '''The total execution time.'''
     @property
-    def avg(self) -> float: '''`total`/`iterations`.'''
+    def avg(self) -> float: '''`total/iterations`.'''
     @property
     def iterations(self) -> int: '''The `times` constructor parameter.'''
 @type_check_only
 class _everymethodrvrv[T, R](Protocol):
+    '''Not exported.'''
     async def __call__(_, self: T, /, *a: Any, **k: Any) -> R|None: ...
 @type_check_only
 class _everymethodft[T, R](Protocol):
+    '''Not exported.'''
     def __call__(_, self: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
 @type_check_only
 class _frv(Protocol):
+    '''Not exported.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: ...

@@ -76,10 +76,11 @@ if sys.platform == 'win32': type _Seek = Literal[0, 1, 2]
 else: type _Seek = Literal[0, 1, 2, 3, 4]
 @type_check_only
 class _PipeFactory(Protocol):
+    '''Not exported.'''
     def __call__(self) -> tuple[int, int]: ...
 @type_check_only
 class _file(LoopContextMixin):
-    '''Not exposed at runtime. Calls itself asyncutils.io.file.'''
+    '''Not exposed. Calls itself asyncutils.io.file.'''
     if sys.platform != 'win32':
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: ...
     async def reg(self, m: mmap, /) -> None: ...

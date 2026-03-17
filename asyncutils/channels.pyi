@@ -14,9 +14,11 @@ __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
     @type_check_only
     class _Observer(Protocol):
+        '''Not exposed.'''
         async def __call__(self, *a: P.args, **k: P.kwargs) -> Any: ...
     @type_check_only
     class _SubscriptionReturnType(Protocol):
+        '''Not exposed.'''
         def __call__(self, strict: bool=...) -> None: ...
     @property
     def idle(self) -> bool: ...
@@ -66,6 +68,7 @@ class EventBus(LoopContextMixin):
     Use instances as context managers only for proper setup and shutdown.'''
     @type_check_only
     class _WildcardType:
+        '''Not exposed.'''
         def __bool__(self) -> Literal[False]: ...
     WILDCARD: _WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''

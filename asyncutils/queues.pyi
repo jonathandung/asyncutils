@@ -37,7 +37,7 @@ class _G[R, T](_Q[R, T], Protocol):
     async def get(self, pwd: R) -> T:
         '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is empty, waits until an item is available.'''
-    def get_nowait(self, pwd: R) -> T:        
+    def get_nowait(self, pwd: R) -> T:
         '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is empty, raises asyncio.QueueEmpty.'''
 @type_check_only
@@ -53,11 +53,11 @@ class _P[R, T](_Q[R, T], Protocol):
 class _B[R, V, T](_G[R, T], _P[V, T], Protocol): '''Does not exist at runtime.'''
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., wait: bool=..., priority: bool=..., lifo: bool=..., raising: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[], log: Callable[[str], None]=..., auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]:
-    '''Returns a password-protected queue, inheriting from asyncio.Queue, with maximum size maxsize. priority and lifo parameters determine if the queue is a priority queue and last-in-first-out.
-    If protect_get is True, get and get_nowait will require a password, specified by password_get or retrieved from a variable in the caller's scope with name get_from (default 'password').
-    If protect_put is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name put_from (default 'password').
-    If init_items is specified, the items in that (async) iterable will be put into the queue immediately. If there are too many items in the (async) iterable, parameters wait and raising determine the behaviour; log is a function used to emit warnings in that case.
-    auditf (default sys.audit) is an audit function that takes the event name ('asyncutils.queues.password_queue'), protect_get, protect_put, get_from, put_from and returns None; note that the passwords are not passed to the audit function.'''
+    '''Returns a password-protected queue, the type of which inherits from asyncio.Queue, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
+    If `protect_get` is True, get and get_nowait will require a password, specified by password_get or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
+    If `protect_put` is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
+    If `init_items` is specified, the items in that (async) iterable will be put into the queue immediately. If there are too many items in the (async) iterable, parameters wait and raising determine the behaviour; log is a function used to emit warnings in that case.
+    `auditf` (default sys.audit) is an audit function that takes the event name ('asyncutils.queues.password_queue'), `protect_get`, `protect_put`, `get_from`, `put_from` and returns None; note that the passwords are not passed to the audit function.'''
 @overload
 def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., wait: bool=..., priority: bool=..., lifo: bool=..., raising: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], log: Callable[[str], None]=..., auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]: ...
 @overload
@@ -73,6 +73,7 @@ def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: L
 @overload
 def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., wait: bool=..., priority: bool=..., lifo: bool=..., raising: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], log: Callable[[str], None]=..., auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ...
 class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
+    '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
     def _init(self, maxsize: int) -> None: ...
     @abstractmethod

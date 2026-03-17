@@ -39,7 +39,7 @@ class sentinel_base:
 @final
 @type_check_only
 class _sentinel(sentinel_base):
-    '''Sentinels for this module, internal or public.'''
+    '''Sentinels for this module, internal or public. Not exported.'''
     def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.config namespace.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''
 def get_past_logs() -> str: '''Returns all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
