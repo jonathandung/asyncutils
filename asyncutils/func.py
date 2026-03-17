@@ -3,7 +3,7 @@ from ._internal import log
 from .config import RAISE, _NO_DEFAULT, _randinst
 from .base import iter_to_aiter
 from .util import safe_cancel, _ignore_cancellation
-from .exceptions import wrap_exc, CRITICAL, MaxIterationsError
+from .exceptions import wrap_exc, CRITICAL, Critical, MaxIterationsError
 from time import perf_counter
 from functools import wraps
 from sys import audit, maxsize as INF
@@ -19,34 +19,34 @@ async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
 def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs={}, default=_NO_DEFAULT):
     if loop is None: loop = _get_loop_no_exit()
     def dec(f, /):
-        n = f.__name__
+        n = getattr(f, '__qualname__', '<name unknown>')
         if stop_when and stop_when.done(): log.warning(f'future to stop periodic coroutine {n} is already done')
         async def wrapper(*a, **k):
             log.debug('periodic task started; source: every'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
             if wait_first: await sleep(intvl)
             for _ in range(max_iterations):
-                try: t = timer(); await f(*supplied_args, *a, **supplied_kwargs, **k); t = timer()-t
-                except CRITICAL: raise
+                t = timer()
+                try: await f(*supplied_args, *a, **supplied_kwargs, **k)
+                except CRITICAL: raise Critical
                 except BaseException:
                     if stop_on_exc:
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    if verbose: log.error(f'error in periodic coroutine {n}', exc_info=True)
-                try: return await wait_for(stop_when, intvl-t*count_f)
+                    (log.error if verbose else log.warning)(f'error in periodic coroutine {n}', exc_info=True)
+                try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    if verbose: log.info(f'future to stop periodic coroutine {n} was cancelled')
+                    (log.info if verbose else log.debug)(f'future to stop periodic coroutine {n} was cancelled')
                     stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 s = f'periodic coroutine {n} reached the maximum of {max_iterations} iterations'
                 if stop_on_exc or default is RAISE: raise MaxIterationsError(s)
-                if verbose or q: log.info(s)
-                else: log.debug(s)
+                (log.info if verbose or q else log.debug)(s)
             if not q: return default
         return wraps(f)(wrapper)
     return dec
@@ -60,7 +60,7 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
             if wait_first: await sleep(intvl)
             for _ in range(max_iterations):
                 try: t = timer(); await f(self, *supplied_args, *a, **supplied_kwargs, **k); t = timer()-t
-                except CRITICAL: raise
+                except CRITICAL: raise Critical
                 except BaseException:
                     if stop_on_exc:
                         if stop_when.done(): return stop_when.result()
@@ -82,16 +82,17 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
             if not q: return default
         return wraps(f)(wrapper)
     return dec
-def timer(f, /, *, precision=6, expected=Exception, log=True, timer=perf_counter, ns=False):
+def timer(f, /, *, precision=6, expected=Exception, should_log=True, timer=perf_counter, ns=False):
     async def wrapper(*a, **k):
+        s = timer()
         try:
-            s = timer(); r = await f(*a, **k); e = timer()-s
-            if log: log.info(f'function {f.__qualname__} executed in {e:.{precision}f} {'nano'*ns}seconds.')
+            r = await f(*a, **k); e = timer()-s
+            if should_log: log.info(f'function {f.__qualname__} executed in {e:.{precision}f} {'nano'*ns}seconds.')
             return r, e
-        except CRITICAL: raise
+        except CRITICAL: raise Critical
         except expected as _:
             e = timer()-s
-            if log: log.warning(f'function {f.__qualname__} encountered {type(_).__qualname__}: {_}')
+            if should_log: log.warning(f'function {f.__qualname__} encountered {type(_).__qualname__}: {_}')
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=lambda *_: None, on_success=lambda *_: None, random=_randinst.random):

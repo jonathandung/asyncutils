@@ -226,7 +226,7 @@ class EventBus(LoopContextMixin):
         try:
             if wait: await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
-            log.info(f'{self.name}: publishing of event {event_type!r} succeeded'); log.debug(f'data: {data!r}')
+            log.info(f'{self.name}: publishing of event {event_type!r} succeeded'); log.debug(f'final data: {data!r}')
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally:
             if p := self._publisher: self._publisher = None; await safe_cancel(p)

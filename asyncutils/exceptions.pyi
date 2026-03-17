@@ -115,7 +115,6 @@ class BusPublishingError(BusError):
     def bus(self) -> EventBus|None: '''May be None if the event bus was garbage-collected.'''
     @property
     def middleware(self) -> Callable[[str, Any]]|None: '''May be None if the middleware was garbage-collected.'''
-@type_check_only
 class LockForceRequest(BaseException):
     '''Thrown to coroutines that acquire locks when a locksmith (inheriting from locks.LocksmithBase) necessitates the lock be released.
     The initialization signature is intentionally omitted here, since it may change without notice and the user should not manually initialize it.'''
