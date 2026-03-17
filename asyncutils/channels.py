@@ -124,7 +124,7 @@ class Observable(LoopContextMixin):
         for o in obs: o._data.add(p)
         return _
 class EventBus(LoopContextMixin):
-    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False, __fmt='{} {}'.format): self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self._publisher, s[None] = __fmt((t := type(self)).__qualname__, name or t._inc_cnt()), Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, None, WeakSet()
+    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False, __fmt='{} {}'.format): self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = __fmt((t := type(self)).__qualname__, name or t._inc_cnt()), Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -154,8 +154,8 @@ class EventBus(LoopContextMixin):
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
     @cached_property
     def auditor(self):
-        def F(e, a, p=to_sync(self.publish, loop=self.loop), f=self.is_auditing, /):
-            if f(): p(e, a, wait=False)
+        def F(e, a, f=self.is_auditing, _=self._begin_publish, /):
+            if f(): _(e, a)
         F.added = False; return F
     @cached_property
     def _published(self): return defaultdict(int)
@@ -205,31 +205,34 @@ class EventBus(LoopContextMixin):
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
-        self.raise_for_shutdown(); f = []
-        if chaperone is None:
-            def chaperone(e, /, a=f.extend, b=f.append): a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
-        async def g():
-            nonlocal data
-            for m, F in self._middlewares.copy().items():
-                if F is not None and F.done(): continue
-                try:
-                    if iscoroutine(data := m(event_type, data)): data = await data
-                except CRITICAL: raise Critical
-                except (ExceptionGroup, Exception) as e: chaperone(e)
-                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False)
-                except BaseException as e: raise BusPublishingError(self, m) from e
-            async with self._lock:
-                if self._tracking: self._published[event_type] += 1
-                s, w = map(lambda _: self._subscribers[_].copy(), (event_type, None))
-            await gather((f := partial(self._publish_helper, data, safe))(s), f(w, event_type))
-        self._publisher = self.make(p := wait_for(g(), timeout))
+        p, f = self._begin_publish(event_type, data, safe, timeout, chaperone)
+        if not wait: return
         try:
-            if wait: await p
+            await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
             log.info(f'{self.name}: publishing of event {event_type!r} succeeded'); log.debug(f'final data: {data!r}')
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
-        finally:
-            if p := self._publisher: self._publisher = None; await safe_cancel(p)
+        finally: await safe_cancel(p)
+    def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
+    @cached_property
+    def _publishers(self): return set()
+    def _begin_publish(self, E, D, S, T, C, /):
+        self.raise_for_shutdown(); f = []
+        if C is None: C = lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
+        async def g(D=D):
+            for m, F in self._middlewares.copy().items():
+                if F is not None and F.done(): continue
+                try:
+                    if iscoroutine(D := m(E, D)): D = await D
+                except CRITICAL: raise Critical
+                except (ExceptionGroup, Exception) as e: C(e)
+                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False)
+                except BaseException as e: raise BusPublishingError(self, m) from e
+            async with self._lock:
+                if self._tracking: self._published[E] += 1
+                s, w = map(lambda _: self._subscribers[_].copy(), (E, None))
+            await gather((f := partial(self._publish_helper, D, S))(s), f(w, E))
+        (P := self._publishers).add(p := self.make(wait_for(g(), T))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
         async def handler(d):
             if F.done(): return
@@ -266,8 +269,8 @@ class EventBus(LoopContextMixin):
                 for _ in range(self.active_tasks): await f()
         except TimeoutError: log.error(f'{self.name} shutdown timed out, some tasks may be incomplete', exc_info=True)
         finally:
-            if p := self._publisher: await safe_cancel(p)
-            del self._lock, self._handler, self._sem, self._publisher
+            if p := self._publishers: await safe_cancel_batch(p)
+            del self._lock, self._handler, self._sem, self._publishers
     async def handle_exception(self, e):
         if iscoroutine(e := self._handler(e)): await e
     def clear(self, event_type=_NO_DEFAULT): return self._subscribers.clear() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)

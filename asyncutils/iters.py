@@ -297,10 +297,10 @@ async def agroupby(it, key):
     while not e:
         yield ck, (g := grouper(t := ck))
         if ck == t: await aconsume(g)
-async def aislice(it, *a):
-    x, y, z = 0 if (s := slice(*a)).start is None else s.start, s.stop, 1 if s.step is None else s.step
+async def aislice(it, /, *a):
+    x, y, z = 0 if (s := slice(*map(int, a))).start is None else s.start, s.stop, 1 if s.step is None else s.step
     if x < 0 or (y is not None and y < 0) or z <= 0: raise ValueError('invalid indices')
-    I, n = acount() if y is None else range(max(x, y)), x
+    I, n = acount() if y is None else arange(max(x, y)), x
     async for i, j in azip(I, it):
         if i == n: yield j; n += z
 async def aiterindex(it, value, start=0, stop=None):

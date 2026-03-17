@@ -1,5 +1,5 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
-from .config import Executor, RAISE, _NO_DEFAULT
+from .config import RAISE, _NO_DEFAULT
 from ._internal import patch as P, log as L
 from ._internal.helpers import _check_methods as b
 from sys import exc_info, audit, stderr, maxsize
@@ -123,24 +123,22 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
                     yield _; await sleep
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
-def a(coro):
-    with event_loop.from_flags(4) as l: return l.run_until_complete(coro)
-def aiter_to_iter(ait, _i=IgnoreErrors(StopAsyncIteration), _a=a, _c=b):
+def aiter_to_iter(ait, _c=b):
     audit('asyncutils.base.aiter_to_iter', ait)
     if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
-        if (_s := getattr(aiter_to_iter, '_s', None)) is None: audit('asyncutils/create_executor', 'base.aiter_to_iter'); aiter_to_iter._s = _s = Executor().submit
+        a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
         if _c(ait, 'asend', 'athrow', 'aclose'):
-            def iterator(f=ait.asend):
+            def iterate(f=ait.asend, a=a):
                 x = None
-                with _i:
-                    while True: yield (x := _s(_a, f(x)).result())
+                while True: yield (x := a(f(x)))
         else:
-            def iterator(f=ait.__anext__):
-                with _i:
-                    while True: yield _s(_a, f()).result()
-        return iterator()
-    raise TypeError('cannot iterate over ait synchronously or asynchronously')
+            def iterate(f=ait.__anext__, a=a):
+                while True: yield a(f())
+        try: yield from iterate()
+        except StopAsyncIteration: ...
+        finally: c.__exit__(*exc_info())
+    else: raise TypeError('cannot iterate over ait synchronously or asynchronously')
 async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False, _=L.warning, m='collect ran out of items'):
     f, i, n = (r := []).append, 0, maxsize if n is None else n
     async for i, _ in aenumerate(it):
@@ -175,4 +173,4 @@ P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
 _.__qualname__ = _.__name__ = 'dummy_task'
-del a, f, _, P, L, b
+del f, _, P, L, b

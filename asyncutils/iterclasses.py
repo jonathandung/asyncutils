@@ -1,7 +1,7 @@
-from .base import aiter_to_iter, iter_to_aiter
+from .base import iter_to_aiter
 from .mixins import EventualLoopMixin, LoopContextMixin
 from .config import Executor, _NO_DEFAULT
-from ._internal.helpers import _get_loop_no_exit, subscriptable
+from ._internal.helpers import _get_loop_no_exit, subscriptable, _check_methods
 from sys import maxsize as INF, audit
 from functools import partial, singledispatchmethod
 from _collections import deque, defaultdict
@@ -14,10 +14,10 @@ class anullcontext:
 class achain:
     __slots__ = 'its'
     @classmethod
-    def from_iterable(cls, it): return cls(*aiter_to_iter(it))
-    def __init__(self, *its): self.its = its
+    def from_iterable(cls, its): (self := super().__new__(cls)).its = its; return self
+    def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        for i in self.its:
+        async for i in iter_to_aiter(self.its):
             async for _ in iter_to_aiter(i): yield _
 @subscriptable
 class apeekable(EventualLoopMixin):
@@ -48,8 +48,8 @@ class apeekable(EventualLoopMixin):
         if a < 0 or b < 0:
             async for _ in iter_to_aiter(self._it): f(_)
         elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
-            from .iters import aislice as s
-            async for _ in s(self._it, d): f(_)
+            from .iters import aislice as g
+            async for _ in g(self._it, d): f(_)
         return tuple(C)[s]
     @__getitem__.register(int)
     async def _(self, i, /):
@@ -60,12 +60,21 @@ class apeekable(EventualLoopMixin):
             from .iters import aislice as s
             async for _ in s(self._it, i-l+1): f(_)
         return c[i]
+class _await_later:
+    __slots__ = 'aw'
+    def __new__(cls, aw, /, _=type((lambda: (yield))())):
+        if _check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _
+        raise TypeError(f'{type(aw).__qualname__!r} object at {id(aw):#x} is not awaitable')
+    def __getattr__(self, name, /): return getattr(self.aw, name)
+    def __repr__(self): return f'<proxy at {id(self):#x} for awaitable at {id(self.aw):#x}>'
+    def __setattr__(self, name, /): raise AttributeError('attribute aw is read-only' if name == 'aw' else f'cannot set attribute {name!r} through proxy')
+    def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass type of awaitable proxy')
 @subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict(deque), validator or (lambda _: True)
     def __contains__(self, v):
         if not self._validator(v): return False
-        try: self._cache[v].appendleft(self.loop.run_until_complete(anext(self[v]))); return True
+        try: self._cache[v].appendleft(_await_later(anext(self[v]))); return True
         except StopIteration: return False
     async def __aiter__(self):
         async for i in self._it:
@@ -74,7 +83,7 @@ class abucket(LoopContextMixin):
     async def __getitem__(self, val, /):
         if not self._validator(val): return
         while True:
-            if (_ := self._cache[val]): yield _.popleft()
+            if (_ := self._cache[val]): yield (await _) if isinstance(_ := _.popleft(), _await_later) else _
             else:
                 while True:
                     try: i = await anext(self._it)

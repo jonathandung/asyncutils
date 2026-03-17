@@ -28,9 +28,9 @@ def to_sync(f, /, timeout=None, loop=None):
     return wraps(f)(wrapper)
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
 def sync_await(aw, *, timeout=None, loop=None):
-    audit('asyncutils.util.sync_await')
+    audit('asyncutils.util.sync_await', aw)
     f = loop is None
-    if (c := _get_()) and (f or loop is (l := c.loop) or getattr(loop, '_thread_id', None) == getattr(l, '_thread_id', NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
+    if (c := _get_()) and (f or loop is (l := c.loop) or getattr(loop, '_thread_id', None) == getattr(l, '_thread_id', NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT)
     try:
         g = aw.__iter__().__next__
         while True: g()

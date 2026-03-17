@@ -3,10 +3,10 @@ from .log import debug as l
 from .submodules import __dict__ as d
 from . import patch as P, running_console as R
 if (a := d.pop('__all_submodules', None)) is None: raise ImportError('asyncutils: cannot reload initialization script')
-g, _a, _u, _f, _s, d, s = lambda: a, frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}
-for _k, _v in d:
+g, _a, _u, _f, _s, _i, s, t = lambda: a, frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
+for _k, _v in _i:
     if _k[0] != '_': break
-for _k, _v in d: _u(dict.fromkeys(_v, _k[:-4]))
+for _k, _v in _i: _u(dict.fromkeys(_v, _k.removesuffix(t)))
 class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
     __slots__ = '_name'
     def __new__(cls, name, /, _d=_d, _a=_a, _s=s, _p='asyncutils'):
@@ -25,7 +25,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
         if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); m = __import__(_n, fromlist=_f)
         if l := getattr(_g(), 'locals', None): l[n] = m
         _s[n] = m; return m
-    P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''))
+    __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._name+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''))
 if C.loaded_all:
     for _ in a: s[_] = __import__(_s+_, fromlist=_f)
     globals().update(s); R._request_write_load_all_()
@@ -36,4 +36,4 @@ else:
 a += ('submodules_map',)
 l('all submodules initialized')
 l('now loading: config')
-del C, P, R, E, V, l, _d, _k, _v, _a, _f, _s, _u, d, _
+del C, P, R, E, V, l, d, t, _d, _k, _v, _a, _f, _s, _u, _i, _
