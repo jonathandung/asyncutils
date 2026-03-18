@@ -1,3 +1,4 @@
+'''Exception handling utilties and exception classes used by this module.'''
 from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import overload, type_check_only, TypeGuard, Self, Literal, Any, NoReturn, ClassVar
@@ -108,6 +109,10 @@ class EventValueError(ValueError): '''Raised when a party attempts to get the va
 class FutureCorrupted(RuntimeError): '''Raised after an internal party discovers an external party has set the result of a future whose result is for it to set only.'''
 class MaxIterationsError(RuntimeError): '''Raised when a function has reached the specified maximum iterations.'''
 class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
+class RateLimitExceeded(RuntimeError):
+    '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
+    The initialization signature is not part of the public API (is considered an implementation detail).'''
+    async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
     def __init__(self, bus: EventBus, mw: Callable[[str, Any]], /): ...

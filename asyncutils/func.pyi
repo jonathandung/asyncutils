@@ -1,9 +1,10 @@
+'''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, and run functions periodically.'''
 from ._internal.protocols import Exceptable, Timer, SupportsIteration
 from .exceptions import _ExceptionWrapper
 from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable
 from typing import Any, Literal, Protocol, Self, overload, type_check_only
 from asyncio.futures import Future
-__all__ = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'rate_limit', 'measure', 'benchmark'
+__all__ = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'measure', 'benchmark', 'RateLimited'
 @overload
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of functools.reduce that takes an async function and possibly async iterable. If the function is sync, specify await_=False.'''
 @overload
@@ -28,7 +29,6 @@ def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expect
 def retry(tries: int=..., delay: float=..., max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> _frv: ...
 def throttle(lim: float, timer: Timer=...) -> _frv: ...
 def debounce(wait: float) -> _frv: ...
-def rate_limit(calls: int, period: float, timer: Timer=...) -> _frv: ...
 async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''
 class benchmark(tuple[float, float, float, float, int]):
     '''Actually a function at runtime.'''
@@ -46,6 +46,14 @@ class benchmark(tuple[float, float, float, float, int]):
     def avg(self) -> float: '''`total/iterations`.'''
     @property
     def iterations(self) -> int: '''The `times` constructor parameter.'''
+class RateLimited[T, **P]:
+    '''The rate limiter pattern as a decorator (factory). See `locks.AdvancedRateLimit` for the async context manager version.'''
+    @overload
+    def __new__(cls, calls: int, period: float, *, raise_: bool=..., timer: Timer=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ...
+    @overload
+    def __new__(cls, f: Callable[P, Awaitable[T]], calls: int, period: float, *, raise_: bool=..., timer: Timer=...) -> Self: '''Limit the rate of calls of a function `f`, such that only `calls` calls within `period` seconds, as determined by `timer`, are allowed.'''
+    async def __call__(self, *a: P.args, **k: P.kwargs) -> T: ...
+    def __repr__(self) -> str: ...
 @type_check_only
 class _everymethodrvrv[T, R](Protocol):
     '''Not exported.'''

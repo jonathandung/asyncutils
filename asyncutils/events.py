@@ -53,7 +53,8 @@ class EventWithValue(EventMixin):
     @property
     def history_asdict(self): return {t: q for t, s in self._hist if (q := s()) is not None}
     def recent_history(self, duration=None):
-        x, I = monotonic()-(constants.EVENT_WITH_VALUE_DEFAULT_RECENT if duration is None else duration), iter(self._hist)
+        if duration is None: duration = constants.EVENT_WITH_VALUE_DEFAULT_RECENT
+        x, I = monotonic()-duration, iter(self._hist)
         for t, _ in I:
             if t >= x: yield t, _; yield from I
     async def wait_for_transition(self, old, new, timeout=None, *, force_transition=False):

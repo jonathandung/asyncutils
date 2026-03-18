@@ -60,14 +60,22 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
         additional_memerr_hooks (optional): see above
         template (optional): the console banner to use, with %-placeholders for name, version and description'''
     def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[]]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
-    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None: ...
+    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
+        '''Run some code.
+        `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
+        `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
+        `threadsafe` is whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
     def interact(self, banner: str=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.'''
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''Run the console and return the integer return code.
-        The strings exitmsg and threadname should support formatting with %.
-        Pass a negative value for max_memerrs to disable the stop after certain number of MemoryErrors behaviour.
-        Pass always_run_interactive=True or use start python with the -i flag so that the console acts like a console even when stdin is piped.'''
-    def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception.'''
+        The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
+        Pass a negative value for `max_memerrs` to disable the stop after certain number of MemoryErrors behaviour.
+        If `always_install_completer` is True, set the completer on readline as long as readline is available.
+        Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and
+        warnings for garbage-collected coroutines not being awaited respectively.
+        If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start
+        python with the -i flag.'''
+    def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception, or do nothing if there was none.'''
     @final
     def interrupt(self) -> None: '''Pass additional_interrupt_hooks to the subclass constructor to change the behaviour when encountering a KeyboardInterrupt, instead of touching this method.'''
     @final
@@ -83,7 +91,7 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     @overload
     def set_return_code(self, code: int, /) -> None: ...
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters ps1 representing sys.ps1, kcolor, reset and fcolor representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
-    def __repr__(self) -> str: ...
+    def __repr__(self) -> str: '''Note that the console is usually not reconstructible by evaluating the representation.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
     '''A derived class of ConsoleBase, used to implement the asyncutils REPL.'''

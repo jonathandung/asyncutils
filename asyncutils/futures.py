@@ -2,19 +2,19 @@ from ._internal.helpers import copy_and_clear
 from sys import audit
 from asyncio.tasks import eager_task_factory, _PyTask # type: ignore
 from asyncio.futures import _PyFuture # type: ignore
+from _contextvars import copy_context
 from ._internal.submodules import futures_all as __all__
 class AsyncCallbacksFuture(_PyFuture):
-    __get_context = staticmethod(__import__('contextvars').copy_context)
     def __init__(self, *, loop=None): audit(type(self).__qualname__, loop); _PyFuture.__init__(self, loop=loop); self._setup()
     def _setup(self): self._loop.set_task_factory(eager_task_factory); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = [], [], []
     def add_async_callback(self, fn, *, context=None):
-        if self._state == 'PENDING': self._async_callbacks.append((fn, context or self.__get_context()))
+        if self._state == 'PENDING': self._async_callbacks.append((fn, context or copy_context()))
         else: self._loop.create_task(fn(self))
     def add_noargs_callback(self, fn, *, context=None):
-        if self._state == 'PENDING': self._noargs_callbacks.append((fn, context or self.__get_context()))
+        if self._state == 'PENDING': self._noargs_callbacks.append((fn, context or copy_context()))
         else: self._loop.call_soon(fn)
     def add_noargs_async_callback(self, fn, *, context=None):
-        if self._state == 'PENDING': self._noargs_async_callbacks.append((fn, context or self.__get_context()))
+        if self._state == 'PENDING': self._noargs_async_callbacks.append((fn, context or copy_context()))
         else: self._loop.create_task(fn())
     def remove_async_callback(self, fn, /):
         if r := (len(self._async_callbacks)-len(l := [(f, c) for f, c in self._async_callbacks if f is not fn])): self._async_callbacks[:] = l

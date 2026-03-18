@@ -33,7 +33,7 @@ class AsyncLRUCache(LoopContextMixin):
         ttl (optional): Time-to-live in seconds. If None, TTL is disabled.
         typed (optional): Whether to cache different argument types separately.'''
     @overload
-    def __call__[T: Coroutine, **P](self, f: Callable[P, T], /) -> Callable[P, T]: ...
+    def __call__[T: Coroutine, **P](self, f: Callable[P, T], /) -> Callable[P, T]: '''The calls of the returned async function will now be cached in this cache.'''
     @overload
     def __call__[T, **P](self, f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
     def cache_clear(self) -> None: '''Clear all cache entries.'''

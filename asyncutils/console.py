@@ -44,7 +44,7 @@ class ConsoleBase(B):
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     def runcode(self, code, *, futimpl=__import__('concurrent.futures._base', fromlist=_f).Future, dont_show_traceback=(KeyboardInterrupt, MemoryError, SyntaxError), threadsafe=True):
-        (self._loop.call_soon_threadsafe if threadsafe else self._loop.call_soon)(self.__callback, F := futimpl(), code, context=self.context)
+        getattr(self._loop, 'call_soon'+'_threadsafe'*threadsafe)(self.__callback, F := futimpl(), code, context=self.context)
         try: return F.result()
         except SystemExit as e: self.set_return_code(e)
         except BaseException as e:

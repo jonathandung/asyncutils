@@ -1,11 +1,11 @@
-from ._internal.helpers import _get_loop_no_exit, copy_and_clear
+from ._internal.helpers import _get_loop_no_exit
 from ._internal import log
 from .config import RAISE, _NO_DEFAULT, _randinst
 from .base import iter_to_aiter
 from .util import safe_cancel, _ignore_cancellation
-from .exceptions import wrap_exc, CRITICAL, Critical, MaxIterationsError
+from .exceptions import wrap_exc, CRITICAL, Critical, MaxIterationsError, RateLimitExceeded
 from time import perf_counter
-from functools import wraps
+from functools import wraps, partial, Placeholder
 from sys import audit, maxsize as INF
 from collections import deque, namedtuple
 from asyncio.tasks import sleep, wait_for, eager_task_factory
@@ -136,19 +136,24 @@ def debounce(wait):
             with _ignore_cancellation: await l; return await f(*a, **k)
         return wraps(f)(wrapper)
     return dec
-def rate_limit(calls, period, timer=perf_counter):
-    def dec(f):
-        async def wrapper(*a, _c_=deque(), _l_=Lock(), **k):
-            async with _l_:
-                audit('asyncutils.func.rate_limit', f, a, k, calls, period); n, C = timer(), copy_and_clear(_c_)
-                for i in C:
-                    if i > n-period: _c_.append(i)
-                if len(_c_) >= calls: await sleep(period-n+_c_.popleft())
-                _c_.append(timer())
-            return await f(*a, **k)
-        return wraps(f)(wrapper)
-    return dec
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s
 async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
     for _ in range(warmup): await f()
     g = measure.__get__(f); audit('asyncutils.func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), S := sum(t), S/len(t), times+warmup)
+class RateLimited:
+    __slots__ = '_func', '_call_times', '_lock', '_period', '_calls', '_timer', '_raise'
+    def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter):
+        if period is None: return partial(cls, Placeholder, f, calls, raise_=raise_, timer=timer)
+        audit('asyncutils.func.RateLimited', f, calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
+    async def __call__(self, *a, **k):
+        p, P, C, f = (T := self._call_times).popleft, self._period, self._calls, self._func
+        async with self._lock:
+            d = (n := self._timer())-P
+            while T:
+                if (x := p()) > d: T.appendleft(x); break
+            if (l := len(T)-self._calls+1) > 0:
+                if self._raise: raise RateLimitExceeded(f, a, k, C, P, l)
+                await sleep(p()-d)
+            T.append(n)
+        return await f(*a, **k)
+    def __repr__(self): return f'{type(self).__name__}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r})'

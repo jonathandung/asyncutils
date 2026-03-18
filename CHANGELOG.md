@@ -144,9 +144,9 @@ Submodules:
   - retry
   - throttle
   - debounce
-  - rate_limit
   - measure
   - benchmark
+  - RateLimited
 
 - futures
 

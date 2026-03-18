@@ -1,3 +1,4 @@
+'''Classes that extend the functionality of `asyncio.locks.Event` but do not inherit from it.'''
 from .mixins import EventMixin
 from _collections_abc import Generator
 from typing import Literal, overload
