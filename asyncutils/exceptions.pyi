@@ -69,29 +69,29 @@ class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     '''Raised when no normalizer is registered for an unrecognized object.'''
     def __init__(self, obj: T, /): ...
     @property
-    def obj(self) -> T|None: '''The unrecognized object.'''
+    def obj(self) -> T|None: '''The unrecognized object. None if garbage collected.'''
 class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     '''Raised when a custom normalizer returns anything but an iterable of integers.'''
     def __init__(self, normalizer: Callable[[T]], obj: T, /): ...
     @property
-    def normalizer(self) -> Callable[[T]]|None: '''The normalizer at fault.'''
+    def normalizer(self) -> Callable[[T]]|None: '''The normalizer at fault. None if garbage collected.'''
     @property
-    def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned.'''
+    def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned. None if garbage collected.'''
 class VersionNormalizerFault[T](VersionConversionError):
     '''Wraps any errors thrown by a custom normalizer, intentionally or otherwise.'''
     def __init__(self, normalizer: Callable[[T], Iterable[int]], obj: T, exc: BaseException, /): ...
     @property
-    def normalizer(self) -> Callable[[T], Iterable[int]]|None: '''The normalizer at fault.'''
+    def normalizer(self) -> Callable[[T], Iterable[int]]|None: '''The normalizer at fault. None if garbage collected.'''
     @property
-    def obj(self) -> T|None: '''The handled object.'''
+    def obj(self) -> T|None: '''The handled object. None if garbage collected.'''
     @property
-    def exc(self) -> BaseException|None: '''The exception thrown.'''
+    def exc(self) -> BaseException|None: '''The exception thrown. None if garbage collected.'''
 class VersionCorrupted(VersionError, RuntimeError):
     '''Raised when internal state consistency checks of a version fail, indicating modification by the user and intrusion of the unstable API.'''
     def __init__(self, obj: VersionInfo, /): ...
     def __getattr__(self, name: str, /) -> Any: ...
     @property
-    def obj(self) -> VersionInfo: '''The instance of `version.VersionInfo` having been corrupted.'''
+    def obj(self) -> VersionInfo|None: '''The instance of `version.VersionInfo` having been corrupted. None if garbage collected.'''
 class BulkheadError(RuntimeError): '''Raised when there is an error in bulkhead processing.'''
 class BulkheadFull(BulkheadError): '''Raised when a bulkhead is full and a party requests it to execute a coroutine.'''
 class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut down and a party requests it to execute a coroutine.'''
@@ -134,14 +134,14 @@ class PasswordQueueError(Exception): '''Base class for all errors related to pas
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when the password_queue function cannot find the password from the closure variables.'''
     @property
-    def from_(self) -> str: ...
+    def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...
 class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the get password from the closure variables.'''
 class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the put password from the closure variables.'''
 class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
     @property
-    def op(self) -> str: ...
+    def op(self) -> str: '''A string representing the operation type.'''
     def __init__(self, op: str, *a): ...
 class PasswordError(PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
@@ -160,10 +160,10 @@ class WrongPasswordType[T](PasswordError, TypeError):
     @property
     def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
 class IgnoreErrors:
-    '''Context manager to ignore errors of the specified types; works in both sync and async.'''
+    '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async.'''
     @property
     def exc(self) -> tuple[ValidExcType, ...]: ...
-    def __init__(self, /, *_: ValidExcType): ...
+    def __init__(self, /, *exc: ValidExcType): ...
     def __enter__(self) -> Self: ...
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> bool: ...

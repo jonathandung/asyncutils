@@ -43,7 +43,7 @@ class LockMixin(metaclass=ABCMeta):
         raise RuntimeError('failed to acquire lock')
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a # type: ignore
-    def acknowledge_locksmith_lock_held(self, smith, /): return True
+    async def acknowledge_locksmith_lock_held(self, _, /): return True
 @subscriptable
 class LockWithOwnerMixin(LockMixin):
     __slots__ = ()

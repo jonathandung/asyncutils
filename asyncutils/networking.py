@@ -63,15 +63,13 @@ class SocketTransport(Transport):
     @classmethod
     def make_protocol(cls): return LineProtocol()
     @property
-    def loop(self):
-        if isinstance(p := self._protocol, LineProtocol): return p.loop
-        return NotImplemented
+    def loop(self): return p.loop if isinstance(p := self._protocol, LineProtocol) else NotImplemented
     def __init__(self, sock=None):
         self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
         if sock: self.connect_sock(sock)
     def _reset_extra(self): super().__init__({'socket': None, 'sockname': None, 'peername': None})
-    def connect_sock(self, sock, trr=_sock_transport_read_ready):
-        sock.setblocking(False); self.loop.add_reader(sock.fileno(), trr, self._protocol, sock, self.close); (e := self._extra)['sockname'] = sock.getsockname()
+    def connect_sock(self, sock, _=_sock_transport_read_ready):
+        sock.setblocking(False); self.loop.add_reader(sock.fileno(), _, self._protocol, sock, self.close); (e := self._extra)['sockname'] = sock.getsockname()
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
         if (s := self._socket) is None: return

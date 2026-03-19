@@ -13,12 +13,13 @@ from ._internal.submodules import locks_all as __all__
 class AdvancedRateLimit(EventualLoopMixin, LockMixin):
     __slots__ = 'rate', '_lock', '_waiters', '_unfair', '_last_update', 'tokens', 'capacity'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._last_update = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
-    async def acquire(self, tokens=1):
+    async def acquire(self, tokens=1, timeout=None):
         async with self._lock:
             self.update_tokens()
             if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((tokens, F := self.loop.create_future()))
             else: self.tokens -= tokens; return True
-        await F; return True
+        try: await wait_for(F, timeout); return True
+        except TimeoutError: return False
     async def release(self, tokens=1):
         async with self._lock: self.update_tokens(); self.tokens = min(self.tokens+tokens, self.capacity)
     async def set_rate(self, new):
@@ -31,7 +32,7 @@ class AdvancedRateLimit(EventualLoopMixin, LockMixin):
             if not f.done(): f.set_result(None)
 class PrioritySemaphore(LockMixin):
     __slots__ = '_value', '_tiebreak', '_waiters'
-    def __init__(self, value=1): self._value, self._tiebreak, self._waiters = value, 0, list[tuple[int, int, Event]]()
+    def __init__(self, value=1): self._value, self._tiebreak, self._waiters = value, 0, []
     async def acquire(self, priority=0):
         self._value -= 1; self._tiebreak += 1; w = self._waiters
         while self._value < 0: heappush(w, (priority, self._tiebreak, e := Event())); await e.wait()
