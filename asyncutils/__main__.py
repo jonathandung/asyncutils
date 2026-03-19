@@ -7,6 +7,6 @@ if not (g := globals()).get(k := '__package__'):
         for g in type(s).__mro__:
             if g.__module__ == a and g.__qualname__ == b == g.__name__: s.name = 'asyncutils.__main__'; break
     del a, b, s
-del k, S
+del g, k, S
 from .cli import run
 run()
