@@ -41,4 +41,5 @@ O01JPuZoia5kAQ==
 
 The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please state that in the email.
 Please note that reporting such potential exploits, if they are to emerge, via public channels such as the issues tab is a sure-fire way
-to notify the attackers (if any), who may then adjust their strategy.
+to notify the attackers (if any), who may then adjust their strategy. Therefore, you should ensure the communication method chosen is not
+compromised according to the guidelines above.
