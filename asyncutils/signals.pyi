@@ -24,5 +24,6 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout
     '''Wait for a signal to be signaled within `timeout`. `processor` is a function, preferrably returning an awaitable, that takes the signals specified by the variadic positional arguments.
     If `raise_on_timeout` is True, throw TimeoutError on timeout. Otherwise, return None.
     If `loop` was passed, the add_signal_handler and remove_signal_handler methods of that event loop will be used.
-    Errors whose types are included in `possible_errors` cause the logger to emit an error and the function to return `default_on_processor_failure` (or None if not passed).
+    Errors whose types are included in `possible_errors` cause the logger `logger` to emit an error and the function to return `default_on_processor_failure` (or None if not passed).
+    Some info related to the progress of the wait also goes to the logger.
     The return value of the processor is returned through this function.'''

@@ -123,7 +123,9 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     async def pushpop(self, item: T) -> T: '''The above, but done asynchronously and not immediately.'''
     async def poppush(self, item: T) -> T: '''Similar.'''
     def clear(self) -> None: '''Clear all the entries from the queue.'''
-    def transaction(self) -> _AsyncGeneratorContextManager[Self]: '''Begin a transaction on entry of the return context.'''
+    def transaction(self) -> _AsyncGeneratorContextManager[Self]:
+        '''Return an async context manager which begins a transaction on entry.
+        If an error occurs within the context, the original items in the queue are restored and the error reraised; otherwise, changes are committed on exit.'''
     @overload
     def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them, emptying this queue in the process.'''
     @overload
@@ -169,7 +171,7 @@ class SmartPriorityQueue[T](PotentQueueBase[T]):
     def qsize(self) -> int: ...
 class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
     @classmethod
-    def from_iter_of_tuples(cls, items: SupportsIteration[tuple[int, int, T]], maxsize: int=...) -> Self: '''Build a queue from the iterable of tuples (priority, tiebreak, item).'''
+    def from_iter_of_tuples(cls, items: SupportsIteration[tuple[int, int, T]], maxsize: int=...) -> Self: '''Build a queue from the (async) iterable of tuples (priority, tiebreak, item).'''
     def __init__(self, maxsize: int=..., *, init_priority: int=..., init_items: SupportsIteration[T]=[]): ...
     def put_nowait(self, item: T, priority: int=...) -> None: ...
     def get_nowait(self) -> T: ...

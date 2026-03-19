@@ -110,8 +110,8 @@ def normalize(o: Any, /) -> tuple[int, int, int]|None:
     (271, 2, 3)
     >>> normalize((1, 3, 5, 7))
     (1, 3, 5)
-    >>> normalize(1.2+2.3j)
-    (1, 2, 0)
+    >>> normalize(1.2+3.4j)
+    (1, 3, 0)
     >>> autogenerate_normalizers()
     True
     >>> normalize(Decimal('1.2345'))

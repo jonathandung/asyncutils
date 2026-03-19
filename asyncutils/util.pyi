@@ -16,7 +16,7 @@ class to_sync_from_loop:
     '''Not a class at runtime.'''
     def __init__(self, loop: AbstractEventLoop): ...
     def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: '''The partial of to_sync under loop=loop.'''
-def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await an awaitable under the given event loop with timeout `timeout`.'''
+def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use `asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
 @overload
 def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: '''Simple function to return a (bounded) semaphore of value `workers`.'''
 @overload
