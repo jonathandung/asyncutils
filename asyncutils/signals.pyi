@@ -21,8 +21,9 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout
 async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., logger: Logger=...) -> T|None: ...
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T, logger: Logger=...) -> T|None:
-    '''Wait for a signal to be signaled within `timeout`. `processor` is a function, preferrably returning an awaitable, that takes the signals specified by the variadic positional arguments.
-    If `raise_on_timeout` is True, throw TimeoutError on timeout. Otherwise, return None.
+    '''Wait for an OS-level signal to be signaled within `timeout` and handle it. See the [signal](https://docs.python.org/3.14/library/signal.html) and [asyncio](https://docs.python.org/3.14/library/asyncio-eventloop.html#loop-add-signal-handler) docs.
+    `processor` should be a function that takes the signal occurred, preferrably returning an awaitable.
+    If `raise_on_timeout` is True, throw `TimeoutError` on timeout. Otherwise, return `None`.
     If `loop` was passed, the add_signal_handler and remove_signal_handler methods of that event loop will be used.
     Errors whose types are included in `possible_errors` cause the logger `logger` to emit an error and the function to return `default_on_processor_failure` (or None if not passed).
     Some info related to the progress of the wait also goes to the logger.

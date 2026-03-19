@@ -32,11 +32,11 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s}')
     try:
         if x: logger.info(f'signal handler registered successfully for total of {x} signals'); del x
-        else: raise RuntimeError('signal handler could not be registered')
+        else: raise RuntimeError('failed to register signal handler')
         try: s = await wait_for(F, timeout)
         except TimeoutError:
             if raise_on_timeout: raise
-            logger.warning(f'wait_for_signal timed out; signals: {S}')
+            return logger.warning(f'wait_for_signal timed out; signals: {S}')
         logger.info(f'signal received: {s}')
         try: s = p(s)
         except possible_errors as e:

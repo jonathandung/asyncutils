@@ -1,6 +1,6 @@
 '''Miscellaneous helper functions for asyncutils submodule that are not meant to be seen by the user.
 These are undocumented and will remain so; neither will they be stable.
-The stub exists for the convenience of development only.'''
+The stub file exists for the convenience of development only.'''
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from asyncio.futures import Future

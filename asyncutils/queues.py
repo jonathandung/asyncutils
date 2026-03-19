@@ -184,10 +184,10 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait expected non-empty queue')
+            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue')
             return self.put_nowait(item)
         if self.full():
-            if raising: raise QueueFull(f'{type(self).__qualname__}.pushpop_nowait expected non-full queue')
+            if raising: raise QueueFull(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-full queue')
             r = self.get_nowait(); self.put_nowait(item); return r
         self.put_nowait(item); return self.get_nowait()
     def poppush_nowait(self, item, raising=True):
@@ -195,7 +195,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait expected non-empty queue')
+            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue')
             return self.put_nowait(item)
         r = self.get_nowait(); self.put_nowait(item); return r
     async def pushpop(self, item): await self.put(item); return await self.get()

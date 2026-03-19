@@ -2,7 +2,7 @@
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
 from ._internal.protocols import IntCompatible
-__all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
+__all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
 @final
 class VersionInfo(str):
     @overload
@@ -93,7 +93,7 @@ class VersionDelta(tuple[int, int, int]):
     @property
     def patch(self) -> int: '''The patch part of the version.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
-def normalize(o: Any, /) -> tuple[int, int, int]|None:
+def normalize(o: Any, /) -> tuple[int, int, int]:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.
     Normalization is hardcoded for str, complex, int, float. For iterables, the default is to take the first three items and pad zeros behind if necessary.
     Register normalizers using register_normalizer, which returns False if there is already a normalizer registered.
@@ -101,7 +101,6 @@ def normalize(o: Any, /) -> tuple[int, int, int]|None:
     Get the normalizer to be used to normalize an object using dispatch_normalizer.
     A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of VersionInfo will delegate to that object.
     If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.
-    Returns None if a normalizer is not found.
     >>> normalize('1.2.3')
     (1, 2, 3)
     >>> normalize(19.0203)
@@ -118,6 +117,7 @@ def normalize(o: Any, /) -> tuple[int, int, int]|None:
     (1, 23, 45)
     >>> normalize(Fraction(1, 3))
     (1, 3, 0)'''
+def normalize_allow_unimplemented(o: Any, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
 @overload
 def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: ...
 @overload

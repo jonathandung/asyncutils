@@ -18,11 +18,9 @@ class VersionInfo(str):
         if (x := f(f(*self[:2]), self[2]))&1: x = ~x
         x >>= 1; return x+(x > -2)
     @classmethod
-    def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError):
-        if c == -1: raise e('hash cannot be -1')
-        if c > -1: c -= 1
-        c <<= 1
-        b, c = f(~c if c < 0 else c)
+    def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError('hash cannot be -1')):
+        if c == -1: raise e
+        b, c = f(~c if (c := (c-1 if c > -1 else c)<<1) < 0 else c)
         return cls(*f(b), c)
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])

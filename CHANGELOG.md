@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.12] - 2026-03-14: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.12] - 2026-03-19: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Added
 
@@ -293,6 +293,8 @@ Submodules:
   - VersionDelta
 
   Functions:
+  - normalize
+  - normalize_allow_unimplemented
   - register_normalizer
   - unregister_normalizer
   - dispatch_normalizer

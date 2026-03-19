@@ -30,5 +30,5 @@ queues_all = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs'
 signals_all = 'wait_for_signal',
 tools_all = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format'
 util_all = 'get_future', 'new_tasks', 'to_sync', 'to_sync_from_loop', 'sync_await', 'semaphore', 'lockf', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'get_aiter_fromf', 'safe_cancel'
-version_all = 'VersionInfo', 'VersionDelta', 'normalize', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
+version_all = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
 __all_submodules = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'

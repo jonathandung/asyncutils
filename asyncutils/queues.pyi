@@ -1,3 +1,4 @@
+'''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
 from .exceptions import IgnoreErrors, PasswordQueueError as PasswordQueueError, PasswordRetrievalError as PasswordRetrievalError, GetPasswordRetrievalError as GetPasswordRetrievalError, PutPasswordRetrievalError as PutPasswordRetrievalError, ForbiddenOperation as ForbiddenOperation, PasswordError as PasswordError, WrongPassword as WrongPassword, WrongPasswordType as WrongPasswordType
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
@@ -20,7 +21,7 @@ ignore_valerrs: Final[IgnoreErrors]
 '''Instance of IgnoreErrors that suppresses ValueError.'''
 @type_check_only
 class _Q[R, T](Protocol):
-    '''A protocol for password-protected queues. Does not exist at runtime.'''
+    '''A protocol representing password-protected queues. Does not exist at runtime.'''
     async def get(self) -> T: ...
     async def put(self, item: T) -> None: ...
     def get_nowait(self) -> T: ...
@@ -58,7 +59,7 @@ class _P[R, T](_Q[R, T], Protocol):
 class _B[R, V, T](_G[R, T], _P[V, T], Protocol): '''Does not exist at runtime.'''
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., wait: bool=..., priority: bool=..., lifo: bool=..., raising: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[], log: Callable[[str], None]=..., auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]:
-    '''Returns a password-protected queue, the type of which inherits from asyncio.Queue, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
+    '''Returns a password-protected queue, the type of which inherits from `asyncio.Queue`, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
     If `protect_get` is True, get and get_nowait will require a password, specified by password_get or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
     If `protect_put` is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
     If `init_items` is specified, the items in that (async) iterable will be put into the queue immediately. If there are too many items in the (async) iterable, parameters wait and raising determine the behaviour; log is a function used to emit warnings in that case.

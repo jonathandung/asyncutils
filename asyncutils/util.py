@@ -3,14 +3,13 @@ from .exceptions import IgnoreErrors, Critical, Deadlock, CRITICAL
 from ._internal.running_console import _get_
 from ._internal.helpers import _get_loop_no_exit, stop_and_closer
 from functools import partial, wraps
-from asyncio.exceptions import CancelledError
 from asyncio.events import _get_running_loop, set_event_loop, new_event_loop
 from asyncio.tasks import eager_task_factory, wait_for, ensure_future, run_coroutine_threadsafe
 from asyncio.locks import Semaphore, BoundedSemaphore, Lock
 from asyncio.timeouts import timeout as _timeout
 from sys import audit
 from ._internal.submodules import util_all as __all__
-_ignore_cancellation = IgnoreErrors(CancelledError)
+_ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
 def get_future(aw, loop=None):
     if loop is None: loop = _get_loop_no_exit()
     F = loop.create_future()
@@ -59,14 +58,14 @@ def sync_lock(l, /, timeout=None):
         return wraps(f)(to_sync(wrapper))
     return dec
 def sync_lock_from_binder(f, /, timeout=None):
-    def dec(meth, /):
+    def dec(m, /):
         async def wrapper(self, *a, **k):
             l = None
             try:
-                async with _timeout(timeout): await (l := f(self)).acquire(); return meth(self, *a, **k)
+                async with _timeout(timeout): await (l := f(self)).acquire(); return m(self, *a, **k)
             finally:
                 if l and l.locked(): l.release()
-        return wraps(meth)(to_sync(wrapper))
+        return wraps(m)(to_sync(wrapper))
     return dec
 def to_async(f, /, loop=None):
     audit('asyncutils.util.to_async', f)
