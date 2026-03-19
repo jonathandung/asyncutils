@@ -33,6 +33,18 @@ which prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 175 ms incl
 
 The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`), though considering how many submodules we provide (30 and ever-increasing!), it is acceptable. In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the -p/--load-all switch is passed.
 
+## Version
+
+This is asyncutils v0.8.12.
+
+This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible. Of course, this isn't a significant issue, seeing as though nobody currently uses the process.
+
+## Environment variables and configuration
+
+Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well, including aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation using the AUTILSCFGPATH environment variable (all uppercase due to Windows limitations), which should point to an absolute path to a configuration json/jsonl.
+
+See [format.jsonc](asyncutils/format.jsonc) for details.
+
 ## Remarks
 
 It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related features.

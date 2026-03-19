@@ -6,10 +6,10 @@ Some keys can have various types, as detailed by the comments attached. */
     // string file path or integer file descriptor, to which the logging is dumped
     "no_log": false,
     // disable logging; conflicts with log_to if true
-    "executor": "thread",
-    // choose the PEP 3148 executor class to use when required refer to config.__doc__ for possible values
     "V": 0, // increase logging verbosity
     "Q": 0, // decrease logging verbosity
+    "executor": "thread",
+    // choose the PEP 3148 executor class to use when required refer to config.__doc__ for possible values
     "quiet": false,
     // ask the console not to show introductory and closing text
     "basic_repl": false,
