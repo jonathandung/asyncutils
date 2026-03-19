@@ -2,17 +2,22 @@ from .exceptions import IgnoreErrors, PasswordQueueError as PasswordQueueError, 
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
 from abc import ABCMeta, abstractmethod
-from typing import Any, Protocol, Literal, Self, ClassVar, overload, type_check_only
+from typing import Any, Protocol, Literal, Self, Final, ClassVar, overload, type_check_only
 from _collections_abc import Callable, Generator, AsyncGenerator, Awaitable, Coroutine
 from contextlib import _AsyncGeneratorContextManager
 from asyncio.queues import Queue
 from asyncio.futures import Future
 __all__ = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs', 'ignore_valerrs', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'WrongPassword', 'WrongPasswordType', 'password_queue', 'PotentQueueBase', 'SmartQueue', 'SmartLifoQueue', 'SmartPriorityQueue', 'UserPriorityQueue'
-ignore_qshutdown: IgnoreErrors
-ignore_qempty: IgnoreErrors
-ignore_qfull: IgnoreErrors
-ignore_qerrs: IgnoreErrors
-ignore_valerrs: IgnoreErrors
+ignore_qshutdown: Final[IgnoreErrors]
+'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''
+ignore_qempty: Final[IgnoreErrors]
+'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown and asyncio.QueueEmpty.'''
+ignore_qfull: Final[IgnoreErrors]
+'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown and asyncio.QueueFull.'''
+ignore_qerrs: Final[IgnoreErrors]
+'''Instance of IgnoreErrors that suppresses all asyncio queue-related errors.'''
+ignore_valerrs: Final[IgnoreErrors]
+'''Instance of IgnoreErrors that suppresses ValueError.'''
 @type_check_only
 class _Q[R, T](Protocol):
     '''A protocol for password-protected queues. Does not exist at runtime.'''

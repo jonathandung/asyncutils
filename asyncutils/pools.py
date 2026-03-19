@@ -200,10 +200,7 @@ class CallbackAccumulator(__import__('_collections').deque, AsyncContextMixin):
     def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_iter(it), maxlen); self.t, self.call_once, self.default_getter = tuple(_filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
-    def _call_default(self):
-        a, k = self.default_getter()
-        for f in self: f(*a, **k)
-    def __exit__(self, /, *_): self._call_default()
+    def __exit__(self, /, *_): a, k = self.default_getter(); self(*a, **k)
     def add(self, o, /): self.append(getattr(o, *self.t))
     def offer_last(self, o, /):
         if (x := self.maxlen) is None or x > len(self): self.add(o)

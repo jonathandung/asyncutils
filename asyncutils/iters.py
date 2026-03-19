@@ -46,23 +46,26 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     t = loop.create_task(feed()); return tuple(map(iterator, Q))
 async def _aunzip_put(Q, t):
     for q, i in zip(Q, t): await q.put(i)
-async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put):
-    audit('asyncutils.iters.aunzip', ait, *_filter_out(fillvalue)); l = len(t := await anext(I := iter_to_aiter(ait), ()))
-    class aunzip_consumer:
-        def __init__(self): self.q = Queue()
-        def __aiter__(self): return self
-        async def __anext__(self, L=Lock(), I=I):
+class _aunzip_consumer_base:
+    __slots__ = 'q'
+    def __init__(self): self.q = Queue()
+    def __aiter__(self): return self
+    def close(self): self.q.shutdown()
+async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
+    audit('asyncutils.iters.aunzip', ait, *_filter_out(fillvalue)); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
+    class aunzip_consumer(_b):
+        __slots__ = ()
+        async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)):
             if self.q.empty():
                 async with L:
                     try:
-                        async for _ in take(I, put_batch, default=RAISE): await _a(Q, _)
+                        async for _ in f(): await _a(Q, _)
                     except E.ItemsExhausted:
                         for q in Q: q.close()
             try:
                 if (r := await self.q.get()) is fillvalue: raise StopAsyncIteration
                 return r
             except QueueShutDown: raise StopAsyncIteration from None
-        def close(self): self.q.shutdown()
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
 async def merge_async_iters(*I, reverse=False):
     audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), _get_loop_no_exit(), _NO_DEFAULT
@@ -772,4 +775,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst
+del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst

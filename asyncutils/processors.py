@@ -76,12 +76,11 @@ class Bulkhead(LoopContextMixin):
     def rejected(self): return self._rejected
     def wait_until_idle(self, timeout=None): return wait_for(self._empty_event.wait(), timeout)
     async def shutdown(self, timeout=None):
-        self._shutdown_event.set(); r = []; self._queue.shutdown(False)
+        self._shutdown_event.set(); r = []; (q := self._queue).shutdown(False)
         try:
-            async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks)
+            async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks, disembowel=True)
         except TimeoutError:
             while True:
-                try: r.append(await self._queue.get())
-                except: self._queue.shutdown(True); break
-        finally: self.running_tasks.clear()
+                try: r.append(await q.get())
+                except: q.shutdown(True); break
         return r

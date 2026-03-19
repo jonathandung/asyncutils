@@ -3,7 +3,7 @@ from .mixins import EventualLoopMixin, LoopContextMixin
 from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _get_loop_no_exit, subscriptable, _check_methods
 from sys import maxsize as INF, audit
-from functools import partial, singledispatchmethod
+from functools import partial
 from _collections import deque, defaultdict
 from heapq import heapify, heappop, heappushpop
 from ._internal.submodules import iterclasses_all as __all__
@@ -14,7 +14,7 @@ class anullcontext:
 class achain:
     __slots__ = 'its'
     @classmethod
-    def from_iterable(cls, its): (self := super().__new__(cls)).its = its; return self
+    def from_iterable(cls, it_of_its): (self := super().__new__(cls)).its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
         async for i in iter_to_aiter(self.its):
@@ -37,29 +37,25 @@ class apeekable(EventualLoopMixin):
     async def __anext__(self):
         if (c := self._cache): return c.popleft()
         return await anext(self._it)
-    @singledispatchmethod
-    async def __getitem__(self, idx, /): raise IndexError(f'cannot get item from {type(self).__qualname__} for index {idx!r}')
-    @__getitem__.register(slice)
-    async def _(self, s, /, i=~INF):
-        if (c := 1 if (_ := s.step) is None else _) > 0: a, b = 0 if (_ := s.start) is None else _, INF if (_ := s.stop) is None else _
-        elif c < 0: a, b = -1 if (_ := s.start) is None else _, i if (_ := s.stop) is None else _
-        else: raise ValueError('slice step cannot be zero')
+    async def __getitem__(self, idx, /, i=~INF):
         f = (C := self._cache).append
-        if a < 0 or b < 0:
+        if isinstance(idx, slice):
+            if (c := 1 if (_ := idx.step) is None else int(_)) > 0: a, b = 0 if (_ := idx.start) is None else int(_), INF if (_ := idx.stop) is None else int(_)
+            elif c < 0: a, b = -1 if (_ := idx.start) is None else int(_), i if (_ := idx.stop) is None else int(_)
+            else: raise ValueError('slice step cannot be zero')
+            if a < 0 or b < 0:
+                async for _ in iter_to_aiter(self._it): f(_)
+            elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
+                from .iters import aislice as g
+                async for _ in g(self._it, d): f(_)
+            return tuple(C)[a:b:c]
+        l, idx = len(C), int(idx)
+        if idx < 0:
             async for _ in iter_to_aiter(self._it): f(_)
-        elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
-            from .iters import aislice as g
-            async for _ in g(self._it, d): f(_)
-        return tuple(C)[s]
-    @__getitem__.register(int)
-    async def _(self, i, /):
-        l, f = len(c := self._cache), c.append
-        if i < 0:
-            async for _ in iter_to_aiter(self._it): f(_)
-        elif i >= l:
+        elif idx >= l:
             from .iters import aislice as s
-            async for _ in s(self._it, i-l+1): f(_)
-        return c[i]
+            async for _ in s(self._it, idx-l+1): f(_)
+        return C[idx]
 class _await_later:
     __slots__ = 'aw'
     def __new__(cls, aw, /, _=type((lambda: (yield))())):
@@ -98,7 +94,7 @@ class OnlineSorter:
         from .iters import to_list
         if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
         return self
-    def __anext__(self): return self._runner(self._popper)
-    def asend(self, item): return self._runner(self._pusher, item)
-    def athrow(self, typ, val=None, tb=None): return self._runner(self._it.throw, typ, val, tb)
-    def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher, self._loop; return r
+    async def __anext__(self): return await self._runner(self._popper)
+    async def asend(self, item): return await self._runner(self._pusher, item)
+    async def athrow(self, typ, val=None, tb=None): return await self._runner(self._it.throw, typ, val, tb)
+    async def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher, self._loop; return await r
