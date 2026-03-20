@@ -35,7 +35,7 @@ The above demo may be considered bad practice in that the shortened names (`auti
 
 ## Version
 
-This is asyncutils v0.8.13.
+This is asyncutils v0.8.14.
 
 This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible. Of course, this isn't a significant issue, seeing as though nobody currently uses the process.
 

@@ -47,7 +47,7 @@ class VersionInfo(str):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'asyncutils v'+'.'.join(map(str, self[:None if self[2] else 2 if self[1] else 1]))
             case 'l': return f'asyncutils version {self}'
-            case 'c': return bytes(self).decode('ascii')
+            case 'c': return bytes(self).decode('latin-1')
             case 't': return str(self.parts)
             case 'd': return repr(int(self))
             case 'h': return repr(hash(self))

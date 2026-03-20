@@ -10,6 +10,7 @@ def test_hash(version):
     assert hash(VersionInfo(42, 0xdead, 0xbeef)) == -0x4945ce289172b3b6
 def test_version(version):
     version.assert_valid()
+    assert type(version) is VersionInfo
     assert version.__floor__() == version.__trunc__() == version.major == version[0] == version.__ceil__()-1
     assert eval(repr(version)) == VersionInfo(version) == round(version, None) == round(version, 3) == version
     with raises(AttributeError, match=escape("attribute 'parts' cannot be set to (0, 0, 0) on VersionInfo object")): version.parts = (0, 0, 0)
