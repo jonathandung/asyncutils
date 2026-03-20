@@ -71,7 +71,7 @@ _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s
 (set_logger_level := lambda level, h=_: log.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 get_past_logs.handler = _
 log.debug('hi')
-__import__('atexit').register(lambda s=s, d=log.debug: d('bye') or s.flush() or s.close())
+__import__('atexit').register(lambda s=s, d=log.debug: None if s.closed else d('bye') or s.flush() or s.close())
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property

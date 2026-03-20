@@ -82,4 +82,6 @@ Have fun!
 ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
+![Tests](https://github.com/jonathandung/py-asyncutils/actions/workflows/tests.yml/badge.svg)
+![codecov](https://codecov.io/gh/jonathandung/py-asyncutils/branch/main/graph/badge.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
