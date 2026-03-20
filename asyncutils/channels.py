@@ -3,7 +3,7 @@ from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
 from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .config import _NO_DEFAULT
-from ._internal.helpers import _filter_out, _get_loop_no_exit, copy_and_clear, stop_and_closer, subscriptable
+from ._internal.helpers import _filter_out, _get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
 from . import constants
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
@@ -290,7 +290,7 @@ class EventBus(LoopContextMixin):
 class Rendezvous:
     __slots__ = '_getters', '_putters', '_loop', '_lock', '_task'
     def __init__(self, *, loop=None, lock=None):
-        if loop is None: loop = _get_loop_no_exit()
+        if loop is None: loop = _get_loop_and_set()
         if lock is None: lock = Lock()
         self._getters, self._putters, self._loop, self._lock = deque(), deque(), loop, lock; self._make_task()
     async def _maintainer(self, f=sleep.__get__(60)):

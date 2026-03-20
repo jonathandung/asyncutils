@@ -3,7 +3,7 @@ from .constants import RECIP_E
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
 from .util import safe_cancel, get_aiter_fromf
 from .iterclasses import achain, anullcontext
-from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_no_exit, _check_methods
+from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_and_set, _check_methods
 from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache
 from sys import audit
@@ -25,7 +25,7 @@ async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
         yield tuple(l); g()
 def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     if n <= 0: raise ValueError('n must be positive')
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     Q, a, l = tuple(Queue(maxqsize) for _ in range(n)), _NO_DEFAULT, Lock()
     async def iterator(q):
         nonlocal n
@@ -68,7 +68,7 @@ async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_a
             except QueueShutDown: raise StopAsyncIteration from None
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
 async def merge_async_iters(*I, reverse=False):
-    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), _get_loop_no_exit(), _NO_DEFAULT
+    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), _get_loop_and_set(), _NO_DEFAULT
     async def drain(i, f=q.put):
         async for _ in i: await f(_)
     async def close():
@@ -138,13 +138,13 @@ def asliced(seq, n, strict=False):
     return ret()
 def batch_buffer(items, batch_size, buffer_size, *, loop=None):
     d = deque(maxlen=buffer_size)
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     async def consumer():
         async for b in batch(items, batch_size): d.extend(b)
     loop.create_task(consumer()); return d
 def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
     q = Queue(maxsize)
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     async def producer():
         try:
             async for _ in it:
@@ -692,9 +692,9 @@ def asubstrindices(seq, reverse=False):
     return ((seq[i:i+L], i, i+L) for L in r async for i in arange(x-L))
 def iter_future(it, summaryf=aconsume):
     async def task(): t = L.time(); await summaryf(it); F.set_result(L.time()-t)
-    F = (L := _get_loop_no_exit()).create_future(); L.create_task(task()); return F
+    F = (L := _get_loop_and_set()).create_future(); L.create_task(task()); return F
 def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable %r'):
-    L, r, I = _get_loop_no_exit(), [], iter_to_aiter(it)
+    L, r, I = _get_loop_and_set(), [], iter_to_aiter(it)
     async def consume():
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
         async for x in amap(O.index, indices):
@@ -753,7 +753,7 @@ async def aguessmax(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
             if __cmp(k, K(i)): return i
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_no_exit()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
 async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=None, __cmp=_compare):
     if (r := await amin(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
         if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
@@ -764,7 +764,7 @@ async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
             if __cmp(K(i), k): return i
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_no_exit()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
 async def apowersoftwo(*, init=1, init_shift=0):
     init <<= init_shift
     while True: yield init; init <<= 1

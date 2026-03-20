@@ -1,4 +1,4 @@
-'''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, and run functions periodically.'''
+'''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
 from ._internal.protocols import Exceptable, Timer, SupportsIteration
 from .exceptions import _ExceptionWrapper
 from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable

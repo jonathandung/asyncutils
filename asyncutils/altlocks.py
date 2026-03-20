@@ -23,12 +23,12 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
             if not (w := f()).done(): w.set_result(None); d -= 1
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     __slots__, _inc_cnt = 'guarded', staticmethod(count(1).__next__)
-    def __init__(self, action='using', rname=None): super().__init__(f"another task is already {action} resource {'#%d'%self._inc_cnt() if rname is None else repr(rname)}"); self.guarded = False
+    def __init__(self, action='using', rname=None): super().__init__(f"another task is already {action} resource{' #%d'%self._inc_cnt() if rname is None else f': {rname!r}'}"); self.guarded = False
     async def __aenter__(self):
         if self.guarded: raise self
         self.guarded = True
-    async def __aexit__(self, /, *_, _e='__aexit__ called without prior __aenter__ call'):
-        if not self.guarded: raise RuntimeError(_e)
+    async def __aexit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')):
+        if not self.guarded: raise e
         self.guarded = False
     @classmethod
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
@@ -110,16 +110,16 @@ class DynamicThrottle:
     @jitter.setter
     def jitter(self, jitter, /): self._jitter = max(0.0, float(jitter))
     @property
-    def time(self): return self._timer()
+    def ctime(self): return self._timer()
     @property
     def successes(self): return self._successes
     @property
     def fails(self): return self._fails
-    async def __aenter__(self): await sleep((1.0/self._rate-self.time+self._last_call)*(1.0+self._randf(self.jitter))); self._last_call = self.time
+    async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._last_call)*(1.0+self._randf(self._jitter))); self._last_call = self.ctime
     async def __aexit__(self, e, *_):
         async with self._lock:
             if (t := self._successes+self._fails) >= self._window: self.rate *= self._ufactor if (r := self._successes/t) > self._ubound else self._lfactor if r < self._lbound else 1.0; self._successes = self._fails = 0
             if e is None: self._successes += 1
             else: self._fails += 1
-    def reset(self): self._successes = self._fails = 0; self._last_call = self.time-1.0/self._rate
+    def reset(self): self._successes = self._fails = 0; self._last_call = self.ctime-1.0/self._rate
 del _randinst

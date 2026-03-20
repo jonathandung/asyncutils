@@ -5,7 +5,7 @@ from ._internal.patch import patch_function_signatures
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
 def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _a=audit):
-    _a(f'asyncutils.exceptions.unnest{'_reverse' if isinstance(s, list) else ''}', s)
+    _a(f'asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), s)
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
         elif raise_critical and isinstance(group, CRITICAL): raise Critical(group)
@@ -155,7 +155,7 @@ def __getattr__(name, /):
     if name != 'WarningToError': raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
     global WarningToError
     class WarningToError:
-        lock, __slots__ = __import__('asyncio.locks', fromlist=('',)).Lock(), ('_warn', '_cm')
+        lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_warn', '_cm'
         def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
         async def __aenter__(self):
             import warnings as _

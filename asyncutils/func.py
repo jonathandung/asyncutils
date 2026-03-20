@@ -1,4 +1,4 @@
-from ._internal.helpers import _get_loop_no_exit
+from ._internal.helpers import _get_loop_and_set
 from ._internal import log
 from .config import RAISE, _NO_DEFAULT, _randinst
 from .base import iter_to_aiter
@@ -17,7 +17,7 @@ async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
 def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs={}, default=_NO_DEFAULT):
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
         if stop_when and stop_when.done(): log.warning(f'future to stop periodic coroutine {n} is already done')
@@ -51,7 +51,7 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
         return wraps(f)(wrapper)
     return dec
 def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs={}, default=_NO_DEFAULT):
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     def dec(f, /):
         n = f.__name__
         async def wrapper(self, /, *a, **k):
@@ -128,7 +128,7 @@ def throttle(lim, timer=perf_counter):
     return dec
 def debounce(wait):
     def dec(f, l=None):
-        (L := _get_loop_no_exit()).set_task_factory(eager_task_factory)
+        (L := _get_loop_and_set()).set_task_factory(eager_task_factory)
         async def wrapper(*a, **k):
             nonlocal l
             if l: await safe_cancel(l)

@@ -114,13 +114,13 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
                     yield _
     elif _c(it, '__iter__') and _c(it.__iter__(), '__next__'):
         if f:
-            async def iterator(sleep=yield_to_event_loop):
-                for _ in it: yield _; await sleep
+            async def iterator():
+                for _ in it: yield _
         else:
-            async def iterator(sleep=yield_to_event_loop):
+            async def iterator():
                 for _ in it:
                     if _ is sentinel or _ == sentinel: break
-                    yield _; await sleep
+                    yield _
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
 def aiter_to_iter(ait, _c=b):
@@ -138,7 +138,7 @@ def aiter_to_iter(ait, _c=b):
         try: yield from iterate()
         except StopAsyncIteration: ...
         finally: c.__exit__(*exc_info())
-    else: raise TypeError('cannot iterate over ait synchronously or asynchronously')
+    else: raise TypeError(f'cannot iterate over {ait!r} synchronously or asynchronously')
 async def collect(it, n=None, default=_NO_DEFAULT, *, __retn=False, _=L.warning, m='collect ran out of items'):
     f, i, n = (r := []).append, 0, maxsize if n is None else n
     async for i, _ in aenumerate(it):

@@ -16,7 +16,7 @@ from .mixins import EventualLoopMixin
 from .base import aiter_to_iter, iter_to_aiter, collect
 from .util import sync_await, safe_cancel
 from .futures import AsyncCallbacksFuture
-from ._internal.helpers import _get_loop_no_exit
+from ._internal.helpers import _get_loop_and_set
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
 ignore_qerrs, ignore_valerrs = f(*_), IgnoreErrors(ValueError)
@@ -101,7 +101,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             nonlocal password_put; password_put = new_pwd; return True
     else:
         def change_put_password(old_pwd, new_pwd): return bool()
-    (q := object.__new__(PasswordQueue)).__init__(maxsize); f, I, L, q.change_get_password, q.change_put_password, change_get_password.__qualname__, change_put_password.__qualname__ = partial(q.put_nowait, pwd=password_put), aiter_to_iter(init_items), _get_loop_no_exit(), change_get_password, change_put_password, change_get_password.__name__, change_put_password.__name__; PasswordQueue.__repr__ = PasswordQueue.__str__ = lambda self, _=f'<password-protected queue at {id(q):#x}>': _; g, p = map(lambda f, l=(l := []): lambda *a: f(l, *a), (_heapq.heappop_max, _heapq.heappush_max) if lifo else (_heapq.heappop, _heapq.heappush)) if priority else ((l := []).pop if lifo else (l := deque(maxlen=maxsize)).popleft, l.append); PasswordQueue.qsize, PasswordQueue.empty = lambda self, l=l: len(l), lambda self, l=l: not l
+    (q := object.__new__(PasswordQueue)).__init__(maxsize); f, I, L, q.change_get_password, q.change_put_password, change_get_password.__qualname__, change_put_password.__qualname__ = partial(q.put_nowait, pwd=password_put), aiter_to_iter(init_items), _get_loop_and_set(), change_get_password, change_put_password, change_get_password.__name__, change_put_password.__name__; PasswordQueue.__repr__ = PasswordQueue.__str__ = lambda self, _=f'<password-protected queue at {id(q):#x}>': _; g, p = map(lambda f, l=(l := []): lambda *a: f(l, *a), (_heapq.heappop_max, _heapq.heappush_max) if lifo else (_heapq.heappop, _heapq.heappush)) if priority else ((l := []).pop if lifo else (l := deque(maxlen=maxsize)).popleft, l.append); PasswordQueue.qsize, PasswordQueue.empty = lambda self, l=l: len(l), lambda self, l=l: not l
     try:
         for i in I: f(i)
     except QueueFull:

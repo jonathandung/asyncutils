@@ -91,6 +91,6 @@ def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
 def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard n items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw ItemsExhausted.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class, with the addition of the step parameter.'''
 yield_to_event_loop: Awaitable[None]
-'''An awaitable object that gives control to the event loop for one iterations.'''
+'''An awaitable object that yields control to the event loop for one iteration when awaited.'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
-'''An awaitable object that completes immediately and is also a generator.'''
+'''An awaitable object that completes immediately and is also an exhausted generator, with the CO_ITERABLE_COROUTINE flag set.'''

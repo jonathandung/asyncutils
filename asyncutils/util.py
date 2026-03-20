@@ -1,7 +1,7 @@
 from .config import Executor, SYNC_AWAIT, _NO_DEFAULT
 from .exceptions import IgnoreErrors, Critical, Deadlock, CRITICAL
 from ._internal.running_console import _get_
-from ._internal.helpers import _get_loop_no_exit, stop_and_closer
+from ._internal.helpers import _get_loop_and_set, stop_and_closer
 from functools import partial, wraps
 from asyncio.events import _get_running_loop, set_event_loop, new_event_loop
 from asyncio.tasks import eager_task_factory, wait_for, ensure_future, run_coroutine_threadsafe
@@ -11,7 +11,7 @@ from sys import audit
 from ._internal.submodules import util_all as __all__
 _ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
 def get_future(aw, loop=None):
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     F = loop.create_future()
     async def wrapper():
         try: F.set_result(await aw)
@@ -19,7 +19,7 @@ def get_future(aw, loop=None):
         except BaseException as e: F.set_exception(e)
     loop.create_task(wrapper()); return F
 def new_tasks(*C):
-    (l := _get_loop_no_exit()).set_task_factory(eager_task_factory); f = l.create_task
+    (l := _get_loop_and_set()).set_task_factory(eager_task_factory); f = l.create_task
     for c in C: yield f(c)
 def to_sync(f, /, timeout=None, loop=None):
     audit('asyncutils.util.to_sync', f)
@@ -69,7 +69,7 @@ def sync_lock_from_binder(f, /, timeout=None):
     return dec
 def to_async(f, /, loop=None):
     audit('asyncutils.util.to_async', f)
-    if loop is None: loop = _get_loop_no_exit()
+    if loop is None: loop = _get_loop_and_set()
     async def wrapper(*a, **k):
         if (e := getattr(to_async, 'executor', None)) is None: audit('asyncutils/create_executor', 'util.to_async'); to_async.executor = e = Executor()
         return await loop.run_in_executor(e, partial(f, *a, **k))
