@@ -98,13 +98,14 @@ class StatefulBarrier(AwaitableMixin):
     def parties(self): return self._parties
 class DynamicThrottle:
     __slots__ = '_min', '_max', '_window', '_successes', '_fails', '_ubound', '_lbound', '_ufactor', '_lfactor', '_lock', '_rate', '_timer', '_last_call', '_jitter', '_randf'
-    def __init__(self, init_rate, min_rate=float('-inf'), max_rate=float('inf'), window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):
-        if min_rate > max_rate: raise ValueError('inconsistent rates')
+    def __init__(self, init_rate, min_rate=1e9, max_rate=float('inf'), window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):
+        if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates')
         C = getcontext(); self._min, self._max, self._window, self._lock, self._timer, self._ubound, self._lbound, self._ufactor, self._lfactor, self.jitter, self._randf = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand; self.rate = init_rate; self.reset()
     @property
     def rate(self): return self._rate
     @rate.setter
-    def rate(self, rate, /): self._rate = max(self._min, min(self._max, rate))
+    def rate(self, rate, /):
+        if abs(1-self._rate/(rate := max(self._min, min(self._max, rate)))) > 0.02: self._rate = rate
     @property
     def jitter(self): return self._jitter
     @jitter.setter

@@ -7,10 +7,10 @@ class CacheWithBackgroundRefresh[T=Any, R=Any](LoopContextMixin):
     Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
     This ensures availability of fresh data without blocking get operations.'''
     def __init__(self, ttl: float|None=..., refresh: float|None=..., processor: Callable[[BaseException, bool]]|None=..., default_loader: Callable[[T], R]|None=...):
-        '''ttl (optional): Time-to-live in seconds; default to constants.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL.
-        refresh (optional): Time before TTL expires to begin the refresh; default to constants.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH.
-        processor (optional): Error handler that takes two arguments (exc, was_batched). `exc` is the exception occurred and `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
-        default_loader (optional): The loader to load values from keys for which specific loaders have not been registered.'''
+        '''`ttl` (optional): Time-to-live in seconds; default to constants.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL.
+        `refresh` (optional): Time before TTL expires to begin the refresh; default to constants.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH.
+        `processor` (optional): Error handler that takes two arguments (exc, was_batched). `exc` is the exception occurred and `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
+        `default_loader` (optional): The loader to load values from keys for which specific loaders have not been registered.'''
     def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
@@ -29,9 +29,9 @@ class CacheWithBackgroundRefresh[T=Any, R=Any](LoopContextMixin):
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., typed: bool=...):
-        '''maxsize (optional): Maximum number of entries to cache; default to constants.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE.
-        ttl (optional): Time-to-live in seconds. If None, TTL is disabled.
-        typed (optional): Whether to cache different argument types separately.'''
+        '''`maxsize` (optional): Maximum number of entries to cache; default to constants.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE.
+        `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
+        `typed` (optional): Whether to cache different argument types separately.'''
     @overload
     def __call__[T: Coroutine, **P](self, f: Callable[P, T], /) -> Callable[P, T]: '''The calls of the returned async function will now be cached in this cache.'''
     @overload

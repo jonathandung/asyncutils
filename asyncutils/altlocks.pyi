@@ -71,24 +71,34 @@ class StatefulBarrier[T=Any](AwaitableMixin):
     def remaining_parties(self) -> int: '''Number of parties the waiting parties are waiting for.'''
 class DynamicThrottle:
     '''An async context manager used to limit the rate of a function being called. See also: `func.RateLimited`, `locks.AdvancedRateLimit`'''
-    def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...): ...
+    def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):
+        '''`init_rate` (required): The initial rate in calls per second.
+        `min_rate`: The minimum rate.
+        `max_rate`: The maximum rate.
+        `window`: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted.
+        `ubound`: Lower bound of the ratio (successes: total calls) such that the rate is multiplied by `ufactor` and clamped to `min_rate` and `max_rate`.
+        `lbound`: Upper bound of the above ratio such that the rate is multiplied by `lfactor` and clamped similarly.
+        `jitter`: The jitter in calculation of the wait time before the context can enter.
+        `timer`: Function to return current time as a float.
+        `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.
+        '''
     @property
-    def rate(self) -> float: ...
+    def rate(self) -> float: '''The current rate.'''
     @rate.setter
-    def rate(self, rate: float, /) -> None: ...
+    def rate(self, rate: float, /) -> None: '''Set the rate manually, applying `min_rate` and `max_rate` bounds.'''
     @property
-    def jitter(self) -> float: ...
+    def jitter(self) -> float: '''The current jitter.'''
     @jitter.setter
-    def jitter(self, jitter, /) -> None: ...
+    def jitter(self, jitter: float, /) -> None: '''Set the jitter.'''
     @property
-    def ctime(self) -> float: ...
+    def ctime(self) -> float: '''The current time as returned by `timer`.'''
     @property
-    def successes(self) -> int: ...
+    def successes(self) -> int: '''Current number of succeeded calls. Reset periodically.'''
     @property
-    def fails(self) -> int: ...
-    async def __aenter__(self) -> None: ...
+    def fails(self) -> int: '''Current number of failed calls. Reset periodically.'''
+    async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
-    def reset(self) -> None: ...
+    def reset(self) -> None: '''Reset the successes and fails.'''

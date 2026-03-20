@@ -196,7 +196,7 @@ class EventBus(LoopContextMixin):
     def clear_all(self) -> None: '''Remove all subscribers and clear statistics.'''
     def subscriber_count(self, event_type: str|_WildcardType) -> int: '''The number of subscribers for that event type.'''
     def clear_wildcards(self) -> WeakSet[Callable[[str, Any], Awaitable]]|None: '''Equivalent to bus.clear(EventBus.WILDCARD).'''
-    def clear_stats(self) -> None: '''Clear statistics.'''
+    def clear_stats(self) -> None: '''Clear the event publication statistics.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
 class Rendezvous[T]:

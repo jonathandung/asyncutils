@@ -25,7 +25,7 @@ class event_loop:
     @overload
     def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType|None, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __del__(self) -> None: '''Destructor; exit the context if it is entered.'''
-    def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: ...
+    def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
 @overload
 def iter_to_aiter[T, R](it: AsyncGenerator[T, R]) -> AsyncGenerator[T, R]: ...
 @overload
