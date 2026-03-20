@@ -12,7 +12,8 @@ from asyncio.tasks import Task
 from concurrent.futures import Future
 __all__ = 'ConsoleBase', 'AsyncUtilsConsole'
 class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
-    '''Inspired by asyncio/__main__.py. Highly adaptable.'''
+    '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.InteractiveColoredConsole` if available.
+    Inspired by asyncio/__main__.py. Highly adaptable.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
@@ -33,7 +34,7 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     @property
     def context(self) -> Context: '''The contextvars.Context instance passed to methods of the underlying asyncio event loop.'''
     @property
-    def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, it is 0.'''
+    def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
     @final
     @property
     def memory_errors(self) -> int: '''The number of `MemoryError`s that have occurred.'''
@@ -43,25 +44,25 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     @property
     def is_running(self) -> bool: '''Whether the console is running. Default implementation uses _internal_is_running only.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=..., importer: Callable[[str], ModuleType]=...):
-        '''loop: Event loop used by console interaction.
-        mod (optional): The module to import within the console, determined by the subclass name by default.
-        modname (optional): The name of the above module.
-        context_factory (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.
-        importer (optional): A function used to import a module from a string.'''
+        '''`loop`: Event loop used by console interaction.
+        `mod` (optional): The module to import within the console, determined by the subclass name by default.
+        `modname` (optional): The name of the above module.
+        `context_factory` (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.
+        `importer` (optional): A function used to import a module from a string.'''
     def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]]]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]]]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self]]]=..., additional_memerr_hooks: Iterable[Callable[[Self]]]=..., template: str=..., **k: Any) -> None:
-        '''name (optional): name of the module using the console
-        version (optional): version of the module using the console
-        description (optional): description of the module using the console
-        default_local_exit (optional): see above
-        disallow_subclass_msg (optional): see above
-        native_handler (optional): see above
-        other_handlers (optional): see above
-        additional_interrupt_hooks (optional): see above
-        additional_memerr_hooks (optional): see above
-        template (optional): the console banner to use, with %-placeholders for name, version and description'''
+        '''`name` (optional): name of the module using the console
+        `version` (optional): version of the module using the console
+        `description` (optional): description of the module using the console
+        `default_local_exit` (optional): see above
+        `disallow_subclass_msg` (optional): see above
+        `native_handler` (optional): see above
+        `other_handlers` (optional): see above
+        `additional_interrupt_hooks` (optional): see above
+        `additional_memerr_hooks` (optional): see above
+        `template` (optional): the console banner to use, with %-placeholders for name, version and description'''
     def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[]]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
-        '''Run some code.
+        '''Run `code`, an instance of `types.CodeType`.
         `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
         `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         `threadsafe` is whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
@@ -77,26 +78,36 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
         python with the -i flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception, or do nothing if there was none.'''
     @final
-    def interrupt(self) -> None: '''Pass additional_interrupt_hooks to the subclass constructor to change the behaviour when encountering a KeyboardInterrupt, instead of touching this method.'''
+    def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a KeyboardInterrupt, instead of touching this method.'''
     @final
-    def memoryerror(self) -> None: '''Pass additional_memerr_hooks to the subclass constructor to change the behaviour when encountering a MemoryError, instead of touching this method.'''
-    def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than write.'''
-    def refresh(self) -> None: '''Callback in interrupt and memoryerror.'''
+    def memoryerror(self) -> None: '''Pass `additional_memerr_hooks` to the subclass constructor to change the behaviour when encountering a MemoryError, instead of touching this method.'''
+    def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than `write`.'''
+    def refresh(self) -> None: '''Callback in `interrupt` and `memoryerror`.'''
     @abstractmethod
-    def prehook(self, max_memerrs: int) -> None: '''Called by run_console before beginning the interaction logic; can raise errors. When implementing, call super().prehook(max_memerrs) before everything. Not really an abstract method, but implementing is highly recommended.'''
+    def prehook(self, max_memerrs: int) -> None:
+        '''Called by `run_console` before beginning the interaction logic.
+        Can raise errors.
+        When implementing, call `super().prehook(max_memerrs)` before everything.
+        Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
-    def posthook(self) -> None: '''Called by run_console after the interaction has ended before writing the exit message; should not raise errors. When implementing, call super().posthook() after everything. Not really an abstract method, but implementing is highly recommended.'''
+    def posthook(self) -> None:
+        '''Called by `run_console` after the interaction has ended before writing the exit message.
+        Should not raise errors.
+        When implementing, call `super().posthook()` after everything.
+        Not really an abstract method, but implementing is highly recommended.'''
     @overload
-    def set_return_code(self, exc: SystemExit, /) -> None: '''Set the return code of this console from an instance of SystemExit or an integer return code and exit the console.'''
+    def set_return_code(self, exc: SystemExit, /) -> None: '''Set the return code of this console from an instance of `SystemExit` or an integer return code and exit the console.'''
     @overload
     def set_return_code(self, code: int, /) -> None: ...
-    def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters ps1 representing sys.ps1, kcolor, reset and fcolor representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
+    def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None:
+        '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing sys.ps1
+        and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
     def __repr__(self) -> str: '''Note that the console is usually not reconstructible by evaluating the representation.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
-    '''A derived class of ConsoleBase, used to implement the asyncutils REPL.'''
+    '''A derived class of `ConsoleBase`, used to implement the asyncutils REPL.'''
     @property
-    def is_running(self) -> bool: '''Performs internal state consistency checks and returns whether the console is currently running. Only one AsyncUtilsConsole can be running at a time. (*)'''
+    def is_running(self) -> bool: '''Performs internal state consistency checks and returns whether the console is currently running. Only one `AsyncUtilsConsole` can be running at a time.'''
     def prehook(self, max_memerrs: int) -> None: '''Ensures the console will be the only one running.'''
     def posthook(self) -> None: '''Ensures that the console is not left running after unset.'''
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: ...
