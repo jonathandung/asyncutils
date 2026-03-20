@@ -22,17 +22,17 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     '''module name -> (locals of console of corresponding type -> Any)
     Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self]], ...]]
-    '''Functions called when KeyboardInterrupt occurs, in that order, besides essential hardcoded logic.
+    '''Functions called when `KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_interrupt_hooks`.'''
     memerr_hooks: ClassVar[tuple[Callable[[Self]], ...]]
-    '''Functions called when MemoryError occurs, in that order, besides essential hardcoded logic.
+    '''Functions called when a `MemoryError` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_memerr_hooks`.'''
     default_local_exit: ClassVar[bool]
-    '''Whether python should continue running after the console exits by default, as opposed to the console raising SystemExit directly.'''
+    '''Whether python should continue running after the console exits by default, as opposed to the console raising `SystemExit` directly.'''
     disallow_subclass_msg: ClassVar[str]
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
     @property
-    def context(self) -> Context: '''The contextvars.Context instance passed to methods of the underlying asyncio event loop.'''
+    def context(self) -> Context: '''The `contextvars.Context` instance passed to methods of the underlying asyncio event loop.'''
     @property
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
     @final
@@ -78,9 +78,9 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
         python with the -i flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception, or do nothing if there was none.'''
     @final
-    def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a KeyboardInterrupt, instead of touching this method.'''
+    def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a `KeyboardInterrupt`, instead of touching this method.'''
     @final
-    def memoryerror(self) -> None: '''Pass `additional_memerr_hooks` to the subclass constructor to change the behaviour when encountering a MemoryError, instead of touching this method.'''
+    def memoryerror(self) -> None: '''Pass `additional_memerr_hooks` to the subclass constructor to change the behaviour when encountering a `MemoryError`, instead of touching this method.'''
     def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than `write`.'''
     def refresh(self) -> None: '''Callback in `interrupt` and `memoryerror`.'''
     @abstractmethod

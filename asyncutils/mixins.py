@@ -18,11 +18,14 @@ class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
     def __await__(self): yield from self.wait().__await__()
     @abstractmethod
-    async def wait(self): ...
+    def wait(self): ...
 @subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     @cached_property
-    def runner(self, _=_get_loop_and_set): __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin'); return partial(_().run_in_executor, Executor())
+    def runner(self, _=_get_loop_and_set):
+        __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin')
+        if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = _()
+        return partial(l.run_in_executor, Executor())
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

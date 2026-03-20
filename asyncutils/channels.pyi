@@ -200,10 +200,10 @@ class EventBus(LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
 class Rendezvous[T]:
-    '''A rendezvous object, emulating Go's unbuffered channels. Usage:
+    '''A rendezvous object, emulating Golang's unbuffered channels. Usage:
     >>> rdv = Rendezvous()
-    >>> await asyncio.gather(*map(rdv.put, range(5, 10)), rdv.exchange(10), *map(rdv.exchange, range(1, 5)), *(rdv.get() for _ in range(5)))
-    [True, True, True, True, True, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    >>> (await asyncio.gather(*map(rdv.put, range(5, 10)), rdv.exchange(10), *map(rdv.exchange, range(1, 5)), *(rdv.get() for _ in range(5))))[-10:]
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     >>> task = rdv._loop.create_task(rdv.put(0))
     >>> await rdv.state_snapshot()
     StateSnapshot(num_getters=0, num_putters=1, num_ops=1, idle=False)

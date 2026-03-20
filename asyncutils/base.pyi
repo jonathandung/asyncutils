@@ -33,7 +33,7 @@ def iter_to_aiter[T, R](it: AsyncGenerator[T, R], sentinel: T) -> AsyncGenerator
 @overload
 def iter_to_aiter[T](it: AsyncIterator[T]) -> AsyncIterator[T]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterator[T], sentinel: T) -> AsyncIterator[T]: ...
+def iter_to_aiter[T](it: AsyncIterator[T], sentinel: T) -> AsyncGenerator[T, None]: ...
 @overload
 def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncGenerator[T, None]: ...
 @overload
@@ -41,15 +41,13 @@ def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T, Non
 @overload
 def iter_to_aiter[T](it: Iterable[T]) -> AsyncGenerator[T, None]: ...
 @overload
-def iter_to_aiter[T](it: Iterable[T], sentinel: T) -> AsyncGenerator[T, None]: '''Convert an (async) iterable to an async iterator non-blockingly. Sent values will be passed through.'''
+def iter_to_aiter[T](it: Iterable[T], sentinel: T) -> AsyncGenerator[T, None]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
 @overload
 def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R, None]: ...
 @overload
 def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T, None, None]: ...
 @overload
-def aiter_to_iter[T](ait: Iterable[T]) -> Generator[T, None, None]: ...
-@overload
-def aiter_to_iter[T](ait: Iterator[T]) -> Iterator[T]: '''Convert an (async) iterable to an iterator. The current method is quite inefficient and a potential improvement would be greatly appreciated.'''
+def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) iterable to a sync generator, or the original iterator if .'''
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
 def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload

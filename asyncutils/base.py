@@ -1,7 +1,7 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
 from .config import RAISE, _NO_DEFAULT
 from ._internal import patch as P, log as L
-from ._internal.helpers import _check_methods as b
+from ._internal.helpers import _check_methods as b, _get_loop_and_set
 from sys import exc_info, audit, stderr, maxsize
 from asyncio.tasks import all_tasks, gather
 from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
@@ -97,7 +97,7 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         r = await gather(*map(f, r), return_exceptions=True)
         if raising and (E := tuple(unnest_reverse(filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
     audit('asyncutils.base.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
@@ -112,15 +112,40 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, _c=b):
                 async for _ in it:
                     if _ is sentinel or _ == sentinel: break
                     yield _
-    elif _c(it, '__iter__') and _c(it.__iter__(), '__next__'):
+    elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
+        audit('asyncutils/create_executor', 'base.iter_to_aiter'); r = lambda f, _=(loop or _get_loop_and_set()).run_in_executor: lambda *a: _(f, *a)
+        g = _c(it, 'send', 'throw', 'close')
         if f:
-            async def iterator():
-                for _ in it: yield _
+            if g:
+                async def iterator(_=r(it.send)):
+                    l = _(None)
+                    try:
+                        while True:
+                            if l is sentinel or l == sentinel: break
+                            l = await _((yield l))
+                    except StopIteration: ...
+                    except StopAsyncIteration: it.close()
+                    except BaseException as e: it.throw(e)
+            else:
+                async def iterator(_=r(it.__next__)):
+                    try:
+                        while True:
+                            if (l := await _()) is sentinel or l == sentinel: break
+                            yield l
+                    except StopIteration: ...
+        elif g:
+            async def iterator(_=r(it.send)):
+                l = _(None)
+                try:
+                    while True: l = await _((yield l))
+                except StopIteration: ...
+                except StopAsyncIteration: it.close()
+                except BaseException as e: it.throw(e)
         else:
-            async def iterator():
-                for _ in it:
-                    if _ is sentinel or _ == sentinel: break
-                    yield _
+            async def iterator(_=r(it.__next__)):
+                try:
+                    while True: yield await _()
+                except StopIteration: ...
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
 def aiter_to_iter(ait, _c=b):

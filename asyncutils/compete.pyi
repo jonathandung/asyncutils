@@ -20,6 +20,5 @@ async def multi_winner_race_with_callback[T](*C: Coroutine[Any, Any, T], timeout
 def convert_to_coro_iter(cfs: SupportsIteration[Awaitable|SupportsIteration], skip_invalid: bool=..., corocheck: Callable[[Any], TypeGuard[Coroutine]]=..., futwrap: Callable[[Future|_F], Future]=..., handle_aiter: Callable[[AsyncIterable], Any]=..., handle_iter: Callable[[Iterable], Any]=...) -> Generator[Coroutine[Any, Any, Any], Any, None]:
     '''A helper function to convert a possibly async iterable of futures, coroutines and even (async) iterables to a plain generator of coroutines,
     such that it may be starred and passed into the functions in this module. Originally designed to complement staggered.staggered_race.
-    Due to the possibility of cfs being an async iterable and this function being designed to operate in a sync context, it is highly inefficient; see #145963.
-    Once it is accepted, preferrably before asyncutils 1.0, this function will be made async, eliminating the performance bottleneck.'''
+    Due to the possibility of cfs being an async iterable and this function being designed to operate in a sync context, it is highly inefficient.'''
 async def enhanced_staggered_race(cfs: SupportsIteration[Awaitable|SupportsIteration], delay: float|None=..., *, loop: AbstractEventLoop|None=...) -> tuple[Any, int|None, list[Exception|None]]: '''asyncio.staggered.staggered_race, but taking a larger variety of objects as the first argument using convert_to_coro_iter. See above.'''

@@ -24,10 +24,10 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     __slots__, _inc_cnt = 'guarded', staticmethod(count(1).__next__)
     def __init__(self, action='using', rname=None): super().__init__(f"another task is already {action} resource{' #%d'%self._inc_cnt() if rname is None else f': {rname!r}'}"); self.guarded = False
-    async def __aenter__(self):
+    def __enter__(self):
         if self.guarded: raise self
         self.guarded = True
-    async def __aexit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')):
+    def __exit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')):
         if not self.guarded: raise e
         self.guarded = False
     @classmethod

@@ -19,6 +19,6 @@ def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # type: ignore
 class _LoopMixinBase:
     __slots__ = 'loop', 'exiter', 'running_tasks', 'make_fut'
-    def __init__(self): self.loop = l = new_event_loop(); self.exiter, self.make_fut, self.running_tasks = register(stop_and_closer(l)), l.create_future, set()
+    def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = register(stop_and_closer(l := new_event_loop())), l, l.create_future, set()
     def make(self, coro): (_ := self.running_tasks).add(t := self.loop.create_task(coro)); t.add_done_callback(_.discard); return t
     def make_multiple(self, C): yield from map(self.make, C)
