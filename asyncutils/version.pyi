@@ -27,6 +27,7 @@ class VersionInfo(str):
     def __ne__(self, other: Any, /) -> bool: '''Whether self is a different version than the other.'''
     def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
     def __repr__(self) -> str: '''`version == eval(repr(version))` holds.'''
+    def __round__(self, ndigits: Literal[1, 2, 3, None]) -> Self: '''Support for rounding.'''
     @overload
     def __add__(self, n: int, /) -> Self: ...
     @overload
@@ -38,7 +39,7 @@ class VersionInfo(str):
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
-    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash'], /) -> str:
+    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'n', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash', 'majmin'], /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
         o, oct: `'0o36602000'`
@@ -52,11 +53,11 @@ class VersionInfo(str):
         c, chars: `'{\\x04\\x00'`
         t, tuple: `'(123, 4, 0)'`
         h, hash: `'116380397'`
+        n, majmin: `'123.4'`
         <anything else>: `'123.4.0'`"""
     def __int__(self) -> int: '''Assumes minor and patch are less than 256.'''
     def __floor__(self) -> int: '''Returns the major version.'''
     def __ceil__(self) -> int: '''Returns the major version, adding one if there is a minor or patch version.'''
-    def __bytes__(self) -> bytes: '''Assumes major, minor, and patch are all less than 256.'''
     def __float__(self) -> float: '''Assumes minor and patch are less than 100.'''
     def __complex__(self) -> complex: '''Loses the patch version.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''

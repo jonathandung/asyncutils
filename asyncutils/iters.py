@@ -243,11 +243,12 @@ async def azip(*I, strict=False, _y=dummy_task):
             await gather(*(f() if (f := getattr(_, 'aclose', None)) else _y for _ in i)); break
 async def amap(f, /, *its, await_=False, strict=False):
     async for _ in azip(*its, strict=strict): r = f(*_); yield (await r) if await_ else r
-async def afilter(f, it, _c=_check_methods):
+async def afilter(f, it):
     if f is None: f = bool
     async for _ in iter_to_aiter(it):
-        if _c(r := f(_), '__await__'): r = await r
+        if iscoroutine(r := f(_)): r = await r
         if r: yield _
+def amapif(f, p, it, /, await_=False): return amap(f, afilter(p, it), await_)
 def amultimapif(f, p, /, *its, await_=False): return astarmap(f, afilter(p, azip(*its)), await_)
 async def arange(a, b=None, c=1, /):
     if not c: raise ValueError('step cannot be zero')
@@ -570,8 +571,7 @@ async def afirst(it, default=_NO_DEFAULT):
 async def alast(it, default=_NO_DEFAULT, _=_check_methods):
     try:
         if _(it, '__getitem__'): return it[-1]
-        if (f := getattr(it, '__reversed__', None)): return f().__next__()
-        return (await to_list(it))[-1]
+        return (await to_list(it))[-1] if (f := getattr(it, '__reversed__', None)) is None else f().__next__()
     except IndexError, TypeError, StopIteration, StopAsyncIteration:
         if default is _NO_DEFAULT: raise ValueError('alast() called on empty iterable without default value')
         return default
@@ -775,4 +775,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst
+del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst

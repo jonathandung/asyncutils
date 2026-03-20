@@ -22,10 +22,10 @@ class VersionInfo(str):
         if c == -1: raise e
         b, c = f(~c if (c := (c-1 if c > -1 else c)<<1) < 0 else c)
         return cls(*f(b), c)
+    def __round__(self, n=None, /): return __class__(self[:n])
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
-    def __bytes__(self): return bytes(self.parts)
     def __complex__(self): return complex(*self[:2])
     def __float__(self, r=.01): return sum((j*r**i for i, j in enumerate(self)), start=.0)
     def __reduce__(self): return __class__, self.parts
@@ -42,15 +42,16 @@ class VersionInfo(str):
         from . import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h').get):
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
-            case 's': return '.'.join(map(str, self[:2+bool(self[2])]))
+            case 's': return 'asyncutils v'+'.'.join(map(str, self[:None if self[2] else 2 if self[1] else 1]))
             case 'l': return f'asyncutils version {self}'
             case 'c': return bytes(self).decode('ascii')
             case 't': return str(self.parts)
             case 'd': return repr(int(self))
             case 'h': return repr(hash(self))
+            case 'n': return self.rpartition('.')[0]
             case 'hex'|'bin'|'oct': return __builtins__[s](int(self))
         return str(self)
     def __add__(self, o, /): return __class__(self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented
@@ -59,7 +60,7 @@ class VersionInfo(str):
     def next_minor(self): return __class__(self[0], self[1]+1)
     def next_major(self): return __class__(self[0]+1)
     def change_sep(self, sep): return self.replace('.', sep)
-    def __setattr__(self, name, /): raise AttributeError(f'attribute {name!r} cannot be set on {__class__.__name__} object')
+    def __setattr__(self, name, value, /): raise AttributeError(f'attribute {name!r} cannot be set to {value!r} on {__class__.__name__} object')
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
@@ -78,7 +79,7 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get
     if isinstance(o, int): o = o>>16, (o>>8)&m, o&m
     elif isinstance(o, float):
         if (o := format(o, '.4f')) in s: return
-        o = map(int, (o[:-4], o[-4:-2], o[-2:]))
+        o, _ = o.split('.', 1); o = map(int, (o, _[:2], _[2:]))
     elif f := dispatch_normalizer(o, t=type):
         try:
             if (o := f(o)) is None: return
