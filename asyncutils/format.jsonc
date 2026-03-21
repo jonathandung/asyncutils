@@ -23,6 +23,7 @@ Some keys can have various types, as detailed by the comments attached. */
     "next_config": "/path/to/your/config.json" /*
     string file path to the json to be used for the next time this module is to be configured
     This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.
+    If null, the environment variable is unset entirely after reading this config.
     Cycles can be created to switch between flags periodically.
     Ensure %AUTILSCFGPATH% is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
     in a previous config. By that logic, you should also remember to update this correctly when the config file is moved.

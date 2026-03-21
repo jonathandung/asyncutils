@@ -90,8 +90,10 @@ if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\'
     if not p.endswith(('.json', '.jsonl')): S.stderr.write('WARNING: AUTILSCFGPATH should point to a json file; proceeding anyway\n')
     with open(p.strip()) as f:
         S.audit('asyncutils/read_config', p)
-        if not isinstance(f := __import__('json').load(f), dict): raise TypeError('incorrent json format for asyncutils configuration; top-level structure should be an object')
-        if isinstance(p := f.pop('next_config', p), str): E[k] = p
+        if (t := type(f := __import__('json').load(f))) is not dict: raise TypeError(f'incorrent json format for asyncutils configuration; top-level structure should be an object, not {t.__name__!r}')
+        if isinstance(v := f.pop('next_config', p), str): E[k] = v
+        elif v is None: del E[k]
+        else: raise TypeError(f'key "next_config" in {p} should point to a string or null, not {v!r}; see format.jsonc')
         N.update(f)
-    del S, f
+    del S, f, v, t
 del p, E, k
