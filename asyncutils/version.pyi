@@ -1,4 +1,7 @@
-'''A versioning scheme for asyncutils. Inspired by torch/torch_version.py, but with quite some differences.'''
+'''A versioning scheme for `asyncutils`. Inspired by `torch/torch_version.py`, but with quite some differences.
+`asyncutils` [uses a subset of SemVer](CONTRIBUTING.md), with two additional restrictions:
+- **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
+- **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
 from ._internal.protocols import IntCompatible
@@ -42,14 +45,14 @@ class VersionInfo(str):
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
-    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'n', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash', 'majmin'], /) -> str:
+    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'n', 'maj', 'min', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash', 'majmin'], /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
         o, oct: `'0o36602000'`
         b, bin: `'0b11110110000010000000000'`
         d, dec: `'8061952'`
-        0, major: `'123'`
-        1, minor: `'4'`
+        0, major, maj: `'123'`
+        1, minor, min: `'4'`
         2, patch: `'0'`
         s, short: `'123.4'`
         l, long: `'asyncutils version 123.4.0'`
@@ -62,7 +65,7 @@ class VersionInfo(str):
     def __floor__(self) -> int: '''Returns the major version.'''
     def __ceil__(self) -> int: '''Returns the major version, adding one if there is a minor or patch version.'''
     def __float__(self) -> float: '''Assumes minor and patch are less than 100.'''
-    def __complex__(self) -> complex: '''Loses the patch version.'''
+    def to_complex(self) -> complex: '''Loses the patch version. Since this class is a `str` subclass, an implementation of `__complex__` will not be recognized.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''
     def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
     def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: '''Whether this version is compatible with the other, given the major and minor tolerances.'''

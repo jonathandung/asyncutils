@@ -35,7 +35,7 @@ from types import ModuleType
 __version__: Final[VersionInfo]
 '''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete).'''
 __hexversion__: Final[int]
-'''0x123456 -> version 12.34.56'''
+'''0x12070e -> version 18.7.14'''
 __git_version__: Final[str]
 '''The git commit hash.'''
 preloaded_submodules: Final[frozenset[str]]

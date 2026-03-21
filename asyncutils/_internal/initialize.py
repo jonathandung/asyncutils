@@ -3,7 +3,7 @@ from .log import debug as l
 from .submodules import __dict__ as d
 from . import patch as P, running_console as R
 if (a := d.pop('__all_submodules', None)) is None: raise ImportError('asyncutils: cannot reload initialization script')
-g, _a, _u, _f, _s, _i, s, t = lambda: a, frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
+_a, _u, _f, _s, _i, s, t = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
 for _k, _v in _i:
     if _k[0] != '_': break
 for _k, _v in _i: _u(dict.fromkeys(_v, _k.removesuffix(t)))

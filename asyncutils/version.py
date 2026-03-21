@@ -26,7 +26,7 @@ class VersionInfo(str):
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
-    def __complex__(self): return complex(*self[:2])
+    def to_complex(self): return complex(*self[:2])
     def __float__(self, r=.01): return sum((j*r**i for i, j in enumerate(self)), start=.0)
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
@@ -42,7 +42,7 @@ class VersionInfo(str):
         from . import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get):
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get):
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'asyncutils v'+'.'.join(map(str, self[:None if self[2] else 2 if self[1] else 1]))
@@ -54,17 +54,20 @@ class VersionInfo(str):
             case 'n': return self.rpartition('.')[0]
             case 'hex'|'bin'|'oct': return __builtins__[s](int(self))
         return str(self)
-    def __add__(self, o, /): return __class__(self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented
-    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
+    def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented
+    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
     def next_patch(self): return self.replace_parts(patch=self[2]+1)
     def next_minor(self): return __class__(self[0], self[1]+1)
-    def next_major(self): return __class__(self[0]+1)
+    def next_major(self): return __class__(self[0]+1, 0)
     def change_sep(self, sep): return self.replace('.', sep)
     def __setattr__(self, name, value, /): raise AttributeError(f'attribute {name!r} cannot be set to {value!r} on {__class__.__name__} object')
+    def __int__(self):
+        if not (p := self[2]) < 0x100 > (m := self[1]): raise OverflowError(f'cannot pack version {self} into an integer')
+        return p|m<<8|self[0]<<16
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation = property('asyncutils v'.__add__); __int__ = __index__ = lambda self: self[2]|self[1]<<8|self[0]<<16; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
+    representation, __index__ = property('asyncutils v'.__add__), __int__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
 VersionInfo.__trunc__ = VersionInfo.__floor__ = VersionInfo.major.fget
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
 @P.patch_properties

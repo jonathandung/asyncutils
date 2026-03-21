@@ -11,6 +11,7 @@ Please note we have a [code of conduct](CODE_OF_CONDUCT.md), please follow it in
 2. Update README.md with details of changes to the interface, including new environment variables,
    useful file locations and container parameters without adding new sections to README.
 3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](https://semver.org/).
+   Pull Request would represent. The versioning scheme we use is [SemVer](https://semver.org/), but
+   we currently only have major, minor and patch for simplicity.
 4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you
    do not have permission to do that, you may request the second reviewer to merge it for you.

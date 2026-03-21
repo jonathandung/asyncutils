@@ -1,4 +1,5 @@
-'''A special module used to set up the asyncutils module namespace. **Do not modify its contents.**'''
+'''A special module used to set up the asyncutils module namespace.
+**Do not modify its contents.**'''
 from typing import Self, Any, Final, final, overload
 from types import ModuleType
 from .protocols import All, Submodule
@@ -15,6 +16,5 @@ class module:
     @property
     def __all__(self) -> All: ...
     def __dir__(self) -> All: ...
-def g() -> All: ...
 a: Final[All]
 s: Final[dict[Submodule, module|ModuleType]]
