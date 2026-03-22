@@ -10,7 +10,23 @@ Also has a well-equipped command line interface taking many flags and options.
 
 ## Setup
 
-Essentially no setup required! Just install py-asyncutils from pip. We are working hard towards packaging for anaconda.
+Essentially no setup required! Just install py-asyncutils from pip:
+
+```bash
+python -m pip install py-asyncutils==0.8.15 # This version
+```
+
+or
+
+```bash
+python -m pip install py-asyncutils[dev] # If installing for development (currently installs ruff, pytest and some plugins thereof)
+```
+
+or with conda:
+
+```bash
+conda install py-asyncutils=0.8.15
+```
 
 Refer to [SUPPORT.md](SUPPORT.md) for steps to checking the installation.
 
