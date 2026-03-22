@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.14] - 2026-03-21: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.15] - 2026-03-22: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Added
 
