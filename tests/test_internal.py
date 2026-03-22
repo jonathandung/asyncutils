@@ -1,5 +1,5 @@
 from asyncutils import _internal as mod
-from pytest import raises, fail, MonkeyPatch
+from pytest import raises, fail
 def test_helpers():
     helpers = mod.helpers
     for _ in helpers._filter_out(None, True, False): assert isinstance(_, bool)
@@ -24,17 +24,13 @@ def test_submods_lazy_loading():
     assert pickle.loads(pickle.dumps(m)) is m
     assert (t := type(M := m.load())) is type(module('config')) and t.__module__ == 'builtins' and t.__name__ == t.__qualname__ == 'module'
     assert m.run is M.run
-def test_others():
+def test_others(cfgjson, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
     assert mod.protocols.All is mod.protocols.foo is mod.running_console._get_() is mod.running_console._unset_() is None # type: ignore
     assert mod.submodules.cli_all == ('run',)
-    import tempfile, importlib, os
-    with MonkeyPatch.context() as m:
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f: f.write(b'{"load_all": true, "V": 2}')
-        m.setenv('AUTILSCFGPATH', n := f.name)
-        N = importlib.reload(mod.unparsed).N
-        assert N.load_all and N.V == 2
-        os.unlink(n)
+    monkeypatch.setenv('AUTILSCFGPATH', cfgjson)
+    N = __import__('importlib').reload(mod.unparsed).N
+    assert N.load_all and N.V == 2
 def test_patch():
     patch = mod.patch
     patch.patch_function_signatures((f := lambda _: None, 'foo'))

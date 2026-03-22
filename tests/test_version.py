@@ -1,7 +1,7 @@
 from pytest import raises, fixture
 from asyncutils.exceptions import VersionValueError
 from asyncutils.version import *
-@fixture(scope='session')
+@fixture(scope='module')
 def ver(): from asyncutils.config import _randinst as _; return VersionInfo(*map(_.randrange, (10, 20)), _.randint(256, 300))
 def test_hash(ver):
     assert (h := hash(ver)) != -1 and VersionInfo.from_hash(h) == ver

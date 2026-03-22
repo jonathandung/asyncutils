@@ -7,7 +7,7 @@ def json_to_argv(p, /, *, json='json', json5='json5', jsonc='commentjson', hjson
     elif f('.hjson'): m = __import__(hjson)
     elif f(('.json', '.jsonl')): m = _ if json == 'json' else __import__(json)
     else: raise ValueError('path should be of json format')
-    with open(p) as f: f, l = (r := []).append, (p := m.load(p).pop)('log_to', s := 'STDERR')
+    with open(p) as f: f, l = (r := []).append, (p := m.load(f).pop)('log_to', s := 'STDERR')
     if p('no_log', False) or l == 'NULL': f('-n')
     elif l != s:
         f('-l')
