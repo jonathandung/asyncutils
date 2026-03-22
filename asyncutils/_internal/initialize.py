@@ -9,11 +9,13 @@ for _k, _v in _i:
 for _k, _v in _i: _u(dict.fromkeys(_v, _k.removesuffix(t)))
 class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
     __slots__ = '_name', '_fs'
-    def __new__(cls, name, /, _d=_d, _a=_a, _s=s):
+    def __new__(cls, name, /, _d=_d, _a=_a, _s=s, _=_f):
         if name in _a: return _s[name]
         if name == '__git_version__':
-            try: return __import__('subprocess').check_output(('git', 'rev-parse', 'HEAD'), text=True).strip()
-            except: raise RuntimeError('failed to get git commit hash') from None
+            if (r := getattr(cls, '_git_ver', None)) is None:
+                try: cls._git_ver = r = (__import__('importlib.resources', fromlist=_).files('asyncutils')/'GIT_VERSION').read_text()
+                except: raise RuntimeError('failed to get git commit hash') from None
+            return r
         try: return getattr(_s[_d[name]], name)
         except AttributeError, KeyError: raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
