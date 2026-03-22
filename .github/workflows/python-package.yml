@@ -27,7 +27,7 @@ jobs:
         ruff check . --output-format=github
     - name: Run tests
       run: |
-        pytest tests/ -v --cov=asyncutils --cov-report=xml
+        pytest tests/ -v --cov asyncutils --cov-report xml --local-badge-output-dir badges/ --local-badge-generate=cov status
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
