@@ -13,7 +13,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
         if name in _a: return _s[name]
         if name == '__git_version__':
             if (r := getattr(cls, '_git_ver', None)) is None:
-                try: cls._git_ver = r = (__import__('importlib.resources', fromlist=_).files('asyncutils')/'GIT_VERSION').read_text()
+                try: cls._git_ver = r = (__import__('importlib.resources', fromlist=_).files('asyncutils')/'GIT_VERSION').read_text().strip()
                 except: raise RuntimeError('failed to get git commit hash') from None
             return r
         try: return getattr(_s[_d[name]], name)
