@@ -25,7 +25,7 @@ autils = 'asyncutils.cli:run'
 dev = ["black", "flake8"]
 
 [tool.setuptools]
-packges = ["asyncutils", "asyncutils._internal"]
+packages = ["asyncutils", "asyncutils._internal"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
