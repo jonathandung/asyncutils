@@ -30,7 +30,7 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/project/YOURPROJECT/${{ github.event.release.name }}
+      url: https://pypi.org/project/py-asyncutils/${{ github.event.release.name }}
     steps:
       - name: Retrieve release distributions
         uses: actions/download-artifact@v8
