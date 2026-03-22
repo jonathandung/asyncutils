@@ -22,7 +22,7 @@ asyncutils = 'asyncutils.cli:run'
 autils = 'asyncutils.cli:run'
 
 [project.optional-dependencies]
-dev = ["black", "flake8"]
+dev = ["ruff>=0.15.0", "pytest>=9.0.0", "pytest-xdist>=3.8.0", "pytest-cov>=7.0.0", "pytest-mock>=3.15.0", "pytest-local-badge>=1.0.0"]
 
 [tool.setuptools]
 packages = ["asyncutils", "asyncutils._internal"]
@@ -32,14 +32,14 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = ["-v", "--cov=asyncutils", "--cov-report=term-missing", "--cov-fail-under=40"]
-log_level = "DEBUG"
-log_cli = true
+addopts = ["-v", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "40"]
 minversion = "9.0"
-required_plugins = ["pytest-xdist>=3.8.0", "pytest-cov>=7.0.0", "pytest-mock>=3.15.0"]
+required_plugins = ["pytest-xdist>=3.8.0", "pytest-cov>=7.0.0", "pytest-mock>=3.15.0", "pytest-local-badge>=1.0.0"]
+log_level = "DEBUG"
 log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_file = ".logs/pytest-logs.txt"
+log_file_mode = "a"
 
 [tool.coverage.run]
 source = ["asyncutils"]

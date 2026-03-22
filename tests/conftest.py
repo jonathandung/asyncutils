@@ -10,8 +10,7 @@ def cfgjson(cfgjsonf, contents):
     try:
         yield n
         import json as J
-        with open(n) as f:
-            assert J.load(f).items() >= J.loads(contents).items()
+        with open(n) as f: assert J.load(f).items() >= J.loads(contents).items()
     finally: __import__('os').unlink(n)
 @dec
 def contents(): return '{"load_all": true, "V": 2}'

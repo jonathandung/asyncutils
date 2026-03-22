@@ -9,4 +9,4 @@ if not (g := globals()).get(k := '__package__'):
     del a, b, s
 del g, k, S
 from .cli import run
-run()
+raise SystemExit(run())
