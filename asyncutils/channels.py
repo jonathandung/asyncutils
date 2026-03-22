@@ -111,9 +111,8 @@ class Observable(LoopContextMixin):
             b.append((a, k))
             if len(b) >= c: await gather(*(f(*A, **K) for A, K in copy_and_clear(b)), return_exceptions=ret_exc)
         self.subscribe_nowait(buffered); return _
-    def at_change(self, key=None, ret_exc=True):
+    def at_change(self, key=lambda *a, **k: (a, k), ret_exc=True):
         f, l = partial((_ := type(self)()).notify, _ret_exc_=ret_exc), object()
-        if key is None: key = lambda *a, **k: (a, k)
         async def distinct(*a, **k):
             nonlocal l
             if (c := key(*a, **k)) != l: l = c; await f(*a, **k)
@@ -218,7 +217,8 @@ class EventBus(LoopContextMixin):
     def _publishers(self): return set()
     def _begin_publish(self, E, D, S, T, C, /):
         self.raise_for_shutdown(); f = []
-        if C is None: C = lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
+        if C is None:
+            def C(e, /, a=f.extend, b=f.append): a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
         async def g(D=D):
             for m, F in self._middlewares.copy().items():
                 if F is not None and F.done(): continue
@@ -228,9 +228,10 @@ class EventBus(LoopContextMixin):
                 except (ExceptionGroup, Exception) as e: C(e)
                 except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False)
                 except BaseException as e: raise BusPublishingError(self, m) from e
+            U = self._subscribers
             async with self._lock:
                 if self._tracking: self._published[E] += 1
-                s, w = map(lambda _: self._subscribers[_].copy(), (E, None))
+                s, w = (U[_].copy() for _ in (E, None))
             await gather((f := partial(self._publish_helper, D, S))(s), f(w, E))
         (P := self._publishers).add(p := self.make(wait_for(g(), T))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):

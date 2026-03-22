@@ -113,8 +113,8 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
                     if _ is sentinel or _ == sentinel: break
                     yield _
     elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
-        audit('asyncutils/create_executor', 'base.iter_to_aiter'); r = lambda f, _=(loop or _get_loop_and_set()).run_in_executor: lambda *a: _(f, *a)
-        g = _c(it, 'send', 'throw', 'close')
+        audit('asyncutils/create_executor', 'base.iter_to_aiter'); g = _c(it, 'send', 'throw', 'close')
+        def r(f, _=(loop or _get_loop_and_set()).run_in_executor): return lambda *a: _(f, *a)
         if f:
             if g:
                 async def iterator(_=r(it.send)):

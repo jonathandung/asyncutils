@@ -32,7 +32,7 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', 'Failed to create log file; falling back to stderr\n', __import__('os').name == 'posix'
+max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix'
 if isinstance(e, str):
     try: e = int(e, 0)
     except ValueError: ...
@@ -45,10 +45,11 @@ match logging_to:
     case 'MAKE':
         T = 'asyncutils_log%d.log'
         for h in range(1, 0x1000):
-            try: logging_to = (s := open(T%h, m)).name
-            except PermissionError as e: s.write(f'ERROR: insufficient permissions: {e}\n'); break
+            try: logging_to = (s := open(T%h, m)).name; break
+            except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
+            except AttributeError: raise SystemError('python opened a file with no `name` attribute') from None
             except Exception: ...
-        else: s.write(M)
+        else: M = True
         del T, h
     case 'MEMORY':
         s = (j := __import__('_io').StringIO)()
@@ -61,11 +62,13 @@ match logging_to:
     case 1 if b: s, logging_to = S.stdout, 'STDOUT'
     case 2 if b: logging_to = 'STDERR'
     case str()|int()|bytes():
-        try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to)
-        except PermissionError as e: s.write(f'ERROR: insufficient permissions: {e}\n{M}')
-        except FileExistsError: s.write('ERROR: log file already exists\n'+M)
-        except OSError as e: s.write(f'ERROR: {e}\n{M}')
-        except Exception as e: s.write(f'ERROR: unexpected error opening log file: {e}\n{M}')
+        M = True
+        try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False
+        except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
+        except FileExistsError: s.write('ERROR: log file already exists\n')
+        except OSError as b: s.write(f'ERROR: {b}\n')
+        except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
+if M: s.write('Failed to create log file; falling back to stderr\n')
 log.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 (set_logger_level := lambda level, h=_: log.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
@@ -133,4 +136,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, f, m, r, s, register, P, _sentinel
+del _, e, L, M, N, S, f, m, r, s, b, register, P, _sentinel # noqa: F821

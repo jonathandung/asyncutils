@@ -322,7 +322,7 @@ async def apairwise(it):
     except StopAsyncIteration: return
     async for b in I: yield a, b; a = b
 async def atriplewise(it):
-    a, b, c = tee(iter_to_aiter(it), 3); await gather(*map(lambda g: anext(g, None), (b, c, c)))
+    a, b, c = tee(iter_to_aiter(it), 3); await gather(*(anext(g, None) for g in (b, c, c)))
     async for _ in azip(a, b, c): yield _
 async def aproduct(*its, repeat=1):
     if repeat < 0: raise ValueError('repeat cannot be negative')
@@ -466,9 +466,8 @@ async def aiterate(f, start):
 async def with_aiter(actxmgr):
     async with actxmgr as I:
         async for i in iter_to_aiter(I): yield i
-async def asorted(it, *, key=None, reverse=False):
+async def asorted(it, *, key=lambda _, /: _, reverse=False):
     from heapq import heappush as f, heappop as g
-    if key is None: key = lambda _, /: _
     m, a = [], (r := []).append
     async for i, j in aenumerate(it): f(m, (key(j), i, j))
     while m: a(g(m))
@@ -525,7 +524,7 @@ async def ainterleaveevenly(its, lengths=None):
     try:
         if (X := len(I)) != len(L := await to_tuple(lengths or map(len, I))): raise ValueError('mismatch in length of its and lengths')
     except TypeError: raise ValueError('ainterleaveevenly: cannot determine lengths of (async) iterables') from None
-    A, *a = map(f := L.__getitem__, _ := sorted(range(X), key=f, reverse=True)); B, *b = map(lambda i: iter_to_aiter(I[i]), _); E, t = [A//X]*len(a), sum(L)
+    A, *a = map(f := L.__getitem__, _ := sorted(range(X), key=f, reverse=True)); B, *b = (iter_to_aiter(I[i]) for i in _); E, t = [A//X]*len(a), sum(L)
     while t:
         yield await anext(B); t -= 1; E = list(map(O.sub, E, a))
         for i, e in enumerate(E):

@@ -1,5 +1,4 @@
 from .mixins import LoopContextMixin
-from ._internal.log import error
 from .base import yield_to_event_loop, event_loop
 from .util import safe_cancel, to_async
 from .exceptions import CRITICAL, Critical
@@ -13,16 +12,18 @@ from asyncio.exceptions import CancelledError
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'
-    def __init__(self, ttl=None, refresh=None, processor=None, default_loader=None, _d=__import__('_collections').defaultdict): super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _d(lambda: default_loader), None, Event(); self.configure(constants.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL if ttl is None else ttl, constants.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH if refresh is None else refresh, processor)
+    def __init__(self, ttl=None, refresh=None, processor=None, default_loader=None, _d=__import__('_collections').defaultdict): super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _d(lambda _=default_loader, /: _), None, Event(); self.configure(constants.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL if ttl is None else ttl, constants.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH if refresh is None else refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
     def should_refresh(self, key): return self.time_past(key) > self._ttl-self._refresh if key in self else False
     def time_past(self, key): return monotonic()-self._cache[key].timestamp
-    def configure(self, ttl, refresh, processor=None, _d=lambda x, *_: error(x)): self._ttl, self._refresh, self._processor = *map(lambda f: f(ttl, refresh), (max, min)), processor or getattr(self, '_processor', _d)
+    def configure(self, ttl, refresh, processor=None, _=lambda *_: None): self._ttl, self._refresh, self._processor = max(ttl, refresh), min(ttl, refresh), processor or getattr(self, '_processor', _)
     def get_loader(self, key):
         if (k := self._loaders[key]) is None: raise LookupError(f'no loader registered for key {key!r}')
         return k
+    async def _process_error(self, e, b, /):
+        if iscoroutine(r := await self.loop.run_in_executor(self._processor, e, b)): await r
     async def get(self, key, loader=None):
         async with self._lock:
             if loader: self.register_loader(key, loader)
@@ -33,29 +34,29 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         if self._task is None: self._event.clear(); self._task = self.make(self.refresh_loop())
     async def __cleanup__(self):
         if self._task: self._event.set(); await safe_cancel(self._task); self._task = None
-    async def load_item(self, key, _=__import__('collections').namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.caches')): self._cache[key] = _(await self.get_loader(key)(), monotonic(), False)
+    async def load_item(self, key, _=__import__('collections').namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.caches')):
+        _ = _(await self.get_loader(key)(key), monotonic(), False)
+        async with self._lock: self._cache[key] = _
     async def refresh_item(self, key):
-        e = None
         async with self._lock:
             if key not in self._loaders or (t := self._cache.get(key)) is None or t.loading: return
             t.loading = True
-            try: await self.load_item(key)
-            except CRITICAL: raise Critical
-            except BaseException as e: t.loading = False
-        if e: self._processor(e, False)
+        try: await self.load_item(key)
+        except CRITICAL: raise Critical
+        except BaseException as e: t.loading = False; await self._process_error(e, False)
     async def refresh_loop(self):
         r, t = self._refresh, []
         while True:
             try:
-                await sleep(r); t.clear()
+                await sleep(r)
                 async with self._lock:
                     n = monotonic()
                     for k in self._cache:
                         if not self._cache[k].loading and n-self._cache[k].timestamps > self._ttl-self._refresh: t.append(self.make(self.refresh_item(k)))
-                if t: await gather(*t, return_exceptions=True)
+                if t: await gather(*t, return_exceptions=True); t.clear()
             except CRITICAL: raise Critical
             except CancelledError: raise
-            except BaseException as e: self._processor(e, True)
+            except BaseException as e: await self._process_error(e, True)
     async def invalidate(self, key):
         async with self._lock: return self._cache.pop(key, None)
     async def clear(self):
