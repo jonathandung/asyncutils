@@ -14,7 +14,6 @@ Top level:
 
 - \_\_version__
 - \_\_hexversion__
-- \_\_git_version__
 - submodules_map
 - preloaded_submodules
 

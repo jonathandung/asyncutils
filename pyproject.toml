@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77.0.3", "wheel"]
+requires = ["setuptools>=82", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,6 +14,7 @@ license = "MIT"
 keywords = ["asynchronous", "convenient", "fast", "light", "feature-rich"]
 classifiers = [
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3 :: ONLY",
   "Programming Language :: Python :: Implementation :: CPython",
   "Operating System :: OS Independent",
   "Development Status :: 3 - Alpha",
