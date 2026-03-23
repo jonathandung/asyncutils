@@ -25,7 +25,7 @@ python -m pip install py-asyncutils[dev] # If installing for development (curren
 or with conda:
 
 ```bash
-conda install py-asyncutils=0.8.16
+conda install -c conda-forge py-asyncutils=0.8.16
 ```
 
 Refer to [SUPPORT.md](SUPPORT.md) for steps to checking the installation.
