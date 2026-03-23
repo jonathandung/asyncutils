@@ -22,6 +22,6 @@ async def test_signal_raise(monkeypatch):
     monkeypatch.setattr(log, 'warning', raise_)
     with raises(Log, match='invalid signal .*: .*'): await f(None)
     if not W:
-        with raises(Log, match='insufficient permissions for signal .*: .*'): await f(Signals.SIGSTOP, timeout=0.1)
+        with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await f(Signals.SIGSTOP, timeout=0.1)
     with raises(Log, match='wait_for_signal timed out'): await f(Signals.SIGILL, timeout=0.1)
     with raises(TimeoutError): await f(Signals.SIGABRT, timeout=0.1, raise_on_timeout=True)

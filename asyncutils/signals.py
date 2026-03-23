@@ -20,18 +20,18 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         for s in S:
             try: o = _s(s := _c(s), hdlr)
             except ValueError as e: logger.warning(f'invalid signal {s}: {e}')
-            except OSError as e: logger.warning(f'OS-level error for signal {s}: {e}')
-            else: a(lambda _, s=s, o=o: _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s}')
+            except OSError as e: logger.warning(f'OS-level error for signal {s.name!r}: {e}')
+            else: a(lambda _, s=s, o=o: _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s.name!r}')
     else:
         for s in S:
             try: o = _g(s := _c(s))
             except ValueError as e: logger.warning(f'invalid signal {s}: {e}'); continue
             try: loop.add_signal_handler(s, hdlr, s)
             except NotImplementedError: break
-            except PermissionError as e: logger.warning(f'insufficient permissions for signal {s}: {e}')
-            except OSError as e: logger.warning(f'OS-level error for signal {s}: {e}')
+            except PermissionError as e: logger.warning(f'insufficient permissions for signal {s.name!r}: {e}')
+            except OSError as e: logger.warning(f'OS-level error for signal {s.name!r}: {e}')
             except RuntimeError as e: logger.warning(f'error registering signal handler: {e}')
-            else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s}')
+            else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s.name!r}')
     try:
         if x: logger.info(f'signal handler registered successfully for total of {x} signals'); del x
         else: raise RuntimeError('failed to register signal handler')
