@@ -1,6 +1,6 @@
 from _collections_abc import Sequence, Callable
 from ._internal.protocols import Openable, DumpType, CanWriteAndFlush
-__all__ = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format'
+__all__ = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format', 'get_cmd_help', 'print_cmd_help'
 def json_to_argv(path: Openable, /, *, json: str=..., json5: str=..., jsonc: str=..., hjson: str=...) -> list[str]:
     '''Return a list of strings representing the command-line arguments for this module from the path to the corresponding
     .json file, with as little items as possible.

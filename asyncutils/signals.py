@@ -9,7 +9,8 @@ from .util import safe_cancel
 from ._internal import log
 from ._internal.submodules import signals_all as __all__
 async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _d=(Signals.SIGINT, Signals.SIGTERM), _s=signal, _g=getsignal):
-    sys.audit('asyncutils.signals.wait_for_signal', S := tuple(map(_c, S)) or _d); c, x = None, 0
+    sys.audit('asyncutils.signals.wait_for_signal', S); c, x = None, 0
+    if S is None: S = _d
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a = (F := loop.create_future()).add_done_callback
     def hdlr(s, f=None, F=F):
@@ -17,17 +18,18 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
     if sys.platform == 'win32':
         logger.info('wait_for_signal has limited functionality on windows')
         for s in S:
-            try: o = _s(s, hdlr)
+            try: o = _s(s := _c(s), hdlr)
             except ValueError as e: logger.warning(f'invalid signal {s}: {e}')
-            except PermissionError as e: logger.warning(f'insufficient permissions for signal {s}: {e}')
             except OSError as e: logger.warning(f'OS-level error for signal {s}: {e}')
             else: a(lambda _, s=s, o=o: _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s}')
     else:
         for s in S:
-            try: o = _g(s)
+            try: o = _g(s := _c(s))
             except ValueError as e: logger.warning(f'invalid signal {s}: {e}'); continue
             try: loop.add_signal_handler(s, hdlr, s)
             except NotImplementedError: break
+            except PermissionError as e: logger.warning(f'insufficient permissions for signal {s}: {e}')
+            except OSError as e: logger.warning(f'OS-level error for signal {s}: {e}')
             except RuntimeError as e: logger.warning(f'error registering signal handler: {e}')
             else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug(f'wait_for_signal: registered handler for signal {s}')
     try:
@@ -36,7 +38,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         try: s = await wait_for(F, timeout)
         except TimeoutError:
             if raise_on_timeout: raise
-            return logger.warning(f'wait_for_signal timed out; signals: {S}')
+            return logger.warning('wait_for_signal timed out')
         logger.info(f'signal received: {s}')
         try: s = p(s)
         except possible_errors as e:

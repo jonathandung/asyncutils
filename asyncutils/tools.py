@@ -1,7 +1,7 @@
-import shlex as s, json as _
+import shlex as s, json as j
 from ._internal.parsed import p
 from ._internal.submodules import tools_all as __all__
-def json_to_argv(p, /, *, json='json', json5='json5', jsonc='commentjson', hjson='hjson', _=_):
+def json_to_argv(p, /, *, json='json', json5='json5', jsonc='commentjson', hjson='hjson', _=j):
     if (f := p.endswith)('.json5'): m = __import__(json5)
     elif f('.jsonc'): m = __import__(jsonc)
     elif f('.hjson'): m = __import__(hjson)
@@ -20,7 +20,7 @@ def json_to_argv(p, /, *, json='json', json5='json5', jsonc='commentjson', hjson
     if p('load_all', False): f('-p')
     f(f'-{'Q'*-l if (l := p('V', 0)-p('Q', 0)) < 0 else 'V'*l}'); return r
 def json_to_argstr(p, /, *, join=s.join, **k): return join(json_to_argv(p, **k))
-def argv_to_json(a, p, /, *, dump=_.dump, _=p.parse_args, A=('.json', '.jsonc', '.json5', '.jsonl')):
+def argv_to_json(a, p, /, *, dump=j.dump, _=p.parse_args, A=('.json', '.jsonc', '.json5', '.jsonl')):
     if not p.endswith(A): raise ValueError('path should end with .json, .jsonc, .json5 or .jsonl')
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
@@ -28,4 +28,4 @@ def get_cfg_json_format(): return (__import__('importlib.resources', fromlist=('
 def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
 get_cmd_help = p.format_help
 def print_cmd_help(file=None): print(get_cmd_help(), file=file, flush=True)
-del p, s, _
+del p, s, j

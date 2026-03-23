@@ -13,9 +13,10 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
 def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T], None, None]: '''Yield tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[R, **P](f: Callable[P, Awaitable[R]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, R]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 class to_sync_from_loop:
-    '''Not a class at runtime.'''
+    '''A version of `to_sync` that is a decorator factory, converting an async function to synchronous by running it in the specified `loop`.
+    Not a class at runtime.'''
     def __init__(self, loop: AbstractEventLoop): ...
-    def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: '''The partial of to_sync under loop=loop.'''
+    def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: '''The partial of `to_sync` under `loop=loop`.'''
 def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use `asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
 @overload
 def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: '''Simple function to return a (bounded) semaphore of value `workers`.'''

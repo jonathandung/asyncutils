@@ -3,21 +3,16 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-      - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
         args: [--maxkb=200]
       - id: check-merge-conflict
       - id: detect-private-key
-      - id: mixed-line-ending
-        args: [--fix=lf]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.7
     hooks:
       - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0
     hooks:

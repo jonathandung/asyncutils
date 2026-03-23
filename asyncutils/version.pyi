@@ -4,7 +4,7 @@
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
-from ._internal.protocols import IntCompatible
+from ._internal.protocols import IntCompatible, Openable
 __all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
 @final
 class VersionInfo(str):
@@ -72,6 +72,9 @@ class VersionInfo(str):
     def next_patch(self) -> Self: '''The patch version following this version.'''
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
+    def shelve(self, path: Openable, little: bool=...) -> None: ...
+    @classmethod
+    def unshelve(cls, path: Openable, little: bool=...) -> Self: ...
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
