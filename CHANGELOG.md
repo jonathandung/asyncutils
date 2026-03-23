@@ -121,7 +121,7 @@ Submodules:
   - RECIP_E
 
   Configuration variables:
-  - Refer to the IDE autocomplete
+  Refer to the IDE autocomplete
 
 - events
 
@@ -268,6 +268,8 @@ Submodules:
   - argstr_to_json
   - get_cfg_json_format
   - print_cfg_json_format
+  - get_cmd_help
+  - print_cmd_help
 
 - util
 
@@ -298,6 +300,10 @@ Submodules:
   - unregister_normalizer
   - dispatch_normalizer
   - autogenerate_normalizers
+
+## [0.8.0] - 2026-03-06
+
+Created [GitHub repository](https://github.com/jonathandung/asyncutils.git).
 
 ## [0.0.0] - 2025-08-xx
 

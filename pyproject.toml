@@ -11,6 +11,7 @@ description = "A library containing versatile and adaptable tools to well comple
 readme = "README.md"
 requires-python = ">=3.14"
 license = "MIT"
+license-files = ["LICENSE", "AUTHORS.md"]
 keywords = ["asynchronous", "convenient", "fast", "light", "feature-rich"]
 classifiers = [
   "Programming Language :: Python :: 3.14",
@@ -30,6 +31,8 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"
 Repository = "https://github.com/jonathandung/asyncutils.git"
+Issues = "https://github.com/jonathandung/asyncutils/issues"
+Changelog = "https://github.com/jonathandung/asyncutils/blob/main/CHANGELOG.md"
 
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'
