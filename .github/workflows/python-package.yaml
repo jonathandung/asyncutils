@@ -42,4 +42,4 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Test conda install
       run:
-        conda install conda-forge::py-asyncutils --dry-run
+        conda install conda-forge::py-asyncutils python=3.14 --dry-run
