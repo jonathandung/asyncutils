@@ -13,20 +13,7 @@ requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE", "AUTHORS.md"]
 keywords = ["asynchronous", "convenient", "fast", "light", "feature-rich"]
-classifiers = [
-  "Programming Language :: Python :: 3.14",
-  "Programming Language :: Python :: 3 :: ONLY",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Operating System :: OS Independent",
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Software Development :: Version Control :: Git",
-  "Topic :: Utilities",
-  "Framework :: AsyncIO",
-  "Natural Language :: English",
-  "Typing :: Typed"
-]
+classifiers = ["Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: ONLY", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: Implementation :: CPython", "Operating System :: OS Independent", "Development Status :: 3 - Alpha", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Natural Language :: English", "Typing :: Typed"]
 
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"

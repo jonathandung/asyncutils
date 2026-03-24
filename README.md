@@ -19,7 +19,8 @@ python -m pip install py-asyncutils==0.8.16 # This version
 or
 
 ```bash
-python -m pip install py-asyncutils[dev] # If installing for development (currently installs ruff, pytest and some plugins thereof)
+python -m pip install py-asyncutils[dev] # If installing for development
+# currently installs ruff, pytest and some plugins thereof
 ```
 
 or with conda:
@@ -28,7 +29,7 @@ or with conda:
 conda install -c conda-forge py-asyncutils=0.8.16
 ```
 
-Refer to [SUPPORT.md](SUPPORT.md) for steps to checking the installation.
+Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/README.md) for steps to checking the installation.
 
 ## Usage
 
@@ -40,28 +41,39 @@ A typical program that uses this module would look like this:
 import asyncutils as autils
 with autils.event_loop() as loop: # this wraps the asyncio event loop implementation with proper cleanup
     rdv = autils.Rendezvous[int](loop=loop) # some types support subscripting
-    print(*(loop.run_until_complete(asyncio.gather(*map(rdv.put, range(10, 20)), rdv.exchange(20),\
-    *map(rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[20:]) # simulate some work with values passed between tasks
-    # Here Rendezvous is a class implementing get and put methods that complete only after there is a corresponding putter or getter
+    print(*(loop.run_until_complete(asyncio.gather(*map(rdv.put, range(10, 20)), rdv.exchange(20),
+    *map(rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[20:])
+    # simulate some work with values passed between tasks
+    # Here `Rendezvous` is a class implementing get and put methods that complete only after there is
+    # a corresponding putter or getter respectively
 ```
 
-which prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 175 ms including the import time of both modules! For reference, asyncio loads in around 160-165 ms. That is, the only reason this module starts slow is due to asyncio loading all its submodules on import, which is frankly suboptimal. Command used:
+which prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 175 ms including the import time of both modules! For reference, asyncio loads in around 160-165 ms.
+That is, the only reason this module starts slow is due to asyncio loading all its submodules on import, which is frankly suboptimal.
+However, we load asyncio early such that attribute accesses later on would not randomly take more than 150 ms.
+
+Command used:
 
 ```bash
 python -m timeit -n 1 -r 1 "import demo"
 ```
 
-The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`), though considering how many submodules we provide (30 and ever-increasing!), it is acceptable. In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the `--load-all` switch is passed.
+The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`),
+though considering how many submodules we provide (30 and ever-increasing!), it is acceptable.
+In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the `--load-all` switch is passed.
 
 ## Version
 
 This is asyncutils v0.8.16.
 
-This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible. Of course, this isn't a significant issue, seeing as though nobody currently uses it.
+This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible.
+Of course, this isn't a significant issue, seeing as though nobody currently uses it.
 
 ## Environment variables and configuration
 
-Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well, including aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation using the `AUTILSCFGPATH` environment variable (all uppercase due to Windows limitations), which should point to an absolute path to a configuration json/jsonl.
+Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well.
+This includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation using the `AUTILSCFGPATH` environment variable (all uppercase due to Windows limitations),
+which should point to an absolute path to a configuration .json[l].
 
 See [format.jsonc](asyncutils/format.jsonc) for details.
 
@@ -75,11 +87,11 @@ Other resources if you're new to the world of async: [asyncio HOWTO](https://doc
 
 If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
 
-For more, check out the [Contributing Guide](CONTRIBUTING.md).
+For more, check out the [Contributing Guide](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE) © 2026 Jonathan Dung
+[MIT](https://github.com/jonathandung/asyncutils/blob/main/LICENSE) © 2026 Jonathan Dung
 
 Have fun!
 

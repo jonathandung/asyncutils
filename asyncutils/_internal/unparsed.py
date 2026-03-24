@@ -2,7 +2,7 @@ N, __doc__ = type('Namespace', (dict,), {'__getattr__': dict.__getitem__, '__set
 
 A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.
-Install using pip: `python -m pip install py-asyncutils` or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails
+Install with: `python -m pip install py-asyncutils`, or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails
 
 options:
     -l, --log-to [FILE]     This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.

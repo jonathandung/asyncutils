@@ -9,7 +9,8 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     else: r.extend(0 for _ in range(2-i))
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
-def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; return c
+def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
+N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
 @a
 class VersionInfo(str):
     __slots__ = 'parts'
@@ -72,8 +73,6 @@ class VersionInfo(str):
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
     representation, __index__ = property('asyncutils v'.__add__), __int__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
-VersionInfo.__trunc__ = VersionInfo.__floor__ = VersionInfo.major.fget
-N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
 @a
 class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
