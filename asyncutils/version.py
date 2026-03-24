@@ -9,7 +9,8 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     else: r.extend(0 for _ in range(2-i))
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
-@P.patch_properties
+def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; return c
+@a
 class VersionInfo(str):
     __slots__ = 'parts'
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
@@ -73,7 +74,7 @@ class VersionInfo(str):
     representation, __index__ = property('asyncutils v'.__add__), __int__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
 VersionInfo.__trunc__ = VersionInfo.__floor__ = VersionInfo.major.fget
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
-@P.patch_properties
+@a
 class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
@@ -104,4 +105,4 @@ def dispatch_normalizer(o, /, f=N.get, t=t): return f(t(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))
-del _, N, t, P, p, E
+del _, N, t, P, p, E, a
