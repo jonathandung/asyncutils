@@ -32,24 +32,24 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         except ValueError: raise GetPasswordRetrievalError(get_from) from None
         if not isinstance(password_get, gettyp): raise WrongPasswordType(None, type(password_get), None, gettyp)
         if isinstance(password_get, str): password_get, strict = intern(password_get), False
-        def u(pwd):
-            if not protect_get: return
-            if not pwd: raise TypeError('no password provided when trying to get from password-protected queue')
-            pwd, = pwd
-            if not isinstance(pwd, gettyp): raise WrongPasswordType(pwd, type(pwd), q, gettyp) # type: ignore
-            if pwd is not password_get and (strict or pwd != password_get): raise WrongPassword(q, pwd) # type: ignore
     if protect_put:
         try:
             if password_put is _NO_DEFAULT and (password_put := (F := _getframe(1)).f_locals.get(put_from := put_from.strip(), o := object())) is o is (password_put := F.f_globals.get(put_from, o)): raise PutPasswordRetrievalError(put_from)
         except ValueError: raise GetPasswordRetrievalError(get_from) from None
         if not isinstance(password_put, puttyp): raise WrongPasswordType(None, type(password_put), None, puttyp)
         if isinstance(password_put, str): password_put, strict = intern(password_put), False
-        def v(pwd):
-            if not protect_put: return
-            if not pwd: raise TypeError('no password provided when trying to put to password-protected queue')
-            pwd, = pwd
-            if not isinstance(pwd, puttyp): raise WrongPasswordType(pwd, type(pwd), q, puttyp) # type: ignore
-            if pwd is not password_put and (strict or pwd != password_put): raise WrongPassword(q, pwd) # type: ignore
+    def u(pwd):
+        if not protect_get: return
+        if not pwd: raise TypeError('no password provided when trying to get from password-protected queue')
+        pwd, = pwd
+        if not isinstance(pwd, gettyp): raise WrongPasswordType(pwd, type(pwd), q, gettyp) # type: ignore
+        if pwd is not password_get and (strict or pwd != password_get): raise WrongPassword(q, pwd) # type: ignore
+    def v(pwd):
+        if not protect_put: return
+        if not pwd: raise TypeError('no password provided when trying to put to password-protected queue')
+        pwd, = pwd
+        if not isinstance(pwd, puttyp): raise WrongPasswordType(pwd, type(pwd), q, puttyp) # type: ignore
+        if pwd is not password_put and (strict or pwd != password_put): raise WrongPassword(q, pwd) # type: ignore
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := _get_loop_and_set()).create_future, object()
     if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(heapq, f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
@@ -127,11 +127,14 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 if not (g := a()).done(): g.set_result(None)
             while P:
                 if not (p := b()).done(): p.set_result(None)
+        def cancel_extend(self, msg=None): return False
         get.__qualname__, get_nowait.__qualname__, put.__qualname__, put_nowait.__qualname__, change_get_password.__qualname__, change_put_password.__qualname__ = get.__name__, get_nowait.__name__, put.__name__, put_nowait.__name__, change_get_password.__name__, change_put_password.__name__
     q = object.__new__(PasswordQueue)
-    async def extend(f=partial(q.put, Placeholder, password_put)):
-        async for i in iter_to_aiter(init_items): await f(i)
-    q.task = L.create_task(extend()); return q # type: ignore
+    if init_items:
+        async def extend(f=partial(q.put, Placeholder, password_put)):
+            async for i in iter_to_aiter(init_items): await f(i)
+        q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
+    return q
 class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     @abstractmethod
     def _init(self, maxsize): ...
