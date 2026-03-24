@@ -85,9 +85,7 @@ class Observable(LoopContextMixin):
         self.subscribe_nowait(filtered); return _
     def map(self, transform, ret_exc=True):
         f = partial((_ := Observable()).notify, _ret_exc_=ret_exc)
-        async def mapped(*a, **k):
-            A, K = transform(*a, **k)
-            await f(*A, **K)
+        async def mapped(*a, **k): A, K = transform(*a, **k); await f(*A, **K)
         self.subscribe_nowait(mapped); return _
     def debounce(self, delay, ret_exc=True):
         f = partial((_ := type(self)()).notify, _ret_exc_=ret_exc); t = None

@@ -15,8 +15,8 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
         except AttributeError, KeyError: raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
     def __getattr__(self, name, /):
-        if (s := getattr(self, '_fs', None)) is None: self._fs = s = frozenset(self.__dir__())
-        if name in s: return getattr(self.load(), name)
+        if name == '_fs': self._fs = s = frozenset(self.__dir__()); return s
+        if name in self._fs: return getattr(self.load(), name)
         raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {name!r}") from None
     def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass module')
