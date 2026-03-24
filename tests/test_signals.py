@@ -26,6 +26,6 @@ async def test_signal_raise():
         with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await f(19, timeout=0.1)
         with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal SIGINT'):
             asyncio.create_task(kill(s := Signals.SIGINT))
-            await wait_for_signal(bad_processor, s, timeout=0.2)
+            await wait_for_signal(bad_processor, s, timeout=0.2, possible_errors=(ZeroDivisionError,))
     with raises(Log, match='wait_for_signal timed out'): await f(Signals.SIGILL, timeout=0.1)
     with raises(TimeoutError): await f(Signals.SIGFPE, timeout=0.1, raise_on_timeout=True)
