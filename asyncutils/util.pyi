@@ -9,7 +9,10 @@ from asyncio.futures import Future
 __all__ = 'get_future', 'new_tasks', 'to_sync', 'to_sync_from_loop', 'sync_await', 'semaphore', 'lockf', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'get_aiter_fromf', 'safe_cancel'
 _ignore_cancellation: IgnoreErrors
 '''Context manager to ignore asyncio.CancelledError.'''
-def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]: '''Wrap an arbitrary awaitable in a future under the provided event loop.'''
+def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
+    '''Wrap an arbitrary awaitable in a task under the provided event loop, creating one and setting if required, and begin waiting on it,
+    wrapping critical exceptions in Critical.
+    This is as opposed to `loop.create_task`, which only takes coroutines.'''
 def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T], None, None]: '''Yield tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[R, **P](f: Callable[P, Awaitable[R]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, R]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 class to_sync_from_loop:

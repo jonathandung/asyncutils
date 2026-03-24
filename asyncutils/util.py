@@ -12,24 +12,20 @@ from ._internal.submodules import util_all as __all__
 _ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
 def get_future(aw, loop=None):
     if loop is None: loop = _get_loop_and_set()
-    F = loop.create_future()
     async def wrapper():
-        try: F.set_result(await aw)
+        try: return await aw
         except CRITICAL: raise Critical
-        except BaseException as e: F.set_exception(e)
-    loop.create_task(wrapper()); return F
-def new_tasks(*C):
-    (l := _get_loop_and_set()).set_task_factory(eager_task_factory); f = l.create_task
-    for c in C: yield f(c)
+    return loop.create_task(wrapper())
+def new_tasks(*C): (l := _get_loop_and_set()).set_task_factory(eager_task_factory); yield from map(l.create_task, C)
 def to_sync(f, /, timeout=None, loop=None):
     audit('asyncutils.util.to_sync', f)
     def wrapper(*a, **k): return sync_await(f(*a, **k), timeout=timeout, loop=loop)
     return wraps(f)(wrapper)
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
-def sync_await(aw, *, timeout=None, loop=None):
+def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     audit('asyncutils.util.sync_await', aw)
     f = loop is None
-    if (c := _get_()) and (f or loop is (l := c.loop) or getattr(loop, '_thread_id', None) == getattr(l, '_thread_id', NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT)
+    if (c := _get_()) and (f or loop is (l := c.loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT)
     try:
         g = aw.__iter__().__next__
         while True: g()
