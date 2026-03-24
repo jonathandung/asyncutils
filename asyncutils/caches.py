@@ -68,14 +68,14 @@ class AsyncLRUCache:
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200)
     def __call__(self, f, /, _=lambda f, a, k: id(f)<<0x80|hash(a)<<0x40|hash(frozenset(k.items()))):
         self._caches[f] = c = self._factory(f)
-        if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)
+        if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)[0]
         async def wrapper(*a, **k):
             K = await self._make_key(f, a, k)
-            if self._ttl and monotonic()-self._timestamps.get(K, 0) > self._ttl: await c.cache_clear(); del self._timestamps[K]
+            if self._ttl and monotonic()-self._timestamps.get(K, 0) > self._ttl: c.cache_clear(); del self._timestamps[K]
             if iscoroutine(r := c(*a, **k)): r = await r
             if self._ttl: self._timestamps[K] = monotonic()
             return r
-        wrapper.__dict__.update({k: getattr(c, k) for k in ('cache_info', 'cache_clear')}); return wraps(f)(wrapper)
+        return wraps(f)(wraps(c, ('cache_info', 'cache_clear'), ())(wrapper))
     async def cache_clear(self):
         self._timestamps.clear(); C = self._caches
         while C: C.popitem()[1].cache_clear(); await yield_to_event_loop

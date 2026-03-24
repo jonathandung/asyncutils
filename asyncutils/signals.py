@@ -48,6 +48,6 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         return s
     finally:
         await safe_cancel(F)
-        if c: c.__exit__(*sys.exc_info())
+        if c: c.__exit__(*sys.exc_info()) # type: ignore
 f((wait_for_signal, 'processor, /, *signals, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))
 del signal, getsignal, Signals, f

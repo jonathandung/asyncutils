@@ -3,7 +3,7 @@ from .mixins import AsyncContextMixin, AwaitableMixin
 from ._internal.protocols import Exceptable, SupportsIteration, Timer, ValidExcType
 from types import TracebackType
 from _collections_abc import Awaitable, Coroutine, Callable
-from typing import Any, Literal, Self, overload
+from typing import Any, Self, overload
 from collections import deque
 from asyncio.locks import BoundedSemaphore
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'

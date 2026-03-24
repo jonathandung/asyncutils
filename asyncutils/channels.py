@@ -155,11 +155,11 @@ class EventBus(LoopContextMixin):
     def auditor(self):
         def F(e, a, f=self.is_auditing, _=self._begin_publish, /):
             if f(): _(e, a)
-        F.added = False; return F
+        F.added = False; return F # type: ignore
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or (a := self.auditor).added): addaudithook(a); self._auditing = a.added = True
+        if not (self._auditing or (a := self.auditor).added): addaudithook(a); self._auditing = a.added = True # type: ignore
     def stop_audit(self): self._auditing = False
     @cached_property
     def _middlewares(self): return {}
@@ -215,19 +215,17 @@ class EventBus(LoopContextMixin):
     def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
     @cached_property
     def _publishers(self): return set()
-    def _begin_publish(self, E, D, S, T, C, /):
+    def _begin_publish(self, E, D, S, T, C, /): # type: ignore[no-redef]
         self.raise_for_shutdown(); f = []
-        if C is None:
-            def C(e, /, a=f.extend, b=f.append): a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)
-        async def g(D=D):
+        async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if C is None else C, D=D):
             for m, F in self._middlewares.copy().items():
                 if F is not None and F.done(): continue
                 try:
                     if iscoroutine(D := m(E, D)): D = await D
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: C(e)
-                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False)
-                except BaseException as e: raise BusPublishingError(self, m) from e
+                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore
+                except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore
             U = self._subscribers
             async with self._lock:
                 if self._tracking: self._published[E] += 1
@@ -255,7 +253,7 @@ class EventBus(LoopContextMixin):
         self.raise_for_shutdown(); t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=constants.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(constants.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if item_timeout is _NO_DEFAULT: item_timeout = constants.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
-            while True: yield await wait_for(q.get(), item_timeout)
+            while True: yield await wait_for(q.get(), item_timeout) # type: ignore
         except QueueShutDown: log.info(f'event stream of {self.name} has been shut down', exc_info=True)
         except TimeoutError: log.error(f'event stream of {self.name} is stopping because of timeout in waiting for item', exc_info=True)
         finally: F.set_result(None); await t
@@ -286,7 +284,7 @@ class EventBus(LoopContextMixin):
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e)
     async def __setup__(self): super().__init__()
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # type: ignore
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_putters', '_loop', '_lock', '_task'
@@ -317,7 +315,7 @@ class Rendezvous:
     def __length_hint__(self): return len(self._getters)+len(self._putters)
     async def state_snapshot(self, _f=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')):
         await self.cleanup()
-        async with self._lock: t = map(len, (self._getters, self._putters))
+        async with self._lock: t = len(self._getters), len(self._putters)
         return _f(*t, sum(t), not any(t))
     async def cleanup(self):
         async with self._lock: self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())

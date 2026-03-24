@@ -15,6 +15,7 @@ from asyncio.coroutines import iscoroutine
 from . import exceptions as E
 import _operator as O, math as M
 from ._internal.submodules import iters_all as __all__
+_randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((2047, (2,)), (9080191, (31, 73)), (4759123141, (2, 7, 61)), (1122004669633, (2, 13, 23, 1662803)), (2152302898747, (2, 3, 5, 7, 11)), (3474749660383, (2, 3, 5, 7, 11, 13)), (18446744073709551616, (2, 325, 9375, 28178, 450775, 9780504, 1795265022)), (3317044064679887385961981, (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41))), lambda _, /: _
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential(fs, /, *a, **k):
     async for f in iter_to_aiter(fs): yield await f(*a, **k)
@@ -38,7 +39,7 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
             else: yield i
     async def feed():
         async def helper(i): await gather(*(q.put(i) for q in Q), return_exceptions=True)
-        try: await gather(*to_list(amap(helper, it)))
+        try: await gather(*await to_list(amap(helper, it)))
         except E.CRITICAL: raise E.Critical
         except BaseException as e:
             if put_exc: await helper(E.wrap_exc(e))
@@ -288,7 +289,7 @@ async def adropwhile(pred, it):
         if not pred(_): yield _; break
     async for _ in I: yield _
 def afilterfalse(f, it): return afilter(lambda i: not (f or bool)(i), it)
-async def agroupby(it, key):
+async def agroupby(it, key=_identity):
     I, e = iter_to_aiter(it), False
     async def grouper(k):
         nonlocal cv, ck, e; yield cv
@@ -356,7 +357,7 @@ async def aziplongest(*its, fillvalue=None):
         yield tuple(v)
 def asumprod(p, q, /): return asum(amap(O.mul, p, q, strict=True))
 async def aconvolve(signal, kernel):
-    w = deque((0,), n := len(K := await to_tuple(await areversed(kernel))))*n
+    w = deque((0,), n := len(K := await to_tuple(areversed(kernel))))*n
     async for x in achain(signal, arepeat(0, n-1)): w.append(x); yield await asumprod(K, w)
 def atabulate(f, start=0, step=1, /, *, await_=False): return amap(f, acount(start, step), await_=await_)
 async def asum(it, start=0):
@@ -382,13 +383,12 @@ async def to_list(it, /):
     f = (r := []).append
     async for _ in iter_to_aiter(it): f(_)
     return r
-_randrange, _sample, _smallprimes, _perfect_test = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((2047, (2,)), (9080191, (31, 73)), (4759123141, (2, 7, 61)), (1122004669633, (2, 13, 23, 1662803)), (2152302898747, (2, 3, 5, 7, 11)), (3474749660383, (2, 3, 5, 7, 11, 13)), (18446744073709551616, (2, 325, 9375, 28178, 450775, 9780504, 1795265022)), (3317044064679887385961981, (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41)))
 async def aconsume(it, n=None):
     if n is None:
         async for _ in iter_to_aiter(it): ...
     else: await anext(aislice(it, n, n), None)
 def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *_filter_out(default, s=_NO_DEFAULT))
-async def aallequal(it, key=lambda _: _, strict=False):
+async def aallequal(it, key=_identity, strict=False):
     I = agroupby(it, key)
     async for _ in I:
         async for _ in I: return False
@@ -437,7 +437,7 @@ async def aroundrobin2(*its):
     async for X in aziplongest(*its, fillvalue=_NO_DEFAULT):
         for x in X:
             if x is not _NO_DEFAULT: yield x
-async def aunique_everseen(it, key=lambda _: _):
+async def aunique_everseen(it, key=_identity):
     A, a, C, c = (S := set()).add, (s := []).append, *map(O.attrgetter('__contains__'), (S, s))
     async for i in iter_to_aiter(it):
         k = key(i)
@@ -445,7 +445,7 @@ async def aunique_everseen(it, key=lambda _: _):
             if not C(k): A(k); yield i
         except TypeError:
             if not c(k): a(k); yield i
-def aunique_justseen(it, key=lambda _: _, _=O.itemgetter): return amap(_(0), agroupby(it)) if key is None else amap(anext, amap(_(1), agroupby(it, key)), await_=True)
+def aunique_justseen(it, key=_identity, _=O.itemgetter): return amap(_(0), agroupby(it)) if key is None else amap(anext, amap(_(1), agroupby(it, key)), await_=True)
 async def aunique(it, key=None, reverse=False):
     async for _ in aunique_justseen(await asorted(it, key=key, reverse=reverse), key): yield _
 async def ancycles(it, n):
@@ -466,7 +466,7 @@ async def aiterate(f, start):
 async def with_aiter(actxmgr):
     async with actxmgr as I:
         async for i in iter_to_aiter(I): yield i
-async def asorted(it, *, key=lambda _, /: _, reverse=False):
+async def asorted(it, *, key=_identity, reverse=False):
     from heapq import heappush as f, heappop as g
     m, a = [], (r := []).append
     async for i, j in aenumerate(it): f(m, (key(j), i, j))
@@ -507,7 +507,7 @@ async def adistinctpermutations(it, r=None):
         d = defaultdict(list)
         for i in I: d[I.index(i)].append(i)
         R = amap(lambda i, E={k: acycle(v) for k, v in d.items()}: to_tuple(await anext(E[_]) for _ in i), a(sorted(map(I.index, I))), await_=True)
-    async for _ in R: yield _
+    async for t in R: yield t
 async def auniquetoeach(*its):
     p = await to_tuple(amap(to_tuple, its, await_=True))
     async for _ in amap(partial(afilter, frozenset(i for i, j in Counter(await to_list(aflatten(map(frozenset, p)))).items() if j == 1).__contains__), p): yield _
@@ -555,7 +555,7 @@ async def arandomcombination(it, r, _=_sample):
     for i in sorted(_(range(len(p := await to_tuple(it))), r)): yield p[i]
 async def arandom_combination_with_replacement(it, r, _=_randrange):
     n = len(p := await to_tuple(it))
-    async for _ in amap(p.__getitem__, sorted(_(n) for _ in range(r))): yield _
+    async for i in amap(p.__getitem__, sorted(_(n) for i in range(r))): yield i
 async def arandompermutation(it, r=None, _=_sample):
     p = await to_tuple(it)
     if r is None: r = len(p)
@@ -590,9 +590,9 @@ async def asubslices(it):
     async for _ in astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2)))): yield _
 def arepeatfunc(f, times=None, *a): return astarmap(f, arepeat(a) if times is None else arepeat(a, times), True)
 async def apolynomialfromroots(roots):
-    p = arange(1, 2)
+    p = range(1, 2)
     async for r in iter_to_aiter(roots): p = aconvolve(p, (1, -r))
-    async for _ in p: yield _
+    async for _ in iter_to_aiter(p): yield _
 async def atranspose(it):
     async for _ in azip(*await to_tuple(it), strict=True): yield _
 async def aflattentensor(tensor, base=(str, bytes), _c=_check_methods):
@@ -612,7 +612,7 @@ async def apolynomialeval(coeff, x):
     if not (n := len(t := await to_tuple(coeff))): return type(x)(0)
     return await asumprod(t, amap(pow, arepeat(x), range(n-1, -1)))
 async def areshape(mat, shape):
-    if isinstance(shape, int): I = batch(aflatten(mat), shape, None)
+    if isinstance(shape, int): I = batch(aflatten(mat), shape, None) # type: ignore
     else: d = anext(shape := iter_to_aiter(shape)); from .func import areduce as f; I = aislice(await f(batch, areversed(shape), aflattentensor(mat), await_=False), d)
     async for i in I: yield i
 async def _factor_pollard(n):
@@ -774,4 +774,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst
+del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

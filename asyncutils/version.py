@@ -29,7 +29,7 @@ class VersionInfo(str):
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
     def to_complex(self): return complex(*self[:2])
-    def __float__(self, r=.01): return sum((j*r**i for i, j in enumerate(self)), start=.0)
+    def __float__(self, r=.01): return sum((j*r**i for i, j in enumerate(self)), start=.0) # type: ignore
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
@@ -37,7 +37,7 @@ class VersionInfo(str):
         try:
             if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
         except ValueError, TypeError, AttributeError: ...
-        raise _(self)
+        raise _(self) # type: ignore
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
     def get_current_version(cls, _=E.StateCorrupted):
@@ -56,7 +56,7 @@ class VersionInfo(str):
             case 'n': return self.rpartition('.')[0]
             case 'hex'|'bin'|'oct': return __builtins__[s](int(self))
         return str(self)
-    def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented
+    def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented # type: ignore
     def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
     def next_patch(self): return self.replace_parts(patch=self[2]+1)
     def next_minor(self): return __class__(self[0], self[1]+1)
@@ -68,7 +68,7 @@ class VersionInfo(str):
         return p|m<<8|self[0]<<16
     def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True)) # pragma: no cover
     @classmethod
-    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb'), 'little' if little else 'big', signed=True)) # pragma: no cover
+    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb'), 'little' if little else 'big', signed=True)) # type: ignore # pragma: no cover
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))

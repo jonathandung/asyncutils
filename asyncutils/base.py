@@ -58,7 +58,7 @@ class event_loop:
             elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)):
-                try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b))
+                try: r = r or l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b)) # type: ignore
                 except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
@@ -91,24 +91,24 @@ adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
 async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False):
     audit('safe_cancel_batch', t); l = []
     async for _ in (adisembowel if disembowel else iter_to_aiter)(t):
-        if not _.done(): _.cancel(); l.append(_)
+        if not _.done(): _.cancel(); l.append(_) # type: ignore[attr-defined]
     r = await gather(*l, return_exceptions=True)
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         r = await gather(*map(f, r), return_exceptions=True)
-        if raising and (E := tuple(unnest_reverse(filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
+        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
     audit('asyncutils.base.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
         if _c(it, 'asend', 'athrow', 'aclose'):
-            async def iterator():
+            async def iterator(): # type: ignore[no-redef]
                 l = await (f := it.asend)(None)
                 while True:
                     if l is sentinel or l == sentinel: break
                     l = await f((yield l))
         else:
-            async def iterator():
+            async def iterator(): # type: ignore[no-redef]
                 async for _ in it:
                     if _ is sentinel or _ == sentinel: break
                     yield _
@@ -117,7 +117,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
         def r(f, _=(loop or _get_loop_and_set()).run_in_executor): return lambda *a: _(f, *a)
         if f:
             if g:
-                async def iterator(_=r(it.send)):
+                async def iterator(_=r(it.send)): # type: ignore[no-redef]
                     l = _(None)
                     try:
                         while True:
@@ -134,7 +134,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
                             yield l
                     except StopIteration: ...
         elif g:
-            async def iterator(_=r(it.send)):
+            async def iterator(_=r(it.send)): # type: ignore[no-redef]
                 l = _(None)
                 try:
                     while True: l = await _((yield l))
@@ -196,6 +196,6 @@ async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_aiter(it): yield start, _; start += step
 P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 'ait'), (collect, 'it, n=None, default={}'), (take, 'it, n, default={}'))
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)}))
-(dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
+(dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close() # type: ignore
 _.__qualname__ = _.__name__ = 'dummy_task'
 del f, _, P, L, b

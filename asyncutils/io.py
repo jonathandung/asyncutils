@@ -72,7 +72,7 @@ class file(LoopContextMixin):
         if (r := cls.open_files.get((file, 'r+b'))) is None is (r := cls.open_files.get((file, 'w+b'))): (r := super().__new__(cls))._f, r._fileno = file, file.fileno()
         return r
     def __iter__(self): return self._f.__iter__()
-    def __del__(self): self.loop.run_until_complete(self.close()); del self.loop
+    def __del__(self): self.loop.run_until_complete(self.close())
     @property
     def closed(self): return self._f.closed
     def fileno(self): return self._fileno
@@ -165,13 +165,13 @@ class MemoryMappedIOManager(LoopContextMixin):
         try:
             with open(*k) as f:
                 if init_size > 0: await self._run(f.truncate, init_size)
-                async with self._factory(f) as x: self.open_files[k] = x; yield x
+                async with self._factory(f) as x: self.open_files[k] = x; yield x # type: ignore
         finally: self.open_files.pop(k, None)
     def open(self, path, init_size=0): return self._open(init_size, path, 'r+b')
     def create(self, path, init_size=0): return self._open(init_size, path, 'w+b')
     async def __cleanup__(self):
         async with self._lock: self.open_mmaps.clear(); await gather(*(f.close() for f in self.open_files.values())); self.open_files.clear()
-    def __del__(self): sync_await(self.__cleanup__(), loop=(l := self.loop)); l.stop(); l.close(); del self.loop
+    def __del__(self): sync_await(self.__cleanup__(), loop=(l := self.loop)); l.stop(); l.close()
     async def copy_file(self, srcp, destp):
         async with self.open(srcp) as src, self.create(destp) as dest: await dest.write(await src.read()); await dest.flush()
     async def checksum(self, path, alg='md5'):

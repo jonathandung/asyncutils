@@ -29,6 +29,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(password_get, gettyp): raise WrongPasswordType(None, type(password_get), None, gettyp)
         if isinstance(password_get, str): password_get, strict = intern(password_get), False
         def u(pwd):
+            if not protect_get: return
             if not isinstance(pwd, gettyp): raise WrongPasswordType(pwd, type(pwd), q, gettyp)
             if pwd is not password_get and (strict or pwd != password_get): raise WrongPassword(q, pwd)
     if protect_put:
@@ -38,26 +39,27 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(password_put, puttyp): raise WrongPasswordType(None, type(password_put), None, puttyp)
         if isinstance(password_put, str): password_put, strict = intern(password_put), False
         def v(pwd):
+            if not protect_put: return
             if not isinstance(pwd, puttyp): raise WrongPasswordType(pwd, type(pwd), q, puttyp)
             if pwd is not password_put and (strict or pwd != password_put): raise WrongPassword(q, pwd)
     class PasswordQueue(Queue):
         def _format(self): raise NotImplementedError
         if protect_get:
             async def get(self, pwd):
-                u(pwd); G, f = self._getters, self._wakeup_next
-                while self.empty():
+                u(pwd); A, f, e, m = (G := self._getters).append, self._wakeup_next, self.empty, L.create_future
+                while e():
                     if self._is_shutdown: raise QueueShutDown
-                    G.append(F := L.create_future())
+                    A(F := m())
                     try: await F
                     except:
                         F.cancel()
                         with ignore_valerrs: G.remove(F)
-                        if not (self.empty() or G.cancelled()): f(G)
+                        if not (e() or G.cancelled()): f(G)
                         raise
                 return self.get_nowait(pwd)
             def get_nowait(self, pwd):
                 if self.empty(): raise QueueShutDown if self._is_shutdown else QueueEmpty
-                v(pwd); i = g(); self._wakeup_next(self._putters); return i
+                u(pwd); i = g(); self._wakeup_next(self._putters); return i
             get.__qualname__, get_nowait.__qualname__ = get.__name__, get_nowait.__name__
         if protect_put:
             async def put(self, item, pwd):

@@ -6,10 +6,11 @@ from typing import Any, Literal, Protocol, Self, overload, type_check_only
 from asyncio.futures import Future
 __all__ = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'measure', 'benchmark', 'RateLimited'
 @overload
-async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of functools.reduce that takes an async function and possibly async iterable. If the function is sync, specify await_=False.'''
+async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of functools.reduce that takes an async function and possibly async iterable. If the function is sync, specify `await_=False`.'''
 @overload
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: ...
-def every[T](intvl: float, /, *, stop_when: Future[T]|None=..., count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T=...) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Coroutine[Any, Any, T|None]]]:
+@overload
+def every(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everyrv:
     '''A decorator factory, useful for periodic monitoring tasks.
     The resultant function will run every `intvl` seconds, as determined by `timer`, at most `max_iterations` times. If `count_f` is True, this time includes the execution time of the function.
     If `wait_first` is True, sleep for `intvl` seconds before the first execution.
@@ -19,7 +20,20 @@ def every[T](intvl: float, /, *, stop_when: Future[T]|None=..., count_f: bool=..
     However, the task is guaranteed to be run at least once.
     When using the supplied_args and supplied_kwargs parameters, maintain a reference to them so that you can edit the args and kwargs fed to the function on the fly.
     Finally, the function returns `default` or None if it was not passed, unless `stop_on_exc` is True or `default` is `RAISE`.'''
-def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]]|None=..., count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R=...) -> Callable[[_everymethodft[T, R]], _everymethodrvrv[T, R]]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
+@overload
+def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everyrv[T]: ...
+@overload
+def every[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> _everyrv[T]: ...
+@overload
+def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> _everyrv[T]: ...
+@overload
+def everymethod(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everymethodrv: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
+@overload
+def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everymethodrv[R, T]: ...
+@overload
+def everymethod[T, R](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R]: ...
+@overload
+def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R, T]: ...
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|_ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
     `timer` is used to count `elapsed`, the time required to execute the function.
@@ -57,12 +71,17 @@ class RateLimited[T, **P]:
 @type_check_only
 class _everymethodrvrv[T, R](Protocol):
     '''Not exported.'''
-    async def __call__(_, self: T, /, *a: Any, **k: Any) -> R|None: ...
+    async def __call__(self, _: T, /, *a: Any, **k: Any) -> R|None: ...
 @type_check_only
 class _everymethodft[T, R](Protocol):
     '''Not exported.'''
-    def __call__(_, self: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
+    def __call__(self, _: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
 @type_check_only
 class _frv(Protocol):
     '''Not exported.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
+@type_check_only
+class _everyrv[T](Protocol):
+    '''Not exported.'''
+    def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
+type _everymethodrv[R=Any, T=Any] = Callable[[_everymethodft[T, R]], _everymethodrvrv[T, R]]

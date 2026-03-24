@@ -51,9 +51,9 @@ def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) ite
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
 def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload
-async def safe_cancel_batch[T](t: SupportsIteration[Future[T]], *, callback: Callable[[T|BaseException]]=..., disembowel: Literal[False]=..., raising: bool=...) -> None: ...
+async def safe_cancel_batch[T](t: SupportsIteration[Future[T]], *, callback: Callable[[T|BaseException]]|None=..., disembowel: Literal[False]=..., raising: bool=...) -> None: ...
 @overload
-async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[[T|BaseException]]=..., disembowel: Literal[True], raising: bool=...) -> None:
+async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[[T|BaseException]]|None=..., disembowel: Literal[True], raising: bool=...) -> None:
     '''Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
     Afterwards, if disembowel is True, clear the iterable using its pop() method repeatedly, falling back to clear().
     The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.

@@ -63,7 +63,7 @@ def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Lite
     If `protect_get` is True, get and get_nowait will require a password, specified by password_get or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
     If `protect_put` is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
     If `init_items` is specified, the items in that (async) iterable will be put into the queue immediately. If there are too many items in the (async) iterable, parameters wait and raising determine the behaviour; log is a function used to emit warnings in that case.
-    `auditf` (default sys.audit) is an audit function that takes the event name ('asyncutils.queues.password_queue'), `protect_get`, `protect_put`, `get_from`, `put_from` and returns None; note that the passwords are not passed to the audit function.'''
+    `auditf` (default sys.audit) is an audit function that takes the event name (`'asyncutils.queues.password_queue'`), `protect_get`, `protect_put`, `get_from`, `put_from` and returns None; note that the passwords are not passed to the audit function.'''
 @overload
 def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., wait: bool=..., priority: bool=..., lifo: bool=..., raising: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], log: Callable[[str], None]=..., auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]: ...
 @overload

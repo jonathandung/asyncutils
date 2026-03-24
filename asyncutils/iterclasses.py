@@ -4,7 +4,7 @@ from .config import Executor, _NO_DEFAULT
 from ._internal.helpers import _get_loop_and_set, subscriptable, _check_methods
 from sys import maxsize as INF, audit
 from functools import partial
-from _collections import deque, defaultdict
+from _collections import deque, defaultdict # type: ignore[import-not-found]
 from heapq import heapify, heappop, heappushpop
 from ._internal.submodules import iterclasses_all as __all__
 class anullcontext:
@@ -79,7 +79,7 @@ class abucket(LoopContextMixin):
     async def __getitem__(self, val, /):
         if not self._validator(val): return
         while True:
-            if (_ := self._cache[val]): yield (await _) if isinstance(_ := _.popleft(), _await_later) else _
+            if (_ := self._cache[val]): yield (await _.aw) if isinstance(_ := _.popleft(), _await_later) else _
             else:
                 while True:
                     try: i = await anext(self._it)

@@ -15,7 +15,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
         except AttributeError, KeyError: raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
     def __getattr__(self, name, /):
-        if (s := self._fs) is None: self._fs = s = frozenset(self.__dir__())
+        if (s := getattr(self, '_fs', None)) is None: self._fs = s = frozenset(self.__dir__())
         if name in s: return getattr(self.load(), name)
         raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {name!r}") from None
     def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
@@ -31,7 +31,7 @@ if C.loaded_all:
     globals().update(s); R._request_write_load_all_()
 else:
     f = object.__new__
-    for _ in a: r._name, r._fs, s[_] = _, None, (r := f(module))
+    for _ in a: r._name, s[_] = _, (r := f(module))
     s.update(config=C, exceptions=E, version=V); del f, r
 a += ('submodules_map',)
 l('all submodules initialized')

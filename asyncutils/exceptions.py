@@ -61,9 +61,9 @@ class ref:
     def __init_subclass__(cls): raise TypeError('cannot subclass ref')
 @subscriptable
 class Critical(BaseException):
-    def __new__(cls, exc=None, msg='critical error occurred or user attempted to terminate the program', _e=exception):
-        if isinstance(exc, cls): return exc
-        BaseException.__init__(e := BaseException.__new__(cls), msg); e.__context__ = _e() if exc is None else exc; return e
+    def __new__(cls, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception):
+        if isinstance(e, cls): return e
+        BaseException.__init__(E := BaseException.__new__(cls), _m); E.__context__ = _e() if e is None else e; return E
     @property
     def __suppress_context__(self): return False
     @property
@@ -138,9 +138,9 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
     def __init__(self, op, *a): self.op = op = op%a; super().__init__('cannot %s PasswordQueue'%op)
 class PasswordError(PasswordQueueError):
     @property
-    def wrongpass(self): return self._refp()
+    def wrongpass(self): return self._refp() # type: ignore[attr-defined]
     @property
-    def queue(self): return self._refq()
+    def queue(self): return self._refq() # type: ignore[attr-defined]
 class WrongPassword(PasswordError, ValueError):
     def __init__(self, *_): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_)
 @subscriptable
@@ -159,7 +159,7 @@ def __getattr__(name, /):
         def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
         async def __aenter__(self):
             import warnings as _
-            async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn)
+            async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore
         async def __aexit__(self, t, /, *_):
             if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
             else: c.__exit__(t, *_)

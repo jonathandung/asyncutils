@@ -29,9 +29,10 @@ from .signals import *
 from .tools import *
 from .util import *
 from .version import *
-from ._internal.protocols import Submodule
+from ._internal.protocols import Submodule, All
 from typing import Final
 from types import ModuleType
+def __dir__() -> All: ...
 __version__: Final[VersionInfo]
 '''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete).'''
 __hexversion__: Final[int]

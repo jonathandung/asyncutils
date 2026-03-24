@@ -8,11 +8,11 @@ from asyncio.exceptions import BrokenBarrierError
 from asyncio.tasks import wait_for, sleep
 from time import monotonic
 from functools import wraps
-from _collections import deque
+from _collections import deque # type: ignore
 from itertools import count
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):
-    def __init__(self, value=1): super().__init__(value); self._waiters = deque()
+    def __init__(self, value=1): super().__init__(value); self._waiters = deque() # type: deque
     @property
     def bound(self): return self._bound_value
     @bound.setter
@@ -46,7 +46,7 @@ class CircuitBreaker:
         self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._call_lock = name, max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Lock(); self._set(0); return self if f is None else self(f)
     def __call__(self, f, /, timer=monotonic, default=_NO_DEFAULT):
         async def wrapper(*a, **k):
-            async with self._call_lock:
+            async with self._call_lock: # type: ignore
                 if (s := self._state) == 2:
                     if timer()-self._opened > self._reset: self._state, self._half_open_calls = 1, 0
                     else: raise CircuitOpen(f'circuit {self.name} is open')

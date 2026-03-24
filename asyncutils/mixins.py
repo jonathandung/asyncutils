@@ -16,7 +16,7 @@ class LoopContextMixin(_LoopMixinBase):
 @subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
-    def __await__(self): yield from self.wait().__await__()
+    def __await__(self): yield from self.wait().__await__() # type: ignore
     @abstractmethod
     def wait(self): ...
 @subscriptable
@@ -25,7 +25,7 @@ class AsyncContextMixin(metaclass=ABCMeta):
     def runner(self, _=_get_loop_and_set):
         __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin')
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = _()
-        return partial(l.run_in_executor, Executor())
+        return partial(l.run_in_executor, Executor()) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

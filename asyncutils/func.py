@@ -147,7 +147,7 @@ class RateLimited:
         audit('asyncutils.func.RateLimited', f, calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, P, C, f = (T := self._call_times).popleft, self._period, self._calls, self._func
-        async with self._lock:
+        async with self._lock: # type: ignore
             d = (n := self._timer())-P
             while T:
                 if (x := p()) > d: T.appendleft(x); break

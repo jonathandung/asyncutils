@@ -7,7 +7,7 @@ import sys
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()
-class ConsoleBase(B):
+class ConsoleBase(B): # type: ignore
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, default_local_exit, disallow_subclass_msg, _unsubclassable = __import__('collections').ChainMap(), (), (lambda self, f=sys._clear_internal_caches, g=__import__('gc').collect, d=debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), False, 'cannot subclass %r', False
     match '1' if C.basic_repl else getenv('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False

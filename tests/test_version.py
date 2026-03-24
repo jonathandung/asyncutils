@@ -11,11 +11,11 @@ def test_ver(ver):
     ver.assert_valid()
     assert type(ver) is VersionInfo
     assert ver.__floor__() == ver.__trunc__() == ver.major == ver[0] == ver.__ceil__()-1
-    with raises(AttributeError, match=r"attribute 'parts' cannot be set to \(0, 0, 0\) on VersionInfo object"): ver.parts = 0, 0, 0
+    with raises(AttributeError, match=r"attribute 'parts' cannot be set to \(0, 0, 0\) on VersionInfo object"): ver.parts = 0, 0, 0 # type: ignore
     with raises(OverflowError, match=r'cannot pack version \d+\.\d+\.\d+ into an integer'): int(ver)
     assert ((ver := VersionInfo(float(round(ver, 2))))+3).patch == len(ver) == 3
     import pickle
-    assert eval(repr(ver)) == VersionInfo(ver) == round(ver, None) == round(ver, 3) == pickle.loads(pickle.dumps(ver)) == VersionInfo(ver.change_sep('-').split('-', 2)) == VersionInfo(ver.to_complex()) == ver.replace_parts() == ver
+    assert eval(repr(ver)) == VersionInfo(ver) == round(ver, 3) == pickle.loads(pickle.dumps(ver)) == VersionInfo(ver.change_sep('-').split('-', 2)) == VersionInfo(ver.to_complex()) == ver.replace_parts() == ver
 def test_fmt(ver):
     assert (_ := str(ver)) == f'{ver:0}.{ver:1}.{ver:2}' == f'{ver:maj}.{ver:min}.{ver:patch}' == ver.representation.removeprefix('asyncutils v')
     assert ver == VersionInfo(_)

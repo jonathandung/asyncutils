@@ -32,7 +32,7 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix'
+max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 if isinstance(e, str):
     try: e = int(e, 0)
     except ValueError: ...

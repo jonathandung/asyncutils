@@ -1,4 +1,4 @@
-from _collections import defaultdict
+from _collections import defaultdict # type: ignore
 from sys import intern
 from asyncio.locks import Lock
 from asyncio.tasks import gather

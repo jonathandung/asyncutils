@@ -4,11 +4,11 @@ def test_helpers():
     helpers = mod.helpers
     for _ in helpers._filter_out(None, True, False): assert isinstance(_, bool)
     assert helpers._check_methods('', 'lower', 'casefold')
-    with raises(AttributeError): helpers.copy_and_clear(())
+    with raises(AttributeError): helpers.copy_and_clear(()) # type: ignore
     class _: ...
     assert helpers.subscriptable(_) is _
-    _ = _[None]()
-    _.foo = lambda: None
+    _ = _[None]() # type: ignore
+    _.foo = lambda: None # type: ignore
     assert not helpers._check_methods(_, 'foo')
 def test_submods_lazy_loading():
     module = mod.initialize.module
