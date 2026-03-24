@@ -39,8 +39,8 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             return logger.warning('wait_for_signal timed out')
         logger.info(f'signal received: {s.name}')
         try:
-            s = p(s)
-            with _i: s = await s
+            r = p(s)
+            with _i: r = await r
         except possible_errors as e:
             logger.error(f'wait_for_signal processor {p!r} encountered expected {type(e).__qualname__} for signal {s}', exc_info=True)
             return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
