@@ -111,8 +111,9 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         @property
         def maxsize(self): return maxsize
         def task_done(self):
+            nonlocal U
             if U == 0: raise ValueError('task_done() called too many times')
-            nonlocal U; U -= 1
+            U -= 1
             if U == 0: E.set()
         async def join(self):
             if U > 0: await E.wait()
