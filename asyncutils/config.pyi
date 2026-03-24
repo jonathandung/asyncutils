@@ -1,12 +1,10 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
 from ._internal.protocols import ValidExcType, PartialInterface
-from _collections_abc import Callable
 from concurrent.futures._base import Executor as _
-from typing import Final, Self, NoReturn, final, type_check_only, overload
+from typing import Final, Self, overload
 from types import TracebackType
 from random import Random
-from threading import Lock
-__all__ = 'debugging', 'debug', 'sentinel_base', 'RAISE', 'SYNC_AWAIT', 'silent', 'Executor', 'set_logger_level', 'basic_repl', 'loaded_all', 'get_past_logs', 'logging_to'
+__all__ = 'debugging', 'debug', 'silent', 'Executor', 'set_logger_level', 'basic_repl', 'loaded_all', 'get_past_logs', 'logging_to'
 class Executor(_, PartialInterface): '''A class that implements the PEP 3148 Executor interface. The exact class is determined at runtime by command-line arguments.'''
 class debugging:
     '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally
@@ -22,33 +20,8 @@ class debugging:
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
-class sentinel_base:
-    '''Base class for sentinel values.'''
-    def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change NoReturn to Self) if your subclass can be instantiated by the user.'''
-    def __repr__(self) -> str: ...
-    def __str__(self) -> str: ...
-    def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
-    def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
-    def __init_subclass__(cls, lock_impl: Callable[[], Lock]=...) -> None: '''`lock_impl` is a callable that takes no arguments and returns a **synchronous** lock (e.g. `_thread.allocate_lock`).'''
-    @property
-    def name(self) -> str: '''Fully qualified name of the sentinel, the only thing that identifies it uniquely. May not be present if impropertly instantiated.'''
-    @property
-    def is_private(self) -> bool: '''Whether the sentinel is private (name begins with underscore).'''
-    @property
-    def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, None if there is none.'''
-@final
-@type_check_only
-class _sentinel(sentinel_base):
-    '''Sentinels for this module, internal or public. Not exported.'''
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.config namespace.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''
 def get_past_logs() -> str: '''Returns all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
-RAISE: Final[_sentinel]
-'''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
-SYNC_AWAIT: Final[_sentinel]
-'''A possible value to Deadlock.noticer, indicating the deadlock situation was found by the sync_await function.'''
-_NO_DEFAULT: Final[_sentinel]
-'''Users are not meant to interact with this directly.'''
 debug: Final[debugging]
 '''A global instance of the debugging context manager.'''
 silent: Final[bool]

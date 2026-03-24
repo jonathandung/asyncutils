@@ -9,7 +9,7 @@ from .channels import EventBus
 from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike
 from .queues import _Q
 from .version import VersionInfo
-__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType'
+__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType', 'PasswordMissing', 'GetPasswordMissing', 'PutPasswordMissing'
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (SystemExit, SystemError, KeyboardInterrupt), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.'''
@@ -37,14 +37,11 @@ def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|N
 def raise_(exc_typ: ValidExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: '''Programmatically raise an exception. `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload. Remaining args are as in `potent_derive`.'''
 @overload
 def raise_(exc_val: BaseException, /, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: ...
-def wrap_exc[E: BaseException](exc: E) -> _ExceptionWrapper[E]: '''Wrap an exception in a special object `wrapper`, such that `exception_occurred(wrapper)` returns True.'''
-def unwrap_exc[E: BaseException](exc: _ExceptionWrapper[E]) -> E: '''Recover the exception wrapped by `wrap_exc`.'''
+def wrap_exc(exc: BaseException) -> _ExceptionWrapper: '''Wrap an exception in a special object `wrapper`, such that `exception_occurred(wrapper)` returns True.'''
+def unwrap_exc(exc: _ExceptionWrapper) -> BaseException: '''Recover the exception wrapped by `wrap_exc`.'''
 def exception_occurred(obj: Any, /) -> TypeGuard[_ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 @type_check_only
-class _ExceptionWrapper[E: BaseException]:
-    '''Does not exist at runtime.'''
-    @property
-    def exc(self) -> E: ...
+class _ExceptionWrapper: '''Does not exist at runtime.'''
 class Deadlock(BaseException):
     '''Raised when a potential deadlock situation is noticed by this module.'''
     def __init__(self, /, *args: str, noticer: Any=...): ...
@@ -162,6 +159,11 @@ class WrongPasswordType[T](PasswordError, TypeError):
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
     @property
     def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
+class PasswordMissing(PasswordQueueError, TypeError):
+    '''Base class of `GetPasswordMissing` and `PutPasswordMissing`.'''
+    def __init__(self): ...
+class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
+class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:
     '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async.'''
     @property

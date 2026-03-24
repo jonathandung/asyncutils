@@ -2,9 +2,9 @@ from .mixins import LoopContextMixin
 from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
 from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
-from .config import _NO_DEFAULT
+from .constants import _NO_DEFAULT
 from ._internal.helpers import _filter_out, _get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
-from . import constants
+from . import context
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
 from sys import addaudithook
@@ -213,7 +213,7 @@ class EventBus(LoopContextMixin):
     def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
     @cached_property
     def _publishers(self): return set()
-    def _begin_publish(self, E, D, S, T, C, /): # type: ignore[no-redef]
+    def _begin_publish(self, E, D, S, T, C, /):
         self.raise_for_shutdown(); f = []
         async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if C is None else C, D=D):
             for m, F in self._middlewares.copy().items():
@@ -248,8 +248,8 @@ class EventBus(LoopContextMixin):
         except TimeoutError:
             if q.full(): log.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
     async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):
-        self.raise_for_shutdown(); t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=constants.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(constants.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
-        if item_timeout is _NO_DEFAULT: item_timeout = constants.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
+        self.raise_for_shutdown(); t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
+        if item_timeout is _NO_DEFAULT: item_timeout = context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
             while True: yield await wait_for(q.get(), item_timeout) # type: ignore
         except QueueShutDown: log.info(f'event stream of {self.name} has been shut down', exc_info=True)

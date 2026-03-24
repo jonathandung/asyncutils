@@ -3,7 +3,7 @@ from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncItera
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from types import TracebackType
-from .config import _sentinel
+from .constants import _sentinel
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine
 __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'
 class event_loop:
@@ -18,7 +18,7 @@ class event_loop:
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this but managing a different event loop.'''
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
-    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to False.'''
+    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to `False`.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
     @overload
     def __exit__(self, t: None, v: None, b: None, /) -> Literal[False]: ...
@@ -73,7 +73,7 @@ async def collect[T](it: SupportsIteration[T]) -> list[T]:
     '''Collect n items from the (async) iterable into a list and return that list.
     When n is not passed, equivalent to `iters.to_list` but slower.
     Refer to `iters.basic_collect` for a marginally faster variant that doesn't accept a default.
-    If default is RAISE and there are less than n items to collect, throw ItemsExhausted.
+    If default is `constants.RAISE` and there are less than n items to collect, throw ItemsExhausted.
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''
 @overload
@@ -83,7 +83,7 @@ def take[T](it: SupportsIteration[T], n: int, *, default: T) -> AsyncGenerator[T
 @overload
 def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
     '''Yield n items from the (async) iterable.
-    Pass RAISE as default to cause ItemsExhausted to be thrown in the case that there are not enough items.
+    Pass `constants.RAISE` as default to cause `ItemsExhausted` to be thrown in the case that there are not enough items.
     To ensure there are exactly n items in the resultant async generator, pass a default value.
     If n is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard n items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw ItemsExhausted.'''
@@ -91,4 +91,4 @@ def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) ->
 yield_to_event_loop: Awaitable[None]
 '''An awaitable object that yields control to the event loop for one iteration when awaited.'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
-'''An awaitable object that completes immediately and is also an exhausted generator, with the CO_ITERABLE_COROUTINE flag set.'''
+'''An awaitable object that completes immediately and is also an exhausted generator, with the `CO_ITERABLE_COROUTINE` flag set.'''

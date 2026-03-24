@@ -1,8 +1,9 @@
 from .mixins import AsyncContextMixin, AwaitableMixin
-from .config import _NO_DEFAULT, _randinst
+from .config import _randinst
+from .constants import _NO_DEFAULT
 from .base import iter_to_aiter
 from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
-from .constants import getcontext
+from .context import getcontext
 from asyncio.locks import Lock, Event, BoundedSemaphore
 from asyncio.exceptions import BrokenBarrierError
 from asyncio.tasks import wait_for, sleep

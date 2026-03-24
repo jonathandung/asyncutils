@@ -1,6 +1,6 @@
 from .mixins import EventMixin
-from . import constants
-from .config import RAISE
+from . import context
+from .constants import RAISE
 from .exceptions import EventValueError, ref
 from _collections import deque # type: ignore
 from asyncio.timeouts import timeout as _timeout
@@ -25,7 +25,7 @@ class SingleWaiterEventWithValue(EventMixin):
         if default is RAISE: raise EventValueError('no value is set')
         return self._value if self._set else default
 class EventWithValue(EventMixin):
-    def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=constants.EVENT_WITH_VALUE_DEFAULT_MAXHIST if maxhist is None else maxhist)
+    def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=context.EVENT_WITH_VALUE_DEFAULT_MAXHIST if maxhist is None else maxhist)
     def _record_hist(self): self._hist.append((monotonic(), ref(self._value)))
     def set(self, value, *, strict=True):
         if value != self._value: self._value = value; self._record_hist()
@@ -53,7 +53,7 @@ class EventWithValue(EventMixin):
     @property
     def history_asdict(self): return {t: q for t, s in self._hist if (q := s()) is not None}
     def recent_history(self, duration=None):
-        if duration is None: duration = constants.EVENT_WITH_VALUE_DEFAULT_RECENT
+        if duration is None: duration = context.EVENT_WITH_VALUE_DEFAULT_RECENT
         x, I = monotonic()-duration, iter(self._hist)
         for t, _ in I:
             if t >= x: yield t, _; yield from I

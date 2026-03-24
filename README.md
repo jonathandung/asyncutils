@@ -13,7 +13,7 @@ Also has a well-equipped command line interface taking many flags and options.
 Essentially no setup required! Just install py-asyncutils from pip:
 
 ```bash
-python -m pip install py-asyncutils==0.8.16 # This version
+python -m pip install py-asyncutils==0.8.17 # This version
 ```
 
 or
@@ -26,7 +26,7 @@ python -m pip install py-asyncutils[dev] # If installing for development
 or with conda:
 
 ```bash
-conda install -c conda-forge py-asyncutils=0.8.16
+conda install -c conda-forge py-asyncutils=0.8.17
 ```
 
 Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/README.md) for steps to checking the installation.
@@ -42,7 +42,7 @@ import asyncutils as autils
 with autils.event_loop() as loop: # this wraps the asyncio event loop implementation with proper cleanup
     rdv = autils.Rendezvous[int](loop=loop) # some types support subscripting
     print(*(loop.run_until_complete(asyncio.gather(*map(rdv.put, range(10, 20)), rdv.exchange(20),
-    *map(rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[20:])
+    *map(rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[10:])
     # simulate some work with values passed between tasks
     # Here `Rendezvous` is a class implementing get and put methods that complete only after there is
     # a corresponding putter or getter respectively
@@ -64,7 +64,7 @@ In fact, the submodules are only loaded on demand by a sophisticated name exposu
 
 ## Version
 
-This is asyncutils v0.8.16.
+This is asyncutils v0.8.17.
 
 This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible.
 Of course, this isn't a significant issue, seeing as though nobody currently uses it.

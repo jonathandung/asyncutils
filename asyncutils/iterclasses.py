@@ -1,6 +1,7 @@
 from .base import iter_to_aiter
 from .mixins import EventualLoopMixin, LoopContextMixin
-from .config import Executor, _NO_DEFAULT
+from .config import Executor
+from .constants import _NO_DEFAULT
 from ._internal.helpers import _get_loop_and_set, subscriptable, _check_methods
 from sys import maxsize as INF, audit
 from functools import partial

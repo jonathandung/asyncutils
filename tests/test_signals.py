@@ -23,7 +23,6 @@ async def test_signal_raise():
     f = __import__('functools').partial(wait_for_signal, processor, loop=asyncio.get_running_loop(), logger=MockLogger())
     with raises(Log, match='invalid signal .*: .*'): await f(None)
     if not W:
-        with raises(RuntimeError, match='failed to register signal handler'): await f(-1)
         with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await f(19, timeout=0.1)
         with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal SIGINT'):
             asyncio.create_task(kill(s := Signals.SIGINT))

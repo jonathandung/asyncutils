@@ -47,9 +47,7 @@ class _ExceptionWrapper:
     def __getattr__(self, name, /): return getattr(self.__exc, name)
     def __repr__(self): return f'_ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass _ExceptionWrapper')
-    @property
-    def exc(self): return self.__exc
-exception_occurred, wrap_exc, unwrap_exc = _ExceptionWrapper.__instancecheck__, _ExceptionWrapper.__new__.__get__(_ExceptionWrapper), _ExceptionWrapper.exc.fget
+exception_occurred, wrap_exc, unwrap_exc = _ExceptionWrapper.__instancecheck__, _ExceptionWrapper.__new__.__get__(_ExceptionWrapper), _ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
 @subscriptable
 class ref:
     __slots__ = '__obj'
@@ -150,6 +148,11 @@ class WrongPasswordType(PasswordError, TypeError):
     def wrongtype(self): return self._reft()
     @property
     def correcttype(self): return self._refc()
+class PasswordMissing(PasswordQueueError, TypeError): ...
+class GetPasswordMissing(PasswordMissing):
+    def __init__(self, _='no password provided when trying to get from password-protected queue'): super().__init__(_)
+class PutPasswordMissing(PasswordMissing):
+    def __init__(self, _='no password provided when trying to put to password-protected queue'): super().__init__(_)
 ignore_all = IgnoreErrors(BaseException)
 def __getattr__(name, /):
     if name != 'WarningToError': raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

@@ -108,5 +108,5 @@ type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as time.monotonic, time.process_time and time.perf_counter.'''
 type All = tuple[str, ...]
 '''Type of the __all__ attributes of asyncutils' submodules.'''
-type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
+type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''

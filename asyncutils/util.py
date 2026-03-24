@@ -1,4 +1,5 @@
-from .config import Executor, SYNC_AWAIT, _NO_DEFAULT
+from .config import Executor
+from .constants import SYNC_AWAIT, _NO_DEFAULT
 from .exceptions import IgnoreErrors, Critical, Deadlock, CRITICAL
 from ._internal.running_console import _get_
 from ._internal.helpers import _get_loop_and_set, stop_and_closer

@@ -2,7 +2,7 @@ import sys
 from signal import signal, getsignal, Signals
 from asyncio.tasks import wait_for
 from ._internal.patch import patch_function_signatures as f
-from .config import _NO_DEFAULT
+from .constants import _NO_DEFAULT
 from .exceptions import Critical, IgnoreErrors, CRITICAL
 from .base import event_loop
 from .util import safe_cancel

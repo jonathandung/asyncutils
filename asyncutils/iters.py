@@ -1,5 +1,5 @@
-from .config import _NO_DEFAULT, RAISE, _randinst
-from .constants import RECIP_E
+from .constants import _NO_DEFAULT, RAISE, RECIP_E
+from .config import _randinst
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
 from .util import safe_cancel, get_aiter_fromf
 from .iterclasses import achain, anullcontext
@@ -35,7 +35,7 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
                 async with l: n -= 1
                 if n == 0: await safe_cancel(t)
                 break
-            elif put_exc and E.exception_occurred(i): raise i.exc
+            elif put_exc and E.exception_occurred(i): raise E.unwrap_exc(i)
             else: yield i
     async def feed():
         async def helper(i): await gather(*(q.put(i) for q in Q), return_exceptions=True)

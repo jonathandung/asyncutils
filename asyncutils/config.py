@@ -1,7 +1,6 @@
 import sys as S, logging as L
 from ._internal.submodules import config_all as __all__
 from ._internal import log, patch as P
-from atexit import register
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N = p.parse_args(); del p
 else: from ._internal.unparsed import N
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
@@ -93,47 +92,10 @@ class debugging:
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))
-class sentinel_base:
-    _can_instantiate, __slots__ = False, ('__name',)
-    def __new__(cls, name=None, _=__import__('keyword').iskeyword):
-        cls._assert_can_instantiate()
-        if name is None: return super().__new__(cls)
-        if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('invalid name')
-        if (o := (c := cls._cache).get(name)) is None:
-            (o := super().__new__(cls)).__name = name
-            with cls._lock: c[name] = o
-        return o
-    @property
-    def name(self): return self.__name
-    @classmethod
-    def _assert_can_instantiate(cls):
-        if not cls._can_instantiate: raise TypeError(f'cannot instantiate {cls.__qualname__!r}') from None
-    def __repr__(self): return f'<{type(self).__qualname__} {self.__name!r} at {id(self):#x}>'
-    def __str__(self): return getattr(self, 'name', '<unbound>')+(' <private>' if self.is_private else '')
-    def __set_name__(self, owner, name, /):
-        if getattr(self, '__name', None) is None: self._assert_can_instantiate(); self.__name = n = f'{owner.__qualname__}.{name}'; self._cache[n] = self
-        else: raise NameError(f'cannot bind named {type(self).__qualname__} to class')
-    def __reduce__(self):
-        try: return type(self), (self.__name,)
-        except AttributeError: raise TypeError(f'cannot pickle unbound instance of {type(self).__qualname__}') from None
-    def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
-        if getattr(cls, '__slots__', True): raise TypeError('slots should be empty for sentinel classes')
-        cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True
-    @property
-    def is_private(self): return getattr(self, '__name', '').split('.', 1)[-1].startswith('_')
-    @property
-    def bound_to(self):
-        if len(l := getattr(self, '__name', '').split('.', 1)) == 2: return l[0]
-    P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}'))
-class _sentinel(sentinel_base):
-    __slots__ = ()
-    def __init_subclass__(cls): raise TypeError('cannot subclass _sentinel')
-    def __reduce__(self): return f'asyncutils.config.{self.name}'
-_NO_DEFAULT, RAISE, SYNC_AWAIT = map(_sentinel, ('_NO_DEFAULT', 'RAISE', 'SYNC_AWAIT'))
-debug, _sentinel._can_instantiate = debugging(), False
+debug = debugging()
 def r(name, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {name!r}")
 def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, f, m, r, s, b, register, P, _sentinel # noqa: F821
+del _, e, L, M, N, S, f, m, r, s, b, P,  # noqa: F821

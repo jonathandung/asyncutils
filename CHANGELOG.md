@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.16] - 2026-03-22: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.17] - 2026-03-24: newest; [unstable](https://semver.org/#spec-item-4)
+
+### Tests
+
+45% coverage, 22 tests
+
+### Docs
+
+40% complete
 
 ### Added
 
@@ -84,16 +92,13 @@ Submodules:
 
   Classes:
   - debugging
-  - sentinel_base
   - Executor
 
   Functions:
   - set_logger_level
   - get_past_logs
 
-  Constants/Sentinels:
-  - RAISE
-  - SYNC_AWAIT
+  Constants:
   - debug
   - silent
   - basic_repl
@@ -110,6 +115,18 @@ Submodules:
 - constants
 
   Classes:
+  - sentinel_base
+
+  Constants:
+  - RECIP_E
+
+  Sentinels:
+  - RAISE
+  - SYNC_AWAIT
+
+- context
+
+  Classes:
   - Context
   - localcontext (context manager)
 
@@ -117,11 +134,7 @@ Submodules:
   - getcontext
   - setcontext
 
-  Constants:
-  - RECIP_E
-
-  Configuration variables:
-  Refer to the IDE autocomplete
+  Configuration variables: Refer to the IDE autocomplete
 
 - events
 
@@ -129,11 +142,74 @@ Submodules:
   - SingleWaiterEventWithValue
   - EventWithValue
 
-- exceptions
+- exceptions:
 
-  Refer to the IDE autocomplete
+  Classes:
+  - ref
+  - IgnoreErrors
+  - WarningToError
+
+  Constants:
+  - CRITICAL
+
+  Context managers (ignore_*):
+  - ignore_all
+
+  Exception types:
+  - Critical
+  - StateCorrupted
+  - VersionError
+  - VersionConversionError
+  - VersionNormalizerMissing
+  - VersionCorrupted
+  - VersionValueError
+  - VersionNormalizerTypeError
+  - VersionNormalizerFault
+  - BulkheadError
+  - BulkheadFull
+  - BulkheadShutDown
+  - PoolError
+  - PoolFull
+  - PoolShutDown
+  - BusError
+  - BusTimeout
+  - BusShutDown
+  - BusStatsErrors
+  - BusPublishingError
+  - CircuitBreakerError
+  - CircuitHalfOpen
+  - CircuitOpen
+  - EventValueError
+  - FutureCorrupted
+  - MaxIterationsError
+  - ItemsExhausted
+  - LockForceRequest
+  - PasswordQueueError
+  - PasswordRetrievalError
+  - GetPasswordRetrievalError
+  - PutPasswordRetrievalError
+  - ForbiddenOperation
+  - PasswordError
+  - WrongPassword
+  - WrongPasswordType
+  - PasswordMissing
+  - GetPasswordMissing
+  - PutPasswordMissing
+
+  Functions:
+  - unnest
+  - unnest_reverse
+  - potent_derive
+  - prepare_exception
+  - raise_
+  - exception_occurred
+  - wrap_exc
+  - unwrap_exc
 
 - func
+
+  Classes:
+  - RateLimited
 
   Functions:
   - areduce
@@ -145,7 +221,6 @@ Submodules:
   - debounce
   - measure
   - benchmark
-  - RateLimited
 
 - futures
 

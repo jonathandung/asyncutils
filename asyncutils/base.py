@@ -1,5 +1,5 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
-from .config import RAISE, _NO_DEFAULT
+from .constants import RAISE, _NO_DEFAULT
 from ._internal import patch as P, log as L
 from ._internal.helpers import _check_methods as b, _get_loop_and_set
 from sys import exc_info, audit, stderr, maxsize

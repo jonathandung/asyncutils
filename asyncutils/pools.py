@@ -1,9 +1,9 @@
 from .base import aiter_to_iter, take, event_loop, dummy_task
 from .util import semaphore, safe_cancel, sync_lock_from_binder
-from .exceptions import exception_occurred, wrap_exc, CRITICAL, Critical, PoolError, PoolShutDown, PoolFull
+from .exceptions import exception_occurred, wrap_exc, unwrap_exc, CRITICAL, Critical, PoolError, PoolShutDown, PoolFull
 from ._internal.helpers import _filter_out, _check_methods, subscriptable
 from .mixins import LoopContextMixin, AsyncContextMixin
-from .config import _NO_DEFAULT
+from .constants import _NO_DEFAULT
 from sys import exc_info
 from time import monotonic
 from itertools import count
@@ -33,7 +33,7 @@ class Pool(LoopContextMixin):
     async def __anext__(self):
         if self._event.is_set() and self._queue.empty(): raise StopAsyncIteration('pool ran out of items')
         try:
-            if exception_occurred(i := await self._queue.get()) and isinstance(e := i.exc, StopAsyncIteration): raise e
+            if exception_occurred(i := await self._queue.get()) and isinstance(e := unwrap_exc(i), StopAsyncIteration): raise e
             return i
         finally:
             if self._task: self._task.cancel()

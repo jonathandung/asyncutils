@@ -15,7 +15,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     @bound.setter
     def bound(self, value: int, /) -> None: ...
 class ResourceGuard(RuntimeError, AsyncContextMixin):
-    '''Reimplementation of anyio.ResourceGuard, as an **async** context manager.'''
+    '''Reimplementation of anyio.ResourceGuard, as a sync or async context manager.'''
     @property
     def guarded(self) -> bool: ...
     def __init__(self, action: str=..., rname: Any=...): ...
@@ -42,7 +42,7 @@ class CircuitBreaker:
         If `name` is passed, use it as the name; return a function wrapping `f` otherwise, with the name of the circuit breaker (for debugging) derived from the name of the function.
         Pass exceptions that are expected to happen through the `exc` parameter.
         When the decorated function fails more than `max_fails` times, the breaker triggers (opens the circuit) and disallow further calls of the same function by throwing an exception.
-        This state persists until the `reset` timeout expires, the default of which can be changed in the constants submodule. Then, the breaker enters the half-open state.
+        This state persists until the `reset` timeout expires, the default of which can be changed in the context submodule. Then, the breaker enters the half-open state.
         If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     @overload
     def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
@@ -80,8 +80,7 @@ class DynamicThrottle:
         `lbound`: Upper bound of the above ratio such that the rate is multiplied by `lfactor` and clamped similarly.
         `jitter`: The jitter in calculation of the wait time before the context can enter.
         `timer`: Function to return current time as a float.
-        `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.
-        '''
+        `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
     @property
     def rate(self) -> float: '''The current rate.'''
     @rate.setter

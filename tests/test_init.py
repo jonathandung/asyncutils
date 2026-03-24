@@ -1,5 +1,4 @@
 import asyncutils
-from pytest import raises
 def test_mod():
     assert isinstance(asyncutils.__getattr__, type)
     assert asyncutils.__all__ is asyncutils.__dir__()
