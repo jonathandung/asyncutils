@@ -24,7 +24,7 @@ async def test_signal_raise(mock_logger):
     with raises(Log, match='invalid signal .*: .*'): await f(None)
     if not W:
         with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await f(19, timeout=0.1)
-        with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal SIGINT'):
+        with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal (SIGINT|2)'):
             asyncio.create_task(kill(s := Signals.SIGINT))
             await wait_for_signal(bad_processor, s, timeout=0.2, possible_errors=(ZeroDivisionError,), logger=mock_logger)
     with raises(Log, match='wait_for_signal timed out'): await f(Signals.SIGILL, timeout=0.1)
