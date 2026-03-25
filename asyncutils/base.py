@@ -1,7 +1,7 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
 from .constants import RAISE, _NO_DEFAULT
 from ._internal import patch as P, log as L
-from ._internal.helpers import check_methods as b, get_loop_and_set
+from ._internal.helpers import check_methods as b, get_loop_and_set as g
 from sys import exc_info, audit, stderr, maxsize
 from asyncio.tasks import all_tasks, gather
 from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
@@ -97,7 +97,7 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         r = await gather(*map(f, r), return_exceptions=True)
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
     audit('asyncutils.base.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
@@ -114,7 +114,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
                     yield _
     elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
         audit('asyncutils/create_executor', 'base.iter_to_aiter'); g = _c(it, 'send', 'throw', 'close')
-        def r(f, _=(loop or get_loop_and_set()).run_in_executor): return lambda *a: _(f, *a)
+        def r(f, _=(loop or _g()).run_in_executor): return lambda *a: _(f, *a)
         if f:
             if g:
                 async def iterator(_=r(it.send)): # type: ignore[no-redef]
@@ -198,4 +198,4 @@ P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close() # type: ignore
 _.__qualname__ = _.__name__ = 'dummy_task'
-del f, _, P, L, b
+del f, _, P, L, b, g
