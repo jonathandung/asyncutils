@@ -2,7 +2,7 @@
 
 Thank you for using asyncutils! This document outlines how to get help with this project.
 
-Before jumping to seek support, please check **[README.md](README.md)** for basic usage and installation.
+Before jumping to seek support, please check **[README.md](https://github.com/jonathandung/asyncutils/blob/dev/README.md)** for a basic usage and installation guide.
 
 ## Bug Reports
 
@@ -15,7 +15,7 @@ If you've found a bug, please:
     - Python version (`python --version`)
     - asyncutils version (`autils -v`)
     - Operating system
-    - Package version (`pip show [package-name]` or `conda list [package-name]`)
+    - Package version (`pip show py-asyncutils` or `conda list py-asyncutils`)
     - Minimal reproducible example
     - Full error traceback
 
@@ -60,7 +60,7 @@ python -m pip install --upgrade pip
 pip uninstall py-asyncutils
 pip install py-asyncutils
 
-# If using conda (not yet supported; will be added in the future)
+# If using conda
 conda update py-asyncutils
 ```
 
@@ -71,14 +71,14 @@ conda update py-asyncutils
 pip list | grep py-asyncutils
 # Check sys.path
 python -c "print(*__import__('sys').path, sep='\n')"
-# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, ... separated by newlines
+# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console, constants, # context, ... separated by newlines
 python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 ```
 
 ## Version Compatibility
 
 - Python 3.15+ required
-- No dependencies, which we're proud of
+- No dependencies outside development, which we're proud of
 - Maybe use virtual environments
 
 ## Response Times

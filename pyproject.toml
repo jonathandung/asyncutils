@@ -19,7 +19,7 @@ classifiers = ["Programming Language :: Python :: 3", "Programming Language :: P
 Homepage = "https://github.com/jonathandung/asyncutils"
 Repository = "https://github.com/jonathandung/asyncutils.git"
 Issues = "https://github.com/jonathandung/asyncutils/issues"
-Changelog = "https://github.com/jonathandung/asyncutils/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/jonathandung/asyncutils/blob/dev/CHANGELOG.md"
 
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'

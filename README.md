@@ -29,7 +29,7 @@ or with conda:
 conda install -c conda-forge py-asyncutils=0.8.17
 ```
 
-Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/README.md) for steps to checking the installation.
+Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/dev/SUPPORT.md) for steps to checking the installation.
 
 ## Usage
 
@@ -87,11 +87,11 @@ Other resources if you're new to the world of async: [asyncio HOWTO](https://doc
 
 If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
 
-For more, check out the [Contributing Guide](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md).
+For more, check out the [Contributing Guide](https://github.com/jonathandung/asyncutils/blob/dev/CONTRIBUTING.md).
 
 ## License
 
-[MIT](https://github.com/jonathandung/asyncutils/blob/main/LICENSE) © 2026 Jonathan Dung
+[MIT](https://github.com/jonathandung/asyncutils/blob/dev/LICENSE) © 2026 Jonathan Dung
 
 Have fun!
 
@@ -115,6 +115,6 @@ Have fun!
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
-![Tests](badges/tests.svg)
-![Coverage](badges/coverage.svg)
+![Tests](https://github.com/jonathandung/asyncutils/blob/dev/badges/tests.svg)
+![Coverage](https://github.com/jonathandung/asyncutils/blob/dev/badges/coverage.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
