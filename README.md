@@ -29,7 +29,7 @@ or with conda:
 conda install -c conda-forge py-asyncutils=0.8.17
 ```
 
-Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/README.md) for steps to checking the installation.
+Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
 
 ## Usage
 

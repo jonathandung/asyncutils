@@ -8,13 +8,15 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ## [0.8.17] - 2026-03-24: newest; [unstable](https://semver.org/#spec-item-4)
 
+Created dev branch for python 3.15 features!
+
 ### Tests
 
 45% coverage, 22 tests
 
 ### Docs
 
-40% complete
+41% complete
 
 ### Added
 
