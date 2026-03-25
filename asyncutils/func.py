@@ -3,16 +3,16 @@ from ._internal import log
 from .constants import RAISE, _NO_DEFAULT
 from .config import _randinst
 from .base import iter_to_aiter
-from .util import safe_cancel, _ignore_cancellation
+lazy from .util import safe_cancel, _ignore_cancellation
 from .exceptions import wrap_exc, CRITICAL, Critical, MaxIterationsError, RateLimitExceeded
 from time import perf_counter
 from functools import wraps, partial, Placeholder
 from sys import audit, maxsize as INF
 from collections import deque, namedtuple
-from asyncio.tasks import sleep, wait_for, eager_task_factory
-from asyncio.locks import Lock
-from asyncio.exceptions import CancelledError
-from asyncio.coroutines import iscoroutine
+lazy from asyncio.tasks import sleep, wait_for, eager_task_factory
+lazy from asyncio.locks import Lock
+lazy from asyncio.exceptions import CancelledError
+lazy from asyncio.coroutines import iscoroutine
 from ._internal.submodules import func_all as __all__
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
