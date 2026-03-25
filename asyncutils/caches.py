@@ -1,14 +1,14 @@
+from time import monotonic
 from .mixins import LoopContextMixin
 from .base import yield_to_event_loop, event_loop
 from .util import safe_cancel, to_async
 from .exceptions import CRITICAL, Critical
-from . import context
-from time import monotonic
-from functools import lru_cache, wraps
-from asyncio.locks import Lock, Event
-from asyncio.coroutines import iscoroutine
-from asyncio.tasks import sleep, gather
-from asyncio.exceptions import CancelledError
+lazy from . import context
+lazy from functools import lru_cache, wraps
+lazy from asyncio.locks import Lock, Event
+lazy from asyncio.coroutines import iscoroutine
+lazy from asyncio.tasks import sleep, gather
+lazy from asyncio.exceptions import CancelledError
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'

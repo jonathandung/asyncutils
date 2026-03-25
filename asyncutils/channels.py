@@ -15,7 +15,7 @@ from asyncio.queues import Queue, QueueEmpty, QueueShutDown
 from asyncio.coroutines import iscoroutine
 from asyncio.tasks import wait_for, gather, sleep, shield
 from asyncio.timeouts import timeout as _timeout
-from ._internal import log, patch as P
+from ._internal import log as L, patch as P
 from ._internal.submodules import channels_all as __all__
 @subscriptable
 class Observable(LoopContextMixin):
@@ -38,7 +38,7 @@ class Observable(LoopContextMixin):
                 if _silent_:
                     if _persistent_: continue
                     break
-                elif _persistent_: log.error(f'{type(e).__qualname__} in observer', exc_info=True)
+                elif _persistent_: L.error(f'{type(e).__qualname__} in observer', exc_info=True)
                 else: raise
     async def wait_for_next(self, timeout=None, strict=False):
         async def one_time(*a, **k): F.set_result((a, k))
@@ -207,7 +207,7 @@ class EventBus(LoopContextMixin):
         try:
             await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
-            log.info(f'{self.name}: publishing of event {event_type!r} succeeded'); log.debug(f'final data: {data!r}')
+            L.info(f'{self.name}: publishing of event {event_type!r} succeeded'); L.debug(f'final data: {data!r}')
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally: await safe_cancel(p)
     def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
@@ -242,18 +242,18 @@ class EventBus(LoopContextMixin):
             with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, event_type); return r
         await self.subscribe(callback, event_type); return self.make(f())
     async def feed_event(self, *d, timeout=None):
-        if (q := self.stream_queue).full(): log.warning('event stream buffer full')
+        if (q := self.stream_queue).full(): L.warning('event stream buffer full')
         try: await wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
-        except QueueShutDown: log.info('event stream is closing', exc_info=True)
+        except QueueShutDown: L.info('event stream is closing', exc_info=True)
         except TimeoutError:
-            if q.full(): log.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
+            if q.full(): L.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
     async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):
         self.raise_for_shutdown(); t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if item_timeout is _NO_DEFAULT: item_timeout = context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
             while True: yield await wait_for(q.get(), item_timeout) # type: ignore
-        except QueueShutDown: log.info(f'event stream of {self.name} has been shut down', exc_info=True)
-        except TimeoutError: log.error(f'event stream of {self.name} is stopping because of timeout in waiting for item', exc_info=True)
+        except QueueShutDown: L.info(f'event stream of {self.name} has been shut down', exc_info=True)
+        except TimeoutError: L.error(f'event stream of {self.name} is stopping because of timeout in waiting for item', exc_info=True)
         finally: F.set_result(None); await t
     async def shutdown(self, immediate=False, timeout=None, preserve_stats=False):
         if self._is_shutdown: return
@@ -264,7 +264,7 @@ class EventBus(LoopContextMixin):
             async with _timeout(timeout):
                 self.stream_queue.shutdown(immediate)
                 for _ in range(self.active_tasks): await f()
-        except TimeoutError: log.error(f'{self.name} shutdown timed out, some tasks may be incomplete', exc_info=True)
+        except TimeoutError: L.error(f'{self.name} shutdown timed out, some tasks may be incomplete', exc_info=True)
         finally:
             if p := self._publishers: await safe_cancel_batch(p)
             del self._lock, self._handler, self._sem, self._publishers
@@ -278,7 +278,7 @@ class EventBus(LoopContextMixin):
         try:
             async with self._sem:
                 if iscoroutine(r := callback(*filter_out(event_type, s=_NO_DEFAULT), data)): await wait_for(r, timeout)
-        except TimeoutError: log.warning(f'callback {callback.__qualname__} timed out')
+        except TimeoutError: L.warning(f'callback {callback.__qualname__} timed out')
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e)
     async def __setup__(self): super().__init__()
@@ -315,8 +315,8 @@ class Rendezvous:
         await self.cleanup()
         async with self._lock: t = len(self._getters), len(self._putters)
         return _f(*t, sum(t), not any(t))
-    async def cleanup(self):
-        async with self._lock: self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
+    async def cleanup(self, _=__import__('_operator').methodcaller('done')):
+        async with self._lock: self._getters, self._putters = deque(filter(_, self._getters)), deque(t for t in self._putters if not t[1].done())
     async def exchange(self, v, /, *, timeout=None, asap=False):
         g, f = self._getters, True
         async with _timeout(timeout):
