@@ -1,14 +1,14 @@
 from .mixins import AsyncContextMixin, AwaitableMixin
 from .config import _randinst
 from .constants import _NO_DEFAULT
-from .base import iter_to_aiter
-from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
-from .context import getcontext
+lazy from .base import iter_to_aiter
+lazy from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
+lazy from .context import getcontext
+lazy from asyncio.exceptions import BrokenBarrierError
+lazy from asyncio.tasks import wait_for, sleep
+lazy from functools import wraps
 from asyncio.locks import Lock, Event, BoundedSemaphore
-from asyncio.exceptions import BrokenBarrierError
-from asyncio.tasks import wait_for, sleep
 from time import monotonic
-from functools import wraps
 from _collections import deque # type: ignore
 from itertools import count
 from ._internal.submodules import altlocks_all as __all__
