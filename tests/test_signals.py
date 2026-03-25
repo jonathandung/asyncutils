@@ -1,7 +1,6 @@
 import asyncio, os
 from asyncutils.signals import wait_for_signal
 from asyncutils.base import event_loop
-from asyncutils._internal.helpers import get_loop_and_set
 from signal import Signals
 from pytest import mark, raises, fixture
 async def kill(sig):
