@@ -8,7 +8,7 @@ from asyncio.locks import Event, Lock
 from asyncio.tasks import wait_for, current_task, wait, gather
 from asyncio.coroutines import iscoroutine
 from ._internal import log
-from ._internal.helpers import _check_methods
+from ._internal.helpers import check_methods
 from ._internal.submodules import locks_all as __all__
 class AdvancedRateLimit(EventualLoopMixin, LockMixin):
     __slots__ = 'rate', '_lock', '_waiters', '_unfair', '_last_update', 'tokens', 'capacity'
@@ -190,6 +190,6 @@ class LocksmithBase:
     def raised_other(self, lock, exc, /):
         if not isinstance(exc, RuntimeError): log.error(f'error encountered in attempt to force {type(lock).__qualname__} at {id(lock):#x}', exc_info=exc)
     async def get_info(self, lock, /): return 'potential deadlock situation'
-    def preliminary_check_lock(self, lock, /): return _check_methods(lock, 'acquire', 'release', 'locked')
+    def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
     def task_raised_critical(self, lock, exc, /): raise exc from None
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())

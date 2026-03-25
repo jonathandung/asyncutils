@@ -3,7 +3,7 @@ from .config import _randinst
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
 from .util import safe_cancel, get_aiter_fromf
 from .iterclasses import achain, anullcontext
-from ._internal.helpers import copy_and_clear, stop_and_closer, _filter_out, _get_loop_and_set, _check_methods
+from ._internal.helpers import copy_and_clear, stop_and_closer, filter_out, get_loop_and_set, check_methods
 from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache
 from sys import audit
@@ -26,7 +26,7 @@ async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
         yield tuple(l); g()
 def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     if n <= 0: raise ValueError('n must be positive')
-    if loop is None: loop = _get_loop_and_set()
+    if loop is None: loop = get_loop_and_set()
     Q, a, l = tuple(Queue(maxqsize) for _ in range(n)), _NO_DEFAULT, Lock()
     async def iterator(q):
         nonlocal n
@@ -53,7 +53,7 @@ class _aunzip_consumer_base:
     def __aiter__(self): return self
     def close(self): self.q.shutdown()
 async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
-    audit('asyncutils.iters.aunzip', ait, *_filter_out(fillvalue)); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
+    audit('asyncutils.iters.aunzip', ait, *filter_out(fillvalue)); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
     class aunzip_consumer(_b):
         __slots__ = ()
         async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)):
@@ -69,7 +69,7 @@ async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_a
             except QueueShutDown: raise StopAsyncIteration from None
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
 async def merge_async_iters(*I, reverse=False):
-    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), _get_loop_and_set(), _NO_DEFAULT
+    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), get_loop_and_set(), _NO_DEFAULT
     async def drain(i, f=q.put):
         async for _ in i: await f(_)
     async def close():
@@ -97,7 +97,7 @@ async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
             if b: yield copy_and_clear(b)
             raise
 def achunked(it, n, strict=False):
-    I = get_aiter_fromf(partial(collect, it, *_filter_out(n)), [])
+    I = get_aiter_fromf(partial(collect, it, *filter_out(n)), [])
     if strict:
         if n is None: raise ValueError('n cannot be None when strict is True')
         async def ret():
@@ -139,13 +139,13 @@ def asliced(seq, n, strict=False):
     return ret()
 def batch_buffer(items, batch_size, buffer_size, *, loop=None):
     d = deque(maxlen=buffer_size)
-    if loop is None: loop = _get_loop_and_set()
+    if loop is None: loop = get_loop_and_set()
     async def consumer():
         async for b in batch(items, batch_size): d.extend(b)
     loop.create_task(consumer()); return d
 def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
     q = Queue(maxsize)
-    if loop is None: loop = _get_loop_and_set()
+    if loop is None: loop = get_loop_and_set()
     async def producer():
         try:
             async for _ in it:
@@ -387,7 +387,7 @@ async def aconsume(it, n=None):
     if n is None:
         async for _ in iter_to_aiter(it): ...
     else: await anext(aislice(it, n, n), None)
-def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *_filter_out(default, s=_NO_DEFAULT))
+def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *filter_out(default, s=_NO_DEFAULT))
 async def aallequal(it, key=_identity, strict=False):
     I = agroupby(it, key)
     async for _ in I:
@@ -547,7 +547,7 @@ async def acollapse(it, base_typ=(str, bytes), levels=None):
             else:
                 try: t = iter_to_aiter(_); g(((l+1, t), N)); break
                 except TypeError: yield _
-def afirsttrue(it, default=_NO_DEFAULT, pred=None): F = afilter(pred, it); return anext(F, *_filter_out(default, _NO_DEFAULT))
+def afirsttrue(it, default=_NO_DEFAULT, pred=None): F = afilter(pred, it); return anext(F, *filter_out(default, _NO_DEFAULT))
 def aprepend(val, it): return achain((val,), it).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _(i)
@@ -567,7 +567,7 @@ async def afirst(it, default=_NO_DEFAULT):
         for i in it: return i
     if default is _NO_DEFAULT: raise ValueError('afirst called on empty iterable without default value')
     return default
-async def alast(it, default=_NO_DEFAULT, _=_check_methods):
+async def alast(it, default=_NO_DEFAULT, _=check_methods):
     try:
         if _(it, '__getitem__'): return it[-1]
         return (await to_list(it))[-1] if (f := getattr(it, '__reversed__', None)) is None else f().__next__()
@@ -595,7 +595,7 @@ async def apolynomialfromroots(roots):
     async for _ in iter_to_aiter(p): yield _
 async def atranspose(it):
     async for _ in azip(*await to_tuple(it), strict=True): yield _
-async def aflattentensor(tensor, base=(str, bytes), _c=_check_methods):
+async def aflattentensor(tensor, base=(str, bytes), _c=check_methods):
     I = iter_to_aiter(tensor)
     while True:
         try: v = await anext(I)
@@ -691,9 +691,9 @@ def asubstrindices(seq, reverse=False):
     return ((seq[i:i+L], i, i+L) for L in r async for i in arange(x-L))
 def iter_future(it, summaryf=aconsume):
     async def task(): t = L.time(); await summaryf(it); F.set_result(L.time()-t)
-    F = (L := _get_loop_and_set()).create_future(); L.create_task(task()); return F
+    F = (L := get_loop_and_set()).create_future(); L.create_task(task()); return F
 def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable %r'):
-    L, r, I = _get_loop_and_set(), [], iter_to_aiter(it)
+    L, r, I = get_loop_and_set(), [], iter_to_aiter(it)
     async def consume():
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
         async for x in amap(O.index, indices):
@@ -752,7 +752,7 @@ async def aguessmax(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
             if __cmp(k, K(i)): return i
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
 async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=None, __cmp=_compare):
     if (r := await amin(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
         if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
@@ -763,7 +763,7 @@ async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
             if __cmp(K(i), k): return i
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := _get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
 async def apowersoftwo(*, init=1, init_shift=0):
     init <<= init_shift
     while True: yield init; init <<= 1
@@ -774,4 +774,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, _check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

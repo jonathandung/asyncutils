@@ -1,5 +1,5 @@
 from .config import Executor
-from ._internal.helpers import _LoopMixinBase, _get_loop_and_set, subscriptable
+from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable
 from functools import cached_property, partial
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
@@ -22,7 +22,7 @@ class AwaitableMixin(metaclass=ABCMeta):
 @subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     @cached_property
-    def runner(self, _=_get_loop_and_set):
+    def runner(self, _=get_loop_and_set):
         __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin')
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = _()
         return partial(l.run_in_executor, Executor()) # type: ignore[attr-defined]
@@ -91,4 +91,4 @@ class EventMixin(AwaitableMixin, metaclass=ABCMeta):
             async with _(duration):
                 while True: yield await self
         except TimeoutError: return
-del timeout, _get_running_loop, new_event_loop, _get_loop_and_set
+del timeout, _get_running_loop, new_event_loop, get_loop_and_set

@@ -16,7 +16,7 @@ from .mixins import EventualLoopMixin
 from .base import iter_to_aiter, collect
 from .util import sync_await, safe_cancel
 from .futures import AsyncCallbacksFuture
-from ._internal.helpers import _get_loop_and_set, subscriptable
+from ._internal.helpers import get_loop_and_set, subscriptable
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
 ignore_qerrs, ignore_valerrs = f(*_), E.IgnoreErrors(ValueError)
@@ -50,7 +50,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         pwd, = pwd
         if not isinstance(pwd, puttyp): raise _.WrongPasswordType(pwd, type(pwd), q, puttyp)
         if pwd is not password_put and (strict or pwd != password_put): raise _.WrongPassword(q, pwd)
-    (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := _get_loop_and_set()).create_future, object()
+    (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
     if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(heapq, f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     @subscriptable

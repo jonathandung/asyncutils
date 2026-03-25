@@ -1,7 +1,7 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
 from .constants import RAISE, _NO_DEFAULT
 from ._internal import patch as P, log as L
-from ._internal.helpers import _check_methods as b, _get_loop_and_set
+from ._internal.helpers import check_methods as b, get_loop_and_set
 from sys import exc_info, audit, stderr, maxsize
 from asyncio.tasks import all_tasks, gather
 from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
@@ -70,12 +70,12 @@ class event_loop:
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
-    def __del__(self, _f=L.debug, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n'):
+    def __del__(self, _f=L.debug, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n', w=lambda m, s=stderr: s.closed or s.write(m)):
         b, n = not (f := self._flags)&2, type(self).__qualname__
         if f&self._ENTERED:
-            if b: stderr.write(_m%n)
+            if b: w(_m%n)
             if f&1: self._flags = f^0x400
-            if self.__exit__(*exc_info()) and b: stderr.write(_w%n)
+            if self.__exit__(*exc_info()) and b: w(_w%n)
         elif b: _f(f'destroyed {n} at {id(self):#x}')
     def __reduce__(self, /): return self.from_flags.__func__, (self.__class__, self._flags)
     P.patch_method_signatures((__enter__, ''), (__exit__, 'typ, val, tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}'))
@@ -114,7 +114,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b):
                     yield _
     elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
         audit('asyncutils/create_executor', 'base.iter_to_aiter'); g = _c(it, 'send', 'throw', 'close')
-        def r(f, _=(loop or _get_loop_and_set()).run_in_executor): return lambda *a: _(f, *a)
+        def r(f, _=(loop or get_loop_and_set()).run_in_executor): return lambda *a: _(f, *a)
         if f:
             if g:
                 async def iterator(_=r(it.send)): # type: ignore[no-redef]

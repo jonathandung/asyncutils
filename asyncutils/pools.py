@@ -1,7 +1,7 @@
 from .base import aiter_to_iter, take, event_loop, dummy_task
 from .util import semaphore, safe_cancel, sync_lock_from_binder
 from .exceptions import exception_occurred, wrap_exc, unwrap_exc, CRITICAL, Critical, PoolError, PoolShutDown, PoolFull
-from ._internal.helpers import _filter_out, _check_methods, subscriptable
+from ._internal.helpers import filter_out, check_methods, subscriptable
 from .mixins import LoopContextMixin, AsyncContextMixin
 from .constants import _NO_DEFAULT
 from sys import exc_info
@@ -24,7 +24,7 @@ class Pool(LoopContextMixin):
     def __aiter__(self):
         async def consumer():
             try:
-                if _check_methods(I := self._it, '__aiter__'):
+                if check_methods(I := self._it, '__aiter__'):
                     async for _ in I: await self.process(_)
                 else:
                     for _ in I: await self.process(_)
@@ -197,7 +197,7 @@ class ConnectionPool:
     def in_use(self): return len(self._in_use)
     del _locker
 class CallbackAccumulator(__import__('_collections').deque, AsyncContextMixin):
-    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_iter(it), maxlen); self.t, self.call_once, self.default_getter = tuple(_filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
+    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_iter(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
     def __exit__(self, /, *_): a, k = self.default_getter(); self(*a, **k)

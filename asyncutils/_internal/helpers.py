@@ -1,12 +1,11 @@
 from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
 from atexit import register
 from sys import audit
-def _filter_out(*a, s=None, f=__import__('_operator').is_not): yield from filter(lambda x, s=s: f(s, x), a)
-def _get_loop_and_set():
-    audit('asyncutils._internal.helpers._get_loop_and_set')
+def filter_out(*a, s=None, f=__import__('_operator').is_not): yield from filter(lambda x, s=s: f(s, x), a)
+def get_loop_and_set():
     if (l := _get_running_loop()) is None: register(stop_and_closer(l := new_event_loop())); set_event_loop(l)
-    return l
-def _check_methods(obj, /, *meth):
+    audit('asyncutils._internal.helpers._get_loop_and_set', l); return l
+def check_methods(obj, /, *meth):
     M = obj.__class__.__mro__
     for m in meth:
         for b in M:

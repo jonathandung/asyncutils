@@ -40,7 +40,7 @@ async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, 
             except CRITICAL: raise Critical
         return r
     finally: audit('asyncutils.compete.multi_winner_race_with_callback/end', C); await safe_cancel_batch(p, callback=loser)
-def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=iscoroutine, futwrap=wrap_future, handle_aiter=None, handle_iter=None, _c=H._check_methods):
+def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=iscoroutine, futwrap=wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods):
     if handle_iter is None: from .iters import to_list as handle_iter
     if handle_aiter is None: from .iters import to_list as handle_aiter
     for i in aiter_to_iter(cfs):

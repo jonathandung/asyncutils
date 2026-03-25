@@ -2,14 +2,14 @@ from asyncutils import _internal as mod
 from pytest import raises, fail
 def test_helpers():
     helpers = mod.helpers
-    for _ in helpers._filter_out(None, True, False): assert isinstance(_, bool)
-    assert helpers._check_methods('', 'lower', 'casefold')
+    for _ in helpers.filter_out(None, True, False): assert isinstance(_, bool)
+    assert helpers.check_methods('', 'lower', 'casefold')
     with raises(AttributeError): helpers.copy_and_clear(()) # type: ignore
     class _: ...
     assert helpers.subscriptable(_) is _
     _ = _[None]() # type: ignore
     _.foo = lambda: None # type: ignore
-    assert not helpers._check_methods(_, 'foo')
+    assert not helpers.check_methods(_, 'foo')
 def test_submods_lazy_loading():
     module = mod.initialize.module
     if 'asyncutils.cli' in __import__('sys').modules: fail('module `asyncutils.cli` is somehow already loaded in test environment')

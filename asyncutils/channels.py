@@ -3,7 +3,7 @@ from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
 from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .constants import _NO_DEFAULT
-from ._internal.helpers import _filter_out, _get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
+from ._internal.helpers import filter_out, get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
 from . import context
 from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
@@ -277,7 +277,7 @@ class EventBus(LoopContextMixin):
     async def _safe_callback(self, callback, data, event_type=None, timeout=None):
         try:
             async with self._sem:
-                if iscoroutine(r := callback(*_filter_out(event_type, s=_NO_DEFAULT), data)): await wait_for(r, timeout)
+                if iscoroutine(r := callback(*filter_out(event_type, s=_NO_DEFAULT), data)): await wait_for(r, timeout)
         except TimeoutError: log.warning(f'callback {callback.__qualname__} timed out')
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e)
@@ -287,7 +287,7 @@ class EventBus(LoopContextMixin):
 class Rendezvous:
     __slots__ = '_getters', '_putters', '_loop', '_lock', '_task'
     def __init__(self, *, loop=None, lock=None):
-        if loop is None: loop = _get_loop_and_set()
+        if loop is None: loop = get_loop_and_set()
         if lock is None: lock = Lock()
         self._getters, self._putters, self._loop, self._lock = deque(), deque(), loop, lock; self._make_task()
     async def _maintainer(self, f=sleep.__get__(60)):

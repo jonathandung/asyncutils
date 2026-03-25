@@ -2,7 +2,7 @@ from .base import iter_to_aiter
 from .mixins import EventualLoopMixin, LoopContextMixin
 from .config import Executor
 from .constants import _NO_DEFAULT
-from ._internal.helpers import _get_loop_and_set, subscriptable, _check_methods
+from ._internal.helpers import get_loop_and_set, subscriptable, check_methods
 from sys import maxsize as INF, audit
 from functools import partial
 from _collections import deque, defaultdict # type: ignore[import-not-found]
@@ -60,7 +60,7 @@ class apeekable(EventualLoopMixin):
 class _await_later:
     __slots__ = 'aw'
     def __new__(cls, aw, /, _=type((lambda: (yield))())):
-        if _check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _
+        if check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _
         raise TypeError(f'{type(aw).__qualname__!r} object at {id(aw):#x} is not awaitable')
     def __getattr__(self, name, /): return getattr(self.aw, name)
     def __repr__(self): return f'<proxy at {id(self):#x} for awaitable at {id(self.aw):#x}>'
@@ -90,7 +90,7 @@ class abucket(LoopContextMixin):
 @subscriptable
 class OnlineSorter:
     __slots__ = '_it', '_runner', '_popper', '_pusher', '_loop'
-    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := _get_loop_and_set()).run_in_executor, l, Executor()), l
+    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := get_loop_and_set()).run_in_executor, l, Executor()), l
     def __aiter__(self):
         from .iters import to_list
         if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)

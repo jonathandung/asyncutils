@@ -5,7 +5,7 @@ from mmap import mmap
 from itertools import starmap
 from functools import partial
 from contextlib import asynccontextmanager
-from ._internal.helpers import _filter_out, subscriptable
+from ._internal.helpers import filter_out, subscriptable
 from ._internal.patch import patch_function_signatures
 from .config import Executor
 from .base import collect
@@ -54,7 +54,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
 class file(LoopContextMixin):
     __slots__ = '_f', '_fileno', 'mmap'
     if sys.platform != 'win32':
-        def madvise(self, option, start=0, length=None, _filter=_filter_out): return self.mmap.madvise(option, start, *_filter(length))
+        def madvise(self, option, start=0, length=None, _filter=filter_out): return self.mmap.madvise(option, start, *_filter(length))
     async def reg(self, m, /):
         async with self.lock: self.mgr.add(m)
     async def unreg(self, m, /):
@@ -87,7 +87,7 @@ class file(LoopContextMixin):
     def size(self): return self.mmap.size()
     def isatty(self): return self._f.isatty()
     readable = writable = seekable = lambda _, /: True
-    def _flush(self, offset, size, _filter=_filter_out): self._f.flush(); self.mmap.flush(offset, *_filter(size))
+    def _flush(self, offset, size, _filter=filter_out): self._f.flush(); self.mmap.flush(offset, *_filter(size))
     def _move(self, dest, src, count): self.mmap.move(dest, src, count)
     def _trunc_from(self, data, offset): c = (m := self.mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
     def _read(self, offset, size): return self.mmap[offset:None if size < 0 else offset+size]
@@ -209,4 +209,4 @@ class MemoryMappedIOManager(LoopContextMixin):
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
-del f, _filter_out, _, m, I, file
+del f, filter_out, _, m, I, file

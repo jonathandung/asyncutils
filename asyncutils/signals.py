@@ -8,9 +8,8 @@ from .base import event_loop
 from .util import safe_cancel
 from ._internal import log
 from ._internal.submodules import signals_all as __all__
-async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _d=(Signals.SIGINT, Signals.SIGTERM), _s=signal, _g=getsignal):
-    sys.audit('asyncutils.signals.wait_for_signal', S); c, x = None, 0
-    if S is None: S = _d
+async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=(Signals.SIGINT, Signals.SIGTERM), logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _s=signal, _g=getsignal):
+    sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *sigs)); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
     if sys.platform == 'win32':
