@@ -8,8 +8,8 @@ jobs:
   release-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-python@v6.2.0
         with:
           python-version: "3.14"
       - name: Build release distributions
@@ -30,16 +30,15 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/p/py-asyncutils/${{ github.event.release.name }}
+      url: https://pypi.org/p/py-asyncutils/${{github.event.release.name}}
     steps:
       - name: Retrieve release distributions
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.1
         with:
           name: release-dists
           path: dist/
       - name: Publish release distributions to PyPI using twine
-        run: |
-          twine upload dist/* --verbose
+        run: twine upload dist/* --verbose
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          TWINE_PASSWORD: ${{secrets.PYPI_TOKEN}}

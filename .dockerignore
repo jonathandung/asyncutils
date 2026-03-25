@@ -1,14 +1,15 @@
 .git
 .gitignore
-.gitattributes
 .github/
-.gitlab/
 **/__pycache__/
 **/*.py[cod]
 .pytest_cache
 .mypy_cache
 .ruff_cache
+.logs
+.secrets.baseline
 .Python
+.flake8.backup
 venv
 env
 .venv
@@ -18,13 +19,11 @@ tests/
 test_*.py
 .coverage
 htmlcov/
-.tox/
 *.cover
 docs/
-*.md
 *.rst
 *.txt
-!README.md
+!requirements-dev.txt
 dist/
 build/
 downloads/
@@ -38,7 +37,6 @@ var/
 *.egg-info/
 *.egg
 .vscode/
-.idea/
 *.swp
 *.swo
 *.so
@@ -56,3 +54,6 @@ docker-compose*.yaml
 Dockerfile
 .dockerignore
 docker-compose.yml
+.markdownlint.json
+.pre-commit-config.yaml
+.editorconfig

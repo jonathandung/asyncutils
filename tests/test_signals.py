@@ -22,18 +22,18 @@ def ignore(*_): ...
 def mock_logger(): return type(__import__('sys').implementation)(warning=raise_, error=raise_, info=ignore, debug=ignore)
 @fixture(scope='module')
 def wait_partial(mock_logger): return __import__('functools').partial(wait_for_signal, processor, logger=mock_logger)
-def test_signal_log(wait_partial):
-    with event_loop() as l:
-        r = l.run_until_complete
-        with raises(Log, match='invalid signal None: .*'): r(wait_partial(None))
-        with raises(Log, match='wait_for_signal timed out'): r(wait_partial(Signals.SIGILL, timeout=0.05))
-@mark.asyncio
+@fixture
+def run_in_loop():
+    with event_loop() as l: yield l.run_until_complete
+def test_signal_log(wait_partial, run_in_loop):
+    with raises(Log, match='invalid signal None: .*'): run_in_loop(wait_partial(None))
+    with raises(Log, match='wait_for_signal timed out'): run_in_loop(wait_partial(Signals.SIGILL, timeout=0.05))
 @mark.skipif(W, reason='these tests are only for unix')
-async def test_signal_log_unix(mock_logger, wait_partial):
-    with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await wait_partial(19, timeout=0.1)
+def test_signal_log_unix(mock_logger, wait_partial, run_in_loop):
+    with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): run_in_loop(wait_partial(19, timeout=0.1))
     with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal (SIGINT|2)'):
         asyncio.create_task(kill(s := Signals.SIGINT))
-        await wait_for_signal(bad_processor, s, timeout=0.1, possible_errors=(ZeroDivisionError,), logger=mock_logger)
+        run_in_loop(wait_for_signal(bad_processor, s, timeout=0.1, possible_errors=(ZeroDivisionError,), logger=mock_logger))
 @mark.asyncio
 async def test_signal_raise(wait_partial):
     with raises(TimeoutError): await wait_partial(Signals.SIGFPE, timeout=0.05, raise_on_timeout=True)

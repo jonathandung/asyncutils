@@ -12,9 +12,9 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v6.0.2
     - name: Set up Python 3.14
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v6.2.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -23,23 +23,20 @@ jobs:
         python -m pip install -r requirements-dev.txt
         python -m pip install -e .
     - name: Lint with ruff
-      run: |
-        ruff check . --output-format=github
+      run: ruff check . --output-format=github
     - name: Run tests
-      run: |
-        pytest tests/ -v --cov asyncutils --cov-report xml --local-badge-output-dir badges/ --local-badge-generate cov status
+      run: pytest tests/ -v --cov asyncutils --cov-report xml --local-badge-output-dir badges/ --local-badge-generate cov status
     - name: Upload coverage
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v5.5.3
       with:
         disable_search: true
         files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{secrets.CODECOV_TOKEN}}
     - uses: conda-incubator/setup-miniconda@v3.3.0
       with:
         auto-update-conda: true
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{matrix.python-version}}
     - name: Test conda install
-      run:
-        conda install conda-forge::py-asyncutils python=3.14 --dry-run
+      run: conda install conda-forge::py-asyncutils python=3.14 --dry-run

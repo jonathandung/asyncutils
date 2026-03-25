@@ -2,9 +2,10 @@ from .config import Executor
 from .constants import SYNC_AWAIT, _NO_DEFAULT
 from .exceptions import IgnoreErrors, Critical, Deadlock, CRITICAL
 from ._internal.running_console import _get_
-from ._internal.helpers import get_loop_and_set, stop_and_closer
+from ._internal.helpers import get_loop_and_set, stop_and_closer, check_methods
 from functools import partial, wraps
 from asyncio.events import _get_running_loop, set_event_loop, new_event_loop
+from asyncio.coroutines import iscoroutine
 from asyncio.tasks import eager_task_factory, wait_for, ensure_future, run_coroutine_threadsafe
 from asyncio.locks import Semaphore, BoundedSemaphore, Lock
 from asyncio.timeouts import timeout as _timeout
@@ -45,22 +46,23 @@ def lockf(f, /, lf=Lock, _lc={}):
         async with l: return await f(*a, **k)
     wrapped.__del__ = partial(_lc.pop, i, None); return wraps(f)(wrapped)
 def sync_lock(l, /, timeout=None):
+    if not check_methods(l, 'acquire', 'release', 'locked'): raise TypeError('acquire, release and locked methods are required')
     def dec(f):
         async def wrapper(*a, **k):
             try:
                 async with _timeout(timeout): await l.acquire(); return f(*a, **k)
             finally:
-                if l.locked(): l.release()
+                if l.locked() and iscoroutine(r := l.release()): await r
         return wraps(f)(to_sync(wrapper))
     return dec
 def sync_lock_from_binder(f, /, timeout=None):
     def dec(m, /):
         async def wrapper(self, *a, **k):
-            l = None
+            if not check_methods(l := f(self), 'acquire', 'release', 'locked'): raise TypeError('acquire, release and locked methods are required')
             try:
-                async with _timeout(timeout): await (l := f(self)).acquire(); return m(self, *a, **k)
+                async with _timeout(timeout): await l.acquire(); return m(self, *a, **k)
             finally:
-                if l and l.locked(): l.release()
+                if l and l.locked() and iscoroutine(l := l.release()): await l
         return wraps(m)(to_sync(wrapper))
     return dec
 def to_async(f, /, loop=None):
