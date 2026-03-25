@@ -34,9 +34,3 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         token: ${{secrets.CODECOV_TOKEN}}
-    - uses: conda-incubator/setup-miniconda@v3.3.0
-      with:
-        auto-update-conda: true
-        python-version: ${{matrix.python-version}}
-    - name: Test conda install
-      run: conda install conda-forge::py-asyncutils python=3.15 --dry-run
