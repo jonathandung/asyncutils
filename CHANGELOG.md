@@ -8,13 +8,15 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ## [0.8.17] - 2026-03-24: newest; [unstable](https://semver.org/#spec-item-4)
 
+This branch was created on 2026-03-25 to integrate PEP 810 lazy imports into the library, greatly improving its efficiency.
+
 ### Tests
 
 45% coverage, 22 tests
 
 ### Docs
 
-40% complete
+41% complete
 
 ### Added
 
