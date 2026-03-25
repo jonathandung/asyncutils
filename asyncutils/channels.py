@@ -4,17 +4,17 @@ from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellati
 from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from .constants import _NO_DEFAULT
 from ._internal.helpers import filter_out, get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
-from . import context
-from _weakrefset import WeakSet
+lazy from . import context
+lazy from _weakrefset import WeakSet
 from collections import defaultdict, deque, namedtuple
 from sys import addaudithook
 from contextlib import contextmanager
 from functools import partial, cached_property
-from asyncio.locks import Lock, Event, Semaphore
-from asyncio.queues import Queue, QueueEmpty, QueueShutDown
-from asyncio.coroutines import iscoroutine
-from asyncio.tasks import wait_for, gather, sleep, shield
-from asyncio.timeouts import timeout as _timeout
+lazy from asyncio.locks import Lock, Event, Semaphore
+lazy from asyncio.queues import Queue, QueueEmpty, QueueShutDown
+lazy from asyncio.coroutines import iscoroutine
+lazy from asyncio.tasks import wait_for, gather, sleep, shield
+lazy from asyncio.timeouts import timeout as _timeout
 from ._internal import log as L, patch as P
 from ._internal.submodules import channels_all as __all__
 @subscriptable
@@ -290,8 +290,8 @@ class Rendezvous:
         if loop is None: loop = get_loop_and_set()
         if lock is None: lock = Lock()
         self._getters, self._putters, self._loop, self._lock = deque(), deque(), loop, lock; self._make_task()
-    async def _maintainer(self, f=sleep.__get__(60)):
-        while True: await f(); await self.cleanup()
+    async def _maintainer(self):
+        while True: await sleep(60); await self.cleanup()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
         except TimeoutError: return False

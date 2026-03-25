@@ -1,4 +1,4 @@
-from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
+lazy from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
 from atexit import register
 from sys import audit
 def filter_out(*a, s=None, f=__import__('_operator').is_not): yield from filter(lambda x, s=s: f(s, x), a)
