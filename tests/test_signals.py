@@ -32,7 +32,7 @@ def test_signal_log(wait_partial, run_in_loop):
 def test_signal_log_unix(mock_logger, wait_partial, run_in_loop):
     with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): run_in_loop(wait_partial(19, timeout=0.1))
     with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal (SIGINT|2)'):
-        asyncio.create_task(kill(s := Signals.SIGINT))
+        run_in_loop.__self__.create_task(kill(s := Signals.SIGINT))
         run_in_loop(wait_for_signal(bad_processor, s, timeout=0.1, possible_errors=(ZeroDivisionError,), logger=mock_logger))
 @mark.asyncio
 async def test_signal_raise(wait_partial):
