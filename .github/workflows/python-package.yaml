@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.15"]
+        python-version: ["3.15.0a7"]
     steps:
     - uses: actions/checkout@v6.0.2
     - name: Set up Python 3.15
