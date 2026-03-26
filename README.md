@@ -10,8 +10,9 @@ Also has a well-equipped command line interface taking many flags and options.
 
 ## Setup
 
-This branch is a development branch, whose contents will never be published. For the current newest installable version, not much setup is required;
-simply install py-asyncutils from pip:
+This branch is a development branch, whose contents will never be published. For the current newest installable version, not much setup is required.
+
+Simply install py-asyncutils from pip:
 
 ```bash
 python -m pip install py-asyncutils==0.8.18 # This version
@@ -117,6 +118,6 @@ Have fun!
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg?branch=dev)
-![Tests](https://github.com/jonathandung/asyncutils/blob/dev/badges/tests.svg)
+![Tests](https://github.com/jonathandung/asyncutils/blob/dev/tests.svg)
 ![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
