@@ -13,7 +13,7 @@ Also has a well-equipped command line interface taking many flags and options.
 Essentially no setup required! Just install py-asyncutils from pip:
 
 ```bash
-python -m pip install py-asyncutils==0.8.17 # This version
+python -m pip install py-asyncutils==0.8.18 # This version
 ```
 
 or
@@ -26,7 +26,7 @@ python -m pip install py-asyncutils[dev] # If installing for development
 or with conda:
 
 ```bash
-conda install -c conda-forge py-asyncutils=0.8.17
+conda install -c conda-forge py-asyncutils=0.8.18
 ```
 
 Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
@@ -64,7 +64,7 @@ In fact, the submodules are only loaded on demand by a sophisticated name exposu
 
 ## Version
 
-This is asyncutils v0.8.17.
+This is asyncutils v0.8.18.
 
 This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible.
 Of course, this isn't a significant issue, seeing as though nobody currently uses it.
@@ -118,5 +118,5 @@ Have fun!
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
 ![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/badges/tests.svg)
-![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg)
+![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
