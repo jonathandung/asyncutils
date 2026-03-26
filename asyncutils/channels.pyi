@@ -119,18 +119,18 @@ class EventBus(LoopContextMixin):
     def auditor(self, event: str, args: tuple[Any, ...], /) -> None: '''The auditor of the event bus. I can't think of a use case where you would call this directly. Not an instance method at runtime, just a function attached to the instance.'''
     def start_audit(self) -> None: '''Connect the bus' audit hook to sys.audit, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the bus' audit hook. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
-    def add_middleware(self, middleware: Callable[[str, Any], Any]) -> None:
+    def add_middleware(self, middleware: Middleware) -> None:
         '''Append a middleware to the back of the pipe of middlewares. The middleware must be a hashable callable taking the event type as the first argument and the associated data as the second.
         If the middleware does not recognize the event type, it should simply return the data immediately. There is no protection in place against malicious malware besides the user's abstraction.
         It is preferred that the middleware be a coroutine function. Each middleware should be extremely optimized, for example through C extensions, to avoid hindrance of the publishing.
         When publishing occurs, the following is done asynchronously.
         The first middleware takes the initial data, does some processing, and passes the modified data to the second middleware, and so on.
         The output of the final middleware is passed to each subscriber concurrently. They cannot see the initial data.'''
-    def remove_middleware(self, middleware: Callable[[str, Any], Any], *, result: Any=..., strict: bool=...) -> Any:
+    def remove_middleware(self, middleware: Middleware, *, result: Any=..., strict: bool=...) -> Any:
         '''Remove a previously added middleware, via `add_middleware` or `add_middleware_once`, and return its result. Runs in O(1) time.
         If `strict` is True and the middleware was never added, throw a KeyError.
         If the middleware has an associated future `add_middleware_once` and it is done, return its result. Otherwise, set its result to `result` and return it.'''
-    def add_middleware_once(self, middleware: Callable[[str, Any], Any], until: Future[Any]) -> bool:
+    def add_middleware_once(self, middleware: Middleware, until: Future[Any]) -> bool:
         '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
         If the middleware has already been associated with another future, do nothing and return False.'''
     def audit_context(self) -> _GeneratorContextManager[None, None, None]:

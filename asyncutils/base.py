@@ -1,5 +1,6 @@
 from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
 from .constants import RAISE, _NO_DEFAULT
+from .config import Executor
 from ._internal import patch as P, log as L
 from ._internal.helpers import check_methods as b, get_loop_and_set as g
 from sys import exc_info, audit, stderr, maxsize
@@ -114,7 +115,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
                     yield _
     elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
         audit('asyncutils/create_executor', 'base.iter_to_aiter'); g = _c(it, 'send', 'throw', 'close')
-        def r(f, _=(loop or _g()).run_in_executor): return lambda *a: _(f, *a)
+        def r(*a, _=(loop or _g()).run_in_executor, e=Executor()): return __import__('_functools').partial(_, e, *a)
         if f:
             if g:
                 async def iterator(_=r(it.send)): # type: ignore[no-redef]
@@ -127,12 +128,10 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
                     except StopAsyncIteration: it.close()
                     except BaseException as e: it.throw(e)
             else:
-                async def iterator(_=r(it.__next__)):
-                    try:
-                        while True:
-                            if (l := await _()) is sentinel or l == sentinel: break
-                            yield l
-                    except StopIteration: ...
+                async def iterator(_=r(next, it, sentinel)):
+                    while True:
+                        if (l := await _()) is sentinel or l == sentinel: break
+                        yield l
         elif g:
             async def iterator(_=r(it.send)): # type: ignore[no-redef]
                 l = _(None)
@@ -142,7 +141,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
                 except StopAsyncIteration: it.close()
                 except BaseException as e: it.throw(e)
         else:
-            async def iterator(_=r(it.__next__)):
+            async def iterator(_=r(next, it, sentinel)):
                 try:
                     while True: yield await _()
                 except StopIteration: ...
