@@ -1,12 +1,11 @@
 import sys
-from asyncio.tasks import eager_task_factory, gather
-from asyncio.locks import Lock
-from mmap import mmap
-from itertools import starmap
-from functools import partial
+lazy from asyncio.tasks import eager_task_factory, gather
+lazy from asyncio.locks import Lock
+lazy from mmap import mmap
+lazy from itertools import starmap
+from _functools import partial # type: ignore
 from contextlib import asynccontextmanager
-from ._internal.helpers import filter_out, subscriptable
-from ._internal.patch import patch_function_signatures
+from ._internal import helpers as H, patch as P
 from .config import Executor
 from .base import collect
 from .util import sync_await
@@ -22,8 +21,8 @@ def f(a, b, m=m, /):
     return double_ended_pipe
 _, I, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, sys.maxsize, '*, pipe_impl={}'
 double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'), ('w', 'wb')))
-patch_function_signatures(*((_, s) for _ in t))
-@subscriptable
+P.patch_function_signatures(*((_, s) for _ in t))
+@H.subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
     __slots__ = 'reader', 'writer', '_executor'
     def __init__(self, r, w, /): sys.audit('asyncutils/create_executor', 'io.AsyncReadWriteCouple'); super().__init__(); self.loop.set_task_factory(eager_task_factory); self.reader, self.writer, self._executor = r, w, Executor()
@@ -54,7 +53,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
 class file(LoopContextMixin):
     __slots__ = '_f', '_fileno', 'mmap'
     if sys.platform != 'win32':
-        def madvise(self, option, start=0, length=None, _filter=filter_out): return self.mmap.madvise(option, start, *_filter(length))
+        def madvise(self, option, start=0, length=None, _filter=H.filter_out): return self.mmap.madvise(option, start, *_filter(length))
     async def reg(self, m, /):
         async with self.lock: self.mgr.add(m)
     async def unreg(self, m, /):
@@ -87,7 +86,7 @@ class file(LoopContextMixin):
     def size(self): return self.mmap.size()
     def isatty(self): return self._f.isatty()
     readable = writable = seekable = lambda _, /: True
-    def _flush(self, offset, size, _filter=filter_out): self._f.flush(); self.mmap.flush(offset, *_filter(size))
+    def _flush(self, offset, size, _filter=H.filter_out): self._f.flush(); self.mmap.flush(offset, *_filter(size))
     def _move(self, dest, src, count): self.mmap.move(dest, src, count)
     def _trunc_from(self, data, offset): c = (m := self.mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
     def _read(self, offset, size): return self.mmap[offset:None if size < 0 else offset+size]
@@ -209,4 +208,4 @@ class MemoryMappedIOManager(LoopContextMixin):
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
-del f, filter_out, _, m, I, file
+del f, H, P, _, m, I, file
