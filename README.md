@@ -118,5 +118,5 @@ Have fun!
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
 ![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/badges/tests.svg)
-![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/settings/badge)
+![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
