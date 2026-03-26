@@ -1,17 +1,17 @@
-from .base import iter_to_aiter
 from .mixins import EventualLoopMixin, LoopContextMixin
-from .config import Executor
+lazy from .base import iter_to_aiter
+lazy from .config import Executor
 from .constants import _NO_DEFAULT
-from ._internal.helpers import get_loop_and_set, subscriptable, check_methods
+from ._internal import helpers as H
 from sys import maxsize as INF, audit
-from functools import partial
-from _collections import deque, defaultdict # type: ignore[import-not-found]
-from heapq import heapify, heappop, heappushpop
+lazy from _functools import partial # type: ignore[import-not-found]
+lazy from _collections import deque, defaultdict # type: ignore[import-not-found]
+lazy import heapq as Q
 from ._internal.submodules import iterclasses_all as __all__
 class anullcontext:
     async def __aenter__(self): ...
     async def __aexit__(*_): ...
-@subscriptable
+@H.subscriptable
 class achain:
     __slots__ = 'its'
     @classmethod
@@ -20,7 +20,7 @@ class achain:
     async def __aiter__(self):
         async for i in iter_to_aiter(self.its):
             async for _ in iter_to_aiter(i): yield _
-@subscriptable
+@H.subscriptable
 class apeekable(EventualLoopMixin):
     def __init__(self, it): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
     def __aiter__(self): return self
@@ -60,13 +60,13 @@ class apeekable(EventualLoopMixin):
 class _await_later:
     __slots__ = 'aw'
     def __new__(cls, aw, /, _=type((lambda: (yield))())):
-        if check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _
+        if H.check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _
         raise TypeError(f'{type(aw).__qualname__!r} object at {id(aw):#x} is not awaitable')
     def __getattr__(self, name, /): return getattr(self.aw, name)
     def __repr__(self): return f'<proxy at {id(self):#x} for awaitable at {id(self.aw):#x}>'
     def __setattr__(self, name, /): raise AttributeError('attribute aw is read-only' if name == 'aw' else f'cannot set attribute {name!r} through proxy')
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass type of awaitable proxy')
-@subscriptable
+@H.subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict(deque), validator or (lambda _: True)
     def __contains__(self, v):
@@ -87,13 +87,13 @@ class abucket(LoopContextMixin):
                     except StopAsyncIteration: return
                     if (v := self._key(i)) == val: yield i; break
                     elif self._validator(v): self._cache[v].append(i)
-@subscriptable
+@H.subscriptable
 class OnlineSorter:
     __slots__ = '_it', '_runner', '_popper', '_pusher', '_loop'
-    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := get_loop_and_set()).run_in_executor, l, Executor()), l
+    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, Executor()), l
     def __aiter__(self):
         from .iters import to_list
-        if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); heapify(h); self._popper, self._pusher = partial(heappop, h), partial(heappushpop, h)
+        if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); Q.heapify(h); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)
         return self
     async def __anext__(self): return await self._runner(self._popper)
     async def asend(self, item): return await self._runner(self._pusher, item)
