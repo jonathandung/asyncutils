@@ -99,7 +99,7 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         r = await gather(*map(f, r), return_exceptions=True)
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
-    audit('asyncutils.base.iter_to_aiter', it); f = sentinel is _NO_DEFAULT
+    audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
         if _c(it, 'asend', 'athrow', 'aclose'):
@@ -122,33 +122,36 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, loop=None, _c=b, _g=g):
                     l = _(None)
                     try:
                         while True:
-                            if l is sentinel or l == sentinel: break
+                            if l is sentinel or (False if (e := sentinel.__eq__(l)) is NotImplemented else e): break
                             l = await _((yield l))
-                    except StopIteration: ...
+                    except RuntimeError as e:
+                        if len(e := e.args) != 1 or e[0] != 'StopIteration interacts badly with generators and cannot be raised into a Future': raise
                     except StopAsyncIteration: it.close()
                     except BaseException as e: it.throw(e)
             else:
                 async def iterator(_=r(next, it, sentinel)):
                     while True:
-                        if (l := await _()) is sentinel or l == sentinel: break
+                        if (l := await _()) is sentinel or (False if (e := sentinel.__eq__(l)) is NotImplemented else e): break
                         yield l
         elif g:
             async def iterator(_=r(it.send)): # type: ignore[no-redef]
                 l = _(None)
                 try:
                     while True: l = await _((yield l))
-                except StopIteration: ...
+                except RuntimeError as e:
+                    if len(e := e.args) != 1 or e[0] != 'StopIteration interacts badly with generators and cannot be raised into a Future': raise
                 except StopAsyncIteration: it.close()
                 except BaseException as e: it.throw(e)
         else:
-            async def iterator(_=r(next, it, sentinel)):
+            async def iterator(_=r(next, it)):
                 try:
                     while True: yield await _()
-                except StopIteration: ...
+                except RuntimeError as e:
+                    if len(e := e.args) != 1 or e[0] != 'StopIteration interacts badly with generators and cannot be raised into a Future': raise
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
 def aiter_to_iter(ait, _c=b):
-    audit('asyncutils.base.aiter_to_iter', ait)
+    audit('asyncutils.base.aiter_to_iter', type(ait).__qualname__)
     if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
         a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
