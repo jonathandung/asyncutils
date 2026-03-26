@@ -10,7 +10,8 @@ Also has a well-equipped command line interface taking many flags and options.
 
 ## Setup
 
-Essentially no setup required! Just install py-asyncutils from pip:
+This branch is a development branch, whose contents will never be published. For the current newest installable version, not much setup is required;
+simply install py-asyncutils from pip:
 
 ```bash
 python -m pip install py-asyncutils==0.8.17 # This version
@@ -29,7 +30,7 @@ or with conda:
 conda install -c conda-forge py-asyncutils=0.8.17
 ```
 
-Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/dev/SUPPORT.md) for steps to checking the installation.
+Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
 
 ## Usage
 
