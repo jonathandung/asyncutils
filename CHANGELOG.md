@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.17] - 2026-03-24: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.18] - 2026-03-26: newest; [unstable](https://semver.org/#spec-item-4)
 
 This branch was created on 2026-03-25 to integrate PEP 810 lazy imports into the library, greatly improving its efficiency.
 

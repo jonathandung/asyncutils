@@ -14,7 +14,7 @@ This branch is a development branch, whose contents will never be published. For
 simply install py-asyncutils from pip:
 
 ```bash
-python -m pip install py-asyncutils==0.8.17 # This version
+python -m pip install py-asyncutils==0.8.18 # This version
 ```
 
 or
@@ -27,7 +27,7 @@ python -m pip install py-asyncutils[dev] # If installing for development
 or with conda:
 
 ```bash
-conda install -c conda-forge py-asyncutils=0.8.17
+conda install -c conda-forge py-asyncutils=0.8.18
 ```
 
 Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
@@ -65,7 +65,7 @@ In fact, the submodules are only loaded on demand by a sophisticated name exposu
 
 ## Version
 
-This is asyncutils v0.8.17.
+This is asyncutils v0.8.18.
 
 This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible.
 Of course, this isn't a significant issue, seeing as though nobody currently uses it.
