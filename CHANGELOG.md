@@ -6,13 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.18] - 2026-03-24: newest; [unstable](https://semver.org/#spec-item-4)
-
-Created dev branch for python 3.15 features!
+## [0.8.18] - 2026-03-26: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Tests
 
-45% coverage, 22 tests
+45% coverage, 25 tests
 
 ### Docs
 
@@ -378,9 +376,15 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
+## [0.8.17] - 2026-03-25
+
+Created dev branch for python 3.15 features.
+
 ## [0.8.0] - 2026-03-06
 
 Created [GitHub repository](https://github.com/jonathandung/asyncutils.git).
+
+Began versioning according to [SemVer](https://semver.org/).
 
 ## [0.0.0] - 2025-08-xx
 
