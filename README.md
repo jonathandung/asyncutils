@@ -119,5 +119,5 @@ Have fun!
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg?branch=dev)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/dev/tests.svg)
-![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg)
+![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg?token=PTRNW1RGXA)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
