@@ -117,6 +117,6 @@ Have fun!
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg?branch=dev)
-![Tests](https://github.com/jonathandung/asyncutils/blob/main/badges/tests.svg)
-![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/settings/badge)
+![Tests](https://github.com/jonathandung/asyncutils/blob/dev/badges/tests.svg)
+![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/dev/graph/badge.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
