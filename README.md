@@ -19,7 +19,7 @@ python -m pip install py-asyncutils==0.8.18 # This version
 or
 
 ```bash
-python -m pip install py-asyncutils[dev] # If installing for development
+python -m pip install py-asyncutils[dev] # If installing for development; this differs from the dev branch
 # currently installs ruff, pytest and some plugins thereof
 ```
 
@@ -118,5 +118,5 @@ Have fun!
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
 ![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
-![Coverage](https://app.codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg)
+![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
