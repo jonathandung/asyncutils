@@ -1,6 +1,6 @@
 lazy from ._internal.helpers import copy_and_clear
 from sys import audit
-from asyncio.tasks import eager_task_factory, _PyTask # type: ignore
+from asyncio.tasks import eager_task_factory, _PyTask # type: ignore[import-not-found]
 from asyncio.futures import _PyFuture # type: ignore
 lazy from _contextvars import copy_context
 from ._internal.submodules import futures_all as __all__
