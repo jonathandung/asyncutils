@@ -2,7 +2,7 @@ from .mixins import EventMixin
 lazy from . import context
 from .constants import RAISE
 from .exceptions import EventValueError, ref
-from _collections import deque # type: ignore
+from _collections import deque # type: ignore[import-not-found]
 lazy from asyncio.timeouts import timeout as _timeout
 lazy from asyncio.tasks import wait_for, wait
 lazy from asyncio.events import get_running_loop

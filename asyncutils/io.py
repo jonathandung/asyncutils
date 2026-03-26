@@ -3,7 +3,7 @@ lazy from asyncio.tasks import eager_task_factory, gather
 lazy from asyncio.locks import Lock
 lazy from mmap import mmap
 lazy from itertools import starmap
-from _functools import partial # type: ignore
+from _functools import partial # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
 from ._internal import helpers as H, patch as P
 from .config import Executor

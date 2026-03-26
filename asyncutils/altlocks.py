@@ -9,7 +9,7 @@ lazy from asyncio.tasks import wait_for, sleep
 lazy from functools import wraps
 from asyncio.locks import Lock, Event, BoundedSemaphore
 from time import monotonic
-from _collections import deque # type: ignore
+from _collections import deque # type: ignore[import-not-found]
 from itertools import count
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):

@@ -1,5 +1,5 @@
 import heapq
-from _collections import deque # type: ignore
+from _collections import deque # type: ignore[import-not-found]
 from itertools import count
 from abc import ABCMeta, abstractmethod
 from sys import _getframe, intern, audit

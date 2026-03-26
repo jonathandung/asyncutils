@@ -7,7 +7,7 @@ from .constants import _NO_DEFAULT
 from sys import exc_info
 from time import monotonic
 from itertools import count
-from functools import partial
+from _functools import partial # type: ignore[import-not-found]
 from asyncio.events import AbstractEventLoop, _get_running_loop, new_event_loop
 from asyncio.timeouts import timeout
 from asyncio.queues import Queue, PriorityQueue, QueueEmpty, QueueShutDown

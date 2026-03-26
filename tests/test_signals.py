@@ -20,7 +20,7 @@ def ignore(*_): ...
 @fixture(scope='module')
 def mock_logger(): return type(__import__('sys').implementation)(warning=raise_, error=raise_, info=ignore, debug=ignore)
 @fixture(scope='module')
-def wait_partial(mock_logger): return __import__('functools').partial(wait_for_signal, processor, logger=mock_logger)
+def wait_partial(mock_logger): return __import__('_functools').partial(wait_for_signal, processor, logger=mock_logger)
 @fixture
 def run_in_loop():
     with event_loop() as l: yield l.run_until_complete
