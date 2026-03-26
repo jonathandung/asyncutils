@@ -9,7 +9,7 @@ from asyncio.exceptions import BrokenBarrierError
 from asyncio.tasks import wait_for, sleep
 from time import monotonic
 from functools import wraps
-from _collections import deque # type: ignore
+from _collections import deque # type: ignore[import-not-found]
 from itertools import count
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):

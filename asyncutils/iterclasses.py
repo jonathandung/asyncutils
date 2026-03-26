@@ -1,12 +1,12 @@
 from .mixins import EventualLoopMixin, LoopContextMixin
-lazy from .base import iter_to_aiter
-lazy from .config import Executor
+from .base import iter_to_aiter
+from .config import Executor
 from .constants import _NO_DEFAULT
 from ._internal import helpers as H
 from sys import maxsize as INF, audit
-lazy from _functools import partial # type: ignore[import-not-found]
-lazy from _collections import deque, defaultdict # type: ignore[import-not-found]
-lazy import heapq as Q
+from _functools import partial # type: ignore[import-not-found]
+from _collections import deque, defaultdict # type: ignore[import-not-found]
+import heapq as Q
 from ._internal.submodules import iterclasses_all as __all__
 class anullcontext:
     async def __aenter__(self): ...

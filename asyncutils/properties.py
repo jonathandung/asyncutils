@@ -1,5 +1,5 @@
 from atexit import register
-from functools import partial, Placeholder
+from _functools import partial, Placeholder # type: ignore[import-not-found]
 from asyncio.events import new_event_loop
 from asyncio.locks import Lock
 from ._internal.helpers import subscriptable

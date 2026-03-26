@@ -1,20 +1,19 @@
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from .config import _randinst
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
-lazy from .util import safe_cancel, get_aiter_fromf
-lazy from .iterclasses import achain, anullcontext
+from .util import safe_cancel, get_aiter_fromf
+from .iterclasses import achain, anullcontext
 from ._internal.helpers import copy_and_clear, stop_and_closer, filter_out, get_loop_and_set, check_methods
-lazy from collections import defaultdict, Counter, deque
+from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache
 from sys import audit
-lazy from asyncio.queues import Queue, QueueEmpty, QueueShutDown, LifoQueue
-lazy from asyncio.locks import Lock, Event, Semaphore
-lazy from asyncio.exceptions import CancelledError
-lazy from asyncio.tasks import gather, wait_for, sleep
-lazy from asyncio.coroutines import iscoroutine
+from asyncio.queues import Queue, QueueEmpty, QueueShutDown, LifoQueue
+from asyncio.locks import Lock, Event, Semaphore
+from asyncio.exceptions import CancelledError
+from asyncio.tasks import gather, wait_for, sleep
+from asyncio.coroutines import iscoroutine
 from . import exceptions as E
-import _operator as O
-lazy import math as M
+import _operator as O, math as M
 from ._internal.submodules import iters_all as __all__
 _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((2047, (2,)), (9080191, (31, 73)), (4759123141, (2, 7, 61)), (1122004669633, (2, 13, 23, 1662803)), (2152302898747, (2, 3, 5, 7, 11)), (3474749660383, (2, 3, 5, 7, 11, 13)), (18446744073709551616, (2, 325, 9375, 28178, 450775, 9780504, 1795265022)), (3317044064679887385961981, (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41))), lambda _, /: _
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
