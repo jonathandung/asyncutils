@@ -9,7 +9,6 @@ from sys import exc_info
 from time import monotonic
 from itertools import count
 from _functools import partial # type: ignore[import-not-found]
-from asyncio.events import AbstractEventLoop, _get_running_loop, new_event_loop
 from asyncio.timeouts import timeout
 from asyncio.queues import Queue, PriorityQueue
 from asyncio.locks import Event, Lock
@@ -30,7 +29,7 @@ class Pool(LoopContextMixin):
                 else:
                     for _ in I: await self.process(_)
             finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
-        self._task = (_get_running_loop() or new_event_loop()).create_task(consumer()); return self
+        import asyncio.events as E; self._task = (E._get_running_loop() or E.new_event_loop()).create_task(consumer()); return self
     async def __anext__(self):
         if self._event.is_set() and self._queue.empty(): raise StopAsyncIteration('pool ran out of items')
         try:
@@ -183,7 +182,7 @@ class ConnectionPool:
         return self._loop
     @loop.setter
     @_locker
-    def loop(self, val: AbstractEventLoop, /): # type: ignore
+    def loop(self, val, /): # type: ignore
         if (l := self._loop) is not None: l.call_soon(l.stop)
         self._loop = val
     @loop.deleter
