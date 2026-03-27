@@ -1,7 +1,7 @@
 from ._internal import patch as P
 RECIP_E = 0.3678794411714423
 class sentinel_base:
-    _can_instantiate, __slots__ = False, ('__name',)
+    _can_instantiate, __slots__ = False, '__name'
     def __new__(cls, name=None, _=__import__('keyword').iskeyword):
         cls._assert_can_instantiate()
         if name is None: return super().__new__(cls)
