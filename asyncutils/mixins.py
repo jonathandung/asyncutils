@@ -4,7 +4,7 @@ from functools import cached_property, partial
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
 from asyncio.timeouts import timeout
-from asyncio.events import _get_running_loop, new_event_loop
+from asyncio import events
 from ._internal.submodules import mixins_all as __all__
 class EventualLoopMixin(_LoopMixinBase): __slots__ = ()
 class LoopContextMixin(_LoopMixinBase):
@@ -61,8 +61,8 @@ class LockWithOwnerMixin(LockMixin):
 @subscriptable
 class EventMixin(AwaitableMixin, metaclass=ABCMeta):
     _loop = None
-    def _set_loop(self, g=_get_running_loop, n=new_event_loop):
-        loop = g() or n()
+    def _set_loop(self, m=events):
+        loop = m._get_running_loop() or m.new_event_loop()
         if self._loop is None: self._loop = loop
         if loop is not self._loop: raise RuntimeError('loop binding failed')
         return loop
@@ -91,4 +91,4 @@ class EventMixin(AwaitableMixin, metaclass=ABCMeta):
             async with _(duration):
                 while True: yield await self
         except TimeoutError: return
-del timeout, _get_running_loop, new_event_loop, get_loop_and_set
+del timeout, get_loop_and_set, events
