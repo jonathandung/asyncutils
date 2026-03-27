@@ -1,4 +1,5 @@
 from asyncutils.tools import *
+from _io import StringIO
 @(dec := __import__('pytest').fixture(scope='module'))
 def argstr(): return '-p -VV'
 @dec
@@ -10,5 +11,12 @@ def test_json_argstr_conv(cfgjson, argstr):
     assert json_to_argstr(cfgjson) == argstr
     argstr_to_json(argstr, cfgjson)
 def test_cmd_help():
-    print_cmd_help(s := __import__('_io').StringIO())
+    print_cmd_help(s := StringIO())
     assert s.getvalue().removesuffix('\n') == get_cmd_help()
+def test_json_fmt(contents):
+    print_cfg_json_format(s := StringIO())
+    fmt = get_cfg_json_format()
+    assert s.getvalue().removesuffix('\n') == fmt
+    import json as J
+    import commentjson
+    assert J.loads(contents).keys() < commentjson.loads(fmt).keys()
