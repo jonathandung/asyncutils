@@ -26,4 +26,9 @@ Current version: 0.8.18
 
 - Major feature additions, with more focus on low-level stuff
 - Comprehensive bugfixes
-- Possibly rework project structure and make use of lazy imports
+- Merge the dev branch into the main branch in one big refactor
+
+## 2.x
+
+- Ramp up coverage to 90%
+- Publish docker image

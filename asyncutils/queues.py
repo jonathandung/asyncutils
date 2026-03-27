@@ -2,6 +2,7 @@ from . import exceptions as E
 from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
 from .futures import AsyncCallbacksFuture
+from ._internal.compat import partial, Placeholder
 from ._internal.helpers import get_loop_and_set, subscriptable
 from ._internal.log import info
 from .mixins import EventualLoopMixin
@@ -14,7 +15,6 @@ from asyncio.tasks import gather, wait_for
 from asyncio.timeouts import timeout as _timeout
 from _collections import deque # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
-from _functools import partial, Placeholder # type: ignore[import-not-found]
 from itertools import count
 from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
