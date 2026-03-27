@@ -1,7 +1,7 @@
 from ._internal.protocols import Timer, ValidExcType
+from .mixins import AsyncContextMixin, EventualLoopMixin
 from types import TracebackType
 from typing import Self, overload
-from .mixins import AsyncContextMixin, EventualLoopMixin
 __all__ = 'TokenBucket', 'LeakyBucket'
 class TokenBucket:
     '''A token bucket rate limiter that controls the rate of operations.

@@ -1,8 +1,8 @@
-from typing import ClassVar, Self, Literal, Awaitable, Any, overload
-from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
+from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from types import TracebackType
+from typing import ClassVar, Self, Literal, Awaitable, Any, overload
 from .constants import _sentinel
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine
 __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'

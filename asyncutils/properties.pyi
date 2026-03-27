@@ -1,7 +1,7 @@
 from ._internal.protocols import AsyncLockLike
+from asyncio.events import AbstractEventLoop
 from _collections_abc import Callable, Awaitable
 from typing import Self, overload
-from asyncio.events import AbstractEventLoop
 __all__ = 'AsyncProperty', 'AsyncLockProperty'
 class AsyncProperty[T, R]:
     @overload

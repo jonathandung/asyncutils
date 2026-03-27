@@ -1,9 +1,9 @@
 from ._internal.protocols import ValidExcType
+from asyncio.events import AbstractEventLoop
 from _collections_abc import Callable, Awaitable, Iterable
+from logging import Logger
 from signal import Signals
 from typing import Literal, overload
-from asyncio.events import AbstractEventLoop
-from logging import Logger
 __all__ = 'wait_for_signal',
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], Awaitable[T]], *S: int, timeout: float|None=..., raise_on_timeout: Literal[True], loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T, sigs: Iterable[int]=..., logger: Logger=...) -> T: ...

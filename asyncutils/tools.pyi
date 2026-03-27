@@ -1,5 +1,5 @@
-from _collections_abc import Sequence, Callable
 from ._internal.protocols import Openable, DumpType, CanWriteAndFlush
+from _collections_abc import Sequence, Callable
 __all__ = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format', 'get_cmd_help', 'print_cmd_help', 'ext2modname'
 ext2modname: dict[str, str]
 '''A dictionary mapping file extensions (w/o the .) to module names to use to parse files of that type as json.

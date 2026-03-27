@@ -1,10 +1,10 @@
-from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMixin, LockWithOwnerMixin
 from ._internal.protocols import AsyncLockLike
-from asyncio.locks import Lock
+from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMixin, LockWithOwnerMixin
 from asyncio.events import AbstractEventLoop
+from asyncio.locks import Lock
 from asyncio.tasks import Task
-from typing import Literal, ClassVar, Any, final
 from _collections_abc import Callable, Awaitable
+from typing import Literal, ClassVar, Any, final
 __all__ = 'AdvancedRateLimit', 'PrioritySemaphore', 'KeyedCondition', 'RLock', 'PriorityLock', 'PriorityRLock'
 class AdvancedRateLimit(EventualLoopMixin, LockMixin):
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):

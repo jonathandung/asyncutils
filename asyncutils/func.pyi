@@ -1,9 +1,9 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
 from ._internal.protocols import Exceptable, Timer, SupportsIteration
 from .exceptions import _ExceptionWrapper
+from asyncio.futures import Future
 from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable
 from typing import Any, Literal, Protocol, Self, overload, type_check_only
-from asyncio.futures import Future
 __all__ = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'measure', 'benchmark', 'RateLimited'
 @overload
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of functools.reduce that takes an async function and possibly async iterable. If the function is sync, specify `await_=False`.'''

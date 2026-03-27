@@ -1,6 +1,6 @@
-from typing import Final, NoReturn, Self, final, type_check_only
 from _collections_abc import Callable
 from threading import Lock
+from typing import Final, NoReturn, Self, final, type_check_only
 __all__ = 'RECIP_E', 'RAISE', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 class sentinel_base:

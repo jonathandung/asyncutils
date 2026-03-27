@@ -1,11 +1,11 @@
 '''Non-conventional asynchronous synchronization primitives.'''
 from .mixins import AsyncContextMixin, AwaitableMixin
 from ._internal.protocols import Exceptable, SupportsIteration, Timer, ValidExcType
-from types import TracebackType
-from _collections_abc import Awaitable, Coroutine, Callable
-from typing import Any, Self, overload
-from collections import deque
 from asyncio.locks import BoundedSemaphore
+from collections import deque
+from _collections_abc import Awaitable, Coroutine, Callable
+from types import TracebackType
+from typing import Any, Self, overload
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class DynamicBoundedSemaphore(BoundedSemaphore):
     '''A subclass of BoundedSemaphore whose bound can be set by the user via the `bound` property.'''

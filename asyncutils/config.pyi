@@ -1,9 +1,9 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
 from ._internal.protocols import ValidExcType, PartialInterface
 from concurrent.futures._base import Executor as _
-from typing import Final, Self, overload
-from types import TracebackType
 from random import Random
+from types import TracebackType
+from typing import Final, Self, overload
 __all__ = 'debugging', 'debug', 'silent', 'Executor', 'set_logger_level', 'basic_repl', 'loaded_all', 'get_past_logs', 'logging_to'
 class Executor(_, PartialInterface): '''A class that implements the PEP 3148 Executor interface. The exact class is determined at runtime by command-line arguments.'''
 class debugging:

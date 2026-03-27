@@ -1,11 +1,11 @@
+from .config import Executor
 from ._internal.protocols import SupportsIteration
 from .mixins import LoopContextMixin, AsyncContextMixin
-from .config import Executor
-from typing import Any, Self, overload
-from _collections_abc import Mapping, AsyncIterable, Callable, Iterable, Generator
 from asyncio.events import AbstractEventLoop
-from asyncio.tasks import Task
 from asyncio.futures import Future
+from asyncio.tasks import Task
+from _collections_abc import Mapping, AsyncIterable, Callable, Iterable, Generator
+from typing import Any, Self, overload
 __all__ = 'Pool', 'AdvancedPool', 'ConnectionPool', 'CallbackAccumulator'
 class Pool[T, R]:
     def __init__(self, func: Callable[[T], R], it: SupportsIteration[T], workers: int=..., bounded: bool=...): ...
