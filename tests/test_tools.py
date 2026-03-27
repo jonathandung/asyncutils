@@ -17,6 +17,5 @@ def test_json_fmt(contents):
     print_cfg_json_format(s := StringIO())
     fmt = get_cfg_json_format()
     assert s.getvalue().removesuffix('\n') == fmt
-    import json as J
-    import commentjson
-    assert J.loads(contents).keys() < commentjson.loads(fmt).keys()
+    from json import loads
+    assert loads(contents).keys() < loads(__import__('re').sub('//.*', '', fmt)).keys()
