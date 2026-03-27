@@ -1,21 +1,21 @@
-import heapq
-from _collections import deque # type: ignore[import-not-found]
-from itertools import count
+lazy import heapq
+lazy from _collections import deque # type: ignore[import-not-found]
+lazy from itertools import count
 from abc import ABCMeta, abstractmethod
 from sys import _getframe, intern, audit
 from functools import partial, Placeholder
 from contextlib import asynccontextmanager
-from asyncio.tasks import gather, wait_for
+lazy from asyncio.tasks import gather, wait_for
 from asyncio.queues import Queue, QueueShutDown, QueueFull, QueueEmpty
-from asyncio.locks import Event
-from asyncio.timeouts import timeout as _timeout
+lazy from asyncio.locks import Event
+lazy from asyncio.timeouts import timeout as _timeout
 from . import exceptions as E
 from .constants import _NO_DEFAULT
-from ._internal.log import info
+lazy from ._internal.log import info
 from .mixins import EventualLoopMixin
-from .base import iter_to_aiter, collect
-from .util import sync_await, safe_cancel
-from .futures import AsyncCallbacksFuture
+lazy from .base import iter_to_aiter, collect
+lazy from .util import sync_await, safe_cancel
+lazy from .futures import AsyncCallbacksFuture
 from ._internal.helpers import get_loop_and_set, subscriptable
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
@@ -176,16 +176,14 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             if self.full(): audit(f'asyncutils.queues.{type(self).__name__}.push', item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
-    async def drain_persistent(self, max=None, timeout=None):
+    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
         m, c = abs(max or float('inf')), 0; info(f'persistent draining of {type(self).__qualname__} started')
-        while c < m:
-            try: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
-            except TimeoutError, QueueShutDown: break
+        with _:
+            while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
     def drain_until_empty(self, max=None):
         max, c = abs(max or float('inf')), 0; info(f'draining of {type(self).__qualname__} started')
-        while c < max:
-            try: yield self.get_nowait(); c += 1
-            except QueueEmpty, QueueShutDown: break
+        with ignore_qempty:
+            while c < max: yield self.get_nowait(); c += 1
     def drain_retlist(self, max=None): return list(self.drain_until_empty(max))
     __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)
