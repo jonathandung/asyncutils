@@ -22,7 +22,7 @@ class achain:
             async for _ in iter_to_aiter(i): yield _
 @H.subscriptable
 class apeekable(EventualLoopMixin):
-    def __init__(self, it): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
+    def __init__(self, it=()): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
     def __aiter__(self): return self
     def __bool__(self):
         try: self.loop.run_until_complete(self.peek()); return True

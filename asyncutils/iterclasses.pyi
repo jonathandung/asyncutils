@@ -18,9 +18,9 @@ class achain[T]:
     def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self: '''Construct an achain from `its`, an (async) iterable of (async) iterables to chain.'''
     def __new__(cls, *its: SupportsIteration[T]): '''Construct an achain from the (async) iterables.'''
     def __aiter__(self) -> AsyncGenerator[T, None]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
-class apeekable[T=Any](EventualLoopMixin):
+class apeekable[T](EventualLoopMixin):
     '''Async version of `more_itertools.peekable`.'''
-    def __init__(self, it: SupportsIteration[T]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
+    def __init__(self, it: SupportsIteration[T]=[]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
     def __aiter__(self) -> Self: '''Return the `apeekable` instance itself.'''
     def __bool__(self) -> bool: '''Check whether any items are left in the underlying iterable without advancing it.'''
     async def peek(self, default: T=...) -> T: '''Return the next item of the underlying iterable without advancing it, or `default` if the items have run out.'''

@@ -27,11 +27,11 @@ def every[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_e
 @overload
 def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> _everyrv[T]: ...
 @overload
-def everymethod(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everymethodrv: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
+def everymethod(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everymethodrv[Any, Any]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
 @overload
 def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everymethodrv[R, T]: ...
 @overload
-def everymethod[T, R](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R]: ...
+def everymethod[T, R](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R, Any]: ...
 @overload
 def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R, T]: ...
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|_ExceptionWrapper, float]]]:
@@ -84,4 +84,4 @@ class _frv(Protocol):
 class _everyrv[T](Protocol):
     '''Not exported.'''
     def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
-type _everymethodrv[R=Any, T=Any] = Callable[[_everymethodft[T, R]], _everymethodrvrv[T, R]]
+type _everymethodrv[R, T] = Callable[[_everymethodft[T, R]], _everymethodrvrv[T, R]]

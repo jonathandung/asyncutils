@@ -13,7 +13,7 @@ def double_ended_text_pipe(pipe_impl: _PipeFactory=...) -> tuple[AsyncReadWriteC
     '''Return a tuple of two `AsyncReadWriteCouple`s, such that each can read what the other writes. Two os-level pipes must be created.
     Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default os.pipe) to customize this behaviour.'''
 def double_ended_binary_pipe(pipe_impl: _PipeFactory=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: ...
-class AsyncReadWriteCouple[T: (str, bytes)=str, R: (str, bytes)=str](LoopContextMixin):
+class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     '''An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
     The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
     @property

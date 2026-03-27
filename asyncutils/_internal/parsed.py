@@ -1,13 +1,14 @@
 from .. import __version__ as V
+from .compat import apargs
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.
-Install with: `python -m pip install py-asyncutils`, or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, suggest_on_error=True, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
+Install with: `python -m pip install py-asyncutils`, or `python -m pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils` if that fails''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter; the file should have one argument per line.
 
 If using this module without exposing the command line, use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file.
 Other json formats are not currently supported; see the possible keys in format.jsonc, which can be accessed using tools.get_cfg_json_format().
 
-Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, tornado, vibora, fastapi and trio.''')
+Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, tornado, vibora, fastapi and trio.''', **apargs)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', default='STDERR', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE is passed (interpreted as an integer file descriptor if possible), the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.

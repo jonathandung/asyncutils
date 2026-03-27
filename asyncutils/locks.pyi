@@ -3,10 +3,10 @@ from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMix
 from asyncio.events import AbstractEventLoop
 from asyncio.locks import Lock
 from asyncio.tasks import Task
-from _collections_abc import Callable, Awaitable
+from _collections_abc import Callable, Awaitable, Coroutine
 from typing import Literal, ClassVar, Any, final
 __all__ = 'AdvancedRateLimit', 'PrioritySemaphore', 'KeyedCondition', 'RLock', 'PriorityLock', 'PriorityRLock'
-class AdvancedRateLimit(EventualLoopMixin, LockMixin):
+class AdvancedRateLimit(EventualLoopMixin, LockMixin[None, Coroutine[Any, Any, None]]):
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):
         '''`rate`: The initial rate at which tokens refill.
         `capacity`: The maximum rate, defaulting to the current rate.

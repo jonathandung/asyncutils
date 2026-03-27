@@ -10,7 +10,7 @@ from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock
 from asyncio.tasks import sleep, wait_for, eager_task_factory
 from collections import deque, namedtuple
-from functools import wraps, partial, Placeholder
+from functools import wraps, partial
 from sys import audit, maxsize as INF
 from time import perf_counter
 from ._internal.submodules import func_all as __all__
@@ -144,7 +144,7 @@ async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult',
 class RateLimited:
     __slots__ = '_func', '_call_times', '_lock', '_period', '_calls', '_timer', '_raise'
     def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter):
-        if period is None: return partial(cls, Placeholder, f, calls, raise_=raise_, timer=timer)
+        if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
         audit('asyncutils.func.RateLimited', f, calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, P, C, f = (T := self._call_times).popleft, self._period, self._calls, self._func
