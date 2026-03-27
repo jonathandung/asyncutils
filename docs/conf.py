@@ -1,0 +1,8 @@
+project = 'asyncutils'
+author = 'Jonathan Dung'
+copyright = '2026-%Y Jonathan Dung'
+version = '0.8'
+release = '0.8.18'
+need_sphinx = '9.1.0'
+pygments_style = 'sphinx'
+html_theme = 'classic'
