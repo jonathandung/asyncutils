@@ -1,4 +1,4 @@
-from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMixin, LockWithOwnerMixin
+from . import mixins as M
 from .exceptions import Critical, LockForceRequest, CRITICAL
 from .base import safe_cancel_batch
 from time import monotonic
@@ -10,7 +10,7 @@ from asyncio.coroutines import iscoroutine
 from ._internal import log
 from ._internal.helpers import check_methods
 from ._internal.submodules import locks_all as __all__
-class AdvancedRateLimit(EventualLoopMixin, LockMixin):
+class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
     __slots__ = 'rate', '_lock', '_waiters', '_unfair', '_last_update', 'tokens', 'capacity'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._last_update = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
     async def acquire(self, tokens=1, timeout=None):
@@ -30,7 +30,7 @@ class AdvancedRateLimit(EventualLoopMixin, LockMixin):
         while self._waiters and self.tokens >= self._waiters[0][0]:
             t, f = self._waiters.popleft(); self.tokens -= t
             if not f.done(): f.set_result(None)
-class PrioritySemaphore(LockMixin):
+class PrioritySemaphore(M.LockMixin):
     __slots__ = '_value', '_tiebreak', '_waiters'
     def __init__(self, value=1): self._value, self._tiebreak, self._waiters = value, 0, []
     async def acquire(self, priority=0):
@@ -45,7 +45,7 @@ class PrioritySemaphore(LockMixin):
     def reset(self):
         for *_, e in self._waiters: e.set()
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
-class KeyedCondition(LockMixin, LoopContextMixin, AwaitableMixin):
+class KeyedCondition(M.LockMixin, M.LoopContextMixin, M.AwaitableMixin):
     __slots__ = '__lock', '_waiters', '_specific_waiters'
     def __init__(self, lock=None): self.__lock, self._waiters, self._specific_waiters = lock or Lock(), set(), defaultdict(set)
     async def acquire(self): await self.__lock.acquire(); return True
@@ -72,7 +72,7 @@ class KeyedCondition(LockMixin, LoopContextMixin, AwaitableMixin):
             for F in (s := self._waiters if key is None else self._specific_waiters.pop(key)):
                 if not F.done(): F.set_result(None)
             l = len(s); s.clear(); return l
-class RLock(LockWithOwnerMixin):
+class RLock(M.LockWithOwnerMixin):
     __slots__ = '__lock', '_count', '_owner'
     def __init__(self, lock=None): self._count, self._owner, self.__lock = 0, None, lock or Lock()
     async def acquire(self):
@@ -88,7 +88,7 @@ class RLock(LockWithOwnerMixin):
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is current_task()
-class PriorityLock(EventualLoopMixin, LockWithOwnerMixin):
+class PriorityLock(M.EventualLoopMixin, M.LockWithOwnerMixin):
     __slots__ = '_waiters', '_owner', '_tiebreak'
     def __init__(self): super().__init__(); self._waiters, self._tiebreak, self._owner = [], 0, None
     async def acquire(self, priority=0, timeout=None):
