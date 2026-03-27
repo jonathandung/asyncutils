@@ -12,7 +12,7 @@ This branch was created on 2026-03-25 to integrate PEP 810 lazy imports into the
 
 ### Tests
 
-45% coverage, 22 tests
+46% coverage, 26 tests
 
 ### Docs
 
