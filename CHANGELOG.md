@@ -8,8 +8,6 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ## [0.8.18] - 2026-03-26: newest; [unstable](https://semver.org/#spec-item-4)
 
-This branch was created on 2026-03-25 to integrate PEP 810 lazy imports into the library, greatly improving its efficiency.
-
 ### Tests
 
 46% coverage, 26 tests
@@ -378,10 +376,44 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
+## [0.8.17] - 2026-03-25
+
+This branch was created to integrate PEP 810 lazy imports into the library, improving its efficiency for python 3.15.
+
+It will be changed to the default branch once 3.15.0-final is released.
+
 ## [0.8.0] - 2026-03-06
 
-Created [GitHub repository](https://github.com/jonathandung/asyncutils.git).
+Created [GitHub repository](https://github.com/jonathandung/asyncutils.git); added version submodule.
 
-## [0.0.0] - 2025-08-xx
+## [0.7.0] - 2026-02-09
+
+Implemented channels.Rendezvous; began migration of implementation details into _internal subpackage; fixed initialization logic and command line.
+
+## [0.6.0] - 2026-01-1x
+
+Completed migration from inline annotations to separated stubs; perfected base.event_loop and lazy loading; added console and cli submodules.
+
+## [0.5.0] - 2025-12-0x
+
+Added CircuitBreaker and EventBus classes; implemented preliminary lazy loading system; created exceptions submodule; began separation of type annotations from .py into .pyi.
+
+## [0.4.0] - 2025-10-0x
+
+Added more complicated patterns and procedures such as Observable and wait_for_signal.
+
+## [0.3.0] - 2025-08-2x
+
+Basically completed refactoring; added more object-oriented patterns such as DynamicThrottle, CacheWithBackgroundRefresh.
+
+## [0.2.0] - 2025-07-0x
+
+Began reorganizing single file containing all functions into submodules.
+
+## [0.1.0] - 2025-06-xx
+
+Added basic but untested features such as tee, merge_async_iters, to_async, iter_to_aiter.
+
+## [0.0.0] - 2025-05-xx
 
 Development begins. This can be classified as a passion project.
