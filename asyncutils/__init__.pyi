@@ -30,9 +30,9 @@ from .signals import *
 from .tools import *
 from .util import *
 from .version import *
-from ._internal.protocols import Submodule, All
 from types import ModuleType
 from typing import Final
+from ._internal.protocols import Submodule, All
 def __dir__() -> All: ...
 __version__: Final[VersionInfo]
 '''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete).'''
