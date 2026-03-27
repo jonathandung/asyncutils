@@ -1,6 +1,6 @@
+from . import exceptions as E
 from ._internal import patch as P
 from ._internal.submodules import version_all as __all__
-from . import exceptions as E
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     a, i = (r := []).append, 0
     for i, j in enumerate(I):
