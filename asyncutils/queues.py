@@ -3,7 +3,7 @@ lazy from _collections import deque # type: ignore[import-not-found]
 lazy from itertools import count
 from abc import ABCMeta, abstractmethod
 from sys import _getframe, intern, audit
-from _functools import partial, Placeholder
+from _functools import partial, Placeholder # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
 lazy from asyncio.tasks import gather, wait_for
 from asyncio.queues import Queue, QueueShutDown, QueueFull, QueueEmpty

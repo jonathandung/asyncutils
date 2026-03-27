@@ -1,8 +1,8 @@
-from _collections import defaultdict # type: ignore[import-not-found]
-from sys import intern
-from asyncio.locks import Lock
-from asyncio.tasks import gather
-from .util import semaphore
+lazy from _collections import defaultdict # type: ignore[import-not-found]
+lazy from sys import intern
+lazy from asyncio.locks import Lock
+lazy from asyncio.tasks import gather
+lazy from .util import semaphore
 from .exceptions import IgnoreErrors
 from ._internal.submodules import misc_all as __all__
 class StateMachine:
