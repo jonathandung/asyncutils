@@ -1,9 +1,9 @@
 from .config import Executor
 from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable
-from functools import cached_property, partial
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
 from asyncio.timeouts import timeout as _timeout
+from functools import cached_property, partial
 from ._internal.submodules import mixins_all as __all__
 class EventualLoopMixin(_LoopMixinBase): __slots__ = ()
 class LoopContextMixin(_LoopMixinBase):

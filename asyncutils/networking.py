@@ -3,8 +3,8 @@ from asyncio.queues import Queue
 from asyncio.transports import Transport
 from socket import error, SHUT_WR
 from .exceptions import IgnoreErrors
-from .util import _ignore_cancellation
 from .mixins import LoopContextMixin
+from .util import _ignore_cancellation
 from ._internal.submodules import networking_all as __all__
 class LineProtocol(Protocol, LoopContextMixin):
     NEWLINE, CARRIAGE_RETURN, _handler = b'\x0a', b'\x0d', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__: tuple[str, ...] = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'

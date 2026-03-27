@@ -1,7 +1,7 @@
 from sys import stderr, exception, audit
 from ._internal.helpers import subscriptable
-from ._internal.submodules import exceptions_all as __all__
 from ._internal.patch import patch_function_signatures
+from ._internal.submodules import exceptions_all as __all__
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
 def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _a=audit):

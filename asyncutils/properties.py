@@ -1,7 +1,7 @@
-from atexit import register
-from _functools import partial, Placeholder # type: ignore[import-not-found]
 from asyncio.events import new_event_loop
 from asyncio.locks import Lock
+from atexit import register
+from _functools import partial, Placeholder # type: ignore[import-not-found]
 from ._internal.helpers import subscriptable
 from ._internal.submodules import properties_all as __all__
 @subscriptable

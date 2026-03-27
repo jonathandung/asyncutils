@@ -1,11 +1,11 @@
 from .base import event_loop, aiter_to_iter, safe_cancel_batch
-from .util import new_tasks
 from .exceptions import CRITICAL, Critical
 from ._internal import helpers as H
+from .util import new_tasks
+import asyncio as A
+from asyncio.staggered import staggered_race
 from sys import audit, exc_info
 from ._internal.submodules import compete_all as __all__
-from asyncio.staggered import staggered_race
-import asyncio as A
 async def first_completed(*C, ret_exc=False, timeout=None, loop=None, _=A.timeout):
     audit('asyncutils.compete.first_completed/start', C); c = None
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()

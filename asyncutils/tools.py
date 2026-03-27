@@ -1,7 +1,7 @@
-import shlex as s
 from ._internal.helpers import check_methods as c
 from ._internal.parsed import p
 from ._internal.submodules import tools_all as __all__
+import shlex as s
 ext2modname, get_cmd_help = {}, p.format_help
 def json_to_argv(p, /, *, _=c, d='.'):
     if _(p, '__fspath__') and isinstance(p := p.__fspath__(), int): raise TypeError('__fspath__ should return str or bytes')

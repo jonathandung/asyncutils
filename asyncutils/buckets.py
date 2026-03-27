@@ -1,8 +1,8 @@
-from .mixins import AsyncContextMixin, EventualLoopMixin
 from . import context
-from time import monotonic
+from .mixins import AsyncContextMixin, EventualLoopMixin
 from asyncio.locks import Lock
 from asyncio.tasks import sleep
+from time import monotonic
 from ._internal.submodules import buckets_all as __all__
 class TokenBucket:
     __slots__ = '_capacity', '_tokens', '_rate', '_last_update', '_timer', '_lock'

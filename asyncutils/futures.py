@@ -1,8 +1,8 @@
-from ._internal.helpers import copy_and_clear
-from sys import audit
-from asyncio.tasks import eager_task_factory, _PyTask # type: ignore[import-not-found]
 from asyncio.futures import _PyFuture # type: ignore[import-not-found]
+from asyncio.tasks import eager_task_factory, _PyTask # type: ignore[import-not-found]
 from _contextvars import copy_context
+from sys import audit
+from ._internal.helpers import copy_and_clear
 from ._internal.submodules import futures_all as __all__
 class AsyncCallbacksFuture(_PyFuture):
     def __init__(self, *, loop=None): audit(type(self).__qualname__, loop); _PyFuture.__init__(self, loop=loop); self._setup()

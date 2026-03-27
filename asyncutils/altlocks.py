@@ -1,16 +1,16 @@
-from .mixins import AsyncContextMixin, AwaitableMixin
+from .base import iter_to_aiter
 from .config import _randinst
 from .constants import _NO_DEFAULT
-from .base import iter_to_aiter
-from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
 from .context import getcontext
-from asyncio.locks import Lock, Event, BoundedSemaphore
+from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
+from .mixins import AsyncContextMixin, AwaitableMixin
 from asyncio.exceptions import BrokenBarrierError
+from asyncio.locks import Lock, Event, BoundedSemaphore
 from asyncio.tasks import wait_for, sleep
-from time import monotonic
-from functools import wraps
 from _collections import deque # type: ignore[import-not-found]
+from functools import wraps
 from itertools import count
+from time import monotonic
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):
     def __init__(self, value=1): super().__init__(value); self._waiters = deque() # type: deque

@@ -1,15 +1,15 @@
+from .base import collect
+from .config import Executor
+from .mixins import LoopContextMixin
+from .util import sync_await
 import sys
 from asyncio.tasks import eager_task_factory, gather
 from asyncio.locks import Lock
-from mmap import mmap
-from itertools import starmap
-from _functools import partial # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
+from _functools import partial # type: ignore[import-not-found]
 from ._internal import helpers as H, patch as P
-from .config import Executor
-from .base import collect
-from .util import sync_await
-from .mixins import LoopContextMixin
+from itertools import starmap
+from mmap import mmap
 from ._internal.submodules import io_all as __all__
 if not (m := sys.modules.get('os')):
     N = sys.builtin_module_names

@@ -1,19 +1,19 @@
 from .base import aiter_to_iter, take, event_loop, dummy_task
-from .util import semaphore, safe_cancel, sync_lock_from_binder
+from .constants import _NO_DEFAULT
 from .exceptions import exception_occurred, wrap_exc, unwrap_exc, CRITICAL, Critical, PoolError, PoolShutDown, PoolFull
 from ._internal.helpers import filter_out, check_methods, subscriptable
 from .mixins import LoopContextMixin, AsyncContextMixin
-from .constants import _NO_DEFAULT
 from .queues import ignore_qempty
+from .util import semaphore, safe_cancel, sync_lock_from_binder
+from asyncio.exceptions import CancelledError
+from asyncio.locks import Event, Lock
+from asyncio.queues import Queue, PriorityQueue
+from asyncio.tasks import gather, wait_for, sleep
+from asyncio.timeouts import timeout
+from _functools import partial # type: ignore[import-not-found]
+from itertools import count
 from sys import exc_info
 from time import monotonic
-from itertools import count
-from _functools import partial # type: ignore[import-not-found]
-from asyncio.timeouts import timeout
-from asyncio.queues import Queue, PriorityQueue
-from asyncio.locks import Event, Lock
-from asyncio.tasks import gather, wait_for, sleep
-from asyncio.exceptions import CancelledError
 from ._internal.submodules import pools_all as __all__
 @subscriptable
 class Pool(LoopContextMixin):

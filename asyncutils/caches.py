@@ -1,15 +1,15 @@
-import collections as C
-from .mixins import LoopContextMixin
-from .base import yield_to_event_loop, event_loop
-from .util import safe_cancel, to_async
-from .exceptions import CRITICAL, Critical
 from . import context
-from time import monotonic
-from functools import lru_cache, wraps
-from asyncio.locks import Lock, Event
+from .base import yield_to_event_loop, event_loop
+from .exceptions import CRITICAL, Critical
+from .mixins import LoopContextMixin
+from .util import safe_cancel, to_async
+import collections as C
 from asyncio.coroutines import iscoroutine
-from asyncio.tasks import sleep, gather
 from asyncio.exceptions import CancelledError
+from asyncio.locks import Lock, Event
+from asyncio.tasks import sleep, gather
+from functools import lru_cache, wraps
+from time import monotonic
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'

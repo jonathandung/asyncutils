@@ -1,9 +1,9 @@
-from _collections import defaultdict # type: ignore
-from sys import intern
 from asyncio.locks import Lock
 from asyncio.tasks import gather
-from .util import semaphore
+from _collections import defaultdict # type: ignore
+from sys import intern
 from .exceptions import IgnoreErrors
+from .util import semaphore
 from ._internal.submodules import misc_all as __all__
 class StateMachine:
     __slots__ = '_state', '_transitions', '_entries', '_exits', '_lock'

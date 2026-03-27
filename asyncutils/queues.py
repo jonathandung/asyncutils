@@ -1,22 +1,22 @@
-import heapq
-from _collections import deque # type: ignore[import-not-found]
-from itertools import count
-from abc import ABCMeta, abstractmethod
-from sys import _getframe, intern, audit
-from _functools import partial, Placeholder # type: ignore[import-not-found]
-from contextlib import asynccontextmanager
-from asyncio.tasks import gather, wait_for
-from asyncio.queues import Queue, QueueShutDown, QueueFull, QueueEmpty
-from asyncio.locks import Event
-from asyncio.timeouts import timeout as _timeout
 from . import exceptions as E
+from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
-from ._internal.log import info
-from .mixins import EventualLoopMixin
-from .base import iter_to_aiter, collect
-from .util import sync_await, safe_cancel
 from .futures import AsyncCallbacksFuture
 from ._internal.helpers import get_loop_and_set, subscriptable
+from ._internal.log import info
+from .mixins import EventualLoopMixin
+from .util import safe_cancel, sync_await
+import heapq
+from abc import ABCMeta, abstractmethod
+from asyncio.locks import Event
+from asyncio.queues import Queue, QueueShutDown, QueueFull, QueueEmpty
+from asyncio.tasks import gather, wait_for
+from asyncio.timeouts import timeout as _timeout
+from _collections import deque # type: ignore[import-not-found]
+from contextlib import asynccontextmanager
+from _functools import partial, Placeholder # type: ignore[import-not-found]
+from itertools import count
+from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
 ignore_qerrs, ignore_valerrs = f(*_), E.IgnoreErrors(ValueError)

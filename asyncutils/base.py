@@ -1,12 +1,12 @@
-from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
-from .constants import RAISE, _NO_DEFAULT
 from .config import Executor
+from .constants import RAISE, _NO_DEFAULT
+from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
 from ._internal import patch as P, log as L
 from ._internal.helpers import check_methods as b, get_loop_and_set as g
-from sys import exc_info, audit, stderr, maxsize
-from asyncio.tasks import all_tasks, gather
-from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
 from asyncio.coroutines import iscoroutine
+from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
+from asyncio.tasks import all_tasks, gather
+from sys import exc_info, audit, stderr, maxsize
 from ._internal.submodules import base_all as __all__
 class event_loop:
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []

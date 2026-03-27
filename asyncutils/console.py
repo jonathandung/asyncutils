@@ -1,8 +1,8 @@
-from ._internal.submodules import console_all as __all__
-from ._internal import patch as P, running_console as R
 from . import __version__ as V, config as C
-from os import getenv as g
+from ._internal import patch as P, running_console as R
 import sys as S
+from os import getenv as g
+from ._internal.submodules import console_all as __all__
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()

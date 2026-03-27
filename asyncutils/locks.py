@@ -1,14 +1,14 @@
 from . import mixins as M
-from .exceptions import Critical, LockForceRequest, CRITICAL
 from .base import safe_cancel_batch
-from time import monotonic
-from _collections import deque, defaultdict # type: ignore[import-not-found]
-from heapq import heappush, heappop
-from asyncio.locks import Event, Lock
-from asyncio.tasks import wait_for, current_task, wait, gather
-from asyncio.coroutines import iscoroutine
+from .exceptions import Critical, LockForceRequest, CRITICAL
 from ._internal import log
 from ._internal.helpers import check_methods
+from asyncio.coroutines import iscoroutine
+from asyncio.locks import Event, Lock
+from asyncio.tasks import wait_for, current_task, wait, gather
+from _collections import deque, defaultdict # type: ignore[import-not-found]
+from heapq import heappush, heappop
+from time import monotonic
 from ._internal.submodules import locks_all as __all__
 class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
     __slots__ = 'rate', '_lock', '_waiters', '_unfair', '_last_update', 'tokens', 'capacity'
