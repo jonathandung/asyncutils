@@ -176,16 +176,14 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             if self.full(): audit(f'asyncutils.queues.{type(self).__name__}.push', item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
-    async def drain_persistent(self, max=None, timeout=None):
+    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
         m, c = abs(max or float('inf')), 0; info(f'persistent draining of {type(self).__qualname__} started')
-        while c < m:
-            try: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
-            except TimeoutError, QueueShutDown: break
+        with _:
+            while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
     def drain_until_empty(self, max=None):
         max, c = abs(max or float('inf')), 0; info(f'draining of {type(self).__qualname__} started')
-        while c < max:
-            try: yield self.get_nowait(); c += 1
-            except QueueEmpty, QueueShutDown: break
+        with ignore_qempty:
+            while c < max: yield self.get_nowait(); c += 1
     def drain_retlist(self, max=None): return list(self.drain_until_empty(max))
     __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)

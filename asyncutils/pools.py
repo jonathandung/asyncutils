@@ -4,13 +4,14 @@ from .exceptions import exception_occurred, wrap_exc, unwrap_exc, CRITICAL, Crit
 from ._internal.helpers import filter_out, check_methods, subscriptable
 from .mixins import LoopContextMixin, AsyncContextMixin
 from .constants import _NO_DEFAULT
+from .queues import ignore_qempty
 from sys import exc_info
 from time import monotonic
 from itertools import count
 from _functools import partial # type: ignore[import-not-found]
 from asyncio.events import AbstractEventLoop, _get_running_loop, new_event_loop
 from asyncio.timeouts import timeout
-from asyncio.queues import Queue, PriorityQueue, QueueEmpty, QueueShutDown
+from asyncio.queues import Queue, PriorityQueue
 from asyncio.locks import Event, Lock
 from asyncio.tasks import gather, wait_for, sleep
 from asyncio.exceptions import CancelledError
@@ -81,11 +82,10 @@ class AdvancedPool(LoopContextMixin):
     def dead(self, worker): return worker in self._workers and worker.done() and not worker.cancelled()
     def revive(self): self.__init__(self._max, self._min, self._queue.maxsize, self._scaling, self._kill_at_exit)
     async def _kill_helper(self):
-        try:
+        with ignore_qempty:
             while True:
                 if not (F := self._queue.get_nowait()[2][3]).done(): await safe_cancel(F)
                 self._queue.task_done()
-        except QueueEmpty, QueueShutDown: ...
     async def submit(self, f, *a, _priority=0, **k): self.raise_for_shutdown(); self._pending += 1; await self._queue.put((_priority, self._tiebreak, (f, a, k, F := self.make_fut()))); self.set_adjuster(); return F
     async def shutdown(self, cancel_pending=False, idle_timeout=None, total_timeout=None):
         self._shutdown = True
