@@ -2,7 +2,7 @@ from .mixins import EventualLoopMixin, LockMixin, LoopContextMixin, AwaitableMix
 from .exceptions import Critical, LockForceRequest, CRITICAL
 from .base import safe_cancel_batch
 from time import monotonic
-from collections import deque, defaultdict
+from _collections import deque, defaultdict # type: ignore[import-not-found]
 from heapq import heappush, heappop
 from asyncio.locks import Event, Lock
 from asyncio.tasks import wait_for, current_task, wait, gather

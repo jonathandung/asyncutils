@@ -22,7 +22,7 @@ def json_to_argv(p, /, *, _=c, d='.'):
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
     if p('load_all', False): f('-p')
     f(f'-{'Q'*-l if (l := p('V', 0)-p('Q', 0)) < 0 else 'V'*l}'); return r
-def json_to_argstr(p, /, *, join=s.join, **k): return join(json_to_argv(p, **k))
+def json_to_argstr(p, /, *, join=s.join): return join(json_to_argv(p))
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=p.parse_args):
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
