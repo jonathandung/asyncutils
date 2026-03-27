@@ -1,7 +1,7 @@
 from asyncio.protocols import Protocol
-from asyncio.queues import Queue
 from asyncio.transports import Transport
-from socket import error, SHUT_WR
+lazy from asyncio.queues import Queue
+lazy from socket import error, SHUT_WR
 from .exceptions import IgnoreErrors
 from .util import _ignore_cancellation
 from .mixins import LoopContextMixin
