@@ -197,7 +197,7 @@ async def aany(it):
     return False
 def _compare(a, b):
     try: return a < b
-    except TypeError, NotImplementedError: return b > a
+    except (TypeError, NotImplementedError): return b > a
 async def amax(it, *, cmp=None, key=None, default=_NO_DEFAULT, __cmp=_compare):
     if (r := await anext(I := iter_to_aiter(it), _NO_DEFAULT)) is _NO_DEFAULT:
         if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to amax with no default value')
@@ -571,7 +571,7 @@ async def alast(it, default=_NO_DEFAULT, _=check_methods):
     try:
         if _(it, '__getitem__'): return it[-1]
         return (await to_list(it))[-1] if (f := getattr(it, '__reversed__', None)) is None else f().__next__()
-    except IndexError, TypeError, StopIteration, StopAsyncIteration:
+    except (IndexError, TypeError, StopIteration, StopAsyncIteration):
         if default is _NO_DEFAULT: raise ValueError('alast() called on empty iterable without default value')
         return default
 def anthorlast(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)

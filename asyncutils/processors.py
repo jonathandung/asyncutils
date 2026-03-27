@@ -53,7 +53,7 @@ class Bulkhead(LoopContextMixin):
         if self.is_shutdown: raise BulkheadShutDown(f'{type(self).__qualname__} is shutting down')
         async with self._sem:
             try: return await self.make(await self._queue.get())
-            except QueueEmpty, QueueShutDown, CancelledError: raise BulkheadShutDown(f'{type(self).__qualname__} is shutting down') from None
+            except (QueueEmpty, QueueShutDown, CancelledError): raise BulkheadShutDown(f'{type(self).__qualname__} is shutting down') from None
             except self._exc as e:
                 if p := self._processor: await p(e)
         self._empty_event.clear() if self.active_tasks else self._empty_event.set()

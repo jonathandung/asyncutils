@@ -8,4 +8,4 @@ command line interface.
 .. note::
 
   This project is being actively developed and currently only supports python 3.14 or above, with a branch specifically
-  using syntax introduced in 3.15. It may be backported to 3.13 soon.
+  using syntax introduced in 3.15. Work to backport it to 3.13 has started.

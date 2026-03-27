@@ -44,7 +44,7 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=A.iscoroutine, futwra
         if corocheck(i): yield i; continue
         try: i = futwrap(i)
         except CRITICAL: raise Critical
-        except AssertionError, TypeError:
+        except (AssertionError, TypeError):
             if not _c(i, '__await__'):
                 if _c(i, '__aiter__'): yield handle_aiter(i)
                 elif _c(i, '__iter__'): yield handle_iter(i)

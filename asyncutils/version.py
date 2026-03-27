@@ -36,7 +36,7 @@ class VersionInfo(str):
     def assert_valid(self, _=E.VersionCorrupted):
         try:
             if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
-        except ValueError, TypeError, AttributeError: ...
+        except (ValueError, TypeError, AttributeError): ...
         raise _(self) # type: ignore
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     @classmethod
@@ -93,8 +93,7 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get
         except E.CRITICAL: raise E.Critical
         except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e)
     elif not c(o): return
-    try: return p(o)
-    except TypeError, ValueError: return
+    with E.IgnoreErrors(TypeError, ValueError): return p(o)
 def normalize(o, /, e=E.VersionNormalizerMissing):
     if (r := normalize_allow_unimplemented(o)) is None: raise e(o)
     return r

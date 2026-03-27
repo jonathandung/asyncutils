@@ -12,7 +12,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
     def __new__(cls, name, /, _d=_d, _a=_a, _s=s):
         if name in _a: return _s[name]
         try: return getattr(_s[_d[name]], name)
-        except AttributeError, KeyError: raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
+        except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
     def __getattr__(self, name, /):
         if name == '_fs': self._fs = s = frozenset(self.__dir__()); return s
