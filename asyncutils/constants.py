@@ -31,6 +31,7 @@ class sentinel_base:
     @property
     def bound_to(self):
         if len(l := getattr(self, '__name', '').split('.', 1)) == 2: return l[0]
+    def is_(self, o, /): return self is o
     P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}'))
 class _sentinel(sentinel_base):
     __slots__ = ()

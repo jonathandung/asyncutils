@@ -13,7 +13,7 @@ from time import monotonic
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'
-    def __init__(self, ttl=None, refresh=None, processor=None, default_loader=None, _=C.defaultdict): super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(); self.configure(context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL if ttl is None else ttl, context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH if refresh is None else refresh, processor)
+    def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, _=C.defaultdict): super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(); self.configure(context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL if ttl is None else ttl, context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH if refresh is None else refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
