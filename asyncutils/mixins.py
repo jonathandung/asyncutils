@@ -3,8 +3,7 @@ from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable
 from functools import cached_property, partial
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
-from asyncio.timeouts import timeout
-from asyncio import events
+from asyncio.timeouts import timeout as _timeout
 from ._internal.submodules import mixins_all as __all__
 class EventualLoopMixin(_LoopMixinBase): __slots__ = ()
 class LoopContextMixin(_LoopMixinBase):
@@ -22,9 +21,9 @@ class AwaitableMixin(metaclass=ABCMeta):
 @subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     @cached_property
-    def runner(self, _=get_loop_and_set):
+    def runner(self):
         __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin')
-        if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = _()
+        if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = get_loop_and_set()
         return partial(l.run_in_executor, Executor()) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
@@ -61,7 +60,8 @@ class LockWithOwnerMixin(LockMixin):
 @subscriptable
 class EventMixin(AwaitableMixin, metaclass=ABCMeta):
     _loop = None
-    def _set_loop(self, m=events):
+    def _set_loop(self):
+        from asyncio import events as m
         loop = m._get_running_loop() or m.new_event_loop()
         if self._loop is None: self._loop = loop
         if loop is not self._loop: raise RuntimeError('loop binding failed')
@@ -76,9 +76,9 @@ class EventMixin(AwaitableMixin, metaclass=ABCMeta):
     def get(self): ...
     @abstractmethod
     def set(self, value): ...
-    async def wait_for_value(self, val, timeout=None, *, set_at_timeout=False, _=timeout):
+    async def wait_for_value(self, val, timeout=None, *, set_at_timeout=False):
         try:
-            async with _(timeout):
+            async with _timeout(timeout):
                 while val is not await self: continue
         except TimeoutError:
             if set_at_timeout: self.set(val)
@@ -86,9 +86,8 @@ class EventMixin(AwaitableMixin, metaclass=ABCMeta):
     async def wait(self, timeout=None, **k):
         try: return self.get()
         except ValueError: return await self.wait_for_next(timeout, **k)
-    async def stream_history_for(self, duration=None, _=timeout):
+    async def stream_history_for(self, duration=None):
         try:
-            async with _(duration):
+            async with _timeout(duration):
                 while True: yield await self
         except TimeoutError: return
-del timeout, get_loop_and_set, events
