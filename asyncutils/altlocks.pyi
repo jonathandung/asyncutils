@@ -47,9 +47,9 @@ class CircuitBreaker:
     @overload
     def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
-class StatefulBarrier[T=Any](AwaitableMixin):
+class StatefulBarrier[T](AwaitableMixin):
     '''A barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
-    def __init__(self, parties: int, name: str=..., initstate: SupportsIteration[T]=..., maxstate: int|None=...):
+    def __init__(self, parties: int, name: str=..., initstate: SupportsIteration[T]=[], maxstate: int|None=...):
         '''`parties`: number of parties required to break the barrier
         `name` (optional): name of the barrier; to appear in error messages
         `initstate` (optional): an iterable storing the initial state; will be exhausted; preferrably not async

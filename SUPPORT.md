@@ -54,7 +54,11 @@ See [SECURITY.md](SECURITY.md) for details.
 
 ```bash
 # Upgrade pip
-python -m pip install --upgrade pip
+python -m pip install -U pip
+
+# Upgrade
+
+pip install -U py-asyncutils
 
 # Clean install
 pip uninstall py-asyncutils

@@ -1,6 +1,6 @@
 from _collections_abc import Callable
 from threading import Lock
-from typing import Final, NoReturn, Self, final, type_check_only
+from typing import Final, NoReturn, Literal, Self, final, type_check_only, overload
 __all__ = 'RECIP_E', 'RAISE', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 class sentinel_base:
@@ -17,6 +17,10 @@ class sentinel_base:
     def is_private(self) -> bool: '''Whether the sentinel is private (name begins with underscore).'''
     @property
     def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, None if there is none.'''
+    @overload
+    def is_(self, other: Self, /) -> bool: ...
+    @overload
+    def is_(self, other: object, /) -> Literal[False]: ...
 @final
 @type_check_only
 class _sentinel(sentinel_base):
