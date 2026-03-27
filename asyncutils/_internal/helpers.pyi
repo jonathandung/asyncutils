@@ -1,12 +1,12 @@
 '''Miscellaneous helper functions for asyncutils submodule that are not meant to be seen by the user.
 These are undocumented and will remain so; neither will they be stable.
 The stub file exists for the convenience of development only.'''
+from .protocols import CanClearAndCopy
 from asyncio.events import AbstractEventLoop
-from asyncio.tasks import Task
 from asyncio.futures import Future
+from asyncio.tasks import Task
 from _collections_abc import Generator, Coroutine, Iterable, Callable
 from typing import Any
-from .protocols import CanClearAndCopy
 def filter_out(*a: Any, s: Any=...) -> Generator[Any, None, None]: ...
 def get_loop_and_set() -> AbstractEventLoop: ...
 def check_methods(obj: Any, /, *meth: str) -> bool: ...

@@ -2,9 +2,9 @@
 `asyncutils` [uses a subset of SemVer](CONTRIBUTING.md), with two additional restrictions:
 - **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
+from ._internal.protocols import IntCompatible, Openable
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
-from ._internal.protocols import IntCompatible, Openable
 __all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
 @final
 class VersionInfo(str):

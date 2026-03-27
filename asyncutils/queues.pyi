@@ -3,12 +3,11 @@ from .exceptions import IgnoreErrors, PasswordQueueError as PasswordQueueError, 
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
 from abc import ABCMeta, abstractmethod
-from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
 from _collections_abc import Callable, Generator, AsyncGenerator, Awaitable, Coroutine
 from contextlib import _AsyncGeneratorContextManager
-from asyncio.queues import Queue
+from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
 from asyncio.futures import Future
-from asyncio.tasks import Task
+from asyncio.queues import Queue
 __all__ = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs', 'ignore_valerrs', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'WrongPassword', 'WrongPasswordType', 'password_queue', 'PotentQueueBase', 'SmartQueue', 'SmartLifoQueue', 'SmartPriorityQueue', 'UserPriorityQueue'
 ignore_qshutdown: Final[IgnoreErrors]
 '''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''

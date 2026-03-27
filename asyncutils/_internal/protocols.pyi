@@ -1,10 +1,10 @@
 '''Defines interfaces and type aliases used in this module's stubs. Pseudo-stable (deprecation periods will span at least 2 minor versions).
 This is a fake module in the sense that the names in this stub are all None at runtime, so do not inherit from its 'protocols'.
 This facilitates lightweight inline type annotations.'''
-from types import TracebackType, FunctionType
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
-from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
 from io import TextIOWrapper, _WrappedBuffer
+from types import TracebackType, FunctionType
+from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''

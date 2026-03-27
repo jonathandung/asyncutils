@@ -1,13 +1,13 @@
 import sys
-from weakref import WeakSet
-from mmap import mmap
-from contextlib import _AsyncGeneratorContextManager
-from typing import IO, Literal, Any, Self, Protocol, type_check_only
-from io import TextIOWrapper, _WrappedBuffer
-from _collections_abc import Iterable, Iterator, AsyncGenerator, Mapping
-from ._internal.protocols import Openable
 from .config import Executor
+from ._internal.protocols import Openable
 from .mixins import LoopContextMixin
+from _collections_abc import Iterable, Iterator, AsyncGenerator, Mapping
+from contextlib import _AsyncGeneratorContextManager
+from io import TextIOWrapper, _WrappedBuffer
+from mmap import mmap
+from typing import IO, Literal, Any, Self, Protocol, type_check_only
+from weakref import WeakSet
 __all__ = 'double_ended_text_pipe', 'double_ended_binary_pipe', 'AsyncReadWriteCouple', 'MemoryMappedIOManager'
 def double_ended_text_pipe(pipe_impl: _PipeFactory=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
     '''Return a tuple of two `AsyncReadWriteCouple`s, such that each can read what the other writes. Two os-level pipes must be created.

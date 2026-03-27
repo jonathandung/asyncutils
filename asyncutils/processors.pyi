@@ -1,7 +1,7 @@
-from .mixins import LoopContextMixin
 from ._internal.protocols import Exceptable, Timer, SupportsIteration
-from typing import Literal
+from .mixins import LoopContextMixin
 from _collections_abc import Awaitable, Callable, AsyncGenerator, Coroutine
+from typing import Literal
 __all__ = 'SemBatchProcessor', 'BatchProcessor', 'Bulkhead'
 class SemBatchProcessor[T, R]:
     def __init__(self, processor: Callable[[list[T]], Awaitable[R]], batch: int=..., max_concurrent: int=..., bounded: bool=...): ...

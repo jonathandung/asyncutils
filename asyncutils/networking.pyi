@@ -1,11 +1,10 @@
-from asyncio.protocols import Protocol
+from .mixins import LoopContextMixin
 from asyncio.events import AbstractEventLoop
-from asyncio.transports import Transport
+from asyncio.protocols import Protocol
+from asyncio.transports import Transport, WriteTransport
+from contextlib import _GeneratorContextManager
 from socket import socket
 from typing import Literal, ClassVar
-from contextlib import _GeneratorContextManager
-from .mixins import LoopContextMixin
-from asyncio.transports import WriteTransport
 __all__ = 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, LoopContextMixin):
     NEWLINE: ClassVar[bytes]

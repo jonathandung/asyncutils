@@ -1,3 +1,4 @@
-'''This module is imported if the module is imported, as opposed to run as a script which would activate the console by default.'''
+'''This submodule automatically reads the config from the correct file, and is loaded only when this module is imported.'''
 from typing import Any
 N: Any
+'''The configuration as a memory-efficient namespace-like object.'''

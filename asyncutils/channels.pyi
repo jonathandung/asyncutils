@@ -1,15 +1,15 @@
 from .mixins import LoopContextMixin
 from ._internal.protocols import Middleware
-from _collections_abc import Callable, Generator, AsyncGenerator, Mapping, Awaitable, Iterable
-from _weakrefset import WeakSet
-from collections import defaultdict
-from contextlib import _GeneratorContextManager
-from typing import Protocol, TypeGuard, Self, Any, Literal, NoReturn, type_check_only, overload
-from asyncio.futures import Future
-from asyncio.tasks import Task
 from asyncio.events import AbstractEventLoop
+from asyncio.futures import Future
 from asyncio.locks import Lock
 from asyncio.queues import Queue
+from asyncio.tasks import Task
+from collections import defaultdict
+from _collections_abc import Callable, Generator, AsyncGenerator, Mapping, Awaitable, Iterable
+from contextlib import _GeneratorContextManager
+from typing import Protocol, TypeGuard, Self, Any, Literal, NoReturn, type_check_only, overload
+from _weakrefset import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
     @type_check_only

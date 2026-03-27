@@ -1,8 +1,8 @@
 '''Miscellaneous context and context system.'''
 from ._internal.protocols import ValidExcType
-from typing import Final, Self, Any, final, overload
-from types import TracebackType
 from dataclasses import dataclass
+from types import TracebackType
+from typing import Final, Self, Any, final, overload
 __all__ = 'Context', 'getcontext', 'setcontext', 'localcontext'
 @final
 @dataclass(kw_only=True, match_args=False, slots=True)

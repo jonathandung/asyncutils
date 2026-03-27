@@ -1,9 +1,9 @@
 from ._internal.protocols import SupportsIteration, ValidExcType, ValidSlice
 from .mixins import EventualLoopMixin, LoopContextMixin
-from types import TracebackType
-from typing import Self, Any, SupportsIndex, overload
 from asyncio.futures import Future
 from _collections_abc import AsyncGenerator, Callable
+from types import TracebackType
+from typing import Self, Any, SupportsIndex, overload
 __all__ = 'anullcontext', 'apeekable', 'achain', 'abucket', 'OnlineSorter'
 class anullcontext:
     '''Simple async-only version of `contextlib.nullcontext`, implemented here to avoid importing `contextlib`.'''
