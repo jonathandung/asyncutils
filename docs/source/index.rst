@@ -1,5 +1,4 @@
-Welcome to the asyncutils docs!
-===
+*Welcome to the asyncutils docs!*
 
 **asyncutils** is a Python library which, as the name suggests, contains helpful routines and types for asynchronous
 programming applications, organized under various submodules. It offers a *simple* and *intuitive* API and a *colourful*

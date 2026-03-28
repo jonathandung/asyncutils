@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [3.12, 3.13, 3.14]
     steps:
     - uses: actions/checkout@v6.0.2
@@ -22,6 +22,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements-dev.txt
         python -m pip install -e .
+        python -m pip check
     - name: Lint with ruff
       run: ruff check . --output-format=github
     - name: Run tests

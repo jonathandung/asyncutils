@@ -10,6 +10,7 @@ from asyncio.tasks import wait_for, sleep
 from _collections import deque # type: ignore[import-not-found]
 from functools import wraps
 from itertools import count
+from sys import audit
 from time import monotonic
 from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):
@@ -38,13 +39,13 @@ class UniqueResourceGuard(ResourceGuard):
     @classmethod
     def guard(cls, obj, /, *, action='using'):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
-        return r
+        audit('asyncutils.altlocks.UniqueResourceGuard', obj); return r
 class CircuitBreaker:
     __slots__ = '_name', '_max_fails', '_reset', '_exc', '_fails', '_opened', '_half_open_calls', '_max_half_open_calls', '_call_lock', '_state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, name, /, max_fails=3, reset=None, exc=Exception, max_half_open_calls=None, _fmt='#%d'):
         f = None
         if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__qualname__', None)) is None is (name := getattr(f, '__name__', None)): name = _fmt%cls._inc_cnt()
-        self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._call_lock = name, max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Lock(); self._set(0); return self if f is None else self(f)
+        audit('asyncutils.altlocks.CircuitBreaker', name, max_fails); self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._call_lock = name, max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Lock(); self._set(0); return self if f is None else self(f)
     def __call__(self, f, /, timer=monotonic, default=_NO_DEFAULT):
         async def wrapper(*a, **k):
             async with self._call_lock: # type: ignore
@@ -124,4 +125,4 @@ class DynamicThrottle:
             if e is None: self._successes += 1
             else: self._fails += 1
     def reset(self): self._successes = self._fails = 0; self._last_call = self.ctime-1.0/self._rate
-del _randinst
+del _randinst, count

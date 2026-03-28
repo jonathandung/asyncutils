@@ -1,4 +1,4 @@
-from . import __version__ as V, config as C
+from . import config as C, __version__ as V
 from ._internal import patch as P, running_console as R
 import sys as S
 from os import getenv as g
@@ -14,7 +14,8 @@ class ConsoleBase(B): # type: ignore
             if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
             from _pyrepl.main import CAN_USE_PYREPL
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
-        if type(self) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
+        S.audit(f'{(t := type(self)).__module__}.{t.__qualname__}', loop)
+        if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
         def stop(p=None, /, _o=loop.stop, *, asap=False):

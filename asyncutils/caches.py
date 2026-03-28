@@ -9,11 +9,15 @@ from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock, Event
 from asyncio.tasks import sleep, gather
 from functools import lru_cache, wraps
+from sys import audit
 from time import monotonic
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'
-    def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, _=C.defaultdict): super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(); self.configure(context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL if ttl is None else ttl, context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH if refresh is None else refresh, processor)
+    def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, _=C.defaultdict):
+        if ttl is None: ttl = context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
+        if refresh is None: refresh = context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
+        audit('asyncutils.caches.CacheWithBackgroundRefresh', ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(); self.configure(ttl, refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
@@ -66,6 +70,7 @@ class AsyncLRUCache:
     __slots__ = '_ttl', '_factory', '_timestamps', '_caches', '_make_key', '_loopctx'
     def __init__(self, maxsize=None, ttl=None, typed=False):
         if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE
+        audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200)
     def __call__(self, f, /, _=lambda f, a, k: id(f)<<0x80|hash(a)<<0x40|hash(frozenset(k.items()))):
         self._caches[f] = c = self._factory(f)

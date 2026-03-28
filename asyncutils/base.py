@@ -90,7 +90,7 @@ def f(n):
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
 async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False):
-    audit('safe_cancel_batch', t); l = []
+    audit('asyncutils.base.safe_cancel_batch', t); l = []
     async for _ in (adisembowel if disembowel else iter_to_aiter)(t):
         if not _.done(): _.cancel(); l.append(_) # type: ignore[attr-defined]
     r = await gather(*l, return_exceptions=True)

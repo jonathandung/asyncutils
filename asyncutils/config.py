@@ -1,8 +1,8 @@
 import logging as L, sys as S
 from ._internal import log, patch as P
 from ._internal.submodules import config_all as __all__
-if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N = p.parse_args(); del p
-else: from ._internal.unparsed import N
+from ._internal.unparsed import N
+if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     d, c, w = e.rpartition(c)
     if c:

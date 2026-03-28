@@ -1,5 +1,5 @@
 from .base import event_loop, aiter_to_iter, safe_cancel_batch
-from .exceptions import CRITICAL, Critical
+from .exceptions import Critical, CRITICAL
 from ._internal import helpers as H
 from .util import new_tasks
 import asyncio as A
