@@ -2,7 +2,7 @@
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
-![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg)
+![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
