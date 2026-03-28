@@ -14,9 +14,9 @@ class LoopContextMixin(_LoopMixinBase):
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); self.exiter()
 class LoopBoundMixin:
-    __slots__ = '_loop'
+    _loop = None
     def make_fut(self):
-        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
+        if (l := self._loop) is None: self._loop = l = get_loop_and_set()
         elif l is not _get_running_loop(): raise RuntimeError('could not bind loop')
         return l.create_future()
 @subscriptable

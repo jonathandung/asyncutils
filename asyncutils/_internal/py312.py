@@ -1,18 +1,18 @@
 from .. import __version__
 if __version__.major >= 3: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
 from .helpers import subscriptable
-from collections import deque
-from asyncio.locks import Event
 from ..mixins import LoopBoundMixin
-__all__ = 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
+from asyncio.locks import Event
+from collections import deque
+__all__ = 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'LifoQueue'
 class QueueEmpty(Exception): ...
 class QueueFull(Exception): ...
 class QueueShutDown(Exception): ...
 @subscriptable
 class Queue(LoopBoundMixin):
     def __init__(self, maxsize=0):
-        self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._finished, self._is_shutdown = maxsize, deque(), deque(), 0, Event(), False
-        self._finished.set(); self._init(maxsize)
+        self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown = maxsize, deque(), deque(), 0, False
+        self._finished = e = Event(); e.set(); self._init(maxsize)
     @staticmethod
     def _wakeup_next(W, /, w=None):
         while W and (w := W.popleft()).done(): ...
@@ -33,36 +33,33 @@ class Queue(LoopBoundMixin):
     def empty(self): return not self._queue
     def full(self): return not 0 < self.qsize() < self.maxsize
     async def put(self, item):
-        while self.full():
+        f, a = self.full, (P := self._putters).append
+        while f():
             if self._is_shutdown: raise QueueShutDown
-            self._putters.append(putter := self.make_fut())
-            try: await putter
+            a(p := self.make_fut())
+            try: await p
             except:
-                putter.cancel()
-                try: self._putters.remove(putter)
+                p.cancel()
+                try: P.remove(p)
                 except ValueError: ...
-                if not self.full() and not putter.cancelled(): self._wakeup_next(self._putters)
+                if not (f() or p.cancelled()): self._wakeup_next(P)
                 raise
         return self.put_nowait(item)
     def put_nowait(self, item):
         if self._is_shutdown: raise QueueShutDown
         if self.full(): raise QueueFull
-        self._put(item)
-        self._unfinished_tasks += 1
-        self._finished.clear()
-        self._wakeup_next(self._getters)
+        self._put(item); self._unfinished_tasks += 1; self._finished.clear(); self._wakeup_next(self._getters)
     async def get(self):
-        while self.empty():
-            if self._is_shutdown and self.empty(): raise QueueShutDown
-            getter = self.make_fut()
-            self._getters.append(getter)
-            try:
-                await getter
+        A, e = (G := self._getters).append, self.empty
+        while e():
+            if self._is_shutdown: raise QueueShutDown
+            A(g := self.make_fut())
+            try: await g
             except:
-                getter.cancel()
-                try: self._getters.remove(getter)
+                g.cancel()
+                try: G.remove(g)
                 except ValueError: ...
-                if not (self.empty() or getter.cancelled()): self._wakeup_next(self._getters)
+                if not (e() or g.cancelled()): self._wakeup_next(G)
                 raise
         return self.get_nowait()
     def get_nowait(self):
@@ -77,11 +74,11 @@ class Queue(LoopBoundMixin):
     def shutdown(self, immediate=False):
         self._is_shutdown = True
         if immediate:
+            g = self._get
             while not self.empty():
-                self._get()
+                g()
                 if (U := self._unfinished_tasks) > 0: self._unfinished_tasks = U-1
             if U == 1: self._finished.set()
-        f = (D := self._getters).popleft
         for D in (self._getters, self._putters):
             f = D.popleft
             while D:
