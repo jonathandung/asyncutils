@@ -31,7 +31,7 @@ class Queue(LoopBoundMixin):
     def _put(self, i, /): self._queue.append(i)
     def qsize(self): return len(self._queue)
     def empty(self): return not self._queue
-    def full(self): return not 0 < self.qsize() < self.maxsize
+    def full(self): return 0 < self.maxsize <= self.qsize()
     async def put(self, item):
         f, a = self.full, (P := self._putters).append
         while f():

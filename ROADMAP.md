@@ -2,7 +2,7 @@
 
 This file provides an overview of the direction towards which this project is heading.
 
-Current version: 0.8.18
+Current version: 0.8.19
 
 ## 0.9
 
