@@ -2,7 +2,7 @@ from . import exceptions as E
 from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
 from .futures import AsyncCallbacksFuture
-from ._internal.compat import partial, Placeholder
+from ._internal.compat import partial, Placeholder, Queue, QueueShutDown, QueueFull, QueueEmpty
 from ._internal.helpers import get_loop_and_set, subscriptable
 from ._internal.log import info
 from .mixins import EventualLoopMixin
@@ -10,7 +10,6 @@ from .util import safe_cancel, sync_await
 import heapq
 from abc import ABCMeta, abstractmethod
 from asyncio.locks import Event
-from asyncio.queues import Queue, QueueShutDown, QueueFull, QueueEmpty
 from asyncio.tasks import gather, wait_for
 from asyncio.timeouts import timeout as _timeout
 from _collections import deque # type: ignore[import-not-found]
@@ -43,7 +42,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not pwd: raise _.GetPasswordMissing
         pwd, = pwd
         if not isinstance(pwd, gettyp): raise _.WrongPasswordType(pwd, type(pwd), q, gettyp)
-        if pwd is not password_get and (strict or pwd != password_get): raise _.WrongPassword(q, pwd)
+        if pwd is not password_get and (strict or not (type(pwd) is type(password_get) and (e := pwd.__eq__(password_get)) is not NotImplemented and e)): raise _.WrongPassword(q, pwd)
     def v(pwd):
         if not protect_put: return
         if not pwd: raise _.PutPasswordMissing
@@ -58,11 +57,11 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         def empty(self): return not l
         def qsize(self): return len(l)
         def full(self): return 0 < maxsize <= len(l)
-        async def get(self, *p, A=G.append):
+        async def get(self, *p, _=G.append):
             u(p)
             while not l:
                 if S: raise QueueShutDown
-                A(F := m())
+                _(F := m())
                 try: await F
                 except:
                     F.cancel()
@@ -74,11 +73,11 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             if self.empty(): raise QueueShutDown if S else QueueEmpty
             if backdoor is not b: u(p)
             i = g(); _wakeup_next(P); return i
-        async def put(self, item, *p, A=P.append):
+        async def put(self, item, *p, _=P.append):
             v(p); e = self.full
             while e():
                 if S: raise QueueShutDown
-                A(F := m())
+                _(F := m())
                 try: await F
                 except:
                     F.cancel()
@@ -118,15 +117,15 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         async def join(self):
             if U > 0: await E.wait()
         def shutdown(self, immediate=False):
-            nonlocal S; S, a, b = True, G.popleft, P.popleft
+            nonlocal S; S = True
             if immediate:
                 nonlocal U; U -= len(l)
                 if U <= 0: U = 0; E.set()
                 l.clear()
-            while G:
-                if not (g := a()).done(): g.set_result(None)
-            while P:
-                if not (p := b()).done(): p.set_result(None)
+            for D in (G, P):
+                f = D.popleft
+                while D:
+                    if not (F := f()).done(): F.set_result(None)
         def cancel_extend(self, msg=None): return False
         get.__qualname__, get_nowait.__qualname__, put.__qualname__, put_nowait.__qualname__, change_get_password.__qualname__, change_put_password.__qualname__ = get.__name__, get_nowait.__name__, put.__name__, put_nowait.__name__, change_get_password.__name__, change_put_password.__name__
     q = object.__new__(PasswordQueue)
@@ -236,7 +235,8 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             self.clear()
             with _: await self.extend(q, 0.1)
             raise
-    def __bool__(self): return not self.empty()
+    def empty(self): return self.qsize() == 0
+    def __bool__(self): return self.qsize() >= 0 # type: ignore
     def map(self, f, stop_when=None, *, lifo=False):
         audit(f'{type(self).__qualname__}.map', self, f)
         if stop_when is None:

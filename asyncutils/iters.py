@@ -2,6 +2,7 @@ from . import exceptions as E
 from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
+from ._internal.compat import Queue, QueueEmpty, QueueShutDown, LifoQueue
 from ._internal.helpers import copy_and_clear, stop_and_closer, filter_out, get_loop_and_set, check_methods
 from .iterclasses import achain, anullcontext
 from .util import safe_cancel, get_aiter_fromf
@@ -9,7 +10,6 @@ import math as M, _operator as O
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock, Event, Semaphore
-from asyncio.queues import Queue, QueueEmpty, QueueShutDown, LifoQueue
 from asyncio.tasks import gather, wait_for, sleep
 from collections import defaultdict, Counter, deque
 from functools import partial, lru_cache

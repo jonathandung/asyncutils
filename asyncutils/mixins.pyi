@@ -2,13 +2,12 @@ from ._internal.helpers import _LoopMixinBase
 from ._internal.protocols import ValidExcType
 from .locks import LocksmithBase
 from abc import ABCMeta, abstractmethod
-from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from _collections_abc import Generator, Callable, Coroutine, AsyncGenerator, Awaitable
 from functools import cached_property
 from types import TracebackType
 from typing import Self, Literal, Any, overload
-__all__ = 'EventualLoopMixin', 'LoopContextMixin', 'AwaitableMixin', 'AsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'EventMixin'
+__all__ = 'EventualLoopMixin', 'LoopBoundMixin', 'LoopContextMixin', 'AwaitableMixin', 'AsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'EventMixin'
 class EventualLoopMixin(_LoopMixinBase): '''An alternative to LoopContextMixin when __aenter__ and __aexit__ are used for other purposes (e.g. lock-like objects such as RLock, KeyedCondition)'''
 class LoopContextMixin(_LoopMixinBase):
     async def __setup__(self) -> None: ...
@@ -60,9 +59,9 @@ class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None, T
     @abstractmethod
     def _release(self) -> T: ...
     def release(self) -> T: ...
-class EventMixin[T](AwaitableMixin, metaclass=ABCMeta):
-    @cached_property
-    def loop(self) -> AbstractEventLoop: ...
+class LoopBoundMixin:
+    def make_fut(self) -> Future[Any]: ...
+class EventMixin[T](AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
     @abstractmethod
     async def wait_for_next(self, timeout: float|None=..., **k) -> T: ...
     @abstractmethod

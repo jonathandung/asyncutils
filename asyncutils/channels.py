@@ -3,12 +3,12 @@ from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .constants import _NO_DEFAULT
 from .exceptions import BusShutDown, BusStatsError, BusPublishingError, BusTimeout, Critical, potent_derive, CRITICAL
 from ._internal import log as L, patch as P
+from ._internal.compat import Queue, QueueEmpty, QueueShutDown
 from ._internal.helpers import filter_out, get_loop_and_set, copy_and_clear, stop_and_closer, subscriptable
 from .mixins import LoopContextMixin
 from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
 from asyncio.coroutines import iscoroutine
 from asyncio.locks import Lock, Event, Semaphore
-from asyncio.queues import Queue, QueueEmpty, QueueShutDown
 from asyncio.tasks import wait_for, gather, sleep, shield
 from asyncio.timeouts import timeout as _timeout
 from collections import defaultdict, deque, namedtuple

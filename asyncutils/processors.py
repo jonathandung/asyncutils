@@ -1,12 +1,12 @@
 from .base import safe_cancel_batch, collect, iter_to_aiter
 from .exceptions import BulkheadFull, BulkheadShutDown
+from ._internal.compat import Queue, QueueFull, QueueEmpty, QueueShutDown
 from ._internal.helpers import subscriptable
 from .mixins import LoopContextMixin
 from .util import semaphore, safe_cancel
 from _functools import partial # type: ignore[import-not-found]
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock, Event
-from asyncio.queues import Queue, QueueFull, QueueEmpty, QueueShutDown
 from asyncio.tasks import sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic

@@ -47,10 +47,10 @@ log_file_mode = "a"
 
 [tool.coverage.run]
 source = ["asyncutils"]
-omit = ["*/__main__.py", "_internal/py313.py"]
+omit = ["*/__main__.py", "*/_internal/compat.py", "*/_internal/py313.py", "*/_internal/py312.py"]
 
 [tool.coverage.report]
-exclude_lines = ["pragma: no cover", "if __name__ == '__main__':", "raise NotImplementedError"]
+exclude_lines = [".*# pragma: no (cover|branch)", "if __name__ == '__main__':", "raise NotImplementedError", "def __repr__\\(self.*\\):", "\\.\\.\\."]
 
 [tool.ruff]
 target-version = "py312"

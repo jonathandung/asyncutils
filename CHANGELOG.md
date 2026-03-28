@@ -274,6 +274,7 @@ Submodules:
 
   Interfaces/Mixins:
   - EventualLoopMixin
+  - LoopBoundMixin
   - LoopContextMixin
   - AwaitableMixin
   - AsyncContextMixin

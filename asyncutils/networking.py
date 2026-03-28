@@ -1,8 +1,8 @@
 from asyncio.protocols import Protocol
-from asyncio.queues import Queue
 from asyncio.transports import Transport
 from socket import error, SHUT_WR
 from .exceptions import IgnoreErrors
+from ._internal.compat import Queue
 from .mixins import LoopContextMixin
 from .util import _ignore_cancellation
 from ._internal.submodules import networking_all as __all__

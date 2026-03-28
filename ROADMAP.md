@@ -36,6 +36,7 @@ Current version: 0.8.18
 
 - Ramp up coverage to 90%
 - Publish docker images
+- Deprecate <= 3.12 compatibility module
 
 ## 4.0
 

@@ -2,6 +2,7 @@ from .config import Executor
 from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
+from asyncio.events import _get_running_loop
 from asyncio.timeouts import timeout as _timeout
 from functools import cached_property, partial
 from ._internal.submodules import mixins_all as __all__
@@ -12,6 +13,12 @@ class LoopContextMixin(_LoopMixinBase):
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); self.exiter()
+class LoopBoundMixin:
+    __slots__ = '_loop'
+    def make_fut(self):
+        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
+        elif l is not _get_running_loop(): raise RuntimeError('could not bind loop')
+        return l.create_future()
 @subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
@@ -58,16 +65,8 @@ class LockWithOwnerMixin(LockMixin):
         if not self.is_owner: raise RuntimeError(f'{type(self).__name__} is not acquired by current task')
         return self._release()
 @subscriptable
-class EventMixin(AwaitableMixin, metaclass=ABCMeta):
-    _loop = None
-    def _set_loop(self):
-        from asyncio import events as m
-        loop = m._get_running_loop() or m.new_event_loop()
-        if self._loop is None: self._loop = loop
-        if loop is not self._loop: raise RuntimeError('loop binding failed')
-        return loop
-    @cached_property
-    def loop(self): return self._set_loop()
+class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
+    __slots__ = ()
     @abstractmethod
     async def wait_for_next(self, timeout=None, **k): ...
     @abstractmethod

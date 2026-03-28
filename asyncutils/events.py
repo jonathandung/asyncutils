@@ -16,10 +16,10 @@ class SingleWaiterEventWithValue(EventMixin):
     def clear(self): self._set, self._waiter = False, None; del self._value
     def is_set(self): return self._set
     async def wait_for_next(self, timeout=None, *, strict=False):
-        if self._waiter:
-            if strict: raise RuntimeError('another waiter')
-        else: self._waiter = self.loop.create_future()
-        try: return await wait_for(self._waiter, timeout)
+        if w := self._waiter:
+            if strict: raise RuntimeError('another waiter is waiting')
+        else: self._waiter = w = self.make_fut()
+        try: return await wait_for(w, timeout)
         finally: self._waiter = None
     def get(self, default=RAISE):
         if default is RAISE: raise EventValueError('no value is set')
@@ -44,7 +44,7 @@ class EventWithValue(EventMixin):
             return default
         return v
     async def wait_for_next(self, timeout=None):
-        self._waiters.add(F := self.loop.create_future())
+        self._waiters.add(F := self.make_fut())
         try: return await wait_for(F, timeout)
         finally: self._waiters.discard(F)
     def is_set(self): return self._value is not None
@@ -66,4 +66,4 @@ class EventWithValue(EventMixin):
         except TimeoutError:
             if force_transition: o = self.get(None); self.set(old); self.set(new); self.set(o, strict=False)
             return False
-    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False, loop=None): return await next(iter((await wait(map((loop or get_running_loop()).create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))
+    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(get_running_loop().create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))

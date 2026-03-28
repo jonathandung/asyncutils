@@ -66,9 +66,9 @@ class VersionInfo(str):
     def __int__(self):
         if not (p := self[2]) < 0x100 > (m := self[1]): raise OverflowError(f'cannot pack version {self} into an integer')
         return p|m<<8|self[0]<<16
-    def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True)) # pragma: no cover
+    def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True))
     @classmethod
-    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True)) # type: ignore # pragma: no cover
+    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True)) # type: ignore
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
