@@ -81,7 +81,7 @@ python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 
 ## Version Compatibility
 
-- Python 3.13+ required
+- Python 3.12+ required
 - No dependencies outside development, which we're proud of
 - Maybe use virtual environments
 

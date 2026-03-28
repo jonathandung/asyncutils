@@ -1,5 +1,5 @@
 '''A versioning scheme for `asyncutils`. Inspired by `torch/torch_version.py`, but with quite some differences.
-`asyncutils` [uses a subset of SemVer](CONTRIBUTING.md), with two additional restrictions:
+`asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
 - **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
 from ._internal.protocols import IntCompatible, Openable
