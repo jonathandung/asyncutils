@@ -1,5 +1,9 @@
 # asyncutils (unfortunately py-asyncutils on pip)
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
+![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
+![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg)
+
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
 Includes a wide range of submodules tailored for specific usages, though concrete implementations are lacking.
@@ -75,7 +79,7 @@ Besides using command line arguments to change console settings, the behaviour o
 This includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation using the `AUTILSCFGPATH` environment variable (all uppercase due to Windows limitations),
 which should point to an absolute path to a configuration .json[l].
 
-See [format.jsonc](asyncutils/format.jsonc) for details.
+See [format.jsonc](https://github.com/jonathandung/asyncutils/blob/main/format.jsonc) for details.
 
 ## Remarks
 
@@ -107,8 +111,6 @@ Have fun!
 ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils)
 ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social)
-![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils)
 ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
@@ -116,6 +118,6 @@ Have fun!
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
 ![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
+![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
-![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)

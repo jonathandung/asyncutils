@@ -337,8 +337,11 @@ Submodules:
 
 - tools
 
-  Functions:
+  Constants:
   - ext2modname
+
+  Functions:
+
   - json_to_argv
   - json_to_argstr
   - argv_to_json
