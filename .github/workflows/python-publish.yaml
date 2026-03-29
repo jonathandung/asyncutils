@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v6.0.2
       - uses: actions/setup-python@v6.2.0
         with:
-          python-version: 3.14
+          python-version: "3.14"
       - name: Build release distributions
         run: |
           pip install -U pip
@@ -24,7 +24,7 @@ jobs:
       - name: Upload distributions
         uses: actions/upload-artifact@v7
         with:
-          name: release-dists
+          name: release-dists-${{matrix.os}}
           path: dist/
   pypi-publish:
     runs-on: ubuntu-latest
@@ -39,8 +39,9 @@ jobs:
       - name: Retrieve release distributions
         uses: actions/download-artifact@v8.0.1
         with:
-          name: release-dists
+          pattern: release-dists-*
           path: dist/
+          merge-multiple: true
       - name: Publish release distributions to PyPI using twine
         run: twine upload dist/* --verbose
         env:
