@@ -6,4 +6,5 @@ version = '0.8'
 release = '0.8.20'
 need_sphinx = '9.1.0'
 pygments_style = 'sphinx'
-html_theme = 'classic'
+html_theme = 'sphinx_rtd_theme'
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
