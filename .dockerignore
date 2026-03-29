@@ -23,7 +23,6 @@ htmlcov/
 docs/
 *.rst
 *.txt
-!requirements-dev.txt
 dist/
 build/
 downloads/
@@ -57,4 +56,3 @@ docker-compose.yml
 .markdownlint.json
 .pre-commit-config.yaml
 .editorconfig
-docs/requirements.in

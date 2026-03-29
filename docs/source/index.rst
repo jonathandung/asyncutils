@@ -4,7 +4,14 @@
 programming applications, organized under various submodules. It offers a *simple* and *intuitive* API and a *colourful*
 command line interface.
 
+.. toctree ::
+  :maxdepth: 2
+  :caption: Contents:
+
+  installation
+  usage
+
 .. note::
 
-  This project is being actively developed and currently only supports python 3.12 or above, with a branch specifically
-  using syntax introduced in 3.15.
+  This project is being actively developed and currently only supports python 3.12 or above, with a non-default dev
+  branch specifically using syntax introduced in 3.15.

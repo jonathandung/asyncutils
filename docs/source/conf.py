@@ -1,3 +1,4 @@
+__import__('sys').path.insert(0, __import__('os.path', fromlist=('',)).abspath('../..'))
 project = 'asyncutils'
 author = 'Jonathan Dung'
 copyright = '2026-%Y Jonathan Dung'

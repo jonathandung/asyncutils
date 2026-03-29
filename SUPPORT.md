@@ -2,7 +2,7 @@
 
 Thank you for using asyncutils! This document outlines how to get help with this project.
 
-Before jumping to seek support, please check **[README.md](https://github.com/jonathandung/asyncutils/blob/main/README.md)** for a basic usage and installation guide.
+Before jumping to seek support, please read through **[README.md](https://github.com/jonathandung/asyncutils/blob/main/README.md)**.
 
 ## Bug Reports
 
@@ -12,8 +12,8 @@ If you've found a bug, please:
 2. If not, create a new issue
 3. Include:
 
-    - Python version (`python --version`)
-    - asyncutils version (`autils -v`)
+    - Python version tag (`python -VV`)
+    - asyncutils version (`python -m asyncutils -v`)
     - Operating system
     - Package version (`pip show py-asyncutils` or `conda list py-asyncutils`)
     - Minimal reproducible example
@@ -52,30 +52,46 @@ See [SECURITY.md](SECURITY.md) for details.
 
 ### Installation Problems
 
+Update your package installer, then try the following fixes:
+
 ```bash
-# Upgrade pip
-python -m pip install -U pip
-
 # Upgrade
-
 pip install -U py-asyncutils
+
+# Check for dependency shenanigans
+pip check
+echo $? # Should be 0
 
 # Clean install
 pip uninstall py-asyncutils
 pip install py-asyncutils
 
+# If using pipx
+
+pip install -U pipx
+pipx ensurepath
+
 # If using conda
 conda update py-asyncutils
+
+# If using uv
+uv pip install -U py-asyncutils
 ```
 
 ### Import Errors
 
+Check if asyncutils is installed:
+
 ```bash
-# Check if installed
 pip list | grep py-asyncutils
+```
+
+If the package is not working with python -S, perform the steps below with python -S -c:
+
+```bash
 # Check sys.path
 python -c "print(*__import__('sys').path, sep='\n')"
-# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console, constants, # context, ... separated by newlines
+# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console, constants, # context, events, exceptions, ... separated by newlines
 python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 ```
 

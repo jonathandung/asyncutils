@@ -20,11 +20,14 @@ class VersionInfo(str):
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding (major, minor, patch) sequentially.'''
     def __len__(self) -> Literal[3]: '''len((major, minor, patch)) == 3.'''
-    def __getitem__(self, idx: int, /) -> int:
-        '''Depending on the value of `idx`:
+    @overload
+    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int:
+        '''Depending on the value of `idx`, corresponds to the following attributes:
         0 -> `major`
         1 -> `minor`
         2 -> `patch`'''
+    @overload
+    def __getitem__(self, idx: int, /) -> NoReturn: ...
     def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
     def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
     def __gt__(self, other: Any, /) -> bool: '''Whether self succeeds the other as a version.'''

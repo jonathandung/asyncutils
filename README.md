@@ -3,6 +3,10 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
 ![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
+![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
+![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
+![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)
+![Docs](https://app.readthedocs.org/projects/asyncutils/badge)
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
@@ -14,47 +18,32 @@ Also has a well-equipped command line interface taking many flags and options.
 
 ## Setup
 
-Essentially no setup required! Just install py-asyncutils from pip:
-
-```bash
-python -m pip install py-asyncutils==0.8.19 # This version
-```
-
-or
-
-```bash
-python -m pip install py-asyncutils[dev] # If installing for development; this differs from the dev branch
-# currently installs ruff, pytest and some plugins thereof
-```
-
-or with conda:
-
-```bash
-conda install -c conda-forge py-asyncutils=0.8.19
-```
-
-Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
+Since the name `asyncutils` was somehow unavailable on PyPI, `py-asyncutils` was chosen instead.
+Packaging for conda has also been done via conda-forge.
+You can install using either conda or pip, or directly from roughly forthnightly GitHub releases; no extra setup is needed.
+See [installation.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/installation.rst) for more.
 
 ## Usage
 
-A typical program that uses this module would look like this:
+A simple program that uses this module would look like this:
 
 `# demo.py`
 
 ```python
-import asyncutils as autils
-with autils.event_loop() as loop: # this wraps the asyncio event loop implementation with proper cleanup
+import asyncutils as autils, asyncio as aio
+with autils.event_loop(check_running=True) as loop:
+    # this wraps the asyncio event loop implementation with proper cleanup
     rdv = autils.Rendezvous[int](loop=loop) # some types support subscripting
-    print(*(loop.run_until_complete(asyncio.gather(*map(rdv.put, range(10, 20)), rdv.exchange(20),
-    *map(rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[10:])
+    print(*(loop.run_until_complete(aio.gather(*map(rdv.put, range(10, 20)), rdv.exchange(20), *map(
+        rdv.exchange, range(1, 10)), *(rdv.get() for _ in range(10)))))[10:])
     # simulate some work with values passed between tasks
     # Here `Rendezvous` is a class implementing get and put methods that complete only after there is
     # a corresponding putter or getter respectively
 ```
 
-which prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 175 ms including the import time of both modules! For reference, asyncio loads in around 160-165 ms.
-That is, the only reason this module starts slow is due to asyncio loading all its submodules on import, which is frankly suboptimal.
-However, we load asyncio early such that attribute accesses later on would not randomly take more than 150 ms.
+This prints `1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20` in 190 ms including the import time of asyncio, which needs around
+160-165 ms to load! That is, the only reason this module starts slow is due to asyncio loading all its submodules on import, which is
+frankly suboptimal. However, we still load asyncio early such that attribute accesses later on would not randomly take more than 150 ms.
 
 Command used:
 
@@ -62,16 +51,17 @@ Command used:
 python -m timeit -n 1 -r 1 "import demo"
 ```
 
-The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`),
-though considering how many submodules we provide (30 and ever-increasing!), it is acceptable.
-In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the `--load-all` switch is passed.
+The above demo may be considered bad practice in that the shortened names (`autils.event_loop`, `autils.Rendezvous`) are used instead of the
+fully qualified names (`asyncutils.base.event_loop`, `asyncutils.channels.Rendezvous`), though considering how many submodules we provide (32
+and ever-increasing!), it is acceptable. In fact, the submodules are only loaded on demand by a sophisticated name exposure system, unless the
+`--load-all` switch is passed.
 
 ## Version
 
 This is asyncutils v0.8.19.
 
-This library is currently in alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be backward-incompatible.
-Of course, this isn't a significant issue, seeing as though nobody currently uses it.
+This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
+backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)
 
 ## Environment variables and configuration
 
@@ -105,19 +95,16 @@ Have fun!
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils)
 ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils)
-![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
 ![GitHub stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/jonathandung/asyncutils?style=social)
 ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils)
 ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social)
+![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils)
 ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
-![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
-![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
-![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
