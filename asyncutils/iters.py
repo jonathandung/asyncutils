@@ -1,17 +1,17 @@
 from . import exceptions as E
-from .base import safe_cancel_batch, adisembowel, iter_to_aiter, collect, take, aenumerate, dummy_task
+from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take, dummy_task
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
-from ._internal.compat import Queue, QueueEmpty, QueueShutDown, LifoQueue
-from ._internal.helpers import copy_and_clear, stop_and_closer, filter_out, get_loop_and_set, check_methods
+from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
+from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer
 from .iterclasses import achain, anullcontext
-from .util import safe_cancel, get_aiter_fromf
+from .util import get_aiter_fromf, safe_cancel
 import math as M, _operator as O
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
-from asyncio.locks import Lock, Event, Semaphore
-from asyncio.tasks import gather, wait_for, sleep
-from collections import defaultdict, Counter, deque
+from asyncio.locks import Event, Lock, Semaphore
+from asyncio.tasks import gather, sleep, wait_for
+from collections import Counter, defaultdict, deque
 from functools import partial, lru_cache
 from sys import audit
 from ._internal.submodules import iters_all as __all__
@@ -19,6 +19,9 @@ _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrang
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential(fs, /, *a, **k):
     async for f in iter_to_aiter(fs): yield await f(*a, **k)
+async def fmap_parallel(fs, /, *a, **k):
+    t = get_loop_and_set().create_task
+    for r in await to_tuple(t(f(*a, **k)) async for f in iter_to_aiter(fs)): yield await r
 async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
     f, g = (l := []).append, l.clear
     async for _ in amap(inner, it, await_=inner_await):

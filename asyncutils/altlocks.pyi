@@ -29,13 +29,11 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
 class UniqueResourceGuard(ResourceGuard):
     '''A subclass of anyio.ResourceGuard that only allows one guard per object.
     Note that this does not stop the object from having an instance of ResourceGuard (or subclass thereof) from guarding it simultaneously.'''
+    @classmethod
+    def guard(cls, obj: Any, /, *, action: str=...) -> Self: ...
 class CircuitBreaker:
     '''The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
     Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.'''
-    @property
-    def name(self) -> str: '''The name of the circuit breaker, shown in error messages.'''
-    @property
-    def fails(self) -> int: '''Current count of conseuctive failures.'''
     @overload
     def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self:
         '''Construct a circuit breaker, whose circuit is initially closed.
@@ -47,6 +45,10 @@ class CircuitBreaker:
     @overload
     def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
+    @property
+    def fails(self) -> int: '''Current count of conseuctive failures.'''
+    @property
+    def name(self) -> str: '''The name of the circuit breaker, shown in error messages.'''
 class StatefulBarrier[T](AwaitableMixin):
     '''A barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
     def __init__(self, parties: int, name: str=..., initstate: SupportsIteration[T]=[], maxstate: int|None=...):
@@ -60,13 +62,13 @@ class StatefulBarrier[T](AwaitableMixin):
         If the timeout expires, raise a TimeoutError and abort the barrier.
         Once enough parties are waiting, all callers receive a tuple (pos, states).
         Here states is the deque of stored state and pos is the number of parties having arrived before this one.'''
-    def _reset(self) -> None: ...
+    def _reset(self) -> None: '''Internal method to advance the barrier to the next generation so that new parties can wait.'''
     def abort(self) -> None: '''Abort the barrier, throwing asyncio.BrokenBarrierError to present waiting parties.'''
     def raise_for_abort(self) -> None: '''Throw asyncio.BrokenBarrierError if the barrier has been aborted.'''
     @property
-    def parties(self) -> int: '''Total number of parties, arrived or not.'''
-    @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
+    @property
+    def parties(self) -> int: '''Total number of parties, arrived or not.'''
     @property
     def remaining_parties(self) -> int: '''Number of parties the waiting parties are waiting for.'''
 class DynamicThrottle:
@@ -81,23 +83,23 @@ class DynamicThrottle:
         `jitter`: The jitter in calculation of the wait time before the context can enter.
         `timer`: Function to return current time as a float.
         `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
-    @property
-    def rate(self) -> float: '''The current rate.'''
-    @rate.setter
-    def rate(self, rate: float, /) -> None: '''Set the rate manually, applying `min_rate` and `max_rate` bounds.'''
-    @property
-    def jitter(self) -> float: '''The current jitter.'''
-    @jitter.setter
-    def jitter(self, jitter: float, /) -> None: '''Set the jitter.'''
-    @property
-    def ctime(self) -> float: '''The current time as returned by `timer`.'''
-    @property
-    def successes(self) -> int: '''Current number of succeeded calls. Reset periodically.'''
-    @property
-    def fails(self) -> int: '''Current number of failed calls. Reset periodically.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
     @overload
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     def reset(self) -> None: '''Reset the successes and fails.'''
+    @property
+    def ctime(self) -> float: '''The current time as returned by `timer`.'''
+    @property
+    def fails(self) -> int: '''Current number of failed calls. Reset periodically.'''
+    @property
+    def jitter(self) -> float: '''The current jitter.'''
+    @jitter.setter
+    def jitter(self, jitter: float, /) -> None: '''Set the jitter.'''
+    @property
+    def rate(self) -> float: '''The current rate.'''
+    @rate.setter
+    def rate(self, rate: float, /) -> None: '''Set the rate manually, applying `min_rate` and `max_rate` bounds.'''
+    @property
+    def successes(self) -> int: '''Current number of succeeded calls. Reset periodically.'''

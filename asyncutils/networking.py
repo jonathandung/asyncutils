@@ -3,12 +3,13 @@ from asyncio.transports import Transport
 from socket import error, SHUT_WR
 from .exceptions import IgnoreErrors
 from ._internal.compat import Queue
-from .mixins import LoopContextMixin
+from ._internal.log import warning
+from .mixins import EventualLoopMixin
 from .util import _ignore_cancellation
 from ._internal.submodules import networking_all as __all__
-class LineProtocol(Protocol, LoopContextMixin):
-    NEWLINE, CARRIAGE_RETURN, _handler = b'\x0a', b'\x0d', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__: tuple[str, ...] = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'
-    def __setup__(self): self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter =None
+class LineProtocol(Protocol, EventualLoopMixin):
+    NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'
+    def __init__(self): self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):
         if (t := self.transport) is None: raise ConnectionError('not connected')
@@ -55,9 +56,9 @@ class LineProtocol(Protocol, LoopContextMixin):
         if self._paused and (w := self._drain_waiter): await w
     async def write_line_with_backpressure(self, line): await self.drain(); self.write_line(line)
     async def write_literal_with_backpressure(self, data): await self.drain(); self.write_literal(data)
-def _sock_transport_read_ready(prot, sock, close):
-    try: prot.data_received(d) if (d := sock.recv(0x1000)) else (prot.eof_received() or close())
-    except (error, OSError) as e: print('Read error'); close(e)
+class LFProtocol(LineProtocol): NEWLINE, __slots__ = b'\n', ()
+class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
+class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(Transport):
     __slots__, _h = ('_protocol', '_socket', '_closing', '_buffer', '_limits'), IgnoreErrors(error, OSError)
     @classmethod
@@ -68,8 +69,12 @@ class SocketTransport(Transport):
         self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
         if sock: self.connect_sock(sock)
     def _reset_extra(self): super().__init__({'socket': None, 'sockname': None, 'peername': None})
-    def connect_sock(self, sock, _=_sock_transport_read_ready):
-        sock.setblocking(False); self.loop.add_reader(sock.fileno(), _, self._protocol, sock, self.close); (e := self._extra)['sockname'] = sock.getsockname()
+    def _sock_transport_read_ready(self, sock, size=0x1000):
+        try: self._protocol.data_received(d) if (d := sock.recv(size)) else (self._protocol.eof_received() or self.close())
+        except (error, OSError) as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
+    def connect_sock(self, sock=None):
+        if sock is None: return
+        sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname()
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
         if (s := self._socket) is None: return
@@ -85,7 +90,7 @@ class SocketTransport(Transport):
         if len(b) > bufsize:
             if (s := self._socket) is None: return
             try: s.sendall(b); b.clear()
-            except (error, OSError) as e: print('Write error'); self.close(e)
+            except (error, OSError) as e: warning(f'{type(self).__qualname__}: write error'); self.close(e)
     def write(self, data): self.loop.call_soon(self._writer, data)
     def get_write_buffer_size(self): return len(self._buffer)
     def get_write_buffer_limits(self): return self._limits
@@ -105,6 +110,7 @@ class SocketTransport(Transport):
         if self._closing: return
         self._closing = True; self._protocol.connection_lost(e); self.disconnect_sock()
     def get_protocol(self): return self._protocol
-    def set_protocol(self, protocol): self._protocol = protocol
+    def set_protocol(self, protocol):
+        if not isinstance(protocol, LineProtocol): raise TypeError('protocol for SocketTransport should be a LineProtocol')
+        self._protocol.connection_lost(None); protocol.connection_made(self); self._protocol = protocol; self.connect_sock(self._socket)
     def abort(self): self.loop.call_soon(self.close)
-del _sock_transport_read_ready

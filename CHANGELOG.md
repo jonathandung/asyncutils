@@ -10,11 +10,11 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ### Tests
 
-46% coverage, 26 tests
+47% coverage, 26 tests
 
 ### Docs
 
-41% complete
+42% complete
 
 ### Added
 
@@ -286,6 +286,9 @@ Submodules:
 
   Classes:
   - LineProtocol
+  - LFProtocol
+  - CRLFProtocol
+  - CRProtocol
   - SocketTransport
 
 - pools

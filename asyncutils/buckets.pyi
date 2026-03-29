@@ -24,6 +24,11 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
         min_factor (optional): Minimum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MINFACTOR`.
         max_factor (optional): Maximum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MAXFACTOR`.
         external_factor_settable (optional): Whether the factor attribute can be modified; default `context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
+    def __enter__(self) -> Self: '''Begin draining the tokens from this bucket.'''
+    @overload
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''Stop draining the tokens in the bucket.'''
+    @overload
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     async def acquire(self, amount: float=...) -> bool: '''Attempt to add `amount` tokens to the bucket immediately; return success.'''
     async def wait_for_tokens(self, amount: float=...) -> float: '''Wait until `amount` tokens can be added to the bucket **at once**. Return the total wait time.'''
     @property
@@ -32,8 +37,3 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
     def factor(self, value: float, /) -> None: '''Manually set the adaptive factor.'''
     @factor.deleter
     def factor(self) -> None: '''Reset the adaptive factor to 1.'''
-    def __enter__(self) -> Self: '''Begin draining the tokens from this bucket.'''
-    @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''Stop draining the tokens in the bucket.'''
-    @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...

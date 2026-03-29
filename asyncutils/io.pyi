@@ -21,36 +21,38 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     @property
     def writer(self) -> IO[R]: '''The underlying writer.'''
     def __init__(self, reader: IO[T], writer: IO[R], /): ...
+    def __getattr__(self, name: str, /) -> Any: ...
+    async def __cleanup__(self) -> None: ...
+    async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
+    async def flush(self) -> None: '''Asynchronously flush the writer.'''
     async def read(self, n: int=..., /) -> T: '''Read `n` characters from the reader.'''
     async def readline(self, limit: int=..., /) -> T: '''Read a line, of length at most `limit`, from the reader.'''
     async def readlines(self, hint: int=..., /) -> list[T]: '''Collect lines of the file into a list until `hint` characters are read.'''
+    async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at `size` or the current position if not passed, and return the new file size.'''
     async def write(self, s: R, /) -> int: '''Write `s` into the writer, returning the number of characters written.'''
     async def writelines(self, lines: Iterable[R], /) -> None: '''Write the lines from the iterable into the writer without adding newline as separators.'''
-    async def flush(self) -> None: '''Asynchronously flush the writer.'''
-    async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at `size` or the current position if not passed, and return the new file size.'''
-    async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
     def fileno(self) -> int: '''Raise OSError.'''
     def isatty(self) -> bool: '''Whether at least one of the reader or the writer is connected to a terminal.'''
     def readable(self) -> bool: '''Whether the reader can be read from.'''
-    def writable(self) -> bool: '''Whether the writer can be written into.'''
-    def seekable(self) -> bool: '''Whether both streams support random access.'''
     def seek(self, offset: int, whence: int=..., /) -> int: '''Raise OSError.'''
+    def seekable(self) -> bool: '''Whether both streams support random access.'''
     def tell(self) -> int: '''Raise OSError.'''
+    def writable(self) -> bool: '''Whether the writer can be written into.'''
     @property
     def closed(self) -> bool: '''Whether the file has been closed.'''
-    async def __cleanup__(self) -> None: ...
-    def __getattr__(self, name: str, /) -> Any: ...
 class MemoryMappedIOManager(LoopContextMixin):
-    '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop. You probably only need one instance of this.'''
+    '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
+    You probably only need one instance of this.
+    In the docstrings below, `mgr` will be an instance of this class.'''
     def __init__(self, executor: Executor|None=...): ...
     @property
-    def open_mmaps(self) -> WeakSet[mmap]: ...
+    def open_mmaps(self) -> WeakSet[mmap]: '''Instance of `weakref.WeakSet` containing the maps managed by this manager.'''
     @property
     def currently_open(self) -> int: ...
     @property
-    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b']]: ...
+    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b']]: '''Dictionary mapping file paths as passed to `mgr.open` or `mgr.create` to the mode the file was opened with.'''
     @property
-    def open_files(self) -> _OpenFiles: ...
+    def open_files(self) -> _OpenFiles: '''Dictionary'''
     @open_files.deleter
     def open_files(self) -> None: ...
     def open(self, path: Openable, init_size: int=...) -> _OpenRV: ...

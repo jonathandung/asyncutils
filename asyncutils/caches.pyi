@@ -22,14 +22,16 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
     def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool]]=...) -> None: '''(Re)configure the cache.'''
     def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising LookupError if there is none.'''
-    async def get(self, key: T, loader: Callable[[T], R]|None=...): '''Get the value for the key from the cache. If the key is expired, it is immediately loaded; if it is within the refresh window, return the current value and trigger background refresh.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
+    async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
+    async def get(self, key: T, loader: Callable[[T], R]|None=...):
+        '''Get the value for the key from the cache.
+        If the key is expired, it is immediately loaded; if it is within the refresh window, return the current value and trigger background refresh.'''
+    async def invalidate(self, key: T) -> R|None: '''Remove a key from the cache, returning the corresponding value if it was in the cache.'''
     async def load_item(self, key: T) -> None: '''Load the entry for a key and store it in the cache.'''
     async def refresh_item(self, key: T) -> None: '''Refresh an entry in the background.'''
     async def refresh_loop(self) -> NoReturn: '''This task runs continuously in the background, checking for entries requiring refresh and spawning tasks to do so.'''
-    async def invalidate(self, key: T) -> R|None: '''Remove a key from the cache, returning the corresponding value if it was in the cache.'''
-    async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., typed: bool=...):

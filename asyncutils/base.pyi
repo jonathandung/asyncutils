@@ -9,23 +9,23 @@ __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisem
 class event_loop:
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
     _ENTERED: ClassVar[int]
-    _SHOULD_CLOSE: ClassVar[int]
-    _INNER_EXIT: ClassVar[int]
     _INNER_AEXIT: ClassVar[int]
+    _INNER_EXIT: ClassVar[int]
     _INTERNAL_MASK: ClassVar[int]
-    def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
-    def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
-    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this but managing a different event loop.'''
-    @classmethod
-    def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
+    _SHOULD_CLOSE: ClassVar[int]
     def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to `False`.'''
+    def __del__(self) -> None: '''Destructor; exit the context if it is entered.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
     @overload
     def __exit__(self, t: None, v: None, b: None, /) -> Literal[False]: ...
     @overload
     def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType|None, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
-    def __del__(self) -> None: '''Destructor; exit the context if it is entered.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
+    def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
+    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this but managing a different event loop.'''
+    @classmethod
+    def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
+    def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
 @overload
 def iter_to_aiter[T, R](it: AsyncGenerator[T, R]) -> AsyncGenerator[T, R]: ...
 @overload
@@ -88,7 +88,7 @@ def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
     If n is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard n items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw ItemsExhausted.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class, with the addition of the step parameter.'''
-yield_to_event_loop: Awaitable[None]
-'''An awaitable object that yields control to the event loop for one iteration when awaited.'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
 '''An awaitable object that completes immediately and is also an exhausted generator, with the `CO_ITERABLE_COROUTINE` flag set.'''
+yield_to_event_loop: Awaitable[None]
+'''An awaitable object that yields control to the event loop for one iteration when awaited.'''
