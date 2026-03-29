@@ -8,3 +8,5 @@ indent_size = 2
 trim_trailing_whitespace = true
 [*.{py,pyi,md}]
 indent_size = 4
+[*.{rst}]
+end_of_line = lf
