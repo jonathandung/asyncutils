@@ -1,4 +1,5 @@
-**Usage**
+Usage
+=====
 
 A simple program that uses this module would look like this:
 

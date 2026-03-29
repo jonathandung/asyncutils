@@ -99,7 +99,7 @@ python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 
 - Python 3.12+ required
 - No dependencies outside development, which we're proud of
-- Maybe use virtual environments
+- This project is under active development (new patch versions daily) that can have breaking changes
 
 ## Response Times
 
@@ -110,19 +110,24 @@ As fast as the creator (currently the sole maintainer) can; that is:
 - Security issues: 1 day
 - General questions: Hopefully community-driven
 
+At this stage, presume the creator dead if:
+
+- promises above are not met, and
+- there was no relevant post on the discussions page (e.g. hiatus announcement)
+
 ## Closing remarks
 
 Don't:
 
 - Bump issues with +1 or "me too"
 - Email maintainers unless urgent
-- Ask about ETA about features/fixes
+- Ask about ETA of features/fixes
 - Post API keys or passwords
 
 Instead:
 
 - React to issues
 - Open discussions or issues, or a pull request if the problem is easily fixable
-- Be patient; at this stage, presume me dead if the response times are not met and I did not post about a hiatus on the discussions page
+- Be patient
 
 Once again, thank you for supporting this small project. Happy programming!

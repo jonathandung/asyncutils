@@ -25,7 +25,9 @@ See [installation.rst](https://github.com/jonathandung/asyncutils/blob/main/docs
 
 ## Usage
 
-See [usage.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/usage.rst).
+This package is very resourceful, containing everything from higher-order error handling functions to network protocols.
+
+See [usage.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/usage.rst) for examples.
 
 ## Version
 

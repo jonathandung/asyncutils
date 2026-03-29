@@ -1,4 +1,5 @@
-**Installation**
+Installation
+============
 
 No setup is required. Of course, ensure that your package manager is updated to the latest version as follows:
 
@@ -67,7 +68,7 @@ or with uv:
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI.
 
-Refer to [SUPPORT.md](https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md) for steps to checking the installation.
+Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`_ for steps to checking the installation.
 
 .. [Ref1]
   The dev extra differs from the dev branch, which is currently not installable. It installs ruff, pytest and some required plugins thereof.
