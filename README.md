@@ -3,10 +3,13 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
 ![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
+![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
-![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
 ![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)
 ![Docs](https://app.readthedocs.org/projects/asyncutils/badge)
+<!--
+![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
+-->
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
@@ -66,6 +69,7 @@ Have fun!
 ![GitHub release date](https://img.shields.io/github/release-date/jonathandung/asyncutils)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils)
+![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils)
 ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils)
 ![GitHub stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social)
@@ -73,11 +77,15 @@ Have fun!
 ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils)
 ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social)
-![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
+
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils)
 ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
+
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
-![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
+![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)
+
+![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)
+![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
