@@ -39,7 +39,7 @@ or if installing for development [Ref1]_:
 
 .. code-block:: bash
 
-  pip install py-asyncutils[dev,docs,pub]
+  pip install py-asyncutils[all]
 
 or directly from the github repository:
 
@@ -71,6 +71,11 @@ to the asyncutils CLI.
 Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`_ for steps to checking the installation.
 
 .. [Ref1]
+
+  The all extra includes the dev, docs and pub extras, mainly for development.
+
   The dev extra differs from the dev branch, which is currently not installable. It installs ruff, pytest and some required plugins thereof.
+
   The docs extra includes sphinx and some plugins for readthedocs builds.
+
   The pub extra includes build and twine for publishing.
