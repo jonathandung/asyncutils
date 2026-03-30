@@ -2,7 +2,6 @@
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
-![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)
 ![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
@@ -66,29 +65,11 @@ For more, check out the [Contributing Guide](https://github.com/jonathandung/asy
 
 Have fun!
 
-![GitHub release](https://img.shields.io/github/v/release/jonathandung/asyncutils)
-![GitHub release date](https://img.shields.io/github/release-date/jonathandung/asyncutils)
-![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils)
-![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils)
-![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils)
-![GitHub stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social)
-![GitHub forks](https://img.shields.io/github/forks/jonathandung/asyncutils?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social)
-![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils)
-![GitHub](https://img.shields.io/github/followers/jonathandung?style=social)
-
-![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils)
-![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
-![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
-![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
-![Noarch](https://anaconda.org/conda-forge/py-asyncutils/badges/platforms.svg)
-
-![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
-![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)
-![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver)
-
-![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)
-![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+| GitHub | Repo | Package | Uses | Status |
+| --- | --- | --- | --- | --- |
+| ![GitHub release](https://img.shields.io/github/v/release/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg) | ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json) | ![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg) |
+| ![GitHub release date](https://img.shields.io/github/release-date/jonathandung/asyncutils) | ![GitHub stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social) | ![Noarch](https://anaconda.org/conda-forge/py-asyncutils/badges/platforms.svg) | ![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white) | ![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen) |
+| ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![GitHub forks](https://img.shields.io/github/forks/jonathandung/asyncutils?style=social) | ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils) | ![Mypy](https://img.shields.io/badge/mypy-checked-blue) | ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) |
+| ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils) | ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social) | ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils) | ![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver) | |
+| ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils) | | |
+| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | | |
