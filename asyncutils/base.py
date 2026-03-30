@@ -70,7 +70,7 @@ class event_loop:
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
-    def __del__(self, _f=L.debug, _m='WARNING: garbage-collecting entered %s context; you are advised to refactor your code\n', _w='WARNING: cannot suppress exceptions from within %s destructor\n', w=lambda m, s=stderr: s.closed or s.write(m)):
+    def __del__(self, _f=L.debug, w=L.warning, _m='garbage-collecting entered %s context; you are advised to refactor your code', _w='cannot suppress exceptions from within %s destructor'):
         b, n = not (f := self._flags)&2, type(self).__qualname__
         if f&self._ENTERED:
             if b: w(_m%n)
@@ -95,19 +95,15 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
     r = await gather(*l, return_exceptions=True)
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
-        r = await gather(*map(f, r), return_exceptions=True)
-        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup('safe_cancel_batch: exceptions in callback function', E)
+        L = len(r := await gather(*map(f, r), return_exceptions=True))
+        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if L > len(E) else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 class _iter_to_aiter_error_handler:
     __slots__ = 'it'
     def __init__(self, it): self.it = it
     def __bool__(self, _=b): return _(self.it, 'send', 'throw', 'close')
     def __enter__(self): ...
-    def __exit__(self, t, v, b, /):
-        if t is None: return False
-        if t is RuntimeError: return len(v := v.args) == 1 and v[0] == 'StopIteration interacts badly with generators and cannot be raised into a Future'
-        if t is StopAsyncIteration: self.it.close(); return True
-        self.it.throw(v); return True
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, _g=g, c=c, C=e, w=L.warning):
+    def __exit__(self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration'))): return False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, _g=g, c=c, C=e, w=L.debug, _f=_iter_to_aiter_error_handler):
     audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
         if f: return it
@@ -123,7 +119,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
                     if c(l, sentinel): break
                     yield l
     elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
-        e, g = None, _iter_to_aiter_error_handler(it)
+        e, g = None, _f(it)
         if use_existing_executor:
             if (e := getattr(iter_to_aiter, 'executor', None)) is None:
                 if create_executor: e = C(iter_to_aiter)
@@ -200,7 +196,7 @@ async def collect(it, n=None, default=_NO_DEFAULT, *, __reti=False, _=L.warning,
     else:
         if default is RAISE: raise ItemsExhausted(m)
         if default is _NO_DEFAULT: _(m)
-        elif n is not None: r.extend(default for _ in range(n-i))
+        elif n is not None: r.extend(default for _ in range(n-i-1))
     return (r, i) if __reti else r
 async def take(it, n, default=_NO_DEFAULT):
     it = iter_to_aiter(it)
@@ -226,4 +222,4 @@ P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close() # type: ignore
 _.__qualname__ = _.__name__ = 'dummy_task'
-del f, _, P, L, b, g
+del f, _, P, L, b, g, _iter_to_aiter_error_handler

@@ -1,3 +1,4 @@
+from asyncutils.config import debug
 @(dec := __import__('pytest').fixture(scope='session'))
 def cfgjsonf(contents):
     with __import__('tempfile').NamedTemporaryFile(mode='w+', delete=False, suffix='.json') as f: f.write(contents)
@@ -11,3 +12,5 @@ def cfgjson(cfgjsonf, contents):
     finally: __import__('os').unlink(n)
 @dec
 def contents(): return '{"load_all": true, "V": 2}'
+def pytest_configure(config): debug.__enter__()
+def pytest_unconfigure(config): debug.__exit__(None, None, None)

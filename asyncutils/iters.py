@@ -94,7 +94,7 @@ async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
                 except TimeoutError:
                     if b: break
             if b:
-                if strict and _ < size: raise ValueError('incomplete batch')
+                if strict and _ < size-1: raise ValueError('incomplete batch')
                 async with s: yield copy_and_clear(b)
         except CancelledError:
             if b: yield copy_and_clear(b)
@@ -243,7 +243,7 @@ async def azip(*I, strict=False):
         if strict:
             for x, y in enumerate(I):
                 try: await anext(y); raise ValueError(f'azip: iterable {x} longer than shortest iterable')
-                except StopAsyncIteration: continue
+                except (StopAsyncIteration, RuntimeError): continue
 async def amap(f, /, *its, await_=False, strict=False):
     async for _ in azip(*its, strict=strict): r = f(*_); yield (await r) if await_ else r
 async def afilter(f, it):
@@ -304,15 +304,15 @@ async def agroupby(it, key=_identity):
     while not e:
         yield ck, (g := grouper(t := ck))
         if ck == t: await aconsume(g)
-async def aislice(it, /, *a):
-    x, y, z = 0 if (s := slice(*map(int, a))).start is None else s.start, s.stop, 1 if s.step is None else s.step
+async def aislice(it, /, *a, _=lambda x: x if x is None else int(x, 0) if isinstance(x, str) else int(x)):
+    x, y, z = 0 if (s := slice(*map(_, a))).start is None else s.start, s.stop, 1 if s.step is None else s.step
     if x < 0 or (y is not None and y < 0) or z <= 0: raise ValueError('invalid indices')
     I, n = acount() if y is None else arange(max(x, y)), x
     async for i, j in azip(I, it):
         if i == n: yield j; n += z
-async def aiterindex(it, value, start=0, stop=None):
+async def aiterindex(it, value, start=0, stop=None, _=check):
     async for i, j in aenumerate(aislice(it, start, stop), start):
-        if check(j, value): yield i
+        if _(j, value): yield i
 async def asieve(n):
     if n < 2: return
     yield 2; s, d = 3, bytearray(range(2))*(n>>1)
@@ -340,6 +340,8 @@ async def atakewhile(pred, it):
         if not pred(_): break
         yield _
 async def atotient(n):
+    if n < 0: raise ValueError('n should be non-negative')
+    if n < 2: return n
     f = (s := set()).add
     async for p in afactor(n):
         if p not in s: f(p); n -= n//p
@@ -599,13 +601,13 @@ async def apolynomialfromroots(roots):
     async for _ in iter_to_aiter(p): yield _
 async def atranspose(it):
     async for _ in azip(*await to_tuple(it), strict=True): yield _
-async def aflattentensor(tensor, base=(str, bytes), _c=check_methods):
+async def aflattentensor(tensor, base_typ=(str, bytes), _c=check_methods):
     I = iter_to_aiter(tensor)
     while True:
         try: v = await anext(I)
         except StopAsyncIteration: break
         I = aprepend(v, I)
-        if isinstance(v, base) or not (_c(v, '__iter__') or _c(v, '__aiter__')): break
+        if isinstance(v, base_typ) or not (_c(v, '__iter__') or _c(v, '__aiter__')): break
         I = aflatten(I)
     async for i in I: yield i
 async def apolynomialderivative(coeff):
@@ -636,21 +638,21 @@ def _probable_prime(n, base, _=lru_cache(_shift_to_odd)):
     for _ in range(s-1):
         if (x := x*x%n) == n-1: return True
     return False
-async def _aisprime(n, _smallprimes=_smallprimes, _perfect_test=_perfect_test, _randrange=_randrange, _probable_prime=_probable_prime):
+async def aisprime(n, _smallprimes=_smallprimes, _perfect_test=_perfect_test, _randrange=_randrange, _probable_prime=_probable_prime):
     if n < 210: return n in _smallprimes
     if not (n&1 and n%3 and n%5 and n%7 and n%11 and n%13 and n%17): return False
     for l, B in _perfect_test:
         if n < l: break
     else: B = (_randrange(2, n-1) for _ in range(64))
     return await aall(amap(partial(_probable_prime, n), B))
-async def afactor(n, _littleprimes=_littleprimes, _aisprime=_aisprime, _factor_pollard=_factor_pollard):
+async def afactor(n, _littleprimes=_littleprimes, _factor_pollard=_factor_pollard):
     if n < 2: raise ValueError('no prime factors')
     for p in _littleprimes:
         while not n%p: yield p; n //= p
     if n < 2: return
     t = [n]
     for n in t:
-        if n < 44521 or await _aisprime(n): yield n
+        if n < 44521 or await aisprime(n): yield n
         else: t += (f := await _factor_pollard(n), n//f)
 async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
@@ -677,8 +679,10 @@ async def amatmul(M, N):
 async def mat_vec_mul(M, V):
     n, v = len(p := await to_tuple(amap(to_tuple, M, await_=True))), await to_tuple(V)
     async for i in arange(n): yield await asum(p[i][j]*v[j] async for j in arange(n))
-def vecs_eq(u, v): return aall(i == j async for i, j in azip(u, v))
-async def afrievalds(A, B, C, k=2, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r)) async for _ in arange(k))
+async def vecs_eq(u, v, cmpeq=check, *, strict=True):
+    try: return await aall(cmpeq(i, j) async for i, j in azip(u, v, strict=strict))
+    except ValueError: return False
+async def afrievalds(A, B, C, k=2, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(k))
 async def basic_collect(it, n):
     l = []
     async for _ in aislice(it, n): l.append(_)
@@ -759,7 +763,7 @@ async def aguessmax(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=N
         if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
 async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=None, __cmp=_compare):
     if (r := await amin(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
+        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmin with no default value')
         return default
     k = K(r)
     try:
@@ -778,4 +782,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, _aisprime, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

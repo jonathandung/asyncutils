@@ -17,8 +17,12 @@ class achain:
     def from_iterable(cls, it_of_its): (self := super().__new__(cls)).its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in iter_to_aiter(self.its):
-            async for _ in iter_to_aiter(i): yield _
+        try:
+            async for i in iter_to_aiter(self.its):
+                try:
+                    async for _ in iter_to_aiter(i): yield _
+                except RuntimeError: ...
+        except RuntimeError: ...
 @H.subscriptable
 class apeekable(EventualLoopMixin):
     def __init__(self, it=()): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
