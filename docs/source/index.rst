@@ -11,6 +11,7 @@ command line interface.
 
   installation
   usage
+  api
 
 .. note::
 

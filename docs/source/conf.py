@@ -8,4 +8,4 @@ need_sphinx = '9.1.0'
 pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 autodoc_typehints = 'none'
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'sphinx_autodoc_typehints']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode', 'sphinx_autodoc_typehints']
