@@ -165,13 +165,13 @@ class LocksmithBase:
         finally:
             if purge_waiters: await self.purge_waiters(lock)
     async def purge_waiters(self, lock, /):
-        if (w := getattr(lock, '_waiters', None)): await safe_cancel_batch(w, disembowel=True)
+        if w := getattr(lock, '_waiters', None): await safe_cancel_batch(w, disembowel=True)
     async def host(self, task, lock, /, *, timeout1=None, timeout2=0.1, timeout3=None):
         await wait(f := tuple(map(self.wrap_task, (self.force(lock, purge_waiters=False), lock.acquire()))), return_when='FIRST_COMPLETED'); f, a = f
         if await wait_for(f, timeout1): await a
         else:
             try: await wait_for(a, timeout2)
-            except TimeoutError: raise TimeoutError(f'failed to acquire lock within {timeout2} seconds') from None
+            except TimeoutError: raise TimeoutError(f'failed to acquire lock {lock!r} within {timeout2} seconds') from None
         self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), timeout3)
     async def _wait_on(self, task, lock, /):
         try: return await task

@@ -1,6 +1,6 @@
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport
-from socket import error, SHUT_WR
+from socket import SHUT_WR
 from .exceptions import IgnoreErrors
 from ._internal.compat import Queue
 from ._internal.log import warning
@@ -60,7 +60,7 @@ class LFProtocol(LineProtocol): NEWLINE, __slots__ = b'\n', ()
 class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
 class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(Transport):
-    __slots__, _h = ('_protocol', '_socket', '_closing', '_buffer', '_limits'), IgnoreErrors(error, OSError)
+    __slots__, _h = ('_protocol', '_socket', '_closing', '_buffer', '_limits'), IgnoreErrors(OSError)
     @classmethod
     def make_protocol(cls): return LineProtocol()
     @property
@@ -71,7 +71,7 @@ class SocketTransport(Transport):
     def _reset_extra(self): super().__init__({'socket': None, 'sockname': None, 'peername': None})
     def _sock_transport_read_ready(self, sock, size=0x1000):
         try: self._protocol.data_received(d) if (d := sock.recv(size)) else (self._protocol.eof_received() or self.close())
-        except (error, OSError) as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
+        except OSError as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None: return
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname()
@@ -90,7 +90,7 @@ class SocketTransport(Transport):
         if len(b) > bufsize:
             if (s := self._socket) is None: return
             try: s.sendall(b); b.clear()
-            except (error, OSError) as e: warning(f'{type(self).__qualname__}: write error'); self.close(e)
+            except OSError as e: warning(f'{type(self).__qualname__}: write error'); self.close(e)
     def write(self, data): self.loop.call_soon(self._writer, data)
     def get_write_buffer_size(self): return len(self._buffer)
     def get_write_buffer_limits(self): return self._limits

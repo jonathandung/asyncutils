@@ -2,6 +2,7 @@
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)
 ![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)
+![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)
 ![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)
 ![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
@@ -82,9 +83,11 @@ Have fun!
 ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils)
 ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils)
+![Noarch](https://anaconda.org/conda-forge/py-asyncutils/badges/platforms.svg)
 
 ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)
 ![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)
+![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver)
 
 ![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)
 ![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen)

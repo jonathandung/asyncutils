@@ -1,5 +1,4 @@
 from .base import iter_to_aiter
-from .config import Executor
 from .constants import _NO_DEFAULT
 from ._internal import helpers as H
 from .mixins import EventualLoopMixin, LoopContextMixin
@@ -90,7 +89,7 @@ class abucket(LoopContextMixin):
 @H.subscriptable
 class OnlineSorter:
     __slots__ = '_it', '_runner', '_popper', '_pusher', '_loop'
-    def __init__(self, it): audit('asyncutils/create_executor', 'iterclasses.OnlineSorter'); self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, Executor()), l
+    def __init__(self, it): self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.new_executor(self, False)), l
     def __aiter__(self):
         from .iters import to_list
         if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); Q.heapify(h); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)

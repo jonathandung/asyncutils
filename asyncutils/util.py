@@ -36,7 +36,7 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
         if f: loop = new_event_loop(); set_event_loop(loop)
         try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
         finally:
-            if f: loop.close(); set_event_loop(None)
+            if f: loop.stop(); loop.close(); set_event_loop(None)
     async def wrapper(): return await aw
     return run_coroutine_threadsafe(wrapper(), loop).result(timeout)
 def semaphore(bounded=False, workers=4): return (BoundedSemaphore if bounded else Semaphore)(workers)

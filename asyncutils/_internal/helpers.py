@@ -16,6 +16,11 @@ def check_methods(obj, /, *meth):
 def stop_and_closer(loop, _=lambda l: l.stop() or l.close()): return _.__get__(loop)
 def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # type: ignore
+def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)
+def new_executor(f, /, save=True):
+    audit('asyncutils/create_executor', (F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')+F.__qualname__); from ..config import Executor as E; e = E()
+    if save: f.executor = e
+    return e
 class _LoopMixinBase:
     __slots__ = 'loop', 'exiter', 'running_tasks', 'make_fut'
     def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = register(stop_and_closer(l := new_event_loop())), l, l.create_future, set()

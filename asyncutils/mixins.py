@@ -27,16 +27,24 @@ class AwaitableMixin(metaclass=ABCMeta):
     def wait(self): ...
 @subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
+    __slots__ = ()
+    def __enter__(self): return self
+    @abstractmethod
+    def __exit__(self, /, *_): ...
+    async def __aenter__(self): return self.__enter__()
+    async def __aexit__(self, /, *_): return self.__exit__(*_)
+@subscriptable
+class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     @cached_property
     def runner(self):
-        __import__('sys').audit('asyncutils/create_executor', 'mixins.AsyncContextMixin')
+        __import__('sys').audit('asyncutils/create_executor', 'mixins.ExecutorRequiredAsyncContextMixin')
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = get_loop_and_set()
         return partial(l.run_in_executor, Executor()) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...
     async def __aenter__(self): return await self.runner(self.__enter__)
-    async def __aexit__(self, *_): return await self.runner(self.__exit__, *_)
+    async def __aexit__(self, /, *_): return await self.runner(self.__exit__, *_)
 @subscriptable
 class LockMixin(metaclass=ABCMeta):
     __slots__ = ()

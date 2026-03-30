@@ -1,9 +1,9 @@
 from . import exceptions as E
-from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take, dummy_task
+from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
-from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer
+from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, check, new_executor
 from .iterclasses import achain, anullcontext
 from .util import get_aiter_fromf, safe_cancel
 import math as M, _operator as O
@@ -235,16 +235,15 @@ async def amin(it, *, cmp=None, key=None, default=_NO_DEFAULT, __cmp=_compare):
             if cmp(_, r): r = _
     else: raise TypeError('cannot pass both cmp and key')
     return r
-async def azip(*I, strict=False, _y=dummy_task):
-    i = tuple(map(iter_to_aiter, I))
-    while True:
-        try: yield tuple(await gather(*map(anext, i)))
-        except StopAsyncIteration:
-            if strict:
-                for x, y in enumerate(i):
-                    try: await anext(y); raise ValueError(f'azip: iterable {x} longer than shortest iterable')
-                    except StopAsyncIteration: continue
-            await gather(*(f() if (f := getattr(_, 'aclose', None)) else _y for _ in i)); break
+async def azip(*I, strict=False):
+    I = tuple(map(iter_to_aiter, I))
+    try:
+        while True: yield tuple(await gather(*map(anext, I)))
+    except (StopAsyncIteration, RuntimeError):
+        if strict:
+            for x, y in enumerate(I):
+                try: await anext(y); raise ValueError(f'azip: iterable {x} longer than shortest iterable')
+                except StopAsyncIteration: continue
 async def amap(f, /, *its, await_=False, strict=False):
     async for _ in azip(*its, strict=strict): r = f(*_); yield (await r) if await_ else r
 async def afilter(f, it):
@@ -313,7 +312,7 @@ async def aislice(it, /, *a):
         if i == n: yield j; n += z
 async def aiterindex(it, value, start=0, stop=None):
     async for i, j in aenumerate(aislice(it, start, stop), start):
-        if j is value or j == value: yield i
+        if check(j, value): yield i
 async def asieve(n):
     if n < 2: return
     yield 2; s, d = 3, bytearray(range(2))*(n>>1)
@@ -386,10 +385,12 @@ async def to_list(it, /):
     f = (r := []).append
     async for _ in iter_to_aiter(it): f(_)
     return r
-async def aconsume(it, n=None):
-    if n is None:
-        async for _ in iter_to_aiter(it): ...
-    else: await anext(aislice(it, n, n), None)
+async def aconsume(it, n=None, _=check_methods):
+    if n == 0: return
+    if n: it = take(it, n)
+    if _(it, '__iter__'): await get_loop_and_set().run_in_executor(new_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0) # type: ignore
+    else:
+        async for _ in it: ...
 def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *filter_out(default, s=_NO_DEFAULT))
 async def aallequal(it, key=_identity, strict=False):
     I = agroupby(it, key)

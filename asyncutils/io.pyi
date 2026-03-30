@@ -48,15 +48,15 @@ class MemoryMappedIOManager(LoopContextMixin):
     @property
     def open_mmaps(self) -> WeakSet[mmap]: '''Instance of `weakref.WeakSet` containing the maps managed by this manager.'''
     @property
-    def currently_open(self) -> int: ...
+    def currently_open(self) -> int: '''Number of currently open memory maps.'''
     @property
-    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b']]: '''Dictionary mapping file paths as passed to `mgr.open` or `mgr.create` to the mode the file was opened with.'''
+    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b', 'x+b']]: '''Dictionary mapping file paths as passed to `mgr.open`, `mgr.create` or `mgr.create_sparsef` to the mode the file was opened with.'''
     @property
-    def open_files(self) -> _OpenFiles: '''Dictionary'''
+    def open_files(self) -> _OpenFiles: '''Dictionary mapping tuples of the form `(file, mode)` to the managed file objects.'''
     @open_files.deleter
-    def open_files(self) -> None: ...
-    def open(self, path: Openable, init_size: int=...) -> _OpenRV: ...
-    def create(self, path: Openable, init_size: int=...) -> _OpenRV: ...
+    def open_files(self) -> None: '''Clear the dictionary of open files.'''
+    def open(self, path: Openable, init_size: int=...) -> _OpenRV: '''An async context manager that opens a file at `path` for memory-mapped reading and writing on entry and closes it on exit. The file must exist and is not truncated.'''
+    def create(self, path: Openable, init_size: int=..., *, exclusive: bool=...) -> _OpenRV: '''An async context manager that opens a file at `path` for memory-mapped writing and reading on entry and closes it on exit. The file must not exist if `exclusive` is True, and is truncated to the beginning.'''
     def create_sparsef(self, path: Openable, total_size: int, chunks: Mapping[int, bytes|str]) -> _OpenRV: ...
     def prefetch_files(self, *paths: Openable, init_size: int=...) -> _AsyncGeneratorContextManager[list[_file], None]: ...
     async def __cleanup__(self) -> None: ...
@@ -71,13 +71,11 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def bulk_resize(self, sizes: Mapping[Openable, int]) -> None: ...
     async def compact_files(self, paths: Iterable[Openable]) -> None: ...
     async def find_in_files(self, pattern: bytes, paths: Mapping[Openable, int], max_per_file: int=..., *, allow_overlapping: bool=...) -> dict[Openable, list[int]]: ...
-'''Below are for type checking only.'''
 type _Algorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
-'''Hardcoded values for algorithms used for calculating checksums.'''
+'''Hardcoded values for algorithms used for calculating checksums. Default is blake2s, which is fast and somewhat secure with low probability of collision.'''
 type _OpenRV = _AsyncGeneratorContextManager[_file, None]
-'''The type of the return values of open, create and create_sparsef.'''
-type _OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b']], _file]
-'''The type of the property open_files.'''
+'''The type of the return values of `open`, `create` and `create_sparsef`.'''
+type _OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], _file]
 if sys.platform == 'win32': type _Seek = Literal[0, 1, 2]
 else: type _Seek = Literal[0, 1, 2, 3, 4]
 @type_check_only
@@ -86,7 +84,7 @@ class _PipeFactory(Protocol):
     def __call__(self) -> tuple[int, int]: ...
 @type_check_only
 class _file(LoopContextMixin):
-    '''Not exposed. Calls itself asyncutils.io.file.'''
+    '''Not exposed. Calls itself `asyncutils.io.file`.'''
     if sys.platform != 'win32':
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: ...
     async def reg(self, m: mmap, /) -> None: ...

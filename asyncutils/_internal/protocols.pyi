@@ -85,9 +85,8 @@ class SigPatcher(Protocol):
     def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...
 @type_check_only
 class Middleware(Protocol):
-    '''Represents a middleware accepted by channels.EventBus.
+    '''Represents a middleware accepted by `channels.EventBus`.
     To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
-    See issue #2.
     Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
     def __call__(self, event_type: str, data: Any, /) -> Any: ...
     def __hash__(self) -> int: ...

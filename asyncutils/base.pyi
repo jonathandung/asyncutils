@@ -13,7 +13,7 @@ class event_loop:
     _INNER_EXIT: ClassVar[int]
     _INTERNAL_MASK: ClassVar[int]
     _SHOULD_CLOSE: ClassVar[int]
-    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., dont_always_stop_on_exit: bool=..., close_existing_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to `False`.'''
+    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to `False`.'''
     def __del__(self) -> None: '''Destructor; exit the context if it is entered.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
     @overload
@@ -22,7 +22,7 @@ class event_loop:
     def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType|None, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
-    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this but managing a different event loop.'''
+    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this, but managing a different event loop.'''
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
@@ -33,15 +33,13 @@ def iter_to_aiter[T, R](it: AsyncGenerator[T, R], sentinel: T) -> AsyncGenerator
 @overload
 def iter_to_aiter[T](it: AsyncIterator[T]) -> AsyncIterator[T]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterator[T], sentinel: T) -> AsyncGenerator[T, None]: ...
+def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T, None]: ...
 @overload
 def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncGenerator[T, None]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T, None]: ...
+def iter_to_aiter[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T, None]: ...
 @overload
-def iter_to_aiter[T](it: Iterable[T]) -> AsyncGenerator[T, None]: ...
-@overload
-def iter_to_aiter[T](it: Iterable[T], sentinel: T) -> AsyncGenerator[T, None]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
+def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T, None]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
 @overload
 def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R, None]: ...
 @overload
