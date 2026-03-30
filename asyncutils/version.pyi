@@ -2,7 +2,7 @@
 `asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
 - **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
-from ._internal.protocols import IntCompatible, Openable
+from ._internal.protocols import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
 __all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
@@ -18,14 +18,16 @@ class VersionInfo(str):
         limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
-    def __iter__(self) -> Iterator[int]: '''An iterator yielding (major, minor, patch) sequentially.'''
+    def __iter__(self) -> Iterator[int]: '''An iterator yielding (major, minor, patch) sequentially.''' # type: ignore[override]
     def __len__(self) -> Literal[3]: '''len((major, minor, patch)) == 3.'''
-    @overload
-    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int:
+    @overload # type: ignore[override]
+    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: # type: ignore[overload-overlap]
         '''Depending on the value of `idx`, corresponds to the following attributes:
         0 -> `major`
         1 -> `minor`
         2 -> `patch`'''
+    @overload
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: ...
     @overload
     def __getitem__(self, idx: int, /) -> NoReturn: ...
     def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
@@ -37,10 +39,10 @@ class VersionInfo(str):
     def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
     def __repr__(self) -> str: '''`version == eval(repr(version))` holds.'''
     @overload
-    def __round__(self, ndigits: Literal[1, 2, 3, None], /) -> Self: '''Support for rounding.'''
-    @overload
     def __round__(self, ndigits: int, /) -> NoReturn: ...
     @overload
+    def __round__(self, ndigits: Literal[1, 2, 3, None], /) -> Self: '''Support for rounding.'''
+    @overload # type: ignore[override]
     def __add__(self, n: int, /) -> Self: ...
     @overload
     def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or `delta`.'''
@@ -50,8 +52,8 @@ class VersionInfo(str):
     def __sub__(self, delta: VersionDelta, /) -> Self: ...
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
-    def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
-    def __format__(self, format_spec: Literal['', 'x', 'b', 'o', 'd', '0', '1', '2', 's', 'l', 'c', 't', 'h', 'n', 'maj', 'min', 'major', 'minor', 'patch', 'short', 'long', 'chars', 'dec', 'hex', 'bin', 'oct', 'tuple', 'hash', 'majmin'], /) -> str:
+    def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.''' # type: ignore[misc,override]
+    def __format__(self, format_spec: str, /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
         o, oct: `'0o36602000'`
@@ -135,15 +137,15 @@ def normalize(o: Any, /) -> tuple[int, int, int]:
     (1, 3, 0)'''
 def normalize_allow_unimplemented(o: Any, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
 @overload
-def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: ...
-@overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
 @overload
-def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
+def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: ...
 @overload
 def unregister_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: '''Unregister the normalizer for the object or type and return it if any.'''
 @overload
-def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
+def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
 @overload
 def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
+@overload
+def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
 def autogenerate_normalizers() -> bool: '''Registers normalizers for decimal.Decimal and fractions.Fraction. Returns if both normalizers were successfully registered (including re-registration of the same normalizer).'''

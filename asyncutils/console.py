@@ -131,7 +131,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
         if R._unset_() is not self: S.stderr.write(_m); del S.modules[__name__]
         super().posthook()
-    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=30, _mn=S.intern('__callback')):
+    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=31, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         try:
             for _ in range(_skip_frames):

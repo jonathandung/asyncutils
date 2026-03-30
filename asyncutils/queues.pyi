@@ -40,19 +40,19 @@ class _Q[R, T](Protocol):
 @type_check_only
 class _G[R, T](_Q[R, T], Protocol):
     '''Does not exist at runtime.'''
-    async def get(self, pwd: R) -> T:
+    async def get(self, pwd: R) -> T: # type: ignore[override]
         '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is empty, waits until an item is available.'''
-    def get_nowait(self, pwd: R) -> T:
+    def get_nowait(self, pwd: R) -> T: # type: ignore[override]
         '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is empty, raises asyncio.QueueEmpty.'''
 @type_check_only
 class _P[R, T](_Q[R, T], Protocol):
     '''Does not exist at runtime.'''
-    async def put(self, item: T, pwd: R) -> None:
+    async def put(self, item: T, pwd: R) -> None: # type: ignore[override]
         '''Puts an item into the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is full, waits until a free slot is available.'''
-    def put_nowait(self, item: T, pwd: R) -> None:
+    def put_nowait(self, item: T, pwd: R) -> None: # type: ignore[override]
         '''Puts an item into the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
         If the queue is full, raises asyncio.QueueFull.'''
 @type_check_only
@@ -65,19 +65,19 @@ def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Lite
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.
     `auditf` (default sys.audit) is an audit function that takes the event name (`'asyncutils.queues.password_queue'`), `protect_get`, `protect_put`, `get_from`, `put_from` and returns None; note that the passwords are not passed to the audit function.'''
 @overload
-def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]: ...
+def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[False], Literal[True], str, str], None]=...) -> _P[R, T]: ... # type: ignore[assignment]
 @overload
 def password_queue[T, R](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=..., init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[False], str, str], None]=...) -> _G[R, T]: ...
 @overload
-def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[False], str, str], None]=...) -> _G[R, T]: ...
+def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[False], str, str], None]=...) -> _G[R, T]: ... # type: ignore[assignment]
 @overload
 def password_queue[T, R, V](password_put: V, password_get: R, maxsize: int=..., *, protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=..., init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ...
 @overload
-def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=..., init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ...
+def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=..., init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ...
+def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ...
+def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ... # type: ignore[assignment]
 class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
@@ -175,7 +175,7 @@ class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
     @classmethod
     def from_iter_of_tuples(cls, items: SupportsIteration[tuple[int, int, T]], maxsize: int=...) -> Self: '''Build a queue from the (async) iterable of tuples (priority, tiebreak, item).'''
     def __init__(self, maxsize: int=..., *, init_priority: int=..., init_items: SupportsIteration[T]=[]): ...
-    def put_nowait(self, item: T, priority: int=...) -> None: ...
-    def get_nowait(self) -> T: ...
-    async def put(self, item: T, priority: int=...) -> None: ...
-    async def get(self) -> T: ...
+    def put_nowait(self, item: T, priority: int=...) -> None: ... # type: ignore[override]
+    def get_nowait(self) -> T: ... # type: ignore[override]
+    async def put(self, item: T, priority: int=...) -> None: ... # type: ignore[override]
+    async def get(self) -> T: ... # type: ignore[override]

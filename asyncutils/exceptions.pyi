@@ -1,6 +1,6 @@
 '''Exception handling utilties and exception classes used by this module.'''
 from .channels import EventBus
-from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike
+from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike, Middleware
 from .locks import LocksmithBase
 from .queues import _Q
 from .version import VersionInfo
@@ -12,10 +12,10 @@ from weakref import ref
 __all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType', 'PasswordMissing', 'GetPasswordMissing', 'PutPasswordMissing'
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (SystemExit, SystemError, KeyboardInterrupt), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
-def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.'''
-def unnest_reverse(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=...) -> Generator[BaseException, BaseException, None]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
+def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=...) -> Generator[BaseException, BaseException, None]: '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.'''
+def unnest_reverse(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=...) -> Generator[BaseException, BaseException, None]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
 @overload
-def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup:
+def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup:
     '''Return an instance of BaseExceptionGroup, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
     The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty, otherwise they are redundant.
     The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the predicate
@@ -25,11 +25,11 @@ def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: b
     The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group. See `prepare_exception`.
     They only have an effect when the first argument is not a group.'''
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException]]|None=..., ack2: Callable[[BaseException]]|None=..., ack3: Callable[[BaseException]]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
 def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> E:
     '''Attach some info to an exception and return it, as detailed below.
     The parameter `traceback` corresponds to the attribute `__traceback__`, `cause` to `__cause__`, `context` to `__context__` and `suppress` to `__suppress_context__`.'''
@@ -72,9 +72,9 @@ class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     def obj(self) -> T|None: '''The unrecognized object. None if garbage collected.'''
 class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     '''Raised when a custom normalizer returns anything but an iterable of integers.'''
-    def __init__(self, normalizer: Callable[[T]], obj: T, /): ...
+    def __init__(self, normalizer: Callable[[T], Any], obj: T, /): ...
     @property
-    def normalizer(self) -> Callable[[T]]|None: '''The normalizer at fault. None if garbage collected.'''
+    def normalizer(self) -> Callable[[T], Any]|None: '''The normalizer at fault. None if garbage collected.'''
     @property
     def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned. None if garbage collected.'''
 class VersionNormalizerFault[T](VersionConversionError):
@@ -115,11 +115,11 @@ class RateLimitExceeded(RuntimeError):
     async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
-    def __init__(self, bus: EventBus, mw: Callable[[str, Any]], /): ...
+    def __init__(self, bus: EventBus, mw: Middleware, /): ...
     @property
     def bus(self) -> EventBus|None: '''May be None if the event bus was garbage-collected.'''
     @property
-    def middleware(self) -> Callable[[str, Any]]|None: '''May be None if the middleware was garbage-collected.'''
+    def middleware(self) -> Middleware|None: '''May be None if the middleware was garbage-collected.'''
 class LockForceRequest(BaseException):
     '''Thrown to coroutines that acquire locks when a locksmith (inheriting from locks.LocksmithBase) necessitates the lock be released.
     The initialization signature is intentionally omitted here, since it may change without notice and the user should not manually initialize it.'''
@@ -129,7 +129,7 @@ class LockForceRequest(BaseException):
     def lock(self) -> AsyncLockLike: '''The lock involved.'''
     def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after releasing the lock and performing error handling.'''
     @property
-    def args(self) -> tuple[str, Any]: '''The tuple (error_message, additional_info).'''
+    def args(self) -> tuple[str, Any]: '''The tuple (error_message, additional_info).''' # type: ignore[override]
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the password_queue function.'''
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when the password_queue function cannot find the password from the closure variables.'''

@@ -43,7 +43,7 @@ class CircuitBreaker:
         This state persists until the `reset` timeout expires, the default of which can be changed in the context submodule. Then, the breaker enters the half-open state.
         If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     @overload
-    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
+    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ... # type: ignore[misc]
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
     @property
     def fails(self) -> int: '''Current count of conseuctive failures.'''

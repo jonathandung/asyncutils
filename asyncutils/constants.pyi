@@ -18,14 +18,14 @@ class sentinel_base:
     @property
     def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, None if there is none.'''
     @overload
-    def is_(self, other: Self, /) -> bool: ...
+    def is_(self, other: Self, /) -> bool: ... # type: ignore[overload-overlap]
     @overload
     def is_(self, other: object, /) -> Literal[False]: ...
 @final
 @type_check_only
 class _sentinel(sentinel_base):
     '''Sentinels for this module, internal or public. Not exported.'''
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.config namespace.'''
+    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.config namespace.''' # type: ignore[override]
 RAISE: Final[_sentinel]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
 SYNC_AWAIT: Final[_sentinel]

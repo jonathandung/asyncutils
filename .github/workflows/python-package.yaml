@@ -24,6 +24,10 @@ jobs:
         pip check
     - name: Lint with ruff
       run: ruff check . --output-format=github
+    - name: Run mypy
+      run: |
+        mypy --version
+        mypy .
     - name: Run tests
       run: pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir . --local-badge-generate status
     - name: Upload coverage

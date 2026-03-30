@@ -18,13 +18,13 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
     '''Whether _pyrepl enhancements are available and allowed.'''
-    LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict]]|None]]
+    LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict], Any]|None]]
     '''module name -> (locals of console of corresponding type -> Any)
     Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
-    interrupt_hooks: ClassVar[tuple[Callable[[Self]], ...]]
+    interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
     '''Functions called when `KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_interrupt_hooks`.'''
-    memerr_hooks: ClassVar[tuple[Callable[[Self]], ...]]
+    memerr_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
     '''Functions called when a `MemoryError` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_memerr_hooks`.'''
     default_local_exit: ClassVar[bool]
@@ -49,7 +49,7 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
         `modname` (optional): The name of the above module.
         `context_factory` (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.
         `importer` (optional): A function used to import a module from a string.'''
-    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]]]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]]]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self]]]=..., additional_memerr_hooks: Iterable[Callable[[Self]]]=..., template: str=..., **k: Any) -> None:
+    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], Any]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], Any]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], Any]]=..., additional_memerr_hooks: Iterable[Callable[[Self], Any]]=..., template: str=..., **k: Any) -> None:
         '''`name` (optional): name of the module using the console
         `version` (optional): version of the module using the console
         `description` (optional): description of the module using the console
@@ -59,8 +59,9 @@ class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
         `other_handlers` (optional): see above
         `additional_interrupt_hooks` (optional): see above
         `additional_memerr_hooks` (optional): see above
-        `template` (optional): the console banner to use, with %-placeholders for name, version and description'''
-    def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[]]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
+        `template` (optional): the console banner to use, with %-placeholders for name, version and description
+        Additional keyword arguments are passed to `template.__mod__`.'''
+    def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
         '''Run `code`, an instance of `types.CodeType`.
         `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
