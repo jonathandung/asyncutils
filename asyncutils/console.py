@@ -49,7 +49,7 @@ class ConsoleBase(B): # type: ignore
         except SystemExit as e: self.set_return_code(e)
         except BaseException as e:
             if not isinstance(e, dont_show_traceback): self.showtraceback()
-            return self.STATEMENT_FAILED
+            return getattr(self, 'STATEMENT_FAILED', None)
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g):
         x, p = False, None; self.write_special(self.BANNER if banner is None else banner)
         try:

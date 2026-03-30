@@ -3,17 +3,19 @@ from ._internal.protocols import ValidExcType
 from abc import ABCMeta, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
+from code import InteractiveConsole
 from collections import ChainMap
 from _collections_abc import Callable, Coroutine, Iterable
 from concurrent.futures import Future
 from _contextvars import Context
-from _pyrepl.console import InteractiveColoredConsole
 from types import ModuleType, CodeType
 from typing import ClassVar, Any, Self, TypeGuard, final, overload
 __all__ = 'ConsoleBase', 'AsyncUtilsConsole'
-class ConsoleBase(InteractiveColoredConsole, metaclass=ABCMeta):
-    '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.InteractiveColoredConsole` if available.
+class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
+    '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.
     Inspired by asyncio/__main__.py. Highly adaptable.'''
+    STATEMENT_FAILED: ClassVar[object]
+    '''This is present if `_pyrepl.console.InteractiveColoredConsol`e is used as the base class.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
