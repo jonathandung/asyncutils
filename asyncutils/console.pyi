@@ -69,7 +69,7 @@ class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
         `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
         `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         `threadsafe` is whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
-    def interact(self, banner: str=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.'''
+    def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.'''
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''Run the console and return the integer return code.
         The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
