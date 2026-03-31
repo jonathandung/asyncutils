@@ -1,5 +1,5 @@
 '''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
-from .exceptions import IgnoreErrors, PasswordQueueError as PasswordQueueError, PasswordRetrievalError as PasswordRetrievalError, GetPasswordRetrievalError as GetPasswordRetrievalError, PutPasswordRetrievalError as PutPasswordRetrievalError, ForbiddenOperation as ForbiddenOperation, PasswordError as PasswordError, WrongPassword as WrongPassword, WrongPasswordType as WrongPasswordType
+from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
 from abc import ABCMeta, abstractmethod
@@ -8,7 +8,7 @@ from contextlib import _AsyncGeneratorContextManager
 from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
 from asyncio.futures import Future
 from asyncio.queues import Queue
-__all__ = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs', 'ignore_valerrs', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'WrongPassword', 'WrongPasswordType', 'password_queue', 'PotentQueueBase', 'SmartQueue', 'SmartLifoQueue', 'SmartPriorityQueue', 'UserPriorityQueue'
+__all__ = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs', 'ignore_valerrs', 'password_queue', 'PotentQueueBase', 'SmartQueue', 'SmartLifoQueue', 'SmartPriorityQueue', 'UserPriorityQueue'
 ignore_qshutdown: Final[IgnoreErrors]
 '''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''
 ignore_qempty: Final[IgnoreErrors]

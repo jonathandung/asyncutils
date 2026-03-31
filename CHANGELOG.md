@@ -158,6 +158,7 @@ Submodules:
   Exception types:
   - Critical
   - StateCorrupted
+  - FaultyConfig
   - VersionError
   - VersionConversionError
   - VersionNormalizerMissing

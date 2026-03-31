@@ -9,7 +9,7 @@ from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import overload, type_check_only, TypeGuard, Self, Literal, Any, NoReturn, ClassVar
 from weakref import ref
-__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType', 'PasswordMissing', 'GetPasswordMissing', 'PutPasswordMissing'
+__all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'FaultyConfig', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType', 'PasswordMissing', 'GetPasswordMissing', 'PutPasswordMissing'
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (SystemExit, SystemError, KeyboardInterrupt), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=...) -> Generator[BaseException, BaseException, None]: '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.'''
@@ -54,6 +54,15 @@ class StateCorrupted(BaseException):
     def adjective(self) -> str: ...
     @property
     def details(self) -> str: ...
+class FaultyConfig(BaseException):
+    '''Raised when the configuration json has values of incorrect types; should not be caught.'''
+    def __init__(self, key: str, wrong: type, correct: type|tuple[type, ...], /): ...
+    @property
+    def key(self) -> str: ...
+    @property
+    def wrong(self) -> type: ...
+    @property
+    def correct(self) -> type|tuple[type, ...]: ...
 class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     '''Raised when a critical error is encountered by exception-handling middleware.'''
     @overload

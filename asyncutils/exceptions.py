@@ -70,6 +70,8 @@ class StateCorrupted(BaseException):
     def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
 class Deadlock(BaseException):
     def __init__(self, /, *_, noticer=None): super().__init__(*_); self.noticer = noticer
+class FaultyConfig(BaseException):
+    def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {repr(c if isinstance(c, tuple) else c.__name__)[1:-1]}, got {w.__name__}')
 class IgnoreErrors:
     __slots__ = 'exc'
     def __init__(self, /, *_): self.exc = _ or (Exception,)

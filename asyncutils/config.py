@@ -2,8 +2,10 @@ import logging as L, sys as S
 from ._internal import log, patch as P
 from ._internal.submodules import config_all as __all__
 from ._internal.unparsed import N
+from .exceptions import FaultyConfig
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
+    if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
         try: return getattr(__import__(d, fromlist=_), w)
@@ -31,15 +33,22 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-max_memerrs, silent, basic_repl, loaded_all, e, Executor, get_past_logs, m, M, b = N.max_memerrs, bool(S.flags.quiet) or N.quiet, N.basic_repl, N.load_all, N.seed, f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
-if isinstance(e, str):
-    try: e = int(e, 0)
-    except ValueError: ...
-if isinstance(logging_to := N.log_to, str):
-    try: logging_to = int(N.log_to, 0)
-    except ValueError:
-        if (logging_to.startswith("b'") and logging_to.endswith("'")) or (logging_to.startswith('b"') and logging_to.endswith('"')): logging_to = logging_to[2:-1].encode(errors='replace')
-match logging_to:
+def g(e, a=False, t=(str, int, bytes)):
+    if isinstance(x := k(e), str):
+        if x.startswith("b'") and x.endswith("'") or x.startswith('b"') and x.endswith('"'):
+            try: x = x[2:-1].encode()
+            except UnicodeEncodeError: ...
+    if isinstance(x, t) or a and (x is None or isinstance(x, float)): return x
+    raise FaultyConfig(e, type(x), t)
+def k(e, a=False, N=N):
+    if isinstance(x := getattr(N, e), str):
+        try: return int(x, 0)
+        except ValueError:
+            if a: raise FaultyConfig(e, str, int)
+    return x
+max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
+silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
+match logging_to := g('log_to'):
     case 'NULL': log.disabled = True
     case 'MAKE':
         T = 'asyncutils_log%d.log'

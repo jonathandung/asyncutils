@@ -20,7 +20,7 @@
     // load all submodules when the console starts
     "seed": null,
     // string or integer or bytestring literal to seed the module-global random device
-    "next_config": "/path/to/your/config.json"
+    "next_config": null
     // string file path to the json to be used for the next time this module is to be configured
     // This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.
     // If null, the environment variable is unset entirely after reading this config.

@@ -12,4 +12,4 @@ extensions = ['sphinx.ext.napoleon', 'sphinx.ext.viewcode', 'autoapi.extension']
 autoapi_dirs = ['../../asyncutils']
 autoapi_file_patterns = ['*.pyi']
 autoapi_root = 'api'
-autoapi_ignore = ['../../asyncutils/_internal/__init__.pyi', '../../asyncutils/_internal/helpers.pyi', '../../asyncutils/_internal/initialize.pyi', '../../asyncutils/_internal/log.pyi', '../../asyncutils/_internal/compat.pyi', '../../asyncutils/_internal/py312.pyi', '../../asyncutils/_internal/py313.pyi', '../../asyncutils/_internal/log.pyi', '../../asyncutils/_internal/compat.pyi', '../../asyncutils/_internal/py312.pyi', '../../asyncutils/_internal/running_console.pyi', '../../asyncutils/_internal/submodules.pyi', '../../asyncutils/__init__.pyi']
+autoapi_ignore = ['*/_internal/__init__.pyi', '*/_internal/helpers.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']

@@ -39,7 +39,7 @@ __version__: Final[VersionInfo]
 __hexversion__: Final[int]
 '''0x12070e -> version 18.7.14'''
 preloaded_submodules: Final[frozenset[str]]
-'''A frozenset containing all submodules that are inevitably preloaded on module startup, which also loads asyncio.
+'''A `frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads `asyncio`.
 This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
-'''A dictionary mapping the submodule names to the submodule objects.'''
+'''A dictionary mapping submodule names to the corresponding submodule objects.'''

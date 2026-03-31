@@ -12,6 +12,7 @@ command line interface.
   installation
   usage
   top-level
+  config
   api/index
   glossary
 
