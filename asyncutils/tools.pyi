@@ -3,7 +3,7 @@ from _collections_abc import Sequence, Callable
 __all__ = 'json_to_argv', 'json_to_argstr', 'argv_to_json', 'argstr_to_json', 'get_cfg_json_format', 'print_cfg_json_format', 'get_cmd_help', 'print_cmd_help', 'ext2modname'
 ext2modname: dict[str, str]
 '''A dictionary mapping file extensions (w/o the .) to module names to use to parse files of that type as json.
-The default module name for a file extension not in this registry is just the extension itself.'''
+The default module name for a file extension not in this registry is just the extension itself. `.jsonl` files are parsed with `json` from the standard library.'''
 def json_to_argv(path: Openable, /) -> list[str]:
     '''Return a list of strings representing the command-line arguments for this module from the path `path` to the corresponding json file, with as
     little items as possible.

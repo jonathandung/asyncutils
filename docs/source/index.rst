@@ -1,7 +1,7 @@
 Welcome to the asyncutils docs!
 ===============================
 
-**asyncutils** is a Python library which, as the name suggests, contains helpful routines and types for asynchronous
+:mod:`asyncutils` is a Python library which, as the name suggests, contains helpful routines and types for asynchronous
 programming applications, organized under various submodules. It offers a *simple* and *intuitive* API and a *colourful*
 command line interface.
 
@@ -11,7 +11,9 @@ command line interface.
 
   installation
   usage
-  api
+  top-level
+  api/index
+  glossary
 
 .. note::
 

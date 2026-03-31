@@ -35,7 +35,7 @@ from typing import Final
 from ._internal.protocols import Submodule, All
 def __dir__() -> All: ...
 __version__: Final[VersionInfo]
-'''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete).'''
+'''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
 __hexversion__: Final[int]
 '''0x12070e -> version 18.7.14'''
 preloaded_submodules: Final[frozenset[str]]

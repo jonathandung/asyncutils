@@ -35,7 +35,7 @@ Next, install py-asyncutils from pip:
 
   pip install py-asyncutils==0.8.20
 
-or if installing for development [Ref1]_:
+or if you are installing for development, and wish to obtain the corresponding :ref:`extras`:
 
 .. code-block:: bash
 
@@ -70,12 +70,16 @@ to the asyncutils CLI.
 
 Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`_ for steps to checking the installation.
 
-.. [Ref1]
+.. _extras:
 
-  The all extra includes the dev, docs and pub extras, mainly for development.
+  The all :term:`extra` includes the dev, docs, pub and json extras, mainly for development.
 
   The dev extra differs from the dev branch, which is currently not installable. It installs ruff, pytest and some required plugins thereof.
 
   The docs extra includes sphinx and some plugins for readthedocs builds.
 
   The pub extra includes build and twine for publishing.
+
+  The json extra bundles libraries on pip used to parse json variants (`jsonc <https://pypi.org/project/json-with-comments/>`_, `json5
+  <https://pypi.org/project/json5/>`_ and `hjson <https://pypi.org/project/hjson/>`_), to be used by :func:`tools.json_to_argv`and
+  :func:`tools.json_to_argstr`.
