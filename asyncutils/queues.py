@@ -310,7 +310,9 @@ class SmartQueue(PotentQueueBase):
     def _init(self, maxsize): self.__queue = deque(maxlen=maxsize if maxsize > 0 else None)
     def _get(self): return self.__queue.popleft()
     def _put(self, item): self.__queue.append(item)
-    def peek(self): return self.__queue[0]
+    def peek(self):
+        if q := self.__queue: return q[0]
+        raise QueueEmpty
     def peek_all(self): return list(self.__queue)
     def qsize(self): return len(self.__queue)
     def rotate(self, n=1, /): self.__queue.rotate(n)
