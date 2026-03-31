@@ -81,5 +81,5 @@ Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPO
   The pub extra includes build and twine for publishing.
 
   The json extra bundles libraries on pip used to parse json variants (`jsonc <https://pypi.org/project/json-with-comments/>`_, `json5
-  <https://pypi.org/project/json5/>`_ and `hjson <https://pypi.org/project/hjson/>`_), to be used by :func:`tools.json_to_argv`and
+  <https://pypi.org/project/json5/>`_ and `hjson <https://pypi.org/project/hjson/>`_), to be used by :func:`tools.json_to_argv` and
   :func:`tools.json_to_argstr`.

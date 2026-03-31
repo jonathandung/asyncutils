@@ -14,4 +14,4 @@ Please note we have a [code of conduct](https://github.com/jonathandung/asyncuti
    would represent after consulting with the project owner. The versioning scheme we use is [SemVer](
    https://semver.org/), but we currently only have major, minor and patch parts for simplicity.
 4. You may merge a PR in once you have the sign-off of two other developers, or if you do not have
-   permission to do that, you may request the second reviewer to merge it for you.
+   permission to do that, you may ask the second reviewer to merge it for you.

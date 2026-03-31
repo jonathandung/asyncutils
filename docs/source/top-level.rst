@@ -10,12 +10,14 @@ This section documents the symbols defined at the top level of this package.
   An instance of :class:`asyncutils.version.VersionInfo` representing the current pip/conda version of this library.
   This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`_.
 
-.. data:: __hexversion__ = int(__version__)
+.. data:: __hexversion__
   :module: asyncutils
   :annotation: int
 
   An integer representing the current pip/conda version of this library. Comparison operators working as expected.
   For version 1.3.11, this would be ``0x01030b``.
+
+  Equivalent to ``int(__version__)``
 
 .. data:: preloaded_submodules
   :module: asyncutils

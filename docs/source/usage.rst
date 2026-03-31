@@ -23,7 +23,7 @@ Command used:
 
 .. code-block:: bash
 
-    python -m timeit -n 1 -r 1 "
+    python -S -E -I -m timeit -n 1 -r 1 "
     import asyncutils as autils, asyncio as aio
     with autils.event_loop(check_running=True) as loop:
         rdv = autils.Rendezvous[int](loop=loop)
