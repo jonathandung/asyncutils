@@ -14,8 +14,8 @@ class VersionInfo(str):
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as (major, minor, patch), zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
         '''A perfect hash function for versions! May produce larger integers than __int__ in some cases, and may also produce negative integers.
-        Of course, since `builtins.hash` returns the output of `__hash__` modulo 2^61-1 (largest Mersenne prime within 64 bits), the reasonable
-        limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
+        Of course, since `builtins.hash` stupidly returns the output of `__hash__` modulo 2^61-1 (largest Mersenne prime within 64 bits), the
+        reasonable limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding (major, minor, patch) sequentially.''' # type: ignore[override]

@@ -29,12 +29,12 @@ class _Q[R, T](Protocol):
     def qsize(self) -> int: '''Number of items in the queue.'''
     def task_done(self) -> None: '''Mark the completion of a task gotten from the queue to join.'''
     @property
-    def maxsize(self) -> int: ...
-    def cancel_extend(self, msg: Any=...) -> None: '''Cancel the current extend operation with a message which will be the argument for the CancelledError seen by the extender.'''
-    def empty(self) -> bool: ...
-    def full(self) -> bool: ...
+    def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
+    def cancel_extend(self, msg: Any=...) -> bool: '''Cancel the current extend operation with a message which will be the argument for the CancelledError seen by the extender. Returns success.'''
+    def empty(self) -> bool: '''Check if the queue is empty.'''
+    def full(self) -> bool: '''Check if the queue is full.'''
     async def join(self) -> None: '''Wait until `task_done` has been called for each item put into the queue.'''
-    def shutdown(self, immediate: bool=...) -> None: ...
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. This functionality was introduced to `asyncio.queues.Queue` in python 3.13, so a backport to 3.12 is required.'''
     def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the get password of the password-protected queue to new_pwd; returns success.'''
     def change_put_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the put password of the password-protected queue to new_pwd; returns success.'''
 @type_check_only
