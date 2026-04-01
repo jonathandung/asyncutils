@@ -1,8 +1,7 @@
 import logging as L, sys as S
-from ._internal import log, patch as P
+from ._internal import log as l, patch as P
 from ._internal.submodules import config_all as __all__
 from ._internal.unparsed import N
-from .exceptions import FaultyConfig
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     if not isinstance(e, str): raise TypeError('executor name should be a string')
@@ -33,23 +32,24 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-def g(e, a=False, t=(str, int, bytes)):
+def c(*a): from .exceptions import FaultyConfig; raise FaultyConfig(*a)
+def k(e, a=False, N=N, c=c):
+    if isinstance(x := N[e], str):
+        try: return int(x, 0)
+        except ValueError:
+            if a: c(e, str, int)
+    return x
+def g(e, a=False, t=(str, int, bytes), c=c, k=k):
     if isinstance(x := k(e), str):
         if x.startswith("b'") and x.endswith("'") or x.startswith('b"') and x.endswith('"'):
             try: x = x[2:-1].encode()
             except UnicodeEncodeError: ...
     if isinstance(x, t) or a and (x is None or isinstance(x, float)): return x
-    raise FaultyConfig(e, type(x), t)
-def k(e, a=False, N=N):
-    if isinstance(x := getattr(N, e), str):
-        try: return int(x, 0)
-        except ValueError:
-            if a: raise FaultyConfig(e, str, int)
-    return x
+    c(e, type(x), t)
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
 match logging_to := g('log_to'):
-    case 'NULL': log.disabled = True
+    case 'NULL': l.disabled = True
     case 'MAKE':
         T = 'asyncutils_log%d.log'
         for h in range(1, 0x1000):
@@ -77,27 +77,27 @@ match logging_to := g('log_to'):
         except OSError as b: s.write(f'ERROR: {b}\n')
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
 if M: s.write('Failed to create log file; falling back to stderr\n')
-log.addHandler(_ := L.StreamHandler(s))
+l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-(set_logger_level := lambda level, h=_: log.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
+(set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 get_past_logs.handler = _
-log.debug('hi')
-__import__('atexit').register(lambda s=s, d=log.debug: None if s.closed else d('bye') or s.flush() or s.close())
+l.debug('hi')
+__import__('atexit').register(lambda s=s, d=l.debug: None if s.closed else d('bye') or s.flush() or s.close())
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
-    def level(self): return log.level
+    def level(self, _=l): return _.level
     def __init__(self): self.orig_level = self.orig_name = None
-    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__):
+    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l):
         if self.orig_level is None:
-            self.orig_name, self.orig_level = _m(l := log.level), l; _s(10)
-            if l != 10: log.debug('debugging: debug mode entered')
-        else: log.warning('debugging: context manager already entered')
+            self.orig_name, self.orig_level = _m(l := _l.level), l; _s(10)
+            if l != 10: _l.debug('debugging: debug mode entered')
+        else: _l.warning('debugging: context manager already entered')
         return self
-    def __exit__(self, /, *_, _s=set_logger_level):
-        if (l := self.orig_level) is None: return log.warning('debugging: context manager not entered')
-        if l != log.level == 10: log.debug('debugging: exiting debug mode'); _s(l)
-        else: log.warning(f'debugging: user already exited debug mode; original level was {self.orig_name}')
+    def __exit__(self, /, *_, _s=set_logger_level, _l=l):
+        if (l := self.orig_level) is None: return _l.warning('debugging: context manager not entered')
+        if l != _l.level == 10: _l.debug('debugging: exiting debug mode'); _s(l)
+        else: _l.warning(f'debugging: user already exited debug mode; original level was {self.orig_name}')
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))
@@ -107,4 +107,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, f, m, r, s, b, P,  # noqa: F821
+del _, e, L, M, N, S, f, m, r, s, b, P, g, k, c, l # noqa: F821

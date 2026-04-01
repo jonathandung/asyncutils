@@ -3,8 +3,7 @@ from asyncio.futures import Future
 from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from types import TracebackType
 from typing import ClassVar, Self, Literal, Awaitable, Any, overload
-from .constants import _sentinel
-from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine
+from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine, Sentinel
 __all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'
 class event_loop:
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
@@ -57,9 +56,9 @@ async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[
     The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
     If `raising` is True, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
 @overload
-async def collect[T](it: SupportsIteration[T], n: int, default: T|_sentinel) -> list[T]: ...
+async def collect[T](it: SupportsIteration[T], n: int, default: T|Sentinel) -> list[T]: ...
 @overload
-async def collect[T](it: SupportsIteration[T], *, default: T|_sentinel) -> list[T]: ...
+async def collect[T](it: SupportsIteration[T], *, default: T|Sentinel) -> list[T]: ...
 @overload
 async def collect[T](it: SupportsIteration[T], n: int) -> list[T]: ...
 @overload
@@ -71,9 +70,7 @@ async def collect[T](it: SupportsIteration[T]) -> list[T]:
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''
 @overload
-def take[T](it: SupportsIteration[T], n: int, *, default: _sentinel) -> AsyncGenerator[T, None]: ...
-@overload
-def take[T](it: SupportsIteration[T], n: int, *, default: T) -> AsyncGenerator[T, None]: ...
+def take[T](it: SupportsIteration[T], n: int, *, default: T|Sentinel) -> AsyncGenerator[T, None]: ...
 @overload
 def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
     '''Yield n items from the (async) iterable.

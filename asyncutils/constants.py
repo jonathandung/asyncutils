@@ -1,5 +1,6 @@
 from ._internal import patch as P
-RECIP_E = 0.3678794411714423
+from ._internal.submodules import constants_all as __all__
+RECIP_E, EXECUTORS_FROZENSET = 0.3678794411714423, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
 class sentinel_base:
     _can_instantiate, __slots__ = False, '__name'
     def __new__(cls, name=None, _=__import__('keyword').iskeyword):
@@ -16,26 +17,35 @@ class sentinel_base:
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {cls.__qualname__!r}') from None
     def __repr__(self): return f'<{type(self).__qualname__} {self.__name!r} at {id(self):#x}>'
-    def __str__(self): return getattr(self, 'name', '<unbound>')+(' <private>' if self.is_private else '')
-    def __set_name__(self, owner, name, /):
-        if getattr(self, '__name', None) is None: self._assert_can_instantiate(); self.__name = n = f'{owner.__qualname__}.{name}'; self._cache[n] = self
-        else: raise NameError(f'cannot bind named {type(self).__qualname__} to class')
+    def __str__(self): return getattr(self, 'name', '<unbound>')+(' <private>'*self.is_private)
+    def __set_name__(self, owner, name, /, _='NOTE: The following is considered bad practice:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, consider:\nclass {0}:\n{1} = {2}()\n'.format):
+        N = f'{owner.__module__}.{owner.__qualname__}.{name}'.replace('<locals>.', '').replace('<lambda>.', '')
+        with self._lock:
+            if (n := getattr(self, '__name', None)) is None:
+                if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{type(self).__qualname__} name collision', name=N)
+                self.__name = N
+            elif N == n and self._cache.get(N) is self:
+                if b := self.bound_to: __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, type(self).__qualname__, N))
+                else: raise NameError(f'cannot bind named unbound {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)
+            else: raise NameError(f'cannot bind named {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)
     def __reduce__(self):
         try: return type(self), (self.__name,)
         except AttributeError: raise TypeError(f'cannot pickle unbound instance of {type(self).__qualname__}') from None
     def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
-        if getattr(cls, '__slots__', True): raise TypeError('slots should be empty for sentinel classes')
+        if getattr(cls, '__slots__', True): raise TypeError('sentinel classes should have empty __slots__')
         cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True
     @property
-    def is_private(self): return getattr(self, '__name', '').split('.', 1)[-1].startswith('_')
+    def is_private(self): return getattr(self, '_sentinel_base__name', '').split('.', 1)[-1].startswith('_')
     @property
-    def bound_to(self):
-        if len(l := getattr(self, '__name', '').split('.', 1)) == 2: return l[0]
+    def bound_to(self): return getattr(self, '_sentinel_base__name', '').rpartition('.')[0] or None
+    @property
+    def back(self): return getattr(self, '_sentinel_base__name', '').rpartition('.')[2] or None
     def is_(self, o, /): return self is o
     P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}'))
 class _sentinel(sentinel_base):
     __slots__ = ()
-    def __init_subclass__(cls): raise TypeError('cannot subclass _sentinel')
-    def __reduce__(self): return f'asyncutils.config.{self.name}'
+    def __init_subclass__(cls): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
+    def __reduce__(self): return f'asyncutils.constants.{self.name}'
 _NO_DEFAULT, RAISE, SYNC_AWAIT = map(_sentinel, ('_NO_DEFAULT', 'RAISE', 'SYNC_AWAIT'))
 _sentinel._can_instantiate = False
+del _sentinel

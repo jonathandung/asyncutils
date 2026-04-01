@@ -36,10 +36,11 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
 class UniqueResourceGuard(ResourceGuard):
     _cache, __slots__ = {}, ()
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass UniqueResourceGuard')
     @classmethod
     def guard(cls, obj, /, *, action='using'):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
-        audit('asyncutils.altlocks.UniqueResourceGuard', obj); return r
+        audit('asyncutils.altlocks.UniqueResourceGuard', type(obj).__qualname__); return r
 class CircuitBreaker:
     __slots__ = '_name', '_max_fails', '_reset', '_exc', '_fails', '_opened', '_half_open_calls', '_max_half_open_calls', '_call_lock', '_state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, name, /, max_fails=3, reset=None, exc=Exception, max_half_open_calls=None, _fmt='#%d'):

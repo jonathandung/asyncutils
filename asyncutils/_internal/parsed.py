@@ -1,4 +1,5 @@
 from .. import __version__ as V
+from ..constants import POSSIBLE_EXECUTORS as c
 from .compat import apargs as j
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
@@ -8,7 +9,7 @@ The file should have one argument per line.
 This format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
-Other json formats are not currently supported; see the possible keys in format.jsonc, which can be accessed using `tools.get_cfg_json_format()`.
+Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using `tools.get_cfg_json_format()`.
 
 Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, tornado, vibora, fastapi and trio.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', default='STDERR', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
@@ -23,7 +24,7 @@ If FILE is 'STDERR', logs to stderr (also the default behaviour and fallback if 
 a('-n', '--no-log', action=b, const='NULL', default=A.SUPPRESS, dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')
-(a := h())('-e', '--executor', choices=(c := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process')), default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
+(a := h())('-e', '--executor', choices=c, default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.

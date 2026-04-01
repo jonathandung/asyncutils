@@ -4,7 +4,8 @@ This facilitates lightweight inline type annotations.'''
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
 from io import TextIOWrapper, _WrappedBuffer
 from types import TracebackType, FunctionType
-from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only
+from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only, final
+from ..constants import sentinel_base
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -100,9 +101,17 @@ class Middleware(Protocol):
     def __hash__(self) -> int: ...
 @type_check_only
 class Bag(dict[str, Any]):
+    '''A thin dictionary subclass that supports attribute access.'''
     def __getattr__(self, key: str, /) -> Any: ...
     def __setattr__(self, key: str, value: Any, /) -> None: ...
     def __delattr__(self, key: str, /) -> None: ...
+@final
+@type_check_only
+class Sentinel(sentinel_base):
+    '''Common type of sentinels for this module, internal or public.'''
+    @property
+    def bound_to(self) -> None: ...
+    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.constants namespace.'''
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the int constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
@@ -122,3 +131,5 @@ type All = tuple[str, ...]
 '''Type of the __all__ attributes of asyncutils' submodules.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
+type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
+'''Type of strings representing executors that can be passed to -e/--executor.'''

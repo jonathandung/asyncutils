@@ -17,7 +17,7 @@ This section documents the symbols defined at the top level of this package.
   An integer representing the current pip/conda version of this library. Comparison operators working as expected.
   For version 1.3.11, this would be ``0x01030b``.
 
-  Equivalent to ``int(__version__)``
+  :note: Equivalent to ``int(__version__)``
 
 .. data:: preloaded_submodules
   :module: asyncutils
@@ -38,7 +38,7 @@ This section documents the symbols defined at the top level of this package.
     submodule and replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object.
     For attribute accesses, it acts as a proxy to the real submodule, loading it when strictly required.
 
-    *The exact deference mechanism is an implementation detail.*
+  :warning: The exact deference mechanism is an implementation detail.
 
 One can access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
 

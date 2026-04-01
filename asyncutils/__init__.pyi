@@ -32,14 +32,14 @@ from .util import *
 from .version import *
 from types import ModuleType
 from typing import Final
-from ._internal.protocols import Submodule, All
-def __dir__() -> All: ...
+from ._internal.protocols import Submodule
+def __dir__() -> tuple[Submodule, ...]: '''The names of all the public submodules of asyncutils.'''
 __version__: Final[VersionInfo]
 '''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
 __hexversion__: Final[int]
 '''0x12070e -> version 18.7.14'''
 preloaded_submodules: Final[frozenset[str]]
-'''A `frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads `asyncio`.
+'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.
 This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
 '''A dictionary mapping submodule names to the corresponding submodule objects.'''

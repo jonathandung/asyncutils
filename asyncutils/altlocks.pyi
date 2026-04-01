@@ -5,7 +5,7 @@ from asyncio.locks import BoundedSemaphore
 from collections import deque
 from _collections_abc import Awaitable, Coroutine, Callable
 from types import TracebackType
-from typing import Any, Self, overload
+from typing import Any, Self, overload, final
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class DynamicBoundedSemaphore(BoundedSemaphore):
     '''A subclass of BoundedSemaphore whose bound can be set by the user via the `bound` property.'''
@@ -15,35 +15,38 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     @bound.setter
     def bound(self, value: int, /) -> None: ...
 class ResourceGuard(RuntimeError, AsyncContextMixin):
-    '''Reimplementation of anyio.ResourceGuard, as a sync or async context manager.'''
+    '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync or async context manager.'''
     @property
     def guarded(self) -> bool: ...
     def __init__(self, action: str=..., rname: Any=...): ...
-    def __enter__(self) -> None: ...
+    def __enter__(self) -> None: '''Throw `self` as an exception (inherits from `RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
     @classmethod
-    def guard(cls, obj: Any, /, *, action: str=...) -> Self: ...
+    def guard(cls, obj: Any, /, *, action: str=...) -> Self: '''Alternate constructor; determines the name of the resource from the representation of the object.'''
+@final
 class UniqueResourceGuard(ResourceGuard):
-    '''A subclass of anyio.ResourceGuard that only allows one guard per object.
+    '''A subclass of :class:`ResourceGuard` that only allows one guard per object.
     Note that this does not stop the object from having an instance of ResourceGuard (or subclass thereof) from guarding it simultaneously.'''
     @classmethod
-    def guard(cls, obj: Any, /, *, action: str=...) -> Self: ...
+    def guard(cls, obj: Any, /, *, action: str=...) -> Self:
+        '''Each object only has one guard. If the object already has a guard, return that guard, regardless of whether it is held.
+        The error will be seen by the user when they actually try to acquire the guard if it is already held.'''
 class CircuitBreaker:
     '''The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
     Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.'''
     @overload
-    def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self:
+    def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
+    @overload
+    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: # type: ignore[misc]
         '''Construct a circuit breaker, whose circuit is initially closed.
         If `name` is passed, use it as the name; return a function wrapping `f` otherwise, with the name of the circuit breaker (for debugging) derived from the name of the function.
         Pass exceptions that are expected to happen through the `exc` parameter.
         When the decorated function fails more than `max_fails` times, the breaker triggers (opens the circuit) and disallow further calls of the same function by throwing an exception.
         This state persists until the `reset` timeout expires, the default of which can be changed in the context submodule. Then, the breaker enters the half-open state.
         If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
-    @overload
-    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: ... # type: ignore[misc]
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
     @property
     def fails(self) -> int: '''Current count of conseuctive failures.'''
@@ -85,9 +88,9 @@ class DynamicThrottle:
         `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
     @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
     def reset(self) -> None: '''Reset the successes and fails.'''
     @property
     def ctime(self) -> float: '''The current time as returned by `timer`.'''

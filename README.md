@@ -39,7 +39,7 @@ See [usage.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source
 
 ## Version
 
-This is asyncutils v0.8.20.
+This is asyncutils v0.8.21.
 
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)

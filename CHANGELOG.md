@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.20] - 2026-03-28: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.21] - 2026-04-01: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Tests
 
@@ -119,6 +119,8 @@ Submodules:
 
   Constants:
   - RECIP_E
+  - EXECUTORS_FROZENSET
+  - POSSIBLE_EXECUTORS
 
   Sentinels:
   - RAISE

@@ -198,43 +198,16 @@ async def aany(it):
     async for _ in iter_to_aiter(it):
         if _: return True
     return False
-def _compare(a, b):
-    try: return a < b
-    except (TypeError, NotImplementedError): return b > a
-async def amax(it, *, cmp=None, key=None, default=_NO_DEFAULT, __cmp=_compare):
+async def _aextreme(it, key, default, cmp):
     if (r := await anext(I := iter_to_aiter(it), _NO_DEFAULT)) is _NO_DEFAULT:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to amax with no default value')
+        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed with no default value')
         return default
-    if cmp is None:
-        if key is None:
-            async for _ in I:
-                if _ > r: r = _
-        else:
-            k, cmp = key(r), __cmp
-            async for _ in I:
-                if cmp(k, x := key(_)): k, r = x, _
-    elif key is None:
-        async for _ in I:
-            if cmp(r, _): r = _
-    else: raise TypeError('cannot pass both cmp and key')
+    k = key(r)
+    async for i in I:
+        if cmp(x := key(i), k): k, r = x, i
     return r
-async def amin(it, *, cmp=None, key=None, default=_NO_DEFAULT, __cmp=_compare):
-    if (r := await anext(I := iter_to_aiter(it), _NO_DEFAULT)) is _NO_DEFAULT:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to amax with no default value')
-        return default
-    if cmp is None:
-        if key is None:
-            async for _ in I:
-                if _ < r: r = _
-        else:
-            k, cmp = key(r), __cmp
-            async for _ in I:
-                if cmp(x := key(_), k): k, r = x, _
-    elif key is None:
-        async for _ in I:
-            if cmp(_, r): r = _
-    else: raise TypeError('cannot pass both cmp and key')
-    return r
+def amax(it, *, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.gt)
+def amin(it, *, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.lt)
 async def azip(*I, strict=False):
     I = tuple(map(iter_to_aiter, I))
     try:
@@ -750,28 +723,19 @@ async def acat(first=None):
 async def aforever():
     audit('asyncutils.iters.aforever')
     while True: yield
-async def aguessmax(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=None, __cmp=_compare):
-    if (r := await amax(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmax with no default value')
+async def _aguess(it, estlen, key, default, finish_event, cmp, f=_aextreme):
+    if (r := await f(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key, RAISE, cmp)) is RAISE:
+        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed with no default value')
         return default
-    k = K(r)
+    k = key(r)
     try:
         async for i in I:
-            if __cmp(k, K(i)): return i
+            if cmp(key(i), k): return i
         return r
     finally:
         if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
-async def aguessmin(it, estlen, *, key=None, default=_NO_DEFAULT, finish_event=None, __cmp=_compare):
-    if (r := await amin(take(I := iter_to_aiter(it), M.ceil(estlen*RECIP_E)), key=(K := key or (lambda x: x)), default=(o := object()))) is o:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to aguessmin with no default value')
-        return default
-    k = K(r)
-    try:
-        async for i in I:
-            if __cmp(K(i), k): return i
-        return r
-    finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+def aguessmax(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.gt)
+def aguessmin(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.lt)
 async def apowersoftwo(*, init=1, init_shift=0):
     init <<= init_shift
     while True: yield init; init <<= 1
@@ -782,4 +746,4 @@ async def areversed(it, /):
         f = (l := []).append
         async for i in iter_to_aiter(it): f(i)
         for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _compare, _factor_pollard, _shift_to_odd, _probable_prime, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+del _aunzip_consumer_base, _aunzip_put, _aguess, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

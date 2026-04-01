@@ -64,6 +64,6 @@ class EventWithValue(EventMixin):
                     await self.wait_for_value(old)
                     if new is await self.wait_for_next(): return True
         except TimeoutError:
-            if force_transition: o = self.get(None); self.set(old); self.set(new); self.set(o, strict=False)
+            if force_transition: o = self.get(None); self.set(old); self.set(new); self.set(o, strict=False) # type: ignore[arg-type]
             return False
     async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(get_running_loop().create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))

@@ -270,7 +270,7 @@ class EventBus(LoopContextMixin):
         if iscoroutine(e := self._handler(e)): await e
     def clear(self, event_type=_NO_DEFAULT): return self._subscribers.clear() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
     def clear_all(self): self.clear(); self.clear_stats()
-    def clear_wildcards(self): return self.clear(None)
+    def clear_wildcards(self): return self.clear(None) # type: ignore[arg-type]
     def clear_stats(self): self._published.clear()
     async def _safe_callback(self, callback, data, event_type=None, timeout=None):
         try:

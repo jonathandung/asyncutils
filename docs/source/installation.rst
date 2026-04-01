@@ -33,7 +33,7 @@ Next, install py-asyncutils from pip:
 
 .. code-block:: bash
 
-  pip install py-asyncutils==0.8.20
+  pip install py-asyncutils==0.8.21
 
 or if you are installing for development, and wish to obtain the corresponding :ref:`extras`:
 
@@ -51,19 +51,19 @@ or with pipx:
 
 .. code-block:: bash
 
-  pipx install py-asyncutils==0.8.20
+  pipx install py-asyncutils==0.8.21
 
 or with conda:
 
 .. code-block:: bash
 
-  conda install -c conda-forge py-asyncutils=0.8.20
+  conda install -c conda-forge py-asyncutils=0.8.21
 
 or with uv:
 
 .. code-block:: bash
 
-  uv pip install 'py-asyncutils==0.8.20'
+  uv pip install 'py-asyncutils==0.8.21'
 
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI.

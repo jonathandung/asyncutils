@@ -1,8 +1,15 @@
 from _collections_abc import Callable
 from threading import Lock
-from typing import Final, NoReturn, Literal, Self, final, type_check_only, overload
-__all__ = 'RECIP_E', 'RAISE', 'SYNC_AWAIT', 'sentinel_base'
+from typing import Final, NoReturn, Literal, Self, overload
+from ._internal.protocols import Sentinel, Executor
+__all__ = 'RECIP_E', 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
+'''The reciprocal of Euler's number.'''
+POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
+'''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity, which is also the order
+in which the executor options appear in the CLI help.'''
+EXECUTORS_FROZENSET: Final[frozenset[Executor]]
+'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)` to allow faster membership testing.'''
 class sentinel_base:
     '''Base class for sentinel values.'''
     def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change NoReturn to Self) if and only if your subclass can be instantiated by the user.'''
@@ -21,14 +28,9 @@ class sentinel_base:
     def is_(self, other: Self, /) -> bool: ... # type: ignore[overload-overlap]
     @overload
     def is_(self, other: object, /) -> Literal[False]: ...
-@final
-@type_check_only
-class _sentinel(sentinel_base):
-    '''Sentinels for this module, internal or public. Not exported.'''
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.config namespace.''' # type: ignore[override]
-RAISE: Final[_sentinel]
+RAISE: Final[Sentinel]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
-SYNC_AWAIT: Final[_sentinel]
+SYNC_AWAIT: Final[Sentinel]
 '''A possible value to Deadlock.noticer, indicating the deadlock situation was found by the sync_await function.'''
-_NO_DEFAULT: Final[_sentinel]
+_NO_DEFAULT: Final[Sentinel]
 '''Users are not meant to interact with this directly.'''
