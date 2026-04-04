@@ -13,13 +13,16 @@ requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE", "AUTHORS.md"]
 keywords = ["asynchronous", "convenient", "fast", "light", "feature-rich"]
-classifiers = ["Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: Implementation :: CPython", "Operating System :: OS Independent", "Development Status :: 3 - Alpha", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Natural Language :: English", "Typing :: Typed"]
+classifiers = ["Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Python :: Implementation :: CPython", "Operating System :: OS Independent", "Development Status :: 3 - Alpha", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Natural Language :: English", "Typing :: Typed"]
 
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"
+Documentation = "https://asyncutils.readthedocs.io/en/stable/api/index.html"
 Repository = "https://github.com/jonathandung/asyncutils.git"
 Issues = "https://github.com/jonathandung/asyncutils/issues"
 Changelog = "https://github.com/jonathandung/asyncutils/blob/main/CHANGELOG.md"
+Download = "https://pypi.org/project/py-asyncutils/#files"
+"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.8.21"
 
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'
@@ -35,6 +38,24 @@ all = ["py-asyncutils[dev,docs,pub,json]>=0.8.21"]
 [tool.setuptools]
 packages = ["asyncutils", "asyncutils._internal"]
 
+[tool.mypy]
+python_version = "3.12"
+files = ["asyncutils/**/*.pyi"]
+verbosity = 1
+follow_imports = "skip"
+warn_unreachable = true
+warn_return_any = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_incomplete_stub = true
+disallow_untyped_defs = true
+disallow_untyped_decorators = true
+disallow_any_unimported = true
+disallow_subclassing_any = true
+disallow_any_generics = true
+extra_checks = true
+exclude_gitignore = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
@@ -48,6 +69,7 @@ log_format = "%(asctime)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_file = ".logs/pytest-logs.txt"
 log_file_mode = "a"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["asyncutils"]

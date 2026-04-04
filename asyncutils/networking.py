@@ -46,7 +46,7 @@ class LineProtocol(Protocol, EventualLoopMixin):
     def write_line(self, line):
         with self._handler:
             if not self.connected_transport.is_closing(): self.write_literal(line.encode('utf-8', 'ignore')+self.NEWLINE)
-    def write_literal(self, data): self.connected_transport.write(data) # type: ignore
+    def write_literal(self, data): self.connected_transport.write(data) # type: ignore[attr-defined]
     def eof_received(self):
         self._eof_received = True
         if self._buffer: self.flush()

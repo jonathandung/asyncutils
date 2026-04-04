@@ -137,7 +137,7 @@ def asliced(seq, n, strict=False):
     if not strict: return I
     async def ret():
         async for s in I:
-            if len(s) != n: raise ValueError('seq is not divisible by n')
+            if len(s) != n: raise ValueError('length of seq is not divisible by n')
             yield s
     return ret()
 def batch_buffer(items, batch_size, buffer_size, *, loop=None):
@@ -515,16 +515,17 @@ async def ainterleaverandomly(its, _=_randrange):
         try: yield await anext(I[i])
         except StopAsyncIteration: I[i] = I[-1]; del I[-1]; x -= 1
 async def acollapse(it, base_typ=(str, bytes), levels=None):
-    (S := deque()).appendleft((0, arepeat(iter_to_aiter(it), 1))); L, f, g = levels or float('inf'), S.popleft, S.extendleft
+    if levels is None: levels = float('inf')
+    (S := deque()).appendleft((0, arepeat(iter_to_aiter(it), 1))); f, g = S.popleft, S.appendleft
     while S:
         l, n = N = f()
-        if l > L:
+        if l > levels:
             async for i in n: yield i
             continue
         async for _ in n:
             if isinstance(_, base_typ): yield _
             else:
-                try: t = iter_to_aiter(_); g(((l+1, t), N)); break
+                try: t = iter_to_aiter(_); g((l+1, t)); g(N); break
                 except TypeError: yield _
 def afirsttrue(it, default=_NO_DEFAULT, pred=None): F = afilter(pred, it); return anext(F, *filter_out(default, _NO_DEFAULT))
 def aprepend(val, it): return achain((val,), it).__aiter__()

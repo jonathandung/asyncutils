@@ -1,13 +1,13 @@
 '''Exception handling utilties and exception classes used by this module.'''
 from .channels import EventBus
-from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike, Middleware
+from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike, Middleware, ExceptionWrapper
 from .locks import LocksmithBase
 from .queues import _Q
 from .version import VersionInfo
 from asyncio.locks import Lock
 from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
-from typing import overload, type_check_only, TypeGuard, Self, Literal, Any, NoReturn, ClassVar
+from typing import overload, TypeGuard, Self, Literal, Any, NoReturn, ClassVar, NewType
 from weakref import ref
 __all__ = 'CRITICAL', 'ref', 'unnest', 'unnest_reverse', 'potent_derive', 'prepare_exception', 'raise_', 'exception_occurred', 'wrap_exc', 'unwrap_exc', 'Critical', 'StateCorrupted', 'FaultyConfig', 'IgnoreErrors', 'WarningToError', 'ignore_all', 'VersionError', 'VersionConversionError', 'VersionNormalizerMissing', 'VersionCorrupted', 'VersionValueError', 'VersionNormalizerTypeError', 'VersionNormalizerFault', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'PoolError', 'PoolFull', 'PoolShutDown', 'BusError', 'BusTimeout', 'BusShutDown', 'BusStatsError', 'BusPublishingError', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'EventValueError', 'FutureCorrupted', 'MaxIterationsError', 'ItemsExhausted', 'PasswordQueueError', 'PasswordRetrievalError', 'GetPasswordRetrievalError', 'PutPasswordRetrievalError', 'ForbiddenOperation', 'PasswordError', 'WrongPassword', 'WrongPasswordType', 'PasswordMissing', 'GetPasswordMissing', 'PutPasswordMissing'
 CRITICAL: tuple[ValidExcType, ...]
@@ -37,11 +37,9 @@ def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|N
 def raise_(exc_typ: ValidExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: '''Programmatically raise an exception. `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload. Remaining args are as in `potent_derive`.'''
 @overload
 def raise_(exc_val: BaseException, /, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: ...
-def wrap_exc(exc: BaseException) -> _ExceptionWrapper: '''Wrap an exception in a special object `wrapper`, such that `exception_occurred(wrapper)` returns True.'''
-def unwrap_exc(exc: _ExceptionWrapper) -> BaseException: '''Recover the exception wrapped by `wrap_exc`.'''
-def exception_occurred(obj: Any, /) -> TypeGuard[_ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
-@type_check_only
-class _ExceptionWrapper: '''Does not exist at runtime.'''
+def wrap_exc(exc: BaseException) -> ExceptionWrapper: '''Wrap an exception in a special object `wrapper`, such that `exception_occurred(wrapper)` returns True.'''
+def unwrap_exc(exc: ExceptionWrapper) -> BaseException: '''Recover the exception wrapped by `wrap_exc`.'''
+def exception_occurred(obj: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class Deadlock(BaseException):
     '''Raised when a potential deadlock situation is noticed by this module.'''
     def __init__(self, /, *args: str, noticer: Any=...): ...
@@ -170,7 +168,7 @@ class WrongPasswordType[T](PasswordError, TypeError):
     def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of `GetPasswordMissing` and `PutPasswordMissing`.'''
-    def __init__(self): ...
+    def __init__(self) -> None: ...
 class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
 class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:

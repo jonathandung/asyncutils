@@ -38,12 +38,11 @@ def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, n
     elif a or k: _s_.write('raise_: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
-@subscriptable
 class _ExceptionWrapper:
     __slots__ = '__exc'
-    def __new__(cls, exc):
-        if isinstance(exc, CRITICAL): raise exc
-        (s := super().__new__(cls)).__exc = exc; return s
+    def __new__(cls, e, /):
+        if isinstance(e, CRITICAL): raise e
+        (s := super().__new__(cls)).__exc = e; return s
     def __getattr__(self, name, /): return getattr(self.__exc, name)
     def __repr__(self): return f'_ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass _ExceptionWrapper')

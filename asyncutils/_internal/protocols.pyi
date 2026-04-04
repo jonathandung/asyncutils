@@ -4,7 +4,7 @@ This facilitates lightweight inline type annotations.'''
 from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer
 from io import TextIOWrapper, _WrappedBuffer
 from types import TracebackType, FunctionType
-from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, overload, type_check_only, final
+from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, NewType, overload, type_check_only, final
 from ..constants import sentinel_base
 @type_check_only
 class SupportsLT(Protocol):
@@ -23,7 +23,7 @@ class AsyncContextManager[T](Protocol):
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool|None: ...
 @type_check_only
-class AsyncLockLike(AsyncContextManager, Protocol):
+class AsyncLockLike[T](AsyncContextManager[T], Protocol):
     '''An object that behaves like an asynchronous lock.'''
     async def acquire(self) -> bool|None: ...
     def release(self) -> None|Awaitable[None]: ...
@@ -37,7 +37,7 @@ class GenericSized[T](Protocol):
 class SupportsSlicing[T](GenericSized[T], Protocol):
     '''Protocol for iterables with size, and index and slice access.'''
     @overload
-    def __getitem__(self, idx: ValidSlice, /) -> GenericSized[T]: ...
+    def __getitem__(self, idx: ValidSlice, /) -> Self: ...
     @overload
     def __getitem__(self, idx: SupportsIndex, /) -> T: ...
     def __len__(self) -> int: ...
@@ -111,7 +111,7 @@ class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''
     @property
     def bound_to(self) -> None: ...
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.constants namespace.'''
+    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.constants namespace.''' # type: ignore[override]
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the int constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
@@ -133,3 +133,5 @@ type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'c
 '''Type of strings representing asyncutils submodule names.'''
 type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
+ExceptionWrapper = NewType('ExceptionWrapper', object)
+'''Does not exist at runtime.'''

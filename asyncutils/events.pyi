@@ -4,15 +4,15 @@ from asyncio.events import AbstractEventLoop
 from _collections_abc import Generator
 from typing import Literal, overload
 __all__ = 'SingleWaiterEventWithValue', 'EventWithValue'
-class SingleWaiterEventWithValue[T](EventMixin):
-    def __init__(self): ...
+class SingleWaiterEventWithValue[T](EventMixin[T]):
+    def __init__(self) -> None: ...
     def set(self, value: T) -> None: '''Set the result of the event, awakening the waiters.'''
     def clear(self) -> None: '''Unset the result of the event.'''
     def is_set(self) -> bool: '''Whether the result is currently set.'''
     async def wait_for_next(self, timeout: float|None=..., *, strict: bool=...) -> T: '''Wait for the next result of the event to be set.''' # type: ignore[override]
     def get(self) -> T: '''Get the result of the event immediately.'''
-class EventWithValue[T](EventMixin):
-    def __init__(self, *, maxhist: int|None=...): '''Initialize an EventWithValue, storing a maximum of `maxhist` entries of past results, which defaults to `context.EVENT_WITH_VALUE_DEFAULT_MAXHIST`.'''
+class EventWithValue[T](EventMixin[T]):
+    def __init__(self, *, maxhist: int|None=...) -> None: '''Initialize an EventWithValue, storing a maximum of `maxhist` entries of past results, which defaults to `context.EVENT_WITH_VALUE_DEFAULT_MAXHIST`.'''
     @overload
     def set(self, value: None, strict: Literal[False]=...) -> None: '''Set the result of the event and wake up waiters. If strict is True, throws an error when the value is None.'''
     @overload

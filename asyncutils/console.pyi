@@ -20,7 +20,7 @@ class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
     '''Whether _pyrepl enhancements are available and allowed.'''
-    LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict], Any]|None]]
+    LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
     '''module name -> (locals of console of corresponding type -> Any)
     Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
@@ -63,8 +63,8 @@ class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
         `additional_memerr_hooks` (optional): see above
         `template` (optional): the console banner to use, with %-placeholders for name, version and description
         Additional keyword arguments are passed to `template.__mod__`.'''
-    def __callback(self, fut: Future, code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine]]=..., futchain: Callable[[Task, Future], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
-    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
+    def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
+    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
         '''Run `code`, an instance of `types.CodeType`.
         `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
         `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.

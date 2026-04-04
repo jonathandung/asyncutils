@@ -8,7 +8,6 @@ async def kill(sig):
     os.kill(os.getpid(), sig)
 async def processor(sig): return sig.value
 async def bad_processor(sig): return 1/0
-@mark.asyncio
 @mark.skipif(W := sys.platform == 'win32', reason='difficult to test signal handling on windows')
 @mark.parametrize('res', range(1, 9))
 async def test_signal(res):
@@ -33,6 +32,5 @@ def test_signal_log_unix(mock_logger, wait_partial, run_in_loop):
     with raises(Log, match='wait_for_signal processor .* encountered expected ZeroDivisionError for signal (SIGINT|2)'):
         run_in_loop.__self__.create_task(kill(s := Signals.SIGINT))
         run_in_loop(wait_for_signal(bad_processor, s, timeout=0.1, possible_errors=(ZeroDivisionError,), logger=mock_logger))
-@mark.asyncio
 async def test_signal_raise(wait_partial):
     with raises(TimeoutError): await wait_partial(Signals.SIGFPE, timeout=0.05, raise_on_timeout=True)

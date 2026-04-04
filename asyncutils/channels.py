@@ -157,7 +157,7 @@ class EventBus(LoopContextMixin):
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or (a := self.auditor).added): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True # type: ignore
+        if not (self._auditing or (a := self.auditor).added): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', self); self._auditing = False
     @cached_property
     def _middlewares(self): return {}
@@ -218,8 +218,8 @@ class EventBus(LoopContextMixin):
                     if iscoroutine(D := m(E, D)): D = await D
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: C(e)
-                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore
-                except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore
+                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore[arg-type]
+                except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore[arg-type]
             U = self._subscribers
             async with self._lock:
                 if self._tracking: self._published[E] += 1
@@ -249,7 +249,7 @@ class EventBus(LoopContextMixin):
         t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if item_timeout is _NO_DEFAULT: item_timeout = context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
-            while True: yield await wait_for(q.get(), item_timeout) # type: ignore
+            while True: yield await wait_for(q.get(), item_timeout) # type: ignore[arg-type]
         except QueueShutDown: L.info(f'event stream of {self.name} has been shut down', exc_info=True)
         except TimeoutError: L.error(f'event stream of {self.name} is stopping because of timeout in waiting for item', exc_info=True)
         finally: F.set_result(None); await t

@@ -1,6 +1,5 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.protocols import Exceptable, Timer, SupportsIteration
-from .exceptions import _ExceptionWrapper
+from ._internal.protocols import Exceptable, Timer, SupportsIteration, ExceptionWrapper
 from asyncio.futures import Future
 from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable
 from typing import Any, Literal, Protocol, Self, overload, type_check_only
@@ -10,7 +9,7 @@ async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration
 @overload
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: ...
 @overload
-def every(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everyrv: ...
+def every(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everyrv[Any]: ...
 @overload
 def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> _everyrv[T]: ...
 @overload
@@ -34,7 +33,7 @@ def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future
 def everymethod[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> _everymethodrv[T, Any]: ...
 @overload
 def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> _everymethodrv[R, T]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
-def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|_ExceptionWrapper, float]]]:
+def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
     `timer` is used to count `elapsed`, the time required to execute the function.
     `res_or_exc` is the awaited result of the wrapped function, or the exception thrown as wrapped by `exceptions.wrap_exc`.
@@ -53,7 +52,7 @@ def debounce(wait: float) -> _frv: ...
 async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''
 class benchmark(tuple[float, float, float, float, int]):
     '''Actually a function at runtime.'''
-    def __new__(cls, f: Callable[[], Awaitable], /, times: int=..., warmup: int=...) -> Self:
+    def __new__(cls, f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=...) -> Self:
         '''`f` is the function to benchmark, which should take no arguments and return an awaitable.
         `times` is how many times the function should be run, which defaults to 1.
         `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results. Default 0.'''

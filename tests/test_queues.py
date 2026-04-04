@@ -5,7 +5,6 @@ from asyncutils._internal.compat import QueueFull, QueueEmpty
 from asyncio.tasks import create_task, sleep
 @fixture
 def pwd(): return _randinst.randbytes(8)
-@mark.asyncio
 async def test_pwdq(pwd):
     Q = password_queue(pwd, maxsize=2, init_items=[0, 1])
     await sleep(0.1)

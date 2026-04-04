@@ -12,7 +12,7 @@ from asyncio.timeouts import timeout as _timeout
 from time import monotonic
 from ._internal.submodules import processors_all as __all__
 @subscriptable
-class SemBatchProcessor:
+class BoundedBatchProcessor:
     __slots__ = '_processor', '_batch', '_sem'
     def __init__(self, processor, batch=10, max_concurrent=5, bounded=False): self._processor, self._batch, self._sem = processor, batch, semaphore(bounded, max_concurrent)
     async def process(self, items):
@@ -33,7 +33,6 @@ class BatchProcessor(LoopContextMixin):
         if not self._batch: return
         async with self._lock: b, self._batch, self._last_process = self._batch.copy(), [], self._timer()
         await self._processor(b)
-    async def __call__(self, b: list, /): return await self._processor(b)
     async def flush(self):
         async with self._lock:
             if self._batch: await self._process()
@@ -76,11 +75,11 @@ class Bulkhead(LoopContextMixin):
     def rejected(self): return self._rejected
     def wait_until_idle(self, timeout=None): return wait_for(self._empty_event.wait(), timeout)
     async def shutdown(self, timeout=None):
-        self._shutdown_event.set(); r = []; (q := self._queue).shutdown(False)
+        self._shutdown_event.set(); f, g, h = (r := []).append, (q := self._queue).get_nowait, q.shutdown; h()
         try:
             async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks, disembowel=True)
         except TimeoutError:
             while True:
-                try: r.append(await q.get())
-                except: q.shutdown(True); break
+                try: f(g())
+                except: h(True); break
         return r

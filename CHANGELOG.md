@@ -306,7 +306,7 @@ Submodules:
 - processors
 
   Classes:
-  - SemBatchProcessor
+  - BoundedBatchProcessor
   - BatchProcessor
   - Bulkhead
 

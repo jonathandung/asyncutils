@@ -61,3 +61,4 @@ cython_debug/
 .vscode/
 .ruff_cache/
 .pypirc
+strip_annotations.py

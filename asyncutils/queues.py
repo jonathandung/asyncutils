@@ -7,7 +7,6 @@ from ._internal.helpers import get_loop_and_set, subscriptable
 from ._internal.log import info
 from .mixins import EventualLoopMixin
 from .util import safe_cancel, sync_await
-import heapq
 from abc import ABCMeta, abstractmethod
 from asyncio.locks import Event
 from asyncio.tasks import gather, wait_for
@@ -50,7 +49,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(pwd, puttyp): raise _.WrongPasswordType(pwd, type(pwd), q, puttyp)
         if pwd is not password_put and (strict or pwd != password_put): raise _.WrongPassword(q, pwd)
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
-    if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(heapq, f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
+    if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(__import__('heapq'), f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     @subscriptable
     class PasswordQueue:
@@ -224,7 +223,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
         r = self.get_nowait(); self.put_nowait(item); return r
     async def pushpop(self, item): await self.put(item); return await self.get()
     async def poppush(self, item): r = await self.get(); await self.put(item); return r
-    def clear(self) -> None:
+    def clear(self):
         with ignore_qempty:
             while True: self.get_nowait()
     @asynccontextmanager
@@ -335,7 +334,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); heapq.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(heapq.heappop, q), partial(heapq.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore
+    async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)

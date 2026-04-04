@@ -50,7 +50,7 @@ class Observable[**P](LoopContextMixin):
     def subscribe_syncf(self, observer: _Observer) -> _SubscriptionReturnType: ...
     def ntimes(self, observer: _Observer, n: int=...) -> _SubscriptionReturnType: ...
     def filter(self, pred: Callable[P, bool], ret_exc: bool=...) -> Self: ...
-    def map(self, transform: Callable[P, tuple[Iterable[Any], Mapping[str, Any]]], ret_exc: bool=...) -> Observable: ...
+    def map(self, transform: Callable[P, tuple[Iterable[Any], Mapping[str, Any]]], ret_exc: bool=...) -> Observable[...]: ...
     def debounce(self, delay: float, ret_exc: bool=...) -> Self: ...
     def throttle(self, interval: float, ret_exc: bool=...) -> Self: ...
     def buffer(self, count: int, ret_exc: bool=...) -> Self: ...
@@ -77,19 +77,17 @@ class EventBus(LoopContextMixin):
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''
     @overload
-    def subscribers_for(self, event_type: str) -> WeakSet[Callable[[Any], Awaitable]]: ...
+    def subscribers_for(self, event_type: str) -> WeakSet[Callable[[Any], Awaitable[Any]]]: ...
     @overload
-    def subscribers_for(self, event_type: _WildcardType) -> WeakSet[Callable[[str, Any], Awaitable]]: '''A WeakSet of subscribers for the event type.'''
+    def subscribers_for(self, event_type: _WildcardType) -> WeakSet[Callable[[str, Any], Awaitable[Any]]]: '''A WeakSet of subscribers for the event type.'''
     def event_names(self) -> set[str]: '''A set of the current event types.'''
     def has_subscribers(self, event_type: str|_WildcardType) -> bool: '''Whether the event type has any subscribers.'''
     @staticmethod
     def is_valid_event_type(event_type: object) -> TypeGuard[str|_WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
     @overload
-    def is_subscribed(self, subscriber: Callable[[Any], Awaitable], event_type: str) -> bool: ... # type: ignore[overload-overlap]
+    def is_subscribed(self, subscriber: Callable[[Any], Awaitable[Any]], event_type: str=...) -> bool: ... # type: ignore[overload-overlap]
     @overload
-    def is_subscribed(self, subscriber: Callable[[str, Any], Awaitable], event_type: _WildcardType) -> bool: ... # type: ignore[overload-overlap]
-    @overload
-    def is_subscribed(self, subscriber: Callable[..., Awaitable]) -> bool: ... # type: ignore[overload-overlap]
+    def is_subscribed(self, subscriber: Callable[[str, Any], Awaitable[Any]], event_type: _WildcardType=...) -> bool: ... # type: ignore[overload-overlap]
     @overload
     def is_subscribed(self, subscriber: object, event_type: object=...) -> Literal[False]: '''Whether the callback is subscribed for the event type, or subscribed for any event type if event_type is not passed.'''
     @property
@@ -97,7 +95,7 @@ class EventBus(LoopContextMixin):
     @property
     def name(self) -> str: '''The name of the event bus.'''
     @property
-    def wildcards(self) -> WeakSet[Callable[[str, Any], Awaitable]]: '''All the wildcard subscribers for this event bus.'''
+    def wildcards(self) -> WeakSet[Callable[[str, Any], Awaitable[Any]]]: '''All the wildcard subscribers for this event bus.'''
     @property
     def wildcard_count(self) -> int: '''The number of wildcard subscribers under this event bus.'''
     @property
@@ -140,17 +138,17 @@ class EventBus(LoopContextMixin):
     @overload
     def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: ...
     @overload
-    async def subscribe[C: Callable[[Any], Awaitable]](self, subscriber: C, /, event_type: str) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
+    async def subscribe[C: Callable[[Any], Awaitable[Any]]](self, subscriber: C, /, event_type: str) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
     @overload
-    async def subscribe[C: Callable[[str, Any], Awaitable]](self, subscriber: C, /, event_type: _WildcardType=...) -> C: ...
+    async def subscribe[C: Callable[[str, Any], Awaitable[Any]]](self, subscriber: C, /, event_type: _WildcardType=...) -> C: ...
     @overload
-    async def unsubscribe(self, subscriber: Callable[[Any], Awaitable], /, event_type: str) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred.'''
+    async def unsubscribe(self, subscriber: Callable[[Any], Awaitable[Any]], /, event_type: str) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred.'''
     @overload
-    async def unsubscribe(self, subscriber: Callable[[str, Any], Awaitable], /, event_type: _WildcardType=...) -> bool: ...
+    async def unsubscribe(self, subscriber: Callable[[str, Any], Awaitable[Any]], /, event_type: _WildcardType=...) -> bool: ...
     @overload
-    def subscribe_to[C: Callable[[Any], Awaitable]](self, event_type: str) -> Callable[[C], C]: '''A decorator factory for functions to subscribe to this event bus under the specified event type.'''
+    def subscribe_to[C: Callable[[Any], Awaitable[Any]]](self, event_type: str) -> Callable[[C], C]: '''A decorator factory for functions to subscribe to this event bus under the specified event type.'''
     @overload
-    def subscribe_to[C: Callable[[str, Any], Awaitable]](self, event_type: _WildcardType) -> Callable[[C], C]: ...
+    def subscribe_to[C: Callable[[str, Any], Awaitable[Any]]](self, event_type: _WildcardType) -> Callable[[C], C]: ...
     def sync_start_publish(self, event_type: str, data: Any=..., *, safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], Any]|None=...) -> None: '''Begin a publication synchronously. Parameters are as in `publish`, below.'''
     async def publish(self, event_type: str, data: Any=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], Any]|None=...) -> None:
         '''Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout `timeout`.
@@ -163,12 +161,12 @@ class EventBus(LoopContextMixin):
         '''Wait for an event of the specified event type that satisfies the condition to occur.
         Note that the function completes once the subscription has registered and returns a task, which will be cancelled on timeout.'''
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: Callable[[str], Awaitable], event_type: str, till_permanent: float|None=...) -> Task[T]:
+    async def subscribe_until[T](self, fut: Future[T], subscriber: Callable[[str], Awaitable[Any]], event_type: str, till_permanent: float|None=...) -> Task[T]:
         '''Add the subscriber under the event type (as a wildcard without event_type) and return a task.
         The subscriber is removed once `fut` completes, and its result returned through the returned task.
         After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: Callable[[str, Any], Awaitable], event_type: _WildcardType=..., till_permanent: float|None=...) -> Task[T]: ...
+    async def subscribe_until[T](self, fut: Future[T], subscriber: Callable[[str, Any], Awaitable[Any]], event_type: _WildcardType=..., till_permanent: float|None=...) -> Task[T]: ...
     @overload
     async def feed_event(self, data: Any, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
     @overload
@@ -185,14 +183,14 @@ class EventBus(LoopContextMixin):
         If preserve_stats is True, the event publication statistics will be saved. Access using get_event_stats.'''
     async def handle_exception(self, e: BaseException) -> None: '''Asynchronously handle an exception according to the `handler` initialization parameter, which can be a sync or async function.'''
     @overload
-    def clear(self, event_type: str) -> WeakSet[Callable[[Any], Awaitable]]|None: ...
+    def clear(self, event_type: str) -> WeakSet[Callable[[Any], Awaitable[Any]]]|None: ...
     @overload
-    def clear(self, event_type: _WildcardType) -> WeakSet[Callable[[str, Any], Awaitable]]|None: ...
+    def clear(self, event_type: _WildcardType) -> WeakSet[Callable[[str, Any], Awaitable[Any]]]|None: ...
     @overload
     def clear(self) -> None: '''Remove all subscribers for the event type, or all subscribers if not passed.'''
     def clear_all(self) -> None: '''Remove all subscribers and clear statistics.'''
     def subscriber_count(self, event_type: str|_WildcardType) -> int: '''The number of subscribers for that event type.'''
-    def clear_wildcards(self) -> WeakSet[Callable[[str, Any], Awaitable]]|None: '''Equivalent to bus.clear(EventBus.WILDCARD).'''
+    def clear_wildcards(self) -> WeakSet[Callable[[str, Any], Awaitable[Any]]]|None: '''Equivalent to bus.clear(EventBus.WILDCARD).'''
     def clear_stats(self) -> None: '''Clear the event publication statistics.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...

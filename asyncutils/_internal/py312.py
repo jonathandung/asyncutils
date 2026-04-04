@@ -3,8 +3,9 @@ if __version__.major >= 3: __import__('warnings').warn(DeprecationWarning, 'this
 from .helpers import subscriptable
 from ..mixins import LoopBoundMixin
 from asyncio.locks import Event
-from collections import deque
-__all__ = 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'LifoQueue'
+from _collections import deque # type: ignore[import-not-found]
+import heapq as H
+__all__ = 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'LifoQueue', 'PriorityQueue'
 class QueueEmpty(Exception): ...
 class QueueFull(Exception): ...
 class QueueShutDown(Exception): ...
@@ -87,3 +88,8 @@ class LifoQueue(Queue):
     def _init(self, maxsize): self._queue = []
     def _get(self): return self._queue.pop()
     def _put(self, i, /): self._queue.append(i)
+class PriorityQueue(Queue):
+    def _init(self, maxsize): self._queue = []
+    def _get(self, _=H.heappop): return _(self._queue)
+    def _put(self, i, /, _=H.heappush): _(self._queue, i)
+del H
