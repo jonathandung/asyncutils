@@ -18,7 +18,7 @@ def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # type: ignore
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)
 def new_executor(f, /, save=True):
-    audit('asyncutils/create_executor', (F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')+F.__qualname__); from ..config import Executor as E; e = E()
+    audit('asyncutils/create_executor', f'{(F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor as E; e = E()
     if save: f.executor = e
     return e
 class _LoopMixinBase:

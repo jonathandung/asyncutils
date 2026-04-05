@@ -2,10 +2,10 @@ from .base import aiter_to_iter, take, event_loop, dummy_task
 from .constants import _NO_DEFAULT
 from .exceptions import exception_occurred, wrap_exc, unwrap_exc, CRITICAL, Critical, PoolError, PoolShutDown, PoolFull
 from ._internal.helpers import filter_out, check_methods, subscriptable
+from ._internal.compat import Queue, PriorityQueue
 from .mixins import LoopContextMixin, AsyncContextMixin
 from .util import semaphore, safe_cancel, sync_lock_from_binder, _ignore_cancellation
 from asyncio.locks import Event, Lock
-from asyncio.queues import Queue, PriorityQueue
 from asyncio.tasks import gather, wait_for, sleep
 from asyncio.timeouts import timeout
 from _functools import partial # type: ignore[import-not-found]
@@ -103,10 +103,10 @@ class AdvancedPool(LoopContextMixin):
     async def starmap(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority) for a in it])
     async def doublestarmap(self, f, it, priority=0): return await gather(*[await self.submit(f, _priority_=priority, **k) for k in it])
     async def starmap_withkwds(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority, **k) for a, k in it])
-    async def resize(self, _min, _max):
-        async with self._lock: M = max(_max, m := max(1, _min)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
+    async def resize(self, min, max):
+        async with self._lock: M = max(max, m := max(1, min)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
     async def drain(self): await self._queue.join()
-    async def restart_worker(self, worker): self._workers.discard(worker); self._workers.add(t := self.make(self._worker_loop())); t.add_done_callback(self._workers.discard); return t
+    def restart_worker(self, worker): (d := (w := self._workers).discard)(worker); w.add(t := self.make(self._worker_loop())); t.add_done_callback(d); return t
     async def health_check(self):
         if self._shutdown: return False
         for w in filter(self.dead, self._workers): await self.restart_worker(w)
@@ -174,13 +174,13 @@ class ConnectionPool:
     async def __aenter__(self): await self.start(); return self
     async def __aexit__(self, /, *_): await self.stop()
     @property
-    @(_locker := sync_lock_from_binder(lambda self: self._lock)) # type: ignore
-    def loop(self): # type: ignore
+    @(_locker := sync_lock_from_binder(lambda self: self._lock)) # type: ignore[attr-defined]
+    def loop(self): # type: ignore[no-redef]
         if self._loop is None: self._loop = (_ := event_loop.from_flags(0)).__enter__(); self._exiter.add(_)
         return self._loop
     @loop.setter
     @_locker
-    def loop(self, val, /): # type: ignore
+    def loop(self, val, /): # type: ignore[no-redef]
         if (l := self._loop) is not None: l.call_soon(l.stop)
         self._loop = val
     @loop.deleter

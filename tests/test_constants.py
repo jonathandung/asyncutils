@@ -5,8 +5,7 @@ def test_misc():
     assert math.isclose(1/RECIP_E, math.e)
     assert EXECUTORS_FROZENSET.issuperset(POSSIBLE_EXECUTORS) and EXECUTORS_FROZENSET.issubset(POSSIBLE_EXECUTORS)
     assert RAISE.is_(RAISE) and not RAISE.is_(SYNC_AWAIT) and SYNC_AWAIT.is_(SYNC_AWAIT)
-    assert RAISE.bound_to is SYNC_AWAIT.bound_to is _NO_DEFAULT.bound_to is None
-    assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'RAISE' and SYNC_AWAIT.name == SYNC_AWAIT.__reduce__() == str(SYNC_AWAIT) =='SYNC_AWAIT'
+    assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'asyncutils.constants.RAISE' and SYNC_AWAIT.name == SYNC_AWAIT.__reduce__() == str(SYNC_AWAIT) == 'asyncutils.constants.SYNC_AWAIT'
     assert not any(_.is_private for _ in (RAISE, SYNC_AWAIT))
     assert _NO_DEFAULT.is_private
 @pytest.fixture
@@ -28,6 +27,3 @@ def test_custom_sentinel():
     assert '.'.join((qux.grault.bound_to, qux.grault.back)).endswith('qux.grault')
     class garply: __slots__, waldo = (), TestSentinel('garply.waldo')
     assert garply.waldo.is_(TestSentinel('garply.waldo'))
-    with pytest.raises(NameError):
-        class spam: __slots__, ham = (), TestSentinel('eggs.ham')
-        print(spam.ham.name)

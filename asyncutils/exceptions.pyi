@@ -149,7 +149,7 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
     @property
     def op(self) -> str: '''A string representing the operation type.'''
-    def __init__(self, op: str, *a): ...
+    def __init__(self, op: str, *a: Any): ...
 class PasswordError(PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
     @property

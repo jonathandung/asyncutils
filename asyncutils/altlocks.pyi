@@ -99,10 +99,10 @@ class DynamicThrottle:
     @property
     def jitter(self) -> float: '''The current jitter.'''
     @jitter.setter
-    def jitter(self, jitter: float, /) -> None: '''Set the jitter.'''
+    def jitter(self, jitter: float, /) -> None: '''Set the jitter to `jitter`.'''
     @property
     def rate(self) -> float: '''The current rate.'''
     @rate.setter
-    def rate(self, rate: float, /) -> None: '''Set the rate manually, applying `min_rate` and `max_rate` bounds.'''
+    def rate(self, rate: float, /) -> None: '''Set the rate manually, applying the `min_rate` and `max_rate` bounds.'''
     @property
-    def successes(self) -> int: '''Current number of succeeded calls. Reset periodically.'''
+    def successes(self) -> int: '''Current number of succeeded calls; reset periodically.'''

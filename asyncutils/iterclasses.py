@@ -100,5 +100,5 @@ class OnlineSorter:
         return self
     async def __anext__(self): return await self._runner(self._popper)
     async def asend(self, item): return await self._runner(self._pusher, item)
-    async def athrow(self, typ, val=None, tb=None): return await self._runner(self._it.throw, typ, val, tb)
+    async def athrow(self, typ, val=None, tb=None, /): return await self._runner(self._it.throw, typ, val, tb)
     async def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher, self._loop; return await r

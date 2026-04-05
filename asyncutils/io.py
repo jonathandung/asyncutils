@@ -76,7 +76,7 @@ class file(LoopContextMixin):
     @property
     def closed(self): return self._f.closed
     def fileno(self): return self._fileno
-    def sync(self, _fsync=m.fsync): self._flush(0, None); _fsync(self._fileno)
+    def sync(self, _=m.fsync): self._flush(0, None); _(self._fileno)
     async def close(self): await gather(*map(self.run, (self.mmap.close, self._f.close)))
     def read_byte(self): return self.mmap.read_byte()
     def write_byte(self, b, /): self.mmap.write_byte(b)
@@ -165,7 +165,7 @@ class MemoryMappedIOManager(LoopContextMixin):
                 async with self._factory(f) as x: self.open_files[k] = x; yield x
         finally: self.open_files.pop(k, None)
     def open(self, path, init_size=0): return self._open(init_size, path, 'r+b')
-    def create(self, path, init_size=0, *, exclusive=False): return self._open(init_size, path, 'x+b' if exclusive else 'w+b')
+    def create(self, path, init_size=0, *, exclusive=True): return self._open(init_size, path, 'x+b' if exclusive else 'w+b')
     async def __cleanup__(self):
         async with self._lock: self.open_mmaps.clear(); await gather(*(f.close() for f in self.open_files.values())); del self.open_files
     def __del__(self): sync_await(self.__cleanup__(), loop=(l := self.loop)); l.stop(); l.close()
@@ -185,20 +185,23 @@ class MemoryMappedIOManager(LoopContextMixin):
             for o, d in chunks.items(): await f.smart_write(d, o)
             yield f
     async def _bulk_reader(self, path, offsets):
-        r = []
+        a = (r := []).append
         async with self.open(path) as f:
-            for o, s in offsets: r.append(await f.read(o, s))
-            return path, r
+            for o, s in offsets: a(await f.read(o, s))
+        return path, r
     async def _bulk_writer(self, path, data):
         async with self.open(path) as f: await gather(*(f.write(d, o) for d, o in data))
-    async def _checksum_helper(self, path, alg='md5'): return path, await self.checksum(path, alg)
+    async def _bulk_creator(self, path, size, chunks, exclusive):
+        async with self.create(path, size, exclusive=exclusive) as f:
+            for o, d in chunks.items(): await f.smart_write(d, o)
+    async def _checksum_helper(self, path, alg='blake2s'): return path, await self.checksum(path, alg)
     async def _resize_helper(self, path, size):
         async with self.open(path) as f: await self._run(f.resize, size)
     async def _compact_helper(self, path):
         async with self.open(path) as f: await f.compact()
     async def bulk_read(self, file_offsets): return dict(await gather(*(self._bulk_reader(*_) for _ in file_offsets.items())))
     async def bulk_write(self, file_data): await gather(*(self._bulk_writer(*_) for _ in file_data.items()))
-    async def bulk_checksum(self, paths, alg='md5'): return dict(await gather(*map(partial(self._checksum_helper, alg=alg), paths)))
+    async def bulk_checksum(self, paths, alg='blake2s'): return dict(await gather(*map(partial(self._checksum_helper, alg=alg), paths)))
     async def bulk_copy(self, pairs): await gather(*(self.copy_file(*p) for p in pairs))
     async def bulk_resize(self, sizes): await gather(*(self._resize_helper(*t) for t in sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))

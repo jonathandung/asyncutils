@@ -25,7 +25,7 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
-    async def get(self, key: T, loader: Callable[[T], R]|None=...):
+    async def get(self, key: T, loader: Callable[[T], R]|None=...) -> R:
         '''Get the value for the key from the cache.
         If the key is expired, it is immediately loaded; if it is within the refresh window, return the current value and trigger background refresh.'''
     async def invalidate(self, key: T) -> R|None: '''Remove a key from the cache, returning the corresponding value if it was in the cache.'''

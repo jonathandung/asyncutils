@@ -117,6 +117,7 @@ type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 '''Objects that support (async) iteration.'''
 type SupportsRichComparison = SupportsLT|SupportsGT
+'''Self-explanatory.'''
 type ValidExcType = type[BaseException]
 '''The type of exc_typ in __exit__ and __aexit__ methods.'''
 type Exceptable = ValidExcType|tuple[ValidExcType, ...]

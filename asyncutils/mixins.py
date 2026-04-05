@@ -1,5 +1,4 @@
-from .config import Executor
-from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable
+from ._internal.helpers import _LoopMixinBase, get_loop_and_set, subscriptable, new_executor
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
 from asyncio.events import _get_running_loop
@@ -37,9 +36,8 @@ class AsyncContextMixin(metaclass=ABCMeta):
 class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     @cached_property
     def runner(self):
-        __import__('sys').audit('asyncutils/create_executor', 'mixins.ExecutorRequiredAsyncContextMixin')
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = get_loop_and_set()
-        return partial(l.run_in_executor, Executor()) # type: ignore[attr-defined]
+        return partial(l.run_in_executor, new_executor(self, False)) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

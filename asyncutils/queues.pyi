@@ -106,7 +106,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''
     @is_shutdown.setter
-    def is_shutdown(self, val: bool, /): ...
+    def is_shutdown(self, val: bool, /) -> None: ...
     @property
     def can_put_now(self) -> bool: '''Whether items can be put into the queue without blocking at this instant.'''
     @property
