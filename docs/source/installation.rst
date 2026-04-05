@@ -74,11 +74,11 @@ Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPO
 
   The all :term:`extra` includes the dev, docs, pub and json extras, mainly for development.
 
-  The dev extra differs from the dev branch, which is currently not installable. It installs ruff, pytest and some required plugins thereof.
+  The dev extra installs ruff, pytest and some required plugins thereof.
 
   The docs extra includes sphinx and some plugins for readthedocs builds.
 
-  The pub extra includes build and twine for publishing.
+  The pub extra includes build, twine and keyring for publishing.
 
   The json extra bundles libraries on pip used to parse json variants (`jsonc <https://pypi.org/project/json-with-comments/>`_, `json5
   <https://pypi.org/project/json5/>`_ and `hjson <https://pypi.org/project/hjson/>`_), to be used by :func:`tools.json_to_argv` and

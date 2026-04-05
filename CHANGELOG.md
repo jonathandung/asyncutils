@@ -10,11 +10,11 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ### Tests
 
-51% coverage, 34 tests
+51% coverage, 38 tests
 
 ### Docs
 
-44% complete
+45% complete
 
 ### Added
 
@@ -387,6 +387,10 @@ Submodules:
   - unregister_normalizer
   - dispatch_normalizer
   - autogenerate_normalizers
+
+## [0.8.20] - 2026-03-29
+
+Started hosting documentation on Read the Docs.
 
 ## [0.8.17] - 2026-03-25
 

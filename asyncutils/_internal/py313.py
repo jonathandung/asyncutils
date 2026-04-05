@@ -1,16 +1,15 @@
 from .. import __version__
 if __version__.major >= 4: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 and 3.13 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
-from _operator import itemgetter
 __all__ = 'apargs', 'partial', 'Placeholder'
 apargs, Placeholder = {}, 'Placeholder'
-def _get_merger(A):
+def _get_merger(A, _=__import__('_operator').itemgetter):
     if not A: return 0, None
     j = n = len(A)
     f = (O := []).append
     for i, a in enumerate(A):
         if a is Placeholder: f(j); j += 1
         else: f(i)
-    return (C := j-n), itemgetter(*O) if C else None
+    return (C := j-n), _( *O) if C else None
 class partial:
     __slots__ = 'func', 'args', 'keywords', '_phs', '_mg'
     @__import__('reprlib').recursive_repr()

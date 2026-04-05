@@ -6,7 +6,7 @@ Current version: 0.8.21
 
 ## [0.9] - 2026-04
 
-- Create a test suite for the module
+- Complete skeleton of test suite for the module
 - Further enrich the command line
 
 ## [1.0] - 2026-06
@@ -14,15 +14,14 @@ Current version: 0.8.21
 - Finalize the API
 - Document each submodule extensively
 
-## 1.x
+## [1.x]
 
 - Enhance the test suite
 - Incorporate user feature requests
-- Release 3.0 once serious bugs are found in 3 or more functions/patterns that necessitate their removal
 
-## 2.x
+## [2.x]
 
-- The python 3.15-only analog to 1.x releases, which will be released at the same time as them.
+- Ramp up coverage to 75%
 
 ## [3.0] - 2027-02 or before
 
@@ -41,9 +40,13 @@ Current version: 0.8.21
 - Remove/supersede overly inefficient or faulty patterns
 - Make release schedule regular (e.g. increment major version yearly and minor monthly)
 
+## [4.11.?] - 2028-09
+
+- Set up funding
+
 ## [5.0] - 2028-10
 
-- Make the python 3.15-only branch the main branch as 3.12 supposedly reaches EOL
+- Drop support for python 3.12 (finally, type parameters with defaults!)
 
 ## [6.0] - 2029-10
 

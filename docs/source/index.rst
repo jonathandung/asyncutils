@@ -18,5 +18,4 @@ command line interface.
 
 .. note::
 
-  This project is being actively developed and currently only supports python 3.12 or above, with a non-default dev
-  branch specifically using syntax introduced in 3.15, which is currently quite outdated.
+  This project is being actively developed and currently only supports python 3.12 or above.
