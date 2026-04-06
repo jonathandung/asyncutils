@@ -7,7 +7,6 @@ release = '0.8.21'
 need_sphinx = '9.1.0'
 pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
-autodoc_typehints = 'none'
 extensions = ['sphinx.ext.napoleon', 'sphinx.ext.viewcode', 'autoapi.extension']
 autoapi_dirs = ['../../asyncutils']
 autoapi_file_patterns = ['*.pyi']

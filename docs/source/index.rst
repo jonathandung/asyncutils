@@ -13,6 +13,7 @@ command line interface.
   usage
   top-level
   config
+  audit-events
   api/index
   glossary
 

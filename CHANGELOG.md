@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.21] - 2026-04-01: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.22] - 2026-04-06: newest; [unstable](https://semver.org/#spec-item-4)
+
+Deleted 'dev' branch.
 
 ### Tests
 
@@ -156,6 +158,8 @@ Submodules:
 
   Context managers (ignore_*):
   - ignore_all
+  - ignore_noncritical
+  - ignore_typical
 
   Exception types:
   - Critical

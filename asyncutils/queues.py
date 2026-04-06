@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 from itertools import count
 from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
-ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueFull, QueueEmpty))
+ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
 ignore_qerrs, ignore_valerrs = f(*_), E.IgnoreErrors(ValueError)
 def _wakeup_next(W):
     P = W.popleft

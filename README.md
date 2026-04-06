@@ -29,13 +29,13 @@ This package is also available on anaconda via the conda-forge channel.
 
 You can install using either conda or pip, or directly from roughly fortnightly GitHub releases; no extra setup is needed.
 
-See [installation.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/installation.rst) for more.
+See the [installation guide](https://asyncutils.readthedocs.io/en/latest/installation.html) for more.
 
 ## Usage
 
 This package is very resourceful, containing everything from higher-order error handling functions to network protocols.
 
-See [usage.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/usage.rst) for examples.
+See the [usage guide](https://asyncutils.readthedocs.io/en/latest/usage.html) for examples.
 
 ## Version
 
@@ -48,7 +48,7 @@ backward-incompatible. (Of course, this isn't a significant issue, seeing as tho
 
 Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well.
 
-See [config.rst](https://github.com/jonathandung/asyncutils/blob/main/docs/source/config.rst).
+See the [configuration guide](https://asyncutils.readthedocs.io/en/latest/config.html).
 
 ## Remarks
 
@@ -80,6 +80,6 @@ Have fun!
 | ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social) | ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils) | ![Mypy](https://img.shields.io/badge/mypy-checked-blue?logo=python&&logoColor=blue) | [![Read the Docs](https://img.shields.io/badge/docs-Read_the_Docs-green?logo=readthedocs)](https://asyncutils.readthedocs.io/en/stable) | ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) |
 | ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils) | ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social) | ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils) | ![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver) | ![Actionlint](https://img.shields.io/badge/actions-actionlint-yellow) | ![Alpha](https://img.shields.io/badge/stage-alpha-red.svg) |
 | ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![User stars](https://img.shields.io/github/stars/jonathandung) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils) | ![Sphinx](https://img.shields.io/badge/docs-sphinx-265094?logo=sphinx) | ![setuptools](https://img.shields.io/badge/packaged_with-setuptools-brightgreen?logo=setuptools) | |
-| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | ![doc8](https://img.shields.io/badge/ReST-doc8-blue.svg) | | |
-| ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | | ![markdownlint](https://img.shields.io/badge/Markdown-markdownlint-blue) | | |
+| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | ![doc8](https://img.shields.io/badge/ReST-doc8-blue.svg) | ![PyPI](https://img.shields.io/badge/on-pypi-blue?logo=pypi) | |
+| ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | | ![markdownlint](https://img.shields.io/badge/Markdown-markdownlint-blue) | ![Conda](https://img.shields.io/badge/on-conda-green?logo=anaconda) | |
 | ![Commits since last release](https://img.shields.io/github/commits-since/jonathandung/asyncutils/latest.svg) | | | ![detect-secrets](https://img.shields.io/badge/detect--secrets-checked-blue?logo=yelp) | | |

@@ -17,4 +17,4 @@ The options are shown below, along with their default values and descriptions:
   :caption: config file format
   :force:
 
-The above keys have a near one-to-one correspondence with the command line arguments. Use ``asyncutils -?`` to see detailed usage.
+The above keys have a near one-to-one correspondence with the command line arguments. Use ``asyncutils -?`` to see detailed CLI usage.

@@ -4,8 +4,8 @@ from ._internal.patch import patch_function_signatures
 from ._internal.submodules import exceptions_all as __all__
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
-def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _a=audit):
-    _a('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), s)
+def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _=audit):
+    _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), s)
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
         elif raise_critical and isinstance(group, CRITICAL): raise Critical(group)
@@ -14,8 +14,8 @@ def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter
             elif not predicate(group): ack2(group)
             elif (y := (yield group)) is not None: h(y)
         else: ack3(group)
-def unnest(g, *A, _d=__import__('_collections').deque, _h=_unnest_helper, **k): (s := _d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := _d(A)).appendleft(g); return _h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
-def unnest_reverse(g, *A, _h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return _h(s.pop, g, s.append, s, **k)
+def unnest(g, *A, d=__import__('_collections').deque, h=_unnest_helper, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
+def unnest_reverse(g, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
 def potent_derive(*groups, ordered=True, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
     if not isinstance(g := groups[0], BaseExceptionGroup): *_, t = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__ = _
@@ -25,12 +25,12 @@ def potent_derive(*groups, ordered=True, **k):
             try: g.__notes__.extend(n)
             except AttributeError: g.__notes__ = list(n)
     return g.with_traceback(t)
-def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppress=False, notes=(), _e=exception):
+def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppress=False, notes=(), _=exception):
     if not isinstance(e, BaseException): raise TypeError(f'cannot prepare non-exception: {e!r}')
     if isinstance(notes, str): e.add_note(notes)
     elif (n := getattr(e, '__notes__', None)) is None: e.__notes__ = list(notes)
     else: n.extend(notes)
-    if cause is None is e.__context__: e.__context__ = context or _e()
+    if cause is None is e.__context__: e.__context__ = context or _()
     else: e.__cause__ = cause
     e.__suppress_context__ = suppress; return e.with_traceback(traceback)
 def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
@@ -71,14 +71,6 @@ class Deadlock(BaseException):
     def __init__(self, /, *_, noticer=None): super().__init__(*_); self.noticer = noticer
 class FaultyConfig(BaseException):
     def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {repr(c if isinstance(c, tuple) else c.__name__)[1:-1]}, got {w.__name__}')
-class IgnoreErrors:
-    __slots__ = 'exc'
-    def __init__(self, /, *_): self.exc = _ or (Exception,)
-    def __enter__(self): return self
-    def __exit__(self, t, /, *_): return issubclass(t or object, self.exc)
-    async def __aenter__(self): return self
-    async def __aexit__(self, *_): return self.__exit__(*_)
-    def combined(self, *others): return type(self)(*{*self.exc, *(others if isinstance(others[0], type) else (_.exc for _ in others))})
 class VersionError(Exception): ...
 for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
     def _(self, a=A, b=B):
@@ -149,24 +141,41 @@ class WrongPasswordType(PasswordError, TypeError):
     def wrongtype(self): return self._reft()
     @property
     def correcttype(self): return self._refc()
-class PasswordMissing(PasswordQueueError, TypeError): ...
-class GetPasswordMissing(PasswordMissing):
-    def __init__(self, _='no password provided when trying to get from password-protected queue'): super().__init__(_)
-class PutPasswordMissing(PasswordMissing):
-    def __init__(self, _='no password provided when trying to put to password-protected queue'): super().__init__(_)
-ignore_all = IgnoreErrors(BaseException)
+class PasswordMissing(PasswordQueueError, TypeError):
+    def __init_subclass__(cls, *, m): cls.__init__ = lambda self: super(cls, self).__init__(m) # type: ignore[assignment]
+class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
+class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(name, /):
-    if name != 'WarningToError': raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
-    global WarningToError
-    class WarningToError:
-        lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_warn', '_cm'
-        def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
-        async def __aenter__(self):
-            import warnings as _
-            async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore
-        async def __aexit__(self, t, /, *_):
-            if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
-            else: c.__exit__(t, *_)
-            return issubclass(t or object, Warning)
-    return WarningToError
+    match name:
+        case 'WarningToError':
+            global WarningToError
+            class WarningToError:
+                lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_warn', '_cm'
+                def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
+                async def __aenter__(self, _=__import__('warnings')):
+                    async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore[arg-type]
+                async def __aexit__(self, t, /, *_):
+                    if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
+                    else: c.__exit__(t, *_)
+                    return issubclass(t or object, Warning)
+        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
+            from ._internal.helpers import check_methods as c; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
+            def f(*_): a, b = map(frozenset, _); return map(tuple, (a-b, b-a))
+            class IgnoreErrors:
+                __slots__ = 'exc', 'but'
+                def __init__(self, /, *_, exclude=(), d=frozenset((Exception,)), f=f): self.exc, self.but = f(_ or d, exclude)
+                def __enter__(self): return self
+                def __exit__(self, t, /, *_):
+                    if t is None: return False
+                    return issubclass(t, self.exc) and not issubclass(t, self.but)
+                def __repr__(self): return f'IgnoreErrors{self.exc!r}.excluding{self.but!r}'
+                async def __aenter__(self): return self
+                async def __aexit__(self, *_): return self.__exit__(*_)
+                def excluding(self, *O, f=f): A, B = f(self.exc, self._combine(O, True)); return type(self)(*A, exclude=B)
+                def combined(self, *O): return type(self)(*self._combine(O))
+                def _combine(self, O, /, e=False, c=c, _=__import__('itertools').chain): t = type(self); return _(self.but if e else self.exc, _.from_iterable((o,) if isinstance(o, type) else o.exc if isinstance(o, t) else o if c(o, '__iter__') else () for o in O))
+            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(CRITICAL), IgnoreErrors(Exception)
+        case str(): raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+        case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
+    return globals()[name]
 del t, a, s, _, A, B, stderr, _ExceptionWrapper, _unnest_helper, audit, exception
