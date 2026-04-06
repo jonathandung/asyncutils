@@ -133,7 +133,7 @@ class LockForceRequest(BaseException):
     @property
     def requester(self) -> LocksmithBase: '''The locksmith that sent this error.'''
     @property
-    def lock(self) -> AsyncLockLike: '''The lock involved.'''
+    def lock(self) -> AsyncLockLike[Any]: '''The lock involved.'''
     def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after releasing the lock and performing error handling.'''
     @property
     def args(self) -> tuple[str, Any]: '''The tuple (error_message, additional_info).''' # type: ignore[override]
@@ -155,13 +155,13 @@ class PasswordError(PasswordQueueError):
     @property
     def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be None if the wrong password has been garbage collected.'''
     @property
-    def queue(self) -> _Q|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
+    def queue(self) -> _Q[Any, Any]|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
 class WrongPassword(PasswordError, ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
-    def __init__(self, queue: _Q, pwd: Any, /): ...
+    def __init__(self, queue: _Q[Any, Any], pwd: Any, /): ...
 class WrongPasswordType[T](PasswordError, TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, pwd: T, wrongtyp: type[T], queue: _Q|None, correcttyp: type, /): ...
+    def __init__(self, pwd: T, wrongtyp: type[T], queue: _Q[Any, Any]|None, correcttyp: type, /): ...
     @property
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
     @property

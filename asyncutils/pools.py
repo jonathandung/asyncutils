@@ -99,7 +99,7 @@ class AdvancedPool(LoopContextMixin):
                 self._queue.shutdown(True); await self.gather(True); await self.drain(); return self.uptime
         except TimeoutError: self.exiter(); raise TimeoutError('kill exceeded timeout, forced shutdown') from None
     async def gather(self, ret_exc=False): return await gather(*self._workers, return_exceptions=ret_exc)
-    async def map(self, f, it, priority=0): return await gather(*[await self.submit(f, i, _priority_=priority) for i in it])
+    async def map(self, f, *its, priority=0): return await gather(*[await self.submit(f, *i, _priority_=priority) for i in zip(*its)])
     async def starmap(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority) for a in it])
     async def doublestarmap(self, f, it, priority=0): return await gather(*[await self.submit(f, _priority_=priority, **k) for k in it])
     async def starmap_withkwds(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority, **k) for a, k in it])

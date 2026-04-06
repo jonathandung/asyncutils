@@ -392,13 +392,61 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
+## [0.8.21] - 2026-04-01
+
+Organized badges into table.
+
+## 2026-03-30
+
+Started using mypy.
+
 ## [0.8.20] - 2026-03-29
 
 Started hosting documentation on Read the Docs.
 
+## 2026-03-27
+
+Set up docs directory.
+
 ## [0.8.17] - 2026-03-25
 
 Created dev branch for python 3.15 features.
+
+## 2026-03-23
+
+Started using detect-secrets and markdownlint.
+
+## 2026-03-22
+
+Started using ruff; created py.typed.
+
+## 2026-03-20
+
+Set up tests directory; started using pytest.
+
+## 2026-03-13
+
+Created Dockerfile.
+
+## [0.8.8] - 2026-03-12
+
+Created .editorconfig, .pre-commit-config.yaml.
+
+## [0.8.6] - 2026-03-10
+
+Created ROADMAP.md.
+
+## [0.8.4] - 2026-03-09
+
+Created SUPPORT.md, CHANGELOG.md.
+
+## [0.8.2] - 2026-03-07
+
+Created .dockerignore, .github/workflows/python-package.yaml, CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE.
+
+## [0.8.1] - 2026-03-06
+
+Created pyproject.toml, .pypirc, SECURITY.md.
 
 ## [0.8.0] - 2026-03-06
 

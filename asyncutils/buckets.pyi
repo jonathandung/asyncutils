@@ -1,7 +1,7 @@
 from ._internal.protocols import Timer, ValidExcType
 from .mixins import AsyncContextMixin, EventualLoopMixin
 from types import TracebackType
-from typing import Self, overload
+from typing import overload
 __all__ = 'TokenBucket', 'LeakyBucket'
 class TokenBucket:
     '''A token bucket rate limiter that controls the rate of operations.
@@ -14,7 +14,7 @@ class TokenBucket:
     async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if `tokens` is not passed can be set through context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS.'''
     @property
     def capacity(self) -> float: '''The capacity of the bucket.'''
-class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
+class LeakyBucket(AsyncContextMixin[LeakyBucket], EventualLoopMixin):
     '''A leaky bucket rate limiter with adaptive flow control. Use as a context manager.
     In the context, tokens leak from the bucket at a constant rate. Operations can add tokens to the bucket.
     The bucket includes an adaptive factor that adjusts based on current fill level to provide smoother rate limiting under varying loads.'''
@@ -24,7 +24,6 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
         min_factor (optional): Minimum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MINFACTOR`.
         max_factor (optional): Maximum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MAXFACTOR`.
         external_factor_settable (optional): Whether the factor attribute can be modified; default `context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
-    def __enter__(self) -> Self: '''Begin draining the tokens from this bucket.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''Stop draining the tokens in the bucket.'''
     @overload

@@ -133,9 +133,9 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     @overload
     def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: ...
     @overload
-    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process.'''
+    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process.'''
     @overload
-    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: ...
+    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: ...
     @overload
     def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[False]=...) -> SmartQueue[T]: '''Return a new queue from which getters can get the items in this queue that satisfy the predicate; items remaining in the original queue did not satisfy the predicate.'''
     @overload

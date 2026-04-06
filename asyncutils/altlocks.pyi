@@ -14,7 +14,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     def bound(self) -> int: ...
     @bound.setter
     def bound(self, value: int, /) -> None: ...
-class ResourceGuard(RuntimeError, AsyncContextMixin):
+class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync or async context manager.'''
     @property
     def guarded(self) -> bool: ...
@@ -52,7 +52,7 @@ class CircuitBreaker:
     def fails(self) -> int: '''Current count of conseuctive failures.'''
     @property
     def name(self) -> str: '''The name of the circuit breaker, shown in error messages.'''
-class StatefulBarrier[T](AwaitableMixin):
+class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     '''A barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
     def __init__(self, parties: int, name: str=..., initstate: SupportsIteration[T]=[], maxstate: int|None=...):
         '''`parties`: number of parties required to break the barrier
