@@ -12,7 +12,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
     sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *sigs)); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
-    if sys.platform == 'win32':
+    if sys.platform == 'win32': # pragma: no cover
         logger.info('wait_for_signal has limited functionality on windows')
         for s in S:
             try: o = _s(s := _c(s), h)
@@ -48,6 +48,6 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         return s
     finally:
         await safe_cancel(F)
-        if c: c.__exit__(*sys.exc_info()) # type: ignore
+        if c: c.__exit__(*sys.exc_info()) # type: ignore[arg-type]
 f((wait_for_signal, 'processor, /, *signals, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))
 del signal, getsignal, Signals, f

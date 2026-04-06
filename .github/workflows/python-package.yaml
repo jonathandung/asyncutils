@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -U pip
-        pip install -e .[dev]
+        pip install -e .[dev,json]
         pip check
     - name: Lint with ruff
       run: ruff check . --output-format=github
