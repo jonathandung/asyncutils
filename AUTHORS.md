@@ -10,4 +10,4 @@
 
 ## All other contributors and their affiliations
 
-None at the moment.
+(None at the moment.)

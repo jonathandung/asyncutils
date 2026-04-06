@@ -7,9 +7,7 @@
 ![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
 ![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)
 ![Docs](https://app.readthedocs.org/projects/asyncutils/badge)
-<!--
 ![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
--->
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
 
@@ -39,7 +37,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/latest/usage.html) fo
 
 ## Version
 
-This is asyncutils v0.8.21.
+This is asyncutils v0.8.22.
 
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)

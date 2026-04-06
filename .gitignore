@@ -20,7 +20,6 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.flake8.backup
 MANIFEST
 *.manifest
 *.spec
@@ -61,4 +60,3 @@ cython_debug/
 .vscode/
 .ruff_cache/
 .pypirc
-strip_annotations.py

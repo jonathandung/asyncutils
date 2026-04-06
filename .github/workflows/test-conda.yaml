@@ -20,4 +20,4 @@ jobs:
         python-version: ${{matrix.python-version}}
     - name: Test conda install
       shell: bash -l {0}
-      run: conda install conda-forge::py-asyncutils=0.8.21 python=${{matrix.python-version}} --dry-run
+      run: conda install conda-forge::py-asyncutils=0.8.22 python=${{matrix.python-version}} --dry-run

@@ -15,7 +15,7 @@ from collections import Counter, defaultdict, deque
 from functools import partial, lru_cache
 from sys import audit
 from ._internal.submodules import iters_all as __all__
-_randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((2047, (2,)), (9080191, (31, 73)), (4759123141, (2, 7, 61)), (1122004669633, (2, 13, 23, 1662803)), (2152302898747, (2, 3, 5, 7, 11)), (3474749660383, (2, 3, 5, 7, 11, 13)), (18446744073709551616, (2, 325, 9375, 28178, 450775, 9780504, 1795265022)), (3317044064679887385961981, (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41))), lambda _, /: _
+_randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _littleprimes[:5]), (0x32907381cdf, _littleprimes[:6]), (0x10000000000000000, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _littleprimes[:13]), (0x4c16c7697197146a6b8eb49518c5, _littleprimes[:18])), lambda _, /: _
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential(fs, /, *a, **k):
     async for f in iter_to_aiter(fs): yield await f(*a, **k)
@@ -137,14 +137,14 @@ def asliced(seq, n, strict=False):
     if not strict: return I
     async def ret():
         async for s in I:
-            if len(s) != n: raise ValueError('length of seq is not divisible by n')
+            if len(s) != n: raise ValueError(f'length of {seq!r} is not divisible by {n}')
             yield s
     return ret()
 def batch_buffer(items, batch_size, buffer_size, *, loop=None):
     d = deque(maxlen=buffer_size)
     if loop is None: loop = get_loop_and_set()
-    async def consumer():
-        async for b in batch(items, batch_size): d.extend(b)
+    async def consumer(f=d.extend):
+        async for b in batch(items, batch_size): f(b)
     loop.create_task(consumer()); return d
 def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
     q = Queue(maxsize)
@@ -368,8 +368,7 @@ async def aconsume(it, n=None, _=check_methods):
         async for _ in it: ...
 def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *filter_out(default, s=_NO_DEFAULT))
 async def aallequal(it, key=_identity, strict=False):
-    I = agroupby(it, key)
-    async for _ in I:
+    async for _ in (I := agroupby(it, key)):
         async for _ in I: return False
         return True
     if strict: raise ValueError('iterable provided is empty')
@@ -407,7 +406,7 @@ async def apowerset(it):
     async for _ in achain.from_iterable(acombinations(s, r) for r in range(len(s)+1)): yield _
 def aquantify(it, pred=bool): return asum(amap(pred, it))
 def apadnone(it): return achain(it, arepeat(None)).__aiter__()
-def agrouper(it, n, fillvalue=_NO_DEFAULT): I = (iter_to_aiter(it),)*n; return azip(*I, strict=True) if fillvalue is RAISE else azip(*I) if fillvalue is _NO_DEFAULT else aziplongest(*I, fillvalue=fillvalue)
+def agrouper(it, n, fillvalue=_NO_DEFAULT): I = (iter_to_aiter(it),)*n; return azip(*I, strict=fillvalue is RAISE) if isinstance(fillvalue, type(RAISE)) else aziplongest(*I, fillvalue=fillvalue)
 async def aroundrobin(*its):
     I = (iter_to_aiter(i) for i in its)
     for i in range(len(its), 0, -1):
@@ -432,10 +431,10 @@ async def ancycles(it, n):
 def apartition(pred, it):
     if pred is None: pred = bool
     s, t, p = tee(iter_to_aiter(it), 3); u, v = tee(amap(pred, p)); return acompress(s, amap(O.not_, u)), acompress(t, v)
-async def aiterexcept(f, exc):
-    while True:
-        try: yield await f()
-        except exc: return
+async def aiterexcept(f, exc, first=None):
+    with E.IgnoreErrors(exc):
+        if first is not None: yield first()
+        while True: yield await f()
 async def ailen(it):
     i = 0
     async for _ in iter_to_aiter(it): i += 1
@@ -527,7 +526,7 @@ async def acollapse(it, base_typ=(str, bytes), levels=None):
             else:
                 try: t = iter_to_aiter(_); g((l+1, t)); g(N); break
                 except TypeError: yield _
-def afirsttrue(it, default=_NO_DEFAULT, pred=None): F = afilter(pred, it); return anext(F, *filter_out(default, _NO_DEFAULT))
+def afirsttrue(it, default=_NO_DEFAULT, pred=None): return anext(afilter(pred, it), *filter_out(default, _NO_DEFAULT))
 def aprepend(val, it): return achain((val,), it).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _(i)
@@ -657,10 +656,7 @@ async def vecs_eq(u, v, cmpeq=check, *, strict=True):
     try: return await aall(cmpeq(i, j) async for i, j in azip(u, v, strict=strict))
     except ValueError: return False
 async def afrievalds(A, B, C, k=2, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(k))
-async def basic_collect(it, n):
-    l = []
-    async for _ in aislice(it, n): l.append(_)
-    return l
+def basic_collect(it, n): return to_list(aislice(it, n))
 async def asubstrings(it):
     s = []
     async for i in iter_to_aiter(it): s.append(i); yield i,
@@ -740,11 +736,30 @@ def aguessmin(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=No
 async def apowersoftwo(*, init=1, init_shift=0):
     init <<= init_shift
     while True: yield init; init <<= 1
+def apowers(base, start=1): return aaccumulate(arepeat(base), O.mul, initial=start)
 async def areversed(it, /):
     try:
         async for i in iter_to_aiter(reversed(it)): yield i
     except TypeError:
-        f = (l := []).append
-        async for i in iter_to_aiter(it): f(i)
-        for i in reversed(l): yield i
-del _aunzip_consumer_base, _aunzip_put, _aguess, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+        for i in reversed(await to_list(it)): yield i
+async def arunlengthencode(it, /):
+    async for k, g in agroupby(it): yield k, ailen(g)
+async def arunlengthdecode(it, /): return aflatten(astarmap(arepeat, it))
+async def _dfthelper(a, i=False, /): R = await to_tuple(take(apowers(M.e**((1 if i else -1)*1j*M.tau/(N := len(a := await to_tuple(a))))), N)); return R, N, a
+async def adft(xarr, /, _=_dfthelper):
+    R, N, xarr = await _(xarr)
+    async for k in arange(N): yield await asumprod(xarr, (R[k*i%N] async for i in arange(N)))
+async def aidft(Xarr, /, _=_dfthelper):
+    R, N, Xarr = await _(Xarr, True)
+    async for k in arange(N): yield await asumprod(Xarr, (R[k*n%N] async for n in arange(N)))/N
+async def aargmin(it, key=_identity, default=_NO_DEFAULT): return (await amin(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
+async def aargmax(it, key=_identity, default=_NO_DEFAULT): return (await amax(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
+def arunningmean(it): return amap(O.truediv, aaccumulate(it), acount(1))
+async def apowersetofsets(it, *, frozen=True):
+    S = tuple(dict.fromkeys(await to_list(amap(frozenset, azip(it)))))
+    async for _ in aflatten(astarmap((frozenset if frozen else set).union, acombinations(S, r)) async for r in arange(len(S)+1)): yield _
+async def aserialize(it):
+    l, n = Lock(), iter_to_aiter(it).__anext__
+    while True:
+        async with l: yield await n()
+del _aunzip_consumer_base, _aunzip_put, _aguess, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

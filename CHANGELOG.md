@@ -72,6 +72,7 @@ Submodules:
   - CacheWithBackgroundRefresh
 
 - channels
+
   Classes:
   - Observable
   - EventBus
@@ -394,37 +395,33 @@ Submodules:
 
 ## [0.8.21] - 2026-04-01
 
-Organized badges into table.
-
-## 2026-03-30
-
-Started using mypy.
+Organized badges into table; started using mypy.
 
 ## [0.8.20] - 2026-03-29
 
 Started hosting documentation on Read the Docs.
 
-## 2026-03-27
+## [0.8.19] - 2026-03-27
 
 Set up docs directory.
 
-## [0.8.17] - 2026-03-25
+## [0.8.18] - 2026-03-26
 
 Created dev branch for python 3.15 features.
 
-## 2026-03-23
+## [0.8.17] - 2026-03-24
 
 Started using detect-secrets and markdownlint.
 
-## 2026-03-22
+## [0.8.16] - 2026-03-22
 
 Started using ruff; created py.typed.
 
-## 2026-03-20
+## [0.8.14] - 2026-03-21
 
 Set up tests directory; started using pytest.
 
-## 2026-03-13
+## [0.8.9] - 2026-03-14
 
 Created Dockerfile.
 
@@ -462,7 +459,7 @@ Completed migration from inline annotations to separated stubs; perfected base.e
 
 ## [0.5.0] - 2025-12-0x
 
-Added CircuitBreaker and EventBus classes; implemented preliminary lazy loading system; created exceptions submodule; began separation of type annotations from .py into .pyi.
+Added classes such as CircuitBreaker and EventBus; implemented preliminary lazy loading system; created exceptions submodule; began separation of type annotations from .py into .pyi.
 
 ## [0.4.0] - 2025-10-0x
 
@@ -470,7 +467,7 @@ Added more complicated patterns and procedures such as Observable and wait_for_s
 
 ## [0.3.0] - 2025-08-2x
 
-Basically completed refactoring; added more object-oriented patterns such as DynamicThrottle, CacheWithBackgroundRefresh.
+Basically completed refactoring; added more object-oriented patterns such as DynamicThrottle and CacheWithBackgroundRefresh.
 
 ## [0.2.0] - 2025-07-0x
 
