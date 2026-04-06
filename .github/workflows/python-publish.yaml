@@ -43,7 +43,7 @@ jobs:
           path: dist/
           merge-multiple: true
       - name: Publish release distributions to PyPI using twine
-        run: twine upload dist/* --verbose
+        run: python -m twine upload dist/* --verbose
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{secrets.PYPI_TOKEN}}

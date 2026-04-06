@@ -25,9 +25,9 @@ jobs:
     - name: Lint with ruff
       run: ruff check . --output-format=github
     - name: Run mypy
-      run: mypy asyncutils
+      run: python -m mypy asyncutils
     - name: Run tests
-      run: pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir . --local-badge-generate status
+      run: python -m pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir . --local-badge-generate status
     - name: Upload coverage
       uses: codecov/codecov-action@v5.5.3
       with:
