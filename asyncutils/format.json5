@@ -24,6 +24,9 @@
   max_memerrs: 3,
   // protect resource integrity by exiting the console on the MemoryError at the index after this
   // corresponds to -m/--max-memerrs
+  debug: false,
+  // turn on debug mode by entering the global debug context manager; may incur performance penalty
+  // corresponds to -d/--debug
   load_all: false,
   // load all submodules when the console starts; corresponds to -p/--load-all
   seed: null,

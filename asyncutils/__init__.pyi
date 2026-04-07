@@ -33,13 +33,14 @@ from .version import *
 from types import ModuleType
 from typing import Final
 from ._internal.protocols import Submodule
-def __dir__() -> tuple[Submodule, ...]: '''The names of all the public submodules of asyncutils.'''
+def __dir__() -> tuple[str, ...]: '''The names of all the public submodules of :mod:`asyncutils`, along with 'preloaded_submodules', 'submodules_map' and 'time_since_boot'.'''
+def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]
-'''The current asyncutils version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
+'''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
 __hexversion__: Final[int]
-'''0x12070e -> version 18.7.14'''
+'''``0x12070e`` -> version 18.7.14'''
 preloaded_submodules: Final[frozenset[str]]
 '''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.
 This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
-'''A dictionary mapping submodule names to the corresponding submodule objects.'''
+'''A dictionary mapping submodule names to the corresponding submodule objects, which may not actually be instances of :class:`types.ModuleType` at runtime (implementation-defined).'''

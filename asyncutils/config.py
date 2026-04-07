@@ -102,6 +102,7 @@ class debugging:
     def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))
 debug = debugging()
+if N.debug: debug.__enter__()
 def r(name, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {name!r}")
 def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)

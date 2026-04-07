@@ -1,5 +1,5 @@
 '''A special module used to set up the asyncutils module namespace.
-**Do not modify its contents.**'''
+**Do not modify its contents or reload it at runtime.**'''
 from types import ModuleType
 from typing import Self, Any, Final, final, overload
 from .protocols import All, Submodule

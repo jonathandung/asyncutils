@@ -52,6 +52,7 @@ M defaults to 3.
 Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
+a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', default=A.SUPPRESS, help='Print this help message and exit.')
 del a, b, c, d, e, f, g, h, i, j, A, V
