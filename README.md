@@ -3,10 +3,9 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
 [![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/p/py-asyncutils)
 [![Coverage](https://codecov.io/gh/jonathandung/asyncutils/branch/main/graph/badge.svg?token=PTRNW1RGXA)](https://app.codecov.io/gh/jonathandung/asyncutils)
-![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)
-![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)
-[![Conda](https://github.com/jonathandung/asyncutils/actions/workflows/test-conda.yaml/badge.svg)](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview)
-![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)
+[![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)](https://github.com/jonathandung/asyncutils/tree/main/tests)
+[![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
+[![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
 [![Docs](https://app.readthedocs.org/projects/asyncutils/badge)](https://asyncutils.readthedocs.io/en/stable)
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
@@ -23,7 +22,7 @@ Takes pride in:
 
 Since the name _asyncutils_ was somehow unavailable on PyPI, _py-asyncutils_ was chosen instead.
 
-This package is also available on anaconda via the conda-forge channel.
+This package is also [available on anaconda](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview) via the conda-forge channel.
 
 You can install using either conda or pip, or directly from roughly fortnightly GitHub releases; no extra setup is needed.
 
@@ -33,7 +32,7 @@ See the [installation guide](https://asyncutils.readthedocs.io/en/stable/install
 
 This package is very resourceful, containing everything from higher-order error handling functions to network protocols.
 
-See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) for examples.
+See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) for some basic examples.
 
 ## Version
 
@@ -50,11 +49,12 @@ See the [configuration guide](https://asyncutils.readthedocs.io/en/stable/config
 
 ## Remarks
 
-It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related features.
+It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related
+features.
 
 Other resources if you're new to the world of async:
 
-- [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html#a-conceptual-overview-of-asyncio)
+- [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html)
 - [Real Python's Async IO Tutorial](https://realpython.com/async-io-python)
 - [Python Async Basics Video Guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
 - [asyncio, threading, multiprocessing](https://www.youtube.com/watch?v=0vFgKr5bjWI)
