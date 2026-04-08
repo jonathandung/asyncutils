@@ -13,7 +13,7 @@ from time import monotonic
 from ._internal.submodules import processors_all as __all__
 @subscriptable
 class BoundedBatchProcessor:
-    __slots__ = '_processor', '_batch', '_sem'
+    __slots__ = '_batch', '_processor', '_sem'
     def __init__(self, processor, batch=10, max_concurrent=5, bounded=False): self._processor, self._batch, self._sem = processor, batch, semaphore(bounded, max_concurrent)
     async def process(self, items):
         f = partial(collect, iter_to_aiter(items), self._batch)
@@ -21,7 +21,7 @@ class BoundedBatchProcessor:
             async with self._sem: yield await self._processor(b)
 @subscriptable
 class BatchProcessor(LoopContextMixin):
-    __slots__ = '_processor', '_maxsize', '_sleep', '_batch', '_last_process', '_lock', '_timer', '_flusher'
+    __slots__ = '_batch', '_flusher', '_last_process', '_lock', '_maxsize', '_processor', '_sleep', '_timer'
     def __init__(self, processor, *, maxsize=100, maxtime=1, timer=monotonic): self._processor, self._maxsize, self._sleep, self._batch, self._last_process, self._lock, self._timer = processor, maxsize, sleep.__get__(maxtime), [], timer(), Lock(), timer; self._flusher = None
     async def add(self, item):
         async with self._lock:
@@ -42,7 +42,7 @@ class BatchProcessor(LoopContextMixin):
     async def __cleanup__(self):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
-    __slots__ = '_sem', '_queue', '_rejected', '_init_val', '_exc', '_processor', '_shutdown_event', '_empty_event', '_max_rej'
+    __slots__ = '_empty_event', '_exc', '_init_val', '_max_rej', '_processor', '_queue', '_rejected', '_sem', '_shutdown_event'
     def __init__(self, max_concurrent, max_queue=0, bounded=False, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._shutdown_event, self._empty_event, self._max_rej = semaphore(bounded, max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)

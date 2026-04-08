@@ -22,7 +22,7 @@ double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'),
 P.patch_function_signatures(*((_, s) for _ in t))
 @H.subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
-    __slots__ = 'reader', 'writer', 'executor'
+    __slots__ = 'executor', 'reader', 'writer'
     _init_executor = H.new_executor
     def __init__(self, r, w, /): super().__init__(); self.loop.set_task_factory(eager_task_factory); self._init_executor(); self.reader, self.writer = r, w
     async def _run(self, f, *a): return await self.loop.run_in_executor(self.executor, f, *a)
@@ -31,14 +31,14 @@ class AsyncReadWriteCouple(LoopContextMixin):
     def readlines(self, hint=-1, /): return self._run(self.reader.readlines, hint)
     def write(self, s, /): return self._run(self.writer.write, s)
     def writelines(self, lines, /): return self._run(self.writer.writelines, lines)
-    def fileno(self): raise OSError('cannot determine fileno of read-write couple')
+    def fileno(self): raise OSError('cannot determine fileno of read-write couple') # noqa: PLR6301
     def isatty(self): return self.reader.isatty() or self.writer.isatty()
     def readable(self): return self.reader.readable()
     def writable(self): return self.writer.writable()
     def flush(self): return self._run(self.writer.flush)
     def seekable(self): return self.reader.seekable() and self.writer.seekable()
-    def seek(self, offset, whence=0, /): raise OSError('cannot use seek on read-write couple')
-    def tell(self): raise OSError('cannot use tell on read-write couple')
+    def seek(self, offset, whence=0, /): raise OSError('cannot use seek on read-write couple') # noqa: ARG002,PLR6301
+    def tell(self): raise OSError('cannot use tell on read-write couple') # noqa: PLR6301
     def truncate(self, size=None, /): return self._run(self.writer.truncate, size)
     async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self.executor.shutdown()
     __cleanup__ = aclose
@@ -49,7 +49,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
         except AttributeError as a:
             try: return getattr(self.writer, name)
             except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {name!r}', (a, b)) from None
-class file(LoopContextMixin):
+class file(LoopContextMixin): # noqa: PLR0904
     __slots__ = '_f', '_fileno', 'mmap'
     if sys.platform != 'win32':
         def madvise(self, option, start=0, length=None, _filter=H.filter_out): return self.mmap.madvise(option, start, *_filter(length))
@@ -137,9 +137,9 @@ class file(LoopContextMixin):
         @staticmethod
         async def run(f, /, *a, r=r): return await r(f, *a)
         @staticmethod
-        def exit(*_): return e()
+        def exit(*_): return e() # noqa: A001
         cls.mgr, cls.lock, cls.run, cls.exit, cls.open_files = m, l, run, exit, {}
-class MemoryMappedIOManager(LoopContextMixin):
+class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
     __slots__ = '_factory'
     def __init__(self, executor=None, f=(file,), n=H.new_executor):
         super().__init__(); self._factory = type('file', f, {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter)
@@ -160,7 +160,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def _open(self, init_size, *k):
         if (x := self.open_files.get(k)): yield x; return
         try:
-            with open(*k) as f:
+            with await self._run(open, *k) as f:
                 if init_size > 0: await self._run(f.truncate, init_size)
                 async with self._factory(f) as x: self.open_files[k] = x; yield x
         finally: self.open_files.pop(k, None)

@@ -11,7 +11,7 @@ from heapq import heappush, heappop
 from time import monotonic
 from ._internal.submodules import locks_all as __all__
 class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
-    __slots__ = 'rate', '_lock', '_waiters', '_unfair', '_last_update', 'tokens', 'capacity'
+    __slots__ = '_last_update', '_lock', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._last_update = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
     async def acquire(self, tokens=1, timeout=None):
         async with self._lock:
@@ -31,7 +31,7 @@ class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
             t, f = self._waiters.popleft(); self.tokens -= t
             if not f.done(): f.set_result(None)
 class PrioritySemaphore(M.LockMixin):
-    __slots__ = '_value', '_tiebreak', '_waiters'
+    __slots__ = '_tiebreak', '_value', '_waiters'
     def __init__(self, value=1): self._value, self._tiebreak, self._waiters = value, 0, []
     async def acquire(self, priority=0):
         self._value -= 1; self._tiebreak += 1; w = self._waiters
@@ -46,7 +46,7 @@ class PrioritySemaphore(M.LockMixin):
         for *_, e in self._waiters: e.set()
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
 class KeyedCondition(M.LockMixin, M.LoopContextMixin, M.AwaitableMixin):
-    __slots__ = '__lock', '_waiters', '_specific_waiters'
+    __slots__ = '__lock', '_specific_waiters', '_waiters'
     def __init__(self, lock=None): self.__lock, self._waiters, self._specific_waiters = lock or Lock(), set(), defaultdict(set)
     async def acquire(self): await self.__lock.acquire(); return True
     async def release(self):
@@ -83,13 +83,13 @@ class RLock(M.LockWithOwnerMixin):
                 if self._owner is None: self._owner, self._count = current_task(), 1; return True
     def _release(self):
         if (c := self._count) <= 0: raise RuntimeError(f'release called too many times on {type(self).__qualname__}')
-        elif c == 1: self._owner = None
+        if c == 1: self._owner = None
         self._count = c-1
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is current_task()
 class PriorityLock(M.EventualLoopMixin, M.LockWithOwnerMixin):
-    __slots__ = '_waiters', '_owner', '_tiebreak'
+    __slots__ = '_owner', '_tiebreak', '_waiters'
     def __init__(self): super().__init__(); self._waiters, self._tiebreak, self._owner = [], 0, None
     async def acquire(self, priority=0, timeout=None):
         heappush(self._waiters, (priority, self._tiebreak, F := self.make_fut())); self._tiebreak += 1
@@ -119,8 +119,8 @@ class PriorityRLock(RLock):
         if self.is_owner: self._count += 1; return True
         if await self.__lock.acquire(priority, timeout): self._count = 1; return True # type: ignore
         return False
-class LocksmithBase:
-    __slots__ = '_recognized', '_loop', '_lock'; handlers = {}
+class LocksmithBase: # noqa: PLR0904
+    __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
         def register(t, H=cls.handlers, h=h):
@@ -140,7 +140,7 @@ class LocksmithBase:
                 try: return bool((await f) if iscoroutine(f := f(self)) else f)
                 except: return False
             r.add(lock); return True
-    async def force(self, lock, /, info=None, *, purge_waiters=True):
+    async def force(self, lock, /, info=None, *, purge_waiters=True): # noqa: PLR0912
         async with self._lock:
             if not self.can_force_lock_held(lock): return False
         if info is None: info = await self.get_info(lock)
@@ -183,13 +183,13 @@ class LocksmithBase:
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)
-    def throw_fallback(self, lock, /): return True
-    def eager_fallback(self, lock, /): return True
-    def release_returned_false(self, lock, /): return False
+    def throw_fallback(self, lock, /): return True # noqa: ARG002
+    def eager_fallback(self, lock, /): return True # noqa: ARG002
+    def release_returned_false(self, lock, /): return False # noqa: ARG002
     def answer_received(self, lock, answer, /): log.info(f'{self!r} received answer {answer!r} from {lock!r}')
     def raised_other(self, lock, exc, /):
         if not isinstance(exc, RuntimeError): log.error(f'error encountered in attempt to force {type(lock).__qualname__} at {id(lock):#x}', exc_info=exc)
-    async def get_info(self, lock, /): return 'potential deadlock situation'
+    async def get_info(self, lock, /): return 'potential deadlock situation' # noqa: ARG002
     def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
-    def task_raised_critical(self, lock, exc, /): raise exc from None
+    def task_raised_critical(self, lock, exc, /): raise exc from None # noqa: ARG002
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())

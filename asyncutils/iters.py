@@ -25,7 +25,7 @@ async def fmap_parallel(fs, /, *a, **k):
 async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
     f, g = (l := []).append, l.clear
     async for _ in amap(inner, it, await_=inner_await):
-        async for _ in amap(outer, _, await_=outer_await): f(_)
+        async for _ in amap(outer, _, await_=outer_await): f(_) # noqa: B020
         yield tuple(l); g()
 def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     if n <= 0: raise ValueError('n must be positive')
@@ -109,7 +109,7 @@ def achunked(it, n, strict=False):
                 yield c
         return ret()
     return I
-async def asideeffect(f, it, /, *, size=None, before=None, after=None):
+async def asideeffect(f, it, /, *, size=None, before=None, after=None): # noqa: PLR0912
     try:
         if before is not None: before()
         if size is None:
@@ -164,19 +164,13 @@ def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
     t, c = loop.create_task(producer()), consumer(); return c
 async def asplitat(it, pred, maxsplit=-1, keep_sep=False):
     I = iter_to_aiter(it)
-    if not maxsplit:
-        r = []
-        async for i in I: r.append(i)
-        yield r; return
+    if not maxsplit: yield await to_list(I); return
     b = []
     async for i in I:
         if pred(i):
             yield b
             if keep_sep: yield [i]
-            if maxsplit == 1:
-                r = []
-                async for i in I: r.append(i)
-                yield r; return
+            if maxsplit == 1: yield await to_list(I); return
             b = []; maxsplit -= 1
         else: b.append(i)
     yield b
@@ -303,8 +297,8 @@ async def atriplewise(it):
 async def aproduct(*its, repeat=1):
     if repeat < 0: raise ValueError('repeat cannot be negative')
     r = [()]
-    async for p in arepeat(amap(to_tuple, its, await_=True), repeat): r = [x+(y,) for x in r async for y in p]
-    for _ in r: yield tuple(_)
+    async for p in arepeat(amap(to_tuple, its, await_=True), repeat): r = [(*x, y) for x in r async for y in p]
+    for _ in r: yield _
 async def astarmap(f, it, /, await_=False):
     async for _ in iter_to_aiter(it): yield (await f(*_)) if await_ else f(*_)
 async def atakewhile(pred, it):
@@ -356,10 +350,7 @@ def atail(n, it, /):
         return f()
 def amultinomial(*c): return aprod(amap(M.comb, aaccumulate(c), c))
 async def to_tuple(it, /): return tuple(await to_list(it))
-async def to_list(it, /):
-    f = (r := []).append
-    async for _ in iter_to_aiter(it): f(_)
-    return r
+async def to_list(it, /): return [_ async for _ in iter_to_aiter(it)]
 async def aconsume(it, n=None, _=check_methods):
     if n == 0: return
     if n: it = take(it, n)
@@ -459,8 +450,7 @@ async def adistinctpermutations(it, r=None):
             for i in range(_-2, -1, -1):
                 if A[i] < A[i+1]: break
             else: return
-            j = _-1
-            for j in range(j, i, -1):
+            for j in range(j := _-1, i, -1): # noqa: B020
                 if A[i] < A[j]: break
             A[i], A[j] = A[j], A[i]; A[i+1:] = A[:i-_:-1]
     async def _partial(A):
@@ -538,7 +528,7 @@ async def arandom_combination_with_replacement(it, r, _=_randrange):
 async def arandompermutation(it, r=None, _=_sample):
     p = await to_tuple(it)
     if r is None: r = len(p)
-    for _ in _(p, r): yield _
+    for _ in _(p, r): yield _ # noqa: B020
 async def afirst(it, default=_NO_DEFAULT):
     try:
         async for i in it: return i
@@ -551,7 +541,7 @@ async def alast(it, default=_NO_DEFAULT, _=check_methods):
         if _(it, '__getitem__'): return it[-1]
         return (await to_list(it))[-1] if (f := getattr(it, '__reversed__', None)) is None else f().__next__()
     except (IndexError, TypeError, StopIteration, StopAsyncIteration):
-        if default is _NO_DEFAULT: raise ValueError('alast() called on empty iterable without default value')
+        if default is _NO_DEFAULT: raise ValueError('alast() called on empty iterable without default value') from None
         return default
 def anthorlast(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)
 def abeforeandafter(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
@@ -602,19 +592,13 @@ async def _factor_pollard(n):
         if d != n: return d
     raise ValueError(f'{n} is prime')
 def _shift_to_odd(n):
-    d = n>>(s := ((n-1)^n).bit_length()-1)
-    if not ((1<<s)*d == n and d&1 and s > -1): raise ValueError('invalid n')
+    if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError('invalid n')
     return s, d
-def _probable_prime(n, base, _=lru_cache(_shift_to_odd)):
-    s, d = _(n-1)
-    if (x := pow(base, d, n)) in (1, n-1): return True
-    for _ in range(s-1):
-        if (x := x*x%n) == n-1: return True
-    return False
+def _probable_prime(n, base, _=lru_cache(_shift_to_odd)): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or any((x := x*x%n) == n-1 for _ in range(s-1))
 async def aisprime(n, _smallprimes=_smallprimes, _perfect_test=_perfect_test, _randrange=_randrange, _probable_prime=_probable_prime):
     if n < 210: return n in _smallprimes
     if not (n&1 and n%3 and n%5 and n%7 and n%11 and n%13 and n%17): return False
-    for l, B in _perfect_test:
+    for l, B in _perfect_test: # noqa: B007
         if n < l: break
     else: B = (_randrange(2, n-1) for _ in range(64))
     return await aall(amap(partial(_probable_prime, n), B))
@@ -623,10 +607,10 @@ async def afactor(n, _littleprimes=_littleprimes, _factor_pollard=_factor_pollar
     for p in _littleprimes:
         while not n%p: yield p; n //= p
     if n < 2: return
-    t = [n]
+    e = (t := [n]).extend
     for n in t:
         if n < 44521 or await aisprime(n): yield n
-        else: t += (f := await _factor_pollard(n), n//f)
+        else: e((f := await _factor_pollard(n), n//f))
 async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
         r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import heappush_max as a, heappush as b, heappushpop_max as c
@@ -672,14 +656,12 @@ def iter_future(it, summaryf=aconsume):
     F = (L := get_loop_and_set()).create_future(); L.create_task(task()); return F
 def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable %r'):
     L, r, I = get_loop_and_set(), [], iter_to_aiter(it)
-    async def consume():
+    async def consume(): # noqa: PLR0912
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
         async for x in amap(O.index, indices):
             if M is not None:
-                if x < 0:
-                    M = None
-                    if x < m: m = x
-                elif x > M: M = x
+                if x < 0: M, m = None, min(m, x)
+                else: M = max(x, M)
             d[x].append(F := L.create_future()); r.append(F)
         async def helper(i, j, d=d):
             async for x, F in aenumerate(d.pop(i, ())):
@@ -700,7 +682,7 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
             async for x, F in aenumerate(l):
                 if F.cancelled(): continue
                 if F.done(): raise ExceptionGroup('error while processing indices for which items were not successfully got', (e, E.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
-                else: F.set_exception(e)
+                F.set_exception(e)
         if finish: await aconsume(I)
         if setatend is None: return
         if setatend.done() and not setatend.cancelled(): raise E.FutureCorrupted(f'setatend {type(setatend).__qualname__} passed to agetitems_from_indices had its result set by an external party')

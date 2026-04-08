@@ -8,7 +8,7 @@ from .mixins import EventualLoopMixin
 from .util import _ignore_cancellation
 from ._internal.submodules import networking_all as __all__
 class LineProtocol(Protocol, EventualLoopMixin):
-    NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_lines', '_closed', '_paused', '_eof_received', 'transport', '_drain_waiter'
+    NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
     def __init__(self): self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):
@@ -97,14 +97,11 @@ class SocketTransport(Transport):
     def set_write_buffer_limits(self, high=None, low=None, _x=0x2000):
         if low is None: low = self._limits[0]
         if high is None: high = self._limits[1]
-        if low < 0: low = 0
-        if high > _x: high = _x
-        if low > high: low = high
-        self._limits = low, high
+        self._limits = min(low := max(low, 0), high := min(high, _x)), high
     def write_eof(self):
         if not self._closing and (s := self._socket):
             with self._h: s.shutdown(SHUT_WR)
-    def can_write_eof(self): return True
+    def can_write_eof(self): return True # noqa: PLR6301
     def is_closing(self): return self._closing
     def close(self, e=None):
         if self._closing: return

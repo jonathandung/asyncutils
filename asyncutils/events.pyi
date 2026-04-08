@@ -3,7 +3,7 @@ from .mixins import EventMixin
 from asyncio.events import AbstractEventLoop
 from _collections_abc import Generator
 from typing import Literal, overload
-__all__ = 'SingleWaiterEventWithValue', 'EventWithValue'
+__all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
     def __init__(self) -> None: ...
     def set(self, value: T) -> None: '''Set the result of the event, awakening the waiters.'''

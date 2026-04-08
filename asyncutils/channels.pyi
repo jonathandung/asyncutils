@@ -8,7 +8,7 @@ from asyncio.tasks import Task
 from collections import defaultdict
 from _collections_abc import Callable, Generator, AsyncGenerator, Mapping, Awaitable, Iterable
 from contextlib import _GeneratorContextManager
-from typing import Protocol, TypeGuard, Self, Any, Concatenate, Literal, NoReturn, type_check_only, overload
+from typing import Protocol, TypeGuard, Self, Any, Concatenate, NewType, Literal, NoReturn, type_check_only, overload
 from _weakrefset import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
@@ -63,10 +63,7 @@ class EventBus(LoopContextMixin):
     A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
     Use instances as context managers only for proper setup and shutdown.'''
-    @type_check_only
-    class _WildcardType:
-        '''Not exposed.'''
-        def __bool__(self) -> Literal[False]: ...
+    _WildcardType = NewType('_WildcardType', None)
     WILDCARD: _WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
@@ -237,7 +234,6 @@ class Rendezvous[T]:
         def num_ops(self) -> int: '''num_getters+num_putters'''
         @property
         def idle(self) -> bool: '''num_getters == num_putters == 0'''
-        def __repr__(self) -> str: ...
     def __length_hint__(self) -> int: '''Approximate number of operations pending; for operator.length_hint.'''
     async def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:

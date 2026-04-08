@@ -42,7 +42,7 @@ class UniqueResourceGuard(ResourceGuard):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
         audit('asyncutils.altlocks.UniqueResourceGuard', type(obj).__qualname__); return r
 class CircuitBreaker:
-    __slots__ = '_name', '_max_fails', '_reset', '_exc', '_fails', '_opened', '_half_open_calls', '_max_half_open_calls', '_call_lock', '_state'; _inc_cnt = staticmethod(count(1).__next__)
+    __slots__ = '_call_lock', '_exc', '_fails', '_half_open_calls', '_max_fails', '_max_half_open_calls', '_name', '_opened', '_reset', '_state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, name, /, max_fails=3, reset=None, exc=Exception, max_half_open_calls=None, _fmt='#%d'):
         f = None
         if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__qualname__', None)) is None is (name := getattr(f, '__name__', None)): name = _fmt%cls._inc_cnt()
@@ -74,7 +74,7 @@ class CircuitBreaker:
     @property
     def name(self): return self._name
 class StatefulBarrier(AwaitableMixin):
-    __slots__ = '_parties', '_exc', '_count', '_state', '_event', '_lock', '_gen', '_initstate'
+    __slots__ = '_count', '_event', '_exc', '_gen', '_initstate', '_lock', '_parties', '_state'
     def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._event, self._lock, self._gen, self._initstate = parties, BrokenBarrierError(f'{type(self).__qualname__} {name} is broken'), 0, deque(maxlen=maxstate), Event(), Lock(), 0, initstate
     async def wait(self, state=None, timeout=None):
         self.raise_for_abort(); S = self._state.append
@@ -100,7 +100,7 @@ class StatefulBarrier(AwaitableMixin):
     @property
     def parties(self): return self._parties
 class DynamicThrottle:
-    __slots__ = '_min', '_max', '_window', '_successes', '_fails', '_ubound', '_lbound', '_ufactor', '_lfactor', '_lock', '_rate', '_timer', '_last_call', '_jitter', '_randf'
+    __slots__ = '_fails', '_jitter', '_last_call', '_lbound', '_lfactor', '_lock', '_max', '_min', '_randf', '_rate', '_successes', '_timer', '_ubound', '_ufactor', '_window'
     def __init__(self, init_rate, min_rate=1e9, max_rate=float('inf'), window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):
         if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates')
         C = getcontext(); self._min, self._max, self._window, self._lock, self._timer, self._ubound, self._lbound, self._ufactor, self._lfactor, self.jitter, self._randf = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand; self.rate = init_rate; self.reset()

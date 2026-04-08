@@ -6,7 +6,7 @@ from asyncio.locks import Semaphore, BoundedSemaphore, Lock
 from asyncio.tasks import Task
 from _collections_abc import Awaitable, Coroutine, Callable, Generator, AsyncGenerator
 from typing import Any, Literal, Concatenate, overload
-__all__ = 'get_future', 'new_tasks', 'to_sync', 'to_sync_from_loop', 'sync_await', 'semaphore', 'lockf', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'get_aiter_fromf', 'safe_cancel'
+__all__ = 'get_aiter_fromf', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop'
 _ignore_cancellation: IgnoreErrors
 '''Context manager to ignore asyncio.CancelledError. This annotation is for module-internal use only.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:

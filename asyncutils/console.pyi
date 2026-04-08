@@ -10,7 +10,7 @@ from concurrent.futures import Future
 from _contextvars import Context
 from types import ModuleType, CodeType
 from typing import ClassVar, Any, Self, TypeGuard, final, overload
-__all__ = 'ConsoleBase', 'AsyncUtilsConsole'
+__all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
     '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.
     Inspired by asyncio/__main__.py. Highly adaptable.'''
@@ -105,7 +105,6 @@ class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None:
         '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing sys.ps1
         and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
-    def __repr__(self) -> str: '''Note that the console is usually not reconstructible by evaluating the representation.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
     '''A derived class of `ConsoleBase`, used to implement the asyncutils REPL.'''
@@ -116,4 +115,3 @@ class AsyncUtilsConsole(ConsoleBase):
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: ...
     def write_special(self, msg: str) -> None: '''Writes msg to stderr only if the quiet flag is not set.'''
     def showtraceback(self) -> None: ...
-    def __repr__(self) -> str: ...

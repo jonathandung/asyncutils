@@ -5,7 +5,7 @@ from ..mixins import LoopBoundMixin
 from asyncio.locks import Event
 from _collections import deque # type: ignore[import-not-found]
 import heapq as H
-__all__ = 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'LifoQueue', 'PriorityQueue'
+__all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
 class QueueEmpty(Exception): ...
 class QueueFull(Exception): ...
 class QueueShutDown(Exception): ...
@@ -85,11 +85,11 @@ class Queue(LoopBoundMixin):
             while D:
                 if not (F := f()).done(): F.set_result(None)
 class LifoQueue(Queue):
-    def _init(self, maxsize): self._queue = []
+    def _init(self, maxsize): self._queue = [] # noqa: ARG002
     def _get(self): return self._queue.pop()
     def _put(self, i, /): self._queue.append(i)
 class PriorityQueue(Queue):
-    def _init(self, maxsize): self._queue = []
+    def _init(self, maxsize): self._queue = [] # noqa: ARG002
     def _get(self, _=H.heappop): return _(self._queue)
     def _put(self, i, /, _=H.heappush): _(self._queue, i)
 del H

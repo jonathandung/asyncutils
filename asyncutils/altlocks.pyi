@@ -21,7 +21,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     def __init__(self, action: str=..., rname: Any=...): ...
     def __enter__(self) -> None: '''Throw `self` as an exception (inherits from `RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
     @classmethod
@@ -88,7 +88,7 @@ class DynamicThrottle:
         `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
     def reset(self) -> None: '''Reset the successes and fails.'''

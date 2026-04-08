@@ -6,7 +6,7 @@ from ._internal.helpers import subscriptable
 from ._internal.submodules import properties_all as __all__
 @subscriptable
 class AsyncProperty:
-    __slots__ = '_name', '_cls', 'fget', 'fset', 'fdel', '__doc__', '_deleted', '_loop', '_finalize', '_strict'
+    __slots__ = '__doc__', '_cls', '_deleted', '_finalize', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'
     def __new__(cls, fget=None, *a, **k): return partial(cls, Placeholder, *a, **k) if fget is None else super().__new__(cls)
     def __init__(self, fget=None, fset=None, fdel=None, *, doc=None, strict=True, loop=None): super().__init__(); self.fget, self.fset, self.fdel, self.__doc__, self._deleted, self._loop, self._finalize, self._strict = fget, fset, fdel, doc or getattr(fget, '__doc__', None), set(), (l := loop or new_event_loop()), register(l.close) if loop is None else l.stop, strict
     def __get__(self, obj, _=None, /):
@@ -43,7 +43,7 @@ class AsyncProperty:
     def setter(self, fset, /): return type(self)(self.fget, fset, self.fdel, doc=self.__doc__, strict=self._strict, loop=self._loop)
     def deleter(self, fdel, /): return type(self)(self.fget, self.fset, fdel, doc=self.__doc__, strict=self._strict, loop=self._loop)
 class AsyncLockProperty(AsyncProperty):
-    __slots__ = '_lock_getter', '_cache'
+    __slots__ = '_cache', '_lock_getter'
     @staticmethod
     def _new_lock(_, *, lock_impl=Lock): return lock_impl()
     def __init__(self, *a, lock_getter=None, **k): super().__init__(*a, **k); self._lock_getter, self._cache = lock_getter or self._new_lock, {}

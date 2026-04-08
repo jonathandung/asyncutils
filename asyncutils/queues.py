@@ -3,8 +3,9 @@ from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
 from .futures import AsyncCallbacksFuture
 from ._internal.compat import partial, Placeholder, Queue, QueueShutDown, QueueFull, QueueEmpty
-from ._internal.helpers import get_loop_and_set, subscriptable
+from ._internal.helpers import get_loop_and_set
 from ._internal.log import info
+from ._internal.unparsed import _ as B
 from .mixins import EventualLoopMixin
 from .util import safe_cancel, sync_await
 from abc import ABCMeta, abstractmethod
@@ -13,6 +14,7 @@ from asyncio.tasks import gather, wait_for
 from asyncio.timeouts import timeout as _timeout
 from _collections import deque # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from itertools import count
 from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
@@ -22,7 +24,24 @@ def _wakeup_next(W):
     P = W.popleft
     while W:
         if not (w := P()).done(): w.set_result(None); break
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E):
+@dataclass(eq=False, frozen=True, match_args=False, slots=True, weakref_slot=True, repr=False)
+class _Queue:
+    maxsize: object
+    empty: object
+    qsize: object
+    full: object
+    get: object
+    get_nowait: object
+    put: object
+    put_nowait: object
+    change_get_password: object
+    change_put_password: object
+    task_done: object
+    join: object
+    shutdown: object
+    cancel_extend: object
+    __repr__: object
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E, B=B): # noqa: PLR0912,PLR0915
     auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
     if protect_get:
         try:
@@ -51,89 +70,78 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
     if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(__import__('heapq'), f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
-    @subscriptable
-    class PasswordQueue:
-        def empty(self): return not l
-        def qsize(self): return len(l)
-        def full(self): return 0 < maxsize <= len(l)
-        async def get(self, *p, _=G.append):
-            u(p)
-            while not l:
-                if S: raise QueueShutDown
-                _(F := m())
-                try: await F
-                except:
-                    F.cancel()
-                    with ignore_valerrs: G.remove(F)
-                    if l and not F.cancelled(): _wakeup_next(G)
-                    raise
-            return self.get_nowait(backdoor=b)
-        def get_nowait(self, *p, backdoor=None):
-            if self.empty(): raise QueueShutDown if S else QueueEmpty
-            if backdoor is not b: u(p)
-            i = g(); _wakeup_next(P); return i
-        async def put(self, item, *p, _=P.append):
-            v(p); e = self.full
-            while e():
-                if S: raise QueueShutDown
-                _(F := m())
-                try: await F
-                except:
-                    F.cancel()
-                    with ignore_valerrs: P.remove(F)
-                    if not (e() or F.cancelled()): _wakeup_next(P)
-                    raise
-            return self.put_nowait(item, backdoor=b)
-        def put_nowait(self, item, *P, backdoor=None):
+    def full(): return 0 < maxsize <= len(l)
+    async def get(*p, _=G.append):
+        u(p)
+        while not l:
             if S: raise QueueShutDown
-            if self.full(): raise QueueFull
-            if backdoor is not b: v(P)
-            p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
-        def __init_subclass__(cls): raise _.ForbiddenOperation('subclass')
-        def __new__(cls): raise _.ForbiddenOperation('instantiate')
-        def change_get_password(self, old_pwd, new_pwd):
-            if not can_change_get: return False
-            if not isinstance(new_pwd, gettyp): return False
-            try: u(old_pwd)
-            except _.CRITICAL: raise _.Critical
-            except: return False
-            nonlocal password_get; password_get = new_pwd; return True
-        def change_put_password(self, old_pwd, new_pwd):
-            if not can_change_put: return False
-            if not isinstance(new_pwd, puttyp): return False
-            try: v(old_pwd)
-            except _.CRITICAL: raise _.Critical
-            except: return False
-            nonlocal password_put; password_put = new_pwd; return True
-        def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
-        @property
-        def maxsize(self): return maxsize
-        def task_done(self):
-            nonlocal U
-            if U == 0: raise ValueError('task_done() called too many times')
-            U -= 1
-            if U == 0: E.set()
-        async def join(self):
-            if U > 0: await E.wait()
-        def shutdown(self, immediate=False):
-            nonlocal S; S = True
-            if immediate:
-                nonlocal U; U -= len(l)
-                if U <= 0: U = 0; E.set()
-                l.clear()
-            for D in (G, P):
-                f = D.popleft
-                while D:
-                    if not (F := f()).done(): F.set_result(None)
-        def cancel_extend(self, msg=None): return False
-        get.__qualname__, get_nowait.__qualname__, put.__qualname__, put_nowait.__qualname__, change_get_password.__qualname__, change_put_password.__qualname__ = get.__name__, get_nowait.__name__, put.__name__, put_nowait.__name__, change_get_password.__name__, change_put_password.__name__
-    q = object.__new__(PasswordQueue)
+            _(F := m())
+            try: await F
+            except:
+                F.cancel()
+                with ignore_valerrs: G.remove(F)
+                if l and not F.cancelled(): _wakeup_next(G)
+                raise
+        return get_nowait(backdoor=b)
+    def get_nowait(*p, backdoor=None):
+        if not l: raise QueueShutDown if S else QueueEmpty
+        if backdoor is not b: u(p)
+        i = g(); _wakeup_next(P); return i
+    async def put(item, *p, _=P.append):
+        v(p)
+        while full():
+            if S: raise QueueShutDown
+            _(F := m())
+            try: await F
+            except:
+                F.cancel()
+                with ignore_valerrs: P.remove(F)
+                if not (full() or F.cancelled()): _wakeup_next(P)
+                raise
+        return put_nowait(item, backdoor=b)
+    def put_nowait(item, *P, backdoor=None):
+        if S: raise QueueShutDown
+        if full(): raise QueueFull
+        if backdoor is not b: v(P)
+        p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
+    def change_get_password(old_pwd, new_pwd):
+        if not can_change_get: return False
+        if not isinstance(new_pwd, gettyp): return False
+        try: u(old_pwd)
+        except _.CRITICAL: raise _.Critical
+        except: return False
+        nonlocal password_get; password_get = new_pwd; return True
+    def change_put_password(old_pwd, new_pwd):
+        if not can_change_put: return False
+        if not isinstance(new_pwd, puttyp): return False
+        try: v(old_pwd)
+        except _.CRITICAL: raise _.Critical
+        except: return False
+        nonlocal password_put; password_put = new_pwd; return True
+    def task_done():
+        nonlocal U
+        if U == 0: raise ValueError('task_done() called too many times')
+        U -= 1
+        if U == 0: E.set()
+    async def join():
+        if U > 0: await E.wait()
+    def shutdown(immediate=False):
+        nonlocal S; S = True
+        if immediate:
+            nonlocal U; U -= len(l)
+            if U <= 0: U = 0; E.set()
+            l.clear()
+        for D in (G, P):
+            f = D.popleft
+            while D:
+                if not (F := f()).done(): F.set_result(None)
+    q = _Queue(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, lambda msg=None: False, lambda: f'<password-protected queue at {id(q):#x}>') # noqa: ARG005
     if init_items:
-        async def extend(f=partial(q.put, Placeholder, password_put)):
+        async def extend(f=partial(put, Placeholder, password_put)):
             async for i in iter_to_aiter(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
     return q
-class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
+class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0904
     @abstractmethod
     def _init(self, maxsize): ...
     @abstractmethod
@@ -240,7 +248,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
         audit(f'{type(self).__qualname__}.map', self, f)
         if stop_when is None:
             stop_when, E = AsyncCallbacksFuture(), (QueueShutDown, QueueEmpty)
-            async def get(g=self.drain_until_empty, /):
+            async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i
                 finally: stop_when.set_result(None)
@@ -260,7 +268,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
         audit(f'{type(self).__qualname__}.starmap', self, f)
         if stop_when is None:
             stop_when, E = AsyncCallbacksFuture(), (QueueShutDown, QueueEmpty)
-            async def get(g=self.drain_until_empty, /):
+            async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i
                 finally: stop_when.set_result(None)
@@ -318,7 +326,7 @@ class SmartQueue(PotentQueueBase):
     def __bool__(self): return bool(self.__queue)
     def empty(self): return not self
 class SmartLifoQueue(PotentQueueBase):
-    def _init(self, maxsize): self.__queue = []
+    def _init(self, maxsize): self.__queue = [] # noqa: ARG002
     def _get(self): return self.__queue.pop()
     def _put(self, item): self.__queue.append(item)
     def peek(self, i=-1, /):

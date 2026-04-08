@@ -11,7 +11,7 @@ async def bad_processor(sig): return 1/0
 @mark.skipif(W := sys.platform == 'win32', reason='difficult to test signal handling on windows')
 @mark.parametrize('res', range(1, 9))
 async def test_signal(res):
-    asyncio.create_task(kill(sig := Signals(res)))
+    _ = asyncio.create_task(kill(sig := Signals(res))) # noqa: RUF006
     assert res == await wait_for_signal(processor, sig, timeout=0.1)
 class Log(BaseException): ...
 def raise_(msg, exc_info=False): raise Log(msg)

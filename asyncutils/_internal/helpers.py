@@ -10,7 +10,7 @@ def check_methods(obj, /, *meth):
     for m in meth:
         for b in M:
             if (_ := b.__dict__.get(m, obj)) is None: return False
-            elif _ is not obj: break
+            if _ is not obj: break
         else: return False
     return True
 def stop_and_closer(loop, _=lambda l: l.stop() or l.close()): return _.__get__(loop)
@@ -22,7 +22,7 @@ def new_executor(f, /, save=True):
     if save: f.executor = e
     return e
 class _LoopMixinBase:
-    __slots__ = 'loop', 'exiter', 'running_tasks', 'make_fut'
+    __slots__ = 'exiter', 'loop', 'make_fut', 'running_tasks'
     def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = register(stop_and_closer(l := new_event_loop())), l, l.create_future, set()
     def make(self, coro): (_ := self.running_tasks).add(t := self.loop.create_task(coro)); t.add_done_callback(_.discard); return t
     def make_multiple(self, C): yield from map(self.make, C)

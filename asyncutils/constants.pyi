@@ -2,7 +2,7 @@ from _collections_abc import Callable
 from threading import Lock
 from typing import Final, NoReturn, Literal, Self, overload
 from ._internal.protocols import Sentinel, Executor
-__all__ = 'RECIP_E', 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'SYNC_AWAIT', 'sentinel_base'
+__all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
@@ -13,8 +13,6 @@ EXECUTORS_FROZENSET: Final[frozenset[Executor]]
 class sentinel_base:
     '''Base class for sentinel values.'''
     def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change NoReturn to Self) if and only if your subclass can be instantiated by the user.'''
-    def __repr__(self) -> str: ...
-    def __str__(self) -> str: ...
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
     def __init_subclass__(cls, lock_impl: Callable[[], Lock]=...) -> None: '''`lock_impl` is a callable that takes no arguments and returns a **synchronous** lock (e.g. `_thread.allocate_lock`).'''

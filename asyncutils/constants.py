@@ -25,7 +25,7 @@ class sentinel_base:
             if (n := getattr(self, '__name', None)) is None:
                 if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{type(self).__qualname__} name collision', name=N)
                 self.__name = N
-            elif N == n and self._cache.get(N) is self:
+            elif n == N and self._cache.get(N) is self:
                 if b := self.bound_to: __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, type(self).__qualname__, N))
                 else: raise NameError(f'cannot bind named unbound {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)
             else: raise NameError(f'cannot bind named {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)

@@ -9,7 +9,6 @@
 .logs
 .secrets.baseline
 .Python
-.flake8.backup
 venv
 env
 .venv

@@ -2,7 +2,7 @@ from ._internal.protocols import Timer, ValidExcType
 from .mixins import AsyncContextMixin, EventualLoopMixin
 from types import TracebackType
 from typing import overload
-__all__ = 'TokenBucket', 'LeakyBucket'
+__all__ = 'LeakyBucket', 'TokenBucket'
 class TokenBucket:
     '''A token bucket rate limiter that controls the rate of operations.
     The bucket fills up with tokens at a fixed rate, with each operation consuming a certain amount of tokens.
@@ -25,7 +25,7 @@ class LeakyBucket(AsyncContextMixin[LeakyBucket], EventualLoopMixin):
         max_factor (optional): Maximum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MAXFACTOR`.
         external_factor_settable (optional): Whether the factor attribute can be modified; default `context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: '''Stop draining the tokens in the bucket.'''
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: '''Stop draining the tokens in the bucket.'''
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     async def acquire(self, amount: float=...) -> bool: '''Attempt to add `amount` tokens to the bucket immediately; return success.'''

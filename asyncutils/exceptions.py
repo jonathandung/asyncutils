@@ -62,7 +62,7 @@ class Critical(BaseException):
         if isinstance(e, cls): return e
         BaseException.__init__(E := BaseException.__new__(cls), _m); E.__context__ = _e() if e is None else e; return E
     @property
-    def __suppress_context__(self): return False
+    def __suppress_context__(self): return False # noqa: PLW3201
     @property
     def exc(self): return self.__cause__ or self.__context__
 class StateCorrupted(BaseException):
@@ -146,23 +146,23 @@ class PasswordMissing(PasswordQueueError, TypeError):
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(name, /):
+    # ruff: disable[PLW0603]
     match name:
         case 'WarningToError':
             global WarningToError
             class WarningToError:
-                lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_warn', '_cm'
+                lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_cm', '_warn'
                 def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
                 async def __aenter__(self, _=__import__('warnings')):
                     async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore[arg-type]
                 async def __aexit__(self, t, /, *_):
                     if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
-                    else: c.__exit__(t, *_)
-                    return issubclass(t or object, Warning)
+                    c.__exit__(t, *_); return issubclass(t or object, Warning)
         case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
             from ._internal.helpers import check_methods as c; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
             def f(*_): a, b = map(frozenset, _); return map(tuple, (a-b, b-a))
             class IgnoreErrors:
-                __slots__ = 'exc', 'but'
+                __slots__ = 'but', 'exc'
                 def __init__(self, /, *_, exclude=(), d=frozenset((Exception,)), f=f): self.exc, self.but = f(_ or d, exclude)
                 def __enter__(self): return self
                 def __exit__(self, t, /, *_):
@@ -178,4 +178,5 @@ def __getattr__(name, /):
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
     return globals()[name]
+    # ruff: enable[PLW0603]
 del t, a, s, _, A, B, stderr, _ExceptionWrapper, _unnest_helper, audit, exception

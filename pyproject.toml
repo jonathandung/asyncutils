@@ -78,15 +78,36 @@ target-version = "py312"
 exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env", "*.egg-info", ".eggs", ".mypy_cache", ".pytest_cache", "docs/source/conf.py"]
 
 [tool.ruff.lint]
-ignore = ["C408", "C901", "E225", "E226", "E227", "E228", "E261", "E301", "E302", "E305", "E306", "E401", "E402", "E501", "E701", "E702",  "E722", "E741", "W292", "F401"]
-select = ["C", "E", "F", "W"]
+ignore = ["ANN401", "ASYNC109", "B008", "B904", "B905", "C408", "C901", "CPY001", "E225", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E402", "E501", "E701", "E702", "E722", "E741", "F401", "PLC0205", "PLC0415", "PLC2701", "PLC2801", "PLR0911", "PLR0913", "PLR0917", "PLR2004", "PLW1514", "TRY003", "TRY300", "RET502", "RET503", "W292"]
+select = ["A", "ARG", "ANN", "ASYNC", "B", "CPY", "C4", "C90", "E", "EM103", "ERA", "EXE", "F", "FIX002", "FLY", "G", "ISC", "LOG", "PERF", "PIE", "PGH004", "PL", "PYI", "RET", "RSE", "RUF", "S", "SIM", "SLOT", "T20", "TRY", "W", "YTT"]
+preview = true
+typing-extensions = false
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "F403", "F405"]
-"__init__.pyi" = ["F403", "F405"]
+"**/*.py" = ["ANN", "PYI"]
+"tests/**" = ["ARG001", "B018", "F403", "F405", "RUF018", "RUF029", "RUF043", "S"]
+"**/__init__.py" = ["RUF067"]
+"**/__init__.pyi" = ["F403", "F405"]
+"**/*.pyi" = ["PYI021", "PYI036", "PYI042"]
+"asyncutils/queues.pyi" = ["A001", "A002", "PYI011"]
+"asyncutils/iters.py" = ["RUF029"]
+"asyncutils/locks.py" = ["PLR6301"]
+"asyncutils/queues.py" = ["A001", "A002"]
+"asyncutils/_internal/py312.py" = ["SIM105"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+docstring-quotes = "single"
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.ruff.lint.pylint]
+allow-dunder-method-names = ["__setup__", "__cleanup__"]
 
 [tool.ruff.format]
 quote-style = "single"

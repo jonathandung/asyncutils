@@ -11,7 +11,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     return tuple(r)
 def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
-@a
+@a # noqa: PLR0904
 class VersionInfo(str):
     __slots__ = 'parts'
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
@@ -66,19 +66,20 @@ class VersionInfo(str):
     def __int__(self):
         if not (p := self[2]) < 0x100 > (m := self[1]): raise OverflowError(f'cannot pack version {self} into an integer')
         return p|m<<8|self[0]<<16
-    def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True))
+    def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True)) # noqa: SIM115
     @classmethod
-    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True)) # type: ignore
+    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True))
     @property
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation, __index__ = property('asyncutils v'.__add__), __int__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
+    representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
 @a
 class VersionDelta(tuple):
+    __slots__ = ()
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
     def __neg__(self): return __class__(*map(int.__neg__, self))
-def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get__(True)), type(True.__init__), type(''.lower)), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
+def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF): # noqa: PLR0912
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
     elif isinstance(o, complex): o = o.real, o.imag, 0
@@ -89,9 +90,10 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=(type(p.__get
     elif f := dispatch_normalizer(o, t=type):
         try:
             if (o := f(o)) is None: return
-            if not c(o): raise E.VersionNormalizerTypeError(f, o)
         except E.CRITICAL: raise E.Critical
-        except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e)
+        except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e) from None
+        else:
+            if not c(o): raise E.VersionNormalizerTypeError(f, o)
     elif not c(o): return
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
 def normalize(o, /, e=E.VersionNormalizerMissing):

@@ -3,7 +3,7 @@ from ._internal.protocols import Exceptable, Timer, SupportsIteration, Exception
 from asyncio.futures import Future
 from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable
 from typing import Any, Literal, Protocol, Self, overload, type_check_only
-__all__ = 'areduce', 'every', 'everymethod', 'timer', 'retry', 'throttle', 'debounce', 'measure', 'benchmark', 'RateLimited'
+__all__ = 'RateLimited', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'measure', 'retry', 'throttle', 'timer'
 @overload
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of functools.reduce that takes an async function and possibly async iterable. If the function is sync, specify `await_=False`.'''
 @overload
@@ -73,7 +73,6 @@ class RateLimited[T, **P]:
     @overload
     def __new__(cls, f: Callable[P, Awaitable[T]], calls: int, period: float, *, raise_: bool=..., timer: Timer=...) -> Self: '''Limit the rate of calls of a function `f`, such that only `calls` calls within `period` seconds, as determined by `timer`, are allowed.'''
     async def __call__(self, *a: P.args, **k: P.kwargs) -> T: ...
-    def __repr__(self) -> str: ...
 @type_check_only
 class _everymethodrvrv[T, R](Protocol):
     '''Not exported.'''

@@ -1,6 +1,6 @@
 from .. import __version__
 if __version__.major >= 4: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 and 3.13 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
-__all__ = 'apargs', 'partial', 'Placeholder'
+__all__ = 'Placeholder', 'apargs', 'partial'
 apargs, Placeholder = {}, 'Placeholder'
 def _get_merger(A, _=__import__('_operator').itemgetter):
     if not A: return 0, None
@@ -9,9 +9,9 @@ def _get_merger(A, _=__import__('_operator').itemgetter):
     for i, a in enumerate(A):
         if a is Placeholder: f(j); j += 1
         else: f(i)
-    return (C := j-n), _( *O) if C else None
+    return (C := j-n), _(*O) if C else None
 class partial:
-    __slots__ = 'func', 'args', 'keywords', '_phs', '_mg'
+    __slots__ = '_mg', '_phs', 'args', 'func', 'keywords'
     @__import__('reprlib').recursive_repr()
     def __repr__(self): (f := (A := [repr(self.func)]).extend)(map(repr, self.args)); f(f'{k}={v!r}' for k, v in self.keywords.items()); return f'asyncutils._internal.compat.partial({', '.join(A)})'
     def __new__(cls, f, /, *a, **k):

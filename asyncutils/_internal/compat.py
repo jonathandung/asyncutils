@@ -1,4 +1,4 @@
-__all__ = 'apargs', 'partial', 'Placeholder', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'LifoQueue', 'PriorityQueue'
+__all__ = 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'apargs', 'partial'
 from sys import version_info as V
 if V >= (3, 14):
     apargs = {'suggest_on_error': True, 'color': __import__('os').getenv('PYTHON_BASIC_REPL') != '1'}

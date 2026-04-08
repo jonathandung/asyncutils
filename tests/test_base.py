@@ -8,6 +8,4 @@ async def test_aenum(): assert await vecs_eq(aenumerate(range(2, 13, 2), 1, step
 async def test_drop(): assert await vecs_eq(aprepend(2, drop(arange(1, 8, 2), 1)), asieve(8))
 async def test_take(): assert await vecs_eq(take(atabulate(atotient, await_=True), 10), (0, 1, 1, 2, 2, 4, 2, 6, 4, 6))
 async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(achain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, 3)
-async def test_aisprime():
-    assert await vecs_eq(afilter(aisprime, range(1, 101)), asieve(100))
-    print(*await to_tuple(asieve(29)))
+async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 1001)), asieve(1000))

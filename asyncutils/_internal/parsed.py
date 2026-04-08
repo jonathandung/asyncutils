@@ -11,7 +11,7 @@ This format differs from that described below.
 Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
 Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using `tools.get_cfg_json_format()`.
 
-Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, tornado, vibora, fastapi and trio.''', **j)
+Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, tornado, or FastAPI.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', default='STDERR', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE is passed (interpreted as an integer file descriptor if possible), the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.

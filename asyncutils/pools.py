@@ -15,7 +15,7 @@ from time import monotonic
 from ._internal.submodules import pools_all as __all__
 @subscriptable
 class Pool(LoopContextMixin):
-    __slots__ = '_func', '_it', '_sem', '_queue', '_task', '_event'
+    __slots__ = '_event', '_func', '_it', '_queue', '_sem', '_task'
     def __init__(self, func, it, workers=4, bounded=False): self._func, self._it, self._sem, self._queue, self._task, self._event = func, it, semaphore(bounded, workers), Queue(1), None, Event()
     async def process(self, item):
         async with self._sem: await self._queue.put(await self._func(item))
@@ -39,8 +39,8 @@ class Pool(LoopContextMixin):
     async def aclose(self):
         if t := self._task: await safe_cancel(t)
     __cleanup__ = aclose
-class AdvancedPool(LoopContextMixin):
-    __slots__ = '__cnt', '_max', 'completed', '_max', '_min', '_scaling', '_kill_at_exit', '_queue', '_workers', '_pending', '_shutdown', '_lock', '_adjustment', '_start', '_current'
+class AdvancedPool(LoopContextMixin): # noqa: PLR0904
+    __slots__ = '__cnt', '_adjustment', '_current', '_kill_at_exit', '_lock', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
     def __init__(self, max_workers=5, min_workers=1, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); self.__cnt, self._max, self._scaling, self._queue, self._workers, self._pending, self._shutdown, self._lock, self._adjustment, self._start, self.completed, self._kill_at_exit = count(), max_workers, scaling, PriorityQueue(qsize), set(), 0, False, Lock(), None, monotonic(), 0, kill_at_exit; self._current = self._min = min_workers
@@ -103,7 +103,7 @@ class AdvancedPool(LoopContextMixin):
     async def starmap(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority) for a in it])
     async def doublestarmap(self, f, it, priority=0): return await gather(*[await self.submit(f, _priority_=priority, **k) for k in it])
     async def starmap_withkwds(self, f, it, priority=0): return await gather(*[await self.submit(f, *a, _priority_=priority, **k) for a, k in it])
-    async def resize(self, min, max):
+    async def resize(self, min, max): # noqa: A002
         async with self._lock: M = max(max, m := max(1, min)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
     async def drain(self): await self._queue.join()
     def restart_worker(self, worker): (d := (w := self._workers).discard)(worker); w.add(t := self.make(self._worker_loop())); t.add_done_callback(d); return t
@@ -131,7 +131,7 @@ class AdvancedPool(LoopContextMixin):
     def uptime(self): return monotonic()-self._start
 @subscriptable
 class ConnectionPool:
-    __slots__ = '_healthchecker', '_creation_times', '_loop', '_factory', '_pool', 'maxsize', 'minsize', '_in_use', 'maxlife', '_cleaner', '_lock', '_available', '_exiter', '_maintainer'
+    __slots__ = '_available', '_cleaner', '_creation_times', '_exiter', '_factory', '_healthchecker', '_in_use', '_lock', '_loop', '_maintainer', '_pool', 'maxlife', 'maxsize', 'minsize'
     def __init__(self, factory, maxsize=10, minsize=10, maxlife=3600, healthchecker=None, cleaner=None): self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._exiter = factory, maxsize, minsize, maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, Lock(), Event(), CallbackAccumulator('__exit__'); self._maintainer = self._loop = None
     def _is_healthy(self, conn, /): return self._healthchecker(conn) and not ((t := self._creation_times.get(id(conn))) and monotonic()-t > self.maxlife)
     async def create_connection(self, *a, _executor_=None, **k): self._creation_times[id(c := self.loop.run_in_executor(_executor_, partial(self._factory, *a, **k)))] = monotonic(); return await c

@@ -13,7 +13,7 @@ from sys import audit
 from time import monotonic
 from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
-    __slots__ = '_cache', '_lock', '_loaders', '_ttl', '_refresh', '_processor', '_task', '_event'
+    __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, _=C.defaultdict):
         if ttl is None: ttl = context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
@@ -54,10 +54,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         while True:
             try:
                 await sleep(r)
-                async with self._lock:
-                    n = monotonic()
-                    for k in self._cache:
-                        if not self._cache[k].loading and n-self._cache[k].timestamps > self._ttl-self._refresh: t.append(self.make(self.refresh_item(k)))
+                async with self._lock: n, d, f = monotonic(), self._ttl-self._refresh, self.refresh_item; t.extend(self.make_multiple(f(k) for k, v in self._cache.items() if not v.loading and n > d+v.timestamp))
                 if t: await gather(*t, return_exceptions=True); t.clear()
             except CRITICAL: raise Critical
             except CancelledError: raise
@@ -67,7 +64,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
     async def clear(self):
         async with self._lock: self._cache.clear()
 class AsyncLRUCache:
-    __slots__ = '_ttl', '_factory', '_timestamps', '_caches', '_make_key', '_loopctx'
+    __slots__ = '_caches', '_factory', '_loopctx', '_make_key', '_timestamps', '_ttl'
     def __init__(self, maxsize=None, ttl=None, typed=False):
         if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE
         audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)

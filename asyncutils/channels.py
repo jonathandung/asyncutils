@@ -17,9 +17,9 @@ from functools import partial, cached_property
 from sys import audit, addaudithook
 from _weakrefset import WeakSet
 from ._internal.submodules import channels_all as __all__
-@subscriptable
+@subscriptable # noqa: PLR0904
 class Observable(LoopContextMixin):
-    __slots__ = '_data', '_lock', '_to_remove', '_queue', '_event'
+    __slots__ = '_data', '_event', '_lock', '_queue', '_to_remove'
     @property
     def idle(self): return self._event.is_set()
     @property
@@ -41,7 +41,7 @@ class Observable(LoopContextMixin):
                 elif _persistent_: L.error(f'{type(e).__qualname__} in observer', exc_info=True)
                 else: raise
     async def wait_for_next(self, timeout=None, strict=False):
-        async def one_time(*a, **k): F.set_result((a, k))
+        async def one_time(*a, **k): F.set_result((a, k)) # noqa: RUF029
         F, u = self.make_fut(), self.subscribe_nowait(one_time)
         try: return await wait_for(F, timeout)
         finally: u(strict)
@@ -91,7 +91,7 @@ class Observable(LoopContextMixin):
         f = partial((_ := type(self)()).notify, _ret_exc_=ret_exc); t = None
         async def debounced(*a, **k):
             nonlocal t
-            if not (t is None or not t.done()): t.cancel()
+            if t is not None: await safe_cancel(t)
             async def _notifier():
                 with _ignore_cancellation: await sleep(delay); await f(*a, **k)
             t = self.make(_notifier())
@@ -120,7 +120,7 @@ class Observable(LoopContextMixin):
         p = partial((_ := type(obs[0])()).notify, _ret_exc_=ret_exc)
         for o in obs: o._data.add(p)
         return _
-class EventBus(LoopContextMixin):
+class EventBus(LoopContextMixin): # noqa: PLR0904
     def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False): audit('asyncutils.channels.EventBus', _ := f'{(t := type(self)).__qualname__} {name or t._inc_cnt()}'); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = _, Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
@@ -283,7 +283,7 @@ class EventBus(LoopContextMixin):
     P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # type: ignore
 @subscriptable
 class Rendezvous:
-    __slots__ = '_getters', '_putters', '_loop', '_lock', '_task'
+    __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
     def __init__(self, *, loop=None, lock=None):
         if loop is None: loop = get_loop_and_set()
         if lock is None: lock = Lock()
@@ -295,15 +295,15 @@ class Rendezvous:
         except TimeoutError: return False
     async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
     async def get(self, default=_NO_DEFAULT, *, timeout=None):
-        p = self._putters
+        f = (p := self._putters).popleft
         try:
             async with _timeout(timeout):
                 async with self._lock:
                     while p:
-                        v, F = p.popleft()
+                        v, F = f()
                         if not F.done(): F.set_result(None); return v
                     if timeout is None and default is not _NO_DEFAULT: return default
-                    else: self._getters.append(F := self._loop.create_future())
+                    self._getters.append(F := self._loop.create_future())
                 return await F
         except TimeoutError:
             if default is _NO_DEFAULT: raise
@@ -323,7 +323,7 @@ class Rendezvous:
                     if not (F := g.popleft()).done(): break
                 else: g.append(F := self._loop.create_future()); f = False
             if f: F.set_result(v); return await self.get()
-            else: await (self._put_helper if asap else self.put)(v); g.appendleft(F); return await F
+            await (self._put_helper if asap else self.put)(v); g.appendleft(F); return await F
     async def _put_helper(self, v, /):
         g = self._getters
         async with self._lock:

@@ -3,7 +3,7 @@ from ._internal import log as l, patch as P
 from ._internal.submodules import config_all as __all__
 from ._internal.unparsed import N
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
-def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
+def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: PLR0912
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -12,7 +12,7 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
     else:
         d = 'loky'
         if e in f: return getattr(__import__('concurrent.futures.'+e, fromlist=_), e.title()+'PoolExecutor')
-        elif e == 'dask':
+        if e == 'dask':
             try: return __import__('distributed.client', fromlist=_).Client
             except ImportError: d = 'dask.distributed'
         elif e == 'loky_noreuse':
@@ -40,11 +40,10 @@ def k(e, a=False, N=N, c=c):
             if a: c(e, str, int)
     return x
 def g(e, a=False, t=(str, int, bytes), c=c, k=k):
-    if isinstance(x := k(e), str):
-        if x.startswith("b'") and x.endswith("'") or x.startswith('b"') and x.endswith('"'):
-            try: x = x[2:-1].encode()
-            except UnicodeEncodeError: ...
-    if isinstance(x, t) or a and (x is None or isinstance(x, float)): return x
+    if isinstance(x := k(e), str) and (x.startswith("b'") and x.endswith("'") or x.startswith('b"') and x.endswith('"')): # noqa: RUF021
+        try: x = x[2:-1].encode() # noqa: SIM105
+        except UnicodeEncodeError: ...
+    if isinstance(x, t) or a and (x is None or isinstance(x, float)): return x # noqa: RUF021
     c(e, type(x), t)
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
@@ -53,7 +52,7 @@ match logging_to := g('log_to'):
     case 'MAKE':
         T = 'asyncutils_log%d.log'
         for h in range(1, 0x1000):
-            try: logging_to = (s := open(T%h, m)).name; break
+            try: logging_to = (s := open(T%h, m)).name; break # noqa: SIM115
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
             except AttributeError: raise SystemError('python opened a file with no `name` attribute') from None
             except Exception: ...
@@ -71,7 +70,7 @@ match logging_to := g('log_to'):
     case 2 if b: logging_to = 'STDERR'
     case str()|int()|bytes():
         M = True
-        try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False
+        try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False # noqa: SIM115
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
         except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')
@@ -86,7 +85,7 @@ __import__('atexit').register(lambda s=s, d=l.debug: None if s.closed else d('by
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
-    def level(self, _=l): return _.level
+    def level(self, _=l): return _.level # noqa: PLR0206
     def __init__(self): self.orig_level = self.orig_name = None
     def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l):
         if self.orig_level is None:

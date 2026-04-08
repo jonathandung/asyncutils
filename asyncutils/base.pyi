@@ -2,9 +2,9 @@ from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from types import TracebackType
-from typing import ClassVar, Self, Literal, Awaitable, Any, overload
+from typing import ClassVar, Self, Literal, Awaitable, Any, NoReturn, overload
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine, Sentinel
-__all__ = 'event_loop', 'iter_to_aiter', 'aiter_to_iter', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'collect', 'take', 'drop', 'aenumerate', 'yield_to_event_loop', 'dummy_task'
+__all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_iter', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_aiter', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 class event_loop:
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
     _ENTERED: ClassVar[int]
@@ -18,7 +18,7 @@ class event_loop:
     @overload
     def __exit__(self, t: None, v: None, b: None, /) -> Literal[False]: ...
     @overload
-    def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType|None, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
+    def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this, but managing a different event loop.'''
@@ -79,6 +79,7 @@ def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
     If n is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard n items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw ItemsExhausted.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class, with the addition of the step parameter.'''
+async def sleep_forever() -> NoReturn: '''A coroutine that never completes.'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
 '''An awaitable object that completes immediately and is also an exhausted generator, with the `CO_ITERABLE_COROUTINE` flag set.'''
 yield_to_event_loop: Awaitable[None]

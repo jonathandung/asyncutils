@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 if __name__ != '__main__': raise ImportError('cannot import asyncutils.__main__')
 if not (g := globals()).get(k := '__package__'):
     import sys as S; n = 'asyncutils'

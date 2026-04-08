@@ -3,7 +3,7 @@ from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest
 from ._internal import patch as P, log as L, helpers as H
 from asyncio.coroutines import iscoroutine
 from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
-from asyncio.tasks import all_tasks, gather
+from asyncio.tasks import all_tasks, gather, sleep
 from sys import exc_info, audit
 from ._internal.submodules import base_all as __all__
 b = H.check_methods
@@ -34,10 +34,10 @@ class event_loop:
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
-                if not f&0x200: raise RuntimeError(f'{type(self).__qualname__}: exception occurred while calling __enter__ of associated event loop: {e}')
+                if not f&0x200: raise RuntimeError(f'{type(self).__qualname__}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
-    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L):
+    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
             N = type(self).__qualname__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
@@ -96,16 +96,16 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         L = len(r := await gather(*map(f, r), return_exceptions=True))
-        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if L > len(E) else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
+        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 class _iter_to_aiter_error_handler:
     __slots__ = 'it'
     def __init__(self, it): self.it = it
     def __bool__(self, _=b): return _(self.it, 'send', 'throw', 'close')
     def __enter__(self): ...
     def __exit__(self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration'))): return False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, c=H.check, H=H, w=L.debug, _f=_iter_to_aiter_error_handler):
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, c=H.check, H=H, w=L.debug, _f=_iter_to_aiter_error_handler): # noqa: PLR0912,PLR0915
     audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
-    if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'):
+    if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'): # noqa: PLR1702
         if f: return it
         if _c(it, 'asend', 'athrow', 'aclose'):
             async def iterator(f=it.asend, c=c): # type: ignore[no-redef]
@@ -128,22 +128,22 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
         if e is None:
             if f:
                 if g:
-                    async def iterator(_=it.send): # type: ignore[no-redef]
+                    async def iterator(_=it.send): # type: ignore[no-redef] # noqa: RUF029
                         l = _(None)
                         with g:
                             while True: l = _((yield l))
                 else:
-                    async def iterator(f=it.__next__): # type: ignore[no-redef]
+                    async def iterator(f=it.__next__): # type: ignore[no-redef] # noqa: RUF029
                         while True: yield f()
             elif g:
-                async def iterator(_=it.send, c=c): # type: ignore[no-redef]:
+                async def iterator(_=it.send, c=c): # type: ignore[no-redef] # noqa: RUF029
                     l = _(None)
                     with g:
                         while True:
                             if c(l, sentinel): break
                             l = _((yield l))
             else:
-                async def iterator(_=it.__next__, c=c): # type: ignore[no-redef]:
+                async def iterator(_=it.__next__, c=c): # type: ignore[no-redef] # noqa: RUF029
                     while True:
                         if c((l := _()), sentinel): break
                         yield l
@@ -174,13 +174,13 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
     return iterator()
 def aiter_to_iter(ait, _c=b):
     audit('asyncutils.base.aiter_to_iter', type(ait).__qualname__)
-    if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): return ait
+    if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): yield from ait
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
         a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
         if _c(ait, 'asend', 'athrow', 'aclose'):
-            def iterate(f=ait.asend, a=a):
+            def iterate(f=ait.asend, a=a): # type: ignore[no-redef]
                 x = None
-                while True: yield (x := a(f(x)))
+                while True: x = yield a(f(x))
         else:
             def iterate(f=ait.__anext__, a=a):
                 while True: yield a(f())
@@ -218,6 +218,7 @@ async def drop(it, n, raising=False):
     if raising and i < n: raise ItemsExhausted('drop ran out of items')
 async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_aiter(it): yield start, _; start += step
+async def sleep_forever(_=float('inf')): await sleep(_)
 P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 'ait'), (collect, 'it, n=None, default={}'), (take, 'it, n, default={}'))
 def a(_, r='asyncutils.base.yield_to_event_loop'): return r
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), '__repr__': a, '__str__': a, '__reduce__': a}))

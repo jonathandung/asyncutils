@@ -8,7 +8,7 @@ from contextlib import _AsyncGeneratorContextManager
 from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
 from asyncio.futures import Future
 from asyncio.queues import Queue
-__all__ = 'ignore_qempty', 'ignore_qfull', 'ignore_qshutdown', 'ignore_qerrs', 'ignore_valerrs', 'password_queue', 'PotentQueueBase', 'SmartQueue', 'SmartLifoQueue', 'SmartPriorityQueue', 'UserPriorityQueue'
+__all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'ignore_valerrs', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
 '''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''
 ignore_qempty: Final[IgnoreErrors]
@@ -101,7 +101,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
     def drain_retlist(self, max: int|None=...) -> list[T]: '''Return a list of the items in the queue and empty it.'''
     def empty(self) -> bool: '''Whether the queue is empty.'''
     def __bool__(self) -> bool: '''Whether there are items in the queue.'''
-    __iter__, __aiter__ = drain_until_empty, drain_persistent
+    __iter__, __aiter__ = drain_until_empty, drain_persistent # noqa: PYI017
     def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is True, pending gets raise immediately even if the queue is not empty.'''
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''

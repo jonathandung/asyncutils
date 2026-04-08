@@ -1,5 +1,5 @@
 altlocks_all = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
-base_all = 'event_loop', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'iter_to_aiter', 'aiter_to_iter', 'yield_to_event_loop', 'collect', 'take', 'drop', 'aenumerate', 'dummy_task'
+base_all = 'event_loop', 'adisembowel', 'adisembowelleft', 'safe_cancel_batch', 'iter_to_aiter', 'aiter_to_iter', 'yield_to_event_loop', 'collect', 'take', 'drop', 'aenumerate', 'dummy_task', 'sleep_forever'
 buckets_all = 'LeakyBucket', 'TokenBucket'
 caches_all = 'AsyncLRUCache', 'CacheWithBackgroundRefresh'
 channels_all = 'EventBus', 'Observable', 'Rendezvous'

@@ -11,10 +11,10 @@ async def test_pwdq(pwd):
     assert Q.full()
     with raises(QueueFull): Q.put_nowait(-1, pwd)
     t = create_task(Q.put(2, pwd))
-    assert 0 == await Q.get()
-    assert 1 == Q.get_nowait()
+    assert await Q.get() == 0
+    assert Q.get_nowait() == 1
     await sleep(0.1)
-    assert t.done() and 2 == await Q.get()
+    assert t.done() and await Q.get() == 2
     t = create_task(Q.get())
     Q.put_nowait(3, pwd)
     await sleep(0.1)

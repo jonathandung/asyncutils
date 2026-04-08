@@ -32,7 +32,7 @@ class Context:
     def __post_init__(self):
         if not (self.CIRCUIT_BREAKER_DEFAULT_RESET > 0 < self.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS and 0 < self.DYNAMIC_THROTTLE_DEFAULT_LBOUND < self.DYNAMIC_THROTTLE_DEFAULT_UBOUND < 1 and self.DYNAMIC_THROTTLE_DEFAULT_LFACTOR < 1.0 < self.DYNAMIC_THROTTLE_DEFAULT_UFACTOR and self.LEAKY_BUCKET_DEFAULT_MAXFACTOR > 1.0 > self.LEAKY_BUCKET_DEFAULT_MINFACTOR > 0.0 < self.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK and self.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH > 0.0 < self.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL and self.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE > 0 < self.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE and all(i is None or i > 0.0 for i in (self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT, self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT)) and self.EVENT_WITH_VALUE_DEFAULT_MAXHIST > 0 < self.EVENT_WITH_VALUE_DEFAULT_RECENT and self.RETRY_DEFAULT_TRIES > 0 < self.DYNAMIC_THROTTLE_DEFAULT_JITTER < 1.0 and self.RETRY_DEFAULT_BACKOFF > 1.0 > self.RETRY_DEFAULT_JITTER > 0.0 < self.RETRY_DEFAULT_DELAY <= self.RETRY_DEFAULT_MAX_DELAY): raise ValueError
     def __init_subclass__(cls): raise TypeError('cannot subclass Context')
-    copy = D.replace
+    copy = D.replace # noqa: RUF045
 _ = __import__('_contextvars').ContextVar('asyncutils_contextvar')
 def getcontext(_=_, d=Context()):
     try: return _.get()
@@ -42,7 +42,7 @@ def setcontext(ctx, /, _=_):
     _.set(ctx)
 f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:
-    __slots__ = 'saved_ctx', 'new_ctx'
+    __slots__ = 'new_ctx', 'saved_ctx'
     def __init__(self, new_ctx): self.new_ctx = new_ctx.copy()
     def __enter__(self): self.saved_ctx = getcontext(); setcontext(self.new_ctx)
     def __exit__(self, /, *_): setcontext(self.saved_ctx)

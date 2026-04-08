@@ -1,0 +1,38 @@
+ ERA eradicate
+ YTT flake8-2020
+ ANN flake8-annotations
+ASYNC flake8-async
+   S flake8-bandit
+   B flake8-bugbear
+   A flake8-builtins
+  C4 flake8-comprehensions
+ EXE flake8-executable
+ FIX flake8-fixme
+ ISC flake8-implicit-str-concat
+ LOG flake8-logging
+   G flake8-logging-format
+ PIE flake8-pie
+ T20 flake8-print
+ PYI flake8-pyi
+   Q flake8-quotes
+ RSE flake8-raise
+ RET flake8-return
+ SLF flake8-self
+ SIM flake8-simplify
+SLOT flake8-slots
+ ARG flake8-unused-arguments
+ PTH flake8-use-pathlib
+ FLY flynt
+   I isort
+ C90 mccabe
+PERF Perflint
+ E/W pycodestyle
+ DOC pydoclint
+   D pydocstyle
+   F Pyflakes
+ PGH pygrep-hooks
+  PL Pylint
+  UP pyupgrade
+FURB refurb
+ RUF Ruff-specific rules
+ TRY tryceratops

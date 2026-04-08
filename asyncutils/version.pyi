@@ -5,7 +5,7 @@
 from ._internal.protocols import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
-__all__ = 'VersionInfo', 'VersionDelta', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer', 'dispatch_normalizer', 'autogenerate_normalizers'
+__all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
 class VersionInfo(str):
     @overload
@@ -37,11 +37,10 @@ class VersionInfo(str):
     def __eq__(self, other: Any, /) -> bool: '''Whether self is the same version as the other.'''
     def __ne__(self, other: Any, /) -> bool: '''Whether self is a different version than the other.'''
     def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
-    def __repr__(self) -> str: '''`version == eval(repr(version))` holds.'''
     @overload
     def __round__(self, ndigits: int, /) -> NoReturn: ...
     @overload
-    def __round__(self, ndigits: Literal[1, 2, 3, None], /) -> Self: '''Support for rounding.'''
+    def __round__(self, ndigits: Literal[1, 2, 3]|None, /) -> Self: '''Support for rounding.'''
     @overload # type: ignore[override]
     def __add__(self, n: int, /) -> Self: ...
     @overload
@@ -80,9 +79,9 @@ class VersionInfo(str):
     def next_patch(self) -> Self: '''The patch version following this version.'''
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
-    def shelve(self, path: Openable, little: bool=...) -> None: ...
+    def shelve(self, path: Openable, little: bool=...) -> None: '''Store this version into the specified `path`.'''
     @classmethod
-    def unshelve(cls, path: Openable, little: bool=...) -> Self: ...
+    def unshelve(cls, path: Openable, little: bool=...) -> Self: '''Recover a stored version.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
@@ -100,7 +99,7 @@ class VersionInfo(str):
     def minor(self) -> int: '''The minor part of the version.'''
     @property
     def patch(self) -> int: '''The patch part of the version.'''
-    __index__, __trunc__ = __int__, __floor__
+    __index__, __trunc__, __radd__ = __int__, __floor__, __add__ # noqa: PYI017
 class VersionDelta(tuple[int, int, int]):
     '''A named tuple representing the difference between versions. Can be taken by the + or - operators.'''
     def __new__(cls, major: int=..., minor: int=..., patch: int=...) -> Self: ...

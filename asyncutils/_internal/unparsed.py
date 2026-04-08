@@ -1,4 +1,5 @@
-N = type('Namespace', (dict,), dict(__getattr__=dict.__getitem__, __setattr__=dict.__setitem__, __delattr__=dict.__delitem__))(log_to='STDERR', executor='thread', Q=0, V=0, quiet=False, basic_repl=False, max_memerrs=3, load_all=False, seed=None, debug=False)
+from .helpers import subscriptable as s
+N = (_ := s(type('Namespace', (dict,), dict(__getattr__=dict.__getitem__, __setattr__=dict.__setitem__, __delattr__=dict.__delitem__))))(log_to='STDERR', executor='thread', Q=0, V=0, quiet=False, basic_repl=False, max_memerrs=3, load_all=False, seed=None, debug=False)
 if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\''):
     import sys as S; S.audit('asyncutils/read_config', p)
     if not p.endswith(('.json', '.jsonl')): S.stderr.write('WARNING: AUTILSCFGPATH should point to a json file; proceeding anyway\n')
@@ -9,4 +10,4 @@ if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\'
         else: raise TypeError(f'key "next_config" in {p} should point to a string or null, not {v!r}; see format.json5')
         N.update(f)
     del S, f, v, t
-del p, E, k
+del p, E, k, s

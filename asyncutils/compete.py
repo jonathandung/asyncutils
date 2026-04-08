@@ -42,7 +42,7 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=A.iscoroutine, futwra
     if handle_aiter is None: from .iters import to_list as handle_aiter
     for i in aiter_to_iter(cfs):
         if corocheck(i): yield i; continue
-        try: i = futwrap(i)
+        try: i = futwrap(i) # noqa: PLW2901
         except CRITICAL: raise Critical
         except (AssertionError, TypeError):
             if not _c(i, '__await__'):
@@ -50,7 +50,7 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=A.iscoroutine, futwra
                 elif _c(i, '__iter__'): yield handle_iter(i)
                 elif not skip_invalid: raise TypeError(f'invalid item in {cfs!r}: {i!r}') from None
                 continue
-        async def wrapper(): return await i
+        async def wrapper(): return await i # noqa: B023
         yield wrapper()
 def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs)), delay, loop=loop)
 del H

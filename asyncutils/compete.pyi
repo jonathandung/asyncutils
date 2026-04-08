@@ -4,7 +4,7 @@ from asyncio.futures import Future
 from _collections_abc import Coroutine, Awaitable, Callable, Generator, AsyncIterable, Iterable
 from concurrent.futures._base import Future as _F
 from typing import Any, Literal, TypeGuard, overload
-__all__ = 'convert_to_coro_iter', 'enhanced_staggered_race', 'first_completed', 'race_with_callback', 'multi_winner_race_with_callback'
+__all__ = 'convert_to_coro_iter', 'enhanced_staggered_race', 'first_completed', 'multi_winner_race_with_callback', 'race_with_callback'
 @overload
 async def first_completed[T](*C: Coroutine[Any, Any, T], ret_exc: Literal[True], timeout: float|None=..., loop: AbstractEventLoop|None=...) -> BaseException|T|None: ...
 @overload

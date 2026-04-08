@@ -3,7 +3,7 @@ from ._internal.protocols import ValidExcType
 from dataclasses import dataclass
 from types import TracebackType
 from typing import Final, Self, Any, final, overload
-__all__ = 'Context', 'getcontext', 'setcontext', 'localcontext'
+__all__ = 'Context', 'getcontext', 'localcontext', 'setcontext'
 @final
 @dataclass(kw_only=True, match_args=False, slots=True)
 class Context:
@@ -43,7 +43,7 @@ class localcontext:
     def saved_ctx(self) -> Context: '''The previous context to be restored on exit.'''
     def __enter__(self) -> None: ...
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType|None, /) -> None: ...
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 def getcontext() -> Context: '''Return the current context.'''
