@@ -13,7 +13,7 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
     '''Wrap an arbitrary awaitable in a task under the provided event loop, creating one and setting if required, and begin waiting on it,
     wrapping critical exceptions in Critical.
     This is as opposed to `loop.create_task`, which only takes coroutines.'''
-def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T], None, None]: '''Yield tasks wrapping the coroutines under a new event loop in order.'''
+def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[R, **P](f: Callable[P, Awaitable[R]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, R]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 class to_sync_from_loop:
     '''A version of `to_sync` that is a decorator factory, converting an async function to synchronous by running it in the specified `loop`.
@@ -29,5 +29,5 @@ def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=
 def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable[P, Awaitable[T]]], Callable[P, T]]: '''Decorator factory to ensure a function returning an awaitable only be called if a lock is acquired within `timeout`, also converting it to a sync function.'''
 def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of `sync_lock`, where `binder` is a function returning a suitable lock from the instance.'''
 def to_async[T, **P](f: Callable[P, T], /, loop: AbstractEventLoop|None=...) -> tuple[Callable[P, Coroutine[Any, Any, T]], Callable[[], None]]: '''Returns a tuple (asyncf, shutdown). asyncf is the async version of the original function (runs in an executor) and shutdown is a function to shut down the executor.'''
-def get_aiter_fromf[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T, None]: '''Emulates the second form of the builtin iter function in async, which the aiter function does not have.'''
+def get_aiter_fromf[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin iter function in async, which the aiter function does not have.'''
 async def safe_cancel(t: Future[Any]) -> None: '''Cancel a single future and wait for the request to complete asynchronously. See `safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''

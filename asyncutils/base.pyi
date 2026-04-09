@@ -32,21 +32,21 @@ def iter_to_aiter[T, R](it: AsyncGenerator[T, R], sentinel: T) -> AsyncGenerator
 @overload
 def iter_to_aiter[T](it: AsyncIterator[T]) -> AsyncIterator[T]: ... # type: ignore[overload-overlap]
 @overload
-def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T, None]: ...
+def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncGenerator[T, None]: ...
+def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T, None]: ...
+def iter_to_aiter[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T, None]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
+def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
 @overload
-def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R, None]: ...
+def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
 @overload
-def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T, None, None]: ...
+def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T]: ...
 @overload
 def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) iterable to a sync generator, or the original iterator if .'''
-def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
-def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T, None]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
+def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
+def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload
 async def safe_cancel_batch[T](t: SupportsIteration[Future[T]], *, callback: Callable[[T|BaseException], object]|None=..., disembowel: Literal[False]=..., raising: bool=...) -> None: ...
 @overload
@@ -63,14 +63,14 @@ async def collect[T](it: SupportsIteration[T], n: int=..., default: T|Sentinel=.
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''
 @overload
-def take[T](it: SupportsIteration[T], n: int, *, default: T|Sentinel) -> AsyncGenerator[T, None]: ...
+def take[T](it: SupportsIteration[T], n: int, *, default: T|Sentinel) -> AsyncGenerator[T]: ...
 @overload
-def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
+def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T]:
     '''Yield `n` items from the (async) iterable.
     To ensure there are exactly `n` items in the resultant async generator, pass a default value.
     In particular, pass `constants.RAISE` as `default` to cause `exceptions.ItemsExhausted` to be thrown in the case that there are not enough items.
     If `n` is None, take all items.'''
-def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard `n` items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw `exceptions.ItemsExhausted`.'''
+def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T]: '''Discard `n` items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw `exceptions.ItemsExhausted`.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class, with the addition of the step parameter.'''
 async def sleep_forever() -> NoReturn: '''A coroutine that never completes (unless an exception is thrown in, of course).'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
