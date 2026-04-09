@@ -8,7 +8,7 @@ from types import TracebackType
 from typing import Any, Self, overload, final
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class DynamicBoundedSemaphore(BoundedSemaphore):
-    '''A subclass of BoundedSemaphore whose bound can be set by the user via the `bound` property.'''
+    '''A subclass of :class:`asyncio.BoundedSemaphore` whose bound can be set by the user via the `bound` property.'''
     def __init__(self, value: int=...): ...
     @property
     def bound(self) -> int: ...
@@ -61,13 +61,13 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `maxstate` (optional): maximum length of state to store; older state will be expelled'''
     async def wait(self, state: T=..., timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
-        If the barrier has already been aborted or broken, raise an asyncio.BrokenBarrierError.
-        If the timeout expires, raise a TimeoutError and abort the barrier.
-        Once enough parties are waiting, all callers receive a tuple (pos, states).
-        Here states is the deque of stored state and pos is the number of parties having arrived before this one.'''
+        If the barrier has already been aborted or broken, raise `asyncio.BrokenBarrierError`.
+        If the timeout expires, raise `TimeoutError` and abort the barrier.
+        Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
+        and `pos` is the number of parties having arrived before this one.'''
     def _reset(self) -> None: '''Internal method to advance the barrier to the next generation so that new parties can wait.'''
-    def abort(self) -> None: '''Abort the barrier, throwing asyncio.BrokenBarrierError to present waiting parties.'''
-    def raise_for_abort(self) -> None: '''Throw asyncio.BrokenBarrierError if the barrier has been aborted.'''
+    def abort(self) -> None: '''Abort the barrier, throwing `asyncio.BrokenBarrierError` to present waiting parties.'''
+    def raise_for_abort(self) -> None: '''Throw `asyncio.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
     @property

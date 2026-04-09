@@ -5,7 +5,6 @@ from _collections_abc import Generator
 from typing import Literal, overload
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
-    def __init__(self) -> None: ...
     def set(self, value: T) -> None: '''Set the result of the event, awakening the waiters.'''
     def clear(self) -> None: '''Unset the result of the event.'''
     def is_set(self) -> bool: '''Whether the result is currently set.'''

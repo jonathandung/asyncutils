@@ -106,7 +106,8 @@ class _iter_to_aiter_error_handler:
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, c=H.check, H=H, w=L.debug, _f=_iter_to_aiter_error_handler): # noqa: C901,PLR0912,PLR0915
     # ruff: disable[RUF029]
     audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
-    if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'): # noqa: PLR1702
+    if _c(it, '__aiter__'): # noqa: PLR1702
+        if not _c(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
         if f: return it
         if _c(it, 'asend', 'athrow', 'aclose'):
             async def iterator(f=it.asend, c=c): # type: ignore[no-redef]

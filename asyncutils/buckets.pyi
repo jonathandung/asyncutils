@@ -8,9 +8,9 @@ class TokenBucket:
     The bucket fills up with tokens at a fixed rate, with each operation consuming a certain amount of tokens.
     If there are not enough tokens, the operation must wait until there are.'''
     def __init__(self, rate: float, capacity: float, timer: Timer=...):
-        '''rate: The number of tokens the bucket gains per second
+        '''rate: The number of tokens the bucket gains per time interval, as defined by the timer
         capacity: The maximum number of tokens the bucket can hold
-        timer (optional): A function such as `time.time` that returns the current time'''
+        timer (optional): A function such as `time.time` that returns the current time; default `time.monotonic`'''
     async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if `tokens` is not passed can be set through context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS.'''
     @property
     def capacity(self) -> float: '''The capacity of the bucket.'''

@@ -13,7 +13,6 @@ class event_loop:
     _INTERNAL_MASK: ClassVar[int]
     _SHOULD_CLOSE: ClassVar[int]
     def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., check_running: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all default to `False`.'''
-    def __del__(self) -> None: '''Destructor; exit the context if it was entered.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
     @overload
     def __exit__(self, t: None, v: None, b: None, /) -> Literal[False]: ...
@@ -30,21 +29,30 @@ def iter_to_aiter[T, R](it: AsyncGenerator[T, R]) -> AsyncGenerator[T, R]: ...
 @overload
 def iter_to_aiter[T, R](it: AsyncGenerator[T, R], sentinel: T) -> AsyncGenerator[T, R]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterator[T]) -> AsyncIterator[T]: ... # type: ignore[overload-overlap]
+def iter_to_aiter[I: AsyncIterator[Any]](it: I) -> I: ...
 @overload
 def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncGenerator[T]: ...
+def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncIterator[T]: ...
 @overload
 def iter_to_aiter[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: '''Convert the (async) iterable `it` to an async iterator non-blockingly. Values sent to the return async generator will be passed to the original.'''
+def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]:
+    '''Convert the (async) iterable `it` to an async generator as non-blockingly as possible.
+    If `it` is already an async iterator, it is returned as is.
+    Values sent to the return async generator will be passed to the original.
+    The async generator will stop when it encounters an item identical to `sentinel`.
+    When `use_existing_executor` is `True` (the default), the function will attempt to use an existing executor as created by previous calls specifying
+    `create_executor=True` to advance the iterable, and fall back to blocking the event loop every step without an executor.
+    When `create_executor` is `True`, the function will create a new executor to run the `__next__` calls if needed.'''
 @overload
 def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
 @overload
 def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T]: ...
 @overload
-def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) iterable to a sync generator, or the original iterator if .'''
+def aiter_to_iter[I: Iterator[Any]](ait: I) -> I: ...
+@overload
+def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) iterable `ait` to a sync generator, or the object itself if it is already an iterator.'''
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
 def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload
@@ -56,10 +64,10 @@ async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[
     The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
     If `raising` is True, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int=..., default: T|Sentinel=...) -> list[T]:
-    '''Collect n items from the (async) iterable into a list and return that list.
-    When n is not passed, equivalent to `iters.to_list` but slower.
+    '''Collect `n` items from the (async) iterable into a list and return that list.
+    When `n` is not passed, equivalent to `iters.to_list` but slower.
     Refer to `iters.basic_collect` for a marginally faster variant that doesn't accept a default.
-    If default is `constants.RAISE` and there are less than n items to collect, throw `exceptions.ItemsExhausted`.
+    If default is `constants.RAISE` and there are less than `n` items to collect, throw `exceptions.ItemsExhausted`.
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''
 @overload
