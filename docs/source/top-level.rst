@@ -47,7 +47,8 @@ This section documents the symbols defined at the top level of this package.
   as a :class:`float`.
   Useful for benchmarking the module's performance.
 
-One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
+One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule, except
+the contextually configured constants in :mod:`asyncutils.context`. The submodule objects, loaded or unloaded, are also accessible by name.
 
 Each module has an :data:`__all__` attribute that is a tuple of strings, representing its public API. Anything not included in it is
 considered unstable, with the sole exceptions of :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.

@@ -2,7 +2,7 @@
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from _collections_abc import Callable, Generator, AsyncGenerator, Awaitable, Coroutine
 from contextlib import _AsyncGeneratorContextManager
 from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
@@ -78,7 +78,7 @@ def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: L
 def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ... # type: ignore[assignment]
 @overload
 def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], auditf: Callable[[Literal['asyncutils.queues.password_queue'], Literal[True], Literal[True], str, str], None]=...) -> _B[R, V, T]: ... # type: ignore[assignment]
-class PotentQueueBase[T](Queue[T], EventualLoopMixin, metaclass=ABCMeta):
+class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
     def _init(self, maxsize: int) -> None: '''Initialize the queue given `maxsize`; called in `__init__`.'''

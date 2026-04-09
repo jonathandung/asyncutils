@@ -14,7 +14,7 @@ async def test_signal(res):
     _ = asyncio.create_task(kill(sig := Signals(res))) # noqa: RUF006
     assert res == await wait_for_signal(processor, sig, timeout=0.1)
 class Log(BaseException): ...
-def raise_(msg, exc_info=False): raise Log(msg)
+def raise_(msg, *a, exc_info=False): raise Log(msg%a)
 def ignore(*_): ...
 @fixture(scope='module')
 def mock_logger(): return type(sys.implementation)(warning=raise_, error=raise_, info=ignore, debug=ignore) # type: ignore

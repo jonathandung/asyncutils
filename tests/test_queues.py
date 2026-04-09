@@ -1,7 +1,7 @@
-from pytest import raises, fixture, mark
+from pytest import raises, fixture
 from asyncutils.config import _randinst
 from asyncutils.queues import *
-from asyncutils._internal.compat import QueueFull, QueueEmpty
+from asyncutils._internal.compat import QueueFull, QueueEmpty, QueueShutDown
 from asyncio.tasks import create_task, sleep
 @fixture
 def pwd(): return _randinst.randbytes(8)
@@ -18,6 +18,10 @@ async def test_pwdq(pwd):
     t = create_task(Q.get())
     Q.put_nowait(3, pwd)
     await sleep(0.1)
-    assert t.done() and Q.empty()
+    assert t.done() and t.result() == 3 and Q.empty()
     with raises(QueueEmpty): Q.get_nowait()
     Q.shutdown()
+    with raises(QueueShutDown): Q.put_nowait(-2, pwd)
+    with raises(QueueShutDown): await Q.put(-3, pwd)
+    with raises(QueueShutDown): Q.get_nowait()
+    with raises(QueueShutDown): await Q.get()

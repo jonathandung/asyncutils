@@ -24,7 +24,7 @@ class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass module')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R._get_, _f=_f, _l=l, _n=_s):
         if not isinstance(m := _s.get(n := self._name), type(self)): return m
-        if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); m = __import__(_n, fromlist=_f)
+        if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__
         if l := getattr(_g(), 'locals', None): l[n] = m
         _s[n] = m; return m
     __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._name+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''))

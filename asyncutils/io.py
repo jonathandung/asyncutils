@@ -190,7 +190,7 @@ class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
             for o, s in offsets: a(await f.read(o, s))
         return path, r
     async def _bulk_writer(self, path, data):
-        async with self.open(path) as f: await gather(*(f.write(d, o) for d, o in data))
+        async with self.open(path) as f: await gather(*starmap(f.write, data))
     async def _bulk_creator(self, path, size, chunks, exclusive):
         async with self.create(path, size, exclusive=exclusive) as f:
             for o, d in chunks.items(): await f.smart_write(d, o)
@@ -199,11 +199,11 @@ class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
         async with self.open(path) as f: await self._run(f.resize, size)
     async def _compact_helper(self, path):
         async with self.open(path) as f: await f.compact()
-    async def bulk_read(self, file_offsets): return dict(await gather(*(self._bulk_reader(*_) for _ in file_offsets.items())))
-    async def bulk_write(self, file_data): await gather(*(self._bulk_writer(*_) for _ in file_data.items()))
+    async def bulk_read(self, file_offsets): return dict(await gather(*starmap(self._bulk_reader, file_offsets.items())))
+    async def bulk_write(self, file_data): await gather(*starmap(self._bulk_writer, file_data.items()))
     async def bulk_checksum(self, paths, alg='blake2s'): return dict(await gather(*map(partial(self._checksum_helper, alg=alg), paths)))
-    async def bulk_copy(self, pairs): await gather(*(self.copy_file(*p) for p in pairs))
-    async def bulk_resize(self, sizes): await gather(*(self._resize_helper(*t) for t in sizes.items()))
+    async def bulk_copy(self, pairs): await gather(*starmap(self.copy_file, pairs))
+    async def bulk_resize(self, sizes): await gather(*starmap(self._resize_helper, sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))
     async def find_in_files(self, pattern, paths, max_per_file=I, *, allow_overlapping=False):
         async def searchf(p, o):

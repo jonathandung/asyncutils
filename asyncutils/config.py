@@ -40,10 +40,10 @@ def k(e, a=False, N=N, c=c):
             if a: c(e, str, int)
     return x
 def g(e, a=False, t=(str, int, bytes), c=c, k=k):
-    if isinstance(x := k(e), str) and (x.startswith("b'") and x.endswith("'") or x.startswith('b"') and x.endswith('"')): # noqa: RUF021
+    if isinstance(x := k(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
         try: x = x[2:-1].encode() # noqa: SIM105
         except UnicodeEncodeError: ...
-    if isinstance(x, t) or a and (x is None or isinstance(x, float)): return x # noqa: RUF021
+    if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     c(e, type(x), t)
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))

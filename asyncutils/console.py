@@ -76,7 +76,7 @@ class ConsoleBase(B): # type: ignore
         for _ in self.memerr_hooks: _(self)
         self.refresh()
     def set_return_code(self, e, /, _s=_s): self.retcode = e if isinstance(e, int) else e.code; self._loop.stop(_s)
-    def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template='%(name)s REPL (version %(version)s) running on {}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n'.format(S.platform), **k):
+    def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%cls.__qualname__)
         if name is None: name = cls.__qualname__.lower().removesuffix('console')
         if other_handlers is None: other_handlers = {}

@@ -122,18 +122,18 @@ class LockForceRequest(BaseException):
     def __init__(self, s, a, l, i, /): self.requester, self.fulfill, self.lock = s, a, l; super().__init__(f'request from {type(s).__qualname__} to release {type(l).__qualname__}', i)
 class PasswordQueueError(Exception): ...
 class PasswordRetrievalError(PasswordQueueError):
-    def __init__(self, from_): self.from_ = from_; super().__init__('failed to retrieve correct password of password-protected queue from closure variable of name %r'%from_)
+    def __init__(self, from_): self.from_ = from_; super().__init__(f'failed to retrieve correct password of password-protected queue from closure variable of name {from_!r}')
 class GetPasswordRetrievalError(PasswordRetrievalError): ...
 class PutPasswordRetrievalError(PasswordRetrievalError): ...
 class ForbiddenOperation(PasswordQueueError, TypeError):
-    def __init__(self, op, *a): self.op = op = op%a; super().__init__('cannot %s PasswordQueue'%op)
+    def __init__(self, op, *a): self.op = op = op%a; super().__init__(f'cannot {op} PasswordQueue')
 class PasswordError(PasswordQueueError):
     @property
     def wrongpass(self): return self._refp() # type: ignore[attr-defined]
     @property
     def queue(self): return self._refq() # type: ignore[attr-defined]
 class WrongPassword(PasswordError, ValueError):
-    def __init__(self, *_): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_)
+    def __init__(self, *_): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_) # noqa: UP031
 @subscriptable
 class WrongPasswordType(PasswordError, TypeError):
     def __init__(self, *_): self._refp, self._reft, self._refq, self._refc = map(ref, _); super().__init__('password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format(*_))

@@ -1,7 +1,7 @@
 from ._internal.helpers import _LoopMixinBase
 from ._internal.protocols import ValidExcType
 from .locks import LocksmithBase
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from asyncio.futures import Future
 from _collections_abc import Generator, Callable, Coroutine, AsyncGenerator, Awaitable
 from functools import cached_property
@@ -17,12 +17,12 @@ class LoopContextMixin(_LoopMixinBase):
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
-class AwaitableMixin[T](metaclass=ABCMeta):
+class AwaitableMixin[T](ABC):
     '''A subclass that implements the `wait` async method automatically becomes awaitable, resolving to the return value of that method.'''
     def __await__(self) -> Generator[Any, None, T]: ...
     @abstractmethod
     def wait(self) -> Awaitable[T]: ...
-class AsyncContextMixin[T](metaclass=ABCMeta):
+class AsyncContextMixin[T](ABC):
     def __enter__(self) -> T: ...
     @overload
     @abstractmethod
@@ -35,7 +35,7 @@ class AsyncContextMixin[T](metaclass=ABCMeta):
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]|None: ...
-class ExecutorRequiredAsyncContextMixin[T](metaclass=ABCMeta):
+class ExecutorRequiredAsyncContextMixin[T](ABC):
     '''`__exit__` is the only abstract method (`__enter__` returns self by default).'''
     @cached_property
     def runner[R, *Ts](self) -> Callable[[Callable[[*Ts], R], *Ts], Future[R]]: ...
@@ -51,7 +51,7 @@ class ExecutorRequiredAsyncContextMixin[T](metaclass=ABCMeta):
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]|None: ...
-class LockMixin[T, R: (None, Coroutine[Any, Any, None])](metaclass=ABCMeta):
+class LockMixin[T, R: (None, Coroutine[Any, Any, None])](ABC):
     def __init_subclass__(cls, *, _lock_factory: Callable[[Self], T]=..., **k: Any) -> None: ...
     @abstractmethod
     async def acquire(self) -> bool: ...
@@ -74,7 +74,7 @@ class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None, T
     def release(self) -> T: ...
 class LoopBoundMixin:
     def make_fut(self) -> Future[Any]: ...
-class EventMixin[T](AwaitableMixin[T], LoopBoundMixin, metaclass=ABCMeta):
+class EventMixin[T](AwaitableMixin[T], LoopBoundMixin, ABC):
     @abstractmethod
     async def wait_for_next(self, timeout: float|None=..., **k: Any) -> T: ...
     @abstractmethod

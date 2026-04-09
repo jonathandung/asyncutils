@@ -63,7 +63,7 @@ class EventBus(LoopContextMixin):
     A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
     Use instances as context managers only for proper setup and shutdown.'''
-    _WildcardType = NewType('_WildcardType', None)
+    _WildcardType = NewType('_WildcardType', None) # type: ignore[valid-newtype]
     WILDCARD: _WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):

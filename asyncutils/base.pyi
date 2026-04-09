@@ -1,8 +1,8 @@
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
-from _collections_abc import Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
+from _collections_abc import Awaitable, Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from types import TracebackType
-from typing import ClassVar, Self, Literal, Awaitable, Any, NoReturn, overload
+from typing import ClassVar, Self, Literal, Any, NoReturn, overload
 from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine, Sentinel
 __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_iter', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_aiter', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 class event_loop:
@@ -79,7 +79,7 @@ def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T, None]:
     If n is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, raising: bool=...) -> AsyncGenerator[T, None]: '''Discard n items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw ItemsExhausted.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class, with the addition of the step parameter.'''
-async def sleep_forever() -> NoReturn: '''A coroutine that never completes.'''
+async def sleep_forever() -> NoReturn: '''A coroutine that never completes (unless an exception is thrown in, of course).'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
 '''An awaitable object that completes immediately and is also an exhausted generator, with the `CO_ITERABLE_COROUTINE` flag set.'''
 yield_to_event_loop: Awaitable[None]

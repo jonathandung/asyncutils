@@ -104,6 +104,7 @@ class _iter_to_aiter_error_handler:
     def __enter__(self): ...
     def __exit__(self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration'))): return False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, c=H.check, H=H, w=L.debug, _f=_iter_to_aiter_error_handler): # noqa: PLR0912,PLR0915
+    # ruff: disable[RUF029]
     audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
     if _c(it, '__aiter__') and _c(it := it.__aiter__(), '__anext__'): # noqa: PLR1702
         if f: return it
@@ -128,22 +129,22 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
         if e is None:
             if f:
                 if g:
-                    async def iterator(_=it.send): # type: ignore[no-redef] # noqa: RUF029
+                    async def iterator(_=it.send): # type: ignore[no-redef]
                         l = _(None)
                         with g:
                             while True: l = _((yield l))
                 else:
-                    async def iterator(f=it.__next__): # type: ignore[no-redef] # noqa: RUF029
+                    async def iterator(f=it.__next__): # type: ignore[no-redef]
                         while True: yield f()
             elif g:
-                async def iterator(_=it.send, c=c): # type: ignore[no-redef] # noqa: RUF029
+                async def iterator(_=it.send, c=c): # type: ignore[no-redef]
                     l = _(None)
                     with g:
                         while True:
                             if c(l, sentinel): break
                             l = _((yield l))
             else:
-                async def iterator(_=it.__next__, c=c): # type: ignore[no-redef] # noqa: RUF029
+                async def iterator(_=it.__next__, c=c): # type: ignore[no-redef]
                     while True:
                         if c((l := _()), sentinel): break
                         yield l
@@ -172,9 +173,10 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
                         yield l
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
+    # ruff: enable[RUF029]
 def aiter_to_iter(ait, _c=b):
     audit('asyncutils.base.aiter_to_iter', type(ait).__qualname__)
-    if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): yield from ait
+    if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): yield from ait; return
     if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
         a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
         if _c(ait, 'asend', 'athrow', 'aclose'):

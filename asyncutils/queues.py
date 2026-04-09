@@ -5,7 +5,6 @@ from .futures import AsyncCallbacksFuture
 from ._internal.compat import partial, Placeholder, Queue, QueueShutDown, QueueFull, QueueEmpty
 from ._internal.helpers import get_loop_and_set
 from ._internal.log import info
-from ._internal.unparsed import _ as B
 from .mixins import EventualLoopMixin
 from .util import safe_cancel, sync_await
 from abc import ABCMeta, abstractmethod
@@ -14,8 +13,7 @@ from asyncio.tasks import gather, wait_for
 from asyncio.timeouts import timeout as _timeout
 from _collections import deque # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
-from itertools import count
+from itertools import count, starmap
 from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
@@ -24,24 +22,17 @@ def _wakeup_next(W):
     P = W.popleft
     while W:
         if not (w := P()).done(): w.set_result(None); break
-@dataclass(eq=False, frozen=True, match_args=False, slots=True, weakref_slot=True, repr=False)
 class _Queue:
-    maxsize: object
-    empty: object
-    qsize: object
-    full: object
-    get: object
-    get_nowait: object
-    put: object
-    put_nowait: object
-    change_get_password: object
-    change_put_password: object
-    task_done: object
-    join: object
-    shutdown: object
-    cancel_extend: object
-    __repr__: object
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E, B=B): # noqa: PLR0912,PLR0915
+    __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
+    def __repr__(self): return f'<password-protected queue at {id(self):#x}'
+    def __new__(cls, /, *a, f=object.__setattr__):
+        self = super().__new__(cls)
+        for a in zip(cls.__slots__, a): f(self, *a) # noqa: B020,PLR1704
+        return self
+    def __setattr__(self, name, value, /, _='cancel_extend', f=object.__setattr__):
+        if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
+        f(self, name, value)
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E): # noqa: PLR0912,PLR0915
     auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
     if protect_get:
         try:
@@ -135,7 +126,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             f = D.popleft
             while D:
                 if not (F := f()).done(): F.set_result(None)
-    q = _Queue(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, lambda msg=None: False, lambda: f'<password-protected queue at {id(q):#x}>') # noqa: ARG005
+    q = _Queue(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
         async def extend(f=partial(put, Placeholder, password_put)):
             async for i in iter_to_aiter(init_items): await f(i)
@@ -298,8 +289,8 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             with ignore_qempty:
                 while True: await q.smart_put((i, await self.get())); i += 1
         self.make(feed()); return q
-    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(i) for i in self.peek_all()))) # type: ignore
-    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*(f(*i) for i in self.peek_all()))) # type: ignore
+    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*map(f, self.peek_all()))) # type: ignore
+    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*starmap(f, self.peek_all()))) # type: ignore
     def filter_nowait(self, pred=bool, /):
         f, g = (k := []).append, (r := []).append
         with ignore_qempty:

@@ -54,6 +54,7 @@ Submodules:
   - take
   - drop
   - aenumerate
+  - sleep_forever
 
   Awaitables:
   - dummy_task

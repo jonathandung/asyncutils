@@ -1,6 +1,6 @@
 '''Implementation of an interactive console base class, as well as an AsyncUtilsConsole class derived from it.'''
 from ._internal.protocols import ValidExcType
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from code import InteractiveConsole
@@ -11,7 +11,7 @@ from _contextvars import Context
 from types import ModuleType, CodeType
 from typing import ClassVar, Any, Self, TypeGuard, final, overload
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
-class ConsoleBase(InteractiveConsole, metaclass=ABCMeta):
+class ConsoleBase(InteractiveConsole, ABC):
     '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.
     Inspired by asyncio/__main__.py. Highly adaptable.'''
     STATEMENT_FAILED: ClassVar[object]
