@@ -19,7 +19,7 @@ jobs:
       - name: Build release distributions
         run: |
           pip install -U pip
-          pip install .[pub]
+          pip install build
           python -m build
       - name: Upload distributions
         uses: actions/upload-artifact@v7
@@ -43,7 +43,9 @@ jobs:
           path: dist/
           merge-multiple: true
       - name: Publish release distributions to PyPI using twine
-        run: python -m twine upload dist/* --verbose
+        run: |
+          pip install twine
+          twine upload dist/* --verbose
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{secrets.PYPI_TOKEN}}

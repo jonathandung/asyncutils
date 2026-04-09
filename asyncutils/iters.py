@@ -3,7 +3,7 @@ from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_b
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
-from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, check, new_executor
+from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, check, create_executor
 from .iterclasses import achain, anullcontext
 from .util import get_aiter_fromf, safe_cancel
 import math as M, _operator as O
@@ -354,7 +354,7 @@ async def to_list(it, /): return [_ async for _ in iter_to_aiter(it)]
 async def aconsume(it, n=None, _=check_methods):
     if n == 0: return
     if n: it = take(it, n)
-    if _(it, '__iter__'): await get_loop_and_set().run_in_executor(new_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0) # type: ignore
+    if _(it, '__iter__'): await get_loop_and_set().run_in_executor(create_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0) # type: ignore
     else:
         async for _ in it: ...
 def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *filter_out(default, s=_NO_DEFAULT))

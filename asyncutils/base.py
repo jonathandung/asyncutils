@@ -123,9 +123,9 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
         e, g = None, _f(it)
         if use_existing_executor:
             if (e := getattr(iter_to_aiter, 'executor', None)) is None:
-                if create_executor: e = H.new_executor(iter_to_aiter)
+                if create_executor: e = H.create_executor(iter_to_aiter)
                 else: w('iter_to_aiter: no existing executor')
-        elif create_executor: e = H.new_executor(iter_to_aiter, save=False)
+        elif create_executor: e = H.create_executor(iter_to_aiter, save=False)
         if e is None:
             if f:
                 if g:

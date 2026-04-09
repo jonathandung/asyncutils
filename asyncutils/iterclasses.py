@@ -93,7 +93,7 @@ class abucket(LoopContextMixin):
 @H.subscriptable
 class OnlineSorter:
     __slots__ = '_it', '_loop', '_popper', '_pusher', '_runner'
-    def __init__(self, it): self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.new_executor(self, False)), l
+    def __init__(self, it): self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
     def __aiter__(self):
         from .iters import to_list
         if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); Q.heapify(h); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)
