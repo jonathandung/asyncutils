@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-asyncutils"
-version = "0.8.22"
+version = "0.8.23"
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 description = "A library containing versatile tools to well complement the asyncio framework. Not as performant as C extensions, but startup speed is great considering the features it provides."
@@ -22,7 +22,7 @@ Repository = "https://github.com/jonathandung/asyncutils.git"
 Issues = "https://github.com/jonathandung/asyncutils/issues"
 Changelog = "https://github.com/jonathandung/asyncutils/blob/main/CHANGELOG.md"
 Download = "https://pypi.org/project/py-asyncutils/#files"
-"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.8.22"
+"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.8.23"
 
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'
@@ -33,7 +33,7 @@ dev = ["ruff>=0.15.9", "mypy>=1.19.1", "pytest>=9.0.2", "pytest-xdist>=3.8.0", "
 docs = ["sphinx>=9.1.0", "sphinx_rtd_theme>=3.1.0", "sphinx-notfound-page>=1.1.0", "sphinx-autoapi>=3.8.0", "doc8>=2.0.0", "sphinx-lint>=1.0.2"]
 pub = ["build>=1.4.2", "twine[keyring]>=6.2.0"]
 json = ["json-with-comments>=1.2.10", "json5>=0.14.0", "hjson>=3.1.0"]
-all = ["py-asyncutils[dev,docs,pub,json]>=0.8.22"]
+all = ["py-asyncutils[dev,docs,pub,json]>=0.8.23"]
 
 [tool.setuptools]
 packages = ["asyncutils", "asyncutils._internal"]
