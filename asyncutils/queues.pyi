@@ -1,5 +1,5 @@
 '''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
-from .exceptions import IgnoreErrors
+from .exceptions import IgnoreErrors, ForbiddenOperation
 from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
 from abc import ABC, abstractmethod
@@ -22,6 +22,7 @@ ignore_valerrs: Final[IgnoreErrors]
 @type_check_only
 class _Q[R, T](Protocol):
     '''A protocol representing password-protected queues. Does not exist at runtime.'''
+    exc: Final[type[ForbiddenOperation]]
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Asynchronously put an item into the queue; if the queue is full, wait until a free slot is available.'''
     def get_nowait(self) -> T: '''Get an item from the queue immediately; raise `QueueEmpty` if impossible.'''

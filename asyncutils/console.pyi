@@ -103,7 +103,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     @overload
     def set_return_code(self, code: int, /) -> None: ...
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None:
-        '''Called to write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing sys.ps1
+        '''Called to write code with emulated color (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing sys.ps1
         and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):

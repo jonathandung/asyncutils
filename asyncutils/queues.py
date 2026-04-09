@@ -22,17 +22,25 @@ def _wakeup_next(W):
     P = W.popleft
     while W:
         if not (w := P()).done(): w.set_result(None); break
-class _Queue:
+class Q:
+    exc = E.ForbiddenOperation
     __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
-    def __repr__(self): return f'<password-protected queue at {id(self):#x}'
+    def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
     def __new__(cls, /, *a, _=f):
         self = super().__new__(cls)
         for a in zip(cls.__slots__, a): _(self, *a) # noqa: B020,PLR1704
         return self
-    def __setattr__(self, name, value, /, _='cancel_extend', f=f):
+    def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
+        if name not in s: raise AttributeError(f'{type(self).__qualname__!r} object has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E): # noqa: C901,PLR0912,PLR0915
+    def __init_subclass__(cls, /, e=exc('subclass'), **_): raise e
+    # ruff: disable[PLR6301]
+    def _get(self, _=exc('call _get() on')): raise _
+    def _put(self, _=exc('call _put() on')): raise _
+    def _init(self, maxsize, _=exc('call _init() on')): raise _ # noqa: ARG002
+    # ruff: enable[PLR6301]
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E, Q=Q): # noqa: C901,PLR0912,PLR0915
     auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
     if protect_get:
         try:
@@ -114,8 +122,6 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if U == 0: raise ValueError('task_done() called too many times')
         U -= 1
         if U == 0: E.set()
-    async def join():
-        if U > 0: await E.wait()
     def shutdown(immediate=False):
         nonlocal S; S = True
         if immediate:
@@ -126,7 +132,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             f = D.popleft
             while D:
                 if not (F := f()).done(): F.set_result(None)
-    q = _Queue(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, lambda msg=None: False) # noqa: ARG005
+    q = Q(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
         async def extend(f=partial(put, Placeholder, password_put)):
             async for i in iter_to_aiter(init_items): await f(i)
@@ -352,4 +358,4 @@ class UserPriorityQueue(SmartPriorityQueue):
     def put(self, item, priority=0): return super().put((priority, self._tiebreak, item))
     def get_nowait(self): return super().get_nowait()[-1]
     async def get(self): return (await super().get())[-1]
-del E, f, _
+del E, f, _, Q

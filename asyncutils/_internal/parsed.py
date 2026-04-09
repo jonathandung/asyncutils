@@ -3,7 +3,7 @@ from ..constants import POSSIBLE_EXECUTORS as c
 from .compat import apargs as j
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
-Has CLI and coloured REPL support for quick development.
+Has CLI and colored REPL support for quick development.
 On both conda and pip as `py-asyncutils`.''', add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line.
 This format differs from that described below.

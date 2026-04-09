@@ -17,7 +17,7 @@ class Log(BaseException): ...
 def raise_(msg, *a, exc_info=False): raise Log(msg%a)
 def ignore(*_): ...
 @fixture(scope='module')
-def mock_logger(): return type(sys.implementation)(warning=raise_, error=raise_, info=ignore, debug=ignore) # type: ignore
+def mock_logger(): return type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore) # type: ignore
 @fixture(scope='module')
 def wait_partial(mock_logger): return __import__('_functools').partial(wait_for_signal, processor, logger=mock_logger)
 @fixture

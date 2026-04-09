@@ -2,7 +2,7 @@ Welcome to the asyncutils docs!
 ===============================
 
 :mod:`asyncutils` is a Python library which, as the name suggests, contains helpful routines and types for asynchronous programming
-applications, organized under various submodules. It offers a *simple* and *intuitive* API and a *colourful* command line interface.
+applications, organized under various submodules. It offers a *simple* and *intuitive* API and a *colorful* command line interface.
 
 .. toctree ::
   :maxdepth: 2

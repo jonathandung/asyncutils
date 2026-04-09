@@ -22,14 +22,13 @@ class partial:
             if a:
                 e(a)
                 if P:
-                    N = len(a)
-                    if N < P: e(Placeholder for _ in range(P-N))
+                    if (N := len(a)) < P: e(Placeholder for _ in range(P-N))
                     A = list(f._mg(A)) # type: ignore
                     if N > P: A.extend(a[P:])
                 C, M = _get_merger(A)
             else: C, M = P, f._mg
             k, f = f.keywords|k, f.func
-        else: A = a; C, M = _get_merger(a)
+        else: C, M = _get_merger(A := a)
         (_ := object.__new__(cls)).func, _.args, _.keywords, _._phs, _._mg = f, tuple(A), k, C, M; return _
     def __call__(self, /, *a, **k):
         if (c := self._phs):

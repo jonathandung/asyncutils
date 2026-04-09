@@ -66,9 +66,9 @@ class ConsoleBase(B): # type: ignore
     def prehook(self, max_memerrs): self._max_memerrs, self._internal_is_running = 3 if max_memerrs is None else max_memerrs, True
     def posthook(self): self._internal_is_running = False
     def write_special(self, msg): self.write(msg)
-    def interrupt(self, _f=_f, _m='\nKeyboardInterrupt\n'):
-        if not self.CAN_USE_PYREPL: self.write(_m)
-        elif (x := __import__('_pyrepl.simple_interact', fromlist=_f)._get_reader().threading_hook): x.add('')
+    def interrupt(self, _=_f, m='\nKeyboardInterrupt\n'):
+        if not self.CAN_USE_PYREPL: self.write(m)
+        elif (x := __import__('_pyrepl.simple_interact', fromlist=_)._get_reader().threading_hook): x.add('')
         self.refresh()
     def memoryerror(self):
         if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(1)

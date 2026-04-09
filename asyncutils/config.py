@@ -69,8 +69,7 @@ match logging_to := g('log_to'):
     case 1 if b: s, logging_to = S.stdout, 'STDOUT'
     case 2 if b: logging_to = 'STDERR'
     case str()|int()|bytes():
-        M = True
-        try: logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False # noqa: SIM115
+        try: M = True; logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False # noqa: SIM115
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
         except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')

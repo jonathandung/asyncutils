@@ -14,5 +14,5 @@ def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) 
 def argstr_to_json(argstr: str, path: Openable, /, *, dump: DumpType=..., split: Callable[[str], Sequence[str]]=...) -> None: '''Parses the shell-escaped string representing the command-line arguments for this module and writes it into a .json path.'''
 def get_cfg_json_format() -> str: '''Get the format of .json configs this module takes as a string. `print_cfg_json_format` is perhaps more useful.'''
 def print_cfg_json_format(file: CanWriteAndFlush[str]=...) -> None: '''Print the above format into the specified file and flush it (default stdout).'''
-def get_cmd_help() -> str: '''Get the command line help as a string containing ANSI colour escape sequences. It would therefore be more useful to call `print_cmd_help` instead.'''
-def print_cmd_help(file: CanWriteAndFlush[str]=...) -> None: '''Print the above help into the specified file and flush it (default stdout).'''
+def get_cmd_help() -> str: '''Get the command line help as a string containing ANSI color escape sequences. It would therefore be more useful to call `print_cmd_help` instead.'''
+def print_cmd_help(file: CanWriteAndFlush[str]=...) -> None: '''Print the above help into the specified file (default stdout) and flush it.'''
