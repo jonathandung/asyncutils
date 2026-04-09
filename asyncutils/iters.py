@@ -24,8 +24,8 @@ async def fmap_parallel(fs, /, *a, **k):
     for r in await to_tuple(t(f(*a, **k)) async for f in iter_to_aiter(fs)): yield await r
 async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
     f, g = (l := []).append, l.clear
-    async for _ in amap(inner, it, await_=inner_await):
-        async for _ in amap(outer, _, await_=outer_await): f(_) # noqa: B020
+    async for _ in amap(outer, it, await_=outer_await):
+        async for _ in amap(inner, _, await_=inner_await): f(_) # noqa: B020
         yield tuple(l); g()
 def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     if n <= 0: raise ValueError('n must be positive')
@@ -534,7 +534,7 @@ async def afirst(it, default=_NO_DEFAULT):
         async for i in it: return i
     except TypeError:
         for i in it: return i
-    if default is _NO_DEFAULT: raise ValueError('afirst called on empty iterable without default value')
+    if default is _NO_DEFAULT: raise ValueError('afirst() called on empty iterable without default value')
     return default
 async def alast(it, default=_NO_DEFAULT, _=check_methods):
     try:
@@ -546,7 +546,7 @@ async def alast(it, default=_NO_DEFAULT, _=check_methods):
 def anthorlast(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)
 def abeforeandafter(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
 async def anthcombination(it, r, idx):
-    if r > (n := len(p := await to_tuple(it))) or r < 0: raise ValueError('inappropriate value of r')
+    if not 0 <= r <= (n := len(p := await to_tuple(it))): raise ValueError(f'r={r} is out of range')
     c, k = 1, min(r, n-r)
     for i in range(1, k+1): c = c*(n-k+i)//i
     if idx < 0: idx += c
@@ -557,9 +557,8 @@ async def anthcombination(it, r, idx):
         yield p[~n]
 async def asubslices(it):
     async for _ in astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2)))): yield _
-def arepeatfunc(f, times=None, *a): return astarmap(f, arepeat(a) if times is None else arepeat(a, times), True)
-async def apolynomialfromroots(roots):
-    p = range(1, 2)
+def arepeatfunc(f, times=None, *a): return astarmap(f, arepeat(a, times), True)
+async def apolynomialfromroots(roots, p=(1,)):
     async for r in iter_to_aiter(roots): p = aconvolve(p, (1, -r))
     async for _ in iter_to_aiter(p): yield _
 async def atranspose(it):
@@ -574,12 +573,10 @@ async def aflattentensor(tensor, base_typ=(str, bytes), _c=check_methods):
         I = aflatten(I)
     async for i in I: yield i
 async def apolynomialderivative(coeff):
-    f = (r := []).append
-    async for _ in iter_to_aiter(coeff): f(_)
-    async for _ in amap(O.mul, r, range(len(r)-1, 0)): yield _
+    async for _ in amap(O.mul, r := await to_tuple(coeff), range(len(r)-1, 0)): yield _
 async def apolynomialeval(coeff, x):
     if not (n := len(t := await to_tuple(coeff))): return type(x)(0)
-    return await asumprod(t, amap(pow, arepeat(x), range(n-1, -1)))
+    return await asumprod(t, areversed(await collect(apowers(x), n-1)))
 async def areshape(mat, shape):
     if isinstance(shape, int): I = batch(aflatten(mat), shape, None) # type: ignore
     else: d = anext(shape := iter_to_aiter(shape)); from .func import areduce as f; I = aislice(await f(batch, areversed(shape), aflattentensor(mat), await_=False), d)

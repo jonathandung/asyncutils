@@ -1,14 +1,15 @@
+# type: ignore
 from asyncutils import _internal as mod
 from pytest import raises, fail
 def test_helpers():
     helpers = mod.helpers
     for _ in helpers.filter_out(None, True, False): assert isinstance(_, bool)
     assert helpers.check_methods('', 'lower', 'casefold')
-    with raises(AttributeError): helpers.copy_and_clear(()) # type: ignore
+    with raises(AttributeError): helpers.copy_and_clear(())
     class _: ...
     assert helpers.subscriptable(_) is _
-    _ = _[None]() # type: ignore
-    _.foo = lambda: None # type: ignore
+    _ = _[None]()
+    _.foo = lambda: None
     assert not helpers.check_methods(_, 'foo')
 def test_submods_lazy_loading():
     module = mod.initialize.module
@@ -26,7 +27,7 @@ def test_submods_lazy_loading():
     assert m.run is M.run
 def test_others(cfgjson, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
-    assert mod.protocols.All is mod.protocols.foo is mod.running_console._get_() is mod.running_console._unset_() is None # type: ignore
+    assert mod.protocols.All is mod.protocols.foo is mod.running_console._get_() is mod.running_console._unset_() is None
     assert mod.submodules.cli_all == ('run',)
     monkeypatch.setenv('AUTILSCFGPATH', cfgjson)
     N = __import__('importlib').reload(mod.unparsed).N

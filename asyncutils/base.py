@@ -97,19 +97,13 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         L = len(r := await gather(*map(f, r), return_exceptions=True))
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
-class _iter_to_aiter_error_handler:
-    __slots__ = 'it'
-    def __init__(self, it): self.it = it
-    def __bool__(self, _=b): return _(self.it, 'send', 'throw', 'close')
-    def __enter__(self): ...
-    def __exit__(self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration'))): return False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, create_executor=False, _c=b, c=H.check, H=H, w=L.debug, _f=_iter_to_aiter_error_handler): # noqa: C901,PLR0912,PLR0915
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=False, create_executor=False, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': 'it', '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)})): # noqa: ARG005,C901,PLR0912,PLR0915
     # ruff: disable[RUF029]
     audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
-    if _c(it, '__aiter__'): # noqa: PLR1702
-        if not _c(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
+    if b(it, '__aiter__'): # noqa: PLR1702
+        if not b(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
         if f: return it
-        if _c(it, 'asend', 'athrow', 'aclose'):
+        if b(it, 'asend', 'athrow', 'aclose'):
             async def iterator(f=it.asend, c=c): # type: ignore[no-redef]
                 l = await f(None)
                 while True:
@@ -120,19 +114,19 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
                 async for l in it:
                     if c(l, sentinel): break
                     yield l
-    elif _c(it, '__iter__') and _c(it := it.__iter__(), '__next__'):
-        e, g = None, _f(it)
+    elif b(it, '__iter__') and b(it := it.__iter__(), '__next__'):
+        e, g = None, _(it)
         if use_existing_executor:
             if (e := getattr(iter_to_aiter, 'executor', None)) is None:
-                if create_executor: e = H.create_executor(iter_to_aiter)
+                if create_executor: e = s(iter_to_aiter)
                 else: w('iter_to_aiter: no existing executor')
-        elif create_executor: e = H.create_executor(iter_to_aiter, save=False)
+        elif create_executor: e = s(iter_to_aiter, save=False)
         if e is None:
             if f:
                 if g:
                     async def iterator(_=it.send): # type: ignore[no-redef]
                         l = _(None)
-                        with g:
+                        with g: # type: ignore
                             while True: l = _((yield l))
                 else:
                     async def iterator(f=it.__next__): # type: ignore[no-redef]
@@ -140,7 +134,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
             elif g:
                 async def iterator(_=it.send, c=c): # type: ignore[no-redef]
                     l = _(None)
-                    with g:
+                    with g: # type: ignore
                         while True:
                             if c(l, sentinel): break
                             l = _((yield l))
@@ -150,12 +144,12 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
                         if c((l := _()), sentinel): break
                         yield l
         else:
-            def r(*a, _=H.get_loop_and_set().run_in_executor, e=e): return __import__('_functools').partial(_, e, *a)
+            def r(*a, _=h().run_in_executor, e=e): return __import__('_functools').partial(_, e, *a)
             if f:
                 if g:
                     async def iterator(_=r(it.send)): # type: ignore[no-redef]
                         l = await _(None)
-                        with g:
+                        with g: # type: ignore
                             while True: l = await _((yield l))
                 else:
                     async def iterator(_=r(next, it)): # type: ignore[no-redef]
@@ -163,12 +157,12 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=True, creat
             elif g:
                 async def iterator(_=r(it.send), c=c): # type: ignore[no-redef]
                     l = await _(None)
-                    with g:
+                    with g: # type: ignore
                         while True:
                             if c(l, sentinel): break
                             l = await _((yield l))
             else:
-                async def iterator(_=r(next, it, sentinel), c=H.check):
+                async def iterator(_=r(next, it, sentinel), c=c):
                     while True:
                         if c((l := await _()), sentinel): break
                         yield l
@@ -227,4 +221,4 @@ def a(_, r='asyncutils.base.yield_to_event_loop'): return r
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), '__repr__': a, '__str__': a, '__reduce__': a}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close() # type: ignore[attr-defined]
 _.__qualname__ = _.__name__ = 'dummy_task'
-del f, _, P, L, b, H, _iter_to_aiter_error_handler
+del f, _, P, L, b, H

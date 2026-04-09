@@ -74,8 +74,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         u(p)
         while not l:
             if S: raise QueueShutDown
-            _(F := m())
-            try: await F
+            try: _(F := m()); await F
             except:
                 F.cancel()
                 with ignore_valerrs: G.remove(F)
@@ -155,8 +154,8 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
         try: self.put_nowait(item); return True
         except QueueFull:
             try: await wait_for(self.put(item), timeout); return False
-            except TimeoutError:
-                if raising: raise
+            except TimeoutError as e:
+                if raising: raise e from None
     async def smart_get(self, *, timeout=None, default=_NO_DEFAULT):
         f = default is _NO_DEFAULT
         try: return self.get_nowait()
@@ -165,8 +164,8 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             return default
         except QueueEmpty:
             try: return await wait_for(self.get(), timeout)
-            except TimeoutError:
-                if f: raise
+            except TimeoutError as e:
+                if f: raise e from None
                 return default
     async def extend(self, it, timeout=None):
         info(f'extending {type(self).__qualname__} with iterable {it!r}')
@@ -212,10 +211,10 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue')
+            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         if self.full():
-            if raising: raise QueueFull(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-full queue')
+            if raising: raise QueueFull(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-full queue with raising=True')
             r = self.get_nowait(); self.put_nowait(item); return r
         self.put_nowait(item); return self.get_nowait()
     def poppush_nowait(self, item, raising=True):
@@ -223,7 +222,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue')
+            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         r = self.get_nowait(); self.put_nowait(item); return r
     async def pushpop(self, item): await self.put(item); return await self.get()

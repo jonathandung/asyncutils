@@ -22,7 +22,7 @@ ignore_valerrs: Final[IgnoreErrors]
 @type_check_only
 class _Q[R, T](Protocol):
     '''A protocol representing password-protected queues. Does not exist at runtime.'''
-    exc: Final[type[ForbiddenOperation]]
+    exc: type[ForbiddenOperation]
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Asynchronously put an item into the queue; if the queue is full, wait until a free slot is available.'''
     def get_nowait(self) -> T: '''Get an item from the queue immediately; raise `QueueEmpty` if impossible.'''
@@ -130,13 +130,13 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
         If an error occurs within the context, the original items in the queue are restored and the error reraised, unless the error is critical and
         deemed to require immediate exit; otherwise, the transaction completes successfully and changes are committed on exit.'''
     @overload
-    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them, emptying this queue in the process.'''
+    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: ...
     @overload
-    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: ...
+    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them, emptying this queue in the process (transformation analogous to `builtins.map`).'''
     @overload
-    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process.'''
+    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: ...
     @overload
-    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: ...
+    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process (transformation analogous to `itertools.starmap`).'''
     @overload
     def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[False]=...) -> SmartQueue[T]: '''Return a new queue from which getters can get the items in this queue that satisfy the predicate; items remaining in the original queue did not satisfy the predicate.'''
     @overload
