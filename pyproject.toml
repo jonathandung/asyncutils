@@ -78,7 +78,7 @@ target-version = "py312"
 exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env", "*.egg-info", ".eggs", ".mypy_cache", ".pytest_cache", "docs/source/conf.py"]
 
 [tool.ruff.lint]
-ignore = ["ANN401", "ASYNC109", "B008", "B904", "B905", "C408", "C901", "CPY001", "E225", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E402", "E501", "E701", "E702", "E722", "E741", "F401", "PLC0205", "PLC0415", "PLC2701", "PLC2801", "PLR0911", "PLR0913", "PLR0917", "PLR2004", "PLW1514", "TRY003", "TRY300", "RET502", "RET503", "W292"]
+ignore = ["ANN401", "ASYNC109", "B008", "B904", "B905", "C408", "CPY001", "E225", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E402", "E501", "E701", "E702", "E722", "E741", "F401", "PLC0205", "PLC0415", "PLC2701", "PLC2801", "PLR0911", "PLR0913", "PLR0917", "PLR2004", "PLW1514", "TRY003", "TRY300", "RET502", "RET503", "W292"]
 select = ["A", "ARG", "ANN", "ASYNC", "B", "CPY", "C4", "C90", "E", "EM103", "ERA", "EXE", "F", "FIX002", "FLY", "FURB", "G", "ISC", "LOG", "PERF", "PIE", "PGH004", "PL", "PYI", "RET", "RSE", "RUF", "S", "SIM", "SLOT", "T20", "TRY", "UP", "W", "YTT"]
 preview = true
 typing-extensions = false
@@ -104,7 +104,7 @@ docstring-quotes = "single"
 mypy-init-return = true
 
 [tool.ruff.lint.mccabe]
-max-complexity = 10
+max-complexity = 24
 
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = ["__setup__", "__cleanup__"]

@@ -7,7 +7,7 @@ from _collections_abc import Callable, Iterator, Iterable
 from typing import Any, Self, Literal, NoReturn, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
-class VersionInfo(str):
+class VersionInfo(str): # noqa: FURB189
     @overload
     def __new__(cls, from_: Any, /) -> Self: ...
     @overload

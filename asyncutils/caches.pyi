@@ -7,20 +7,20 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
     This ensures availability of fresh data without blocking get operations.'''
     @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], Any]=..., default_loader: Callable[[T], R]):
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., default_loader: Callable[[T], R]):
         '''`ttl` (optional): Time-to-live in seconds; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
         `refresh` (optional): Time before TTL expires to begin the refresh; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         `processor` (optional): Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
         `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         `default_loader` (optional): The loader to load values from keys for which specific loaders have not been registered.'''
     @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], Any]=...): ...
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=...): ...
     def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
     def should_refresh(self, key: T) -> bool: '''Whether the key should be refreshed at this instant.'''
     def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
-    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], Any]=...) -> None: '''(Re)configure the cache.'''
+    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re)configure the cache.'''
     def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising LookupError if there is none.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...

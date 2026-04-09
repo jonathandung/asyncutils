@@ -17,7 +17,7 @@ from itertools import count, starmap
 from sys import audit, _getframe, intern
 from ._internal.submodules import queues_all as __all__
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
-ignore_qerrs, ignore_valerrs = f(*_), E.IgnoreErrors(ValueError)
+ignore_qerrs, ignore_valerrs, f = f(*_), E.IgnoreErrors(ValueError), object.__setattr__
 def _wakeup_next(W):
     P = W.popleft
     while W:
@@ -25,14 +25,14 @@ def _wakeup_next(W):
 class _Queue:
     __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
     def __repr__(self): return f'<password-protected queue at {id(self):#x}'
-    def __new__(cls, /, *a, f=object.__setattr__):
+    def __new__(cls, /, *a, _=f):
         self = super().__new__(cls)
-        for a in zip(cls.__slots__, a): f(self, *a) # noqa: B020,PLR1704
+        for a in zip(cls.__slots__, a): _(self, *a) # noqa: B020,PLR1704
         return self
-    def __setattr__(self, name, value, /, _='cancel_extend', f=object.__setattr__):
+    def __setattr__(self, name, value, /, _='cancel_extend', f=f):
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E): # noqa: PLR0912,PLR0915
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E): # noqa: C901,PLR0912,PLR0915
     auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
     if protect_get:
         try:

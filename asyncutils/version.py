@@ -12,7 +12,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
 def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
 @a # noqa: PLR0904
-class VersionInfo(str):
+class VersionInfo(str): # noqa: FURB189
     __slots__ = 'parts'
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionInfo')

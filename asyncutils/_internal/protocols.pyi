@@ -169,8 +169,6 @@ class MemoryMappedFile(LoopContextMixin):
 @type_check_only
 class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''
-    @property
-    def bound_to(self) -> None: ...
     def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.constants namespace.''' # type: ignore[override]
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the int constructor.'''
@@ -202,4 +200,6 @@ type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b',
 if sys.platform == 'win32': type _Seek = Literal[0, 1, 2]
 else: type _Seek = Literal[0, 1, 2, 3, 4]
 ExceptionWrapper = NewType('ExceptionWrapper', object)
+'''Does not exist at runtime.'''
+WildcardType = NewType('WildcardType', None) # type: ignore[valid-newtype]
 '''Does not exist at runtime.'''
