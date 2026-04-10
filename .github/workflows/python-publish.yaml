@@ -44,7 +44,7 @@ jobs:
           merge-multiple: true
       - name: Publish release distributions to PyPI using twine
         run: |
-          pip install twine
+          pip install -U packaging twine
           twine upload dist/* --verbose
         env:
           TWINE_USERNAME: __token__
