@@ -1,7 +1,7 @@
 from ._internal.compat import PriorityQueue, Queue
-from ._internal.helpers import check_methods, filter_out, subscriptable
+from ._internal.helpers import filter_out, subscriptable
 from ._internal.submodules import pools_all as __all__
-from .base import aiter_to_iter, event_loop, take
+from .base import iter_to_aiter, aiter_to_iter, event_loop, take
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
 from .mixins import AsyncContextMixin, LoopContextMixin
@@ -25,10 +25,7 @@ class Pool(LoopContextMixin):
     def __aiter__(self):
         async def consumer():
             try:
-                if check_methods(I := self._it, '__aiter__'):
-                    async for _ in I: await self.process(_)
-                else:
-                    for _ in I: await self.process(_)
+                async for _ in iter_to_aiter(self._it): await self.process(_)
             finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
         import asyncio.events as E; self._task = (E._get_running_loop() or E.new_event_loop()).create_task(consumer()); return self
     async def __anext__(self):
@@ -37,7 +34,7 @@ class Pool(LoopContextMixin):
             if exception_occurred(i := await self._queue.get()) and isinstance(e := unwrap_exc(i), StopAsyncIteration): raise e
             return i
         finally:
-            if self._task: self._task.cancel()
+            if t := self._task: t.cancel()
     async def __setup__(self): super().__init__()
     async def aclose(self):
         if t := self._task: await safe_cancel(t)
@@ -50,7 +47,7 @@ class AdvancedPool(LoopContextMixin): # noqa: PLR0904
     def __repr__(self): return f'{type(self).__qualname__}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
     async def _threadsafe_get(self):
         with self._tlock: return await self._queue.get()
-    def _worker_loop_sync(self, _):
+    def _worker_loop(self, _):
         x = 0
         try:
             while not self._shutdown:
@@ -62,14 +59,14 @@ class AdvancedPool(LoopContextMixin): # noqa: PLR0904
                 finally:
                     self._queue.task_done(); x += 1
                     with self._tlock: self.completed += 1; self._pending -= 1
-        except CRITICAL as e: self.loop.call_soon_threadsafe(_.set_exception, Critical(e))
+        except CRITICAL as e: self.loop.call_soon_threadsafe(_.set_exception, Critical(e)) # type: ignore
         else: self.loop.call_soon_threadsafe(_.set_result, x)
-    def _worker(self): (T := Thread(target=self._worker_loop_sync, args=(F := self.make_fut(),))).start(); return T, F
+    def _worker(self): (T := Thread(target=self._worker_loop, args=(F := self.make_fut(),))).start(); return T, F
     async def _adjust_workers(self):
         if not self._scaling: return
         async with self._lock:
-            if (l := self._pending/(self._current or 1)) > 1.5 and self._current < self._max: self._scale_to(min(self._max, self._current+max(1, int(self._current/2))))
-            elif l < 0.5 and self._current > self._min: self._scale_to(max(self._min, self._current-max(1, int(self._current*0.3))))
+            if (l := self._pending/((c := self._current) or 1)) > 1.5 and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
+            elif l < 0.5 and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*0.3))))
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             f, g, h = self._workers.add, self._futures.add, self._worker
@@ -113,7 +110,7 @@ class AdvancedPool(LoopContextMixin): # noqa: PLR0904
                 for _ in range(self._current): await self._queue.put((0, self._tiebreak, None))
                 self._queue.shutdown(True); await self.join(); await self.drain(); return self.uptime
         except TimeoutError: self.exiter(); raise TimeoutError('kill exceeded timeout, forced shutdown') from None
-    async def join(self): await gather(*self._futures)
+    async def join(self): await gather(*self._futures, return_exceptions=True)
     async def map(self, f, *its, priority=0): return await gather(*map(partial(self.complete, f, _priority_=priority), *its))
     async def starmap(self, f, it, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))

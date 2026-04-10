@@ -64,8 +64,9 @@ class VersionInfo(str): # noqa: FURB189
     def change_sep(self, sep): return self.replace('.', sep)
     def __setattr__(self, name, value, /): raise AttributeError(f'attribute {name!r} cannot be set to {value!r} on {__class__.__name__} object')
     def __int__(self):
-        if not (p := self[2]) < 0x100 > (m := self[1]): raise OverflowError(f'cannot pack version {self} into an integer')
-        return p|m<<8|self[0]<<16
+        M, m, p = self
+        if not 0 <= p < 0x100 > m >= 0: raise OverflowError(f'cannot pack version {self} into an integer')
+        return p|m<<8|M<<16
     def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()+8)>>3, 'little' if little else 'big', signed=True)) # noqa: SIM115
     @classmethod
     def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True))

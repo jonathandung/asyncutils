@@ -49,14 +49,15 @@ def g(e, a=False, t=(str, int, bytes), c=c, k=k):
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
 match logging_to := g('log_to'):
+    # ruff: disable[BLE001,SIM115]
     case 'NULL': l.disabled = True
     case 'MAKE':
         T = 'asyncutils_log%d.log'
         for h in range(1, 0x1000):
-            try: logging_to = (s := open(T%h, m)).name; break # noqa: SIM115
+            try: logging_to = (s := open(T%h, m)).name; break
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
             except AttributeError: raise SystemError('python opened a file with no `name` attribute') from None
-            except Exception: ... # noqa: BLE001
+            except Exception: ...
         else: M = True
         del T, h
     case 'MEMORY':
@@ -70,18 +71,17 @@ match logging_to := g('log_to'):
     case 1 if b: s, logging_to = S.stdout, 'STDOUT'
     case 2 if b: logging_to = 'STDERR'
     case str()|int()|bytes():
-        try: M = True; logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False # noqa: SIM115
+        try: M = True; logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
         except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')
-        except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n') # noqa: BLE001
+        except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
+    # ruff: enable[BLE001,SIM115]
 if M: s.write('Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 (set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 get_past_logs.handler = _
-l.debug('hi')
-__import__('atexit').register(lambda s=s, d=l.debug: None if s.closed else d('bye') or s.flush() or s.close())
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
@@ -102,6 +102,8 @@ class debugging:
     P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))
 debug = debugging()
 if N.debug: debug.__enter__()
+l.debug('hi')
+__import__('atexit').register(lambda s=s, d=l.debug: None if s.closed else d('bye') or s.flush() or s.close())
 def r(name, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {name!r}")
 def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)

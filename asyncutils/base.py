@@ -1,12 +1,13 @@
 from ._internal import helpers as H, log as L, patch as P
 from ._internal.submodules import base_all as __all__
 from .constants import _NO_DEFAULT, RAISE
+from .context import getcontext
 from .exceptions import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, unnest_reverse
 from asyncio.coroutines import iscoroutine
 from asyncio.events import _get_running_loop, new_event_loop, set_event_loop
 from asyncio.tasks import all_tasks, gather, sleep
 from sys import audit, exc_info
-b = H.check_methods
+b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
@@ -23,7 +24,7 @@ class event_loop: # noqa: N801
     @classmethod
     def from_flags(cls, flags, /): (r := object.__new__(cls))._flags = flags; return r
     def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19)
-    def __enter__(self, _m='event_loop context already entered'):
+    def __enter__(self, _m='event_loop context already entered', _f=c):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop
             raise RuntimeError(_m)
@@ -34,14 +35,15 @@ class event_loop: # noqa: N801
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
-                if not f&0x200: raise RuntimeError(f'{type(self).__qualname__}: exception occurred while calling __enter__ of associated event loop: {e}') from e
+                if not f&0x200: raise RuntimeError(f'{_f(self)}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
+        # ruff: disable[E722]
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
             N = type(self).__qualname__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
-        f, l = f&~e, self._loop
+        f &= ~e; l = self._loop
         if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
         if not f&0x400: self.__reusable.append(l)
         if not ((c := f&self._SHOULD_CLOSE) and f&0x10):
@@ -53,7 +55,7 @@ class event_loop: # noqa: N801
                 except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
-                except: # noqa: E722
+                except:
                     if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop')
             elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
@@ -62,7 +64,7 @@ class event_loop: # noqa: N801
                 except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
-                except: # noqa: E722
+                except:
                     if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop')
             elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
@@ -70,6 +72,7 @@ class event_loop: # noqa: N801
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
+        # ruff: enable[E722]
     def __del__(self, _f=L.debug, w=L.warning, _m='garbage-collecting entered %s context; you are advised to refactor your code', _w='cannot suppress exceptions from within %s destructor'):
         b, n = not (f := self._flags)&2, type(self).__qualname__
         if f&self._ENTERED:
@@ -97,9 +100,11 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         L = len(r := await gather(*map(f, r), return_exceptions=True))
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
-def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=False, create_executor=False, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': 'it', '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)})): # noqa: ARG005,C901,PLR0912,PLR0915
+def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': 'it', '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else ((self.it.close() if t is StopAsyncIteration else self.it.throw(v)) or True)})): # noqa: ARG005,C901,PLR0912,PLR0915
     # ruff: disable[RUF029]
-    audit('asyncutils.base.iter_to_aiter', type(it).__qualname__); f = sentinel is _NO_DEFAULT
+    audit('asyncutils.base.iter_to_aiter', a(it)); f, C = sentinel is _NO_DEFAULT, getcontext()
+    if use_existing_executor is None: use_existing_executor = C.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR
+    if create_executor is None: create_executor = C.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR
     if b(it, '__aiter__'): # noqa: PLR1702
         if not b(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
         if f: return it
@@ -169,12 +174,12 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=False, crea
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
     # ruff: enable[RUF029]
-def aiter_to_iter(ait, _c=b):
-    audit('asyncutils.base.aiter_to_iter', type(ait).__qualname__)
-    if _c(ait, '__iter__') and _c(ait := ait.__iter__(), '__next__'): yield from ait; return
-    if _c(ait, '__aiter__') and _c(ait := ait.__aiter__(), '__anext__'):
+def aiter_to_iter(ait, a=c, b=b):
+    audit('asyncutils.base.aiter_to_iter', a(ait))
+    if b(ait, '__iter__') and b(ait := ait.__iter__(), '__next__'): yield from ait; return
+    if b(ait, '__aiter__') and b(ait := ait.__aiter__(), '__anext__'):
         a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
-        if _c(ait, 'asend', 'athrow', 'aclose'):
+        if b(ait, 'asend', 'athrow', 'aclose'):
             def iterate(f=ait.asend, a=a): # type: ignore[no-redef]
                 x = None
                 while True: x = yield a(f(x))
@@ -221,4 +226,4 @@ def a(_, r='asyncutils.base.yield_to_event_loop'): return r
 yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), '__repr__': a, '__str__': a, '__reduce__': a}))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close() # type: ignore[attr-defined]
 _.__qualname__ = _.__name__ = 'dummy_task'
-del f, _, P, L, b, H
+del f, _, P, L, b, c, H

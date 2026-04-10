@@ -6,7 +6,7 @@ from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'get_aiter_fromf', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop'
+__all__ = 'aiter_fromf', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop'
 _ignore_cancellation: IgnoreErrors
 '''Context manager to ignore asyncio.CancelledError. This annotation is for module-internal use only.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
@@ -29,5 +29,5 @@ def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=
 def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable[P, Awaitable[T]]], Callable[P, T]]: '''Decorator factory to ensure a function returning an awaitable only be called if a lock is acquired within `timeout`, also converting it to a sync function.'''
 def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of `sync_lock`, where `binder` is a function returning a suitable lock from the instance.'''
 def to_async[T, **P](f: Callable[P, T], /, loop: AbstractEventLoop|None=...) -> tuple[Callable[P, Coroutine[Any, Any, T]], Callable[[], None]]: '''Returns a tuple (asyncf, shutdown). asyncf is the async version of the original function (runs in an executor) and shutdown is a function to shut down the executor.'''
-def get_aiter_fromf[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin iter function in async, which the aiter function does not have.'''
+def aiter_fromf[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin iter function in async, which the aiter function does not have.'''
 async def safe_cancel(t: Future[Any]) -> None: '''Cancel a single future and wait for the request to complete asynchronously. See `safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''

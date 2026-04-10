@@ -72,7 +72,7 @@ def to_async(f, /, loop=None):
         if (e := getattr(to_async, 'executor', None)) is None: audit('asyncutils/create_executor', 'util.to_async'); to_async.executor = e = Executor()
         return await loop.run_in_executor(e, partial(f, *a, **k))
     return wraps(f)(wrapper), stop_and_closer(loop)
-async def get_aiter_fromf(f, s=_NO_DEFAULT, /):
+async def aiter_fromf(f, s=_NO_DEFAULT, /):
     while True:
         if (r := await f()) is s or r == s: break
         yield r

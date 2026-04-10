@@ -1,5 +1,5 @@
 from ._internal import log
-from ._internal.helpers import get_loop_and_set
+from ._internal.helpers import get_loop_and_set, fullname
 from ._internal.submodules import func_all as __all__
 from .base import iter_to_aiter
 from .config import _randinst
@@ -139,12 +139,12 @@ def debounce(wait):
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s
 async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
     for _ in range(warmup): await f()
-    g = measure.__get__(f); audit('asyncutils.func.benchmark', f, t := [(await g())[1] for _ in range(times)]); return _f(min(t), max(t), S := sum(t), S/len(t), times+warmup)
+    g = measure.__get__(f); audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [(await g())[1] for _ in range(times)]), max(t), S := sum(t), S/times, T)
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
     def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter):
         if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
-        audit('asyncutils.func.RateLimited', f, calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
+        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, P, C, f = (T := self._call_times).popleft, self._period, self._calls, self._func
         async with self._lock: # type: ignore

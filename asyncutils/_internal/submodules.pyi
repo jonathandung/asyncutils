@@ -1,4 +1,4 @@
-'''Exports the __all__ attributes of all of asyncutils's public submodules.'''
+'''Exports the `__all__` attributes of all of asyncutils's public submodules.'''
 from .protocols import All
 from typing import Final
 altlocks_all: Final[All]

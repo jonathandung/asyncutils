@@ -6,6 +6,7 @@
 [![Tests](https://github.com/jonathandung/asyncutils/blob/main/tests.svg)](https://github.com/jonathandung/asyncutils/tree/main/tests)
 [![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
+[![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
 [![Docs](https://app.readthedocs.org/projects/asyncutils/badge)](https://asyncutils.readthedocs.io/en/stable)
 
 A python library abstracting all the common patterns the creator can think of that somehow always pop up in async code.
@@ -36,7 +37,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) fo
 
 ## Version
 
-This is asyncutils v0.8.23.
+This is asyncutils v0.8.24.
 
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)

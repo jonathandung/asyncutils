@@ -7,10 +7,10 @@ from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, EventualLoopMixin):
-    '''An implementation of asyncio.protocols.Protocol providing line-based buffering and writing.
+    '''An implementation of `asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
     The idea was originally introduced in PEP 3153, but did not see eventual adaptation in the standard library.
     This particular implementation is designed to be used with SocketTransport, though other transports can enforce it too.
-    Instantiating this class will give an LFProtocol or CRLFProtocol depending on os.linesep.'''
+    Instantiating this class will give an `LFProtocol` or `CRLFProtocol` depending on `os.linesep`.'''
     NEWLINE: ClassVar[bytes]
     '''The newline sequence used by this protocol as bytes.'''
     CARRIAGE_RETURN: ClassVar[bytes]
@@ -31,16 +31,16 @@ class LineProtocol(Protocol, EventualLoopMixin):
     def write_line(self, line: str) -> None: '''Write the string `line` to the transport, followed by the newline sequence.'''
     def write_literal(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline.'''
     def eof_received(self) -> None: ...
-    async def read_line(self) -> str|None: ...
-    async def drain(self) -> None: ...
-    async def write_line_with_backpressure(self, line: str) -> None: ...
-    async def write_literal_with_backpressure(self, data: bytes) -> None: ...
+    async def read_line(self) -> str|None: '''Read a line from the internal buffer and return it, or `None` if EOF is reached.'''
+    async def drain(self) -> None: '''Wait until the transport is ready for more data to be written (i.e. the write buffer is flushed).'''
+    async def write_line_with_backpressure(self, line: str) -> None: '''Write the string `line` to the transport, followed by the newline sequence, after draining it.'''
+    async def write_literal_with_backpressure(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline, after draining it.'''
 class LFProtocol(LineProtocol): '''Line Feed protocol for Unix-like systems.'''
 class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed protocol for Windows.'''
 class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9.'''
 class SocketTransport(Transport):
     @classmethod
-    def make_protocol(cls) -> Protocol: ...
+    def make_protocol(cls) -> LineProtocol: ...
     @property
     def loop(self) -> AbstractEventLoop: ...
     def __init__(self, sock: socket|None=...): ...

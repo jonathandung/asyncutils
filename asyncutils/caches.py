@@ -74,7 +74,7 @@ class AsyncLRUCache:
         if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)[0]
         async def wrapper(*a, **k):
             K, t, T, S = await self._make_key(f, a, k), self._ttl, self._timer, self._timestamps
-            if None is not t < T()-S.get(K, 0): c.cache_clear(); del S[K]
+            if None is not t < T()-S.get(K, 0.0): c.cache_clear(); del S[K]
             if iscoroutine(r := c(*a, **k)): r = await r
             if t: S[K] = T()
             return r

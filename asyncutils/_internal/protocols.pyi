@@ -4,34 +4,12 @@ This facilitates lightweight inline type annotations.'''
 from ..constants import sentinel_base
 from ..mixins import LoopContextMixin
 import sys
-from _collections_abc import (
-    AsyncGenerator,
-    AsyncIterable,
-    Awaitable,
-    Buffer,
-    Callable,
-    Coroutine,
-    Generator,
-    Iterable,
-    Iterator,
-)
+from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
 from contextlib import _AsyncGeneratorContextManager
 from io import TextIOWrapper, _WrappedBuffer
 from mmap import mmap
 from types import FunctionType, TracebackType
-from typing import (
-    IO,
-    Any,
-    Literal,
-    NewType,
-    Protocol,
-    Self,
-    SupportsIndex,
-    SupportsInt,
-    final,
-    overload,
-    type_check_only,
-)
+from typing import IO, Any, Literal, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -146,7 +124,7 @@ class MemoryMappedFile(LoopContextMixin):
     async def move(self, dest: int, src: int, count: int) -> None: ...
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
-    async def seek(self, pos: int, whence: _Seek=...) -> None: ...
+    async def seek(self, pos: int, whence: Seek=...) -> None: ...
     def __new__(cls, file: IO[bytes], /) -> Self: ...
     def __iter__(self) -> Iterator[bytes]: ...
     @property
@@ -230,8 +208,21 @@ type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha51
 type OpenRV = _AsyncGeneratorContextManager[MemoryMappedFile, None]
 '''The type of the return values of the `open`, `create` and `create_sparsef` methods of `io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
-if sys.platform == 'win32': type _Seek = Literal[0, 1, 2]
-else: type _Seek = Literal[0, 1, 2, 3, 4]
+'''The type of the `open_files` property of `io.MemoryMappedIOManager`.'''
+if sys.platform == 'win32':
+    type Seek = Literal[0, 1, 2]
+    '''Possible values of the `whence` parameter for `io.MemoryMappedIOManager.seek`, as follows:
+    * 0: SEEK_SET
+    * 1: SEEK_CUR
+    * 2: SEEK_END'''
+else:
+    type Seek = Literal[0, 1, 2, 3, 4]
+    '''Possible values of the `whence` parameter for `io.MemoryMappedIOManager.seek`, as follows:
+    * 0: SEEK_SET
+    * 1: SEEK_CUR
+    * 2: SEEK_END
+    * 3: SEEK_DATA
+    * 4: SEEK_HOLE'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''Does not exist at runtime.'''
 WildcardType = NewType('WildcardType', None) # type: ignore[valid-newtype]

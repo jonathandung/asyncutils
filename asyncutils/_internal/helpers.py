@@ -17,11 +17,13 @@ def stop_and_closer(loop, _=lambda l: l.stop() or l.close()): return _.__get__(l
 def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # type: ignore
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)
+def coerce_callable(o, /): return o if callable(o) else type(o)
 def create_executor(f, /, save=True):
-    audit('asyncutils/create_executor', f'{(F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor; e = Executor()
+    audit('asyncutils/create_executor', f'{(F := coerce_callable(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor; e = Executor()
     if save: f.executor = e
     return e
-class _LoopMixinBase:
+def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if rmpref else n
+class LoopMixinBase:
     __slots__ = 'exiter', 'loop', 'make_fut', 'running_tasks'
     def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = register(stop_and_closer(l := new_event_loop())), l, l.create_future, set()
     def make(self, coro): (_ := self.running_tasks).add(t := self.loop.create_task(coro)); t.add_done_callback(_.discard); return t

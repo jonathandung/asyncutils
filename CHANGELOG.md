@@ -6,9 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 This project uses [Semantic Versioning](https://semver.org/).
 
-## [0.8.23] - 2026-04-09: newest; [unstable](https://semver.org/#spec-item-4)
-
-Deleted 'dev' branch.
+## [0.8.24] - 2026-04-10: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Tests
 
@@ -377,7 +375,7 @@ Submodules:
   - sync_lock_from_binder
   - lockf
   - semaphore
-  - get_aiter_fromf
+  - aiter_fromf
   - safe_cancel
 
 - version
@@ -393,6 +391,14 @@ Submodules:
   - unregister_normalizer
   - dispatch_normalizer
   - autogenerate_normalizers
+
+## [0.8.23] - 2026-04-09
+
+Integrated pre-commit CI.
+
+## [0.8.22] - 2026-04-06
+
+Deleted dev branch.
 
 ## [0.8.21] - 2026-04-01
 

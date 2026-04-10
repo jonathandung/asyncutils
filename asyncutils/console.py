@@ -1,5 +1,6 @@
 from . import __version__ as V, config as C
 from ._internal import patch as P, running_console as R
+from ._internal.helpers import fullname
 from ._internal.submodules import console_all as __all__
 import sys as S
 from os import getenv as g
@@ -14,7 +15,7 @@ class ConsoleBase(B): # type: ignore
             if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
             from _pyrepl.main import CAN_USE_PYREPL
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
-        S.audit(f'{(t := type(self)).__module__}.{t.__qualname__}', loop)
+        S.audit(fullname(t := type(self)), loop)
         if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
@@ -131,7 +132,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
         if R._unset_() is not self: S.stderr.write(_m); del S.modules[__name__]
         super().posthook()
-    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=31, _mn=S.intern('__callback')):
+    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=32, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         try:
             for _ in range(_skip_frames):

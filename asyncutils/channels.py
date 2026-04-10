@@ -1,7 +1,7 @@
 from . import context
 from ._internal import log as L, patch as P
 from ._internal.compat import Queue, QueueEmpty, QueueShutDown
-from ._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable
+from ._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable, fullname
 from ._internal.submodules import channels_all as __all__
 from .base import event_loop, iter_to_aiter, safe_cancel_batch
 from .constants import _NO_DEFAULT
@@ -55,7 +55,7 @@ class Observable(LoopContextMixin):
     async def handle_unsubscriptions(self):
         async with self._lock: self._data -= (s := self._to_remove); s.clear()
     async def _notify_helper(self, r, a, k): await gather(*self.make_multiple(obs(*a, **k) for obs in self._data.copy()), return_exceptions=r)
-    def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable'); self._data, self._lock, self._to_remove, self._queue, self._event = set(init_observers), Lock(), set(), None if maxsize is None else Queue(maxsize), Event()
+    def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable', maxsize); self._data, self._lock, self._to_remove, self._queue, self._event = set(init_observers), Lock(), set(), None if maxsize is None else Queue(maxsize), Event()
     def __iter__(self): return self._data.__iter__()
     def __aiter__(self): return iter_to_aiter(self)
     async def __setup__(self): LoopContextMixin.__init__(self)
@@ -121,7 +121,7 @@ class Observable(LoopContextMixin):
         for o in obs: o._data.add(p)
         return _
 class EventBus(LoopContextMixin): # noqa: PLR0904
-    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False): audit('asyncutils.channels.EventBus', _ := f'{(t := type(self)).__qualname__} {name or t._inc_cnt()}'); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = _, Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False): audit('asyncutils.channels.EventBus', max_concurrent); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -151,13 +151,13 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
     @cached_property
     def auditor(self):
-        def f(e, a, f=self.is_auditing, _=self._begin_publish, /):
+        def f(e, a, f=self.is_auditing, _=self.sync_start_publish, /):
             if f(): _(e, a)
         return f # type: ignore
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True
+        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True # type: ignore
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', self); self._auditing = False
     @cached_property
     def _middlewares(self): return {}
@@ -197,8 +197,8 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
-        if not self._auditing: audit('asyncutils.channels.EventBus.publish', self, event_type)
-        p, f = self._begin_publish(event_type, data, safe, timeout, chaperone)
+        if self._auditing: audit(event_type, data)
+        p, f = self.sync_start_publish(event_type, data, safe=safe, timeout=timeout, chaperone=chaperone)
         if not wait: return
         try:
             await p
@@ -206,26 +206,25 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
             L.info('%s: publishing of event %r succeeded', self.name, event_type); L.debug('final data: %r', data)
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally: await safe_cancel(p)
-    def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
     @cached_property
     def _publishers(self): return set()
-    def _begin_publish(self, E, D, S, T, C, /):
+    def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
-        async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if C is None else C, D=D):
+        async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if chaperone is None else chaperone, D=data):
             for m, F in self._middlewares.copy().items():
                 if F is not None and F.done(): continue
                 try:
-                    if iscoroutine(D := m(E, D)): D = await D
+                    if iscoroutine(D := m(event_type, D)): D = await D
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: C(e) # noqa: BLE001
                 except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore[arg-type]
                 except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore[arg-type]
             U = self._subscribers
             async with self._lock:
-                if self._tracking: self._published[E] += 1
-                s, w = (U[_].copy() for _ in (E, None))
-            await gather((f := partial(self._publish_helper, D, S))(s), f(w, E))
-        (P := self._publishers).add(p := self.make(wait_for(g(), T))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
+                if self._tracking: self._published[event_type] += 1
+                s, w = (U[_].copy() for _ in (event_type, None))
+            await gather((f := partial(self._publish_helper, D, safe))(s), f(w, event_type))
+        (P := self._publishers).add(p := self.make(wait_for(g(), timeout))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
         async def handler(d):
             if F.done(): return

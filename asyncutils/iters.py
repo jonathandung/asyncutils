@@ -6,7 +6,7 @@ from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_b
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from .iterclasses import achain, anullcontext
-from .util import get_aiter_fromf, safe_cancel
+from .util import aiter_fromf, safe_cancel
 import _operator as O, math as M
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
@@ -102,7 +102,7 @@ async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
             if b: yield copy_and_clear(b)
             raise
 def achunked(it, n, strict=False):
-    I = get_aiter_fromf(partial(collect, it, n), [])
+    I = aiter_fromf(partial(collect, it, n), [])
     if strict:
         if n is None: raise ValueError('n cannot be None when strict is True')
         async def ret():
@@ -587,29 +587,29 @@ async def _factor_pollard(n):
     if n == 4: return 2
     async for b in arange(1, n):
         x = y = 2; d = 1
-        while d == 1: d = M.gcd((x := (x*x+b)%n)-(y := ((z := (y*y+b)%n)*z+b)%n), n)
+        while (d := M.gcd((x := (x*x+b)%n)-(y := ((z := (y*y+b)%n)*z+b)%n), n)) == 1: ...
         if d != n: return d
     raise ValueError(f'{n} is prime')
 def _shift_to_odd(n):
     if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError('invalid n')
     return s, d
 def _probable_prime(n, base, _=lru_cache(_shift_to_odd)): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or any((x := x*x%n) == n-1 for _ in range(s-1))
-async def aisprime(n, _smallprimes=_smallprimes, _perfect_test=_perfect_test, _randrange=_randrange, _probable_prime=_probable_prime):
-    if n < 210: return n in _smallprimes
+async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable_prime):
+    if n < 210: return n in s
     if not (n&1 and n%3 and n%5 and n%7 and n%11 and n%13 and n%17): return False
-    for l, B in _perfect_test: # noqa: B007
+    for l, _ in p:
         if n < l: break
-    else: B = (_randrange(2, n-1) for _ in range(64))
-    return await aall(amap(partial(_probable_prime, n), B))
-async def afactor(n, _littleprimes=_littleprimes, _factor_pollard=_factor_pollard):
+    else: _ = (r(2, n-1) for _ in range(64))
+    return await aall(amap(partial(f, n), _))
+async def afactor(n, _=_littleprimes, F=_factor_pollard):
     if n < 2: raise ValueError('no prime factors')
-    for p in _littleprimes:
+    for p in _:
         while not n%p: yield p; n //= p
     if n < 2: return
     e = (t := [n]).extend
     for n in t:
         if n < 44521 or await aisprime(n): yield n
-        else: e((f := await _factor_pollard(n), n//f))
+        else: e((f := await F(n), n//f))
 async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
         r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import _heappush_max as a, heappush as b, _heappushpop_max as c # type: ignore
@@ -651,7 +651,7 @@ def asubstrindices(seq, reverse=False):
 def iter_future(it, summaryf=aconsume):
     async def task(): t = L.time(); await summaryf(it); F.set_result(L.time()-t)
     F = (L := get_loop_and_set()).create_future(); L.create_task(task()); return F
-def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable %r'):
+def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable {!r}'.format):
     L, r, I = get_loop_and_set(), [], iter_to_aiter(it)
     async def consume(): # noqa: PLR0912
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
@@ -674,15 +674,16 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
         except BaseException as e:
             async for F in afilterfalse(O.methodcaller('done'), r): F.set_exception(e)
             raise
+        a = _(it)
         for i, l in d.items():
-            e = IndexError(_%(i, it))
+            e = IndexError(a%i)
             async for x, F in aenumerate(l):
-                if F.cancelled(): continue
-                if F.done(): raise ExceptionGroup('error while processing indices for which items were not successfully got', (e, E.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
-                F.set_exception(e)
+                if not F.cancelled():
+                    if F.done(): raise ExceptionGroup('error while processing indices for which items were not successfully got', (e, E.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
+                    F.set_exception(e)
         if finish: await aconsume(I)
         if setatend is None: return
-        if setatend.done() and not setatend.cancelled(): raise E.FutureCorrupted(f'setatend {type(setatend).__qualname__} passed to agetitems_from_indices had its result set by an external party')
+        if setatend.done() and not setatend.cancelled(): raise E.FutureCorrupted(f'future setatend at {id(setatend):#x} (exact type {type(setatend).__qualname__}) passed to agetitems_from_indices had its result set by an external party')
         setatend.set_result(L.time()-s)
     c = L.create_task(consume())
     if setatend is not None: setatend.add_done_callback(lambda _: L.run_until_complete(gather(safe_cancel(c), safe_cancel_batch(r))))

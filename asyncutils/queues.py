@@ -27,9 +27,9 @@ class Q:
     __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
     def __new__(cls, /, *a, _=f):
-        self = super().__new__(cls)
-        for a in zip(cls.__slots__, a): _(self, *a) # noqa: B020,PLR1704
-        return self
+        s = super().__new__(cls)
+        for a in zip(cls.__slots__, a): _(s, *a) # noqa: B020,PLR1704
+        return s
     def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
         if name not in s: raise AttributeError(f'{type(self).__qualname__!r} object has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
@@ -102,20 +102,22 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if full(): raise QueueFull
         if backdoor is not b: v(P)
         p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
+    # ruff: disable[E722]
     def change_get_password(old_pwd, new_pwd):
         if not can_change_get: return False
         if not isinstance(new_pwd, gettyp): return False
         try: u(old_pwd)
         except _.CRITICAL: raise _.Critical
-        except: return False # noqa: E722
+        except: return False
         nonlocal password_get; password_get = new_pwd; return True
     def change_put_password(old_pwd, new_pwd):
         if not can_change_put: return False
         if not isinstance(new_pwd, puttyp): return False
         try: v(old_pwd)
         except _.CRITICAL: raise _.Critical
-        except: return False # noqa: E722
+        except: return False
         nonlocal password_put; password_put = new_pwd; return True
+    # ruff: enable[E722]
     def task_done():
         nonlocal U
         if U == 0: raise ValueError('task_done() called too many times')

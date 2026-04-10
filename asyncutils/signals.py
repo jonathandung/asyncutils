@@ -1,12 +1,12 @@
 from ._internal import log
 from ._internal.patch import patch_function_signatures as f
-from ._internal.submodules import signals_all as __all__
 from .base import event_loop
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, Critical, IgnoreErrors
 from .util import safe_cancel
 from asyncio.tasks import wait_for
 from signal import Signals, getsignal, signal
+__all__ = 'wait_for_signal',
 async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=(Signals.SIGINT, Signals.SIGTERM), logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _s=signal, _g=getsignal): # noqa: PLR0912,PLR0915
     import sys; sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *sigs)); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()

@@ -172,11 +172,11 @@ class EventBus(LoopContextMixin):
     @overload
     def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[tuple[str, Any], None]: '''Open an event stream for the event type.'''
     async def shutdown(self, immediate: bool=..., timeout: float|None=..., preserve_stats: bool=...) -> None:
-        '''Gracefully shut down the event bus, within `timeout` if specified.
+        '''Gracefully shut down the event bus.
         After the shutdown, publications fail fast and middlewares are cleared.
-        This waits for as many subscriber callbacks to complete as possible.
-        If immediate is True, getters for the queue for the event stream will error immediately.
-        If preserve_stats is True, the event publication statistics will be saved. Access using get_event_stats.'''
+        This waits for as many subscriber callbacks to complete as possible, within `timeout` seconds if specified.
+        If `immediate` is `True`, getters for the queue for the event stream will error immediately.
+        If `preserve_stats` is `True`, the event publication statistics will be saved and accessible with `get_event_stats()`.'''
     async def handle_exception(self, e: BaseException) -> None: '''Asynchronously handle an exception according to the `handler` initialization parameter, which can be a sync or async function.'''
     @overload
     def clear(self, event_type: str) -> WeakSet[Callable[[Any], Awaitable[object]]]|None: ...

@@ -26,13 +26,13 @@ class LineProtocol(Protocol, EventualLoopMixin):
         if t := self.transport:
             with self._handler: t.close(); self._closed = True
         return self._closed
-    def data_received(self, data, bufsize=0x2000):
+    def data_received(self, data, bufsize=0x1000):
         (b := self._buffer).extend(data); n = self.NEWLINE
         if len(b) > bufsize: self.flush()
         while not self._closed and n in b: l, b = b.split(n, 1); self._put_line(l)
         self._buffer = b
         if self._eof_received: self.flush(); self.signal_eof()
-    def flush(self): self._put_line(self._buffer); self._buffer.clear()
+    def flush(self): self._put_line(b := self._buffer); b.clear()
     def signal_eof(self): self._lines.put_nowait(None)
     def pause_writing(self):
         self._paused = True
@@ -51,7 +51,7 @@ class LineProtocol(Protocol, EventualLoopMixin):
         self._eof_received = True
         if self._buffer: self.flush()
         if self._lines.empty() and not self._closed: self.signal_eof()
-    async def read_line(self): return None if self._closed and self._lines.empty() else (self._lines.task_done() if (l := await self._lines.get()) is None else l)
+    async def read_line(self): L = self._lines; return None if self._closed and L.empty() else (L.task_done() if (l := await L.get()) is None else l)
     async def drain(self):
         if self._paused and (w := self._drain_waiter): await w
     async def write_line_with_backpressure(self, line): await self.drain(); self.write_line(line)
