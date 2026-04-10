@@ -1,3 +1,3 @@
 '''All the contents of this subpackage are meant for internal use only and may change without notice, unless otherwise specified.'''
 __all__ = 'compat', 'helpers', 'log', 'patch', 'protocols', 'running_console', 'submodules'
-from . import compat, helpers, log, patch, protocols, running_console, submodules, initialize as initialize, parsed as parsed, py312 as py312, py313 as py313, unparsed as unparsed
+from . import compat, helpers, initialize as initialize, log, parsed as parsed, patch, protocols, py312 as py312, py313 as py313, running_console, submodules, unparsed as unparsed

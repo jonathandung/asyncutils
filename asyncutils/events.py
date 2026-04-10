@@ -1,13 +1,13 @@
 from . import context
+from ._internal.submodules import events_all as __all__
 from .constants import RAISE
 from .exceptions import EventValueError, ref
 from .mixins import EventMixin
+from _collections import deque  # type: ignore[import-not-found]
 from asyncio.events import get_running_loop
+from asyncio.tasks import wait, wait_for
 from asyncio.timeouts import timeout as _timeout
-from asyncio.tasks import wait_for, wait
-from _collections import deque # type: ignore[import-not-found]
 from time import monotonic
-from ._internal.submodules import events_all as __all__
 class SingleWaiterEventWithValue(EventMixin):
     def __init__(self): self.clear()
     def set(self, value):

@@ -1,16 +1,16 @@
-from .config import Executor
-from .constants import SYNC_AWAIT, _NO_DEFAULT
-from .exceptions import IgnoreErrors, Critical, Deadlock, CRITICAL
-from ._internal.helpers import get_loop_and_set, stop_and_closer, check_methods
+from ._internal.helpers import check_methods, get_loop_and_set, stop_and_closer
 from ._internal.running_console import _get_
+from ._internal.submodules import util_all as __all__
+from .config import Executor
+from .constants import _NO_DEFAULT, SYNC_AWAIT
+from .exceptions import CRITICAL, Critical, Deadlock, IgnoreErrors
 from asyncio.coroutines import iscoroutine
-from asyncio.events import _get_running_loop, set_event_loop, new_event_loop
-from asyncio.locks import Semaphore, BoundedSemaphore, Lock
-from asyncio.tasks import eager_task_factory, wait_for, ensure_future, run_coroutine_threadsafe
+from asyncio.events import _get_running_loop, new_event_loop, set_event_loop
+from asyncio.locks import BoundedSemaphore, Lock, Semaphore
+from asyncio.tasks import eager_task_factory, ensure_future, run_coroutine_threadsafe, wait_for
 from asyncio.timeouts import timeout as _timeout
 from functools import partial, wraps
 from sys import audit
-from ._internal.submodules import util_all as __all__
 _ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
 def get_future(aw, loop=None):
     if loop is None: loop = get_loop_and_set()

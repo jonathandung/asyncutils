@@ -1,15 +1,15 @@
 from . import mixins as M
-from .base import safe_cancel_batch
-from .exceptions import Critical, LockForceRequest, CRITICAL
 from ._internal import log
 from ._internal.helpers import check_methods
+from ._internal.submodules import locks_all as __all__
+from .base import safe_cancel_batch
+from .exceptions import CRITICAL, Critical, LockForceRequest
+from _collections import defaultdict, deque  # type: ignore[import-not-found]
 from asyncio.coroutines import iscoroutine
 from asyncio.locks import Event, Lock
-from asyncio.tasks import wait_for, current_task, wait, gather
-from _collections import deque, defaultdict # type: ignore[import-not-found]
-from heapq import heappush, heappop
+from asyncio.tasks import current_task, gather, wait, wait_for
+from heapq import heappop, heappush
 from time import monotonic
-from ._internal.submodules import locks_all as __all__
 class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
     __slots__ = '_last_update', '_lock', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._last_update = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
@@ -138,7 +138,7 @@ class LocksmithBase: # noqa: PLR0904
             if lock in (r := self._recognized): return False
             if callable(f := getattr(lock, 'acknowledge_locksmith_lock_held', None)):
                 try: return bool((await f) if iscoroutine(f := f(self)) else f)
-                except: return False
+                except: return False # noqa: E722
             r.add(lock); return True
     async def force(self, lock, /, info=None, *, purge_waiters=True): # noqa: PLR0912
         async with self._lock:
@@ -147,17 +147,17 @@ class LocksmithBase: # noqa: PLR0904
         try:
             if iscoroutine(r := lock.release()): r = await r
         except CRITICAL: raise Critical
-        except:
+        except: # noqa: E722
             if self.find_owner(lock) is (o := current_task()):
                 if o is None: return self.throw_fallback(lock)
                 if (c := o.get_coro()) is None: return self.eager_fallback(lock)
                 F = self._loop.create_future()
-                try: c.throw(LockForceRequest(self, F.set_result, lock, info))
+                try: c.throw(LockForceRequest(self, F.set_result, lock, info)) # type: ignore
                 except CRITICAL as e: self.task_raised_critical(lock, e)
                 except LockForceRequest as e:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
                     else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self)) # type: ignore
-                except BaseException as e: self.raised_other(lock, e)
+                except BaseException as e: self.raised_other(lock, e) # noqa: BLE001
                 else: self.answer_received(lock, await F)
             if callable(f := self.handlers.get(type(lock))) and iscoroutine(r := f(lock)): await r
             return True
@@ -177,19 +177,21 @@ class LocksmithBase: # noqa: PLR0904
         try: return await task
         finally:
             if lock.locked() and iscoroutine(a := lock.release()): await a
-    async def lock_busy(self, lock, requester, /): log.info(f'lock busy: {lock}; requester: {requester}')
-    async def task_reraised_request(self, lock, /): log.warning(f'{type(self).__qualname__}.force: running task did not handle request to release {type(lock).__qualname__} properly')
+    async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
+    async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s properly', type(self).__qualname__, type(lock).__qualname__)
     def wrap_task(self, task): return self._loop.create_task(task)
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)
-    def throw_fallback(self, lock, /): return True # noqa: ARG002
-    def eager_fallback(self, lock, /): return True # noqa: ARG002
-    def release_returned_false(self, lock, /): return False # noqa: ARG002
-    def answer_received(self, lock, answer, /): log.info(f'{self!r} received answer {answer!r} from {lock!r}')
+    # ruff: disable[ARG002]
+    def throw_fallback(self, lock, /): return True
+    def eager_fallback(self, lock, /): return True
+    def release_returned_false(self, lock, /): return False
+    def answer_received(self, lock, answer, /): log.info('%r received answer %r from %r', self, answer, lock)
     def raised_other(self, lock, exc, /):
-        if not isinstance(exc, RuntimeError): log.error(f'error encountered in attempt to force {type(lock).__qualname__} at {id(lock):#x}', exc_info=exc)
-    async def get_info(self, lock, /): return 'potential deadlock situation' # noqa: ARG002
+        if not isinstance(exc, RuntimeError): log.error('error encountered in attempt to force %s at %#x', type(lock).__qualname__, id(lock), exc_info=exc)
+    async def get_info(self, lock, /): return 'potential deadlock situation'
     def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
-    def task_raised_critical(self, lock, exc, /): raise exc from None # noqa: ARG002
+    def task_raised_critical(self, lock, exc, /): raise exc from None
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())
+    # ruff: enable[ARG002]

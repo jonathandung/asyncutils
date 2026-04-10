@@ -1,11 +1,11 @@
-from .exceptions import IgnoreErrors
 from ._internal.protocols import AsyncLockLike
+from .exceptions import IgnoreErrors
+from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
-from asyncio.locks import Semaphore, BoundedSemaphore, Lock
+from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
-from _collections_abc import Awaitable, Coroutine, Callable, Generator, AsyncGenerator
-from typing import Any, Literal, Concatenate, overload
+from typing import Any, Concatenate, Literal, overload
 __all__ = 'get_aiter_fromf', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop'
 _ignore_cancellation: IgnoreErrors
 '''Context manager to ignore asyncio.CancelledError. This annotation is for module-internal use only.'''
@@ -15,7 +15,7 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
     This is as opposed to `loop.create_task`, which only takes coroutines.'''
 def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[R, **P](f: Callable[P, Awaitable[R]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, R]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
-class to_sync_from_loop:
+class to_sync_from_loop: # noqa: N801
     '''A version of `to_sync` that is a decorator factory, converting an async function to synchronous by running it in the specified `loop`.
     Not a class at runtime.'''
     def __init__(self, loop: AbstractEventLoop): ...

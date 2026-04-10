@@ -1,14 +1,14 @@
+from ._internal import helpers as H, patch as P
+from ._internal.submodules import io_all as __all__
 from .mixins import LoopContextMixin
 from .util import sync_await
 import sys
-from asyncio.tasks import eager_task_factory, gather
+from _functools import partial  # type: ignore[import-not-found]
 from asyncio.locks import Lock
+from asyncio.tasks import eager_task_factory, gather
 from contextlib import asynccontextmanager
-from _functools import partial # type: ignore[import-not-found]
-from ._internal import helpers as H, patch as P
 from itertools import starmap
 from mmap import mmap
-from ._internal.submodules import io_all as __all__
 if not (m := sys.modules.get('os')):
     N = sys.builtin_module_names
     for n in ('nt', 'posix'):
@@ -23,7 +23,6 @@ P.patch_function_signatures(*((_, s) for _ in t))
 @H.subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
     __slots__ = 'executor', 'reader', 'writer'
-    _init_executor = H.create_executor
     def __init__(self, r, w, /): super().__init__(); self.loop.set_task_factory(eager_task_factory); self._init_executor(); self.reader, self.writer = r, w
     async def _run(self, f, *a): return await self.loop.run_in_executor(self.executor, f, *a)
     def read(self, n=-1, /): return self._run(self.reader.read, n)
@@ -41,7 +40,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
     def tell(self): raise OSError('cannot use tell on read-write couple') # noqa: PLR6301
     def truncate(self, size=None, /): return self._run(self.writer.truncate, size)
     async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self.executor.shutdown()
-    __cleanup__ = aclose
+    __cleanup__, _init_executor = aclose, H.create_executor
     @property
     def closed(self): return self.reader.closed and self.writer.closed
     def __getattr__(self, name, /):
@@ -49,10 +48,10 @@ class AsyncReadWriteCouple(LoopContextMixin):
         except AttributeError as a:
             try: return getattr(self.writer, name)
             except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {name!r}', (a, b)) from None
-class file(LoopContextMixin): # noqa: PLR0904
+class File(LoopContextMixin): # noqa: PLR0904
     __slots__ = '_f', '_fileno', 'mmap'
     if sys.platform != 'win32':
-        def madvise(self, option, start=0, length=None, _filter=H.filter_out): return self.mmap.madvise(option, start, *_filter(length))
+        def madvise(self, option, start=0, length=None, _=H.filter_out): return self.mmap.madvise(option, start, *_(length))
     async def reg(self, m, /):
         async with self.lock: self.mgr.add(m)
     async def unreg(self, m, /):
@@ -81,13 +80,13 @@ class file(LoopContextMixin): # noqa: PLR0904
     def read_byte(self): return self.mmap.read_byte()
     def write_byte(self, b, /): self.mmap.write_byte(b)
     def resize(self, newsize): self.mmap.resize(newsize)
-    def find(self, sub, start=None, end=None, _filter=_): return self.mmap.find(sub, **_filter(start=start, end=end))
-    def rfind(self, sub, start=None, end=None, _filter=_): return self.mmap.rfind(sub, **_filter(start=start, end=end))
+    def find(self, sub, start=None, end=None, _=_): return self.mmap.find(sub, **_(start=start, end=end))
+    def rfind(self, sub, start=None, end=None, _=_): return self.mmap.rfind(sub, **_(start=start, end=end))
     def tell(self): return self.mmap.tell()
     def size(self): return self.mmap.size()
     def isatty(self): return self._f.isatty()
     readable = writable = seekable = lambda _, /: True
-    def _flush(self, offset, size, _filter=H.filter_out): self._f.flush(); self.mmap.flush(offset, *_filter(size))
+    def _flush(self, offset, size, _=H.filter_out): self._f.flush(); self.mmap.flush(offset, *_(size))
     def _move(self, dest, src, count): self.mmap.move(dest, src, count)
     def _trunc_from(self, data, offset): c = (m := self.mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
     def _read(self, offset, size): return self.mmap[offset:None if size < 0 else offset+size]
@@ -104,7 +103,7 @@ class file(LoopContextMixin): # noqa: PLR0904
     def smart_write(self, data, offset=0): return self.write(data.encode('utf-8', 'replace') if isinstance(data, str) else data, offset)
     async def copy_range(self, src_offset, dest_offset, size):
         try: await self.write(await self.read(src_offset, size), dest_offset); return True
-        except: return False
+        except: return False # noqa: E722
     def fill(self, pattern, offset=0, count=1): return self.write(pattern*count, offset)
     async def compare(self, other, /, size=-1, offset_self=0, offset_other=0): return (await self.read(offset_self, size)) == (await other.read(offset_other, size))
     async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum(x.bit_count() for x in map(int.__xor__, await self.read(offset_self, size), await other.read(offset_other, size), strict=size>0))
@@ -141,7 +140,7 @@ class file(LoopContextMixin): # noqa: PLR0904
         cls.mgr, cls.lock, cls.run, cls.exit, cls.open_files = m, l, run, exit, {}
 class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
     __slots__ = '_factory'
-    def __init__(self, executor=None, f=(file,), n=H.create_executor):
+    def __init__(self, executor=None, f=(File,), n=H.create_executor):
         super().__init__(); self._factory = type('file', f, {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter)
     @property
     def open_mmaps(self): return self._factory.mgr
@@ -209,4 +208,4 @@ class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
-del f, H, P, _, m, I, file
+del f, H, P, _, m, I, File

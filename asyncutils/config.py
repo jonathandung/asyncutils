@@ -1,7 +1,8 @@
-import logging as L, sys as S
 from ._internal import log as l, patch as P
 from ._internal.submodules import config_all as __all__
 from ._internal.unparsed import N
+import logging as L
+import sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: PLR0912
     if not isinstance(e, str): raise TypeError('executor name should be a string')
@@ -55,7 +56,7 @@ match logging_to := g('log_to'):
             try: logging_to = (s := open(T%h, m)).name; break # noqa: SIM115
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
             except AttributeError: raise SystemError('python opened a file with no `name` attribute') from None
-            except Exception: ...
+            except Exception: ... # noqa: BLE001
         else: M = True
         del T, h
     case 'MEMORY':
@@ -73,7 +74,7 @@ match logging_to := g('log_to'):
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
         except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')
-        except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
+        except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n') # noqa: BLE001
 if M: s.write('Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))

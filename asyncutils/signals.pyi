@@ -1,6 +1,6 @@
 from ._internal.protocols import ValidExcType
+from _collections_abc import Awaitable, Callable, Iterable
 from asyncio.events import AbstractEventLoop
-from _collections_abc import Callable, Awaitable, Iterable
 from logging import Logger
 from signal import Signals
 from typing import Literal, overload

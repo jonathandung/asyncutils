@@ -12,7 +12,7 @@ def test_helpers():
     _.foo = lambda: None
     assert not helpers.check_methods(_, 'foo')
 def test_submods_lazy_loading():
-    module = mod.initialize.module
+    module = mod.initialize.Module
     if 'asyncutils.cli' in __import__('sys').modules: fail('module `asyncutils.cli` is somehow already loaded in test environment')
     assert isinstance(m := module('cli'), module) and m is module('cli')
     assert (a := m.__all__) is m.__dir__()

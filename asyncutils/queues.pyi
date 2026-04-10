@@ -1,13 +1,13 @@
 '''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
-from .exceptions import IgnoreErrors, ForbiddenOperation
-from .mixins import EventualLoopMixin
 from ._internal.protocols import SupportsIteration
+from .exceptions import ForbiddenOperation, IgnoreErrors
+from .mixins import EventualLoopMixin
+from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from abc import ABC, abstractmethod
-from _collections_abc import Callable, Generator, AsyncGenerator, Awaitable, Coroutine
-from contextlib import _AsyncGeneratorContextManager
-from typing import Any, Protocol, Literal, Self, Final, overload, type_check_only
 from asyncio.futures import Future
 from asyncio.queues import Queue
+from contextlib import _AsyncGeneratorContextManager
+from typing import Any, Final, Literal, Protocol, Self, overload, type_check_only
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'ignore_valerrs', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
 '''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''

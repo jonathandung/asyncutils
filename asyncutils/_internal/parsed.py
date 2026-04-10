@@ -1,6 +1,6 @@
-from .. import __version__ as V
-from ..constants import POSSIBLE_EXECUTORS as c
 from .compat import apargs as j
+from .. import __version__ as V
+from ..constants import POSSIBLE_EXECUTORS as C
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
@@ -24,7 +24,7 @@ If FILE is 'STDERR', logs to stderr (also the default behaviour and fallback if 
 a('-n', '--no-log', action=b, const='NULL', default=A.SUPPRESS, dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')
-(a := h())('-e', '--executor', choices=c, default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
+(a := h())('-e', '--executor', choices=C, default='thread', metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
@@ -42,7 +42,7 @@ pebble_thread: Use pebble.pool.thread.ThreadPool.
 pebble_process: Use pebble.pool.process.ProcessPool.
 More options may be added in the future.''')
 a('-c', '--custom-executor', dest='executor', metavar=j, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
-for _ in c: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
+for _ in C: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')
 a('-V', action=g, default=0, help='Produce more logging output. Additive.')
 (a := h('repl', 'Configure the behaviour of the Read-Eval-Print Loop of this module.'))('-q', '--quiet', action=f, help='Do not display the banner and exit message in the REPL; the -q flag can be passed to the python command directly to achieve the same effect.')
@@ -55,4 +55,4 @@ a('-s', '--seed', help='Seed the random instance used internally by this module 
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', default=A.SUPPRESS, help='Print this help message and exit.')
-del a, b, c, d, e, f, g, h, i, j, A, V
+del a, b, C, d, e, f, g, h, i, j, A, V

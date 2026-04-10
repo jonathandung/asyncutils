@@ -1,12 +1,12 @@
 from ._internal.helpers import _LoopMixinBase
 from ._internal.protocols import ValidExcType
 from .locks import LocksmithBase
+from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from abc import ABC, abstractmethod
 from asyncio.futures import Future
-from _collections_abc import Generator, Callable, Coroutine, AsyncGenerator, Awaitable
 from functools import cached_property
 from types import TracebackType
-from typing import Self, Literal, Any, overload
+from typing import Any, Literal, Self, overload
 __all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'EventualLoopMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopBoundMixin', 'LoopContextMixin'
 class EventualLoopMixin(_LoopMixinBase): '''An alternative to LoopContextMixin when __aenter__ and __aexit__ are used for other purposes (e.g. lock-like objects such as RLock, KeyedCondition)'''
 class LoopContextMixin(_LoopMixinBase):

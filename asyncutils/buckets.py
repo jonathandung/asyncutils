@@ -1,10 +1,10 @@
 from . import context
+from ._internal.submodules import buckets_all as __all__
 from .mixins import AsyncContextMixin, EventualLoopMixin
 from asyncio.locks import Lock
 from asyncio.tasks import sleep
 from sys import audit
 from time import monotonic
-from ._internal.submodules import buckets_all as __all__
 class TokenBucket:
     __slots__ = '_capacity', '_last_update', '_lock', '_rate', '_timer', '_tokens'
     def __init__(self, rate, capacity, timer=monotonic): audit('asyncutils.buckets.TokenBucket', rate, capacity); self._capacity = self._tokens = capacity; self._rate, self._lock, self._last_update, self._timer = rate, Lock(), timer(), timer

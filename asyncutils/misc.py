@@ -1,10 +1,10 @@
-from asyncio.locks import Lock
-from asyncio.tasks import gather
-from _collections import defaultdict # type: ignore
-from sys import intern
+from ._internal.submodules import misc_all as __all__
 from .exceptions import IgnoreErrors
 from .util import semaphore
-from ._internal.submodules import misc_all as __all__
+from _collections import defaultdict  # type: ignore
+from asyncio.locks import Lock
+from asyncio.tasks import gather
+from sys import intern
 class StateMachine:
     __slots__ = '_entries', '_exits', '_lock', '_state', '_transitions'
     def __init__(self, state, /): self._state, self._transitions, self._entries, self._exits, self._lock = intern(state), defaultdict(set), {}, {}, Lock()

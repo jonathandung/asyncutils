@@ -1,7 +1,7 @@
+from ._internal.protocols import Executor, Sentinel
 from _collections_abc import Callable
 from threading import Lock
-from typing import Final, NoReturn, Literal, Self, overload
-from ._internal.protocols import Sentinel, Executor
+from typing import Final, Literal, NoReturn, Self, overload
 __all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number.'''

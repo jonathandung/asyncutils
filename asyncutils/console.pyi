@@ -1,15 +1,15 @@
 '''Implementation of an interactive console base class, as well as an AsyncUtilsConsole class derived from it.'''
 from ._internal.protocols import ValidExcType
+from _collections_abc import Callable, Coroutine, Iterable
+from _contextvars import Context
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from code import InteractiveConsole
 from collections import ChainMap
-from _collections_abc import Callable, Coroutine, Iterable
 from concurrent.futures import Future
-from _contextvars import Context
-from types import ModuleType, CodeType
-from typing import ClassVar, Any, Self, TypeGuard, final, overload
+from types import CodeType, ModuleType
+from typing import Any, ClassVar, Self, TypeGuard, final, overload
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
     '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.

@@ -254,7 +254,7 @@ Submodules:
   - achain
   - apeekable
   - abucket
-  - OnlineSorter
+  - online_sorter
 
 - iters
 
@@ -450,25 +450,27 @@ Created pyproject.toml, .pypirc, SECURITY.md.
 
 Created [GitHub repository](https://github.com/jonathandung/asyncutils.git); added version submodule.
 
+*The below entries are abridged.*
+
 ## [0.7.0] - 2026-02-09
 
-Implemented channels.Rendezvous; began migration of implementation details into _internal subpackage; fixed initialization logic and command line.
+Implemented `channels.Rendezvous`; began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
 
 ## [0.6.0] - 2026-01-1x
 
-Completed migration from inline annotations to separated stubs; perfected base.event_loop and lazy loading; added console and cli submodules.
+Completed migration from inline annotations to separated stubs; perfected `base.event_loop` and lazy loading; added `console` and `cli` submodules.
 
 ## [0.5.0] - 2025-12-0x
 
-Added classes such as CircuitBreaker and EventBus; implemented preliminary lazy loading system; created exceptions submodule; began separation of type annotations from .py into .pyi.
+Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule; began separation of type annotations from .py into .pyi.
 
 ## [0.4.0] - 2025-10-0x
 
-Added more complicated patterns and procedures such as Observable and wait_for_signal.
+Added more complicated patterns and procedures such as `channels.Observable` and `signals.wait_for_signal`.
 
 ## [0.3.0] - 2025-08-2x
 
-Basically completed refactoring; added more object-oriented patterns such as DynamicThrottle and CacheWithBackgroundRefresh.
+Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `caches.CacheWithBackgroundRefresh`.
 
 ## [0.2.0] - 2025-07-0x
 
@@ -476,8 +478,8 @@ Began reorganizing single file containing all functions into submodules.
 
 ## [0.1.0] - 2025-06-xx
 
-Added basic but untested features such as tee, merge_async_iters, to_async, iter_to_aiter.
+Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_aiter` and `base.sync_await`.
 
 ## [0.0.0] - 2025-05-xx
 
-Development begins. This can be classified as a passion project.
+Development began. This can be classified as a passion project.

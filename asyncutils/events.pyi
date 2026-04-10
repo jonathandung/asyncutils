@@ -1,7 +1,7 @@
 '''Classes that extend the functionality of `asyncio.locks.Event` but do not inherit from it.'''
 from .mixins import EventMixin
-from asyncio.events import AbstractEventLoop
 from _collections_abc import Generator
+from asyncio.events import AbstractEventLoop
 from typing import Literal, overload
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):

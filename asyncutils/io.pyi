@@ -1,12 +1,12 @@
 '''Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes,
 and memory maps. Does not depend on `aiofiles` or any such library.'''
+from ._internal.protocols import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
 from .config import Executor
-from ._internal.protocols import Openable, OpenFiles, OpenRV, MemoryMappedFile, HashAlgorithm
 from .mixins import LoopContextMixin
-from _collections_abc import Iterable, Mapping, Callable
+from _collections_abc import Callable, Iterable, Mapping
 from contextlib import _AsyncGeneratorContextManager
 from mmap import mmap
-from typing import IO, Literal, Any
+from typing import IO, Any, Literal
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:

@@ -1,7 +1,7 @@
-from sys import stderr, exception, audit
 from ._internal.helpers import subscriptable
 from ._internal.patch import patch_function_signatures
 from ._internal.submodules import exceptions_all as __all__
+from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
 def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _=audit):
@@ -48,7 +48,7 @@ class _ExceptionWrapper:
     def __init_subclass__(cls): raise TypeError('cannot subclass _ExceptionWrapper')
 exception_occurred, wrap_exc, unwrap_exc = _ExceptionWrapper.__instancecheck__, _ExceptionWrapper.__new__.__get__(_ExceptionWrapper), _ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
 @subscriptable
-class ref:
+class ref: # noqa: N801
     __slots__ = '__obj'
     def __new__(cls, obj, r=__import__('_weakref').ref):
         if isinstance(obj, (cls, r)): return obj
@@ -116,7 +116,7 @@ class FutureCorrupted(RuntimeError): ...
 class MaxIterationsError(RuntimeError): ...
 class ItemsExhausted(ValueError): ...
 class RateLimitExceeded(RuntimeError):
-    def __init__(self, f, a, k, c, p, l): self._f, self._a, self._k = f, a, k; super().__init__(f'rate limit of {c} calls in {p} periods exceeded by {l} calls when calling {f!r}')
+    def __init__(self, f, a, k, c, p, l, /): self._f, self._a, self._k = f, a, k; super().__init__(f'rate limit of {c} calls in {p} periods exceeded by {l} calls when calling {f!r}')
     async def repeat_call(self): return await self._f(*self._a, **self._k)
 class LockForceRequest(BaseException):
     def __init__(self, s, a, l, i, /): self.requester, self.fulfill, self.lock = s, a, l; super().__init__(f'request from {type(s).__qualname__} to release {type(l).__qualname__}', i)

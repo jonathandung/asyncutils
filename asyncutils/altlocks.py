@@ -1,18 +1,18 @@
+from ._internal.submodules import altlocks_all as __all__
 from .base import iter_to_aiter
 from .config import _randinst
 from .constants import _NO_DEFAULT
 from .context import getcontext
-from .exceptions import CircuitHalfOpen, CircuitOpen, CircuitBreakerError, Critical, CRITICAL
+from .exceptions import CRITICAL, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical
 from .mixins import AsyncContextMixin, AwaitableMixin
+from _collections import deque  # type: ignore[import-not-found]
 from asyncio.exceptions import BrokenBarrierError
-from asyncio.locks import Lock, Event, BoundedSemaphore
-from asyncio.tasks import wait_for, sleep
-from _collections import deque # type: ignore[import-not-found]
+from asyncio.locks import BoundedSemaphore, Event, Lock
+from asyncio.tasks import sleep, wait_for
 from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
-from ._internal.submodules import altlocks_all as __all__
 class DynamicBoundedSemaphore(BoundedSemaphore):
     def __init__(self, value=1): super().__init__(value); self._waiters = deque() # type: deque
     @property
@@ -66,7 +66,7 @@ class CircuitBreaker:
                     if default is _NO_DEFAULT: raise
                     return default
                 except CRITICAL: raise Critical
-                except BaseException as e: raise CircuitBreakerError(f'unexpected {type(e).__qualname__} in {f!r} under CircuitBreaker {self.name!r}: {e}') from None
+                except BaseException as e: raise CircuitBreakerError(f'unexpected {type(e).__qualname__} in {f!r} under CircuitBreaker {self.name!r}: {e}') from None # noqa: BLE001
         return wraps(f)(wrapper)
     def _set(self, state, /): self._state, self._fails = state, 0
     @property

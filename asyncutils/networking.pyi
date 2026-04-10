@@ -4,7 +4,7 @@ from asyncio.protocols import Protocol
 from asyncio.transports import Transport, WriteTransport
 from contextlib import _GeneratorContextManager
 from socket import socket
-from typing import Literal, ClassVar
+from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, EventualLoopMixin):
     '''An implementation of asyncio.protocols.Protocol providing line-based buffering and writing.

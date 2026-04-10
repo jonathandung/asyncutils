@@ -1,7 +1,7 @@
-from ._internal.protocols import Exceptable, Timer, SupportsIteration
+from ._internal.protocols import Exceptable, SupportsIteration, Timer
 from .mixins import LoopContextMixin
-from _collections_abc import Awaitable, Callable, AsyncGenerator, Coroutine
-from typing import Literal, Any
+from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine
+from typing import Any, Literal
 __all__ = 'BatchProcessor', 'BoundedBatchProcessor', 'Bulkhead'
 class BoundedBatchProcessor[T, R]:
     def __init__(self, processor: Callable[[list[T]], Awaitable[R]], batch: int=..., max_concurrent: int=..., bounded: bool=...) -> None: ...

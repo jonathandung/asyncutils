@@ -1,19 +1,19 @@
-from .base import iter_to_aiter
-from .config import _randinst
-from .constants import RAISE, _NO_DEFAULT
-from .exceptions import wrap_exc, CRITICAL, Critical, MaxIterationsError, RateLimitExceeded
 from ._internal import log
 from ._internal.helpers import get_loop_and_set
-from .util import safe_cancel, _ignore_cancellation
+from ._internal.submodules import func_all as __all__
+from .base import iter_to_aiter
+from .config import _randinst
+from .constants import _NO_DEFAULT, RAISE
+from .exceptions import CRITICAL, Critical, MaxIterationsError, RateLimitExceeded, wrap_exc
+from .util import _ignore_cancellation, safe_cancel
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock
-from asyncio.tasks import sleep, wait_for, eager_task_factory
+from asyncio.tasks import eager_task_factory, sleep, wait_for
 from collections import deque, namedtuple
-from functools import wraps, partial
+from functools import partial, wraps
 from sys import audit, maxsize as INF
 from time import perf_counter
-from ._internal.submodules import func_all as __all__
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
@@ -21,7 +21,7 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
-        if stop_when and stop_when.done(): log.warning(f'future to stop periodic coroutine {n} is already done')
+        if stop_when and stop_when.done(): log.warning('future to stop periodic coroutine %s is already done', n)
         async def wrapper(*a, **k): # noqa: PLR0912
             log.debug('periodic task started; source: every'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
@@ -35,14 +35,13 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    (log.error if verbose else log.warning)(f'error in periodic coroutine {n}', exc_info=True)
+                    (log.exception if verbose else log.warning)('error in periodic coroutine %s', n)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    (log.info if verbose else log.debug)(f'future to stop periodic coroutine {n} was cancelled')
-                    stop_when = loop.create_future()
+                    (log.info if verbose else log.debug)('future to stop periodic coroutine %s was cancelled', n); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 s = f'periodic coroutine {n} reached the maximum of {max_iterations} iterations'
@@ -57,29 +56,29 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
         n = f.__name__
         async def wrapper(self, /, *a, **k): # noqa: PLR0912
             log.debug('periodic task started; source: everymethod'); q = default is _NO_DEFAULT
-            if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning(f'future to stop periodic coroutine {n} is already done')
+            if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('future to stop periodic coroutine %s is already done', n)
             if wait_first: await sleep(intvl)
             for _ in range(max_iterations):
                 try: t = timer(); await f(self, *supplied_args, *a, **(supplied_kwargs or {}), **k); t = timer()-t
                 except CRITICAL: raise Critical
-                except BaseException:
+                except: # noqa: E722
                     if stop_on_exc:
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    if verbose: log.error(f'error in periodic coroutine {n}', exc_info=True)
+                    if verbose: log.exception('error in periodic coroutine %s', n)
                 try: return await wait_for(stop_when, intvl-t*count_f)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    if verbose: log.info(f'future to stop periodic coroutine {n} was cancelled')
+                    if verbose: log.info('future to stop periodic coroutine %s was cancelled', n)
                     stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 s = f'periodic coroutine {n} reached the maximum of {max_iterations} iterations'
                 if stop_on_exc or default is RAISE: raise MaxIterationsError(s)
-                if verbose or q: log.info(s)
+                (log.info if verbose or q else log.debug)(s)
             if not q: return default
         return wraps(f)(wrapper)
     return dec
@@ -88,12 +87,12 @@ def timer(f, /, *, precision=6, expected=Exception, should_log=True, timer=perf_
         s = timer()
         try:
             r = await f(*a, **k); e = timer()-s
-            if should_log: log.info(f'function {f.__qualname__} executed in {e:.{precision}f} {'nano'*ns}seconds.')
+            if should_log: log.info('function %s executed in %.*f %sseconds.', f.__qualname__, precision, e, 'nano'*ns)
             return r, e
         except CRITICAL: raise Critical
         except expected as _:
             e = timer()-s
-            if should_log: log.warning(f'function {f.__qualname__} encountered {type(_).__qualname__} after {e:.{precision}f} {'nano'*ns}seconds: {_}')
+            if should_log: log.warning('function %s encountered %s after %.*f %sseconds: %s', f.__qualname__, type(_).__qualname__, precision, e, 'nano'*ns, _)
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=lambda *_: None, on_success=lambda *_: None, random=_randinst.random):

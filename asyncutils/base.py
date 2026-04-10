@@ -1,13 +1,13 @@
-from .constants import RAISE, _NO_DEFAULT
-from .exceptions import IgnoreErrors, Critical, ItemsExhausted, CRITICAL, unnest_reverse
-from ._internal import patch as P, log as L, helpers as H
-from asyncio.coroutines import iscoroutine
-from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
-from asyncio.tasks import all_tasks, gather, sleep
-from sys import exc_info, audit
+from ._internal import helpers as H, log as L, patch as P
 from ._internal.submodules import base_all as __all__
+from .constants import _NO_DEFAULT, RAISE
+from .exceptions import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, unnest_reverse
+from asyncio.coroutines import iscoroutine
+from asyncio.events import _get_running_loop, new_event_loop, set_event_loop
+from asyncio.tasks import all_tasks, gather, sleep
+from sys import audit, exc_info
 b = H.check_methods
-class event_loop:
+class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
@@ -52,18 +52,18 @@ class event_loop:
                 try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
                 except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
                 except RuntimeError:
-                    if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
-                except BaseException:
-                    if not f&0x200: _l.error(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop', exc_info=True)
+                    if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
+                except: # noqa: E722
+                    if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop')
             elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)) and not r:
                 try: r = l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b)) # type: ignore
                 except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError:
-                    if not f&0x100: _l.error('RuntimeError exiting associated event loop', exc_info=True)
-                except BaseException:
-                    if not f&0x200: _l.error(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop', exc_info=True)
+                    if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
+                except: # noqa: E722
+                    if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop')
             elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
             with _i: l.close()

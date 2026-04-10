@@ -2,8 +2,8 @@ from ._internal.protocols import SupportsIteration, ValidExcType, ValidSlice
 from .mixins import EventualLoopMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
 from types import TracebackType
-from typing import Self, Any, SupportsIndex, overload
-__all__ = 'OnlineSorter', 'abucket', 'achain', 'anullcontext', 'apeekable'
+from typing import Any, Self, SupportsIndex, overload
+__all__ = 'abucket', 'achain', 'anullcontext', 'apeekable', 'online_sorter'
 class anullcontext:
     '''Simple async-only version of `contextlib.nullcontext`, implemented here to avoid importing `contextlib`.'''
     async def __aenter__(self) -> None: ...
@@ -35,7 +35,7 @@ class abucket[T, R](LoopContextMixin):
     def __contains__(self, v: R) -> bool: ...
     def __aiter__(self) -> AsyncGenerator[T]: ...
     def __getitem__(self, val: R, /) -> AsyncGenerator[T]: ...
-class OnlineSorter[T]:
+class online_sorter[T]:
     '''A class implementing an async generator-like interface that sorts items as they arrive.'''
     def __init__(self, it: SupportsIteration[T]): ''''''
     def __aiter__(self) -> Self: ...

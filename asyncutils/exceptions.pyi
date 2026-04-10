@@ -1,13 +1,13 @@
 '''Exception handling utilties and exception classes used by this module.'''
+from ._internal.protocols import AsyncLockLike, Exceptable, ExceptionWrapper, Middleware, ValidExcType
 from .channels import EventBus
-from ._internal.protocols import ValidExcType, Exceptable, AsyncLockLike, Middleware, ExceptionWrapper
 from .locks import LocksmithBase
 from .queues import _Q
 from .version import VersionInfo
-from asyncio.locks import Lock
 from _collections_abc import Callable, Generator, Iterable
+from asyncio.locks import Lock
 from types import TracebackType
-from typing import overload, TypeGuard, Self, Literal, Any, NoReturn, ClassVar, NewType
+from typing import Any, ClassVar, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
 __all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_typical', 'potent_derive', 'prepare_exception', 'raise_', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: tuple[ValidExcType, ...]
@@ -127,16 +127,16 @@ class BusPublishingError(BusError):
     def bus(self) -> EventBus|None: '''May be None if the event bus was garbage-collected.'''
     @property
     def middleware(self) -> Middleware|None: '''May be None if the middleware was garbage-collected.'''
-class LockForceRequest(BaseException):
-    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from locks.LocksmithBase) necessitates the lock be released.
-    The initialization signature is intentionally omitted here, since it may change without notice and the user should not manually initialize it.'''
+class LockForceRequest[T](BaseException):
+    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from locks.LocksmithBase) necessitates the lock be released.'''
+    def __init__(self, requester: LocksmithBase, fulfill: Callable[[Any], None], lock: AsyncLockLike[Any], info: T, /): ...
     @property
     def requester(self) -> LocksmithBase: '''The locksmith that sent this error.'''
     @property
     def lock(self) -> AsyncLockLike[Any]: '''The lock involved.'''
-    def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after releasing the lock and performing error handling.'''
+    def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after presumably releasing the lock and performing error handling.'''
     @property
-    def args(self) -> tuple[str, Any]: '''The tuple (error_message, additional_info).''' # type: ignore[override]
+    def args(self) -> tuple[str, T]: '''The tuple (error_message, additional_info).''' # type: ignore[override]
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the password_queue function.'''
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when the password_queue function cannot find the password from the closure variables.'''

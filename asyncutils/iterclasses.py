@@ -1,12 +1,12 @@
+from ._internal import helpers as H
+from ._internal.submodules import iterclasses_all as __all__
 from .base import iter_to_aiter
 from .constants import _NO_DEFAULT
-from ._internal import helpers as H
 from .mixins import EventualLoopMixin, LoopContextMixin
-from _collections import deque, defaultdict # type: ignore[import-not-found]
-from _functools import partial # type: ignore[import-not-found]
 import heapq as Q
-from sys import maxsize as INF, audit
-from ._internal.submodules import iterclasses_all as __all__
+from _collections import defaultdict, deque  # type: ignore[import-not-found]
+from _functools import partial  # type: ignore[import-not-found]
+from sys import audit, maxsize as INF
 class anullcontext:
     async def __aenter__(self): ...
     async def __aexit__(*_): ...
@@ -91,7 +91,7 @@ class abucket(LoopContextMixin):
                     if (v := self._key(i)) == val: yield i; break
                     elif self._validator(v): self._cache[v].append(i)
 @H.subscriptable
-class OnlineSorter:
+class online_sorter:
     __slots__ = '_it', '_loop', '_popper', '_pusher', '_runner'
     def __init__(self, it): self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
     def __aiter__(self):

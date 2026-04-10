@@ -1,7 +1,7 @@
+/* This file describes the intended format of the json files whose paths can be set as AUTILSCFGPATH to configure the behaviour of this module.
+The values associated with the keys are their defaults.
+Some keys can have various types, as detailed by the comments attached. */
 {
-  /* This file describes the intended format of the json files whose paths can be set as AUTILSCFGPATH to configure the behaviour of this module.
-  The values associated with the keys are their defaults.
-  Some keys can have various types, as detailed by the comments attached. */
   log_to: "STDERR",
   // string file path or integer file descriptor, to which the logging is dumped
   // corresponds to -l/--log-to
@@ -13,8 +13,7 @@
   executor: "thread",
   /* choose the PEP 3148 executor class to use when required
   refer to `tools.get_cmd_help()` for possible values
-  corresponds to -e/--executor/-c/--custom-executor
-  */
+  corresponds to -e/--executor/-c/--custom-executor */
   quiet: false,
   // ask the console not to show introductory and closing text
   // corresponds to -q/--quiet

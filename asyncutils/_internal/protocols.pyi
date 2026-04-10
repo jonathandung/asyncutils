@@ -1,15 +1,37 @@
 '''Defines interfaces and type aliases used in this module's stubs. Pseudo-stable (deprecation periods will span at least 2 minor versions).
 This is a fake module in the sense that the names in this stub are all None at runtime, so do not inherit from its 'protocols'.
 This facilitates lightweight inline type annotations.'''
-from _collections_abc import Awaitable, Iterator, Iterable, AsyncIterable, Callable, Generator, Coroutine, Buffer, AsyncGenerator
-from io import TextIOWrapper, _WrappedBuffer
-from types import TracebackType, FunctionType
-from contextlib import _AsyncGeneratorContextManager
-from mmap import mmap
-from typing import Protocol, Self, SupportsIndex, SupportsInt, Any, Literal, IO, NewType, overload, type_check_only, final
 from ..constants import sentinel_base
 from ..mixins import LoopContextMixin
 import sys
+from _collections_abc import (
+    AsyncGenerator,
+    AsyncIterable,
+    Awaitable,
+    Buffer,
+    Callable,
+    Coroutine,
+    Generator,
+    Iterable,
+    Iterator,
+)
+from contextlib import _AsyncGeneratorContextManager
+from io import TextIOWrapper, _WrappedBuffer
+from mmap import mmap
+from types import FunctionType, TracebackType
+from typing import (
+    IO,
+    Any,
+    Literal,
+    NewType,
+    Protocol,
+    Self,
+    SupportsIndex,
+    SupportsInt,
+    final,
+    overload,
+    type_check_only,
+)
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -111,7 +133,7 @@ class SupportsMatMul(Protocol):
     def __matmul__(self, other: Self) -> Self: ...
 @type_check_only
 class MemoryMappedFile(LoopContextMixin):
-    '''Not exposed; calls itself `asyncutils.io.file`.'''
+    '''Not exposed; calls itself `asyncutils.io.File`.'''
     if sys.platform != 'win32':
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: ...
     async def reg(self, m: mmap, /) -> None: ...
@@ -164,6 +186,18 @@ class MemoryMappedFile(LoopContextMixin):
     async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: ...
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_result: int=...) -> list[int]: ...
     async def compact(self) -> None: ...
+@type_check_only
+class Bag(dict[str, Any]): # noqa: FURB189
+    '''A thin dictionary subclass that supports attribute access.'''
+    def __getattr__(self, key: str, /) -> Any: ...
+    def __setattr__(self, key: str, value: Any, /) -> None: ...
+    def __delattr__(self, key: str, /) -> None: ...
+@type_check_only
+class AUnzipConsumer[T]:
+    '''The type of each consumer in the tuple return value of `iters.aunzip`.'''
+    def __aiter__(self) -> Self: ...
+    async def __anext__(self) -> T: ...
+    def close(self) -> None: '''Shut down the underlying queue, such that this consumer no longer receives the values at its position.'''
 @final
 @type_check_only
 class Sentinel(sentinel_base):

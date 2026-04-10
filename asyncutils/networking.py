@@ -1,12 +1,12 @@
+from ._internal.compat import Queue
+from ._internal.log import warning
+from ._internal.submodules import networking_all as __all__
+from .exceptions import IgnoreErrors
+from .mixins import EventualLoopMixin
+from .util import _ignore_cancellation
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport
 from socket import SHUT_WR
-from .exceptions import IgnoreErrors
-from ._internal.compat import Queue
-from ._internal.log import warning
-from .mixins import EventualLoopMixin
-from .util import _ignore_cancellation
-from ._internal.submodules import networking_all as __all__
 class LineProtocol(Protocol, EventualLoopMixin):
     NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
     def __init__(self): self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None

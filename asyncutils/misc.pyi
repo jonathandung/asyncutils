@@ -1,5 +1,5 @@
-from _collections_abc import Callable, Awaitable
-from typing import Literal, Any, overload
+from _collections_abc import Awaitable, Callable
+from typing import Any, Literal, overload
 __all__ = 'StateMachine', 'gather_with_limited_concurrency'
 class StateMachine:
     def __init__(self, state: str, /): ...

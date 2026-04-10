@@ -1,6 +1,6 @@
-import dataclasses as D
 from ._internal.patch import patch_function_signatures as f
 from ._internal.submodules import context_all as __all__
+import dataclasses as D
 @D.dataclass(kw_only=True, match_args=False, slots=True)
 class Context:
     CIRCUIT_BREAKER_DEFAULT_RESET: float = 30.0

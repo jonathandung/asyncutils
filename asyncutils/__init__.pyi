@@ -1,5 +1,6 @@
 '''asyncutils is a feature-rich asynchronous utilities library with CLI and REPL support.'''
 __all__ = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version'
+from ._internal.protocols import Submodule
 from .altlocks import *
 from .base import *
 from .buckets import *
@@ -32,7 +33,6 @@ from .util import *
 from .version import *
 from types import ModuleType
 from typing import Final
-from ._internal.protocols import Submodule
 def __dir__() -> tuple[str, ...]: '''The names of all the public submodules of :mod:`asyncutils`, along with 'preloaded_submodules', 'submodules_map' and 'time_since_boot'.'''
 def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]

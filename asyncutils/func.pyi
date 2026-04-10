@@ -1,7 +1,7 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.protocols import Exceptable, Timer, SupportsIteration, ExceptionWrapper
+from ._internal.protocols import Exceptable, ExceptionWrapper, SupportsIteration, Timer
+from _collections_abc import Awaitable, Callable, Coroutine, Iterable, Mapping
 from asyncio.futures import Future
-from _collections_abc import Callable, Iterable, Mapping, Coroutine, Awaitable
 from typing import Any, Literal, Protocol, Self, overload, type_check_only
 __all__ = 'RateLimited', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'measure', 'retry', 'throttle', 'timer'
 @overload
@@ -45,8 +45,9 @@ def retry(tries: int=..., delay: float=..., max_delay: float=..., backoff: float
     `backoff` is the multiplier applied to the delay (initially `delay`) after each failed attempt, which can never exceed `max_delay`.
     `jitter` is the maximum random jitter added to the delay.
     `exc` specifies which exceptions to catch and retry on; if an exception not in `exc` is raised, it is propagated immediately.
-    `on_retry` and `on_success` are callbacks called before each retry and after a successful call, with the attempt number (starting from 0)
-    and the exception caught or the time taken for the successful call respectively.'''
+    `on_retry` and `on_success` are callbacks called before each retry and after a successful call, with the attempt number (zero-based)
+    as the first argument and the exception caught or the time taken for the successful call respectively as the second. `on_success` is
+    only called once.'''
 def throttle(lim: float, timer: Timer=...) -> _frv: ...
 def debounce(wait: float) -> _frv: ...
 async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''

@@ -1,6 +1,6 @@
-import shlex as s
 from ._internal.parsed import p
 from ._internal.submodules import tools_all as __all__
+import shlex as s
 ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
 def json_to_argv(p, /, *, d='.', c='json'): # noqa: PLR0912
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {type(p).__qualname__} instead of str or bytes')

@@ -1,21 +1,21 @@
 from . import exceptions as E
+from ._internal.compat import Placeholder, Queue, QueueEmpty, QueueFull, QueueShutDown, partial
+from ._internal.helpers import get_loop_and_set
+from ._internal.log import info
+from ._internal.submodules import queues_all as __all__
 from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
 from .futures import AsyncCallbacksFuture
-from ._internal.compat import partial, Placeholder, Queue, QueueShutDown, QueueFull, QueueEmpty
-from ._internal.helpers import get_loop_and_set
-from ._internal.log import info
 from .mixins import EventualLoopMixin
 from .util import safe_cancel, sync_await
+from _collections import deque  # type: ignore[import-not-found]
 from abc import ABCMeta, abstractmethod
 from asyncio.locks import Event
 from asyncio.tasks import gather, wait_for
 from asyncio.timeouts import timeout as _timeout
-from _collections import deque # type: ignore[import-not-found]
 from contextlib import asynccontextmanager
 from itertools import count, starmap
-from sys import audit, _getframe, intern
-from ._internal.submodules import queues_all as __all__
+from sys import _getframe, audit, intern
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
 ignore_qerrs, ignore_valerrs, f = f(*_), E.IgnoreErrors(ValueError), object.__setattr__
 def _wakeup_next(W):
@@ -107,14 +107,14 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(new_pwd, gettyp): return False
         try: u(old_pwd)
         except _.CRITICAL: raise _.Critical
-        except: return False
+        except: return False # noqa: E722
         nonlocal password_get; password_get = new_pwd; return True
     def change_put_password(old_pwd, new_pwd):
         if not can_change_put: return False
         if not isinstance(new_pwd, puttyp): return False
         try: v(old_pwd)
         except _.CRITICAL: raise _.Critical
-        except: return False
+        except: return False # noqa: E722
         nonlocal password_put; password_put = new_pwd; return True
     def task_done():
         nonlocal U

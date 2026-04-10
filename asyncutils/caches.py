@@ -1,17 +1,17 @@
 from . import context
-from .base import yield_to_event_loop, event_loop
+from ._internal.submodules import caches_all as __all__
+from .base import event_loop, yield_to_event_loop
 from .exceptions import CRITICAL, Critical
 from .mixins import LoopContextMixin
 from .util import safe_cancel, to_async
 import collections as C
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
-from asyncio.locks import Lock, Event
-from asyncio.tasks import sleep, gather
+from asyncio.locks import Event, Lock
+from asyncio.tasks import gather, sleep
 from functools import lru_cache, wraps
 from sys import audit
 from time import monotonic
-from ._internal.submodules import caches_all as __all__
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_timer', '_ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic, _=C.defaultdict):
@@ -48,7 +48,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
             t.loading = True
         try: await self.load_item(key)
         except CRITICAL: raise Critical
-        except BaseException as e: t.loading = False; await self._process_error(e, False)
+        except BaseException as e: t.loading = False; await self._process_error(e, False) # noqa: BLE001
     async def refresh_loop(self):
         r, t = self._refresh, []
         while True:
@@ -58,7 +58,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
                 if t: await gather(*t, return_exceptions=True); t.clear()
             except CRITICAL: raise Critical
             except CancelledError: raise
-            except BaseException as e: await self._process_error(e, True)
+            except BaseException as e: await self._process_error(e, True) # noqa: BLE001
     async def invalidate(self, key):
         async with self._lock: return self._cache.pop(key, None)
     async def clear(self):

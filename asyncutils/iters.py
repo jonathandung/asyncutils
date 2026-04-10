@@ -1,20 +1,20 @@
 from . import exceptions as E
+from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
+from ._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, get_loop_and_set, stop_and_closer
+from ._internal.submodules import iters_all as __all__
 from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
-from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
-from ._internal.helpers import check_methods, copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, check, create_executor
 from .iterclasses import achain, anullcontext
 from .util import get_aiter_fromf, safe_cancel
-import math as M, _operator as O
+import _operator as O, math as M
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import gather, sleep, wait_for
 from collections import Counter, defaultdict, deque
-from functools import partial, lru_cache
+from functools import lru_cache, partial
 from sys import audit
-from ._internal.submodules import iters_all as __all__
 _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _littleprimes[:5]), (0x32907381cdf, _littleprimes[:6]), (0x10000000000000000, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _littleprimes[:13]), (0x4c16c7697197146a6b8eb49518c5, _littleprimes[:18])), lambda _, /: _
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_aiter(fs)])
 async def fmap_sequential(fs, /, *a, **k):
@@ -44,19 +44,21 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
         async def helper(i): await gather(*(q.put(i) for q in Q), return_exceptions=True)
         try: await gather(*await to_list(amap(helper, it)))
         except E.CRITICAL: raise E.Critical
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001
             if put_exc: await helper(E.wrap_exc(e))
         finally: await helper(a)
     t = loop.create_task(feed()); return tuple(map(iterator, Q))
 async def _aunzip_put(Q, t):
-    for q, i in zip(Q, t): await q.put(i)
+    from .queues import ignore_qshutdown
+    for q, i in zip(Q, t):
+        with ignore_qshutdown: await q.put(i)
 class _aunzip_consumer_base:
     __slots__ = 'q'
     def __init__(self): self.q = Queue()
     def __aiter__(self): return self
     def close(self): self.q.shutdown()
 async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
-    audit('asyncutils.iters.aunzip', ait, *filter_out(fillvalue)); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
+    audit('asyncutils.iters.aunzip', type(ait).__qualname__); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
     class aunzip_consumer(_b):
         __slots__ = ()
         async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)):
@@ -71,8 +73,8 @@ async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_a
                 return r
             except QueueShutDown: raise StopAsyncIteration from None
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
-async def merge_async_iters(*I, reverse=False):
-    audit('asyncutils.iters.merge_async_iters', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), get_loop_and_set(), _NO_DEFAULT
+async def merge(*I, reverse=False):
+    audit('asyncutils.iters.merge', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), get_loop_and_set(), _NO_DEFAULT
     async def drain(i, f=q.put):
         async for _ in i: await f(_)
     async def close():
@@ -100,7 +102,7 @@ async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
             if b: yield copy_and_clear(b)
             raise
 def achunked(it, n, strict=False):
-    I = get_aiter_fromf(partial(collect, it, *filter_out(n)), [])
+    I = get_aiter_fromf(partial(collect, it, n), [])
     if strict:
         if n is None: raise ValueError('n cannot be None when strict is True')
         async def ret():
@@ -436,7 +438,7 @@ async def with_aiter(actxmgr):
     async with actxmgr as I:
         async for i in iter_to_aiter(I): yield i
 async def asorted(it, *, key=_identity, reverse=False):
-    from heapq import heappush as f, heappop as g
+    from heapq import heappop as g, heappush as f
     m, a = [], (r := []).append
     async for i, j in aenumerate(it): f(m, (key(j), i, j))
     while m: a(g(m))
@@ -516,7 +518,7 @@ async def acollapse(it, base_typ=(str, bytes), levels=None):
             else:
                 try: t = iter_to_aiter(_); g((l+1, t)); g(N); break
                 except TypeError: yield _
-def afirsttrue(it, default=_NO_DEFAULT, pred=None): return anext(afilter(pred, it), *filter_out(default, _NO_DEFAULT))
+def afirsttrue(it, default=_NO_DEFAULT, pred=None): return anext(afilter(pred, it), *filter_out(default, s=_NO_DEFAULT))
 def aprepend(val, it): return achain((val,), it).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _(i)
@@ -610,7 +612,7 @@ async def afactor(n, _littleprimes=_littleprimes, _factor_pollard=_factor_pollar
         else: e((f := await _factor_pollard(n), n//f))
 async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
-        r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import heappush_max as a, heappush as b, heappushpop_max as c
+        r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import _heappush_max as a, heappush as b, _heappushpop_max as c # type: ignore
         while True: a(l, await r()); yield l[0]; b(h, c(l, await r())); yield (l[0]+h[0])/2
     if (m := O.index(maxlen)) <= 0: raise ValueError('window size should be positiive')
     w, o = deque(), []; from bisect import bisect_left as b, insort_right as f
@@ -639,10 +641,8 @@ async def vecs_eq(u, v, cmpeq=check, *, strict=True):
 async def afrievalds(A, B, C, k=2, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(k))
 def basic_collect(it, n): return to_list(aislice(it, n))
 async def asubstrings(it):
-    s = []
-    async for i in iter_to_aiter(it): s.append(i); yield i,
-    c = len(s := tuple(s))+1
-    async for n in arange(2, c):
+    for i in (s := await to_tuple(it)): yield i,
+    async for n in arange(2, c := len(s)+1):
         async for i in arange(c-n): yield s[i:i+n]
 def asubstrindices(seq, reverse=False):
     r = range(1, x := len(seq)+1)
@@ -725,12 +725,12 @@ async def arunlengthencode(it, /):
     async for k, g in agroupby(it): yield k, ailen(g)
 async def arunlengthdecode(it, /): return aflatten(astarmap(arepeat, it))
 async def _dfthelper(a, i=False, /): R = await to_tuple(take(apowers(M.e**((1 if i else -1)*1j*M.tau/(N := len(a := await to_tuple(a))))), N)); return R, N, a
-async def adft(xarr, /, _=_dfthelper):
-    R, N, xarr = await _(xarr)
-    async for k in arange(N): yield await asumprod(xarr, (R[k*i%N] async for i in arange(N)))
-async def aidft(Xarr, /, _=_dfthelper):
-    R, N, Xarr = await _(Xarr, True)
-    async for k in arange(N): yield await asumprod(Xarr, (R[k*n%N] async for n in arange(N)))/N
+async def adft(a, /, _=_dfthelper):
+    R, N, a = await _(a)
+    async for k in arange(N): yield await asumprod(a, (R[k*i%N] async for i in arange(N)))
+async def aidft(A, /, _=_dfthelper):
+    R, N, A = await _(A, True)
+    async for k in arange(N): yield await asumprod(A, (R[k*n%N] async for n in arange(N)))/N
 async def aargmin(it, key=_identity, default=_NO_DEFAULT): return (await amin(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
 async def aargmax(it, key=_identity, default=_NO_DEFAULT): return (await amax(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
 def arunningmean(it): return amap(O.truediv, aaccumulate(it), acount(1))

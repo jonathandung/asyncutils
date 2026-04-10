@@ -1,11 +1,11 @@
+from ._internal.protocols import GeneratorCoroutine, Sentinel, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
+from _collections_abc import AsyncGenerator, AsyncIterable, AsyncIterator, Awaitable, Callable, Generator, Iterable, Iterator
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
-from _collections_abc import Awaitable, Callable, AsyncGenerator, AsyncIterator, AsyncIterable, Generator, Iterator, Iterable
 from types import TracebackType
-from typing import ClassVar, Self, Literal, Any, NoReturn, overload
-from ._internal.protocols import ValidExcType, SupportsPop, SupportsPopLeft, SupportsIteration, GeneratorCoroutine, Sentinel
+from typing import Any, ClassVar, Literal, NoReturn, Self, overload
 __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_iter', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_aiter', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
-class event_loop:
+class event_loop: # noqa: N801
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
     _ENTERED: ClassVar[int]
     _INNER_AEXIT: ClassVar[int]

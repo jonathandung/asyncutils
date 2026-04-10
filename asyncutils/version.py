@@ -91,7 +91,7 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
         try:
             if (o := f(o)) is None: return
         except E.CRITICAL: raise E.Critical
-        except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e) from None
+        except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e) from None # noqa: BLE001
         else:
             if not c(o): raise E.VersionNormalizerTypeError(f, o)
     elif not c(o): return

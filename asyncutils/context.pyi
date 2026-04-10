@@ -2,7 +2,7 @@
 from ._internal.protocols import ValidExcType
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Final, Self, Any, final, overload
+from typing import Any, Final, Self, final, overload
 __all__ = 'Context', 'getcontext', 'localcontext', 'setcontext'
 @final
 @dataclass(kw_only=True, match_args=False, slots=True)

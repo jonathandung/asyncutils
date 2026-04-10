@@ -1,9 +1,9 @@
+from ._internal.compat import Placeholder, partial
+from ._internal.helpers import subscriptable
+from ._internal.submodules import properties_all as __all__
 from asyncio.events import new_event_loop
 from asyncio.locks import Lock
 from atexit import register
-from ._internal.compat import partial, Placeholder
-from ._internal.helpers import subscriptable
-from ._internal.submodules import properties_all as __all__
 @subscriptable
 class AsyncProperty:
     __slots__ = '__doc__', '_cls', '_deleted', '_finalize', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'

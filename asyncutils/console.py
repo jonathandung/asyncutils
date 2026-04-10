@@ -1,8 +1,8 @@
-from . import config as C, __version__ as V
+from . import __version__ as V, config as C
 from ._internal import patch as P, running_console as R
+from ._internal.submodules import console_all as __all__
 import sys as S
 from os import getenv as g
-from ._internal.submodules import console_all as __all__
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()
@@ -31,13 +31,13 @@ class ConsoleBase(B): # type: ignore
     def __callback(self, fut, code, /, *, makef=type(refresh), corocheck=__import__('asyncio.coroutines', fromlist=_f).iscoroutine, futchain=__import__('asyncio.futures', fromlist=_f)._chain_future):
         try: c = makef(code, self.locals)()
         except SystemExit as e: return self.set_return_code(e)
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001
             if isinstance(e, KeyboardInterrupt): self.interrupt()
             elif isinstance(e, MemoryError): self.memoryerror()
             return fut.set_exception(e)
         if not corocheck(c): return fut.set_result(c)
         try: self._fut = _ = self._loop.create_task(c, context=self.context); futchain(_, fut)
-        except BaseException as e: fut.set_exception(e)
+        except BaseException as e: fut.set_exception(e) # noqa: BLE001
     def showtraceback(self):
         t, v, b = S.exc_info()
         try:
@@ -47,7 +47,7 @@ class ConsoleBase(B): # type: ignore
         getattr(self._loop, 'call_soon'+'_threadsafe'*threadsafe)(self.__callback, F := futimpl(), code, context=self.context)
         try: return F.result()
         except SystemExit as e: self.set_return_code(e)
-        except BaseException as e:
+        except BaseException as e: # noqa: BLE001
             if not isinstance(e, dont_show_traceback): self.showtraceback()
             return getattr(self, 'STATEMENT_FAILED', None)
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g):
@@ -92,7 +92,7 @@ class ConsoleBase(B): # type: ignore
             if callable(h := getattr(S, i := '__interactivehook__', None)):
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
-                except: w(f'Error running {self!r}\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc()
+                except: w(f'Error running {self!r}\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
                 if always_install_completer or (h.__module__ == 'site' and h.__name__ == 'register_readline'):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete) # noqa: SIM105
                     except ImportError: ...
@@ -103,7 +103,7 @@ class ConsoleBase(B): # type: ignore
                 except MemoryError: self.memoryerror()
         else: self.write_special(self.BANNER); self.runcode(compile((l := S.stdin).read(), getattr(l, 'name', '<stdin>'), 'exec'))
         try: self.posthook()
-        except BaseException as e: w(f'{type(e).__qualname__} occurred in posthook of {self!r}: {e}\n')
+        except BaseException as e: w(f'{type(e).__qualname__} occurred in posthook of {self!r}: {e}\n') # noqa: BLE001
         if suppress_asyncio_warnings: P.patch_asyncio_warnings()
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode

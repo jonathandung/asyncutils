@@ -1,22 +1,22 @@
 from . import context
-from .base import event_loop, iter_to_aiter, safe_cancel_batch
-from .constants import _NO_DEFAULT
-from .exceptions import BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, potent_derive, CRITICAL
 from ._internal import log as L, patch as P
 from ._internal.compat import Queue, QueueEmpty, QueueShutDown
 from ._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable
+from ._internal.submodules import channels_all as __all__
+from .base import event_loop, iter_to_aiter, safe_cancel_batch
+from .constants import _NO_DEFAULT
+from .exceptions import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, potent_derive
 from .mixins import LoopContextMixin
-from .util import safe_cancel, sync_await, to_async, to_sync, _ignore_cancellation
+from .util import _ignore_cancellation, safe_cancel, sync_await, to_async, to_sync
+from _weakrefset import WeakSet
 from asyncio.coroutines import iscoroutine
-from asyncio.locks import Lock, Event, Semaphore
+from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import gather, shield, sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
 from collections import defaultdict, deque, namedtuple
 from contextlib import contextmanager
-from functools import partial, cached_property
-from sys import audit, addaudithook
-from _weakrefset import WeakSet
-from ._internal.submodules import channels_all as __all__
+from functools import cached_property, partial
+from sys import addaudithook, audit
 @subscriptable # noqa: PLR0904
 class Observable(LoopContextMixin):
     __slots__ = '_data', '_event', '_lock', '_queue', '_to_remove'
@@ -38,7 +38,7 @@ class Observable(LoopContextMixin):
                 if _silent_:
                     if _persistent_: continue
                     break
-                elif _persistent_: L.error(f'{type(e).__qualname__} in observer', exc_info=True)
+                elif _persistent_: L.exception('%s in observer', type(e).__qualname__)
                 else: raise
     async def wait_for_next(self, timeout=None, strict=False):
         async def one_time(*a, **k): F.set_result((a, k)) # noqa: RUF029
@@ -151,13 +151,13 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
     @cached_property
     def auditor(self):
-        def F(e, a, f=self.is_auditing, _=self._begin_publish, /):
+        def f(e, a, f=self.is_auditing, _=self._begin_publish, /):
             if f(): _(e, a)
-        F.added = False; return F # type: ignore
+        return f # type: ignore
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or (a := self.auditor).added): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True
+        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', self); self._auditing = False
     @cached_property
     def _middlewares(self): return {}
@@ -203,7 +203,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
         try:
             await p
             if f: raise ExceptionGroup(f'errors occurred in publishing middlewares of {self.name}', f) from None
-            L.info(f'{self.name}: publishing of event {event_type!r} succeeded'); L.debug(f'final data: {data!r}')
+            L.info('%s: publishing of event %r succeeded', self.name, event_type); L.debug('final data: %r', data)
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally: await safe_cancel(p)
     def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None): self._begin_publish(event_type, data, safe, timeout, chaperone)
@@ -217,7 +217,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
                 try:
                     if iscoroutine(D := m(E, D)): D = await D
                 except CRITICAL: raise Critical
-                except (ExceptionGroup, Exception) as e: C(e)
+                except (ExceptionGroup, Exception) as e: C(e) # noqa: BLE001
                 except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore[arg-type]
                 except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore[arg-type]
             U = self._subscribers
@@ -250,8 +250,8 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
         if item_timeout is _NO_DEFAULT: item_timeout = context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
             while True: yield await wait_for(q.get(), item_timeout) # type: ignore[arg-type]
-        except QueueShutDown: L.info(f'event stream of {self.name} has been shut down', exc_info=True)
-        except TimeoutError: L.error(f'event stream of {self.name} is stopping because of timeout in waiting for item', exc_info=True)
+        except QueueShutDown: L.info('event stream of %s has been shut down', self.name, exc_info=True)
+        except TimeoutError: L.exception('event stream of %s is stopping because of timeout in waiting for item', self.name)
         finally: F.set_result(None); await t
     async def shutdown(self, immediate=False, timeout=None, preserve_stats=False):
         if self._is_shutdown: return
@@ -262,7 +262,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
             async with _timeout(timeout):
                 self.stream_queue.shutdown(immediate)
                 for _ in range(self.active_tasks): await f()
-        except TimeoutError: L.error(f'{self.name} shutdown timed out, some tasks may be incomplete', exc_info=True)
+        except TimeoutError: L.exception('%s shutdown timed out, some tasks may be incomplete', self.name)
         finally:
             if p := self._publishers: await safe_cancel_batch(p)
             del self._lock, self._handler, self._sem, self._publishers
@@ -276,9 +276,9 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
         try:
             async with self._sem:
                 if iscoroutine(r := callback(*filter_out(event_type, s=_NO_DEFAULT), data)): await wait_for(r, timeout)
-        except TimeoutError: L.warning(f'callback {callback.__qualname__} timed out')
+        except TimeoutError: L.warning('callback %s timed out', callback.__qualname__)
         except CRITICAL: self.exiter(); raise Critical
-        except BaseException as e: await self.handle_exception(e)
+        except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
     P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # type: ignore
 @subscriptable

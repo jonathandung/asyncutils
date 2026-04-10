@@ -1,4 +1,4 @@
-from asyncio.events import new_event_loop, _get_running_loop, set_event_loop
+from asyncio.events import _get_running_loop, new_event_loop, set_event_loop
 from atexit import register
 from sys import audit
 def filter_out(*a, s=None, f=__import__('_operator').is_not): yield from filter(lambda x, s=s: f(s, x), a)
@@ -18,7 +18,7 @@ def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # type: ignore
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)
 def create_executor(f, /, save=True):
-    audit('asyncutils/create_executor', f'{(F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor as E; e = E()
+    audit('asyncutils/create_executor', f'{(F := f if callable(f) else type(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor; e = Executor()
     if save: f.executor = e
     return e
 class _LoopMixinBase:

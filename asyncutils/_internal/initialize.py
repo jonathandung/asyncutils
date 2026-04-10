@@ -1,7 +1,7 @@
-from .. import config as C, constants as D, exceptions as E, version as V, time_since_boot as T
+from . import patch as P, running_console as R
 from .log import debug as l
 from .submodules import __dict__ as d
-from . import patch as P, running_console as R
+from .. import config as C, constants as D, exceptions as E, time_since_boot as T, version as V
 if (a := d.pop('__all_submodules', None)) is None: raise ImportError('asyncutils: cannot reload internal initialization module')
 _a, _u, _f, _s, _i, s, t = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
 for _k, _v in _i:
@@ -9,7 +9,7 @@ for _k, _v in _i:
 try:
     while True: _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
 except StopIteration: ...
-class module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
+class Module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
     __slots__ = '_fs', '_name'
     def __new__(cls, name, /, _d=_d, _a=_a, _s=s):
         if name in _a: return _s[name]
@@ -34,7 +34,7 @@ if C.loaded_all:
     l(f'all submodules loaded in {T():.1f} milliseconds')
 else:
     f = object.__new__
-    for _ in a: r._name, s[_] = _, (r := f(module))
+    for _ in a: r._name, s[_] = _, (r := f(Module))
     s.update(zip(f := ('config', 'constants', 'exceptions', 'version'), (C, D, E, V))); l(f'all submodules initialized in {T():.1f} milliseconds')
     for _ in f: l(f'now loading: {_}')
     del f, r

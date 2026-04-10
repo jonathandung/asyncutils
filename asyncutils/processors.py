@@ -1,16 +1,16 @@
-from .base import safe_cancel_batch, collect, iter_to_aiter
-from .exceptions import BulkheadFull, BulkheadShutDown
-from ._internal.compat import Queue, QueueFull, QueueEmpty, QueueShutDown
+from ._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown
 from ._internal.helpers import subscriptable
+from ._internal.submodules import processors_all as __all__
+from .base import collect, iter_to_aiter, safe_cancel_batch
+from .exceptions import BulkheadFull, BulkheadShutDown
 from .mixins import LoopContextMixin
-from .util import semaphore, safe_cancel
-from _functools import partial # type: ignore[import-not-found]
+from .util import safe_cancel, semaphore
+from _functools import partial  # type: ignore[import-not-found]
 from asyncio.exceptions import CancelledError
-from asyncio.locks import Lock, Event
+from asyncio.locks import Event, Lock
 from asyncio.tasks import sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic
-from ._internal.submodules import processors_all as __all__
 @subscriptable
 class BoundedBatchProcessor:
     __slots__ = '_batch', '_processor', '_sem'
@@ -81,5 +81,5 @@ class Bulkhead(LoopContextMixin):
         except TimeoutError:
             while True:
                 try: f(g())
-                except: h(True); break
+                except: h(True); break # noqa: E722
         return r

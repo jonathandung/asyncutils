@@ -1,8 +1,8 @@
 from ._internal.protocols import SupportsIteration
+from _collections_abc import AsyncIterable, Awaitable, Callable, Coroutine, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
-from _collections_abc import Coroutine, Awaitable, Callable, Generator, AsyncIterable, Iterable
-from concurrent.futures._base import Future as _F
+from concurrent.futures._base import Future as SyncFuture
 from typing import Any, Literal, TypeGuard, overload
 __all__ = 'convert_to_coro_iter', 'enhanced_staggered_race', 'first_completed', 'multi_winner_race_with_callback', 'race_with_callback'
 @overload
@@ -17,7 +17,7 @@ async def race_with_callback[T](*C: Coroutine[Any, Any, T], winner: Callable[[T]
     If no coroutine completes within `timeout`, None is returned.
     The loser callback is called on each return value of or exception raised by the losing coroutines after seeing CancelledError.'''
 async def multi_winner_race_with_callback[T](*C: Coroutine[Any, Any, T], timeout: float, winner: Callable[[T], Any]=..., loser: Callable[[Any|BaseException], Any]=...) -> list[T]: '''Return a list of all the coroutines that completed within `timeout`, and cancel the rest, triggering callbacks similarly to race_with_callback.'''
-def convert_to_coro_iter(cfs: SupportsIteration[Awaitable[Any]|SupportsIteration[Any]], skip_invalid: bool=..., corocheck: Callable[[Any], TypeGuard[Coroutine[Any, Any, Any]]]=..., futwrap: Callable[[Future[Any]|_F[Any]], Future[Any]]=..., handle_aiter: Callable[[AsyncIterable[Any]], Any]=..., handle_iter: Callable[[Iterable[Any]], Any]=...) -> Generator[Coroutine[Any, Any, Any], Any, None]:
+def convert_to_coro_iter(cfs: SupportsIteration[Awaitable[Any]|SupportsIteration[Any]], skip_invalid: bool=..., corocheck: Callable[[Any], TypeGuard[Coroutine[Any, Any, Any]]]=..., futwrap: Callable[[Future[Any]|SyncFuture[Any]], Future[Any]]=..., handle_aiter: Callable[[AsyncIterable[Any]], Any]=..., handle_iter: Callable[[Iterable[Any]], Any]=...) -> Generator[Coroutine[Any, Any, Any], Any, None]:
     '''A helper function to convert a possibly async iterable of futures, coroutines and even (async) iterables to a plain generator of coroutines,
     such that it may be starred and passed into the functions in this module. Originally designed to complement staggered.staggered_race.
     Due to the possibility of cfs being an async iterable and this function being designed to operate in a sync context, it is highly inefficient.'''

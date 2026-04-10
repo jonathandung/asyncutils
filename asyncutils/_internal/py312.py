@@ -2,9 +2,9 @@ from .. import __version__
 if __version__.major >= 3: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
 from .helpers import subscriptable
 from ..mixins import LoopBoundMixin
-from asyncio.locks import Event
-from _collections import deque # type: ignore[import-not-found]
 import heapq as H
+from _collections import deque  # type: ignore[import-not-found]
+from asyncio.locks import Event
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
 class QueueEmpty(Exception): ...
 class QueueFull(Exception): ...

@@ -3,8 +3,8 @@
 - **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
 from ._internal.protocols import IntCompatible, Openable, ValidSlice
-from _collections_abc import Callable, Iterator, Iterable
-from typing import Any, Self, Literal, NoReturn, final, overload
+from _collections_abc import Callable, Iterable, Iterator
+from typing import Any, Literal, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
 class VersionInfo(str): # noqa: FURB189

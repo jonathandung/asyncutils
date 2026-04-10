@@ -1,9 +1,9 @@
-from asyncio.futures import _PyFuture # type: ignore[import-not-found]
-from asyncio.tasks import eager_task_factory, _PyTask # type: ignore[import-not-found]
-from _contextvars import copy_context
-from sys import audit
 from ._internal.helpers import copy_and_clear
 from ._internal.submodules import futures_all as __all__
+from _contextvars import copy_context
+from asyncio.futures import _PyFuture  # type: ignore[import-not-found]
+from asyncio.tasks import _PyTask, eager_task_factory  # type: ignore[import-not-found]
+from sys import audit
 class AsyncCallbacksFuture(_PyFuture):
     def __init__(self, *, loop=None): audit(type(self).__qualname__, loop); _PyFuture.__init__(self, loop=loop); self._setup()
     def _setup(self): self._loop.set_task_factory(eager_task_factory); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = [], [], []
