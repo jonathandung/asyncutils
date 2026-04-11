@@ -1,4 +1,5 @@
 from ._internal.compat import Queue
+from ._internal.helpers import audit_fullname
 from ._internal.log import warning
 from ._internal.submodules import networking_all as __all__
 from .exceptions import IgnoreErrors
@@ -10,7 +11,7 @@ from socket import SHUT_WR
 from sys import audit
 class LineProtocol(Protocol, EventualLoopMixin):
     NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
-    def __init__(self): audit('asyncutils.networking.LineProtocol'); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
+    def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):
         if (t := self.transport) is None: raise ConnectionError('no transport connected')
@@ -67,7 +68,7 @@ class SocketTransport(Transport):
     @property
     def loop(self): return p.loop if isinstance(p := self._protocol, LineProtocol) else NotImplemented
     def __init__(self, sock=None):
-        audit('asyncutils.networking.SocketTransport'); self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
+        audit_fullname(self); self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
         if sock: self.connect_sock(sock)
     def _reset_extra(self): super().__init__({'socket': None, 'sockname': None, 'peername': None})
     def _sock_transport_read_ready(self, sock, size=0x1000):

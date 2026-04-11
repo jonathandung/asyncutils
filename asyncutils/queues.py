@@ -1,6 +1,6 @@
 from . import exceptions as E
 from ._internal.compat import Placeholder, Queue, QueueEmpty, QueueFull, QueueShutDown, partial
-from ._internal.helpers import get_loop_and_set
+from ._internal.helpers import get_loop_and_set, fullname
 from ._internal.log import info
 from ._internal.submodules import queues_all as __all__
 from .base import collect, iter_to_aiter
@@ -31,7 +31,7 @@ class Q:
         for a in zip(cls.__slots__, a): _(s, *a) # noqa: B020,PLR1704
         return s
     def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
-        if name not in s: raise AttributeError(f'{type(self).__qualname__!r} object has no attribute {name!r}')
+        if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
     def __init_subclass__(cls, /, e=exc('subclass'), **_): raise e
@@ -40,8 +40,8 @@ class Q:
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _ # noqa: ARG002
     # ruff: enable[PLR6301]
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, auditf=audit, _=E, Q=Q): # noqa: C901,PLR0912,PLR0915
-    auditf('asyncutils.queues.password_queue', protect_get, protect_put, get_from, put_from)
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0912,PLR0915
+    audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None)
     if protect_get:
         try:
             if password_get is _NO_DEFAULT and (password_get := (F := _getframe(1)).f_locals.get(get_from := get_from.strip(), o := object())) is o is (password_get := F.f_globals.get(get_from, o)): raise _.GetPasswordRetrievalError(get_from)
@@ -170,28 +170,28 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
                 if f: raise e from None
                 return default
     async def extend(self, it, timeout=None):
-        info(f'extending {type(self).__qualname__} with iterable {it!r}')
+        info(f'extending {fullname(self)} with iterable {it!r}')
         async with _timeout(timeout):
             async for i in iter_to_aiter(it): await self.smart_put(i)
     def sync_put(self, item, *, timeout=None): return sync_await(self.smart_put(item, timeout=timeout), loop=self.loop)
     def sync_get(self, *, timeout=None, default): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
         try:
-            if self.full(): audit(f'asyncutils.queues.{type(self).__name__}.push', item, self.get_nowait())
+            if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
     async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
-        m, c = abs(max or float('inf')), 0; info(f'persistent draining of {type(self).__qualname__} started')
+        m, c = abs(max or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
         with _:
             while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
     def drain_until_empty(self, max=None):
-        max, c = abs(max or float('inf')), 0; info(f'draining of {type(self).__qualname__} started')
+        max, c = abs(max or float('inf')), 0; info(f'draining of {fullname(self)} started')
         with ignore_qempty:
             while c < max: yield self.get_nowait(); c += 1
     def drain_retlist(self, max=None): return list(self.drain_until_empty(max))
     __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)
-    def __str__(self): return f'{type(self).__qualname__}({self.maxsize})'
+    def __str__(self): return f'{fullname(self)}({self.maxsize})'
     @property
     def is_shutdown(self): return self._event.is_set()
     @is_shutdown.setter
@@ -213,10 +213,10 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
+            if raising: raise QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         if self.full():
-            if raising: raise QueueFull(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-full queue with raising=True')
+            if raising: raise QueueFull(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-full queue with raising=True')
             r = self.get_nowait(); self.put_nowait(item); return r
         self.put_nowait(item); return self.get_nowait()
     def poppush_nowait(self, item, raising=True):
@@ -224,7 +224,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             if raising: raise QueueShutDown
             return
         if self.empty():
-            if raising: raise QueueEmpty(f'{type(self).__qualname__}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
+            if raising: raise QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         r = self.get_nowait(); self.put_nowait(item); return r
     async def pushpop(self, item): await self.put(item); return await self.get()
@@ -234,16 +234,17 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             while True: self.get_nowait()
     @asynccontextmanager
     async def transaction(self, _=E.IgnoreErrors(TimeoutError)):
-        audit(f'{type(self).__qualname__}.transaction', self); q = self.peek_all()
+        audit((s := f'{fullname(self)}.transaction/%s')%'start', i := id(self)); q = self.peek_all()
         try: yield self
         except:
             self.clear()
             with _: await self.extend(q, 0.1)
             raise
+        finally: audit(s%'end', i)
     def empty(self): return self.qsize() == 0
     def __bool__(self): return self.qsize() >= 0 # type: ignore
     def map(self, f, stop_when=None, *, lifo=False):
-        audit(f'{type(self).__qualname__}.map', self, f)
+        audit(f'{fullname(self)}.map', id(self), fullname(f))
         if stop_when is None:
             stop_when, E = AsyncCallbacksFuture(), (QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
@@ -263,7 +264,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
         if stop_when: stop_when.add_done_callback(s.cancel)
         return q
     def starmap(self, f, stop_when=None, *, lifo=False):
-        audit(f'{type(self).__qualname__}.starmap', self, f)
+        audit(f'{fullname(self)}.starmap', id(self), fullname(f))
         if stop_when is None:
             stop_when, E = AsyncCallbacksFuture(), (QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
@@ -282,14 +283,14 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
         if stop_when: stop_when.add_done_callback(s.cancel)
         return q
     def filter(self, pred=bool, *, lifo=False):
-        audit(f'{type(self).__qualname__}.filter', self, pred)
+        audit(f'{fullname(self)}.filter', id(self), fullname(pred))
         q = (SmartLifoQueue if lifo else SmartQueue)(self.maxsize)
         async def feed():
             with ignore_qshutdown:
                 while True: await (self if pred(i := await self.get()) else q).smart_put(i)
         self.make(feed()); return q
     def enumerate(self, *, lifo=False):
-        audit(f'{type(self).__qualname__}.enumerate', self)
+        audit(f'{fullname(self)}.enumerate', id(self))
         q = (SmartLifoQueue if lifo else SmartQueue)(self.maxsize)
         async def feed():
             i = 0
@@ -331,7 +332,7 @@ class SmartLifoQueue(PotentQueueBase):
         s = self.qsize()
         if i < 0: i += s
         if 0 <= i < s: return self.__queue[i]
-        raise IndexError(f'failed to peek {type(self).__qualname__} item at index {i}')
+        raise IndexError(f'failed to peek {fullname(self)} item at index {i}')
     def peek_all(self): return self.__queue.copy()
     def qsize(self): return len(self.__queue)
     def __bool__(self): return bool(self.__queue)
@@ -351,7 +352,7 @@ class SmartPriorityQueue(PotentQueueBase):
     def empty(self): return not self
 class UserPriorityQueue(SmartPriorityQueue):
     @classmethod
-    def from_iter_of_tuples(cls, items, maxsize=0, _pqimpl=SmartPriorityQueue): _pqimpl.__init__(Q := object.__new__(cls), maxsize, init_items=items); Q.__tiebreak = count(); return Q
+    def from_iter_of_tuples(cls, items, maxsize=0, _=SmartPriorityQueue): _.__init__(Q := object.__new__(cls), maxsize, init_items=items); Q.__tiebreak = count(); return Q
     def __init__(self, maxsize=0, *, init_items=(), init_priority=0): self.__tiebreak = count(); super().__init__(maxsize, init_items=((init_priority, self._tiebreak, j) async for j in iter_to_aiter(init_items)))
     @property
     def _tiebreak(self): return next(self.__tiebreak)

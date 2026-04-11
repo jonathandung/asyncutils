@@ -3,7 +3,7 @@ Audit events table
 
 This page details all events raised by this library through sys.audit and the corresponding arguments. This module takes care not to expose sensitive
 information in the events, so that the audit hooks often only see the fully qualified name of the type of some handled object rather than the object
-itself. For consistency and namespace integrity, the name of all audit events begin with 'asyncutils', and are often exactly the fully qualified name
+itself. For consistency and namespace integrity, all audit event names begin with :mod:`asyncutils`, and are often exactly the fully qualified name
 of the function being called.
 
 See the official documentation for :func:`sys.audit` and :func:`sys.addaudithook` on how to listen to these events, as well as
@@ -46,7 +46,7 @@ this table take inspiration.
     - ``name``: :class:`str`, ``fname``: :class:`str`
     - Raised when a :class:`asyncutils.altlocks.CircuitBreaker` of name ``name`` is applied on a function with name ``fname``.
   * - asyncutils.base.safe_cancel_batch
-    - ``it``: :class:`SupportsIteration[asyncio.future.Future]`
+    - ``it``: :type:`SupportsIteration[asyncio.future.Future]`
     - Raised when :func:`asyncutils.base.safe_cancel_batch` is called on the (possibly async) iterable ``it``.
   * - asyncutils.base.iter_to_aiter
     - ``tname``: :class:`str`
@@ -72,6 +72,15 @@ this table take inspiration.
   * - asyncutils.channels.EventBus
     - ``max_concurrent``: :class:`int`
     - Raised when :class:`asyncutils.channels.EventBus` is instantiated, with ``max_concurrent`` being the maximum number of event handlers allowed to run concurrently.
+  * - asyncutils.channels.EventBus.start_audit
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`start_audit` method of :class:`asyncutils.channels.EventBus` is called, with the memory address of the instance as argument.
+  * - asyncutils.channels.EventBus.stop_audit
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`stop_audit` method of :class:`asyncutils.channels.EventBus` is called, with the memory address of the instance as argument.
+  * - asyncutils.channels.EventBus.event_stream
+    - ``addr``: :class:`int`, ``event_type``: :class:`str|None`
+    - Raised when the :meth:`event_stream` method of :class:`asyncutils.channels.EventBus` is called. ``addr`` is the memory address of the instance, and ``event_type`` is the event type the stream was opened for or ``None`` for catch-all streams.
   * - asyncutils.cli.run
     - \
     - Raised with no arguments when the command-line interface of this library is first invoked through the entry point ``[python [-m ]]asyncutils``, even if just asking for the version or help.
@@ -94,10 +103,10 @@ this table take inspiration.
     - ``ntasks``: :class:`int`
     - Raised when :func:`asyncutils.compete.multi_winner_race_with_callback` finishes, with ``ntasks`` coroutines.
   * - asyncutils.exceptions.unnest
-    - ``excdq``: :class:`collections.deque[BaseException]`
+    - ``excdq``: :type:`collections.deque[BaseException]`
     - Raised when :func:`asyncutils.exceptions.unnest` is called, with ``excdq`` being the queue that is to store the exceptions and flatten them, the items in which are initially not all the groups that will be processed.
   * - asyncutils.exceptions.unnest_reverse
-    - ``exclst``: :class:`list[BaseException]`
+    - ``exclst``: :type:`list[BaseException]`
     - Raised when :func:`asyncutils.exceptions.unnest_reverse` is called, with ``exclst`` being the stack that is to store the exceptions and flatten them, with only a subset of the groups to be eventually collapsed in it at the beginning.
   * - asyncutils.exceptions.raise\_
     - ``exc``: :class:`BaseException`
@@ -135,3 +144,117 @@ this table take inspiration.
   * - asyncutils.iters.aforever
     - \
     - Raised when :func:`asyncutils.iters.aforever` is called.
+  * - asyncutils.networking.LineProtocol
+    - \
+    - Raised when :class:`asyncutils.networking.LineProtocol` is instantiated.
+  * - asyncutils.networking.CRLFProtocol
+    - \
+    - Raised when :class:`asyncutils.networking.CRLFProtocol` is instantiated.
+  * - asyncutils.networking.CRProtocol
+    - \
+    - Raised when :class:`asyncutils.networking.CRProtocol` is instantiated.
+  * - asyncutils.networking.LFProtocol
+    - \
+    - Raised when :class:`asyncutils.networking.LFProtocol` is instantiated.
+  * - asyncutils.networking.SocketTransport
+    - \
+    - Raised when :class:`asyncutils.networking.SocketTransport` is instantiated.
+  * - asyncutils.queues.password_queue
+    - ``get_from``: :class:`str|None`, ``put_from``: :class:`str|None`
+    - Raised when :func:`asyncutils.queues.password_queue` is called, with the names of the variables from which passwords for get and put operations will be retrieved in the caller scope if they are protected, or ``None`` if they are not protected. Of course, the audit hooks do not see the passwords themselves.
+  * - asyncutils.queues.SmartQueue.push
+    - ``addr``: :class:`int`, ``pushed``: :class:`typing.Any`, ``popped``: :class:`typing.Any`
+    - Raised when the :meth:`push` method of an exact instance of :class:`asyncutils.queues.SmartQueue` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
+  * - asyncutils.queues.SmartQueue.transaction/start
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartQueue.transaction/end
+    - ``addr``: :class:`int`
+    - Raised when the context manager returned by the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` exits (the transaction succeeds or fails), with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartQueue.map
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`map` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartQueue.starmap
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`starmap` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartQueue.filter
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`filter` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the predicate.
+  * - asyncutils.queues.SmartQueue.enumerate
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`enumerate` method of an exact instance of :class:`:asyncutils.queues.SmartQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartLifoQueue.push
+    - ``addr``: :class:`int`, ``pushed``: :class:`typing.Any`, ``popped``: :class:`typing.Any`
+    - Raised when the :meth:`push` method of an exact instance of :class:`asyncutils.queues.SmartLifoQueue` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
+  * - asyncutils.queues.SmartLifoQueue.transaction/start
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartLifoQueue.transaction/end
+    - ``addr``: :class:`int`
+    - Raised when the context manager returned by the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` exits (the transaction succeeds or fails), with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartLifoQueue.map
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`map` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartLifoQueue.starmap
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`starmap` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartLifoQueue.filter
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`filter` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the predicate.
+  * - asyncutils.queues.SmartLifoQueue.enumerate
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`enumerate` method of an exact instance of :class:`:asyncutils.queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartPriorityQueue.push
+    - ``addr``: :class:`int`, ``pushed``: :class:`typing.Any`, ``popped``: :class:`typing.Any`
+    - Raised when the :meth:`push` method of an exact instance of :class:`asyncutils.queues.SmartPriorityQueue` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
+  * - asyncutils.queues.SmartPriorityQueue.transaction/start
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartPriorityQueue.transaction/end
+    - ``addr``: :class:`int`
+    - Raised when the context manager returned by the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` exits (the transaction succeeds or fails), with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.SmartPriorityQueue.map
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`map` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartPriorityQueue.starmap
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`starmap` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.SmartPriorityQueue.filter
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`filter` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the predicate.
+  * - asyncutils.queues.SmartPriorityQueue.enumerate
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`enumerate` method of an exact instance of :class:`:asyncutils.queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.UserPriorityQueue.push
+    - ``addr``: :class:`int`, ``pushed``: :class:`typing.Any`, ``popped``: :class:`typing.Any`
+    - Raised when the :meth:`push` method of an exact instance of :class:`asyncutils.queues.UserPriorityQueue` is called and the queue is full, such that an item
+  * - asyncutils.queues.UserPriorityQueue.transaction/start
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.UserPriorityQueue.transaction/end
+    - ``addr``: :class:`int`
+    - Raised when the context manager returned by the :meth:`transaction` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` exits (the transaction succeeds or fails), with ``addr`` being the memory address of the instance.
+  * - asyncutils.queues.UserPriorityQueue.map
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`map` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.UserPriorityQueue.starmap
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`starmap` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the transformation function.
+  * - asyncutils.queues.UserPriorityQueue.filter
+    - ``addr``: :class:`int`, ``fname``: :class:`str`
+    - Raised when the :meth:`filter` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance and ``fname`` the fully qualified name of the predicate.
+  * - asyncutils.queues.UserPriorityQueue.enumerate
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`enumerate` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
+  * - asyncutils.signals.wait_for_signal
+    - ``sigs``: :type:`tuple[int, ...]`
+    - Raised when :func:`asyncutils.signals.wait_for_signal` is called, with the signal numbers to be waited for as argument.
+  * - asyncutils.util.sync_await
+    - ``atname``: :class:`str`
+    - Raised when :func:`asyncutils.util.sync_await` is called on an awaitable whose type is of name ``atname``.
+  * - asyncutils.util.to_async
+    - ``fname``: :class:`str`
+    - Raised when :func:`asyncutils.util.to_async` is called on a function with name ``fname``.
+  * - asyncutils.util.to_sync
+    - ``fname``: :class:`str`
+    - Raised when :func:`asyncutils.util.to_sync` is called on a function with name ``fname``.

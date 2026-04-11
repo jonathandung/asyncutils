@@ -157,8 +157,8 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', self); addaudithook(a); self._auditing = a.added = True # type: ignore
-    def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', self); self._auditing = False
+        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True # type: ignore
+    def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self._auditing = False
     @cached_property
     def _middlewares(self): return {}
     def add_middleware(self, middleware): self._middlewares[middleware] = None
@@ -244,7 +244,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
             if q.full(): L.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
     async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):
         self.raise_for_shutdown()
-        if not self._auditing: audit('asyncutils.channels.EventBus.event_stream', self, event_type)
+        if not self._auditing: audit('asyncutils.channels.EventBus.event_stream', id(self), event_type)
         t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if item_timeout is _NO_DEFAULT: item_timeout = context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:

@@ -191,6 +191,7 @@ class EventBus(LoopContextMixin):
     async def __cleanup__(self) -> None: ...
 class Rendezvous[T]:
     '''A rendezvous object, emulating Golang's unbuffered channels. Usage:
+    ```python
     >>> rdv = Rendezvous()
     >>> (await asyncio.gather(*map(rdv.put, range(5, 10)), rdv.exchange(10), *map(rdv.exchange, range(1, 5)), *(rdv.get() for _ in range(5))))[-10:]
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -206,7 +207,8 @@ class Rendezvous[T]:
     >>> task = rdv._loop.create_task(rdv.get())
     >>> await rdv.reset()
     >>> task.cancelled()
-    True'''
+    True
+    ```'''
     def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...): '''If loop is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''Put in a value to the rendezvous, blocking until it is gotten or timeout is reached, at which point TimeoutError is raised and the put cancelled.

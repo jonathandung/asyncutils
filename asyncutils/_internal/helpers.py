@@ -23,6 +23,7 @@ def create_executor(f, /, save=True):
     if save: f.executor = e
     return e
 def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if rmpref else n
+def audit_fullname(f, /, rmpref=False): audit(fullname(f, rmpref))
 class LoopMixinBase:
     __slots__ = 'exiter', 'loop', 'make_fut', 'running_tasks'
     def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = register(stop_and_closer(l := new_event_loop())), l, l.create_future, set()
