@@ -8,8 +8,8 @@
 
 ## Reporting a Vulnerability
 
-The creator of this project thinks it highly unlikely there will be any security vulnerabilities in the near future (he is nowhere near that advanced),
-but this is still included for compliance. Please report as described below.
+The creator of this project thinks it highly unlikely there will be any security vulnerabilities in the near future (this project is nowhere near
+that advanced), but this is still included for compliance. Please report as described below.
 
 - **Method native to GitHub**
 
@@ -18,7 +18,9 @@ but this is still included for compliance. Please report as described below.
 - **Via email**
 
   [Send me an email](mailto:jonathandung@yahoo.com).
+
   If possible, encrypt your message with PGP; the fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`, and the public key is shown below.
+
   You should always check it against the fingerprint first in case either was compromised.
 
 ```text
@@ -40,6 +42,7 @@ O01JPuZoia5kAQ==
 ```
 
 The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please state that in the email.
-Please note that reporting such potential exploits, if they are to emerge, via public channels such as the issues tab is a sure-fire way
-to notify the attackers (if any), who may then adjust their strategy. Therefore, you should ensure the communication method chosen is not
-compromised according to the guidelines above.
+
+Please note that reporting such potential exploits, if they are to emerge, via public channels such as the issues tab is a sure-fire way to notify
+the attackers (if any), who may then adjust their strategy. Therefore, you should ensure the communication method chosen is not compromised according
+to the guidelines above.

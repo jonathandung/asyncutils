@@ -38,9 +38,9 @@ This section documents the symbols defined at the top level of this package.
 
   :note:
     For submodules that are not yet loaded, the value is an instance of an internal class with the same behaviour but not inserted into
-    :data:`sys.modules`. This class is not a subclass of :class:`types.ModuleType` and provides a :meth:`load` method that fetches the
-    submodule and replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object.
-    For attribute accesses, it acts as a proxy to the real submodule, loading it when strictly required.
+    :data:`sys.modules`. This class is not a subclass of :class:`types.ModuleType` and provides a :meth:`load` method that fetches the submodule and
+    replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object. For attribute accesses, it acts
+    as a proxy to the real submodule, loading it when strictly required.
 
   :warning: The exact deference mechanism is an implementation detail.
 
@@ -48,12 +48,14 @@ This section documents the symbols defined at the top level of this package.
   :no-index:
   :module: asyncutils
 
-  Time since the module started initializing (was imported or invoked in the command line) in ms, as returned by :func:`time.monotonic`,
-  as a :class:`float`.
+  Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.
   Useful for benchmarking the module's performance.
 
-One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule, except
-the contextually configured constants in :mod:`asyncutils.context`. The submodule objects, loaded or unloaded, are also accessible by name.
+Besides the contextually configured constants in :mod:`asyncutils.context`:
+---------------------------------------------------------------------------
 
-Each module has an :data:`__all__` attribute that is a tuple of strings, representing its public API. Anything not included in it is
-considered unstable, with the sole exceptions of :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.
+One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule. The submodule
+objects, loaded or unloaded, are also accessible by name.
+
+Also, each module has an :data:`__all__` attribute that is a tuple of strings, representing its public API. Anything not included in it is considered
+unstable, with the sole exceptions of :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.

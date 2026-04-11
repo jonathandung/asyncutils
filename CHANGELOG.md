@@ -2,9 +2,9 @@
 
 All notable changes to this project are and will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/).
+The format is based on [Keep a Changelog](https://keepachangelog.com).
 
-This project uses [Semantic Versioning](https://semver.org/).
+This project uses [Semantic Versioning](https://semver.org).
 
 ## [0.8.24] - 2026-04-10: newest; [unstable](https://semver.org/#spec-item-4)
 
@@ -18,12 +18,16 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-Top level:
+- Top level:
 
-- \_\_version__
-- \_\_hexversion__
-- submodules_map
-- preloaded_submodules
+  Constants:
+  - \_\_version__
+  - \_\_hexversion__
+  - submodules_map
+  - preloaded_submodules
+
+  Functions:
+  - time_since_boot
 
 Submodules:
 

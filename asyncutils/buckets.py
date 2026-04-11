@@ -11,9 +11,9 @@ class TokenBucket:
     async def consume(self, tokens=None):
         if tokens is None: tokens = float(context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS)
         async with self._lock:
-            e, self._last_update = (n := self._timer())-self._last_update, n; self._tokens = min(self._capacity, self._tokens+e*self._rate)
-            if (d := self._tokens-tokens) >= 0: self._tokens = d; return
-            await sleep(-d/self._rate); self._tokens = 0
+            e, self._last_update = (n := self._timer())-self._last_update, n; self._tokens = d = min(self._capacity, self._tokens+e*self._rate)
+            if (d := d-tokens) >= 0: self._tokens = d
+            else: await sleep(-d/self._rate); self._tokens = 0
     @property
     def capacity(self): return self._capacity
 class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
@@ -36,7 +36,7 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
             async with self._lock:
                 self._set_tokens(); self._adjust()
                 if self._add_tokens(amount): return w
-            await sleep(_ := min(m, (amount-self._capacity+self._tokens)/self._leak/self._factor)); w += _
+            await sleep(_ := min(m, (amount-self._capacity+self._tokens)/(self._leak*self._factor))); w += _
     @property
     def factor(self): return self._factor
     @factor.setter

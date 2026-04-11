@@ -91,7 +91,8 @@ If the package is not working with python -S, perform the steps below with pytho
 ```bash
 # Check sys.path
 python -c "print(*__import__('sys').path, sep='\n')"
-# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console, constants, # context, events, exceptions, ... separated by newlines
+# Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console
+# constants, context, events, exceptions, ... separated by newlines
 python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 ```
 
