@@ -35,13 +35,13 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    (log.exception if verbose else log.warning)('error in periodic coroutine %s', n)
+                    (log.error if verbose else log.warning)('error in periodic coroutine %s', n, exc_info=True)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    (log.info if verbose else log.debug)('future to stop periodic coroutine %s was cancelled', n); stop_when = loop.create_future()
+                    (log.info if verbose else log.debug)('future to stop periodic coroutine %s was cancelled', n, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 s = f'periodic coroutine {n} reached the maximum of {max_iterations} iterations'

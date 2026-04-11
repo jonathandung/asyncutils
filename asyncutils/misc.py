@@ -17,8 +17,8 @@ class StateMachine:
                 if t == state and (_ is None or await _()): break
             else: return False
             await self._helper('_exits'); self._state = state; await self._helper('_entries'); return True
-    async def _helper(self, attr, _h=IgnoreErrors(KeyError)):
-        async with _h: await getattr(self, attr)[self._state]()
+    async def _helper(self, attr, _=IgnoreErrors(KeyError)):
+        async with _: await getattr(self, attr)[self._state]()
 async def gather_with_limited_concurrency(n, /, *coros, bounded=False, ret_exc=False):
     async def wrapped(c, s=semaphore(bounded, n)):
         async with s: return await c
