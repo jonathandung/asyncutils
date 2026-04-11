@@ -17,3 +17,5 @@ autoapi_member_order = 'groupwise'
 autoapi_keep_files = True
 autoapi_options = ['members', 'undoc-members', 'show-inheritance', 'show-module-summary', 'special-members']
 suppress_warnings = ['autoapi.python_import_resolution']
+html_static_path = ['_static']
+html_css_files = ['custom.css']

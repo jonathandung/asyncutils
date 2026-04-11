@@ -66,10 +66,10 @@ class EventBus(LoopContextMixin):
     WILDCARD: WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
-        '''name: The name of this event bus, which will appear in error messages.
-        handler: A function that takes an exception having occurred in a subscribers and handles it.
-        max_concurrent: The maximum number of concurrent callbacks; default 128.
-        tracking_stats: Whether to remember the amount of published data to subscribers of each event type.'''
+        '''`name`: The name of this event bus, which will appear in error messages.
+        `handler`: A function that takes an exception having occurred in a subscribers and handles it.
+        `max_concurrent`: The maximum number of concurrent callbacks; default 128.
+        `tracking_stats`: Whether to remember the amount of published data to subscribers of each event type.'''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''
     @overload
@@ -99,7 +99,7 @@ class EventBus(LoopContextMixin):
     @property
     def stream_queue(self) -> Queue[tuple[str, Any]]|Queue[Any]:
         '''The asynchronous queue to which events are output by the event_stream method.
-        The items in the queue are tuples (event_type, data) if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type.'''
+        The items in the queue are tuples `(event_type, data)` if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type.'''
     @stream_queue.setter
     def stream_queue(self, val: Queue[tuple[str, Any]|Any], /) -> None: ...
     def is_auditing(self) -> bool: '''Whether the event bus is connected to `sys.audit`.'''
@@ -107,16 +107,17 @@ class EventBus(LoopContextMixin):
     def auditing(self) -> bool: '''Get/set property for `is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
     @auditing.setter
     def auditing(self, val: bool, /) -> None: ...
-    def auditor(self, event: str, args: tuple[Any, ...], /) -> None: '''The auditor of the event bus. I can't think of a use case where you would call this directly. Not an instance method at runtime, just a function attached to the instance.'''
-    def start_audit(self) -> None: '''Connect the bus' audit hook to sys.audit, creating if necessary. Incurs overhead. Use with caution.'''
+    def auditor(self, event: str, args: tuple[Any, ...], /) -> None:
+        '''The auditor of the event bus. You probably don't want to call this directly.
+        Not an instance method at runtime, just a function as an attribute of the instance.'''
+    def start_audit(self) -> None: '''Connect the bus' audit hook to `sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the bus' audit hook. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
     def add_middleware(self, middleware: Middleware) -> None:
         '''Append a middleware to the back of the pipe of middlewares. The middleware must be a hashable callable taking the event type as the first argument and the associated data as the second.
         If the middleware does not recognize the event type, it should simply return the data immediately. There is no protection in place against malicious malware besides the user's abstraction.
         It is preferred that the middleware be a coroutine function. Each middleware should be extremely optimized, for example through C extensions, to avoid hindrance of the publishing.
-        When publishing occurs, the following is done asynchronously.
-        The first middleware takes the initial data, does some processing, and passes the modified data to the second middleware, and so on.
-        The output of the final middleware is passed to each subscriber concurrently. They cannot see the initial data.'''
+        When publishing occurs, the first middleware takes the initial data, does some processing asynchronously, and passes the modified data to the second middleware, and so on.
+        The output of the final middleware is broadcast to each subscriber concurrently. They cannot see the initial data.'''
     def remove_middleware(self, middleware: Middleware, *, result: Any=..., strict: bool=...) -> Any:
         '''Remove a previously added middleware, via `add_middleware` or `add_middleware_once`, and return its result. Runs in O(1) time.
         If `strict` is True and the middleware was never added, throw a KeyError.
@@ -124,9 +125,7 @@ class EventBus(LoopContextMixin):
     def add_middleware_once(self, middleware: Middleware, until: Future[Any]) -> bool:
         '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
         If the middleware has already been associated with another future, do nothing and return False.'''
-    def audit_context(self) -> _GeneratorContextManager[None, None, None]:
-        '''Start receiving publications from sys.audit upon entry and stop on exit. Use as a context manager.
-        Note that publish does not trigger sys.audit; it is the other way around to avoid infinite recursion.'''
+    def audit_context(self) -> _GeneratorContextManager[None, None, None]: '''Start receiving publications from and sending publications to `sys.audit` upon entry and stop on exit. Use as a context manager.'''
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> _GeneratorContextManager[None, None, None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''
     @overload

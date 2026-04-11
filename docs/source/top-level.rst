@@ -4,6 +4,7 @@ Top level
 This section documents the symbols defined at the top level of this package.
 
 .. data:: __version__
+  :no-index:
   :module: asyncutils
   :annotation: asyncutils.version.VersionInfo
 
@@ -11,6 +12,7 @@ This section documents the symbols defined at the top level of this package.
   This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`_.
 
 .. data:: __hexversion__
+  :no-index:
   :module: asyncutils
   :annotation: int
 
@@ -20,12 +22,14 @@ This section documents the symbols defined at the top level of this package.
   :note: Equivalent to ``int(__version__)``
 
 .. data:: preloaded_submodules
+  :no-index:
   :module: asyncutils
   :annotation: frozenset[str]
 
   A :class:`frozenset` of submodule names which are preloaded when importing the library for essential initialization.
 
 .. data:: submodules_map
+  :no-index:
   :module: asyncutils
   :annotation: dict[str, types.ModuleType]
 
@@ -41,6 +45,7 @@ This section documents the symbols defined at the top level of this package.
   :warning: The exact deference mechanism is an implementation detail.
 
 .. function:: time_since_boot()
+  :no-index:
   :module: asyncutils
 
   Time since the module started initializing (was imported or invoked in the command line) in ms, as returned by :func:`time.monotonic`,

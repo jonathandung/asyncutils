@@ -12,6 +12,8 @@ See the official documentation for :func:`sys.audit` and :func:`sys.addaudithook
 Also see `the standard library audit event table <https://docs.python.org/3/library/audit_events.html>`_, from which the inclustion and format of
 this table take inspiration.
 
+.. rst-class:: widepage
+
 .. list-table:: Audit events
   :header-rows: 1
   :widths: 35 30 35
@@ -23,7 +25,7 @@ this table take inspiration.
     - ``fname``: :class:`str`
     - Raised when :mod:`asyncutils` creates an executor, type dictated by configuration. ``fname`` is of the form 'submodule.function'.
   * - asyncutils/get_loop_and_set
-    - ``loop``: :class:`asyncio.BaseEventLoop`
+    - ``loop``: :class:`asyncio.base_events.BaseEventLoop`
     - Raised when :mod:`asyncutils` retrieves an event loop ``loop``, creating one if necessary, and sets it as the event loop for the current thread if not already set.
   * - asyncutils/read_config
     - ``cfg_path``: :class:`str`
@@ -44,7 +46,7 @@ this table take inspiration.
     - ``name``: :class:`str`, ``fname``: :class:`str`
     - Raised when a :class:`asyncutils.altlocks.CircuitBreaker` of name ``name`` is applied on a function with name ``fname``.
   * - asyncutils.base.safe_cancel_batch
-    - ``it``: :class:`asyncutils._internal.protocols.SupportsIteration[asyncio.futures.Future]`
+    - ``it``: :class:`SupportsIteration[asyncio.future.Future]`
     - Raised when :func:`asyncutils.base.safe_cancel_batch` is called on the (possibly async) iterable ``it``.
   * - asyncutils.base.iter_to_aiter
     - ``tname``: :class:`str`

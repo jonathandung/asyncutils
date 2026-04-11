@@ -1,0 +1,33 @@
+.wy-nav-content {
+    max-width: none !important;
+    padding: 1.5rem 2rem !important;
+}
+
+.wy-table-responsive {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    margin: 1em 0;
+}
+
+.wy-table-responsive table {
+    width: auto !important;
+    min-width: 100% !important;
+}
+
+.wy-table-responsive {
+    position: relative;
+}
+
+.wy-table-responsive::after {
+    content: "↔ Scroll horizontally →";
+    position: absolute;
+    bottom: -25px;
+    right: 0;
+    font-size: 12px;
+    color: #666;
+    background: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0.7;
+}
