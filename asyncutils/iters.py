@@ -1,6 +1,6 @@
 from . import exceptions as E
 from ._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
-from ._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, get_loop_and_set, stop_and_closer
+from ._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, fullname, get_loop_and_set, stop_and_closer
 from ._internal.submodules import iters_all as __all__
 from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take
 from .config import _randinst
@@ -683,16 +683,16 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
                     F.set_exception(e)
         if finish: await aconsume(I)
         if setatend is None: return
-        if setatend.done() and not setatend.cancelled(): raise E.FutureCorrupted(f'future setatend at {id(setatend):#x} (exact type {type(setatend).__qualname__}) passed to agetitems_from_indices had its result set by an external party')
+        if setatend.done() and not setatend.cancelled(): raise E.FutureCorrupted(f'future setatend at {id(setatend):#x} (exact type {fullname(setatend)}) passed to agetitems_from_indices had its result set by an external party')
         setatend.set_result(L.time()-s)
     c = L.create_task(consume())
     if setatend is not None: setatend.add_done_callback(lambda _: L.run_until_complete(gather(safe_cancel(c), safe_cancel_batch(r))))
-    audit('asyncutils.iters.agetitems_from_indices', it, r); return r
+    audit('asyncutils.iters.agetitems_from_indices', fullname(it)); return r
 async def aintersend(i1, i2):
-    audit('asyncutils.iters.aintersend', i1, i2); a, b = await gather(anext(i1), anext(i2))
+    audit('asyncutils.iters.aintersend', fullname(i1), fullname(i2)); a, b = await gather(anext(i1), anext(i2))
     while True: yield a, b; a, b = await gather(i1.asend(b), i2.asend(a))
 async def asendstream(i1, i2):
-    audit('asyncutils.iters.asendstream', i1, i2)
+    audit('asyncutils.iters.asendstream', fullname(i1), fullname(i2))
     async for v in iter_to_aiter(i2): yield await i1.asend(v)
 async def acat(first=None):
     audit('asyncutils.iters.acat', first)

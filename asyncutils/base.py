@@ -9,7 +9,7 @@ from asyncio.tasks import all_tasks, gather, sleep
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
-    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __slots__, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, ('_flags', '_loop', '_task'), []
+    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
         pool = self.__reusable
@@ -22,9 +22,9 @@ class event_loop: # noqa: N801
     def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep|self._INTERNAL_MASK
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
-    def from_flags(cls, flags, /): (r := object.__new__(cls))._flags = flags; return r
+    def from_flags(cls, flags, /, _=H.fullname): r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19)
-    def __enter__(self, _m='event_loop context already entered', _f=c):
+    def __enter__(self, _m='event_loop context already entered'):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop
             raise RuntimeError(_m)
@@ -35,14 +35,15 @@ class event_loop: # noqa: N801
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
-                if not f&0x200: raise RuntimeError(f'{_f(self)}: exception occurred while calling __enter__ of associated event loop: {e}') from e
+                if not f&0x200: raise RuntimeError(f'{self._istr}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
-    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered, errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
+    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L, _f=H.fullname): # noqa: PLR0912
         # ruff: disable[E722]
+        N = self._istr
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
-            N = type(self).__qualname__; raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
+            raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
         f &= ~e; l = self._loop
         if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
         if not f&0x400: self.__reusable.append(l)
@@ -52,34 +53,34 @@ class event_loop: # noqa: N801
         if f&self._INNER_EXIT:
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
-                except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __exit__ of associated event loop', exc_info=True)
+                except CRITICAL: _l.critical(f'{N}: critical error while calling __exit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
                 except:
-                    if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __exit__ of associated event loop')
-            elif not f&0x200: _l.error('__enter__ already called but __exit__ is not present')
+                    if not f&0x200: _l.exception(f'{N}: exception occurred while calling __exit__ of associated event loop')
+            elif not f&0x200: _l.error(f'{N}: __enter__ already called but __exit__ is not present')
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)) and not r:
                 try: r = l.run_until_complete(g(None, None, None) if f&0x80000 else g(t, v, b)) # type: ignore
-                except CRITICAL: _l.critical(f'{type(self).__qualname__} at {id(self):#x}: critical error while calling __aexit__ of associated event loop', exc_info=True)
+                except CRITICAL: _l.critical(f'{N}: critical error while calling __aexit__ of associated event loop', exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
                 except:
-                    if not f&0x200: _l.exception(f'{type(self).__qualname__} at {id(self):#x}: exception occurred while calling __aexit__ of associated event loop')
-            elif not f&0x200: _l.error('__aenter__ already called but __aexit__ is not present')
+                    if not f&0x200: _l.exception(f'{N}: exception occurred while calling __aexit__ of associated event loop')
+            elif not f&0x200: _l.error(f'{N}: __aenter__ already called but __aexit__ is not present')
         if f&8 or not (c or f&0x20):
             with _i: l.close()
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
         # ruff: enable[E722]
-    def __del__(self, _f=L.debug, w=L.warning, _m='garbage-collecting entered %s context; you are advised to refactor your code', _w='cannot suppress exceptions from within %s destructor'):
-        b, n = not (f := self._flags)&2, type(self).__qualname__
+    def __del__(self, _f=L.debug, w=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor'):
+        b, N = not (f := self._flags)&2, self._istr
         if f&self._ENTERED:
-            if b: w(_m%n)
+            if b: w(_m%N)
             if f&1: self._flags = f^0x400
-            if self.__exit__(*exc_info()) and b: w(_w%n)
-        elif b: _f(f'destroyed {n} at {id(self):#x}')
+            if self.__exit__(*exc_info()) and b: w(_w%N)
+        elif b: _f(f'destroyed {N}')
     def __reduce__(self, /): return self.from_flags.__func__, (self.__class__, self._flags)
     P.patch_method_signatures((__enter__, ''), (__exit__, 'typ, val, tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}'))
 def f(n):

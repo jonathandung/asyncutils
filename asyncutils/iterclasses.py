@@ -64,7 +64,7 @@ class _await_later:
     __slots__ = 'aw'
     def __new__(cls, aw, /, _=type((lambda: (yield))())): # noqa: PLC3002
         if H.check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _ # noqa: RUF021
-        raise TypeError(f'{type(aw).__qualname__!r} object at {id(aw):#x} is not awaitable')
+        raise TypeError(f'{H.fullname(type(aw))} object at {id(aw):#x} is not awaitable')
     def __getattr__(self, name, /): return getattr(self.aw, name)
     def __repr__(self): return f'<proxy at {id(self):#x} for awaitable at {id(self.aw):#x}>'
     def __setattr__(self, name, /): raise AttributeError('attribute aw is read-only' if name == 'aw' else f'cannot set attribute {name!r} through proxy')
@@ -93,7 +93,7 @@ class abucket(LoopContextMixin):
 @H.subscriptable
 class online_sorter:
     __slots__ = '_it', '_loop', '_popper', '_pusher', '_runner'
-    def __init__(self, it): self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
+    def __init__(self, it=()): audit('asyncutils.iterclasses.online_sorter'); self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
     def __aiter__(self):
         from .iters import to_list
         if not hasattr(self, '_popper'): h = self._loop.run_until_complete(to_list(self._it)); Q.heapify(h); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)

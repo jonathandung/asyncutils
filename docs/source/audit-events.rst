@@ -115,3 +115,21 @@ this table take inspiration.
   * - asyncutils.io.double_ended_pipe
     - ``reader1``: :class:`int`, ``writer1``: :class:`int`, ``reader2``: :class:`int`, ``writer2``: :class:`int`
     - Raised when :func:`asyncutils.io.double_ended_text_pipe` or :func:`asyncutils.io.double_ended_binary_pipe` is called, with the file descriptors of the reader and writer ends of both pipes as arguments.
+  * - asyncutils.iterclasses.online_sorter
+    - \
+    - Raised when :class:`asyncutils.iterclasses.online_sorter` is instantiated.
+  * - asyncutils.iters.agetitems_from_indices
+    - ``tname``: :class:`str`
+    - Raised when :func:`asyncutils.iters.agetitems_from_indices` is called on an iterable, the type of which has full name ``tname``.
+  * - asyncutils.iters.aintersend
+    - ``tname1``: :class:`str`, ``tname2``: :class:`str`
+    - Raised when :func:`asyncutils.iters.aintersend` is called on two async generators, the types of which have full names ``tname1`` and ``tname2`` respectively.
+  * - asyncutils.iters.asendstream
+    - ``tname1``: :class:`str`, ``tname2``: :class:`str`
+    - Raised when :func:`asyncutils.iters.asendstream` is called, the full name of the type of the async generator being ``tname1`` and that of the (async) iterable being ``tname2``.
+  * - asyncutils.iters.acat
+    - ``first``: :class:`typing.Any`
+    - Raised when :func:`asyncutils.iters.acat` is called, ``first`` being the item yielded to start the async generator.
+  * - asyncutils.iters.aforever
+    - \
+    - Raised when :func:`asyncutils.iters.aforever` is called.

@@ -12,8 +12,6 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/py-asyncutils/${{github.event.release.name}}
-    strategy:
-      fail-fast: false
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: actions/setup-python@v6.2.0
