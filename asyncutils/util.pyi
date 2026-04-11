@@ -21,7 +21,7 @@ class to_sync_from_loop: # noqa: N801
     def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: '''The partial of `to_sync` under `loop=loop`.'''
 def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use `asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
 @overload
-def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: '''Simple function to return a (bounded) semaphore of value `workers`.'''
+def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: '''Simple helper to return a (bounded) semaphore of value `workers`.'''
 @overload
 def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: ...
 def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, Coroutine[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as created by `lf`, to a function `f` that returns an awaitable, also converting it to an async function.'''

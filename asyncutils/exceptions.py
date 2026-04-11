@@ -39,7 +39,7 @@ def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, n
     _a_('asyncutils.exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class _ExceptionWrapper:
-    __slots__ = '__exc'
+    __slots__ = '__exc',
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
         (s := super().__new__(cls)).__exc = e; return s
@@ -49,7 +49,7 @@ class _ExceptionWrapper:
 exception_occurred, wrap_exc, unwrap_exc = _ExceptionWrapper.__instancecheck__, _ExceptionWrapper.__new__.__get__(_ExceptionWrapper), _ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
 @subscriptable
 class ref: # noqa: N801
-    __slots__ = '__obj'
+    __slots__ = '__obj',
     def __new__(cls, obj, r=__import__('_weakref').ref):
         if isinstance(obj, (cls, r)): return obj
         try: return r(obj)

@@ -53,7 +53,7 @@ async def _aunzip_put(Q, t):
     for q, i in zip(Q, t):
         with ignore_qshutdown: await q.put(i)
 class _aunzip_consumer_base:
-    __slots__ = 'q'
+    __slots__ = 'q',
     def __init__(self): self.q = Queue()
     def __aiter__(self): return self
     def close(self): self.q.shutdown()
@@ -61,7 +61,7 @@ async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_a
     audit('asyncutils.iters.aunzip', type(ait).__qualname__); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
     class aunzip_consumer(_b):
         __slots__ = ()
-        async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)):
+        async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)): # noqa: B008
             if self.q.empty():
                 async with L:
                     try:
@@ -111,7 +111,7 @@ def achunked(it, n, strict=False):
                 yield c
         return ret()
     return I
-async def asideeffect(f, it, /, *, size=None, before=None, after=None): # noqa: PLR0912
+async def asideeffect(f, it, /, *, size=None, before=None, after=None):
     try:
         if before is not None: before()
         if size is None:
@@ -476,7 +476,7 @@ async def adistinctpermutations(it, r=None):
     except TypeError:
         d = defaultdict(list)
         for i in I: d[I.index(i)].append(i)
-        R = amap(lambda i, E={k: acycle(v) for k, v in d.items()}: to_tuple(await anext(E[_]) for _ in i), a(sorted(map(I.index, I))), await_=True)
+        R = amap(lambda i, E={k: acycle(v) for k, v in d.items()}: to_tuple(await anext(E[_]) for _ in i), a(sorted(map(I.index, I))), await_=True) # noqa: B008
     async for t in R: yield t
 async def auniquetoeach(*its):
     p = await to_tuple(amap(to_tuple, its, await_=True))
@@ -590,10 +590,11 @@ async def _factor_pollard(n):
         while (d := M.gcd((x := (x*x+b)%n)-(y := ((z := (y*y+b)%n)*z+b)%n), n)) == 1: ...
         if d != n: return d
     raise ValueError(f'{n} is prime')
+@lru_cache
 def _shift_to_odd(n):
     if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError('invalid n')
     return s, d
-def _probable_prime(n, base, _=lru_cache(_shift_to_odd)): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or any((x := x*x%n) == n-1 for _ in range(s-1))
+def _probable_prime(n, base, _=_shift_to_odd): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or any((x := x*x%n) == n-1 for _ in range(s-1))
 async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable_prime):
     if n < 210: return n in s
     if not (n&1 and n%3 and n%5 and n%7 and n%11 and n%13 and n%17): return False
@@ -653,7 +654,7 @@ def iter_future(it, summaryf=aconsume):
     F = (L := get_loop_and_set()).create_future(); L.create_task(task()); return F
 def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable {!r}'.format):
     L, r, I = get_loop_and_set(), [], iter_to_aiter(it)
-    async def consume(): # noqa: PLR0912
+    async def consume():
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
         async for x in amap(O.index, indices):
             if M is not None:

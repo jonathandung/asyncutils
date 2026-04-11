@@ -1,5 +1,3 @@
-from .. import __version__
-if __version__.major >= 4: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 and 3.13 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
 __all__ = 'Placeholder', 'apargs', 'partial'
 apargs, Placeholder = {}, 'Placeholder'
 def _get_merger(A, _=__import__('_operator').itemgetter):
@@ -36,7 +34,7 @@ class partial: # noqa: N801
             except IndexError: raise TypeError(f"missing positional arguments in 'partial' call; expected at least {c}, got {len(a)}") from None
         else: A = self.args
         return self.func(*A, *a, **self.keywords, **k)
-    def __get__(self, o, _=None, m=type(__version__.assert_valid), /): return self if o is None else m(self, o)
+    def __get__(self, o, _=None): return self if o is None else type(self.__get__)(self, o) # type: ignore
     def __reduce__(self): return type(self), (self.func,), (self.func, self.args, self.keywords or None)
     def __setstate__(self, s, /):
         f, a, k = s

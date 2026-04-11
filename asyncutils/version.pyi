@@ -4,12 +4,12 @@
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
 from ._internal.protocols import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterable, Iterator
-from typing import Any, Literal, NoReturn, Self, final, overload
+from typing import Any, Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
 class VersionInfo(str): # noqa: FURB189
     @overload
-    def __new__(cls, from_: Any, /) -> Self: ...
+    def __new__(cls, from_: object, /) -> Self: ...
     @overload
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as (major, minor, patch), zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
@@ -18,8 +18,8 @@ class VersionInfo(str): # noqa: FURB189
         reasonable limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
-    def __iter__(self) -> Iterator[int]: '''An iterator yielding (major, minor, patch) sequentially.''' # type: ignore[override]
-    def __len__(self) -> Literal[3]: '''len((major, minor, patch)) == 3.'''
+    def __iter__(self) -> Iterator[int]: '''An iterator yielding `major`, `minor`, `patch` sequentially.''' # type: ignore[override]
+    def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload # type: ignore[override]
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: # type: ignore[overload-overlap]
         '''Depending on the value of `idx`, corresponds to the following attributes:
@@ -87,8 +87,10 @@ class VersionInfo(str): # noqa: FURB189
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     @property
     def representation(self) -> str:
-        '''>>> print(VersionInfo(4, 2).representation)
-        asyncutils v4.2.0'''
+        '''```python
+        >>> print(VersionInfo(4, 2).representation)
+        asyncutils v4.2.0
+        ```'''
     @property
     def is_unstable(self) -> Literal[False]: '''True only in development, so should be considered always False.'''
     @property
@@ -100,17 +102,16 @@ class VersionInfo(str): # noqa: FURB189
     @property
     def patch(self) -> int: '''The patch part of the version.'''
     __index__, __trunc__, __radd__ = __int__, __floor__, __add__ # noqa: PYI017
-class VersionDelta(tuple[int, int, int]):
+class VersionDelta(NamedTuple):
     '''A named tuple representing the difference between versions. Can be taken by the + or - operators.'''
-    def __new__(cls, major: int=..., minor: int=..., patch: int=...) -> Self: ...
-    @property
-    def major(self) -> int: '''The major part of the version.'''
-    @property
-    def minor(self) -> int: '''The minor part of the version.'''
-    @property
-    def patch(self) -> int: '''The patch part of the version.'''
+    major: int = ...
+    '''The major part of the version.'''
+    minor: int = ...
+    '''The minor part of the version.'''
+    patch: int = ...
+    '''The patch part of the version.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
-def normalize(o: Any, /) -> tuple[int, int, int]:
+def normalize(o: object, /) -> tuple[int, int, int]:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.
     Normalization is hardcoded for str, complex, int, float. For iterables, the default is to take the first three items and pad zeros behind if necessary.
     Register normalizers using register_normalizer, which returns False if there is already a normalizer registered.
@@ -134,7 +135,7 @@ def normalize(o: Any, /) -> tuple[int, int, int]:
     (1, 23, 45)
     >>> normalize(Fraction(1, 3))
     (1, 3, 0)'''
-def normalize_allow_unimplemented(o: Any, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
+def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
 @overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
 @overload

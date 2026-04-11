@@ -9,5 +9,5 @@ if not (g := globals()).get(k := '__package__'):
             if g.__module__ == a and g.__qualname__ == b == g.__name__: s.name = 'asyncutils.__main__'; break
     del a, b, p, s, S
 del g, k
-from .cli import run
+from .cli import run # noqa: E402
 raise SystemExit(run())

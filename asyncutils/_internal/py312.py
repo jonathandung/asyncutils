@@ -1,5 +1,3 @@
-from .. import __version__
-if __version__.major >= 3: __import__('warnings').warn(DeprecationWarning, 'this module for python 3.12 compatibility is deprecated; you are strongly advised to upgrade to 3.15')
 from .helpers import subscriptable
 from ..mixins import LoopBoundMixin
 import heapq as H

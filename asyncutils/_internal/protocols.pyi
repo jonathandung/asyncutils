@@ -2,6 +2,7 @@
 This is a fake module in the sense that the names in this stub are all None at runtime, so do not inherit from its 'protocols'.
 This facilitates lightweight inline type annotations.'''
 from ..constants import sentinel_base
+from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys
 from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
@@ -9,7 +10,7 @@ from contextlib import _AsyncGeneratorContextManager
 from io import TextIOWrapper, _WrappedBuffer
 from mmap import mmap
 from types import FunctionType, TracebackType
-from typing import IO, Any, Literal, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -110,6 +111,88 @@ class SupportsMatMul(Protocol):
     '''A class that supports matrix multiplication.'''
     def __matmul__(self, other: Self) -> Self: ...
 @type_check_only
+class BenchmarkResult(NamedTuple):
+    min: float
+    '''The minimum execution time among all non-warmup calls.'''
+    max: float
+    '''The maximum execution time among all non-warmup calls.'''
+    total: float
+    '''The total execution time.'''
+    avg: float
+    '''`total/iterations`.'''
+    iterations: int
+    '''The `times` constructor parameter.'''
+@type_check_only
+class EveryMethodRVRV[T, R](Protocol):
+    '''Not exported.'''
+    async def __call__(self, _: T, /, *a: Any, **k: Any) -> R|None: ...
+@type_check_only
+class EveryMethodFT[T, R](Protocol):
+    '''Not exported.'''
+    def __call__(self, _: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
+@type_check_only
+class DecoratorFactoryRV(Protocol):
+    '''Not exported.'''
+    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
+@type_check_only
+class EveryRV[T](Protocol):
+    '''Not exported.'''
+    def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
+@type_check_only
+class SubscriptionRV(Protocol):
+    '''Not exposed.'''
+    def __call__(self, strict: bool=...) -> None: ...
+@type_check_only
+class StateSnapshot(NamedTuple):
+    '''Type of snapshots of the current state of the Rendezvous object, returned by `state_snapshot`.'''
+    num_getters: int
+    '''Current number of slots waiting for values.'''
+    num_putters: int
+    '''Current number of values waiting for slots.'''
+    num_ops: int
+    '''`num_getters+num_putters`'''
+    idle: bool
+    '''`num_getters == num_putters == 0`'''
+@type_check_only
+class Q[R, T](Protocol):
+    '''A protocol representing password-protected queues. Does not exist at runtime.'''
+    exc: type[ForbiddenOperation]
+    async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
+    async def put(self, item: T) -> None: '''Asynchronously put an item into the queue; if the queue is full, wait until a free slot is available.'''
+    def get_nowait(self) -> T: '''Get an item from the queue immediately; raise `QueueEmpty` if impossible.'''
+    def put_nowait(self, item: T) -> None: '''Put an item into the queue immediately; raise `QueueFull` if impossible.'''
+    def qsize(self) -> int: '''Number of items in the queue.'''
+    def task_done(self) -> None: '''Mark the completion of a task gotten from the queue to join.'''
+    @property
+    def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
+    def cancel_extend(self, msg: Any=...) -> bool: '''Cancel the current extend operation with a message which will be the argument for the CancelledError seen by the extender. Returns success.'''
+    def empty(self) -> bool: '''Check if the queue is empty.'''
+    def full(self) -> bool: '''Check if the queue is full.'''
+    async def join(self) -> None: '''Wait until `task_done` has been called for each item put into the queue.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. This functionality was introduced to `asyncio.queues.Queue` in python 3.13, so a backport to 3.12 is required.'''
+    def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the get password of the password-protected queue to new_pwd; returns success.'''
+    def change_put_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the put password of the password-protected queue to new_pwd; returns success.'''
+@type_check_only
+class G[R, T](Q[R, T], Protocol):
+    '''Does not exist at runtime.'''
+    async def get(self, pwd: R) -> T: # type: ignore[override]
+        '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
+        If the queue is empty, waits until an item is available.'''
+    def get_nowait(self, pwd: R) -> T: # type: ignore[override]
+        '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
+        If the queue is empty, raises asyncio.QueueEmpty.'''
+@type_check_only
+class P[R, T](Q[R, T], Protocol):
+    '''Does not exist at runtime.'''
+    async def put(self, item: T, pwd: R) -> None: # type: ignore[override]
+        '''Puts an item into the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
+        If the queue is full, waits until a free slot is available.'''
+    def put_nowait(self, item: T, pwd: R) -> None: # type: ignore[override]
+        '''Puts an item into the password-protected queue, if the password provided was correct; raises WrongPassword otherwise.
+        If the queue is full, raises asyncio.QueueFull.'''
+@type_check_only
+class B[R, V, T](G[R, T], P[V, T], Protocol): '''Does not exist at runtime.'''
+@type_check_only
 class MemoryMappedFile(LoopContextMixin):
     '''Not exposed; calls itself `asyncutils.io.File`.'''
     if sys.platform != 'win32':
@@ -209,6 +292,10 @@ type OpenRV = _AsyncGeneratorContextManager[MemoryMappedFile, None]
 '''The type of the return values of the `open`, `create` and `create_sparsef` methods of `io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the `open_files` property of `io.MemoryMappedIOManager`.'''
+type SpecificSubscriber = Callable[[Any], Awaitable[object]]
+'''The type of subscribers for `channels.EventBus`.'''
+type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]
+'''The type of wildcard subscribers for `channels.EventBus`.'''
 if sys.platform == 'win32':
     type Seek = Literal[0, 1, 2]
     '''Possible values of the `whence` parameter for `io.MemoryMappedIOManager.seek`, as follows:
@@ -223,6 +310,8 @@ else:
     * 2: SEEK_END
     * 3: SEEK_DATA
     * 4: SEEK_HOLE'''
+type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], EveryMethodRVRV[T, R]]
+type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''Does not exist at runtime.'''
 WildcardType = NewType('WildcardType', None) # type: ignore[valid-newtype]

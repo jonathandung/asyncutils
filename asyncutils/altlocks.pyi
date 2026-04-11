@@ -18,20 +18,20 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync- and async-compatible context manager.'''
     @property
     def guarded(self) -> bool: ...
-    def __init__(self, action: str=..., rname: Any=...): ...
+    def __init__(self, action: str=..., rname: object=...): ...
     def __enter__(self) -> None: '''Throw `self` as an exception (inherits from `RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
     @classmethod
-    def guard(cls, obj: Any, /, *, action: str=...) -> Self: '''Alternate constructor; determines the name of the resource from the representation of the object.'''
+    def guard(cls, obj: object, /, *, action: str=...) -> Self: '''Alternate constructor; determines the name of the resource from the representation of the object.'''
 @final
 class UniqueResourceGuard(ResourceGuard):
     '''A subclass of :class:`ResourceGuard` that only allows one guard per object.
     Note that this does not stop the object from having an instance of ResourceGuard (or subclass thereof) from guarding it simultaneously.'''
     @classmethod
-    def guard(cls, obj: Any, /, *, action: str=...) -> Self:
+    def guard(cls, obj: object, /, *, action: str=...) -> Self:
         '''Each object only has one guard. If the object already has a guard, return that guard, regardless of whether it is held.
         The error will be seen by the user when they actually try to acquire the guard if it is already held.'''
 class CircuitBreaker:

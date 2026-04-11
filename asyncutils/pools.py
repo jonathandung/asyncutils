@@ -5,9 +5,9 @@ from .base import iter_to_aiter, aiter_to_iter, event_loop, take
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
 from .mixins import AsyncContextMixin, LoopContextMixin
-from .util import safe_cancel, semaphore, sync_lock_from_binder
+from .util import safe_cancel, sync_lock_from_binder
 from _functools import partial  # type: ignore[import-not-found]
-from asyncio.locks import Event, Lock
+from asyncio.locks import Event, Lock, Semaphore
 from asyncio.futures import _chain_future # type: ignore[import-not-found]
 from asyncio.tasks import gather, sleep, wait_for
 from asyncio.timeouts import timeout
@@ -19,7 +19,7 @@ from time import monotonic
 @subscriptable
 class Pool(LoopContextMixin):
     __slots__ = '_event', '_func', '_it', '_queue', '_sem', '_task'
-    def __init__(self, func, it, workers=4, bounded=False): self._func, self._it, self._sem, self._queue, self._task, self._event = func, it, semaphore(bounded, workers), Queue(1), None, Event()
+    def __init__(self, func, it, workers=4): self._func, self._it, self._sem, self._queue, self._task, self._event = func, it, Semaphore(workers), Queue(1), None, Event()
     async def process(self, item):
         async with self._sem: await self._queue.put(await self._func(item))
     def __aiter__(self):
@@ -39,7 +39,7 @@ class Pool(LoopContextMixin):
     async def aclose(self):
         if t := self._task: await safe_cancel(t)
     __cleanup__ = aclose
-class AdvancedPool(LoopContextMixin): # noqa: PLR0904
+class AdvancedPool(LoopContextMixin):
     __slots__ = '__cnt', '_adjustment', '_current', '_kill_at_exit', '_lock', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
@@ -62,11 +62,11 @@ class AdvancedPool(LoopContextMixin): # noqa: PLR0904
         except CRITICAL as e: self.loop.call_soon_threadsafe(_.set_exception, Critical(e)) # type: ignore
         else: self.loop.call_soon_threadsafe(_.set_result, x)
     def _worker(self): (T := Thread(target=self._worker_loop, args=(F := self.make_fut(),))).start(); return T, F
-    async def _adjust_workers(self):
+    async def _adjust_workers(self, hi=1.5, lo=0.5):
         if not self._scaling: return
         async with self._lock:
-            if (l := self._pending/((c := self._current) or 1)) > 1.5 and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
-            elif l < 0.5 and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*0.3))))
+            if (l := self._pending/((c := self._current) or 1)) > hi and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
+            elif l < lo and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*0.3))))
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             f, g, h = self._workers.add, self._futures.add, self._worker

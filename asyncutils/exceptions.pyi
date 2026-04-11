@@ -1,8 +1,7 @@
 '''Exception handling utilties and exception classes used by this module.'''
-from ._internal.protocols import AsyncLockLike, Exceptable, ExceptionWrapper, Middleware, ValidExcType
+from ._internal.protocols import AsyncLockLike, Exceptable, ExceptionWrapper, Middleware, ValidExcType, Q
 from .channels import EventBus
 from .locks import LocksmithBase
-from .queues import _Q
 from .version import VersionInfo
 from _collections_abc import Callable, Generator, Iterable
 from asyncio.locks import Lock
@@ -155,13 +154,13 @@ class PasswordError(PasswordQueueError):
     @property
     def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be None if the wrong password has been garbage collected.'''
     @property
-    def queue(self) -> _Q[Any, Any]|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
+    def queue(self) -> Q[Any, Any]|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
 class WrongPassword(PasswordError, ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
-    def __init__(self, queue: _Q[Any, Any], pwd: Any, /): ...
+    def __init__(self, queue: Q[Any, Any], pwd: Any, /): ...
 class WrongPasswordType[T](PasswordError, TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, pwd: T, wrongtyp: type[T], queue: _Q[Any, Any]|None, correcttyp: type, /): ...
+    def __init__(self, pwd: T, wrongtyp: type[T], queue: Q[Any, Any]|None, correcttyp: type, /): ...
     @property
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
     @property

@@ -2,7 +2,7 @@ from ._internal.parsed import p
 from ._internal.submodules import tools_all as __all__
 import shlex as s
 ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
-def json_to_argv(p, /, *, d='.', c='json'): # noqa: PLR0912
+def json_to_argv(p, /, *, d='.', c='json'):
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {type(p).__qualname__} instead of str or bytes')
     if isinstance(p, bytes): p = p.decode()
     if not isinstance(p, int):
@@ -16,7 +16,7 @@ def json_to_argv(p, /, *, d='.', c='json'): # noqa: PLR0912
         f('-l')
         if l != 'MAKE': f(l)
     if (s := p('executor', l := 'thread')) != l: f('-c' if d in s else '-e'); f(s)
-    if (l := p('max_memerrs', 3)) != 3: f('-m'); f(str(l))
+    if (l := p('max_memerrs', 3)) != 3: f('-m'); f(str(l)) # noqa: PLR2004
     if p('quiet', False): f('-q')
     if p('basic_repl', False): f('-b')
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))

@@ -34,13 +34,13 @@ class Q:
         if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
-    def __init_subclass__(cls, /, e=exc('subclass'), **_): raise e
-    # ruff: disable[PLR6301]
+    # ruff: disable[ARG002,B008,PLR6301]
+    def __init_subclass__(cls, /, _=exc('subclass'), **k): raise _
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
-    def _init(self, maxsize, _=exc('call _init() on')): raise _ # noqa: ARG002
-    # ruff: enable[PLR6301]
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0912,PLR0915
+    def _init(self, maxsize, _=exc('call _init() on')): raise _
+    # ruff: enable[ARG002,B008,PLR6301]
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None)
     if protect_get:
         try:
@@ -139,7 +139,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             async for i in iter_to_aiter(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
     return q
-class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0904
+class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     @abstractmethod
     def _init(self, maxsize): ...
     @abstractmethod
@@ -180,7 +180,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta): # noqa: PLR0
             if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
-    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
+    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)): # noqa: B008
         m, c = abs(max or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
         with _:
             while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1

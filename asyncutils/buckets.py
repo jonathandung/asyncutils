@@ -19,7 +19,7 @@ class TokenBucket:
 class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
     def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit('asyncutils.buckets.LeakyBucket', capacity, leak); C = context.getcontext(); self._leak, self._last, self._lock, self._drainer, self._factor, self._min_factor, self._max_factor, self._external_factor_settable, self._timer = leak, timer(), Lock(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MINFACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAXFACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self._capacity = self._tokens = capacity
     def _adjust_from_params(self, a, b, c, d, /):
-        if abs((n := min(self._factor*b, self._max_factor) if (r := self._tokens/self._capacity) <= a else max(self._factor*d, self._min_factor) if r >= c else min(self._factor*1.05, 1) if self._factor < 1 else self._factor)-self._factor) > 0.02: self._factor = n
+        if (f := self._factor) < abs((n := min(f*b, self._max_factor) if (r := self._tokens/self._capacity) <= a else max(f*d, self._min_factor) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self._factor = n
     def _add_tokens(self, amount):
         if (s := self._tokens+amount) <= self._capacity: self._tokens = s; return True
         return False
@@ -27,7 +27,7 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
     async def _drain(self):
         while True:
             async with self._lock: self._set_tokens(); self._adjust()
-            await sleep(min(1/self._leak/self._factor, 1))
+            await sleep(min(1/(self._leak*self._factor), 1))
     async def acquire(self, amount=1):
         async with self._lock: self._set_tokens(); return self._add_tokens(amount)
     async def wait_for_tokens(self, amount=1):
@@ -45,7 +45,10 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
         else: raise ValueError('LeakyBucket.factor is read-only')
     @factor.deleter
     def factor(self): self._factor = 1
-    def _adjust(self): self._adjust_from_params(*((0.15, 1.1, 0.85, 0.9) if (c := self._capacity) > 0x100 else (0.23, 1.2, 0.77, 0.81) if c > 0x80 else (0.3, 1.4, 0.7, 0.73)))
+    def _adjust(self):
+        c = self._capacity
+        for b, t in context.LEAKY_BUCKET_ADJMAP:
+            if c >= b: return self._adjust_from_params(*t)
     def __enter__(self):
         if self._drainer is None: self._drainer = self.make(self._drain())
         return self

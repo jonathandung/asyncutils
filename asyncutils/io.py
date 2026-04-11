@@ -50,7 +50,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
             try: return getattr(self.writer, name)
             except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {name!r}', (a, b)) from None
     # ruff: enable[PLR6301]
-class File(LoopContextMixin): # noqa: PLR0904
+class File(LoopContextMixin):
     __slots__ = '_f', '_fileno', 'mmap'
     if sys.platform != 'win32':
         def madvise(self, option, start=0, length=None, _=H.filter_out): return self.mmap.madvise(option, start, *_(length))
@@ -108,7 +108,7 @@ class File(LoopContextMixin): # noqa: PLR0904
         except: return False # noqa: E722
     def fill(self, pattern, offset=0, count=1): return self.write(pattern*count, offset)
     async def compare(self, other, /, size=-1, offset_self=0, offset_other=0): return (await self.read(offset_self, size)) == (await other.read(offset_other, size))
-    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum(x.bit_count() for x in map(int.__xor__, await self.read(offset_self, size), await other.read(offset_other, size), strict=size>0))
+    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum(x.bit_count() for x in map(int.__xor__, await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0))
     async def read_until(self, delim, offset=0, maxsize=-1): return (d, offset+len(d)) if (p := (d := await self.read(offset, maxsize)).find(delim)) == -1 else (d[:p+(l := len(delim))], offset+p+l)
     async def insert(self, data, offset): await self.write(data if offset > await self.run(self.size) else data+await self.read(offset), offset)
     async def delete(self, offset, size):
@@ -140,8 +140,8 @@ class File(LoopContextMixin): # noqa: PLR0904
         @staticmethod
         def exit(*_): return e() # noqa: A001
         cls.mgr, cls.lock, cls.run, cls.exit, cls.open_files = m, l, run, exit, {}
-class MemoryMappedIOManager(LoopContextMixin): # noqa: PLR0904
-    __slots__ = '_factory'
+class MemoryMappedIOManager(LoopContextMixin):
+    __slots__ = '_factory',
     def __init__(self, executor=None, f=(File,), n=H.create_executor):
         super().__init__(); self._factory = type('file', f, {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter)
     @property

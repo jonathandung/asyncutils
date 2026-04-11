@@ -119,7 +119,7 @@ class PriorityRLock(RLock):
         if self.is_owner: self._count += 1; return True
         if await self.__lock.acquire(priority, timeout): self._count = 1; return True # type: ignore
         return False
-class LocksmithBase: # noqa: PLR0904
+class LocksmithBase:
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
@@ -140,7 +140,7 @@ class LocksmithBase: # noqa: PLR0904
                 try: return bool((await f) if iscoroutine(f := f(self)) else f)
                 except: return False # noqa: E722
             r.add(lock); return True
-    async def force(self, lock, /, info=None, *, purge_waiters=True): # noqa: PLR0912
+    async def force(self, lock, /, info=None, *, purge_waiters=True):
         async with self._lock:
             if not self.can_force_lock_held(lock): return False
         if info is None: info = await self.get_info(lock)

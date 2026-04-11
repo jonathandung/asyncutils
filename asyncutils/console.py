@@ -8,7 +8,7 @@ try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()
 class ConsoleBase(B): # type: ignore
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, default_local_exit, disallow_subclass_msg, _unsubclassable = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), False, 'cannot subclass %r', False
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), 'cannot subclass %r'; default_local_exit = _unsubclassable = False # noqa: B008
     match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False
         case str() as s:
@@ -25,7 +25,7 @@ class ConsoleBase(B): # type: ignore
         def close(p=None, /, _o=loop.close):
             if p is _s: _o()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.retcode, self._fut, (d := dict(__name__='__main__', __doc__='A console with top-level await support.', __package__=__package__, __loader__=__loader__, __spec__=__spec__, __builtins__=__builtins__, __file__=__file__))[modname] = stop, close, False, 0, loop, context_factory(), 0, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.retcode, self._fut, (d := {'__name__': '__main__', '__doc__': 'A console with top-level await support.', '__package__': __package__, '__loader__': __loader__, '__spec__': __spec__, '__builtins__': __builtins__, '__file__': __file__})[modname] = stop, close, False, 0, loop, context_factory(), 0, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
     def refresh(self):
         if not ((F := self._fut) is None or F.done()): F.cancel()
@@ -51,7 +51,7 @@ class ConsoleBase(B): # type: ignore
         except BaseException as e: # noqa: BLE001
             if not isinstance(e, dont_show_traceback): self.showtraceback()
             return getattr(self, 'STATEMENT_FAILED', None)
-    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g):
+    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g): # noqa: B008
         x, p = False, None; self.write_special(self.BANNER if banner is None else banner)
         try:
             if p := _g('PYTHONSTARTUP'):
@@ -86,7 +86,7 @@ class ConsoleBase(B): # type: ignore
     def __repr__(self): return f'{type(self).__qualname__}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
-    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False): # noqa: PLR0912
+    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False):
         self.prehook(max_memerrs); S.audit(f'{type(self).__qualname__}.run', self); l = self._loop
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = S.stderr.write

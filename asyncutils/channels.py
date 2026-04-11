@@ -17,7 +17,7 @@ from collections import defaultdict, deque, namedtuple
 from contextlib import contextmanager
 from functools import cached_property, partial
 from sys import addaudithook, audit
-@subscriptable # noqa: PLR0904
+@subscriptable
 class Observable(LoopContextMixin):
     __slots__ = '_data', '_event', '_lock', '_queue', '_to_remove'
     @property
@@ -120,7 +120,7 @@ class Observable(LoopContextMixin):
         p = partial((_ := type(obs[0])()).notify, _ret_exc_=ret_exc)
         for o in obs: o._data.add(p)
         return _
-class EventBus(LoopContextMixin): # noqa: PLR0904
+class EventBus(LoopContextMixin):
     def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False): audit('asyncutils.channels.EventBus', max_concurrent); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
@@ -231,7 +231,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
             if iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)):
+    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
             with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, event_type); return r
@@ -279,7 +279,7 @@ class EventBus(LoopContextMixin): # noqa: PLR0904
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, bounded=False, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # type: ignore
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # noqa: B008 # type: ignore
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
@@ -287,7 +287,7 @@ class Rendezvous:
         if loop is None: loop = get_loop_and_set()
         if lock is None: lock = Lock()
         self._getters, self._putters, self._loop, self._lock = deque(), deque(), loop, lock; self._make_task()
-    async def _maintainer(self, f=sleep.__get__(60)):
+    async def _maintainer(self, f=sleep.__get__(60)): # noqa: B008
         while True: await f(); await self.cleanup()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True

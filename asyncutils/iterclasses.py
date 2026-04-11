@@ -12,7 +12,7 @@ class anullcontext:
     async def __aexit__(*_): ...
 @H.subscriptable
 class achain:
-    __slots__ = 'its'
+    __slots__ = 'its',
     @classmethod
     def from_iterable(cls, it_of_its): (self := super().__new__(cls)).its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
@@ -61,8 +61,8 @@ class apeekable(EventualLoopMixin):
             async for _ in s(self._it, idx-l+1): f(_)
         return C[idx]
 class _await_later:
-    __slots__ = 'aw'
-    def __new__(cls, aw, /, _=type((lambda: (yield))())): # noqa: PLC3002
+    __slots__ = 'aw',
+    def __new__(cls, aw, /, _=type((lambda: (yield))())): # noqa: B008,PLC3002
         if H.check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _ # noqa: RUF021
         raise TypeError(f'{H.fullname(type(aw))} object at {id(aw):#x} is not awaitable')
     def __getattr__(self, name, /): return getattr(self.aw, name)

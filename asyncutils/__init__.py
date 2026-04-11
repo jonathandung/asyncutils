@@ -2,7 +2,7 @@ from sys import implementation as I
 if I.name != 'cpython': raise ImportError('asyncutils only supports cpython')
 if I.version < (3, 12): raise ImportError('asyncutils currently only supports python 3.12 or above')
 from time import monotonic as T
-def time_since_boot(t=T(), T=T): return (T()-t)*1000
+def time_since_boot(t=T(), T=T): return (T()-t)*1000 # noqa: B008
 from .version import VersionInfo as V
 __hexversion__, preloaded_submodules = int(__version__ := V('0.8.24')), frozenset(('config', 'constants', 'exceptions', 'version'))
 def __getattr__(name, /, g=globals()):

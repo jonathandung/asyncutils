@@ -11,9 +11,9 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     return tuple(r)
 def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
 N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
-@a # noqa: PLR0904
+@a
 class VersionInfo(str): # noqa: FURB189
-    __slots__ = 'parts'
+    __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionInfo')
     def __hash__(self, f=lambda x, y, /: y*y+x if x < y else x*x+x+y):
@@ -44,7 +44,7 @@ class VersionInfo(str): # noqa: FURB189
         from . import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get):
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'asyncutils v'+'.'.join(map(str, self[:None if self[2] else 2 if self[1] else 1]))
@@ -80,7 +80,7 @@ class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
     def __neg__(self): return __class__(*map(int.__neg__, self))
-def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF): # noqa: PLR0912
+def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if isinstance(o, VersionInfo): return o.parts
     if isinstance(o, str): o = o.split('.')
     elif isinstance(o, complex): o = o.real, o.imag, 0

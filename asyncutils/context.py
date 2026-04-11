@@ -21,6 +21,7 @@ class Context:
     LEAKY_BUCKET_DEFAULT_MAXFACTOR: float = 10.0
     LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK: float = 0.1
     LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR: bool = True
+    LEAKY_BUCKET_ADJMAP: object = ((0x100, (0.15, 1.1, 0.85, 0.9)), (0x80, (0.23, 1.2, 0.77, 0.81)), (0, (0.3, 1.4, 0.7, 0.73)))
     BACKGROUND_REFRESH_CACHE_DEFAULT_TTL: float = 60.0
     BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH: float = 15.0
     ASYNC_LRU_CACHE_DEFAULT_MAXSIZE: int = 128
@@ -39,7 +40,7 @@ class Context:
     def __init_subclass__(cls): raise TypeError('cannot subclass Context')
     copy = D.replace # noqa: RUF045
 _ = __import__('_contextvars').ContextVar('asyncutils_contextvar')
-def getcontext(_=_, d=Context()):
+def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
     except LookupError: _.set(d); return d
 def setcontext(ctx, /, _=_):

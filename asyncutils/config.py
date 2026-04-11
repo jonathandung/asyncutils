@@ -4,7 +4,7 @@ from ._internal.unparsed import N
 import logging as L
 import sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
-def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: PLR0912
+def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -80,22 +80,22 @@ match logging_to := g('log_to'):
 if M: s.write('Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-(set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
+(set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))((D := 10)*min(max(3-N.V+N.Q, 1), 5))
 get_past_logs.handler = _
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
     def level(self, _=l): return _.level # noqa: PLR0206
     def __init__(self): self.orig_level = self.orig_name = None
-    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l):
+    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l, _d=D):
         if self.orig_level is None:
-            self.orig_name, self.orig_level = _m(l := _l.level), l; _s(10)
-            if l != 10: _l.debug('debugging: debug mode entered')
+            self.orig_name, self.orig_level = _m(l := _l.level), l; _s(_d)
+            if l != _d: _l.debug('debugging: debug mode entered')
         else: _l.warning('debugging: context manager already entered')
         return self
-    def __exit__(self, /, *_, _s=set_logger_level, _l=l):
+    def __exit__(self, /, *_, _s=set_logger_level, _l=l, _L=D):
         if (l := self.orig_level) is None: return _l.warning('debugging: context manager not entered')
-        if l != _l.level == 10: _l.debug('debugging: exiting debug mode'); _s(l)
+        if l != _l.level == _L: _l.debug('debugging: exiting debug mode'); _s(l)
         else: _l.warning(f'debugging: user already exited debug mode; original level was {self.orig_name}')
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
@@ -109,4 +109,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, f, m, r, s, b, P, g, k, c, l # noqa: F821
+del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, c, l # noqa: F821

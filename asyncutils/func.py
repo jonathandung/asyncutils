@@ -12,17 +12,17 @@ from asyncio.locks import Lock
 from asyncio.tasks import eager_task_factory, sleep, wait_for
 from collections import deque, namedtuple
 from functools import partial, wraps
-from sys import audit, maxsize as INF
+from sys import audit, maxsize as I
 from time import perf_counter
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
-def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT):
+def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
         if stop_when and stop_when.done(): log.warning('future to stop periodic coroutine %s is already done', n)
-        async def wrapper(*a, **k): # noqa: PLR0912
+        async def wrapper(*a, **k):
             log.debug('periodic task started; source: every'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
             if wait_first: await sleep(intvl)
@@ -50,11 +50,11 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
             if not q: return default
         return wraps(f)(wrapper)
     return dec
-def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=INF, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT):
+def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = f.__name__
-        async def wrapper(self, /, *a, **k): # noqa: PLR0912
+        async def wrapper(self, /, *a, **k):
             log.debug('periodic task started; source: everymethod'); q = default is _NO_DEFAULT
             if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('future to stop periodic coroutine %s is already done', n)
             if wait_first: await sleep(intvl)
@@ -95,7 +95,7 @@ def timer(f, /, *, precision=6, expected=Exception, should_log=True, timer=perf_
             if should_log: log.warning('function %s encountered %s after %.*f %sseconds: %s', f.__qualname__, type(_).__qualname__, precision, e, 'nano'*ns, _)
             return wrap_exc(_), e
     return wraps(f)(wrapper)
-def retry(tries=None, delay=None, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=lambda *_: None, on_success=lambda *_: None, random=_randinst.random):
+def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=(_ := lambda *_: None), on_success=_, random=_randinst.random):
     from .context import getcontext as C; C = C()
     if tries is None: tries = C.RETRY_DEFAULT_TRIES
     if delay is None: delay = C.RETRY_DEFAULT_DELAY
@@ -142,18 +142,19 @@ async def benchmark(f, /, times=1, warmup=0, *, _f=namedtuple('BenchmarkResult',
     g = measure.__get__(f); audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [(await g())[1] for _ in range(times)]), max(t), S := sum(t), S/times, T)
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
-    def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter):
-        if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
-        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), Lock(), int(calls), raise_, timer; return _
+    def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=Lock, _=partial):
+        if period is None: return _(cls, calls=f, period=calls, raise_=raise_, timer=timer)
+        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), lock_impl(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
-        p, P, C, f = (T := self._call_times).popleft, self._period, self._calls, self._func
+        p, A, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
         async with self._lock: # type: ignore
             d = (n := self._timer())-P
             while T:
-                if (x := p()) > d: T.appendleft(x); break
+                if (x := p()) > d: A(x); break
             if (l := len(T)-self._calls+1) > 0:
                 if self._raise: raise RateLimitExceeded(f, a, k, C, P, l)
                 await sleep(p()-d)
             T.append(n)
         return await f(*a, **k)
     def __repr__(self): return f'{type(self).__name__}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r})'
+del _, I, perf_counter, partial, Lock

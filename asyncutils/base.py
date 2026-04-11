@@ -23,7 +23,7 @@ class event_loop: # noqa: N801
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
     def from_flags(cls, flags, /, _=H.fullname): r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
-    def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19)
+    def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19) # noqa: PLR0913
     def __enter__(self, _m='event_loop context already entered'):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop
@@ -38,7 +38,7 @@ class event_loop: # noqa: N801
                 if not f&0x200: raise RuntimeError(f'{self._istr}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
-    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L, _f=H.fullname): # noqa: PLR0912
+    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
         # ruff: disable[E722]
         N = self._istr
         if not (f := self._flags)&(e := self._ENTERED):
@@ -106,7 +106,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
     audit('asyncutils.base.iter_to_aiter', a(it)); f, C = sentinel is _NO_DEFAULT, getcontext()
     if use_existing_executor is None: use_existing_executor = C.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR
     if create_executor is None: create_executor = C.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR
-    if b(it, '__aiter__'): # noqa: PLR1702
+    if b(it, '__aiter__'):
         if not b(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
         if f: return it
         if b(it, 'asend', 'athrow', 'aclose'):
@@ -150,6 +150,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                         if c((l := _()), sentinel): break
                         yield l
         else:
+            # ruff: disable[B008]
             def r(*a, _=h().run_in_executor, e=e): return __import__('_functools').partial(_, e, *a)
             if f:
                 if g:
@@ -172,6 +173,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                     while True:
                         if c((l := await _()), sentinel): break
                         yield l
+            # ruff: enable[B008]
     else: raise TypeError('cannot iterate over it synchronously or asynchronously')
     return iterator()
     # ruff: enable[RUF029]

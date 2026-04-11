@@ -4,17 +4,17 @@ from ._internal.submodules import processors_all as __all__
 from .base import collect, iter_to_aiter, safe_cancel_batch
 from .exceptions import BulkheadFull, BulkheadShutDown
 from .mixins import LoopContextMixin
-from .util import safe_cancel, semaphore
+from .util import safe_cancel
 from _functools import partial  # type: ignore[import-not-found]
 from asyncio.exceptions import CancelledError
-from asyncio.locks import Event, Lock
+from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic
 @subscriptable
 class BoundedBatchProcessor:
     __slots__ = '_batch', '_processor', '_sem'
-    def __init__(self, processor, batch=10, max_concurrent=5, bounded=False): self._processor, self._batch, self._sem = processor, batch, semaphore(bounded, max_concurrent)
+    def __init__(self, processor, batch=10, max_concurrent=5): self._processor, self._batch, self._sem = processor, batch, Semaphore(max_concurrent)
     async def process(self, items):
         f = partial(collect, iter_to_aiter(items), self._batch)
         while b := await f():
@@ -43,7 +43,7 @@ class BatchProcessor(LoopContextMixin):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
     __slots__ = '_empty_event', '_exc', '_init_val', '_max_rej', '_processor', '_queue', '_rejected', '_sem', '_shutdown_event'
-    def __init__(self, max_concurrent, max_queue=0, bounded=False, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._shutdown_event, self._empty_event, self._max_rej = semaphore(bounded, max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
+    def __init__(self, max_concurrent, max_queue=0, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._shutdown_event, self._empty_event, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
         except QueueFull as e:

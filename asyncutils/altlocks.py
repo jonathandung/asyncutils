@@ -30,7 +30,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     def __enter__(self):
         if self.guarded: raise self
         self.guarded = True
-    def __exit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')):
+    def __exit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')): # noqa: B008
         if not self.guarded: raise e
         self.guarded = False
     @classmethod
@@ -52,7 +52,7 @@ class CircuitBreaker:
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def wrapper(*a, **k):
             async with self._call_lock: # type: ignore
-                if (s := self._state) == 2:
+                if (s := self._state) == 2: # noqa: PLR2004
                     if timer()-self._opened > self._reset: self._state, self._half_open_calls = 1, 0
                     else: raise CircuitOpen(f'circuit {self.name} is open')
                 elif s == 1:
