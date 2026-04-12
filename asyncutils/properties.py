@@ -1,5 +1,5 @@
 from ._internal.compat import Placeholder, partial
-from ._internal.helpers import subscriptable
+from ._internal.helpers import fullname, subscriptable
 from ._internal.submodules import properties_all as __all__
 from asyncio.events import new_event_loop
 from asyncio.locks import Lock
@@ -55,3 +55,13 @@ class AsyncLockProperty(AsyncProperty):
     def get_lock(self, obj):
         if (r := self._cache.get(i := id(obj))) is None: self._cache[i] = r = self._lock_getter(obj)
         return r
+class coercedmethod: # noqa: N801
+    __slots__ = '__f', '__name', '__owner'
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass coercedmethod')
+    def __init__(self, f, /): self.__f = f
+    def __set_name__(self, typ, name, /): self.__owner, self.__name = typ, name
+    def __getattr__(self, n, /): return getattr(self.__f, n)
+    def __get__(self, obj, typ=None, /):
+        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__name!r}') if typ is self.__owner else RuntimeError('incorrectly bound coercedmethod')
+        if not (typ is None or isinstance(obj, typ)): raise TypeError('coercedmethod.__get__ called incorrectly')
+        return lambda *a, **k: self.__f(obj, *a, **k)

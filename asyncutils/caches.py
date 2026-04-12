@@ -69,7 +69,7 @@ class AsyncLRUCache:
         if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE
         audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx, self._timer = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200), timer
-    def __call__(self, f, /, _=lambda f, a, k: id(f)<<0x7a|hash(a)<<0x3d|hash(frozenset(k.items()))):
+    def __call__(self, f, /, _=lambda f, a, k, s=0x3d, t=0x7a: id(f)<<t|hash(a)<<s|hash(frozenset(k.items()))):
         self._caches[f] = c = self._factory(f)
         if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)[0]
         async def wrapper(*a, **k):

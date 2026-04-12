@@ -2,13 +2,14 @@ from ._internal import log
 from ._internal.patch import patch_function_signatures as f
 from .base import event_loop
 from .constants import _NO_DEFAULT
+from .context import getcontext
 from .exceptions import CRITICAL, Critical, IgnoreErrors
 from .util import safe_cancel
 from asyncio.tasks import wait_for
 from signal import Signals, getsignal, signal
 __all__ = 'wait_for_signal',
-async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=(Signals.SIGINT, Signals.SIGTERM), logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _s=signal, _g=getsignal): # noqa: PLR0912,PLR0915
-    import sys; sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *sigs)); c, x = None, 0
+async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=None, logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _s=signal, _g=getsignal): # noqa: PLR0912,PLR0915
+    import sys; sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs))); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
     if sys.platform == 'win32': # pragma: no cover

@@ -7,8 +7,6 @@ from .mixins import EventualLoopMixin
 from .util import _ignore_cancellation
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport
-from socket import SHUT_WR
-from sys import audit
 class LineProtocol(Protocol, EventualLoopMixin):
     NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
     def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
@@ -70,7 +68,7 @@ class SocketTransport(Transport):
     def __init__(self, sock=None):
         audit_fullname(self); self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
         if sock: self.connect_sock(sock)
-    def _reset_extra(self): super().__init__({'socket': None, 'sockname': None, 'peername': None})
+    def _reset_extra(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def _sock_transport_read_ready(self, sock, size=0x1000):
         try: self._protocol.data_received(d) if (d := sock.recv(size)) else (self._protocol.eof_received() or self.close())
         except OSError as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
@@ -101,8 +99,8 @@ class SocketTransport(Transport):
         if high is None: high = self._limits[1]
         self._limits = min(low := max(low, 0), high := min(high, _x)), high
     def write_eof(self):
-        if not self._closing and (s := self._socket):
-            with self._h: s.shutdown(SHUT_WR)
+        if not (self._closing or (s := self._socket) is None):
+            with self._h: s.shutdown(1)
     def can_write_eof(self): return True # noqa: PLR6301
     def is_closing(self): return self._closing
     def close(self, e=None):

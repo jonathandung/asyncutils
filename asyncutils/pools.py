@@ -3,6 +3,7 @@ from ._internal.helpers import filter_out, subscriptable
 from ._internal.submodules import pools_all as __all__
 from .base import iter_to_aiter, aiter_to_iter, event_loop, take
 from .constants import _NO_DEFAULT
+from .context import getcontext
 from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
 from .mixins import AsyncContextMixin, LoopContextMixin
 from .util import safe_cancel, sync_lock_from_binder
@@ -62,11 +63,12 @@ class AdvancedPool(LoopContextMixin):
         except CRITICAL as e: self.loop.call_soon_threadsafe(_.set_exception, Critical(e)) # type: ignore
         else: self.loop.call_soon_threadsafe(_.set_result, x)
     def _worker(self): (T := Thread(target=self._worker_loop, args=(F := self.make_fut(),))).start(); return T, F
-    async def _adjust_workers(self, hi=1.5, lo=0.5):
+    async def _adjust_workers(self):
         if not self._scaling: return
+        C = getcontext()
         async with self._lock:
-            if (l := self._pending/((c := self._current) or 1)) > hi and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
-            elif l < lo and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*0.3))))
+            if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
+            elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             f, g, h = self._workers.add, self._futures.add, self._worker
@@ -91,7 +93,7 @@ class AdvancedPool(LoopContextMixin):
         from .queues import ignore_qempty as C; f, g = (q := self._queue).get_nowait, q.task_done
         with C:
             while True:
-                if (F := f()[2]) is not None: await safe_cancel(F[3])
+                if (F := f()[2]) is not None: await safe_cancel(F[-1])
                 g()
     async def complete(self, *a, **k): return await (await self.submit(*a, **k))
     async def submit(self, f, *a, _priority_=0, **k):
@@ -111,7 +113,7 @@ class AdvancedPool(LoopContextMixin):
                 self._queue.shutdown(True); await self.join(); await self.drain(); return self.uptime
         except TimeoutError: self.exiter(); raise TimeoutError('kill exceeded timeout, forced shutdown') from None
     async def join(self): await gather(*self._futures, return_exceptions=True)
-    async def map(self, f, *its, priority=0): return await gather(*map(partial(self.complete, f, _priority_=priority), *its))
+    async def map(self, f, *its, priority=0, strict=False): return await gather(*map(partial(self.complete, f, _priority_=priority), *its, strict=strict))
     async def starmap(self, f, it, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))
     async def starmap_withkwds(self, f, it, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(*a, **k) for a, k in it))
@@ -139,7 +141,7 @@ class AdvancedPool(LoopContextMixin):
 @subscriptable
 class ConnectionPool:
     __slots__ = '_available', '_cleaner', '_creation_times', '_exiter', '_factory', '_healthchecker', '_in_use', '_lock', '_loop', '_maintainer', '_pool', 'maxlife', 'maxsize', 'minsize'
-    def __init__(self, factory, maxsize=10, minsize=10, maxlife=3600, healthchecker=None, cleaner=None): self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._exiter = factory, maxsize, minsize, maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, Lock(), Event(), CallbackAccumulator('__exit__'); self._maintainer = self._loop = None
+    def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = getcontext(); self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._exiter = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, Lock(), Event(), CallbackAccumulator('__exit__'); self._maintainer = self._loop = None
     def _is_healthy(self, conn, /): return self._healthchecker(conn) and not ((t := self._creation_times.get(id(conn))) and monotonic()-t > self.maxlife)
     async def create_connection(self, *a, _executor_=None, **k): self._creation_times[id(c := self.loop.run_in_executor(_executor_, partial(self._factory, *a, **k)))] = monotonic(); return await c
     async def acquire(self, *a, **k):
@@ -157,9 +159,10 @@ class ConnectionPool:
             else:
                 self._cleaner(conn)
                 if self.currsize < self.minsize: self.loop.create_task(self.create_connection(*a, **k))
-    async def _maintain(self, intvl=30.0):
+    async def _maintain(self):
+        f = sleep.__get__(getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:
-            await sleep(intvl); n = []
+            await f(); n = []
             async with self._lock:
                 for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
                 self._pool = n

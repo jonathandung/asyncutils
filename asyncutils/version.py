@@ -57,7 +57,7 @@ class VersionInfo(str): # noqa: FURB189
             case 'hex'|'bin'|'oct': return __builtins__[s](int(self))
         return str(self)
     def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented # type: ignore
-    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
+    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o, strict=True)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
     def next_patch(self): return self.replace_parts(patch=self[2]+1)
     def next_minor(self): return __class__(self[0], self[1]+1)
     def next_major(self): return __class__(self[0]+1, 0)

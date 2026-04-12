@@ -25,7 +25,7 @@ async def fmap_parallel(fs, /, *a, **k):
 async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
     f, g = (l := []).append, l.clear
     async for _ in amap(outer, it, await_=outer_await):
-        async for _ in amap(inner, _, await_=inner_await): f(_) # noqa: B020
+        async for i in amap(inner, _, await_=inner_await): f(i)
         yield tuple(l); g()
 def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
     if n <= 0: raise ValueError('n must be positive')
@@ -496,7 +496,7 @@ async def ainterleaveevenly(its, lengths=None):
     except TypeError: raise ValueError('ainterleaveevenly: cannot determine lengths of (async) iterables') from None
     A, *a = map(f := L.__getitem__, _ := sorted(range(X), key=f, reverse=True)); B, *b = (iter_to_aiter(I[i]) for i in _); E, t = [A//X]*len(a), sum(L)
     while t:
-        yield await anext(B); t -= 1; E = list(map(O.sub, E, a))
+        yield await anext(B); t -= 1; E[:] = map(O.sub, E, a)
         for i, e in enumerate(E):
             if e < 0: yield await anext(b[i]); t -= 1; E[i] += A
 async def ainterleaverandomly(its, _=_randrange):
@@ -530,7 +530,7 @@ async def arandom_combination_with_replacement(it, r, _=_randrange):
 async def arandompermutation(it, r=None, _=_sample):
     p = await to_tuple(it)
     if r is None: r = len(p)
-    for _ in _(p, r): yield _ # noqa: B020
+    for i in _(p, r): yield i
 async def afirst(it, default=_NO_DEFAULT):
     try:
         async for i in it: return i

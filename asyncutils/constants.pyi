@@ -2,7 +2,7 @@ from ._internal.protocols import Executor, Sentinel
 from _collections_abc import Callable
 from threading import Lock
 from typing import Final, Literal, NoReturn, Self, overload
-__all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
+__all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
@@ -32,3 +32,9 @@ SYNC_AWAIT: Final[Sentinel]
 '''A possible value to Deadlock.noticer, indicating the deadlock situation was found by the sync_await function.'''
 _NO_DEFAULT: Final[Sentinel]
 '''Users are not meant to interact with this directly.'''
+CLOSED: Final[int]
+'''The closed state of a circuit breaker.'''
+HALF_OPEN: Final[int]
+'''The half-open state of a circuit breaker.'''
+OPEN: Final[int]
+'''The open state of a circuit breaker.'''

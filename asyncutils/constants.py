@@ -49,5 +49,6 @@ class _sentinel(sentinel_base):
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
     def __reduce__(self): return self.name
 _NO_DEFAULT, RAISE, SYNC_AWAIT = map(_sentinel, ('_NO_DEFAULT', 'RAISE', 'SYNC_AWAIT'))
+CLOSED, HALF_OPEN, OPEN = range(3)
 _sentinel._can_instantiate = False
 del _sentinel

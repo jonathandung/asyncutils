@@ -15,8 +15,8 @@ def json_to_argv(p, /, *, d='.', c='json'):
     elif l != s:
         f('-l')
         if l != 'MAKE': f(l)
-    if (s := p('executor', l := 'thread')) != l: f('-c' if d in s else '-e'); f(s)
-    if (l := p('max_memerrs', 3)) != 3: f('-m'); f(str(l)) # noqa: PLR2004
+    f('-c' if d in (s := p('executor', l := 'thread')) else '-e'); f(s)
+    if isinstance(l := p('max_memerrs', None), int): f('-m'); f(str(l))
     if p('quiet', False): f('-q')
     if p('basic_repl', False): f('-b')
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))

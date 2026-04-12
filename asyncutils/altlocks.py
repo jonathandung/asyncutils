@@ -26,7 +26,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
             if not (w := f()).done(): w.set_result(None); d -= 1
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     __slots__, _inc_cnt = 'guarded', staticmethod(count(1).__next__)
-    def __init__(self, action='using', rname=None): super().__init__(f"another task is already {action} resource{f' #{self._inc_cnt()}' if rname is None else f': {rname!r}'}"); self.guarded = False
+    def __init__(self, action='using', rname=None): super().__init__(f'another task is already {action} resource{f" #{self._inc_cnt()}" if rname is None else f": {rname!r}"}'); self.guarded = False
     def __enter__(self):
         if self.guarded: raise self
         self.guarded = True
@@ -42,12 +42,14 @@ class UniqueResourceGuard(ResourceGuard):
     def guard(cls, obj, /, *, action='using'):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
         audit('asyncutils.altlocks.UniqueResourceGuard', fullname(type(obj))); return r
+    @classmethod
+    def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
 class CircuitBreaker:
     __slots__ = '_call_lock', '_exc', '_fails', '_half_open_calls', '_max_fails', '_max_half_open_calls', '_name', '_opened', '_reset', '_state'; _inc_cnt = staticmethod(count(1).__next__)
-    def __new__(cls, name, /, max_fails=3, reset=None, exc=Exception, max_half_open_calls=None, _='#%d'):
+    def __new__(cls, name, /, max_fails=None, reset=None, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
         if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__qualname__', None)) is None is (name := getattr(f, '__name__', None)): name = _%cls._inc_cnt()
-        audit('asyncutils.altlocks.CircuitBreaker', name, max_fails); self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._call_lock = name, max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Lock(); self._set(0); return self if f is None else self(f)
+        audit('asyncutils.altlocks.CircuitBreaker', name, max_fails); self, C = super().__new__(cls), getcontext(); self._name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._call_lock = name, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Lock(); self._set(0); return self if f is None else self(f)
     def __call__(self, f, /, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def wrapper(*a, **k):
@@ -58,10 +60,7 @@ class CircuitBreaker:
                 elif s == 1:
                     if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise CircuitHalfOpen(f'circuit {self.name} exceeded the maximum of {m} calls in the half-open state')
                     self._half_open_calls = c+1
-                try:
-                    r = await f(*a, **k)
-                    if s == 1: self._half_open_calls = 0; self._set(0)
-                    return r
+                try: r = await f(*a, **k)
                 except self._exc:
                     self._fails = x = self._fails+1
                     if x >= self._max_fails: self._opened = timer(); self._set(2)
@@ -69,12 +68,17 @@ class CircuitBreaker:
                     return default
                 except CRITICAL: raise Critical
                 except BaseException as e: raise CircuitBreakerError(f'unexpected {type(e).__qualname__} in {fullname(f)} under CircuitBreaker {self.name!r}: {e}') from None # noqa: BLE001
+                else:
+                    if s == 1: self._half_open_calls = 0; self._set(0)
+                    return r
         return wraps(f)(wrapper)
     def _set(self, state, /): self._state, self._fails = state, 0
     @property
     def fails(self): return self._fails
     @property
     def name(self): return self._name
+    @property
+    def state(self): return self._state
 class StatefulBarrier(AwaitableMixin):
     __slots__ = '_count', '_event', '_exc', '_gen', '_initstate', '_lock', '_parties', '_state'
     def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._event, self._lock, self._gen, self._initstate = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Event(), Lock(), 0, initstate

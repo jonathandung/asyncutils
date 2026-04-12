@@ -11,6 +11,6 @@ def cfgjson(cfgjsonf, contents):
         with open(n) as f: assert J.load(f).items() >= J.loads(contents).items()
     finally: __import__('os').unlink(n)
 @dec
-def contents(): return '{"load_all": true, "V": 2}'
+def contents(): return '{"load_all": true, "V": 2, "max_memerrs": 5}'
 def pytest_configure(config): debug.__enter__()
 def pytest_unconfigure(config): debug.__exit__(None, None, None)

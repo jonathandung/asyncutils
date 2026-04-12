@@ -1,9 +1,14 @@
 from ._internal.helpers import copy_and_clear, fullname
 from ._internal.submodules import futures_all as __all__
 from _contextvars import copy_context
-from asyncio.futures import _PyFuture  # type: ignore[import-not-found]
-from asyncio.tasks import _PyTask, eager_task_factory  # type: ignore[import-not-found]
+from asyncio.futures import Future, _PyFuture  # type: ignore[import-not-found]
+from asyncio.tasks import Task, _PyTask, eager_task_factory  # type: ignore[import-not-found]
 from sys import audit
+class Base:
+    def __init__(self): self._creation_time = self.get_loop().time() # type: ignore[attr-defined]
+    def __lt__(self, other, /): return self._creation_time < other._creation_time
+class TimeAwareFuture(Base, Future): ...
+class TimeAwareTask(Base, Task): ...
 class AsyncCallbacksFuture(_PyFuture):
     def __init__(self, *, loop=None): audit(type(self).__qualname__, loop); _PyFuture.__init__(self, loop=loop); self._setup()
     def _setup(self): self._loop.set_task_factory(eager_task_factory); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = [], [], []
@@ -27,3 +32,6 @@ class AsyncCallbacksFuture(_PyFuture):
         for g, _ in f: b(g, context=_)
 class AsyncCallbacksTask(_PyTask, AsyncCallbacksFuture):
     def __init__(self, coro, **k): audit(type(self).__qualname__, coro, k.get('loop'), k.get('name')); _PyTask.__init__(self, coro, **k); self._setup()
+class TimeAwareAsyncCallbacksFuture(Base, AsyncCallbacksFuture): ...
+class TimeAwareAsyncCallbacksTask(Base, AsyncCallbacksTask): ...
+del Base

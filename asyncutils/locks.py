@@ -1,13 +1,16 @@
 from . import mixins as M
 from ._internal import log
-from ._internal.helpers import check_methods
+from ._internal.helpers import check_methods, fullname
 from ._internal.submodules import locks_all as __all__
 from .base import safe_cancel_batch
 from .exceptions import CRITICAL, Critical, LockForceRequest
+from .properties import coercedmethod
+from .queues import ignore_valerrs
 from _collections import defaultdict, deque  # type: ignore[import-not-found]
 from asyncio.coroutines import iscoroutine
-from asyncio.locks import Event, Lock
+from asyncio.locks import Condition, Event, Lock
 from asyncio.tasks import current_task, gather, wait, wait_for
+from contextlib import asynccontextmanager
 from heapq import heappop, heappush
 from time import monotonic
 class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
@@ -53,25 +56,167 @@ class KeyedCondition(M.LockMixin, M.LoopContextMixin, M.AwaitableMixin):
         if iscoroutine(r := self.__lock.release()): await r
     def locked(self): return self.__lock.locked()
     async def wait(self, key=None, timeout=None):
-        async with self.__lock: (s := self._waiters if key is None else self._specific_waiters[key]).add(F := self.loop.create_future())
+        (s := self._waiters if key is None else self._specific_waiters[key]).add(F := self.loop.create_future())
         try: await wait_for(F, timeout)
+        finally: s.discard(F)
+    async def wait_all(self): await gather(*map(self.wait, self._specific_waiters), return_exceptions=True)
+    def assert_locked(self):
+        if not self.locked(): raise RuntimeError('must acquire condition to notify')
+    def notify(self, n=1, key=None, strict=False):
+        self.assert_locked(); i = 0
+        for i, F in enumerate((s := self._waiters if (c := key is None) else self._specific_waiters[key]).copy()):
+            if i >= n: break
+            if not F.done(): F.set_result(None)
+            s.discard(F)
+            if not (c or s): del self._specific_waiters[key]
+        else:
+            if strict and i+1 < n: raise ValueError(f'{fullname(self)}: not enough parties to notify')
+    def notify_all(self, key=None):
+        self.assert_locked()
+        for F in (s := self._waiters if key is None else self._specific_waiters.pop(key)):
+            if not F.done(): F.set_result(None)
+        l = len(s); s.clear(); return l
+class MultiCountDownLatch:
+    __slots__ = '_cond', '_counts'
+    def __init__(self, counts): self._cond, self._counts = KeyedCondition(), dict(counts)
+    async def count_down(self, key):
+        async with (C := self._cond):
+            if (c := (d := self._counts).get(key)) is None or c <= 0: del d[key]; raise KeyError(key)
+            if c == 1: C.notify_all(key); del d[key]
+            else: d[key] = c-1
+    async def wait(self, key):
+        async with (C := self._cond): await C.wait(key)
+    async def wait_all(self): await self._cond.wait_all()
+class Base:
+    __slots__ = '__wrapped__', 'reader', 'reading', 'writer', 'writing'
+    def __init__(self, l, f, /, _=__slots__[1:]):
+        for s in _: setattr(self, s, getattr(l, s))
+        self.__wrapped__ = f
+    def __init_subclass__(cls, /, **_):
+        if getattr(cls, '__slots__', True): raise TypeError('__slots__ should be empty tuple')
+    def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
+class RWLock:
+    def __new__(cls, prefer_writers=True): return object.__new__((WritePreferredRWLock if prefer_writers else ReadPreferredRWLock) if cls is __class__ else cls)
+    @coercedmethod
+    class reader(Base):
+        __slots__ = ()
+        async def __call__(self, *a, **k):
+            async with self.reading(): return await self.__wrapped__(*a, **k)
+    @coercedmethod
+    class writer(Base):
+        __slots__ = ()
+        async def __call__(self, *a, **k):
+            async with self.writing(): return await self.__wrapped__(*a, **k)
+class ReadPreferredRWLock(RWLock):
+    __slots__ = '_clock', '_readers', '_wlock'
+    def __init__(self): self._readers, self._clock, self._wlock = 0, Lock(), Lock()
+    @asynccontextmanager
+    async def reading(self):
+        async with self._clock:
+            if (r := self._readers+1) == 1: await self._wlock.acquire()
+            self._readers = r
+        try: yield
         finally:
-            async with self.__lock: s.discard(F)
-    async def notify(self, n=1, key=None, strict=False):
-        i = 0
-        async with self.__lock:
-            for i, F in enumerate((s := self._waiters if (c := key is None) else self._specific_waiters[key]).copy()):
-                if i >= n: break
-                if not F.done(): F.set_result(None)
-                s.discard(F)
-                if not (c or s): del self._specific_waiters[key]
-            else:
-                if strict and i+1 < n: raise ValueError(f'{type(self).__qualname__}: not enough parties to notify')
-    async def notify_all(self, key=None):
-        async with self.__lock:
-            for F in (s := self._waiters if key is None else self._specific_waiters.pop(key)):
-                if not F.done(): F.set_result(None)
-            l = len(s); s.clear(); return l
+            async with self._clock:
+                if (r := self._readers-1) == 0: self._wlock.release()
+                self._readers = r
+    @asynccontextmanager
+    async def writing(self):
+        async with self._wlock: yield
+class WritePreferredRWLock(RWLock):
+    __slots__ = '_cond', '_nr', '_nw', '_writer_active'
+    def __init__(self): self._cond, self._writer_active = Condition(), False; self._nr = self._nw = 0
+    @asynccontextmanager
+    async def reading(self):
+        async with (C := self._cond):
+            w = C.wait
+            while self._writer_active or self._nw > 0: await w()
+            self._nr += 1
+        try: yield
+        finally:
+            async with C:
+                if (r := self._nr-1) == 0: C.notify_all()
+                self._nr = r
+    @asynccontextmanager
+    async def writing(self):
+        async with (C := self._cond):
+            w = C.wait; self._nw += 1
+            while self._writer_active or self._nr > 0: await w()
+            self._nw -= 1; self._writer_active = True
+        try: yield
+        finally:
+            async with C: self._writer_active = False; C.notify_all()
+class FairRWLock(RWLock):
+    __slots__ = '_cond', '_qd', '_readers', '_writer_active'
+    def __init__(self): self._cond, self._writer_active, self._readers, self._qd = Condition(), False, 0, deque()
+    @asynccontextmanager
+    async def reading(self):
+        async with (C := self._cond):
+            F, w = C._get_loop().create_future(), C.wait # type: ignore[attr-defined]
+            (Q := self._qd).append(E := (False, F))
+            try:
+                while True:
+                    if Q[0][1] is not F or self._writer_active: await w()
+                    else: self._readers += 1; Q.popleft(); F.set_result(True); break
+            except:
+                with ignore_valerrs: Q.remove(E)
+                raise
+        try: yield
+        finally:
+            async with C:
+                if (r := self._readers-1) == 0: C.notify_all()
+                self._readers = r
+    @asynccontextmanager
+    async def writing(self):
+        async with (C := self._cond):
+            F, w = C._get_loop().create_future(), C.wait # type: ignore[attr-defined]
+            (Q := self._qd).append(E := (True, F))
+            try:
+                while True:
+                    if Q[0][1] is not F or self._writer_active or self._readers > 0: await w()
+                    else: self._writer_active = True; Q.popleft(); F.set_result(True); break
+            except:
+                with ignore_valerrs: Q.remove(E)
+                raise
+        try: yield
+        finally:
+            async with C: self._writer_active = False; C.notify_all()
+class PriorityRWLock(RWLock):
+    __slots__ = '_cond', '_count', '_ilock', '_qd', '_readers', '_writer_active'
+    def __init__(self): self._cond, self._count, self._ilock, self._writer_active, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
+    async def _push_item(self, priority, is_writer):
+        async with self._ilock: self._count = (c := self._count)+1
+        heappush(self._qd, E := (priority, is_writer, c, self._cond._get_loop().create_future())); return E # type: ignore[attr-defined]
+    @asynccontextmanager
+    async def reading(self, priority=0):
+        async with (C := self._cond):
+            F, Q, w = (E := await self._push_item(priority, False))[-1], self._qd, C.wait
+            try:
+                while True:
+                    if Q[0][-1] is not F or self._writer_active: await w()
+                    else: self._readers += 1; heappop(Q); F.set_result(True); break
+            except:
+                with ignore_valerrs: Q.remove(E)
+                raise
+        try: yield
+        finally:
+            async with C:
+                if (r := self._readers-1) == 0: C.notify_all()
+                self._readers = r
+    @asynccontextmanager
+    async def writing(self, priority=0):
+        async with (C := self._cond):
+            F, Q, w = (E := await self._push_item(priority, True))[-1], self._qd, C.wait
+            try:
+                while True:
+                    if Q[0][-1] is not F or self._writer_active or self._readers > 0: await w()
+                    else: self._writer_active = True; heappop(Q); F.set_result(True); break
+            except:
+                with ignore_valerrs: Q.remove(E)
+                raise
+        try: yield
+        finally:
+            async with C: self._writer_active = False; C.notify_all()
 class RLock(M.LockWithOwnerMixin):
     __slots__ = '__lock', '_count', '_owner'
     def __init__(self, lock=None): self._count, self._owner, self.__lock = 0, None, lock or Lock()
@@ -195,3 +340,4 @@ class LocksmithBase:
     def task_raised_critical(self, lock, exc, /): raise exc from None
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())
     # ruff: enable[ARG002]
+del Base

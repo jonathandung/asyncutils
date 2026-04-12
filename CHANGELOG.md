@@ -10,7 +10,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-51% coverage, 38 tests
+52% coverage, 41 tests
 
 ### Docs
 
@@ -238,6 +238,10 @@ Submodules:
   Classes:
   - AsyncCallbacksFuture
   - AsyncCallbacksTask
+  - TimeAwareAsyncCallbacksFuture
+  - TimeAwareAsyncCallbacksTask
+  - TimeAwareFuture
+  - TimeAwareTask
 
 - io
 
@@ -272,6 +276,11 @@ Submodules:
   - PriorityLock
   - PriorityRLock
   - LocksmithBase
+  - RWLock
+  - ReadPreferringRWLock
+  - WritePreferringRWLock
+  - FairRWLock
+  - PriorityRWLock
 
 - misc
 
@@ -323,6 +332,7 @@ Submodules:
   Classes:
   - AsyncProperty
   - AsyncLockProperty
+  - coercedmethod
 
 - queues
 

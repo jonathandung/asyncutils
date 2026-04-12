@@ -26,9 +26,9 @@ class Q:
     exc = E.ForbiddenOperation
     __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
-    def __new__(cls, /, *a, _=f):
+    def __new__(cls, /, *A, _=f):
         s = super().__new__(cls)
-        for a in zip(cls.__slots__, a): _(s, *a) # noqa: B020,PLR1704
+        for a in zip(cls.__slots__, A): _(s, *a)
         return s
     def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
         if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')

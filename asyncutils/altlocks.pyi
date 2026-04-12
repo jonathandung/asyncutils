@@ -5,7 +5,7 @@ from _collections_abc import Awaitable, Callable, Coroutine
 from asyncio.locks import BoundedSemaphore
 from collections import deque
 from types import TracebackType
-from typing import Any, Self, final, overload
+from typing import Any, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class DynamicBoundedSemaphore(BoundedSemaphore):
     '''A subclass of :class:`asyncio.BoundedSemaphore` whose bound can be set by the user via the `bound` property.'''
@@ -28,12 +28,17 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     def guard(cls, obj: object, /, *, action: str=...) -> Self: '''Alternate constructor; determines the name of the resource from the representation of the object.'''
 @final
 class UniqueResourceGuard(ResourceGuard):
-    '''A subclass of :class:`ResourceGuard` that only allows one guard per object.
+    '''A subclass of :class:`ResourceGuard` that only allows one guard per object. Cannot be further subclassed.
+    The object does not have to be hashable, but a strong reference will be held to it for the lifetime of the guard.
     Note that this does not stop the object from having an instance of ResourceGuard (or subclass thereof) from guarding it simultaneously.'''
+    def __new__(cls, /, *a: Any, **k: Any) -> NoReturn: '''Use the `guard` class method instead.'''
+    @classmethod
+    def clear_cache(cls) -> None: '''Clear the internal cache mapping guarded objects to their guards. Call only when you are sure no guards are in use.'''
     @classmethod
     def guard(cls, obj: object, /, *, action: str=...) -> Self:
-        '''Each object only has one guard. If the object already has a guard, return that guard, regardless of whether it is held.
-        The error will be seen by the user when they actually try to acquire the guard if it is already held.'''
+        '''Each object only has one guard.
+        If the object already has a guard, return that guard, regardless of whether it is held. In that case, the `action` parameter is ignored.
+        The error will be seen by the user only when they actually try to acquire the guard if it is already held.'''
 class CircuitBreaker:
     '''The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
     Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.'''
@@ -44,21 +49,28 @@ class CircuitBreaker:
         '''Construct a circuit breaker, whose circuit is initially closed.
         If `name` is passed, use it as the name; return a function wrapping `f` otherwise, with the name of the circuit breaker (for debugging) derived from the name of the function.
         Pass exceptions that are expected to happen through the `exc` parameter.
-        When the decorated function fails more than `max_fails` times, the breaker triggers (opens the circuit) and disallow further calls of the same function by throwing an exception.
-        This state persists until the `reset` timeout expires, the default of which can be changed in the context submodule. Then, the breaker enters the half-open state.
+        When the decorated function fails more than `max_fails` times (default `context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers (opens the circuit) and disallows further
+        calls of the wrapped functions by throwing an exception.
+        This state persists until the `reset` timeout expires (default `context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the half-open state.
         If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
-    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]: ...
+    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]:
+        '''Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature but strictly returning a coroutine.
+        Care should be taken when applying the same circuit breaker to multiple functions, as they will not be able to run concurrently, and the calls counters will be shared.
+        `timer` (default `time.monotonic`) is used to get the current time for timeout calculation.
+        `default` is returned if an expected exception is raised, also suppressing that exception.'''
     @property
     def fails(self) -> int: '''Current count of conseuctive failures.'''
     @property
     def name(self) -> str: '''The name of the circuit breaker, shown in error messages.'''
+    @property
+    def state(self) -> int: '''The state of the circuit breaker: 0 for closed, 1 for half-open, and 2 for open.'''
 class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
-    '''A barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
+    '''An async barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
     def __init__(self, parties: int, name: str=..., initstate: SupportsIteration[T]=[], maxstate: int|None=...):
-        '''`parties`: number of parties required to break the barrier
-        `name` (optional): name of the barrier; to appear in error messages
-        `initstate` (optional): an iterable storing the initial state; will be exhausted; preferrably not async
-        `maxstate` (optional): maximum length of state to store; older state will be expelled'''
+        '''`parties` (required): number of parties required to break the barrier
+        `name`: name of the barrier; to appear in error messages
+        `initstate`: an iterable storing the initial state; will be exhausted; preferrably not async
+        `maxstate`: maximum length of state to store; older state will be expelled'''
     async def wait(self, state: T=..., timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
         If the barrier has already been aborted or broken, raise `asyncio.BrokenBarrierError`.
@@ -66,7 +78,7 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
         and `pos` is the number of parties having arrived before this one.'''
     def _reset(self) -> None: '''Internal method to advance the barrier to the next generation so that new parties can wait.'''
-    def abort(self) -> None: '''Abort the barrier, throwing `asyncio.BrokenBarrierError` to present waiting parties.'''
+    def abort(self) -> None: '''Abort the barrier, signalling `asyncio.BrokenBarrierError` to present waiting parties.'''
     def raise_for_abort(self) -> None: '''Throw `asyncio.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
