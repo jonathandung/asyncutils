@@ -183,17 +183,17 @@ class ConnectionPool:
     async def __aenter__(self): await self.start(); return self
     async def __aexit__(self, /, *_): await self.stop()
     @property
-    @(_locker := sync_lock_from_binder(lambda self: self._lock)) # type: ignore[attr-defined]
+    @(_ := sync_lock_from_binder(lambda self: self._lock)) # type: ignore[attr-defined]
     def loop(self): # type: ignore[no-redef]
         if self._loop is None: self._loop = (_ := event_loop.from_flags(0)).__enter__(); self._exiter.add(_)
         return self._loop
     @loop.setter
-    @_locker
+    @_
     def loop(self, val, /): # type: ignore[no-redef]
         if (l := self._loop) is not None: l.call_soon(l.stop)
         self._loop = val
     @loop.deleter
-    @_locker
+    @_
     def loop(self): self._loop = None
     @property
     def currsize(self): return self.available+self.in_use
@@ -201,7 +201,7 @@ class ConnectionPool:
     def available(self): return len(self._pool)
     @property
     def in_use(self): return len(self._in_use)
-    del _locker
+    del _
 class CallbackAccumulator(__import__('_collections').deque, AsyncContextMixin):
     def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_iter(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):

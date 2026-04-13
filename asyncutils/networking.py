@@ -2,6 +2,7 @@ from ._internal.compat import Queue
 from ._internal.helpers import audit_fullname
 from ._internal.log import warning
 from ._internal.submodules import networking_all as __all__
+from . import context as C
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
 from .util import _ignore_cancellation
@@ -26,7 +27,8 @@ class LineProtocol(Protocol, EventualLoopMixin):
         if t := self.transport:
             with self._handler: t.close(); self._closed = True
         return self._closed
-    def data_received(self, data, bufsize=0x1000):
+    def data_received(self, data, bufsize=None):
+        if bufsize is None: bufsize = C.LINE_PROTOCOL_DEFAULT_BUFFER_SIZE
         (b := self._buffer).extend(data); n = self.NEWLINE
         if len(b) > bufsize: self.flush()
         while not self._closed and n in b: l, b = b.split(n, 1); self._put_line(l)
@@ -66,11 +68,11 @@ class SocketTransport(Transport):
     @property
     def loop(self): return p.loop if isinstance(p := self._protocol, LineProtocol) else NotImplemented
     def __init__(self, sock=None):
-        audit_fullname(self); self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), (0x800, 0x2000), p
+        audit_fullname(self); self._reset_extra(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), C.SOCKET_TRANSPORT_LIMITS, p
         if sock: self.connect_sock(sock)
     def _reset_extra(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
-    def _sock_transport_read_ready(self, sock, size=0x1000):
-        try: self._protocol.data_received(d) if (d := sock.recv(size)) else (self._protocol.eof_received() or self.close())
+    def _sock_transport_read_ready(self, sock, size=None):
+        try: self._protocol.data_received(d) if (d := sock.recv(C.LINE_PROTOCOL_DEFAULT_BUFFER_SIZE if size is None else size)) else (self._protocol.eof_received() or self.close())
         except OSError as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None and (sock := self._socket) is None: return
@@ -84,9 +86,10 @@ class SocketTransport(Transport):
     def sock_context(self, sock):
         try: yield self.connect_sock(sock)
         finally: self.disconnect_sock()
-    def _writer(self, data, bufsize=0x2000):
+    def _writer(self, data, bufsize=None):
         if self._closing: return
         (b := self._buffer).extend(data)
+        if bufsize is None: bufsize = C.SOCKET_TRANSPORT_LIMITS[1]
         if len(b) > bufsize:
             if (s := self._socket) is None: return
             try: s.sendall(b); b.clear()
@@ -94,10 +97,10 @@ class SocketTransport(Transport):
     def write(self, data): self.loop.call_soon(self._writer, data)
     def get_write_buffer_size(self): return len(self._buffer)
     def get_write_buffer_limits(self): return self._limits
-    def set_write_buffer_limits(self, high=None, low=None, _x=0x2000):
+    def set_write_buffer_limits(self, high=None, low=None):
         if low is None: low = self._limits[0]
         if high is None: high = self._limits[1]
-        self._limits = min(low := max(low, 0), high := min(high, _x)), high
+        self._limits = min(low := max(low, 0), high := min(high, C.SOCKET_TRANSPORT_LIMITS[1])), high
     def write_eof(self):
         if not (self._closing or (s := self._socket) is None):
             with self._h: s.shutdown(1)

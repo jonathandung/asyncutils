@@ -1,4 +1,4 @@
-from . import mixins as M
+from . import context as C, mixins as M
 from ._internal import log
 from ._internal.helpers import check_methods, fullname
 from ._internal.submodules import locks_all as __all__
@@ -16,15 +16,15 @@ from time import monotonic
 class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
     __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._lu = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
-    async def acquire(self, tokens=1, timeout=None):
+    async def acquire(self, tokens=None, timeout=None):
         async with self._lock:
             self.update_tokens_lock_held()
-            if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((tokens, F := self.loop.create_future()))
+            if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((C.ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens, F := self.loop.create_future()))
             else: self.tokens -= tokens; return True
         try: await wait_for(F, timeout); return True
         except TimeoutError: return False
-    async def release(self, tokens=1):
-        async with self._lock: self.update_tokens_lock_held(); self.tokens = min(self.tokens+tokens, self.capacity)
+    async def release(self, tokens=None):
+        async with self._lock: self.update_tokens_lock_held(); self.tokens = min(self.tokens+(C.ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens), self.capacity)
     async def set_rate(self, new):
         async with self._lock: self.update_tokens_lock_held(); self.rate, self.capacity = new, max(self.capacity, new)
     def locked(self): return bool(self._waiters)
@@ -36,7 +36,7 @@ class AdvancedRateLimit(M.EventualLoopMixin, M.LockMixin):
         self.tokens = T; w.appendleft(t)
 class PrioritySemaphore(M.LockMixin):
     __slots__ = '_tiebreak', '_value', '_waiters'
-    def __init__(self, value=1): self._value, self._tiebreak, self._waiters = value, 0, []
+    def __init__(self, value=None): self._value, self._tiebreak, self._waiters = C.PRIORITY_SEMAPHORE_DEFAULT_VALUE if value is None else value, 0, []
     async def acquire(self, priority=0):
         self._value -= 1; self._tiebreak += 1; w = self._waiters
         while self._value < 0: heappush(w, (priority, self._tiebreak, e := Event())); await e.wait()
@@ -98,7 +98,7 @@ class Base:
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 class RWLock:
     __slots__ = ('_wa',)
-    def __new__(cls, /, prefer_writers=True): return object.__new__((WritePreferredRWLock if prefer_writers else ReadPreferredRWLock) if cls is __class__ else cls)
+    def __new__(cls, /, prefer_writers=None): return object.__new__((WritePreferredRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock) if cls is __class__ else cls)
     @coercedmethod
     class reader(Base):
         __slots__ = ()
