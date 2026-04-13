@@ -68,7 +68,7 @@ class LockWithOwnerMixin(LockMixin):
     @abstractmethod
     def _release(self): ...
     def release(self):
-        if not self.is_owner: raise RuntimeError(f'{type(self).__name__} is not acquired by current task')
+        if not self.is_owner: raise RuntimeError(f'{type(self).__qualname__} is not acquired by current task')
         return self._release()
 @subscriptable
 class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
