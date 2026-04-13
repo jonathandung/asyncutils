@@ -86,14 +86,14 @@ Check if asyncutils is installed:
 pip list | grep py-asyncutils
 ```
 
-If the package is not working with python -S, perform the steps below with python -S -c:
+If the package is not working with python -S, perform the steps below:
 
 ```bash
 # Check sys.path
-python -c "print(*__import__('sys').path, sep='\n')"
+python -S -c "print(*__import__('sys').path, sep='\n')"
 # Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console
 # constants, context, events, exceptions, ... separated by newlines
-python -c "print(*dir(__import__('asyncutils')), sep='\n')"
+python -S -c "print(*dir(__import__('asyncutils')), sep='\n')"
 ```
 
 ## Version Compatibility
