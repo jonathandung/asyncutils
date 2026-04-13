@@ -31,7 +31,7 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
             if f: loop.stop(); loop.close(); set_event_loop(None)
     async def wrapper(): return await aw
     return run_coroutine_threadsafe(wrapper(), loop).result(timeout)
-def semaphore(bounded=False, workers=4): return (BoundedSemaphore if bounded else Semaphore)(workers)
+def semaphore(bounded=False, workers=None): from . import context as C; return (BoundedSemaphore if bounded else Semaphore)(C.SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
 def lockf(f, /, lf=Lock, _lc={}): # noqa: B006
     if (l := _lc.get(i := id(f))) is None: _lc[i] = l = lf()
     async def wrapped(*a, **k):

@@ -66,7 +66,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
 class AsyncLRUCache:
     __slots__ = '_caches', '_factory', '_loopctx', '_make_key', '_timer', '_timestamps', '_ttl'
     def __init__(self, maxsize=None, ttl=None, typed=False, timer=monotonic):
-        if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE
+        if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE
         audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx, self._timer = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200), timer
     def __call__(self, f, /, _=lambda f, a, k, s=0x3d, t=0x7a: id(f)<<t|hash(a)<<s|hash(frozenset(k.items()))):

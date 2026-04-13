@@ -20,7 +20,7 @@ from time import monotonic
 @subscriptable
 class Pool(LoopContextMixin):
     __slots__ = '_event', '_func', '_it', '_queue', '_sem', '_task'
-    def __init__(self, func, it, workers=4): self._func, self._it, self._sem, self._queue, self._task, self._event = func, it, Semaphore(workers), Queue(1), None, Event()
+    def __init__(self, f, it, /, workers=4): self._func, self._it, self._sem, self._queue, self._task, self._event = f, it, Semaphore(workers), Queue(1), None, Event()
     async def process(self, item):
         async with self._sem: await self._queue.put(await self._func(item))
     def __aiter__(self):

@@ -2,6 +2,7 @@ from ._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown
 from ._internal.helpers import subscriptable
 from ._internal.submodules import processors_all as __all__
 from .base import collect, iter_to_aiter, safe_cancel_batch
+from .context import getcontext
 from .exceptions import BulkheadFull, BulkheadShutDown
 from .mixins import LoopContextMixin
 from .util import safe_cancel
@@ -14,7 +15,7 @@ from time import monotonic
 @subscriptable
 class BoundedBatchProcessor:
     __slots__ = '_batch', '_processor', '_sem'
-    def __init__(self, processor, batch=10, max_concurrent=5): self._processor, self._batch, self._sem = processor, batch, Semaphore(max_concurrent)
+    def __init__(self, processor, batch=None, max_concurrent=None): C = getcontext(); self._processor, self._batch, self._sem = processor, C.BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE if batch is None else batch, Semaphore(C.BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT if max_concurrent is None else max_concurrent)
     async def process(self, items):
         f = partial(collect, iter_to_aiter(items), self._batch)
         while b := await f():
@@ -22,7 +23,7 @@ class BoundedBatchProcessor:
 @subscriptable
 class BatchProcessor(LoopContextMixin):
     __slots__ = '_batch', '_flusher', '_last_process', '_lock', '_maxsize', '_processor', '_sleep', '_timer'
-    def __init__(self, processor, *, maxsize=100, maxtime=1, timer=monotonic): self._processor, self._maxsize, self._sleep, self._batch, self._last_process, self._lock, self._timer = processor, maxsize, sleep.__get__(maxtime), [], timer(), Lock(), timer; self._flusher = None
+    def __init__(self, processor, *, maxsize=None, maxtime=None, timer=monotonic): C = getcontext(); self._processor, self._maxsize, self._sleep, self._batch, self._last_process, self._lock, self._timer = processor, C.BATCH_PROCESSOR_DEFAULT_MAX_SIZE if maxsize is None else maxsize, sleep.__get__(C.BATCH_PROCESSOR_DEFAULT_MAX_TIME if maxtime is None else maxtime), [], timer(), Lock(), timer; self._flusher = None
     async def add(self, item):
         async with self._lock:
             self._batch.append(item)
@@ -43,7 +44,7 @@ class BatchProcessor(LoopContextMixin):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
     __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdevt', '_sem'
-    def __init__(self, max_concurrent, max_queue=0, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
+    def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None): super().__init__(); C = getcontext(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(C.BULKHEAD_DEFAULT_MAX_QUEUE if max_queue is None else max_queue), 0, max_concurrent, exc, processor, Event(), Event(), C.BULKHEAD_DEFAULT_MAX_REJ if max_rej is None else max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
         except QueueFull as e:

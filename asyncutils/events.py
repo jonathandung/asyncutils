@@ -25,7 +25,7 @@ class SingleWaiterEventWithValue(EventMixin):
         if default is RAISE: raise EventValueError('no value is set')
         return self._value if self._set else default
 class EventWithValue(EventMixin):
-    def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=context.EVENT_WITH_VALUE_DEFAULT_MAXHIST if maxhist is None else maxhist)
+    def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is None else maxhist)
     def _record_hist(self): self._hist.append((monotonic(), ref(self._value)))
     def set(self, value, *, strict=True):
         if value != self._value: self._value = value; self._record_hist()

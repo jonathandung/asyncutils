@@ -1,4 +1,5 @@
 from ._internal.submodules import misc_all as __all__
+from . import context as C
 from .exceptions import IgnoreErrors
 from _collections import defaultdict  # type: ignore
 from asyncio.locks import Lock, Semaphore
@@ -18,7 +19,7 @@ class StateMachine:
             await self._helper('_exits'); self._state = state; await self._helper('_entries'); return True
     async def _helper(self, attr, _=IgnoreErrors(KeyError)):
         async with _: await getattr(self, attr)[self._state]()
-async def gather_with_limited_concurrency(n, /, *coros, ret_exc=False):
-    async def wrapped(c, s=Semaphore(n)): # noqa: B008
+async def gather_with_limited_concurrency(n=None, /, *coros, ret_exc=False):
+    async def wrapped(c, s=Semaphore(C.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # noqa: B008
         async with s: return await c
     return await gather(*map(wrapped, coros), return_exceptions=ret_exc)

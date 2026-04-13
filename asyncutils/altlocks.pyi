@@ -1,4 +1,4 @@
-'''Non-conventional asynchronous synchronization primitives.'''
+'''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
 from ._internal.types import AsyncLockLike, Exceptable, SupportsIteration, Timer, ValidExcType
 from .mixins import AsyncContextMixin, AwaitableMixin
 from _collections_abc import Awaitable, Callable, Coroutine

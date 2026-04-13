@@ -35,7 +35,7 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., typed: bool=...):
-        '''`maxsize` (optional): Maximum number of entries to cache; default `context.ASYNC_LRU_CACHE_DEFAULT_MAXSIZE`.
+        '''`maxsize` (optional): Maximum number of entries to cache; default `context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE`.
         `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
         `typed` (optional): Whether to cache different argument types separately.'''
     @overload

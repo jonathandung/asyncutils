@@ -11,7 +11,7 @@ class SingleWaiterEventWithValue[T](EventMixin[T]):
     async def wait_for_next(self, timeout: float|None=..., *, strict: bool=...) -> T: '''Wait for the next result of the event to be set.''' # type: ignore[override]
     def get(self) -> T: '''Get the result of the event immediately.'''
 class EventWithValue[T](EventMixin[T]):
-    def __init__(self, *, maxhist: int|None=...) -> None: '''Initialize an EventWithValue, storing a maximum of `maxhist` entries of past results, which defaults to `context.EVENT_WITH_VALUE_DEFAULT_MAXHIST`.'''
+    def __init__(self, *, maxhist: int|None=...) -> None: '''Initialize an EventWithValue, storing a maximum of `maxhist` entries of past results, which defaults to `context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`.'''
     @overload
     def set(self, value: None, strict: Literal[False]=...) -> None: '''Set the result of the event and wake up waiters. If strict is True, throws an error when the value is None.'''
     @overload
