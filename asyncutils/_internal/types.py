@@ -1,0 +1,1 @@
+def __getattr__(_, /): return
