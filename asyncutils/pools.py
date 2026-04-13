@@ -162,11 +162,10 @@ class ConnectionPool:
     async def _maintain(self):
         f = sleep.__get__(getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:
-            await f(); n = []
+            await f(); n, g = [], self.create_connection
             async with self._lock:
                 for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
-                self._pool = n
-                while self.currsize < self.minsize: n.append(await self.create_connection())
+                n.extend(await gather(*(g() for _ in range(self.minsize-self.currsize)))); self._pool = n
     async def start(self, akgen=None, executor=None):
         f = self.create_connection
         if akgen is None:

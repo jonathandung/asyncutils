@@ -1,5 +1,5 @@
 '''Exports the `__all__` attributes of all of asyncutils's public submodules.'''
-from .protocols import All
+from .types import All
 from typing import Final
 altlocks_all: Final[All]
 base_all: Final[All]

@@ -60,7 +60,7 @@ class LFProtocol(LineProtocol): NEWLINE, __slots__ = b'\n', ()
 class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
 class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(Transport):
-    __slots__, _h = ('_protocol', '_socket', '_closing', '_buffer', '_limits'), IgnoreErrors(OSError)
+    __slots__ = '_buffer', '_closing', '_limits', '_protocol', '_socket'; _h = IgnoreErrors(OSError)
     @classmethod
     def make_protocol(cls): return LineProtocol()
     @property
@@ -73,7 +73,7 @@ class SocketTransport(Transport):
         try: self._protocol.data_received(d) if (d := sock.recv(size)) else (self._protocol.eof_received() or self.close())
         except OSError as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
     def connect_sock(self, sock=None):
-        if sock is None: return
+        if sock is None and (sock := self._socket) is None: return
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname()
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
@@ -109,5 +109,5 @@ class SocketTransport(Transport):
     def get_protocol(self): return self._protocol
     def set_protocol(self, protocol):
         if not isinstance(protocol, LineProtocol): raise TypeError('protocol for SocketTransport should be a LineProtocol')
-        self._protocol.connection_lost(None); protocol.connection_made(self); self._protocol = protocol; self.connect_sock(self._socket)
+        self._protocol.connection_lost(None); protocol.connection_made(self); self._protocol = protocol; self.connect_sock()
     def abort(self): self.loop.call_soon(self.close)

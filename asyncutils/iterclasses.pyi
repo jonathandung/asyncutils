@@ -1,4 +1,4 @@
-from ._internal.protocols import SupportsIteration, ValidExcType, ValidSlice
+from ._internal.types import SupportsIteration, ValidExcType, ValidSlice
 from .mixins import EventualLoopMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
 from types import TracebackType

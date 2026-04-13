@@ -66,7 +66,7 @@ class _await_later:
         if H.check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _ # noqa: RUF021
         raise TypeError(f'{H.fullname(type(aw))} object at {id(aw):#x} is not awaitable')
     def __getattr__(self, name, /): return getattr(self.aw, name)
-    def __repr__(self): return f'<proxy at {id(self):#x} for awaitable at {id(self.aw):#x}>'
+    def __repr__(self): return f'<proxy at {id(self):#x} to awaitable at {id(self.aw):#x}>'
     def __setattr__(self, name, /): raise AttributeError('attribute aw is read-only' if name == 'aw' else f'cannot set attribute {name!r} through proxy')
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass type of awaitable proxy')
 @H.subscriptable

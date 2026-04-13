@@ -1,5 +1,5 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.protocols import AsyncLockLike, Exceptable, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
+from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
 from _collections_abc import Awaitable, Callable, Coroutine, Iterable, Mapping
 from asyncio.futures import Future
 from typing import Any, Literal, Self, overload

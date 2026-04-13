@@ -1,6 +1,6 @@
 '''A special module used to set up the asyncutils module namespace.
 **Do not modify its contents or reload it at runtime.**'''
-from .protocols import All, Submodule
+from .types import All, Submodule
 from types import ModuleType
 from typing import Any, Final, Self, final, overload
 @final

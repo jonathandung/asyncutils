@@ -102,6 +102,9 @@ this table take inspiration.
   * - asyncutils.compete.multi_winner_race_with_callback/end
     - ``ntasks``: :class:`int`
     - Raised when :func:`asyncutils.compete.multi_winner_race_with_callback` finishes, with ``ntasks`` coroutines.
+  * - asyncutils.console.AsyncUtilsConsole.run
+    - ``addr``: :class:`int`
+    - Raised when the :meth:`run` method of an instance of :class:`asyncutils.console.AsyncUtilsConsole` at ``addr`` is called.
   * - asyncutils.exceptions.unnest
     - ``excdq``: :type:`collections.deque[BaseException]`
     - Raised when :func:`asyncutils.exceptions.unnest` is called, with ``excdq`` being the queue that is to store the exceptions and flatten them, the items in which are initially not all the groups that will be processed.

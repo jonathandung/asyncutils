@@ -1,4 +1,4 @@
-from ._internal.protocols import Executor, Sentinel
+from ._internal.types import Executor, Sentinel
 from _collections_abc import Callable
 from threading import Lock
 from typing import Final, Literal, NoReturn, Self, overload
@@ -12,7 +12,7 @@ EXECUTORS_FROZENSET: Final[frozenset[Executor]]
 '''Equivalent to `frozenset(POSSIBLE_EXECUTORS)` to allow faster membership testing.'''
 class sentinel_base:
     '''Base class for sentinel values.'''
-    def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change NoReturn to Self) if and only if your subclass can be instantiated by the user.'''
+    def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change `NoReturn` to `Self`) if and only if your subclass can be instantiated by the user.'''
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
     def __init_subclass__(cls, lock_impl: Callable[[], Lock]=...) -> None: '''`lock_impl` is a callable that takes no arguments and returns a **synchronous** lock (e.g. `_thread.allocate_lock`).'''

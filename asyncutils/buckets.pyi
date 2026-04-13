@@ -1,4 +1,4 @@
-from ._internal.protocols import Timer, ValidExcType
+from ._internal.types import Timer, ValidExcType
 from .mixins import AsyncContextMixin, EventualLoopMixin
 from types import TracebackType
 from typing import overload

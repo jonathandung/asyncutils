@@ -6,7 +6,7 @@ from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_b
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from .iterclasses import achain, anullcontext
-from .util import aiter_fromf, safe_cancel
+from .util import aiter_from_f, safe_cancel
 import _operator as O, math as M
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
@@ -102,7 +102,7 @@ async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
             if b: yield copy_and_clear(b)
             raise
 def achunked(it, n, strict=False):
-    I = aiter_fromf(partial(collect, it, n), [])
+    I = aiter_from_f(partial(collect, it, n), [])
     if strict:
         if n is None: raise ValueError('n cannot be None when strict is True')
         async def ret():

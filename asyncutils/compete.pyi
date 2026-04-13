@@ -1,4 +1,4 @@
-from ._internal.protocols import SupportsIteration
+from ._internal.types import SupportsIteration
 from _collections_abc import AsyncIterable, Awaitable, Callable, Coroutine, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future

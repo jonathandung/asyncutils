@@ -30,13 +30,11 @@ class Module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
     __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._name+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''))
 if C.loaded_all:
     for _ in a: s[_] = __import__(_s+_, fromlist=_f)
-    globals().update(s); R._request_write_load_all_()
-    l(f'all submodules loaded in {T():.1f} milliseconds')
+    globals().update(s); R._request_write_load_all_(); l('all submodules loaded in %.1f milliseconds', T())
 else:
     f = object.__new__
     for _ in a: r._name, s[_] = _, (r := f(Module))
-    s.update(zip(f := ('config', 'constants', 'exceptions', 'version'), (C, D, E, V))); l(f'all submodules initialized in {T():.1f} milliseconds')
-    for _ in f: l(f'now loading: {_}')
-    del f, r
+    for _ in (f := ('config', 'constants', 'exceptions', 'version')): l('preloading: %s', _)
+    s.update(zip(f, (C, D, E, V))); l('all submodules initialized in %.1f milliseconds', T()); del f, r
 a.extend(('submodules_map', 'preloaded_submodules', 'time_since_boot'))
 del C, P, R, E, V, l, d, t, _d, _k, _v, _a, _f, _s, _u, _i, _

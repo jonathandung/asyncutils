@@ -1,5 +1,5 @@
 '''Implementation of an interactive console base class, as well as an AsyncUtilsConsole class derived from it.'''
-from ._internal.protocols import ValidExcType
+from ._internal.types import ValidExcType
 from _collections_abc import Callable, Coroutine, Iterable
 from _contextvars import Context
 from abc import ABC, abstractmethod

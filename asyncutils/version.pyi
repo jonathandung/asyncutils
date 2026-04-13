@@ -2,7 +2,7 @@
 `asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
 - **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
 - **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
-from ._internal.protocols import IntCompatible, Openable, ValidSlice
+from ._internal.types import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterable, Iterator
 from typing import Any, Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'

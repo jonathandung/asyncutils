@@ -88,11 +88,11 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
     elif isinstance(o, float):
         if (o := format(o, '.4f')) in s: return
         o, _ = o.split('.', 1); o = map(int, (o, _[:2], _[2:]))
-    elif f := dispatch_normalizer(o, t=type):
+    elif f := dispatch_normalizer(o, type):
         try:
             if (o := f(o)) is None: return
         except E.CRITICAL: raise E.Critical
-        except BaseException as e: unregister_normalizer(o, t=type); raise E.VersionNormalizerFault(f, o, e) from None # noqa: BLE001
+        except BaseException as e: unregister_normalizer(o, type); raise E.VersionNormalizerFault(f, o, e) from None # noqa: BLE001
         else:
             if not c(o): raise E.VersionNormalizerTypeError(f, o)
     elif not c(o): return
@@ -100,9 +100,9 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
 def normalize(o, /, e=E.VersionNormalizerMissing):
     if (r := normalize_allow_unimplemented(o)) is None: raise e(o)
     return r
-def register_normalizer(o, n, /, f=N.setdefault, t=t): return f(t(o), n) is n
-def unregister_normalizer(o, /, f=N.pop, t=t): return f(t(o), None)
-def dispatch_normalizer(o, /, f=N.get, t=t): return f(t(o))
+def register_normalizer(o, n, /, _=t, f=N.setdefault): return f(_(o), n) is n
+def unregister_normalizer(o, /, _=t, f=N.pop): return f(_(o), None)
+def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))

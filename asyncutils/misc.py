@@ -9,7 +9,7 @@ class StateMachine:
     def __init__(self, state, /): self._state, self._transitions, self._entries, self._exits, self._lock = intern(state), defaultdict(set), {}, {}, Lock()
     def add(self, from_state, to_state, condition=None): self._transitions[intern(from_state)].add((intern(to_state), condition))
     on_enter, on_exit = map(lambda attr: lambda self, state, handler: getattr(self, attr).__setitem__(state, handler), ('_entries', '_exits'))
-    async def transition(self, state):
+    async def transition(self, state, /):
         state = intern(state)
         async with self._lock:
             for t, _ in self._transitions.get(self._state, ()):

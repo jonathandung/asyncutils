@@ -1,6 +1,6 @@
 '''Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes,
 and memory maps. Does not depend on `aiofiles` or any such library.'''
-from ._internal.protocols import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
+from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
 from .config import Executor
 from .mixins import LoopContextMixin
 from _collections_abc import Callable, Iterable, Mapping

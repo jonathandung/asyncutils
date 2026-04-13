@@ -1,7 +1,7 @@
 '''Miscellaneous helper functions for asyncutils submodule that are not meant to be seen by the user.
 These are undocumented and will remain so; neither will they be stable.
 The stub file exists for the convenience of development only.'''
-from .protocols import CanClearAndCopy
+from .types import CanClearAndCopy
 from ..config import Executor
 from _collections_abc import Callable, Coroutine, Generator, Iterable
 from asyncio.events import AbstractEventLoop

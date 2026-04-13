@@ -8,7 +8,7 @@ try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
 _f, _s = ('',), object()
 class ConsoleBase(B): # type: ignore
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d(f'Emergency garbage collection after MemoryError: {g()} objects collected in total'),), 'cannot subclass %r'; default_local_exit = _unsubclassable = False # noqa: B008
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %r'; default_local_exit = _unsubclassable = False # noqa: B008
     match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False
         case str() as s:
@@ -83,17 +83,17 @@ class ConsoleBase(B): # type: ignore
         if other_handlers is None: other_handlers = {}
         k['name'] = cls.NAME = name; (f := k.setdefault)('version', 'unknown'); f('description', 'Enjoy!'); cls.BANNER, cls.LOCALS_HANDLERS, cls.interrupt_hooks, cls.memerr_hooks, cls.default_local_exit, cls._unsubclassable, other_handlers[name] = template%k, cls.LOCALS_HANDLERS.new_child(other_handlers), (*cls.interrupt_hooks, *additional_interrupt_hooks), (*cls.memerr_hooks, *additional_memerr_hooks), default_local_exit, disallow_subclass_msg is not None, native_handler
         if disallow_subclass_msg: cls.disallow_subclass_msg = disallow_subclass_msg
-    def __repr__(self): return f'{type(self).__qualname__}({self._loop!r}, local_exit={self.local_exit})'
+    def __repr__(self): return f'{fullname(self)}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
     def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False):
-        self.prehook(max_memerrs); S.audit(f'{type(self).__qualname__}.run', self); l = self._loop
+        self.prehook(max_memerrs); S.audit(f'{fullname(self)}.run', id(self)); l = self._loop
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = S.stderr.write
             if callable(h := getattr(S, i := '__interactivehook__', None)):
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
-                except: w(f'Error running {self!r}\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
+                except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
                 if always_install_completer or (h.__module__ == 'site' and h.__name__ == 'register_readline'):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete) # noqa: SIM105
                     except ImportError: ...
@@ -110,7 +110,7 @@ class ConsoleBase(B): # type: ignore
         self.write_special(exitmsg%n); return self.retcode
     P.patch_method_signatures((interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as sync_await in this REPL, they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f: d.update(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or setattr(f := lambda m=m, /: m.update({k: v if (g := getattr(v, 'load', None)) is None else g() for k, v in m.items()}), '__qualname__', l := 'load_all') or setattr(f, '__name__', l) or d.update(__version__=v, load_all=f), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
-    def __repr__(self): return f'<{'running' if self.is_running else 'idle'} asyncutils console at {id(self):#x}>'
+    def __repr__(self): return f'<{"running" if self.is_running else "idle"} asyncutils console at {id(self):#x}>'
     @property
     def is_running(self, _='User tampered with console-internal state!\n'): # noqa: PLR0206
         if not self._loop.is_running(): self._internal_is_running = False; return False

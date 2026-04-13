@@ -1,5 +1,5 @@
 '''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
-from ._internal.protocols import SupportsIteration, B, G, P
+from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator

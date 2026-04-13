@@ -1,4 +1,4 @@
-from ._internal.protocols import Exceptable, SupportsIteration, Timer
+from ._internal.types import Exceptable, SupportsIteration, Timer
 from .mixins import LoopContextMixin
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine
 from typing import Any, Literal

@@ -1,4 +1,4 @@
-from ._internal.protocols import AsyncLockLike
+from ._internal.types import AsyncLockLike
 from _collections_abc import Awaitable, Callable
 from asyncio.events import AbstractEventLoop
 from asyncio.locks import Lock

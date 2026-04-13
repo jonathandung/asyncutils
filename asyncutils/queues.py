@@ -80,10 +80,10 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 with ignore_valerrs: G.remove(F)
                 if l and not F.cancelled(): _wakeup_next(G)
                 raise
-        return get_nowait(backdoor=b)
-    def get_nowait(*p, backdoor=None):
+        return get_nowait(_=b)
+    def get_nowait(*p, _=None):
         if not l: raise QueueShutDown if S else QueueEmpty
-        if backdoor is not b: u(p)
+        if _ is not b: u(p)
         i = g(); _wakeup_next(P); return i
     async def put(item, *p, _=P.append):
         v(p)
@@ -96,11 +96,11 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 with ignore_valerrs: P.remove(F)
                 if not (full() or F.cancelled()): _wakeup_next(P)
                 raise
-        return put_nowait(item, backdoor=b)
-    def put_nowait(item, *P, backdoor=None):
+        return put_nowait(item, _=b)
+    def put_nowait(item, *P, _=None):
         if S: raise QueueShutDown
         if full(): raise QueueFull
-        if backdoor is not b: v(P)
+        if _ is not b: v(P)
         p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
     # ruff: disable[E722]
     def change_get_password(old_pwd, new_pwd):

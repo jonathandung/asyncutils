@@ -9,7 +9,7 @@ __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTra
 class LineProtocol(Protocol, EventualLoopMixin):
     '''An implementation of `asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
     The idea was originally introduced in PEP 3153, but did not see eventual adaptation in the standard library.
-    This particular implementation is designed to be used with SocketTransport, though other transports can enforce it too.
+    This particular implementation is designed to be used with `SocketTransport`, though other transports can enforce it too.
     Instantiating this class will give an `LFProtocol` or `CRLFProtocol` depending on `os.linesep`.'''
     NEWLINE: ClassVar[bytes]
     '''The newline sequence used by this protocol as bytes.'''
@@ -27,7 +27,7 @@ class LineProtocol(Protocol, EventualLoopMixin):
     def signal_eof(self) -> None: '''Signal that the stream is at EOF.'''
     def pause_writing(self) -> None: ...
     def resume_writing(self) -> None: ...
-    def _put_line(self, data: bytes) -> None: '''Put the given data into the buffer as a single line.'''
+    def _put_line(self, data: bytes) -> None: '''Put the given `data` into the buffer as a single line.'''
     def write_line(self, line: str) -> None: '''Write the string `line` to the transport, followed by the newline sequence.'''
     def write_literal(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline.'''
     def eof_received(self) -> None: ...
@@ -39,6 +39,7 @@ class LFProtocol(LineProtocol): '''Line Feed protocol for Unix-like systems.'''
 class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed protocol for Windows.'''
 class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9.'''
 class SocketTransport(Transport):
+    '''A thread-unsafe transport that connects `LineProtocol`s to sockets.'''
     @classmethod
     def make_protocol(cls) -> LineProtocol: ...
     @property

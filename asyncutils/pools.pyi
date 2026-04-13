@@ -1,4 +1,4 @@
-from ._internal.protocols import SupportsIteration, ValidExcType
+from ._internal.types import SupportsIteration, ValidExcType
 from .config import Executor
 from .mixins import AsyncContextMixin, LoopContextMixin
 from _collections_abc import Callable, Generator, Iterable, Mapping

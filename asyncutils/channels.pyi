@@ -1,4 +1,4 @@
-from ._internal.protocols import Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
+from ._internal.types import Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
 from .mixins import LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable, Generator, Iterable, Mapping
 from _weakrefset import WeakSet

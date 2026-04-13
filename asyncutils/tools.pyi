@@ -1,4 +1,4 @@
-from ._internal.protocols import CanWriteAndFlush, DumpType, Openable
+from ._internal.types import CanWriteAndFlush, DumpType, Openable
 from _collections_abc import Callable, Sequence
 __all__ = 'argstr_to_json', 'argv_to_json', 'ext2modname', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'print_cfg_json_format', 'print_cmd_help'
 ext2modname: dict[str, str]
@@ -9,8 +9,10 @@ def json_to_argv(path: Openable, /) -> list[str]:
     little items as possible.
     For integer file descriptors as `path`, the format is assumed to be plain json.
     The module, name as determined by `ext2modname`, should have a `load` function that takes `path` and returns a dict of its contents.'''
-def json_to_argstr(path: Openable, /, *, join: Callable[[list[str]], str]=...) -> str: '''Essentially the output of json_to_argv but joined into a shell-escaped string.'''
-def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) -> None: '''Writes the sequence of strings, parsed as command-line arguments for this module, into `path` with .json format.'''
+def json_to_argstr(path: Openable, /, *, join: Callable[[list[str]], str]=...) -> str: '''Essentially the output of `json_to_argv`, but joined into a shell-escaped string with `join`.'''
+def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) -> None:
+    '''Writes the sequence of strings, parsed as command-line arguments for this module, into `path` with .json format.
+    Since this function is 'environment-agnostic', it may have unintended behaviour if the arguments passed rely on current configuration, which is not captured.'''
 def argstr_to_json(argstr: str, path: Openable, /, *, dump: DumpType=..., split: Callable[[str], Sequence[str]]=...) -> None: '''Parses the shell-escaped string representing the command-line arguments for this module and writes it into a .json path.'''
 def get_cfg_json_format() -> str: '''Get the format of .json configs this module takes as a string. `print_cfg_json_format` is perhaps more useful.'''
 def print_cfg_json_format(file: CanWriteAndFlush[str]=...) -> None: '''Print the above format into the specified file and flush it (default stdout).'''

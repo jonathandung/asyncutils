@@ -1,4 +1,4 @@
-from ._internal.protocols import AsyncContextManager, Exceptable, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
+from ._internal.types import AsyncContextManager, Exceptable, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Hashable, Iterable, Reversible
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future

@@ -1,5 +1,5 @@
 '''Miscellaneous context and context system.'''
-from ._internal.protocols import ValidExcType
+from ._internal.types import ValidExcType
 from _collections_abc import Sequence
 from dataclasses import dataclass
 from types import TracebackType

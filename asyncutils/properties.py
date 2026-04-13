@@ -48,9 +48,9 @@ class AsyncLockProperty(AsyncProperty):
     def _new_lock(_, *, lock_impl=Lock): return lock_impl()
     def __init__(self, *a, lock_getter=None, **k): super().__init__(*a, **k); self._lock_getter, self._cache = lock_getter or self._new_lock, {}
     def __repr__(self): return f'{super().__repr__()[:-1]}, lock_getter={self._lock_getter!r})'
-    def _helper(self, f, o, *a, c='get'):
+    def _helper(self, f, *a, c='get'):
         async def _():
-            async with self.get_lock(o): await f(o, *a)
+            async with self.get_lock(a[0]): await f(*a)
         return super()._helper(_, c=c)
     def get_lock(self, obj):
         if (r := self._cache.get(i := id(obj))) is None: self._cache[i] = r = self._lock_getter(obj)

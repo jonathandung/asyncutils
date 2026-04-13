@@ -1,4 +1,4 @@
-from ._internal.protocols import GeneratorCoroutine, Sentinel, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
+from ._internal.types import GeneratorCoroutine, Sentinel, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
 from _collections_abc import AsyncGenerator, AsyncIterable, AsyncIterator, Awaitable, Callable, Generator, Iterable, Iterator
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future

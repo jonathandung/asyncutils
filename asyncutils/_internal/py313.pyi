@@ -1,6 +1,8 @@
 '''Backport of functools.partial that supports placeholders to python 3.13 or under.'''
-from functools import partial
-from typing import Any, Final
-__all__ = 'Placeholder', 'apargs', 'partial'
-apargs: dict[str, Any]
-Placeholder: Final[object]
+import sys
+if sys.version_info < (3, 14):
+    from functools import partial
+    from typing import Any, Final
+    __all__ = 'Placeholder', 'apargs', 'partial'
+    apargs: dict[str, Any]
+    Placeholder: Final[object]

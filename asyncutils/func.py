@@ -156,5 +156,5 @@ class RateLimited:
                 await sleep(p()-d)
             T.append(n)
         return await f(*a, **k)
-    def __repr__(self): return f'{type(self).__name__}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r})'
+    def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r})'
 del _, I, perf_counter, partial, Lock

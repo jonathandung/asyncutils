@@ -42,8 +42,8 @@ class BatchProcessor(LoopContextMixin):
     async def __cleanup__(self):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
-    __slots__ = '_empty_event', '_exc', '_init_val', '_max_rej', '_processor', '_queue', '_rejected', '_sem', '_shutdown_event'
-    def __init__(self, max_concurrent, max_queue=0, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._shutdown_event, self._empty_event, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
+    __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdevt', '_sem'
+    def __init__(self, max_concurrent, max_queue=0, max_rej=-1, exc=Exception, processor=None): super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
         except QueueFull as e:
@@ -55,7 +55,7 @@ class Bulkhead(LoopContextMixin):
             except (QueueEmpty, QueueShutDown, CancelledError): raise BulkheadShutDown(f'{type(self).__qualname__} is shutting down') from None
             except self._exc as e:
                 if p := self._processor: await p(e)
-        self._empty_event.clear() if self.active_tasks else self._empty_event.set()
+        self._mtevt.clear() if self.active_tasks else self._mtevt.set()
     async def __cleanup__(self): await self.shutdown()
     @property
     def available_slots(self): return self._sem._value
@@ -70,14 +70,14 @@ class Bulkhead(LoopContextMixin):
     @property
     def is_available(self): return bool(self.available_slots and self.available_qslots)
     @property
-    def is_shutdown(self): return self._shutdown_event.is_set()
+    def is_shutdown(self): return self._sdevt.is_set()
     @property
     def rejected(self): return self._rejected
-    def wait_until_idle(self, timeout=None): return wait_for(self._empty_event.wait(), timeout)
+    def wait_until_idle(self, timeout=None): return wait_for(self._mtevt.wait(), timeout)
     async def shutdown(self, timeout=None):
-        self._shutdown_event.set(); f, g, h = (r := []).append, (q := self._queue).get_nowait, q.shutdown; h()
+        self._sdevt.set(); f, g, h = (r := []).append, (q := self._queue).get_nowait, q.shutdown; h()
         try:
-            async with _timeout(timeout): await self._empty_event.wait(); await safe_cancel_batch(self.running_tasks, disembowel=True)
+            async with _timeout(timeout): await self._mtevt.wait(); await safe_cancel_batch(self.running_tasks, disembowel=True)
         except TimeoutError:
             while True:
                 try: f(g())
