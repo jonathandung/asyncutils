@@ -21,7 +21,7 @@ Takes pride in:
 
 ## Setup
 
-Since the name _asyncutils_ was somehow unavailable on PyPI, _py-asyncutils_ was chosen instead.
+Since the name 'asyncutils' was somehow unavailable on PyPI, 'py-asyncutils' was chosen instead.
 
 This package is also [available on anaconda](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview) via the conda-forge channel.
 
@@ -42,7 +42,9 @@ This is asyncutils v0.8.25.
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)
 
-## Environment variables and configuration
+See [this page](https://github.com/jonathandung/asyncutils/tags) for the currently available tags.
+
+## Configuration
 
 Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well.
 

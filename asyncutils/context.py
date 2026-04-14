@@ -43,6 +43,8 @@ class Context:
     GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT: int = 8
     LINE_PROTOCOL_DEFAULT_BUFFER_SIZE: int = 0x1000
     SOCKET_TRANSPORT_LIMITS: object = 0x800, 0x2000
+    ADVANCED_POOL_DEFAULT_MAX_WORKERS: int = 5
+    ADVANCED_POOL_DEFAULT_MIN_WORKERS: int = 1
     ADVANCED_POOL_THRESHOLD_HI: float = 1.5
     ADVANCED_POOL_THRESHOLD_LO: float = 0.5
     ADVANCED_POOL_FACTOR: float = 0.3
@@ -65,9 +67,9 @@ _ = __import__('_contextvars').ContextVar('asyncutils_contextvar')
 def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
     except LookupError: _.set(d); return d
-def setcontext(ctx, /, _=_):
-    if not isinstance(ctx, Context): raise TypeError('setcontext: ctx must be an instance of asyncutils.context.Context')
-    _.set(ctx)
+def setcontext(c, /, _=_):
+    if not isinstance(c, Context): raise TypeError('setcontext: ctx must be an instance of asyncutils.context.Context')
+    _.set(c)
 f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:
     __slots__ = 'new_ctx', 'saved_ctx'

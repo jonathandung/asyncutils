@@ -91,10 +91,11 @@ async def batch(it, size, max_concurrent_batches=None, timeout=None, strict=Fals
     while True:
         try:
             for _ in range(size):
-                try: g(await wait_for(f(), timeout))
+                try: x = await wait_for(f(), timeout)
                 except StopAsyncIteration: break
                 except TimeoutError:
                     if b: break
+                g(x)
             if b:
                 if strict and _ < size-1: raise ValueError('incomplete batch')
                 async with s: yield copy_and_clear(b)
@@ -523,7 +524,8 @@ def aprepend(val, it): return achain((val,), it).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _(i)
 async def arandomcombination(it, r, _=_sample):
-    for i in sorted(_(range(len(p := await to_tuple(it))), r)): yield p[i]
+    (_ := _(range(len(p := await to_tuple(it))), r)).sort()
+    for i in _: yield p[i]
 async def arandom_combination_with_replacement(it, r, _=_randrange):
     n = len(p := await to_tuple(it))
     async for i in amap(p.__getitem__, sorted(_(n) for i in range(r))): yield i

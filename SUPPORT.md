@@ -10,7 +10,7 @@ If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
 2. If not, create a new issue
-3. Refer and adhere to the issue template chosen
+3. Refer and adhere to the issue template chosen; otherwise, issue risks being closed without going through actual review
 
 ## Feature Requests
 

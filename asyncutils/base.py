@@ -108,7 +108,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
     if use_existing_executor is None: use_existing_executor = C.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR
     if create_executor is None: create_executor = C.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR
     if b(it, '__aiter__'):
-        if not b(it := it.__aiter__(), '__anext__'): raise TypeError('__aiter__ did not return an async iterator')
+        if not b(it := it.__aiter__(), '__anext__'): raise TypeError('iter_to_aiter: __aiter__ did not return an async iterator')
         if f: return it
         if b(it, 'asend', 'athrow', 'aclose'):
             async def iterator(f=it.asend, c=c):
@@ -169,7 +169,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                         if c((l := await _()), sentinel): break
                         yield l
             # ruff: enable[B008]
-    else: raise TypeError('cannot iterate over it synchronously or asynchronously')
+    else: raise TypeError(f'iter_to_aiter: cannot iterate over {it!r} synchronously or asynchronously')
     return iterator()
     # ruff: enable[RUF029]
 def aiter_to_iter(ait, a=c, b=b):
@@ -187,7 +187,7 @@ def aiter_to_iter(ait, a=c, b=b):
         try: yield from iterate()
         except StopAsyncIteration: ...
         finally: c.__exit__(*exc_info())
-    else: raise TypeError(f'cannot iterate over {ait!r} synchronously or asynchronously')
+    else: raise TypeError(f'aiter_to_iter: cannot iterate over {ait!r} synchronously or asynchronously')
 async def collect(it, n=None, default=_NO_DEFAULT, *, __reti=False, _=L.warning, m='collect ran out of items'):
     f, i = (r := []).append, 0
     async for i, _ in aenumerate(it):

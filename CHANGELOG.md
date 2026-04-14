@@ -10,7 +10,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-52% coverage, 41 tests
+49% coverage, 46 tests
 
 ### Docs
 

@@ -8,7 +8,7 @@ __all__ = 'Executor', 'basic_repl', 'debug', 'debugging', 'get_past_logs', 'load
 class Executor(_, PartialInterface): '''A class that implements the PEP 3148 Executor interface. The exact class is determined at runtime by command-line arguments.'''
 class debugging:
     '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally
-    (using `set_logger_level`) within the context.'''
+    within the context (using `set_logger_level`).'''
     @property
     def level(self) -> int: '''The current level of the asyncutils logger, as an integer.'''
     @property
@@ -17,9 +17,9 @@ class debugging:
     def orig_name(self) -> str|None: '''The original logger level name as a string, before this context was entered, or None if it was not.'''
     def __enter__(self) -> Self: '''Start debugging. More output is produced; where to depends on the user's own configuration, accessible via `logging_to` and `debug.level`.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''
 def get_past_logs() -> str: '''Returns all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
 debug: Final[debugging]
@@ -35,6 +35,9 @@ loaded_all: Final[bool]
 _randinst: Final[Random]
 '''The random number generator (instance of random.Random) used by this module.'''
 logging_to: Final[str]
-'''A string indicating where the logging output of the program is going. 'NULL' means no logging is taking place, 'MEMORY' means the logs are
-not going to a file but can be retrieved from get_past_logs, 'STDOUT' means logging is going to stdout and 'STDERR' means it is going to stderr.
-Otherwise, it is the filename, which may be an integer (file descriptor) or bytestring in extremely rare cases the caller need not prepare for.'''
+'''A string indicating where the logging output of the program is going.
+It is the name (path; possibly relative) of the log file, with four exceptions:
+'NULL': no logging is taking place
+'MEMORY': the logs are not going to a physical file but can be retrieved by `get_past_logs`
+'STDOUT': logging is going to stdout
+'STDERR': logging is going to stderr'''

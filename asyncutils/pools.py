@@ -44,7 +44,7 @@ class AdvancedPool(LoopContextMixin):
     __slots__ = '__cnt', '_adjustment', '_current', '_kill_at_exit', '_lock', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
-    def __init__(self, max_workers=5, min_workers=1, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._lock, self._adjustment, self._start, self.completed, self._kill_at_exit = count(), TLock(), max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, Lock(), None, monotonic(), 0, kill_at_exit; self._current = self._min = min_workers
+    def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._lock, self._adjustment, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, Lock(), None, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
     def __repr__(self): return f'{type(self).__qualname__}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
     async def _threadsafe_get(self):
         with self._tlock: return await self._queue.get()
