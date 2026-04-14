@@ -1,6 +1,6 @@
 from asyncutils.base import *
-from asyncutils.iters import *
 from asyncutils.iterclasses import *
+from asyncutils.iters import *
 def test_aiter_to_iter(): assert all(i == j for i, j in zip(aiter_to_iter(arange(10)), range(10)))
 async def test_iter_to_aiter(): assert await vecs_eq(iter_to_aiter(range(10)), arange(10))
 async def test_amap(): assert await vecs_eq(amap(1 .__lshift__, arange(10)), apowersoftwo(), strict=False)

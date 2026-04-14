@@ -55,4 +55,3 @@ docker-compose.yml
 .markdownlint.json
 .pre-commit-config.yaml
 .editorconfig
-strip_annotations.py

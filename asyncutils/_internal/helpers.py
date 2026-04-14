@@ -22,7 +22,7 @@ def create_executor(f, /, save=True):
     audit('asyncutils/create_executor', f'{(F := coerce_callable(f)).__module__.removeprefix('asyncutils.')}.{F.__qualname__}'); from ..config import Executor; e = Executor()
     if save: f.executor = e
     return e
-def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if rmpref else n
+def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): f = coerce_callable(f); n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if rmpref else n
 def audit_fullname(f, /, rmpref=False): audit(fullname(f, rmpref))
 class LoopMixinBase:
     __slots__ = 'exiter', 'loop', 'make_fut', 'running_tasks'

@@ -1,6 +1,6 @@
 # type: ignore
+from pytest import fail, raises
 from asyncutils import _internal as mod
-from pytest import raises, fail
 def test_helpers():
     helpers = mod.helpers
     for _ in helpers.filter_out(None, True, False): assert isinstance(_, bool)

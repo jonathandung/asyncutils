@@ -1,4 +1,4 @@
-from pytest import raises, fixture
+from pytest import fixture, raises
 from asyncutils.exceptions import VersionValueError
 from asyncutils.version import *
 @fixture(scope='module')

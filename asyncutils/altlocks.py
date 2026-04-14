@@ -9,8 +9,9 @@ from .mixins import AsyncContextMixin, AwaitableMixin
 from _collections import deque  # type: ignore[import-not-found]
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import BrokenBarrierError
-from asyncio.locks import BoundedSemaphore, Event, Lock
-from asyncio.tasks import sleep, wait_for
+from asyncio.locks import BoundedSemaphore, Condition, Lock
+from asyncio.tasks import sleep
+from asyncio.timeouts import timeout as _timeout
 from functools import wraps
 from itertools import count
 from sys import audit
@@ -89,31 +90,36 @@ class CircuitBreaker:
     @property
     def state(self): return self._state
 class StatefulBarrier(AwaitableMixin):
-    __slots__ = '_count', '_evt', '_exc', '_gen', '_initstate', '_lock', '_parties', '_state'
-    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._evt, self._lock, self._gen, self._initstate = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Event(), Lock(), 0, initstate
+    __slots__ = '_broken', '_cond', '_count', '_exc', '_initstate', '_parties', '_state'
+    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._cond, self._initstate, self._broken = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Condition(), initstate, False
     async def wait(self, state=None, timeout=None):
-        self.raise_for_abort(); f, C = (S := self._state).append, S.copy
-        if (s := self._initstate) is not None:
-            async for _ in iter_to_aiter(s): f(_)
-        async with self._lock:
-            g = self._gen; self._count = (c := self._count)+1
-            if state is not None: f(state)
-            if c == self._parties-1: self._evt.set(); s = C(); self._reset(); return c, s
         try:
-            await wait_for(self._evt.wait(), timeout)
-            if g != self._gen: return -1, deque()
-            async with self._lock: return self._count-1, C()
-        except TimeoutError: self.abort(); raise
-    def _reset(self): self._count = 0; self._state.clear(); self._evt.clear(); self._gen += 1
-    def abort(self): self._evt.set()
+            async with _timeout(timeout), (C := self._cond):
+                self.raise_for_abort(); f = (S := self._state).append
+                if (s := self._initstate) is not None:
+                    async for _ in iter_to_aiter(s): f(_)
+                    self._initstate = None
+                self._count = (c := self._count)+1
+                if state is not None: f(state)
+                if c == self._parties-1: self._count = 0; C.notify_all(); self._broken = True
+                else:
+                    w = C.wait
+                    while not self._broken: await w()
+                return c, S.copy()
+        except TimeoutError: await self.abort(); raise
+    async def abort(self):
+        async with (C := self._cond):
+            if not self._broken: self._broken = True; C.notify_all()
     def raise_for_abort(self):
-        if self.broken: raise self._exc
+        if self._broken: raise self._exc
     @property
-    def broken(self): return self._evt.is_set()
+    def broken(self): return self._broken
     @property
     def remaining_parties(self): return self._parties-self._count
     @property
     def parties(self): return self._parties
+    @property
+    def n_waiting(self): return self._count
 class DynamicThrottle:
     __slots__ = '_fails', '_jitter', '_last_call', '_lbound', '_lfactor', '_lock', '_max', '_min', '_randf', '_rate', '_successes', '_timer', '_ubound', '_ufactor', '_window'
     def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):

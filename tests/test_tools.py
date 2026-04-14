@@ -1,5 +1,5 @@
-from asyncutils.tools import *
 from _io import StringIO
+from asyncutils.tools import *
 @(dec := __import__('pytest').fixture(scope='module'))
 def argstr(): return '-e thread -m 5 -p -VV'
 @dec

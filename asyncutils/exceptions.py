@@ -5,7 +5,7 @@ from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
 def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _=audit):
-    _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), s)
+    _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
         elif raise_critical and isinstance(group, CRITICAL): raise Critical(group)

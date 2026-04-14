@@ -46,8 +46,8 @@ this table take inspiration.
     - ``name``: :class:`str`, ``fname``: :class:`str`
     - Raised when a :class:`asyncutils.altlocks.CircuitBreaker` of name ``name`` is applied on a function with name ``fname``.
   * - asyncutils.base.safe_cancel_batch
-    - ``it``: :type:`SupportsIteration[asyncio.future.Future]`
-    - Raised when :func:`asyncutils.base.safe_cancel_batch` is called on the (possibly async) iterable ``it``.
+    - ``ityp``: :class:`str`
+    - Raised when :func:`asyncutils.base.safe_cancel_batch` is called on the (possibly async) iterable with exact type of name ``ityp``.
   * - asyncutils.base.iter_to_aiter
     - ``tname``: :class:`str`
     - Raised when :func:`asyncutils.base.iter_to_aiter` is called on an iterable of type with name ``tname``.
@@ -106,11 +106,11 @@ this table take inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`run` method of an instance of :class:`asyncutils.console.AsyncUtilsConsole` at ``addr`` is called.
   * - asyncutils.exceptions.unnest
-    - ``excdq``: :type:`collections.deque[BaseException]`
-    - Raised when :func:`asyncutils.exceptions.unnest` is called, with ``excdq`` being the queue that is to store the exceptions and flatten them, the items in which are initially not all the groups that will be processed.
+    - ``n``: :type:`int`
+    - Raised when :func:`asyncutils.exceptions.unnest` is called, with ``n`` being a sloppy lower bound on the number of exception( group)s.
   * - asyncutils.exceptions.unnest_reverse
-    - ``exclst``: :type:`list[BaseException]`
-    - Raised when :func:`asyncutils.exceptions.unnest_reverse` is called, with ``exclst`` being the stack that is to store the exceptions and flatten them, with only a subset of the groups to be eventually collapsed in it at the beginning.
+    - ``n``: :type:`int`
+    - Raised when :func:`asyncutils.exceptions.unnest_reverse` is called, with ``n`` being a sloppy lower bound on the number of exception( group)s.
   * - asyncutils.exceptions.raise\_
     - ``exc``: :class:`BaseException`
     - Raised when :func:`asyncutils.exceptions.raise_` is about to raise ``exc``, such that hooks may process the instance or perform validation outside the scope of :func:`asyncutils.exceptions.prepare_exception`.
@@ -251,7 +251,7 @@ this table take inspiration.
     - Raised when the :meth:`enumerate` method of an exact instance of :class:`:asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.signals.wait_for_signal
     - ``sigs``: :type:`tuple[int, ...]`
-    - Raised when :func:`asyncutils.signals.wait_for_signal` is called, with the signal numbers to be waited for as argument.
+    - Raised when :func:`asyncutils.signals.wait_for_signal` is called on signal numbers ``sigs``.
   * - asyncutils.util.sync_await
     - ``atname``: :class:`str`
     - Raised when :func:`asyncutils.util.sync_await` is called on an awaitable whose type is of name ``atname``.

@@ -1,8 +1,8 @@
-from pytest import raises, fixture
+from asyncio.tasks import create_task, sleep
+from pytest import fixture, raises
+from asyncutils._internal.compat import QueueEmpty, QueueFull, QueueShutDown
 from asyncutils.config import _randinst
 from asyncutils.queues import *
-from asyncutils._internal.compat import QueueFull, QueueEmpty, QueueShutDown
-from asyncio.tasks import create_task, sleep
 @fixture
 def pwd(): return _randinst.randbytes(8)
 async def test_pwdq(pwd):

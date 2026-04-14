@@ -79,14 +79,12 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `name`: name of the barrier; to appear in error messages
         `initstate`: an iterable storing the initial state; will be exhausted; preferrably not async
         `maxstate`: maximum length of state to store; older state will be expelled'''
-    async def wait(self, state: T=..., timeout: float|None=...) -> tuple[int, deque[T]]:
+    async def wait(self, state: T=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
         If the barrier has already been aborted or broken, raise `asyncio.BrokenBarrierError`.
-        If the timeout expires, raise `TimeoutError` and abort the barrier.
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
         and `pos` is the number of parties having arrived before this one.'''
-    def _reset(self) -> None: '''Internal method to advance the barrier to the next generation so that new parties can wait.'''
-    def abort(self) -> None: '''Abort the barrier, signalling `asyncio.BrokenBarrierError` to present waiting parties.'''
+    async def abort(self) -> None: '''Abort the barrier, signalling `asyncio.BrokenBarrierError` to present waiting parties.'''
     def raise_for_abort(self) -> None: '''Throw `asyncio.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
@@ -94,6 +92,8 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     def parties(self) -> int: '''Total number of parties, arrived or not.'''
     @property
     def remaining_parties(self) -> int: '''Number of parties the waiting parties are waiting for.'''
+    @property
+    def n_waiting(self) -> int: '''Number of parties currently waiting.'''
 class DynamicThrottle:
     '''An async context manager used to limit the rate of a function being called. See also: `func.RateLimited`, `locks.AdvancedRateLimit`'''
     def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):

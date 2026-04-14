@@ -37,7 +37,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) fo
 
 ## Version
 
-This is asyncutils v0.8.24.
+This is asyncutils v0.8.25.
 
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)

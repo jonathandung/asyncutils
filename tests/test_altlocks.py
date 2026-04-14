@@ -1,5 +1,6 @@
+from collections import deque
+from asyncio.tasks import sleep, gather
 import pytest
-from asyncio import sleep
 from asyncutils.altlocks import *
 from asyncutils.exceptions import CircuitOpen
 @pytest.fixture
@@ -33,3 +34,9 @@ async def test_cbreaker():
     await sleep(0.25)
     for _ in range(2): assert await g() == 0
     await f()
+async def test_sbarrier():
+    b = StatefulBarrier[int](3)
+    assert not b.broken
+    (u, x), (v, y), (w, z) = await gather(*map(b.wait, range(1, 6, 2)))
+    assert (u, v, w) == (0, 1, 2)
+    assert x == y == z == deque((1, 3, 5))

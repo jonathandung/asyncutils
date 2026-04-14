@@ -209,18 +209,16 @@ class Rendezvous[T]:
     ```'''
     def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...): '''If loop is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
-        '''Put in a value to the rendezvous, blocking until it is gotten or timeout is reached, at which point TimeoutError is raised and the put cancelled.
-        Also be prepared to intercept or reraise CancelledError resulting from reset.'''
-    async def put(self, value: T, /, *, timeout: float|None=...) -> bool:
-        '''Like raising_put, but returns a boolean representing if the put succeeded. The recommended interface.
-        May still raise CancelledError when the Rendezvous is reset, which should be allowed to propagate.'''
+        '''Put in `value` to the rendezvous, blocking until it is gotten or timeout is reached, at which point `TimeoutError` is raised and the put cancelled.
+        Also be prepared to intercept or reraise `CancelledError` resulting from reset.'''
+    async def put(self, value: T, /, *, timeout: float|None=...) -> bool: '''Like `raising_put`, but returns a boolean representing if the put succeeded. The recommended interface..'''
     async def get(self, default: T|None=..., *, timeout: float|None=...) -> T:
         '''Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.
         If default is not passed and the timeout is reached, the TimeoutError is propagated. In any case, the get is cancelled at timeout.'''
     async def cleanup(self) -> None: '''Clean up the internal getter and putter stacks.'''
     async def reset(self) -> None:
-        '''Reset the Rendezvous. Call from a monitoring task when a deadlock appears to have occurred.
-        This cancels all pending gets, puts and exchanges; their callers will see CancelledError.'''
+        '''Hard reset the rendezvous. Call from a monitoring task when a deadlock appears to have occurred.
+        This cancels all pending gets, puts and exchanges; their callers will see `CancelledError`.'''
     def __length_hint__(self) -> int: '''Approximate number of operations pending; for operator.length_hint.'''
     async def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:

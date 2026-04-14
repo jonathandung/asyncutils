@@ -86,12 +86,12 @@ async def merge(*I, reverse=False):
         if (c := await q.get()) is a: break
         yield c
 def aflatten(it): return achain.from_iterable(it).__aiter__()
-async def batch(it, size, max_concurrent_batches=8, timeout=None, strict=False):
-    f, s, b, _ = iter_to_aiter(it).__anext__, anullcontext() if max_concurrent_batches is None else Semaphore(max_concurrent_batches), [], 0
+async def batch(it, size, max_concurrent_batches=None, timeout=None, strict=False):
+    f, s, g, _ = iter_to_aiter(it).__anext__, anullcontext() if max_concurrent_batches is None else Semaphore(max_concurrent_batches), (b := []).append, 0
     while True:
         try:
             for _ in range(size):
-                try: b.append(await wait_for(f(), timeout))
+                try: g(await wait_for(f(), timeout))
                 except StopAsyncIteration: break
                 except TimeoutError:
                     if b: break

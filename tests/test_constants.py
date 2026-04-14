@@ -8,6 +8,7 @@ def test_misc():
     assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'asyncutils.constants.RAISE' and SYNC_AWAIT.name == SYNC_AWAIT.__reduce__() == str(SYNC_AWAIT) == 'asyncutils.constants.SYNC_AWAIT'
     assert not any(_.is_private for _ in (RAISE, SYNC_AWAIT))
     assert _NO_DEFAULT.is_private
+    assert tuple(range(3)) == (CLOSED, HALF_OPEN, OPEN)
 @pytest.fixture
 def ctxmgr(): return pytest.raises(TypeError, match="cannot instantiate '.*'")
 @pytest.mark.parametrize('cls', (sentinel_base, type(RAISE)))
@@ -19,6 +20,7 @@ def test_sentinels(cls, ctxmgr):
         class Foo: __slots__, baz = (), cls()
     with ctxmgr:
         class Bar: __slots__, quux = (), cls('Bar.quux')
+    assert not (sentinel_base._can_instantiate or type(RAISE)._can_instantiate)
 def test_custom_sentinel():
     class TestSentinel(sentinel_base): __slots__ = ()
     a = TestSentinel()

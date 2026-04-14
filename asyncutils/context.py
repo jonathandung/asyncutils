@@ -58,15 +58,15 @@ class Context:
     BULKHEAD_DEFAULT_MAX_REJ: int = -1
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: object = 2, 15
     def __post_init__(self):
-        if not (self.CIRCUIT_BREAKER_DEFAULT_RESET > 0 < self.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS and self.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE > 0 and 0 < self.DYNAMIC_THROTTLE_DEFAULT_LBOUND < self.DYNAMIC_THROTTLE_DEFAULT_UBOUND < 1 and self.DYNAMIC_THROTTLE_DEFAULT_LFACTOR < 1.0 < self.DYNAMIC_THROTTLE_DEFAULT_UFACTOR and self.LEAKY_BUCKET_DEFAULT_MAXFACTOR > 1.0 > self.LEAKY_BUCKET_DEFAULT_MINFACTOR > 0.0 < self.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK and self.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH > 0.0 < self.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL and self.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE > 0 < self.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE and all(i is None or i > 0.0 for i in (self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT, self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT)) and self.EVENT_WITH_VALUE_DEFAULT_MAX_HIST > 0 < self.EVENT_WITH_VALUE_DEFAULT_RECENT and self.RETRY_DEFAULT_TRIES > 0 < self.DYNAMIC_THROTTLE_DEFAULT_JITTER < 1.0 and self.RETRY_DEFAULT_BACKOFF > 1.0 > self.RETRY_DEFAULT_JITTER > 0.0 < self.RETRY_DEFAULT_DELAY <= self.RETRY_DEFAULT_MAX_DELAY): raise ValueError
-    def __init_subclass__(cls): raise TypeError('cannot subclass Context')
+        if not (self.CIRCUIT_BREAKER_DEFAULT_RESET > 0 < self.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS and self.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE > 0 < self.DYNAMIC_THROTTLE_DEFAULT_LBOUND < self.DYNAMIC_THROTTLE_DEFAULT_UBOUND < 1 < self.DYNAMIC_THROTTLE_DEFAULT_UFACTOR > self.DYNAMIC_THROTTLE_DEFAULT_LFACTOR < 1 < self.LEAKY_BUCKET_DEFAULT_MAXFACTOR > self.LEAKY_BUCKET_DEFAULT_MINFACTOR > 0.0 < self.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK and self.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH > 0.0 < self.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL and self.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE > 0 < self.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE and all(i is None or i > 0.0 for i in (self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT, self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT)) and self.EVENT_WITH_VALUE_DEFAULT_MAX_HIST > 0 < self.EVENT_WITH_VALUE_DEFAULT_RECENT and self.RETRY_DEFAULT_TRIES > 0 < self.DYNAMIC_THROTTLE_DEFAULT_JITTER < 1.0 and self.RETRY_DEFAULT_BACKOFF > 1.0 > self.RETRY_DEFAULT_JITTER > 0.0 < self.RETRY_DEFAULT_DELAY <= self.RETRY_DEFAULT_MAX_DELAY): raise ValueError
+    def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.context.Context')
     copy = D.replace # noqa: RUF045
 _ = __import__('_contextvars').ContextVar('asyncutils_contextvar')
 def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
     except LookupError: _.set(d); return d
 def setcontext(ctx, /, _=_):
-    if not isinstance(ctx, Context): raise TypeError
+    if not isinstance(ctx, Context): raise TypeError('setcontext: ctx must be an instance of asyncutils.context.Context')
     _.set(ctx)
 f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:

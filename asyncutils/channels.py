@@ -3,13 +3,14 @@ from ._internal import log as L, patch as P
 from ._internal.compat import Queue, QueueEmpty, QueueShutDown
 from ._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable, fullname
 from ._internal.submodules import channels_all as __all__
-from .base import event_loop, iter_to_aiter, safe_cancel_batch
+from .base import event_loop, adisembowel, iter_to_aiter, safe_cancel_batch
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, potent_derive
 from .mixins import LoopContextMixin
 from .util import _ignore_cancellation, safe_cancel, sync_await, to_async, to_sync
 from _weakrefset import WeakSet
 from asyncio.coroutines import iscoroutine
+from asyncio.exceptions import CancelledError
 from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import gather, shield, sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
@@ -283,15 +284,13 @@ class EventBus(LoopContextMixin):
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
-    def __init__(self, *, loop=None, lock=None):
-        if loop is None: loop = get_loop_and_set()
-        if lock is None: lock = Lock()
-        self._getters, self._putters, self._loop, self._lock = deque(), deque(), loop, lock; self._make_task()
+    def __init__(self, *, loop=None, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), get_loop_and_set() if loop is None else loop, Lock() if lock is None else lock; self._make_task()
     async def _maintainer(self, f=sleep.__get__(60)): # noqa: B008
-        while True: await f(); await self.cleanup()
+        g = self.cleanup
+        while True: await f(); await g()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
-        except TimeoutError: return False
+        except (CancelledError, TimeoutError): return False
     async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
     async def get(self, default=_NO_DEFAULT, *, timeout=None):
         f = (p := self._putters).popleft
@@ -308,10 +307,10 @@ class Rendezvous:
             if default is _NO_DEFAULT: raise
             return default
     def __length_hint__(self): return len(self._getters)+len(self._putters)
-    async def state_snapshot(self, _f=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')):
+    async def state_snapshot(self, _=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')):
         await self.cleanup()
         async with self._lock: t = len(self._getters), len(self._putters)
-        return _f(*t, sum(t), not any(t))
+        return _(*t, sum(t), not any(t))
     async def cleanup(self):
         async with self._lock: self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
     async def exchange(self, v, /, *, timeout=None, asap=False):
@@ -331,8 +330,8 @@ class Rendezvous:
             else: self._putters.append((v, F := self._loop.create_future()))
         return F
     async def reset(self, _=partial(safe_cancel_batch, disembowel=True)):
-        async with self._lock: await gather(*map(_, (self._getters, self._putters)))
-        self._task.cancel(); self._make_task()
+        async with self._lock: await gather(safe_cancel_batch(self._getters, disembowel=True), safe_cancel_batch(F async for _, F in adisembowel(self._putters)))
+        await safe_cancel(self._task); self._make_task()
     def _make_task(self): self._task = self._loop.create_task(self._maintainer())
     P.patch_method_signatures((reset, ''), (state_snapshot, ''), (_maintainer, ''))
 del P

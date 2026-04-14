@@ -10,14 +10,7 @@ If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
 2. If not, create a new issue
-3. Include:
-
-    - Python version tag (`python -VV`)
-    - asyncutils version (`python -m asyncutils -v`)
-    - Operating system
-    - Package version (`pip show py-asyncutils` or `conda list py-asyncutils`)
-    - Minimal reproducible example
-    - Full error traceback
+3. Refer and adhere to the issue template chosen
 
 ## Feature Requests
 
@@ -86,14 +79,15 @@ Check if asyncutils is installed:
 pip list | grep py-asyncutils
 ```
 
-If the package is not working with python -S, perform the steps below:
+If the package is not working with python, perform the steps below:
 
 ```bash
 # Check sys.path
-python -S -c "print(*__import__('sys').path, sep='\n')"
+python -c "print(*__import__('sys').path, sep='\n')"
 # Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console
 # constants, context, events, exceptions, ... separated by newlines
-python -S -c "print(*dir(__import__('asyncutils')), sep='\n')"
+python -c "print(*dir(__import__('asyncutils')), sep='\n')"
+# If not loading site, repeat the above steps w/ python -S -c
 ```
 
 ## Version Compatibility
