@@ -11,9 +11,9 @@ try:
 except StopIteration: ...
 class Module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
     __slots__ = '_fs', '_name'
-    def __new__(cls, name, /, _d=_d, _a=_a, _s=s):
-        if name in _a: return _s[name]
-        try: return getattr(_s[_d[name]], name)
+    def __new__(cls, name, /, _d=_d, _a=_a, _=s):
+        if name in _a: return _[name]
+        try: return getattr(_[_d[name]], name)
         except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
     def __getattr__(self, name, /):

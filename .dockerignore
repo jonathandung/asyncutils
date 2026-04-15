@@ -2,7 +2,7 @@
 .gitignore
 .github/
 **/__pycache__/
-**/*.py[cod]
+**/*.py[codz]
 .pytest_cache
 .mypy_cache
 .ruff_cache
@@ -51,7 +51,6 @@ docker-compose*.yaml
 *.sqlite3
 Dockerfile
 .dockerignore
-docker-compose.yml
 .markdownlint.json
 .pre-commit-config.yaml
 .editorconfig
