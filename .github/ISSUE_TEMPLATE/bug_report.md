@@ -31,7 +31,7 @@ If applicable, add screenshots to help explain your problem.
 - Python version tag (`python -VV`)
 - asyncutils version (`python -m asyncutils -v` or `asyncutils -v`)
 - Operating system
-- Package version (`pip show py-asyncutils` or `conda list py-asyncutils`)
+- Package version (`pip show py-asyncutils | grep Version:` or `conda list py-asyncutils --fields version`)
 - Full error traceback
 
 ## Additional context

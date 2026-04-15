@@ -8,8 +8,8 @@
 
 ## Reporting a Vulnerability
 
-The creator of this project thinks it highly unlikely there will be any security vulnerabilities in the near future (this project is nowhere near
-that advanced), but this is still included for compliance. Please report as described below.
+I think it highly unlikely there will be any security vulnerabilities in the near future (this project is nowhere near that advanced), but this is
+still included for compliance. Please report as described below.
 
 - **Method native to GitHub**
 

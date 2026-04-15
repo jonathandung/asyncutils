@@ -94,21 +94,21 @@ python -c "print(*dir(__import__('asyncutils')), sep='\n')"
 
 - Python 3.12+ required
 - No dependencies outside development, which we're proud of
-- This project is under active development (new patch versions daily) that can have breaking changes
+- This project is under active development (patch version is frequently bumped) that can have breaking changes
 
 ## Response Times
 
-As fast as the creator (currently the sole maintainer) can; that is:
+As fast as I can; that is:
 
 - Bug reports: 3 days
 - Feature requests: Reviewed biweekly
 - Security issues: 1 day
 - General questions: Hopefully community-driven
 
-At this stage, presume the creator dead if:
+At this stage, presume me dead if:
 
 - promises above are not met, and
-- there was no relevant post on the discussions page (e.g. hiatus announcement)
+- there was no relevant post on the discussions page (e.g. hiatus announcement) or my status was not set to 'On vacation'
 
 ## Closing remarks
 
