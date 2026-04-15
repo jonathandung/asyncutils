@@ -14,7 +14,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Docs
 
-45% complete
+46% complete
 
 ### Added
 
@@ -92,7 +92,9 @@ Submodules:
   Functions:
   - first_completed
   - race_with_callback
+  - multi_winner_race_with_callback
   - convert_to_coro_iter
+  - enhanced_gather
   - enhanced_staggered_race
 
 - config
@@ -239,6 +241,8 @@ Submodules:
   Classes:
   - AsyncCallbacksFuture
   - AsyncCallbacksTask
+  - EagerAsyncCallbacksFuture
+  - EagerAsyncCallbacksTask
   - TimeAwareAsyncCallbacksFuture
   - TimeAwareAsyncCallbacksTask
   - TimeAwareFuture

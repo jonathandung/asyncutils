@@ -1,4 +1,4 @@
-from ._internal.helpers import check_methods, get_loop_and_set, stop_and_closer, fullname
+from ._internal.helpers import check_methods, create_executor, get_loop_and_set, stop_and_closer, fullname
 from ._internal.running_console import _get_
 from ._internal.submodules import util_all as __all__
 from .config import Executor
@@ -61,7 +61,7 @@ def to_async(f, /, loop=None):
     audit('asyncutils.util.to_async', fullname(f))
     if loop is None: loop = get_loop_and_set()
     async def wrapper(*a, **k):
-        if (e := getattr(to_async, 'executor', None)) is None: audit('asyncutils/create_executor', 'util.to_async'); to_async.executor = e = Executor()
+        if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
         return await loop.run_in_executor(e, partial(f, *a, **k))
     return wraps(f)(wrapper), stop_and_closer(loop)
 async def aiter_from_f(f, s=_NO_DEFAULT, /):

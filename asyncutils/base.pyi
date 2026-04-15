@@ -51,9 +51,11 @@ def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
 @overload
 def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T]: ...
 @overload
-def aiter_to_iter[I: Iterator[Any]](ait: I) -> I: ...
+def aiter_to_iter[I: Iterator[Any]](ait: I, *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> I: ...
 @overload
-def aiter_to_iter[T](ait: Iterable[T]) -> Iterator[T]: '''Convert an (async) iterable `ait` to a sync generator, or the object itself if it is already an iterator.'''
+def aiter_to_iter[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> Iterator[T]:
+    '''Convert an async iterable `ait` to a sync generator, or return the native iterator for the object if it is already a sync iterable.
+    If the event loop is currently running and `use_futures` is `False` (default `context.AITER_TO_ITER_DEFAULT_ALLOW_FUTURES`), raise `RuntimeError` to clarify that `concurrent.futures.Future` must be used in this case, one future per item yielded, which is inefficient.'''
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
 def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload

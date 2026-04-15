@@ -1,8 +1,7 @@
 from ._internal import log as l, patch as P
 from ._internal.submodules import config_all as __all__
 from ._internal.unparsed import N
-import logging as L
-import sys as S
+import logging as L, sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     if not isinstance(e, str): raise TypeError('executor name should be a string')

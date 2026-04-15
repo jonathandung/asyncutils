@@ -10,7 +10,7 @@ class debugging:
     '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally
     within the context (using `set_logger_level`).'''
     @property
-    def level(self) -> int: '''The current level of the asyncutils logger, as an integer.'''
+    def level(self) -> int: '''The current level of the `asyncutils` logger, as an integer.'''
     @property
     def orig_level(self) -> int|None: '''The original logger level as an integer, before this context was entered, or None if it was not.'''
     @property
@@ -23,11 +23,11 @@ class debugging:
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''
 def get_past_logs() -> str: '''Returns all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
 debug: Final[debugging]
-'''A global instance of the debugging context manager.'''
+'''A global instance of the `debugging` context manager.'''
 silent: Final[bool]
 '''Whether the user requested to run the program with no banner and exit message in the REPL.'''
 basic_repl: Final[bool]
-'''Whether the user specified not to use the functions from _pyrepl to run the console.'''
+'''Whether the user specified not to use the functions from `_pyrepl` to run the console.'''
 max_memerrs: Final[int]
 '''Maximum number of memory errors that can occur before the console automatically exits. Negative if there is no maximum.'''
 loaded_all: Final[bool]
@@ -39,5 +39,5 @@ logging_to: Final[str]
 It is the name (path; possibly relative) of the log file, with four exceptions:
 'NULL': no logging is taking place
 'MEMORY': the logs are not going to a physical file but can be retrieved by `get_past_logs`
-'STDOUT': logging is going to stdout
-'STDERR': logging is going to stderr'''
+'STDOUT': logging is going to `stdout`
+'STDERR': logging is going to `stderr`'''

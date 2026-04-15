@@ -17,6 +17,7 @@ class Context:
     DYNAMIC_THROTTLE_DEFAULT_JITTER: float = 0.2
     ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR: bool = False
     ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR: bool = False
+    AITER_TO_ITER_DEFAULT_ALLOW_FUTURES: bool = True
     TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS: float = 1.0
     LEAKY_BUCKET_DEFAULT_MINFACTOR: float = 0.1
     LEAKY_BUCKET_DEFAULT_MAXFACTOR: float = 10.0
@@ -29,6 +30,7 @@ class Context:
     EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE: int = 100
     EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT: float|None = 3.0
     EVENT_BUS_STREAM_DEFAULT_TIMEOUT: float|None = 5.0
+    CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID: bool = True
     EVENT_WITH_VALUE_DEFAULT_MAX_HIST: int = 128
     EVENT_WITH_VALUE_DEFAULT_RECENT: float = 5.0
     RETRY_DEFAULT_TRIES: int = 3
@@ -59,10 +61,10 @@ class Context:
     BULKHEAD_DEFAULT_MAX_QUEUE: int = 0
     BULKHEAD_DEFAULT_MAX_REJ: int = -1
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: object = 2, 15
+    SEMAPHORE_DEFAULT_VALUE: int = 8
     def __post_init__(self):
         if not (self.CIRCUIT_BREAKER_DEFAULT_RESET > 0 < self.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS and self.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE > 0 < self.DYNAMIC_THROTTLE_DEFAULT_LBOUND < self.DYNAMIC_THROTTLE_DEFAULT_UBOUND < 1 < self.DYNAMIC_THROTTLE_DEFAULT_UFACTOR > self.DYNAMIC_THROTTLE_DEFAULT_LFACTOR < 1 < self.LEAKY_BUCKET_DEFAULT_MAXFACTOR > self.LEAKY_BUCKET_DEFAULT_MINFACTOR > 0.0 < self.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK and self.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH > 0.0 < self.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL and self.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE > 0 < self.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE and all(i is None or i > 0.0 for i in (self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT, self.EVENT_BUS_STREAM_DEFAULT_TIMEOUT)) and self.EVENT_WITH_VALUE_DEFAULT_MAX_HIST > 0 < self.EVENT_WITH_VALUE_DEFAULT_RECENT and self.RETRY_DEFAULT_TRIES > 0 < self.DYNAMIC_THROTTLE_DEFAULT_JITTER < 1.0 and self.RETRY_DEFAULT_BACKOFF > 1.0 > self.RETRY_DEFAULT_JITTER > 0.0 < self.RETRY_DEFAULT_DELAY <= self.RETRY_DEFAULT_MAX_DELAY): raise ValueError
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.context.Context')
-    copy = D.replace # noqa: RUF045
 _ = __import__('_contextvars').ContextVar('asyncutils_contextvar')
 def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
@@ -73,7 +75,10 @@ def setcontext(c, /, _=_):
 f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:
     __slots__ = 'new_ctx', 'saved_ctx'
-    def __init__(self, new_ctx): self.new_ctx = new_ctx.copy()
+    def __init__(self, ctx=None, _=D.replace, **k):
+        if ctx is None: ctx = getcontext()
+        if type(ctx) is not Context: raise TypeError('localcontext: ctx must be an instance of asyncutils.context.Context')
+        self.new_ctx = _(ctx, **k)
     def __enter__(self): self.saved_ctx = getcontext(); setcontext(self.new_ctx)
     def __exit__(self, /, *_): setcontext(self.saved_ctx)
 def __getattr__(name, /): return getattr(getcontext(), name)

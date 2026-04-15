@@ -11,7 +11,7 @@ class TimeAwareFuture(Base, Future): ...
 class TimeAwareTask(Base, Task): ...
 class AsyncCallbacksFuture(_PyFuture):
     def __init__(self, *, loop=None): audit(type(self).__qualname__, loop); _PyFuture.__init__(self, loop=loop); self._setup()
-    def _setup(self): self._loop.set_task_factory(eager_task_factory); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = [], [], []
+    def _setup(self): self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = [], [], []
     def add_async_callback(self, fn, *, context=None):
         if self._state == 'PENDING': self._async_callbacks.append((fn, context or copy_context()))
         else: self._loop.create_task(fn(self))
@@ -32,6 +32,9 @@ class AsyncCallbacksFuture(_PyFuture):
         for g, _ in f: b(g, context=_)
 class AsyncCallbacksTask(_PyTask, AsyncCallbacksFuture):
     def __init__(self, coro, **k): audit(type(self).__qualname__, coro, k.get('loop'), k.get('name')); _PyTask.__init__(self, coro, **k); self._setup()
+class EagerAsyncCallbacksFuture(AsyncCallbacksFuture):
+    def _setup(self): self._loop.set_task_factory(eager_task_factory); super()._setup()
+class EagerAsyncCallbacksTask(AsyncCallbacksTask, EagerAsyncCallbacksFuture): ...
 class TimeAwareAsyncCallbacksFuture(Base, AsyncCallbacksFuture): ...
 class TimeAwareAsyncCallbacksTask(Base, AsyncCallbacksTask): ...
 del Base

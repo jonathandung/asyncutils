@@ -4,9 +4,12 @@ from ._internal.submodules import base_all as __all__
 from .constants import _NO_DEFAULT, RAISE
 from .context import getcontext
 from .exceptions import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, unnest_reverse
+from _functools import partial
 from asyncio.coroutines import iscoroutine
+from asyncio.futures import _chain_future
 from asyncio.events import _get_running_loop, new_event_loop, set_event_loop
 from asyncio.tasks import all_tasks, gather, sleep
+from concurrent.futures import Future
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
@@ -146,7 +149,7 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                     while not c((l := _()), sentinel): yield l
         else:
             # ruff: disable[B008]
-            def r(*a, _=h().run_in_executor, e=e): return __import__('_functools').partial(_, e, *a)
+            def r(*a, _=h().run_in_executor, e=e): return partial(_, e, *a)
             if f:
                 if g:
                     async def iterator(_=r(it.send)):
@@ -172,22 +175,33 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
     else: raise TypeError(f'iter_to_aiter: cannot iterate over {it!r} synchronously or asynchronously')
     return iterator()
     # ruff: enable[RUF029]
-def aiter_to_iter(ait, a=c, b=b):
+def aiter_to_iter(ait, *, use_futures=None, loop=None, a=c, b=b):
     audit('asyncutils.base.aiter_to_iter', a(ait))
     if b(ait, '__iter__') and b(ait := ait.__iter__(), '__next__'): yield from ait; return
-    if b(ait, '__aiter__') and b(ait := ait.__aiter__(), '__anext__'):
-        a = (c := event_loop.from_flags(4)).__enter__().run_until_complete
-        if b(ait, 'asend', 'athrow', 'aclose'):
-            def iterate(f=ait.asend, a=a):
-                x = None
-                while True: x = yield a(f(x))
+    if not b(ait, '__aiter__') and b(ait := ait.__aiter__(), '__anext__'): raise TypeError(f'aiter_to_iter: cannot iterate over {ait!r} synchronously or asynchronously')
+    try:
+        c, d = b(ait, 'asend', 'athrow', 'aclose'), None
+        if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
+        if loop.is_running():
+            if not (getcontext().AITER_TO_ITER_DEFAULT_ALLOW_FUTURES if use_futures is None else use_futures): raise RuntimeError(f'aiter_to_iter: cannot convert async iterator {ait!r} to sync in running event loop without using futures')
+            def f(*a, f, c=loop.create_task, g=_chain_future, t=Future): return g(c(f(*a)), F := t()) or F.result()
+            if d:
+                f, x = partial(f, f=ait.asend), None
+                while True: x = yield f(x)
+            else:
+                f = partial(f, f=ait.__anext__)
+                while True: yield f()
         else:
-            def iterate(f=ait.__anext__, a=a):
+            a = loop.run_until_complete
+            if d:
+                f, x = ait.asend, None
+                while True: x = yield a(f(x))
+            else:
+                f = ait.__anext__
                 while True: yield a(f())
-        try: yield from iterate()
-        except StopAsyncIteration: ...
-        finally: c.__exit__(*exc_info())
-    else: raise TypeError(f'aiter_to_iter: cannot iterate over {ait!r} synchronously or asynchronously')
+    except StopAsyncIteration: ...
+    finally:
+        if c: c.__exit__(*exc_info())
 async def collect(it, n=None, default=_NO_DEFAULT, *, __reti=False, _=L.warning, m='collect ran out of items'):
     f, i = (r := []).append, 0
     async for i, _ in aenumerate(it):

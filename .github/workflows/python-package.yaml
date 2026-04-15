@@ -27,7 +27,7 @@ jobs:
     - name: Run mypy
       run: python -m mypy asyncutils
     - name: Run tests
-      run: python -m pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir . --local-badge-generate status -n auto
+      run: python -m pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir assets --local-badge-generate status -n auto
     - name: Upload coverage
       uses: codecov/codecov-action@v5.5.3
       with:

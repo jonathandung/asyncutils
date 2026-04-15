@@ -20,7 +20,7 @@ def test_sentinels(cls, ctxmgr):
         class Foo: __slots__, baz = (), cls()
     with ctxmgr:
         class Bar: __slots__, quux = (), cls('Bar.quux')
-    assert not (sentinel_base._can_instantiate or type(RAISE)._can_instantiate)
+    assert not (sentinel_base._can_instantiate or type(RAISE)._can_instantiate) # type: ignore[attr-defined]
 def test_custom_sentinel():
     class TestSentinel(sentinel_base): __slots__ = ()
     a = TestSentinel()

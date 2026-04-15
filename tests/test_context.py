@@ -1,3 +1,4 @@
+# type: ignore
 import pytest
 from asyncutils import context
 def test_mod():

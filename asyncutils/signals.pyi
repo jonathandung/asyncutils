@@ -22,7 +22,7 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], T], *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ValidExcType, ...]=..., default_on_processor_failure: T, sigs: Iterable[int]=..., logger: Logger=...) -> T|None:
     '''Wait for an operating system level signal included in `sigs` and the variable positional arguments to be signaled within `timeout` and handle it.
-    See the docs for the [signal](https://docs.python.org/library/signal.html) and [asyncio](https://docs.python.org/library/asyncio-eventloop.html#loop-add-signal-handler) libraries, as well as [the Wikipedia page for signals](https://en.wikipedia.org/wiki/Signal_(IPC)).
+    See the docs for the [`signal`](https://docs.python.org/library/signal.html) and [`asyncio`](https://docs.python.org/library/asyncio-eventloop.html#loop-add-signal-handler) libraries, as well as [the Wikipedia page for signals](https://en.wikipedia.org/wiki/Signal_(IPC)).
     `processor` should be a function that takes the signal occurred, preferrably returning an awaitable object.
     If `raise_on_timeout` is True, throw `TimeoutError` on timeout. Otherwise, return `None`.
     If `loop` was passed, its `add_signal_handler` and `remove_signal_handler` methods will be used.

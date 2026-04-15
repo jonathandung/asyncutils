@@ -37,12 +37,13 @@ async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, 
             except CRITICAL: raise Critical
         return r
     finally: audit('asyncutils.compete.multi_winner_race_with_callback/end', L); await safe_cancel_batch(p, callback=loser)
-def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=A.iscoroutine, futwrap=A.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods):
+def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscoroutine, futwrap=A.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods): # type: ignore
     if handle_iter is None: from .iters import to_list as handle_iter
     if handle_aiter is None: from .iters import to_list as handle_aiter
-    for i in aiter_to_iter(cfs):
+    if skip_invalid is None: from .context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid # noqa: N811
+    for i in aiter_to_iter(cfs, loop=loop):
         if corocheck(i): yield i; continue
-        try: i = futwrap(i) # noqa: PLW2901
+        try: i = futwrap(i, loop) # noqa: PLW2901
         except CRITICAL: raise Critical
         except (AssertionError, TypeError):
             if not _c(i, '__await__'):
@@ -50,7 +51,8 @@ def convert_to_coro_iter(cfs, skip_invalid=True, corocheck=A.iscoroutine, futwra
                 elif _c(i, '__iter__'): yield handle_iter(i)
                 elif not skip_invalid: raise TypeError(f'invalid item in {cfs!r}: {i!r}') from None
                 continue
-        async def wrapper(): return await i # noqa: B023
-        yield wrapper()
-def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs)), delay, loop=loop)
+        async def f(): return await i # noqa: B023
+        yield f()
+def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs, loop=loop)), delay, loop=loop)
+def enhanced_gather(it, return_exceptions=False, loop=None, _=A.gather): return _(*convert_to_coro_iter(it, loop=loop), return_exceptions=return_exceptions)
 del H, A
