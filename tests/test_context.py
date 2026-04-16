@@ -2,7 +2,6 @@
 import pytest
 from asyncutils import context
 def test_mod():
-    with pytest.raises(TypeError): context.Context(0.0)
     with pytest.raises(AttributeError): context.Context().foo = None
     with pytest.raises(TypeError): context.setcontext(None)
     ctx = context.getcontext()

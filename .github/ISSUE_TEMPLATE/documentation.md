@@ -37,7 +37,6 @@ If applicable, add screenshots to help explain your problem.
 - Python version tag (`python -VV`)
 - Read the docs build number; see [this page](https://app.readthedocs.org/projects/asyncutils/builds/?utm_source=asyncutils&utm_content=flyout)
 - Package version (`pip show py-asyncutils | grep Version:` or `conda list py-asyncutils --fields version`)
-- Full error traceback
 
 ## Additional context
 

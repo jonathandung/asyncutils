@@ -1,7 +1,7 @@
 '''A versioning scheme for `asyncutils`. Inspired by `torch/torch_version.py`, but with quite some differences.
 `asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
-- **MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.**
-- **MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINORS.**'''
+- MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.
+- MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINOR VERSIONS.'''
 from ._internal.types import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterable, Iterator
 from typing import Any, Literal, NamedTuple, NoReturn, Self, final, overload

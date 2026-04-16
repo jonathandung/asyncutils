@@ -1,4 +1,4 @@
-'''asyncutils is a feature-rich asynchronous utilities library with CLI and REPL support.'''
+'''A feature-rich asynchronous utilities library with CLI and REPL support.'''
 __all__ = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version', 'preloaded_submodules', 'submodules_map', 'time_since_boot' # noqa: RUF022
 from ._internal.types import Submodule
 from .altlocks import *
@@ -33,7 +33,7 @@ from .util import *
 from .version import *
 from types import ModuleType
 from typing import Final
-def __dir__() -> tuple[str, ...]: '''The names of all the public submodules of :mod:`asyncutils`, along with 'preloaded_submodules', 'submodules_map' and 'time_since_boot'.'''
+def __dir__() -> tuple[str, ...]: '''The names of all the public submodules of :mod:`asyncutils`, along with `'preloaded_submodules'`, `'submodules_map'` and `'time_since_boot'`.'''
 def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]
 '''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
