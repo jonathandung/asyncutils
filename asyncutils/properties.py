@@ -55,8 +55,8 @@ class AsyncLockProperty(AsyncProperty):
         return super()._helper(_, c=c)
     def get_lock(self, obj):
         if (r := (c := self._cache).get(i := id(obj))) is None: c[i] = r = self._lock_getter(obj)
-        try: finalize(obj, c.pop, i, None)
-        except TypeError: ... # noqa: SIM105
+        try: finalize(obj, c.pop, i, None) # noqa: SIM105
+        except TypeError: ...
         return r
 class coercedmethod: # noqa: N801
     __slots__ = '__f', '__name', '__owner'
