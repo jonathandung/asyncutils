@@ -21,8 +21,8 @@ class LeakyBucket(AsyncContextMixin[LeakyBucket], EventualLoopMixin):
     def __init__(self, capacity: float, leak: float, min_factor: float=..., max_factor: float=..., external_factor_settable: bool=..., timer: Timer=...):
         '''`capacity`: The maximum number of tokens the bucket can hold
         `leak`: The rate at which tokens leak from the bucket
-        `min_factor` (optional): Minimum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MINFACTOR`.
-        `max_factor` (optional): Maximum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MAXFACTOR`.
+        `min_factor` (optional): Minimum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MIN_FACTOR`.
+        `max_factor` (optional): Maximum adaptive factor; default `context.LEAKY_BUCKET_DEFAULT_MAX_FACTOR`.
         `external_factor_settable` (optional): Whether the factor attribute can be modified; default `context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: '''Stop draining the tokens in the bucket.'''

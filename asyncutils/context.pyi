@@ -1,16 +1,20 @@
 '''Contextual configuration system, inspired by the `decimal` module.'''
 from ._internal.types import ValidExcType
 from _collections_abc import Sequence
-from dataclasses import dataclass
 from types import TracebackType
-from typing import Any, Final, final, overload
-__all__ = 'Context', 'getcontext', 'localcontext', 'setcontext'
+from typing import Any, Final, NamedTuple, final, overload
+__all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'setcontext'
 @final
-@dataclass(kw_only=True, match_args=False, slots=True)
-class Context:
-    '''Uses a dataclass to store configuration for extensibility and ease of use, though that may not be optimal for performance.
-    Of course, this is not related to instantiating a certain class, as in the `decimal` module, but rather a convenient way to store configuration
-    for the various utilities and patterns this library bundles, especially to dynamically get default values in function signatures.'''
+class Context(NamedTuple):
+    '''A `collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is,
+    not loading `dataclasses`, which loads `inspect` and triggers a cascade of imports.
+    This class can technically be instantiated with positional arguments, but since the order of the fields are kept in alphabetical order of submodule
+    and new fields may be added in the future, only keyword arguments should be used to avoid subtle bugs.
+    For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed
+    by a concise description of what it configures.
+    Of course, this class is not related to instantiating a certain class, as in the `decimal` module, but rather a convenient way to store configuration
+    for the various utilities and patterns this library bundles, especially to dynamically get default values in function signatures.
+    The behaviour of this class as a tuple at runtime is an implementation detail.'''
     CIRCUIT_BREAKER_DEFAULT_RESET: float = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
@@ -27,8 +31,8 @@ class Context:
     ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR: bool = ...
     AITER_TO_ITER_DEFAULT_ALLOW_FUTURES: bool = ...
     TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS: float = ...
-    LEAKY_BUCKET_DEFAULT_MINFACTOR: float = ...
-    LEAKY_BUCKET_DEFAULT_MAXFACTOR: float = ...
+    LEAKY_BUCKET_DEFAULT_MIN_FACTOR: float = ...
+    LEAKY_BUCKET_DEFAULT_MAX_FACTOR: float = ...
     LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK: float = ...
     LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR: bool = ...
     LEAKY_BUCKET_ADJMAP: Sequence[tuple[float, tuple[float, float, float, float]]] = ...
@@ -70,13 +74,13 @@ class Context:
     BULKHEAD_DEFAULT_MAX_REJ: int = ...
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
-    def __post_init__(self) -> None: ...
 class localcontext:
-    def __init__(self, ctx: Context, **k: Any): '''Note that the context of the current thread is to be set to `ctx` upon entry of the context manager.'''
+    '''Context manager for temporarily setting the context to a modified version of the provided context. Not reentrant.'''
+    def __init__(self, ctx: Context, **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''
     @property
-    def new_ctx(self) -> Context: ...
+    def new_ctx(self) -> Context: '''The new context to be set on context manager entry.'''
     @property
-    def saved_ctx(self) -> Context: '''The previous context to be restored on exit.'''
+    def saved_ctx(self) -> Context: '''The previous context to be restored on context manager exit.'''
     def __enter__(self) -> None: ...
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
@@ -84,6 +88,9 @@ class localcontext:
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 def getcontext() -> Context: '''Return the current context for the active thread.'''
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
+all_contextual_consts: frozenset[str]
+'''A `frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
+These names will not be listed in the `__dir__` function of this submodule, since there are so many of them (currently 59) and more may be added in the future.'''
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
@@ -100,8 +107,8 @@ ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR: Final[bool]
 ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR: Final[bool]
 AITER_TO_ITER_DEFAULT_ALLOW_FUTURES: Final[bool]
 TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS: Final[float]
-LEAKY_BUCKET_DEFAULT_MINFACTOR: Final[float]
-LEAKY_BUCKET_DEFAULT_MAXFACTOR: Final[float]
+LEAKY_BUCKET_DEFAULT_MIN_FACTOR: Final[float]
+LEAKY_BUCKET_DEFAULT_MAX_FACTOR: Final[float]
 LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK: Final[float]
 LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR: Final[bool]
 LEAKY_BUCKET_ADJMAP: Final[Sequence[tuple[float, tuple[float, float, float, float]]]]

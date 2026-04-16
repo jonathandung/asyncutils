@@ -117,7 +117,7 @@ class MaxIterationsError(RuntimeError): '''Raised when a function has reached th
 class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
 class RateLimitExceeded(RuntimeError):
     '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
-    The initialization signature is considered an implementation detail, may change without notice, and is therefore not here.'''
+    The initialization signature is considered an implementation detail. It may change without notice, and is therefore not here.'''
     async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
@@ -127,7 +127,7 @@ class BusPublishingError(BusError):
     @property
     def middleware(self) -> Middleware|None: '''May be None if the middleware was garbage-collected.'''
 class LockForceRequest[T](BaseException):
-    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from locks.LocksmithBase) necessitates the lock be released.'''
+    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from `locks.LocksmithBase`) necessitates the lock be released.'''
     def __init__(self, requester: LocksmithBase, fulfill: Callable[[Any], None], lock: AsyncLockLike[Any], info: T, /): ...
     @property
     def requester(self) -> LocksmithBase: '''The locksmith that sent this error.'''
@@ -135,15 +135,15 @@ class LockForceRequest[T](BaseException):
     def lock(self) -> AsyncLockLike[Any]: '''The lock involved.'''
     def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after presumably releasing the lock and performing error handling.'''
     @property
-    def args(self) -> tuple[str, T]: '''The tuple (error_message, additional_info).''' # type: ignore[override]
+    def args(self) -> tuple[str, T]: '''The tuple `(error_message, additional_info)`.''' # type: ignore[override]
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the password_queue function.'''
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when the password_queue function cannot find the password from the closure variables.'''
     @property
     def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...
-class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the get password from the closure variables.'''
-class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when the password_queue function cannot find the put password from the closure variables.'''
+class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when the `password_queue` function cannot find the get password from the closure variables.'''
+class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when the `password_queue` function cannot find the put password from the closure variables.'''
 class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
     @property
@@ -152,9 +152,9 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
 class PasswordError(PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
     @property
-    def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be None if the wrong password has been garbage collected.'''
+    def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be `None` if the wrong password has been garbage collected.'''
     @property
-    def queue(self) -> Q[Any, Any]|None: '''The queue associated with the exception. May be None if the queue has been garbage collected.'''
+    def queue(self) -> Q[Any, Any]|None: '''The queue associated with the exception. May be `None` if the queue has been garbage collected.'''
 class WrongPassword(PasswordError, ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
     def __init__(self, queue: Q[Any, Any], pwd: Any, /): ...
@@ -162,9 +162,9 @@ class WrongPasswordType[T](PasswordError, TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
     def __init__(self, pwd: T, wrongtyp: type[T], queue: Q[Any, Any]|None, correcttyp: type, /): ...
     @property
-    def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
+    def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
     @property
-    def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be None if the wrong password type has been garbage collected.'''
+    def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of `GetPasswordMissing` and `PutPasswordMissing`.'''
     def __init__(self) -> None: ...

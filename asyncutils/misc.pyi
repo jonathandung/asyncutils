@@ -1,3 +1,4 @@
+'''Utilities that cannot be easily classified into any submodule.'''
 from _collections_abc import Awaitable, Callable
 from typing import Any, Literal, overload
 __all__ = 'StateMachine', 'gather_with_limited_concurrency'

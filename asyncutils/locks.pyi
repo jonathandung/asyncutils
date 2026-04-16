@@ -1,3 +1,5 @@
+'''More advanced locking primitives. Besides `RWLock` and subclasses thereof, all classes strictly follow the asynchronous lock interface
+as defined by `asyncio.Lock` and made explicit in the `_internal.types.AsyncLockLike` protocol.'''
 from ._internal.types import AsyncLockLike, RWLockRV
 from .mixins import AwaitableMixin, EventualLoopMixin, LockMixin, LockWithOwnerMixin, LoopContextMixin
 from _collections_abc import Awaitable, Callable, Coroutine, Mapping

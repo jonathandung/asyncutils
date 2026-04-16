@@ -1,3 +1,4 @@
+'''The most useful patterns and helpers core to this module and are therefore required by the `console` submodule, among many others.'''
 from ._internal.types import GeneratorCoroutine, Sentinel, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
 from _collections_abc import AsyncGenerator, AsyncIterable, AsyncIterator, Awaitable, Callable, Generator, Iterable, Iterator
 from asyncio.events import AbstractEventLoop

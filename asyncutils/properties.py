@@ -4,6 +4,7 @@ from ._internal.submodules import properties_all as __all__
 from asyncio.events import new_event_loop
 from asyncio.locks import Lock
 from atexit import register
+from weakref import finalize
 @subscriptable
 class AsyncProperty:
     __slots__ = '__doc__', '_cls', '_deleted', '_finalize', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'
@@ -53,7 +54,9 @@ class AsyncLockProperty(AsyncProperty):
             async with self.get_lock(a[0]): await f(*a)
         return super()._helper(_, c=c)
     def get_lock(self, obj):
-        if (r := self._cache.get(i := id(obj))) is None: self._cache[i] = r = self._lock_getter(obj)
+        if (r := (c := self._cache).get(i := id(obj))) is None: c[i] = r = self._lock_getter(obj)
+        try: finalize(obj, c.pop, i, None)
+        except TypeError: ... # noqa: SIM105
         return r
 class coercedmethod: # noqa: N801
     __slots__ = '__f', '__name', '__owner'

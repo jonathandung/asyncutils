@@ -1,3 +1,4 @@
+'''Mixins classes for some common or specialized patterns that provide methods based on some abstract methods.'''
 from ._internal.helpers import LoopMixinBase
 from ._internal.types import ValidExcType
 from .locks import LocksmithBase

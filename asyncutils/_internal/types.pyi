@@ -1,6 +1,6 @@
-'''Defines interfaces and type aliases used in this module's stubs. Pseudo-stable (deprecation periods will span at least 2 minor versions).
-This is a fake module in the sense that the names in this stub are all None at runtime, so do not inherit from its 'protocols'.
-This facilitates lightweight inline type annotations.'''
+'''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
+Pseudo-stable (deprecation periods will span at least 2 minor versions).
+This is a fake module in the sense that the names in this stub are all `None` at runtime, so do not inherit from its 'protocols'.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin

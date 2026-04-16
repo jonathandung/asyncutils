@@ -1,3 +1,4 @@
+'''Utilities related to the command-line interface and getting metadata for package configuration.'''
 from ._internal.types import CanWriteAndFlush, DumpType, Openable
 from _collections_abc import Callable, Sequence
 __all__ = 'argstr_to_json', 'argv_to_json', 'ext2modname', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'print_cfg_json_format', 'print_cmd_help'

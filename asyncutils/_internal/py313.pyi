@@ -1,4 +1,4 @@
-'''Backport of functools.partial that supports placeholders to python 3.13 or under.'''
+'''Backport of `functools.partial` that supports placeholders to python 3.13 or under.'''
 import sys
 if sys.version_info < (3, 14):
     from functools import partial

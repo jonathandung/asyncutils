@@ -1,4 +1,4 @@
-'''This module reexports all the attributes of the logger used by asyncutils.'''
+'''This module reexports all the attributes of the logger used by `asyncutils`.'''
 import logging as L
 from _collections_abc import Mapping
 from typing import Final

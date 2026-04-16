@@ -29,7 +29,7 @@ class EventWithValue[T](EventMixin[T]):
     def history(self) -> list[tuple[float, T]]: '''The past results of the event as a list of tuples (timestamp, value).'''
     @property
     def history_asdict(self) -> dict[float, T]: '''Above, but as a dictionary.'''
-    def recent_history(self, duration: float|None=...) -> Generator[tuple[float, T], None, None]: '''Yield recent history entries in order; what qualifies as recent depends on `duration`, defaulting to `context.EVENT_WITH_VALUE_DEFAULT_RECENT`.'''
+    def recent_history(self, duration: float|None=...) -> Generator[tuple[float, T]]: '''Yield recent history entries in order; what qualifies as recent depends on `duration`, defaulting to `context.EVENT_WITH_VALUE_DEFAULT_RECENT`.'''
     async def wait_for_transition(self, old: T, new: T, timeout: float|None=..., *, force_transition: bool=...) -> bool:
         '''Wait until the value is set to `old`, and then `new`. The timeout for which defaults to `context.EVENT_WITH_VALUE_DEFAULT_TIMEOUT`.
         If the timeout expires and force_transition is True, cause the transition to happen manually.

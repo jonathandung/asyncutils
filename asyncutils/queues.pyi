@@ -1,4 +1,4 @@
-'''Extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
+'''Non-inheriting extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin

@@ -1,3 +1,4 @@
+'''Processors for asynchronous tasks.'''
 from ._internal.types import Exceptable, SupportsIteration, Timer
 from .mixins import LoopContextMixin
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine

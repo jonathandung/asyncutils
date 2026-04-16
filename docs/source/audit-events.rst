@@ -126,6 +126,12 @@ this table take inspiration.
   * - asyncutils.futures.AsyncCallbacksTask/schedule_callbacks
     - ``addr``: :class:`int`
     - The above, but for exact instances of :class:`asyncutils.futures.AsyncCallbacksTask`.
+  * - asyncutils.futures.EagerAsyncCallbacksFuture/schedule_callbacks
+    - ``addr``: :class:`int`
+    - The above, but for exact instances of :class:`asyncutils.futures.EagerAsyncCallbacksFuture`.
+  * - asyncutils.futures.EagerAsyncCallbacksTask/schedule_callbacks
+    - ``addr``: :class:`int`
+    - The above, but for exact instances of :class:`asyncutils.futures.EagerAsyncCallbacksTask`.
   * - asyncutils.io.double_ended_pipe
     - ``reader1``: :class:`int`, ``writer1``: :class:`int`, ``reader2``: :class:`int`, ``writer2``: :class:`int`
     - Raised when :func:`asyncutils.io.double_ended_text_pipe` or :func:`asyncutils.io.double_ended_binary_pipe` is called, with the file descriptors of the reader and writer ends of both pipes as arguments.

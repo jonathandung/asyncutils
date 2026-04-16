@@ -1,3 +1,4 @@
+'''Asynchronous descriptors, mimicking `property`. Optionally apply a lock.'''
 from ._internal.types import AsyncLockLike
 from _collections_abc import Awaitable, Callable
 from asyncio.events import AbstractEventLoop
@@ -23,15 +24,15 @@ class AsyncProperty[T, R]:
 class AsyncLockProperty[T, R](AsyncProperty[T, R]):
     @overload
     @staticmethod
-    def _new_lock[L: AsyncLockLike[Any]](_: R, *, lock_impl: type[L]) -> L: '''Create a new lock for the given object. The implementation should not cache the locks for each instance, since that is done by this class already.'''
+    def _new_lock[L: AsyncLockLike[Any]](_: R, *, lock_impl: type[L]) -> L: ...
     @overload
     @staticmethod
-    def _new_lock(_: R) -> Lock: '''Create a new lock for the given object. The implementation can refer to the properties of the object, but should not cache the locks for each instance, since that is done by this class already.'''
+    def _new_lock(_: R) -> Lock: '''Default way to create a new lock for the given object. The implementation should not cache the locks for each instance, since that is done by this class already.'''
     @overload
     def __new__(cls, *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
-    def get_lock(self, obj: R) -> AsyncLockLike[Any]: ...
+    def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a memory-address based cache.'''
 @final
 class coercedmethod[T, R, **P]: # noqa: N801
     def __init__(self, func: Callable[Concatenate[R, P], T], /): ...

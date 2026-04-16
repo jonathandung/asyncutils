@@ -1,3 +1,4 @@
+'''Object-oriented (async) iteration helpers.'''
 from ._internal.types import SupportsIteration, ValidExcType, ValidSlice
 from .mixins import EventualLoopMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
@@ -12,10 +13,10 @@ class anullcontext:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 class achain[T]:
-    '''Async version of itertools.chain, taking async or sync iterables.'''
+    '''Async version of `itertools.chain`, taking async or sync iterables.'''
     @classmethod
-    def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self: '''Construct an achain from `its`, an (async) iterable of (async) iterables to chain.'''
-    def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an achain from the (async) iterables.'''
+    def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self: '''Construct an `achain` from `its`, an (async) iterable of (async) iterables to chain.'''
+    def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an `achain` from the (async) iterables.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
 class apeekable[T](EventualLoopMixin):
     '''Async version of `more_itertools.peekable`.'''

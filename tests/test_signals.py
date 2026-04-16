@@ -1,14 +1,8 @@
-import asyncio
-import os
-import sys
+import asyncio, sys, os
 from signal import Signals
-
 from pytest import fixture, mark, raises
-
 from asyncutils.base import event_loop
 from asyncutils.signals import wait_for_signal
-
-
 async def kill(sig):
     await asyncio.sleep(0.05)
     os.kill(os.getpid(), sig)

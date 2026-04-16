@@ -1,3 +1,4 @@
+'''Some asyncio protocols and a transport. See [the documentation page](https://docs.python.org/3/library/asyncio-protocol.html).'''
 from .mixins import EventualLoopMixin
 from asyncio.events import AbstractEventLoop
 from asyncio.protocols import Protocol

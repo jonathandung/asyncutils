@@ -1,3 +1,4 @@
+'''This module provides various pool implementations for concurrent execution and resource management in asynchronous contexts.'''
 from ._internal.types import SupportsIteration, ValidExcType
 from .config import Executor
 from .mixins import AsyncContextMixin, LoopContextMixin

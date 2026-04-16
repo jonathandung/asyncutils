@@ -1,3 +1,4 @@
+'''Miscellaneous public constants.'''
 from ._internal.types import Executor, Sentinel
 from _collections_abc import Callable
 from threading import Lock
@@ -25,13 +26,13 @@ class sentinel_base:
     @overload
     def is_(self, other: Self, /) -> bool: ... # type: ignore[overload-overlap]
     @overload
-    def is_(self, other: object, /) -> Literal[False]: ...
+    def is_(self, other: object, /) -> Literal[False]: '''`operator.is_` for sentinels.'''
 RAISE: Final[Sentinel]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
 SYNC_AWAIT: Final[Sentinel]
-'''A possible value to Deadlock.noticer, indicating the deadlock situation was found by the sync_await function.'''
+'''A possible value to `exceptions.Deadlock.noticer`, indicating the deadlock situation was found by the `util.sync_await` function.'''
 _NO_DEFAULT: Final[Sentinel]
-'''Users are not meant to interact with this directly.'''
+'''Users are not meant to interact with this directly; only here for completeness.'''
 CLOSED: Final[int]
 '''The closed state of a circuit breaker.'''
 HALF_OPEN: Final[int]

@@ -1,3 +1,4 @@
+'''Compatibility shims for older Python versions.'''
 import sys as s, typing as t
 from functools import partial
 __all__ = 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'apargs', 'partial'

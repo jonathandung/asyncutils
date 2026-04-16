@@ -1,12 +1,12 @@
 '''Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes,
-and memory maps. Does not depend on `aiofiles` or any such library.'''
+and memory maps. Does not depend on `aiofiles` or any such library, using executors as determined by the module configuration.'''
 from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
 from .config import Executor
 from .mixins import LoopContextMixin
 from _collections_abc import Callable, Iterable, Mapping
 from contextlib import _AsyncGeneratorContextManager
 from mmap import mmap
-from typing import IO, Any, Literal
+from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
@@ -30,12 +30,12 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at `size` (or the current position if not passed), and return the new file size.'''
     async def write(self, s: R, /) -> int: '''Write `s` into the writer, returning the number of characters written.'''
     async def writelines(self, lines: Iterable[R], /) -> None: '''Write the lines from the iterable into the writer without adding newline as separators.'''
-    def fileno(self) -> int: '''Raise OSError.'''
+    def fileno(self) -> NoReturn: '''Raise `OSError`.'''
     def isatty(self) -> bool: '''Whether at least one of the reader or the writer is connected to a terminal.'''
     def readable(self) -> bool: '''Whether the reader can be read from.'''
-    def seek(self, offset: int, whence: int=..., /) -> int: '''Raise OSError.'''
+    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise `OSError`.'''
     def seekable(self) -> bool: '''Whether both streams support random access.'''
-    def tell(self) -> int: '''Raise OSError.'''
+    def tell(self) -> NoReturn: '''Raise `OSError`.'''
     def writable(self) -> bool: '''Whether the writer can be written into.'''
     @property
     def closed(self) -> bool: '''Whether the file has been closed.'''

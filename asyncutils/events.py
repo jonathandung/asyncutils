@@ -32,8 +32,8 @@ class EventWithValue(EventMixin):
         if value is None:
             if strict: raise EventValueError('use clear instead')
         else:
-            t, w = [], self._waiters
-            for _ in w: t.append(_) if _.done() else _.set_result(value)
+            f, w = (t := []).append, self._waiters
+            for _ in w: f(_) if _.done() else _.set_result(value)
             w.difference_update(t)
     def remove_done_waiters(self): (W := self._waiters).difference_update(filter(lambda w: w.done(), W))
     def set_once(self, value): v = self._value; self.set(value); self.set(v)
@@ -44,9 +44,9 @@ class EventWithValue(EventMixin):
             return default
         return v
     async def wait_for_next(self, timeout=None):
-        self._waiters.add(F := self.make_fut())
+        (w := self._waiters).add(F := self.make_fut())
         try: return await wait_for(F, timeout)
-        finally: self._waiters.discard(F)
+        finally: w.discard(F)
     def is_set(self): return self._value is not None
     @property
     def history(self): return [(t, q) for t, s in self._hist if (q := s()) is not None]

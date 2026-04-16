@@ -1,3 +1,4 @@
+'''Functional and chainable interface to get async generators from (async) iterables.'''
 from ._internal.types import AsyncContextManager, Exceptable, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Hashable, Iterable, Reversible
 from asyncio.events import AbstractEventLoop
