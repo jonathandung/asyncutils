@@ -59,4 +59,5 @@ dmypy.json
 cython_debug/
 .vscode/
 .ruff_cache/
+.out/
 .pypirc

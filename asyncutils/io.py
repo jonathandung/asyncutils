@@ -15,7 +15,7 @@ if not (m := S.modules.get('os')):
         if n in N: m = __import__(n); break
     else: raise ImportError('cannot find pipe and fsync implementations')
 def f(a, b, m=m, f=S.audit, /):
-    def double_ended_pipe(pipe_impl=m.pipe, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
+    def double_ended_pipe(*, pipe_impl=m.pipe, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
     return double_ended_pipe
 _, I, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, S.maxsize, '*, pipe_impl={}'
 double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'), ('w', 'wb')))

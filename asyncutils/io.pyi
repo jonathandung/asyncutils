@@ -9,10 +9,10 @@ from mmap import mmap
 from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
-def double_ended_text_pipe(pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
+def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
     '''Return a tuple of two `AsyncReadWriteCouple`s, such that each can read what the other writes. Two os-level pipes must be created.
     Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default os.pipe) to customize this behaviour.'''
-def double_ended_binary_pipe(pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: ...
+def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: ...
 class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     '''An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
     The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
@@ -20,6 +20,8 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     def reader(self) -> IO[T]: '''The underlying reader.'''
     @property
     def writer(self) -> IO[R]: '''The underlying writer.'''
+    @property
+    def executor(self) -> Executor: '''The underlying executor.'''
     def __init__(self, reader: IO[T], writer: IO[R], /): ...
     def __getattr__(self, name: str, /) -> Any: ...
     async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
@@ -42,7 +44,7 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     __cleanup__ = aclose
 class MemoryMappedIOManager(LoopContextMixin):
     '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
-    You probably only need one instance of this.
+    You will probably only ever need one instance of this.
     In the docstrings below, `mgr` will be an instance of this class.'''
     def __init__(self, executor: Executor|None=...): ...
     @property
@@ -53,8 +55,6 @@ class MemoryMappedIOManager(LoopContextMixin):
     def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b', 'x+b']]: '''Dictionary mapping file paths as passed to `mgr.open`, `mgr.create` or `mgr.create_sparsef` to the mode the file was opened with.'''
     @property
     def open_files(self) -> OpenFiles: '''Dictionary mapping tuples of the form `(file, mode)` to the managed file objects.'''
-    @open_files.deleter
-    def open_files(self) -> None: '''Clear the dictionary of open files.'''
     def open(self, path: Openable, init_size: int=...) -> OpenRV: '''An async context manager that opens a file at `path` for memory-mapped reading and writing on entry and closes it on exit. The file must exist and is not truncated.'''
     def create(self, path: Openable, init_size: int=..., *, exclusive: bool=...) -> OpenRV: '''An async context manager that opens a file at `path` for memory-mapped writing and reading on entry and closes it on exit. The file is truncated to the beginning, and must not exist if `exclusive` is `True` (the default behaviour).'''
     def create_sparsef(self, path: Openable, total_size: int, chunks: Mapping[int, bytes|str]) -> OpenRV: '''An async context manager that creates a file of size `total_size` at `path`, with `chunks` mapping offsets to the data to be written there. Though it is technically undefined behaviour to have overlapping chunks, the implementation overwrites data from old chunks with that from new ones.'''

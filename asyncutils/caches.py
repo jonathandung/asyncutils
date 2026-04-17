@@ -1,6 +1,6 @@
-from . import context
+from .context import getcontext
 from ._internal.submodules import caches_all as __all__
-from .base import event_loop, yield_to_event_loop
+from .base import event_loop
 from .exceptions import CRITICAL, Critical
 from .mixins import LoopContextMixin
 from .util import safe_cancel, to_async
@@ -15,8 +15,9 @@ from time import monotonic
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_timer', '_ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic, _=C.defaultdict):
-        if ttl is None: ttl = context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
-        if refresh is None: refresh = context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
+        C = getcontext()
+        if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
+        if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
         audit('asyncutils.caches.CacheWithBackgroundRefresh', ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event, self._timer = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(), timer; self.configure(ttl, refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
@@ -65,8 +66,8 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         async with self._lock: self._cache.clear()
 class AsyncLRUCache:
     __slots__ = '_caches', '_factory', '_loopctx', '_make_key', '_timer', '_timestamps', '_ttl'
-    def __init__(self, maxsize=None, ttl=None, typed=False, timer=monotonic):
-        if maxsize is None: maxsize = context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE
+    def __init__(self, maxsize=None, ttl=None, *, typed=False, timer=monotonic):
+        if maxsize is None: maxsize = getcontext().ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE
         audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx, self._timer = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200), timer
     def __call__(self, f, /, _=lambda f, a, k, s=0x3d, t=0x7a: id(f)<<t|hash(a)<<s|hash(frozenset(k.items()))):
@@ -79,9 +80,9 @@ class AsyncLRUCache:
             if t: S[K] = T()
             return r
         return wraps(f)(wraps(c, ('cache_info', 'cache_clear'), ())(wrapper))
-    async def cache_clear(self):
+    def cache_clear(self):
         self._timestamps.clear(); C = self._caches
-        while C: C.popitem()[1].cache_clear(); await yield_to_event_loop
+        while C: C.popitem()[1].cache_clear()
     def __del__(self): self._loopctx.__exit__(None, None, None)
     @property
     def loop(self): return self._loopctx.__enter__()

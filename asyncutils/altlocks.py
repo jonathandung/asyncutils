@@ -92,7 +92,7 @@ class CircuitBreaker:
 class StatefulBarrier(AwaitableMixin):
     __slots__ = '_broken', '_cond', '_count', '_exc', '_initstate', '_parties', '_state'
     def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._cond, self._initstate, self._broken = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Condition(), initstate, False
-    async def wait(self, state=None, timeout=None):
+    async def wait(self, state=None, *, timeout=None):
         try:
             async with _timeout(timeout), (C := self._cond):
                 self.raise_for_abort(); f = (S := self._state).append

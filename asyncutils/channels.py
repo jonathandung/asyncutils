@@ -133,7 +133,7 @@ class EventBus(LoopContextMixin):
     def has_subscribers(self, event_type): return bool(self._subscribers[event_type])
     @staticmethod
     def is_valid_event_type(event_type): return event_type is None or isinstance(event_type, str)
-    def is_subscribed(self, callback, event_type=_NO_DEFAULT): return any(callback in i for i in self._subscribers.values()) if event_type is _NO_DEFAULT else callback in self._subscribers.get(event_type, ())
+    def is_subscribed(self, subscriber, event_type=_NO_DEFAULT): return any(subscriber in i for i in self._subscribers.values()) if event_type is _NO_DEFAULT else subscriber in self._subscribers.get(event_type, ())
     @property
     def total_subscribers(self): return sum(map(len, self._subscribers.values()))
     @property
@@ -185,14 +185,14 @@ class EventBus(LoopContextMixin):
             if o: self.stop_tracking() if stats_receiver is None else stats_receiver.set_result(self.stop_tracking(True))
     def start_tracking(self): self._tracking = True
     def stop_tracking(self, ret_stats=False): self._tracking = False; return copy_and_clear(self._published) if ret_stats else self._published.clear()
-    async def subscribe(self, callback, /, event_type=None):
+    async def subscribe(self, subscriber, /, event_type=None):
         self.raise_for_shutdown()
-        async with self._lock: self._subscribers[event_type].add(callback)
-        return callback
-    async def unsubscribe(self, callback, /, event_type=None):
+        async with self._lock: self._subscribers[event_type].add(subscriber)
+        return subscriber
+    async def unsubscribe(self, subscriber, /, event_type=None):
         self.raise_for_shutdown()
         async with self._lock:
-            try: self._subscribers[event_type].remove(callback); return True
+            try: self._subscribers[event_type].remove(subscriber); return True
             except KeyError: return False
     def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type), loop=self.loop)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
@@ -232,11 +232,11 @@ class EventBus(LoopContextMixin):
             if iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    async def subscribe_until(self, fut, callback, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)): # noqa: B008
+    async def subscribe_until(self, fut, subscriber, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
-            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(callback, event_type); return r
-        await self.subscribe(callback, event_type); return self.make(f())
+            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
+        await self.subscribe(subscriber, event_type); return self.make(f())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): L.warning('event stream buffer full')
         try: await wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
@@ -280,7 +280,8 @@ class EventBus(LoopContextMixin):
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, __cleanup__, _inc_cnt = None, shutdown, classmethod(_); del _ # noqa: B008 # type: ignore
+    def __cleanup__(self): return self.shutdown(immediate=True)
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008 # type: ignore
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'

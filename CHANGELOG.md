@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com).
 
 This project uses [Semantic Versioning](https://semver.org).
 
-## [0.8.25] - 2026-04-14: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.26] - 2026-04-16: newest; [unstable](https://semver.org/#spec-item-4)
 
 ### Tests
 
-48% coverage, 46 tests
+49% coverage, 46 tests
 
 ### Docs
 
@@ -397,6 +397,8 @@ Submodules:
   - semaphore
   - aiter_from_f
   - safe_cancel
+  - transient_block
+  - transient_block_from_loop
 
 - version
 

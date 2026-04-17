@@ -12,12 +12,12 @@ async def first_completed[T](*C: Coroutine[Any, Any, T], ret_exc: Literal[False]
     '''Return the result of the first coroutine that completes among those passed in.
     If ret_exc is True, the coroutine might have errored, in which case the exception it throws is returned.
     In any case, the losing coroutines are cancelled together and the function returns when the cancellations finish.'''
-async def race_with_callback[T](*C: Coroutine[Any, Any, T], winner: Callable[[T], Any]=..., loser: Callable[[Any|BaseException], Any]=..., timeout: float|None=...) -> T|None:
+async def race_with_callback[T](*C: Coroutine[Any, Any, T], winner: Callable[[T], object]=..., loser: Callable[[Any|BaseException], object]=..., timeout: float|None=...) -> T|None:
     '''Return the result of the first coroutine to complete, which will have winner called on it.
     If no coroutine completes within `timeout`, None is returned.
     The loser callback is called on each return value of or exception raised by the losing coroutines after seeing CancelledError.'''
-async def multi_winner_race_with_callback[T](*C: Coroutine[Any, Any, T], timeout: float, winner: Callable[[T], Any]=..., loser: Callable[[Any|BaseException], Any]=...) -> list[T]: '''Return a list of all the coroutines that completed within `timeout`, and cancel the rest, triggering callbacks similarly to race_with_callback.'''
-def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., corocheck: Callable[[Any], TypeGuard[Coroutine[Any, Any, Any]]]=..., futwrap: Callable[[Future[Any]|SyncFuture[Any], AbstractEventLoop|None], Future[Any]]=..., handle_aiter: Callable[[AsyncIterable[Any]], Any]=..., handle_iter: Callable[[Iterable[Any]], Any]=...) -> Generator[Coroutine[Any, Any, Any], Any, None]:
+async def multi_winner_race_with_callback[T](*C: Coroutine[Any, Any, T], timeout: float, winner: Callable[[T], object]=..., loser: Callable[[Any|BaseException], object]=...) -> list[T]: '''Return a list of all the coroutines that completed within `timeout`, and cancel the rest, triggering callbacks similarly to race_with_callback.'''
+def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., loop: AbstractEventLoop|None=..., corocheck: Callable[[Any], TypeGuard[Coroutine[Any, Any, Any]]]=..., futwrap: Callable[[Future[Any]|SyncFuture[Any], AbstractEventLoop|None], Future[Any]]=..., handle_aiter: Callable[[AsyncIterable[Any]], object]=..., handle_iter: Callable[[Iterable[Any]], object]=...) -> Generator[Coroutine[Any, Any, Any], Any, None]:
     '''A helper function to convert a possibly async iterable of futures, coroutines and even (async) iterables to a plain generator of coroutines,
     such that it may be starred and passed into the functions in this module. Originally designed to complement staggered.staggered_race.
     Due to the possibility of `cfs` being an async iterable and this function being designed to operate in a sync context, it is somewhat inefficient.'''

@@ -45,7 +45,7 @@ class ConsoleBase(B): # type: ignore
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     def runcode(self, code, *, futimpl=__import__('concurrent.futures._base', fromlist=_f).Future, dont_show_traceback=(KeyboardInterrupt, MemoryError, SyntaxError), threadsafe=True):
-        getattr(self._loop, 'call_soon'+'_threadsafe'*threadsafe)(self.__callback, F := futimpl(), code, context=self.context)
+        getattr(self._loop, 'call_soon_threadsafe' if threadsafe else 'call_soon')(self.__callback, F := futimpl(), code, context=self.context)
         try: return F.result()
         except SystemExit as e: self.set_return_code(e)
         except BaseException as e: # noqa: BLE001
@@ -134,10 +134,12 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         super().posthook()
     def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=32, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
+        if b is None: return
         try:
             for _ in range(_skip_frames):
-                if b is None or (n := b.tb_next) is None: break
-                b = n.tb_next if (c := n.tb_frame.f_code).co_filename.endswith(_suf) and c.co_firstlineno == _fln and c.co_name == _mn else n
+                if (b := b.tb_next) is None: break
+            else:
+                if (c := b.tb_frame.f_code).co_filename.endswith(_suf) and c.co_firstlineno == _fln and c.co_name == _mn: b = b.tb_next
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))

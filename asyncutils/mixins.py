@@ -13,11 +13,13 @@ class LoopContextMixin(LoopMixinBase):
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); self.exiter()
 class LoopBoundMixin:
-    _loop = None
-    def make_fut(self):
-        if (l := self._loop) is None: self._loop = l = get_loop_and_set()
+    __slots__ = '_loop',
+    @property
+    def loop(self):
+        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
         elif l is not _get_running_loop(): raise RuntimeError('could not bind loop')
-        return l.create_future()
+        return l
+    def make_fut(self): return self.loop.create_future()
 @subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
@@ -58,7 +60,7 @@ class LockMixin(metaclass=ABCMeta):
         raise RuntimeError('failed to acquire lock')
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a # type: ignore
-    async def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
+    def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
 @subscriptable
 class LockWithOwnerMixin(LockMixin):
     __slots__ = ()
@@ -81,6 +83,8 @@ class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
     def get(self): ...
     @abstractmethod
     def set(self, value): ...
+    @abstractmethod
+    def clear(self): ...
     async def wait_for_value(self, val, timeout=None, *, set_at_timeout=False):
         try:
             async with _timeout(timeout):

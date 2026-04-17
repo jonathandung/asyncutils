@@ -1,4 +1,4 @@
-'''Implementation of an interactive console base class, as well as an AsyncUtilsConsole class derived from it.'''
+'''Implementation of an interactive console base class, as well as an `AsyncUtilsConsole` class derived from it.'''
 from ._internal.types import ValidExcType
 from _collections_abc import Callable, Coroutine, Iterable
 from _contextvars import Context
@@ -14,6 +14,8 @@ __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
     '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.
     Inspired by asyncio/__main__.py. Highly adaptable.'''
+    BANNER: ClassVar[str]
+    '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     STATEMENT_FAILED: ClassVar[object]
     '''This is present if `_pyrepl.console.InteractiveColoredConsol`e is used as the base class.'''
     NAME: ClassVar[str]
@@ -42,16 +44,15 @@ class ConsoleBase(InteractiveConsole, ABC):
     def memory_errors(self) -> int: '''The number of `MemoryError`s that have occurred.'''
     @final
     @property
-    def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in is_running for state consistency checks.'''
+    def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in `is_running` for state consistency checks.'''
     @property
-    def is_running(self) -> bool: '''Whether the console is running. Default implementation uses _internal_is_running only.'''
-    def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=..., importer: Callable[[str], ModuleType]=...):
+    def is_running(self) -> bool: '''Whether the console is running. The default implementation uses `_internal_is_running` only.'''
+    def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
         '''`loop`: Event loop used by console interaction.
         `mod` (optional): The module to import within the console, determined by the subclass name by default.
         `modname` (optional): The name of the above module.
-        `context_factory` (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.
-        `importer` (optional): A function used to import a module from a string.'''
-    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], Any]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], Any]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], Any]]=..., additional_memerr_hooks: Iterable[Callable[[Self], Any]]=..., template: str=..., **k: Any) -> None:
+        `context_factory` (optional): A function that takes no arguments and returns an instance of contextvars.Context, to be used by the event loop.'''
+    def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], object]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], object]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], object]]=..., additional_memerr_hooks: Iterable[Callable[[Self], object]]=..., template: str=..., **k: Any) -> None:
         '''`name` (optional): name of the module using the console
         `version` (optional): version of the module using the console
         `description` (optional): description of the module using the console
@@ -63,12 +64,12 @@ class ConsoleBase(InteractiveConsole, ABC):
         `additional_memerr_hooks` (optional): see above
         `template` (optional): the console banner to use, with %-placeholders for name, version and description
         Additional keyword arguments are passed to `template.__mod__`.'''
-    def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], None]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
+    def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
         '''Run `code`, an instance of `types.CodeType`.
         `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
         `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
-        `threadsafe` is whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
+        `threadsafe` dictates whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
     def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # type: ignore[override]
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''Run the console and return the integer return code.
@@ -79,7 +80,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         warnings for garbage-collected coroutines not being awaited respectively.
         If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start
         python with the -i flag.'''
-    def showtraceback(self) -> None: '''Display the formatted traceback of the previous exception, or do nothing if there was none.'''
+    def showtraceback(self) -> None: '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing (this differs from the superclass behaviour).'''
     @final
     def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a `KeyboardInterrupt`, instead of touching this method.'''
     @final
@@ -88,14 +89,12 @@ class ConsoleBase(InteractiveConsole, ABC):
     def refresh(self) -> None: '''Callback in `interrupt` and `memoryerror`.'''
     @abstractmethod
     def prehook(self, max_memerrs: int) -> None:
-        '''Called by `run_console` before beginning the interaction logic.
-        Can raise errors.
+        '''Called by `run_console` before beginning the interaction logic. Can raise errors.
         When implementing, call `super().prehook(max_memerrs)` before everything.
         Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
     def posthook(self) -> None:
-        '''Called by `run_console` after the interaction has ended before writing the exit message.
-        Should not raise errors.
+        '''Called by `run_console` after the interaction has ended before writing the exit message. Should not raise errors.
         When implementing, call `super().posthook()` after everything.
         Not really an abstract method, but implementing is highly recommended.'''
     @overload

@@ -26,19 +26,19 @@ def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Lite
     If `protect_put` is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''
 @overload
-def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[]) -> P[R, T]: ... # type: ignore[assignment]
+def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> P[R, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=..., init_items: SupportsIteration[T]=[]) -> G[R, T]: ...
+def password_queue[T, R](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=..., init_items: SupportsIteration[T]=[], strict: bool=...) -> G[R, T]: ...
 @overload
-def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=object, init_items: SupportsIteration[T]=[]) -> G[R, T]: ... # type: ignore[assignment]
+def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[False], can_change_get: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., gettyp: type[R]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> G[R, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R, V](password_put: V, password_get: R, maxsize: int=..., *, protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=..., init_items: SupportsIteration[T]=[]) -> B[R, V, T]: ...
+def password_queue[T, R, V](password_put: V, password_get: R, maxsize: int=..., *, protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=..., init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ...
 @overload
-def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=..., init_items: SupportsIteration[T]=[]) -> B[R, V, T]: ... # type: ignore[assignment]
+def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=..., init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[]) -> B[R, V, T]: ... # type: ignore[assignment]
+def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ... # type: ignore[assignment]
 @overload
-def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[]) -> B[R, V, T]: ... # type: ignore[assignment]
+def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ... # type: ignore[assignment]
 class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
@@ -51,6 +51,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     def peek_all(self) -> list[T]: '''Return a list of all the items in the queue.'''
     @abstractmethod
     def qsize(self) -> int: '''Return the size of the queue as an integer.'''
+    def reset(self) -> None: '''Revert the queue to an empty state.'''
     async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call put_nowait if a slot is immediately available, waiting for a slot with `timeout` otherwise; if the timeout expires and `raising` is True, throw TimeoutError.'''
     async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call get_nowait if an item is immediately available, waiting for a item with `timeout` otherwise; if the timeout expires and `default` is provided, return it.'''
     async def extend(self, it: SupportsIteration[T], timeout: float|None=...) -> None: '''Add the items from `it` into the queue within `timeout`.'''
@@ -127,6 +128,7 @@ class SmartLifoQueue[T](PotentQueueBase[T]):
 class SmartPriorityQueue[T](PotentQueueBase[T]):
     '''A priority queue, where the priority of each item is determined by comparing it to other items.'''
     def __init__(self, maxsize: int=..., *, init_items: SupportsIteration[T]=[]): ...
+    async def start(self, maxsize: int, init_items: SupportsIteration[T]) -> None: ...
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
     def _put(self, item: T) -> None: ...

@@ -26,6 +26,6 @@ properties_all = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 queues_all = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'ignore_valerrs', 'password_queue'
 signals_all = 'wait_for_signal',
 tools_all = 'argstr_to_json', 'argv_to_json', 'ext2modname', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'print_cfg_json_format', 'print_cmd_help'
-util_all = 'aiter_from_f', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop'
+util_all = 'aiter_from_f', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
 version_all = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 __all_submodules = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']

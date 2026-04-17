@@ -179,7 +179,7 @@ async def asplitat(it, pred, maxsplit=-1, keep_sep=False):
     yield b
 async def batch_process(items, size, processor):
     async for b in batch(items, size): yield await processor(b)
-async def window(it, size, step):
+async def window(it, size, step=1):
     if not size >= 1 <= step: raise ValueError('size and step should both be >=1')
     b, c = deque(maxlen=size), 0
     async for i in it:
@@ -727,8 +727,8 @@ async def areversed(it, /):
         for i in reversed(await to_list(it)): yield i
 async def arunlengthencode(it, /):
     async for k, g in agroupby(it): yield k, ailen(g)
-async def arunlengthdecode(it, /): return aflatten(astarmap(arepeat, it))
-async def _dfthelper(a, i=False, /): R = await to_tuple(take(apowers(M.e**((1 if i else -1)*1j*M.tau/(N := len(a := await to_tuple(a))))), N)); return R, N, a
+def arunlengthdecode(it, /): return aflatten(astarmap(arepeat, it))
+async def _dfthelper(a, i=False, /): return await to_tuple(take(apowers(M.e**((1 if i else -1)*1j*M.tau/(N := len(a := await to_tuple(a))))), N)), N, a
 async def adft(a, /, _=_dfthelper):
     R, N, a = await _(a)
     async for k in arange(N): yield await asumprod(a, (R[k*i%N] async for i in arange(N)))

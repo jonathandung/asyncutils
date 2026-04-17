@@ -11,33 +11,36 @@ from weakref import ref
 __all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_typical', 'potent_derive', 'prepare_exception', 'raise_', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (SystemExit, SystemError, KeyboardInterrupt), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
-def unnest(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=...) -> Generator[BaseException, BaseException, None]: '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.'''
-def unnest_reverse(group: BaseException, *additional: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=...) -> Generator[BaseException, BaseException, None]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
+def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
+    '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.
+    Keyword arguments are as in `potent_derive`.'''
+def unnest_reverse(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
 @overload
-def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup:
-    '''Return an instance of BaseExceptionGroup, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
-    The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty, otherwise they are redundant.
+def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup:
+    '''Return an instance of `BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
+    The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
     The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the predicate
-    and exceptions that are not in `keep` respectively. They must be callables that return fast (e.g. collecting into a list).
-    If `raise_critical` is True, exit early once a critical exception (type of which is a member of CRITICAL) is encountered and propagate it.
+    and exceptions that are not in `keep` respectively. They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
+    If `raise_critical` is True, exit early once a critical exception (type of which is a member of `CRITICAL`) is encountered and propagate it.
     `notes` is attached to the group using `add_note()`.
     The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see `prepare_exception`.
     They only have an effect when the first argument is not a group.'''
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], Any]|None=..., ack2: Callable[[BaseException], Any]|None=..., ack3: Callable[[BaseException], Any]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
 def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> E:
-    '''Attach some info to an exception and return it, as detailed below.
+    '''Attach some info to the exception `exc` and return it.
+    `notes` is an iterable of strings that are added to the exception using `add_note()`. If a single string, it is treated as one note; to avoid this, convert the string to a tuple beforehand.
     The parameter `traceback` corresponds to the attribute `__traceback__`, `cause` to `__cause__`, `context` to `__context__` and `suppress` to `__suppress_context__`.'''
 @overload
 def raise_(exc_typ: ValidExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: '''Programmatically raise an exception. `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload. Remaining args are as in `potent_derive`.'''
 @overload
-def raise_(exc_val: BaseException, /, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: ...
-def wrap_exc(exc: BaseException) -> ExceptionWrapper: '''Wrap an exception in a special object `wrapper`, such that `exception_occurred(wrapper)` returns True.'''
-def unwrap_exc(exc: ExceptionWrapper) -> BaseException: '''Recover the exception wrapped by `wrap_exc`.'''
+def raise_(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: ...
+def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns `True`.'''
+def unwrap_exc(wrapper: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by `wrap_exc`.'''
 def exception_occurred(obj: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class Deadlock(BaseException):
     '''Raised when a potential deadlock situation is noticed by this module.'''
@@ -68,6 +71,8 @@ class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     def __init__(self, exc: None=...): ...
     @property
     def exc(self) -> E: '''The exception that occurred, determined by the raising scope by default.'''
+    @property
+    def __suppress_context__(self) -> Literal[False]: ... # type: ignore[override]
 class VersionError(Exception): '''Base class for all version-related errors.'''
 class VersionConversionError(VersionError): '''Base class for errors thrown when attempting to normalize an object to a version.'''
 class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the VersionInfo constructor is negative, for instance.'''
@@ -78,7 +83,7 @@ class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     def obj(self) -> T|None: '''The unrecognized object. None if garbage collected.'''
 class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     '''Raised when a custom normalizer returns anything but an iterable of integers.'''
-    def __init__(self, normalizer: Callable[[T], Any], obj: T, /): ...
+    def __init__(self, normalizer: Callable[[T], object], obj: T, /): ...
     @property
     def normalizer(self) -> Callable[[T], Any]|None: '''The normalizer at fault. None if garbage collected.'''
     @property
@@ -136,9 +141,9 @@ class LockForceRequest[T](BaseException):
     def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after presumably releasing the lock and performing error handling.'''
     @property
     def args(self) -> tuple[str, T]: '''The tuple `(error_message, additional_info)`.''' # type: ignore[override]
-class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the password_queue function.'''
+class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by the `password_queue` function.'''
 class PasswordRetrievalError(PasswordQueueError):
-    '''Raised when the password_queue function cannot find the password from the closure variables.'''
+    '''Raised when the `password_queue` function cannot find the password from the closure variables.'''
     @property
     def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...
@@ -174,6 +179,8 @@ class IgnoreErrors:
     '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async.'''
     @property
     def exc(self) -> tuple[ValidExcType, ...]: ...
+    @property
+    def but(self) -> tuple[ValidExcType, ...]: ...
     def __init__(self, /, *exc: ValidExcType, exclude: Iterable[ValidExcType]=...): ...
     def __enter__(self) -> Self: ...
     @overload
@@ -190,6 +197,7 @@ class IgnoreErrors:
 class WarningToError:
     '''Async context manager to convert specific warnings to errors.'''
     lock: ClassVar[Lock]
+    '''The lock to be held by instances when mutating the global warning filters.'''
     def __init__(self, /, *typs: type[Warning]): '''Positional arguments represent warning types to convert to their corresponding error types if they are to occur within the context.'''
     async def __aenter__(self) -> None: ...
     @overload

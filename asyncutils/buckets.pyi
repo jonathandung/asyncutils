@@ -34,5 +34,3 @@ class LeakyBucket(AsyncContextMixin[LeakyBucket], EventualLoopMixin):
     def factor(self) -> float: '''The current adaptive factor.'''
     @factor.setter
     def factor(self, value: float, /) -> None: '''Manually set the adaptive factor to `value`, clamped to `min_factor` and `max_factor`.'''
-    @factor.deleter
-    def factor(self) -> None: '''Reset the adaptive factor to 1.'''

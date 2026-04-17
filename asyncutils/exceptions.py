@@ -14,8 +14,8 @@ def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter
             elif not predicate(group): ack2(group)
             elif (y := (yield group)) is not None: h(y)
         else: ack3(group)
-def unnest(g, *A, d=__import__('_collections').deque, h=_unnest_helper, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
-def unnest_reverse(g, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
+def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest_helper, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
+def unnest_reverse(g, /, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
 def potent_derive(*groups, ordered=True, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
     if not isinstance(g := groups[0], BaseExceptionGroup): *_, t = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__ = _
@@ -38,15 +38,15 @@ def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, n
     elif a or k: _s_.write('raise_: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
-class _ExceptionWrapper:
+class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
         (s := super().__new__(cls)).__exc = e; return s
     def __getattr__(self, name, /): return getattr(self.__exc, name)
-    def __repr__(self): return f'_ExceptionWrapper({self.__exc!r})'
-    def __init_subclass__(cls): raise TypeError('cannot subclass _ExceptionWrapper')
-exception_occurred, wrap_exc, unwrap_exc = _ExceptionWrapper.__instancecheck__, _ExceptionWrapper.__new__.__get__(_ExceptionWrapper), _ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
+    def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
+    def __init_subclass__(cls): raise TypeError('cannot subclass ExceptionWrapper')
+exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
 @subscriptable
 class ref: # noqa: N801
     __slots__ = '__obj',
@@ -142,7 +142,8 @@ class WrongPasswordType(PasswordError, TypeError):
     @property
     def correcttype(self): return self._refc()
 class PasswordMissing(PasswordQueueError, TypeError):
-    def __init_subclass__(cls, *, m): cls.__init__ = lambda self: super(cls, self).__init__(m) # type: ignore[assignment]
+    def __init__(self): raise TypeError('use GetPasswordMissing or PutPasswordMissing instead')
+    def __init_subclass__(cls, *, m): cls.__init__ = lambda self: BaseException.__init__(self, m) # type: ignore[assignment]
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(name, /):
@@ -179,4 +180,4 @@ def __getattr__(name, /):
         case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
     return globals()[name]
     # ruff: enable[PLW0603]
-del t, a, s, _, A, B, stderr, _ExceptionWrapper, _unnest_helper, audit, exception
+del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception

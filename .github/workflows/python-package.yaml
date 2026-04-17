@@ -5,13 +5,32 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6.0.2
+    - uses: actions/setup-python@v6.2.0
+      with:
+        python-version: 3.12
+    - name: Install dependencies
+      run: |
+        pip install -U pip
+        pip install -e .[dev]
+        pip check
+    - name: Lint with ruff
+      run: ruff check . --output-format=github
+    - name: Run mypy
+      run: mypy asyncutils
+    - name: Run stubtest
+      run: python -m mypy.stubtest asyncutils --strict-type-check-only --allowlist=allowlist.txt
+  test:
+    needs: lint
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.12, 3.13, 3.14]
+        python-version: [3.12, 3.14]
     steps:
     - uses: actions/checkout@v6.0.2
     - uses: actions/setup-python@v6.2.0
@@ -22,14 +41,11 @@ jobs:
         pip install -U pip
         pip install -e .[dev,json]
         pip check
-    - name: Lint with ruff
-      run: ruff check . --output-format=github
-    - name: Run mypy
-      run: python -m mypy asyncutils
     - name: Run tests
-      run: python -m pytest tests/ -v --tb short --cov asyncutils --cov-report xml --local-badge-output-dir assets --local-badge-generate status -n auto
-    - name: Upload coverage
-      uses: codecov/codecov-action@v5.5.3
+      run: pytest tests/ -v --tb short --cov asyncutils --cov-report xml -n auto
+    - name: Upload results
+      if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'}}
+      uses: codecov/codecov-action@v6.0.0
       with:
         disable_search: true
         files: ./coverage.xml

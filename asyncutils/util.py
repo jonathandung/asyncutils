@@ -1,7 +1,6 @@
 from ._internal.helpers import check_methods, create_executor, get_loop_and_set, stop_and_closer, fullname
 from ._internal.running_console import _get_
 from ._internal.submodules import util_all as __all__
-from .config import Executor
 from .constants import _NO_DEFAULT, SYNC_AWAIT
 from .exceptions import CRITICAL, Critical, Deadlock, IgnoreErrors
 from asyncio.coroutines import iscoroutine
@@ -21,6 +20,9 @@ def get_future(aw, loop=None):
 def new_tasks(*C): (l := get_loop_and_set()).set_task_factory(eager_task_factory); yield from map(l.create_task, C)
 def to_sync(f, /, timeout=None, loop=None): audit('asyncutils.util.to_sync', fullname(f)); return wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop))
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
+def _set_call(F, f, /): F.set_result(f())
+def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_set_call, F := l.create_future(), partial(f, *a, **k)); return F
+def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     audit('asyncutils.util.sync_await', fullname(aw)); f = loop is None
     if (c := _get_()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore

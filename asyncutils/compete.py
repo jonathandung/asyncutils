@@ -54,5 +54,5 @@ def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscor
         async def f(): return await i # noqa: B023
         yield f()
 def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs, loop=loop)), delay, loop=loop)
-def enhanced_gather(it, return_exceptions=False, loop=None, _=A.gather): return _(*convert_to_coro_iter(it, loop=loop), return_exceptions=return_exceptions)
+def enhanced_gather(it, return_exceptions=False, *, loop=None, _=A.gather): return _(*convert_to_coro_iter(it, loop=loop), return_exceptions=return_exceptions)
 del H, A

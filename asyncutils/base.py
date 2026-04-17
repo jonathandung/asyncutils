@@ -202,7 +202,7 @@ def aiter_to_iter(ait, *, use_futures=None, loop=None, a=c, b=b):
     except StopAsyncIteration: ...
     finally:
         if c: c.__exit__(*exc_info())
-async def collect(it, n=None, default=_NO_DEFAULT, *, __reti=False, _=L.warning, m='collect ran out of items'):
+async def collect(it, n=None, *, default=_NO_DEFAULT, __reti=False, _=L.warning, m='collect ran out of items'):
     f, i = (r := []).append, 0
     async for i, _ in aenumerate(it):
         if i == n: break
@@ -212,7 +212,7 @@ async def collect(it, n=None, default=_NO_DEFAULT, *, __reti=False, _=L.warning,
         if default is _NO_DEFAULT: _(m)
         elif n is not None: r.extend(default for _ in range(n-i-1))
     return (r, i) if __reti else r
-async def take(it, n, default=_NO_DEFAULT):
+async def take(it, n, *, default=_NO_DEFAULT):
     it = iter_to_aiter(it)
     if n is None:
         async for i in it: yield i
@@ -225,7 +225,7 @@ async def take(it, n, default=_NO_DEFAULT):
         if default is RAISE: raise ItemsExhausted('take ran out of items')
         if default is not _NO_DEFAULT:
             for _ in range(n-i): yield default
-async def drop(it, n, raising=False):
+async def drop(it, n, *, raising=False):
     i = 0
     async for i, _ in aenumerate(it):
         if i >= n: yield _

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py-asyncutils"
-version = "0.8.25"
+version = "0.8.26"
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 description = "A library containing versatile tools to well complement the asyncio framework. Not as performant as C extensions, but startup speed is great considering the features it provides."
@@ -22,18 +22,18 @@ Repository = "https://github.com/jonathandung/asyncutils.git"
 Issues = "https://github.com/jonathandung/asyncutils/issues"
 Changelog = "https://github.com/jonathandung/asyncutils/blob/main/CHANGELOG.md"
 Download = "https://pypi.org/project/py-asyncutils/#files"
-"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.8.25"
+"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.8.26"
 
 [project.scripts]
 asyncutils = 'asyncutils.cli:run'
 autils = 'asyncutils.cli:run'
 
 [project.optional-dependencies]
-dev = ["ruff>=0.15.10", "mypy>=1.20.0", "pytest>=9.0.3", "pytest-xdist>=3.8.0", "pytest-cov>=7.1.0", "pytest-mock>=3.15.1", "pytest-local-badge>=1.0.3", "pytest-asyncio>=1.3.0"]
+dev = ["ruff>=0.15.11", "mypy>=1.20.1", "pytest>=9.0.3", "pytest-xdist>=3.8.0", "pytest-cov>=7.1.0", "pytest-mock>=3.15.1", "pytest-local-badge>=1.0.3", "pytest-asyncio>=1.3.0"]
 docs = ["sphinx>=9.1.0", "sphinx_rtd_theme>=3.1.0", "sphinx-notfound-page>=1.1.0", "sphinx-autoapi>=3.8.0", "doc8>=2.0.0", "sphinx-lint>=1.0.2"]
 pub = ["build>=1.4.3", "twine>=6.2.0", "keyring>=25.7.0", "packaging>=26.0"]
 json = ["json-with-comments>=1.2.10", "json5>=0.14.0", "hjson>=3.1.0"]
-all = ["py-asyncutils[dev,docs,pub,json]>=0.8.25"]
+all = ["py-asyncutils[dev,docs,pub,json]>=0.8.26"]
 
 [tool.setuptools]
 packages = ["asyncutils", "asyncutils._internal"]
@@ -77,15 +77,15 @@ target-version = "py312"
 exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env", "*.egg-info", ".eggs", ".mypy_cache", ".pytest_cache", "docs/source/conf.py"]
 
 [tool.ruff.lint]
-ignore = ["ANN401", "ASYNC109", "B904", "B905", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "F401", "N803", "N806", "N812", "N818", "PLC0415", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
+ignore = ["ANN401", "ASYNC109", "B904", "B905", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "N803", "N806", "N812", "N818", "PLC0415", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
 select = ["A", "ARG", "ANN", "ASYNC", "B", "BLE001", "COM819", "C4", "C901", "E", "EM103", "ERA001", "EXE", "F", "FIX002", "FLY002", "FURB", "G", "ISC", "LOG", "N", "PERF", "PIE", "PGH004", "PL", "PYI", "RET", "RSE102", "RUF", "S", "SIM", "SLOT", "T100", "T201", "TRY", "UP", "W", "YTT"]
 preview = true
 typing-extensions = false
 logger-objects = ["asyncutils._internal.log"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["ARG001", "B018", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
-"**/*.py" = ["ANN", "FURB180", "PYI"]
+"tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
+"**/*.py" = ["ANN", "F401", "FURB180", "PYI"]
 "**/*.pyi" = ["PYI021", "PYI036", "PYI042"]
 "**/__init__.py" = ["RUF067"]
 "**/__init__.pyi" = ["F403", "F405"]
@@ -95,7 +95,7 @@ logger-objects = ["asyncutils._internal.log"]
 "asyncutils/io.py" = ["PLW2901"]
 "asyncutils/iters.py" = ["N801", "PLR2004", "RUF029"]
 "asyncutils/locks.py" = ["N801", "PLR6301"]
-"asyncutils/queues.py" = ["A001", "A002"]
+"asyncutils/queues.py" = ["A001", "A002", "ARG002"]
 "asyncutils/version.py" = ["B008", "PLR2004"]
 "asyncutils/_internal/py312.py" = ["SIM105"]
 "asyncutils/_internal/compat.py" = ["F403"]
@@ -120,14 +120,11 @@ max-complexity = 24
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = ["__setup__", "__cleanup__"]
 max-returns = 10
-max-args = 12
+max-args = 13
 max-positional-args = 7
 max-public-methods = 46
 max-branches = 18
 max-nested-blocks = 6
-
-[tool.ruff.format]
-quote-style = "single"
 
 [tool.doc8]
 max-line-length = 150

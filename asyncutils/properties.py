@@ -10,12 +10,7 @@ class AsyncProperty:
     __slots__ = '__doc__', '_cls', '_deleted', '_finalize', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'
     def __new__(cls, fget=None, *a, **k): return partial(cls, Placeholder, *a, **k) if fget is None else super().__new__(cls)
     def __init__(self, fget=None, fset=None, fdel=None, *, doc=None, strict=True, loop=None): super().__init__(); self.fget, self.fset, self.fdel, self.__doc__, self._deleted, self._loop, self._finalize, self._strict = fget, fset, fdel, doc or getattr(fget, '__doc__', None), set(), (l := loop or new_event_loop()), register(l.close) if loop is None else l.stop, strict
-    def __get__(self, obj, _=None, /):
-        self._raise_for_unbound()
-        if (f := self.fget) is None: return self._get_helper(f'unreadable attribute: {self._name}')
-        if obj is None: return self
-        if obj in self._deleted: return self._get_helper('cannot get deleted attribute')
-        return self._helper(f, obj)
+    def __get__(self, obj, _=None, /): self._raise_for_unbound(); return self._get_helper(f'unreadable attribute: {self._name}') if (f := self.fget) is None else self if obj is None else self._get_helper('cannot get deleted attribute') if obj in self._deleted else self._helper(f, obj)
     def __set__(self, obj, val, /):
         self._raise_for_unbound()
         if (f := self.fset) is None: return self._set_helper('immutable attribute', val)

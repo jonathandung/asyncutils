@@ -1,3 +1,4 @@
+'''Bridges between asynchronous consumers/subscribers and producers/publishers.'''
 from ._internal.types import Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
 from .mixins import LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable, Generator, Iterable, Mapping
@@ -154,12 +155,12 @@ class EventBus(LoopContextMixin):
         '''Wait for an event of the specified event type that satisfies the condition to occur.
         Note that the function completes once the subscription has registered and returns a task, which will be cancelled on timeout.'''
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, till_permanent: float|None=...) -> Task[T]:
-        '''Add the subscriber under the event type (as a wildcard without event_type) and return a task.
+    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, till_permanent: float|None=...) -> Task[T]: ...
+    @overload
+    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., till_permanent: float|None=...) -> Task[T]:
+        '''Add the subscriber under the event type (as a wildcard if `event_type` is `WILDCARD` or not passed) and return a task.
         The subscriber is removed once `fut` completes, and its result returned through the returned task.
         After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
-    @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., till_permanent: float|None=...) -> Task[T]: ...
     @overload
     async def feed_event(self, data: Any, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
     @overload
@@ -224,5 +225,5 @@ class Rendezvous[T]:
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
         '''Put in a value to the rendezvous and get a different one back, not necessarily in that order.
         If asap is True, don't wait for the put to complete.'''
-    async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning an asyncio.Future. When cancelled, the put is cancelled as well. When done, the value has been handed off to a getter.'''
+    async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning an `asyncio.Future`. When cancelled, the put is cancelled as well. When done, the value has been handed off to a getter.'''
     async def _maintainer(self) -> NoReturn: '''Periodically clean up done getters and putters.'''

@@ -15,5 +15,5 @@ class Module:
     @property
     def __all__(self) -> All: ...
     def __dir__(self) -> All: ...
-a: Final[All]
+a: Final[list[str]]
 s: Final[dict[Submodule, Module|ModuleType]]

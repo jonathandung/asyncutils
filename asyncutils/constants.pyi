@@ -1,11 +1,11 @@
 '''Miscellaneous public constants.'''
-from ._internal.types import Executor, Sentinel
+from ._internal.types import Executor, RaiseType, SyncAwaitType, NoDefaultType
 from _collections_abc import Callable
 from threading import Lock
 from typing import Final, Literal, NoReturn, Self, overload
 __all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
-'''The reciprocal of Euler's number.'''
+'''The reciprocal of Euler's number, used by `iters.aguessmin` and `iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 '''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity, which is also the order
 in which the executor options appear in the CLI help.'''
@@ -22,16 +22,18 @@ class sentinel_base:
     @property
     def is_private(self) -> bool: '''Whether the sentinel is private (name begins with underscore).'''
     @property
-    def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, None if there is none.'''
+    def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, or `None` if there is none.'''
+    @property
+    def back(self) -> str|None: '''The unqualified name of the sentinel, or `None` if there is none.'''
     @overload
     def is_(self, other: Self, /) -> bool: ... # type: ignore[overload-overlap]
     @overload
     def is_(self, other: object, /) -> Literal[False]: '''`operator.is_` for sentinels.'''
-RAISE: Final[Sentinel]
+RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
-SYNC_AWAIT: Final[Sentinel]
+SYNC_AWAIT: Final[SyncAwaitType]
 '''A possible value to `exceptions.Deadlock.noticer`, indicating the deadlock situation was found by the `util.sync_await` function.'''
-_NO_DEFAULT: Final[Sentinel]
+_NO_DEFAULT: Final[NoDefaultType]
 '''Users are not meant to interact with this directly; only here for completeness.'''
 CLOSED: Final[int]
 '''The closed state of a circuit breaker.'''

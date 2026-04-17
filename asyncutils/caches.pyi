@@ -1,3 +1,4 @@
+from ._internal.types import Timer
 from .mixins import LoopContextMixin
 from _collections_abc import Callable, Coroutine
 from typing import Any, NoReturn, overload
@@ -7,14 +8,14 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
     This ensures availability of fresh data without blocking get operations.'''
     @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., default_loader: Callable[[T], R]):
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, default_loader: Callable[[T], R], processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
         '''`ttl` (optional): Time-to-live in seconds; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
         `refresh` (optional): Time before TTL expires to begin the refresh; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         `processor` (optional): Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
         `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         `default_loader` (optional): The loader to load values from keys for which specific loaders have not been registered.'''
     @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=...): ...
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...): ...
     def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
@@ -34,7 +35,7 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     async def refresh_loop(self) -> NoReturn: '''This task runs continuously in the background, checking for entries requiring refresh and spawning tasks to do so.'''
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
-    def __init__(self, maxsize: int|None=..., ttl: float|None=..., typed: bool=...):
+    def __init__(self, maxsize: int|None=..., ttl: float|None=..., *, typed: bool=..., timer: Timer=...):
         '''`maxsize` (optional): Maximum number of entries to cache; default `context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE`.
         `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
         `typed` (optional): Whether to cache different argument types separately.'''

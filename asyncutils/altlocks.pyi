@@ -79,7 +79,7 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `name`: name of the barrier; to appear in error messages
         `initstate`: an iterable storing the initial state; will be exhausted; preferrably not async
         `maxstate`: maximum length of state to store; older state will be expelled'''
-    async def wait(self, state: T=...) -> tuple[int, deque[T]]:
+    async def wait(self, state: T=..., *, timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
         If the barrier has already been aborted or broken, raise `asyncio.BrokenBarrierError`.
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state

@@ -40,7 +40,7 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __round__(self, ndigits: int, /) -> NoReturn: ...
     @overload
-    def __round__(self, ndigits: Literal[1, 2, 3]|None, /) -> Self: '''Support for rounding.'''
+    def __round__(self, ndigits: Literal[1, 2, 3]|None=..., /) -> Self: '''Support for rounding.'''
     @overload # type: ignore[override]
     def __add__(self, n: int, /) -> Self: ...
     @overload
@@ -51,7 +51,7 @@ class VersionInfo(str): # noqa: FURB189
     def __sub__(self, delta: VersionDelta, /) -> Self: ...
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
-    def __setattr__(self, name: str, /) -> NoReturn: '''Disallow modifying attributes of the object.''' # type: ignore[misc,override]
+    def __setattr__(self, name: str, value: Any, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: str, /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
         x, hex: `'0x7b0400'`
@@ -102,6 +102,7 @@ class VersionInfo(str): # noqa: FURB189
     @property
     def patch(self) -> int: '''The patch part of the version.'''
     __index__, __trunc__, __radd__ = __int__, __floor__, __add__ # noqa: PYI017
+@final
 class VersionDelta(NamedTuple):
     '''A named tuple representing the difference between versions. Can be taken by the + or - operators.'''
     major: int = ...
@@ -110,6 +111,8 @@ class VersionDelta(NamedTuple):
     '''The minor part of the version.'''
     patch: int = ...
     '''The patch part of the version.'''
+    def __floor__(self) -> int: '''The major part of the delta.'''
+    def __trunc__(self) -> int: '''The same as `__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
 def normalize(o: object, /) -> tuple[int, int, int]:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.

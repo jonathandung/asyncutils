@@ -6,5 +6,5 @@ async def test_iter_to_aiter(): assert await vecs_eq(iter_to_aiter(range(10)), a
 async def test_amap(): assert await vecs_eq(amap(1 .__lshift__, arange(10)), apowersoftwo(), strict=False)
 async def test_drop(): assert await vecs_eq(aprepend(2, drop(arange(1, 8, 2), 1)), asieve(8))
 async def test_take(): assert await vecs_eq(take(atabulate(atotient, await_=True), 10), (0, 1, 1, 2, 2, 4, 2, 6, 4, 6))
-async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(achain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, 3)
+async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(achain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, default=3)
 async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 1001)), asieve(1000))

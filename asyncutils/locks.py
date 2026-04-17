@@ -1,12 +1,14 @@
+# type: ignore
 from . import context as C, mixins as M
 from ._internal import log
 from ._internal.helpers import check_methods, fullname
 from ._internal.submodules import locks_all as __all__
 from .base import safe_cancel_batch
+from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, Critical, LockForceRequest
 from .properties import coercedmethod
 from .queues import ignore_valerrs
-from _collections import defaultdict, deque  # type: ignore[import-not-found]
+from _collections import defaultdict, deque
 from asyncio.coroutines import iscoroutine
 from asyncio.locks import Condition, Event, Lock
 from asyncio.tasks import current_task, gather, wait, wait_for
@@ -96,9 +98,10 @@ class Base:
     def __init_subclass__(cls, /, **_):
         if getattr(cls, '__slots__', True): raise TypeError('__slots__ should be empty tuple')
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
+def _rwlock_sub_new(cls, /): (_ := object.__new__(cls)).setup(); return _
 class RWLock:
     __slots__ = ('_wa',)
-    def __new__(cls, /, prefer_writers=None): return object.__new__((WritePreferredRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock) if cls is __class__ else cls)
+    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock)
     @coercedmethod
     class reader(Base):
         __slots__ = ()
@@ -109,10 +112,13 @@ class RWLock:
         __slots__ = ()
         async def __call__(self, *a, **k):
             async with self.writing(): return await self.__wrapped__(*a, **k)
-    def locked(self): return self._wa # type: ignore[attr-defined]
+    def locked(self): return self._wa
+    def __init_subclass__(cls, /, **_):
+        if not isinstance(getattr(cls, '__slots__', None), tuple): raise TypeError('__slots__ must be a tuple')
+        cls.__new__ = _rwlock_sub_new
 class ReadPreferredRWLock(RWLock):
     __slots__ = '_cm', '_readers'
-    def __init__(self): self._readers, self._cm, self._wa = 0, Lock(), Lock()
+    def setup(self): self._readers, self._cm, self._wa = 0, Lock(), Lock()
     @asynccontextmanager
     async def reading(self):
         async with self._cm:
@@ -129,7 +135,7 @@ class ReadPreferredRWLock(RWLock):
     def locked(self): return self._wa.locked()
 class WritePreferredRWLock(RWLock):
     __slots__ = '_cond', '_nr', '_nw'
-    def __init__(self): self._cond, self._wa = Condition(), False; self._nr = self._nw = 0
+    def setup(self): self._cond, self._wa = Condition(), False; self._nr = self._nw = 0
     @asynccontextmanager
     async def reading(self):
         async with (C := self._cond):
@@ -152,11 +158,11 @@ class WritePreferredRWLock(RWLock):
             async with C: self._wa = False; C.notify_all()
 class FairRWLock(RWLock):
     __slots__ = '_cond', '_qd', '_readers'
-    def __init__(self): self._cond, self._wa, self._readers, self._qd = Condition(), False, 0, deque()
+    def setup(self): self._cond, self._wa, self._readers, self._qd = Condition(), False, 0, deque()
     @asynccontextmanager
     async def reading(self):
         async with (C := self._cond):
-            F, w = C._get_loop().create_future(), C.wait # type: ignore[attr-defined]
+            F, w = C._get_loop().create_future(), C.wait
             (Q := self._qd).append(E := (False, F))
             try:
                 while True:
@@ -173,7 +179,7 @@ class FairRWLock(RWLock):
     @asynccontextmanager
     async def writing(self):
         async with (C := self._cond):
-            F, w = C._get_loop().create_future(), C.wait # type: ignore[attr-defined]
+            F, w = C._get_loop().create_future(), C.wait
             (Q := self._qd).append(E := (True, F))
             try:
                 while True:
@@ -187,10 +193,10 @@ class FairRWLock(RWLock):
             async with C: self._wa = False; C.notify_all()
 class PriorityRWLock(RWLock):
     __slots__ = '_cond', '_count', '_ilock', '_qd', '_readers'
-    def __init__(self): self._cond, self._count, self._ilock, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
+    def setup(self): self._cond, self._count, self._ilock, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
     async def _push_item(self, priority, is_writer):
         async with self._ilock: self._count = (c := self._count)+1
-        heappush(self._qd, E := (priority, *((is_writer, c) if isinstance(self, WritePreferredPriorityRWLock) else (c, is_writer)), self._cond._get_loop().create_future())); return E # type: ignore[attr-defined]
+        heappush(self._qd, E := (priority, *((is_writer, c) if isinstance(self, WritePreferredPriorityRWLock) else (c, is_writer)), self._cond._get_loop().create_future())); return E
     @asynccontextmanager
     async def reading(self, priority=0):
         async with (C := self._cond):
@@ -221,7 +227,7 @@ class PriorityRWLock(RWLock):
         try: yield
         finally:
             async with C: self._wa = False; C.notify_all()
-class WritePreferredPriorityRWLock(PriorityRWLock): ...
+class WritePreferredPriorityRWLock(PriorityRWLock): __slots__ = ()
 class RLock(M.LockWithOwnerMixin):
     __slots__ = '__lock', '_count', '_owner'
     def __init__(self, lock=None): self._count, self._owner, self.__lock = 0, None, lock or Lock()
@@ -260,14 +266,14 @@ class PriorityLock(M.EventualLoopMixin, M.LockWithOwnerMixin):
 class PriorityRLock(RLock):
     __slots__ = ()
     def __init__(self): super().__init__(PriorityLock())
-    def __del__(self): self.__lock.exiter() # type: ignore
+    def __del__(self): self.__lock.exiter()
     @property
-    def owner(self): o = self.__lock._owner = self._owner; return o # type: ignore
+    def owner(self): o = self.__lock._owner = self._owner; return o
     @owner.setter
-    def owner(self, val, /): self._owner = self.__lock._owner = val # type: ignore
+    def owner(self, val, /): self._owner = self.__lock._owner = val
     async def acquire(self, priority=0, timeout=None):
         if self.is_owner: self._count += 1; return True
-        if await self.__lock.acquire(priority, timeout): self._count = 1; return True # type: ignore
+        if await self.__lock.acquire(priority, timeout): self._count = 1; return True
         return False
 class LocksmithBase:
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
@@ -302,11 +308,11 @@ class LocksmithBase:
                 if o is None: return self.throw_fallback(lock)
                 if (c := o.get_coro()) is None: return self.eager_fallback(lock)
                 F = self._loop.create_future()
-                try: c.throw(LockForceRequest(self, F.set_result, lock, info)) # type: ignore
+                try: c.throw(LockForceRequest(self, F.set_result, lock, info))
                 except CRITICAL as e: self.task_raised_critical(lock, e)
                 except LockForceRequest as e:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
-                    else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self)) # type: ignore
+                    else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self))
                 except BaseException as e: self.raised_other(lock, e) # noqa: BLE001
                 else: self.answer_received(lock, await F)
             if callable(f := self.handlers.get(type(lock))) and iscoroutine(r := f(lock)): await r
@@ -316,20 +322,22 @@ class LocksmithBase:
             if purge_waiters: await self.purge_waiters(lock)
     async def purge_waiters(self, lock, /):
         if w := getattr(lock, '_waiters', None): await safe_cancel_batch(w, disembowel=True)
-    async def host(self, task, lock, /, *, timeout1=None, timeout2=0.1, timeout3=None):
+    async def host(self, task, lock, /, *, timeout1=_NO_DEFAULT, timeout2=_NO_DEFAULT, timeout3=_NO_DEFAULT):
         await wait(f := tuple(map(self.wrap_task, (self.force(lock, purge_waiters=False), lock.acquire()))), return_when='FIRST_COMPLETED'); f, a = f
-        if await wait_for(f, timeout1): await a
+        if await wait_for(f, C.LOCKSMITH_DEFAULT_TIMEOUTS if timeout1 is _NO_DEFAULT else timeout1): await a
         else:
-            try: await wait_for(a, timeout2)
+            try: await wait_for(a, C.LOCKSMITH_DEFAULT_TIMEOUTS if timeout2 is _NO_DEFAULT else timeout2)
             except TimeoutError: raise TimeoutError(f'failed to acquire lock {lock!r} within {timeout2} seconds') from None
-        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), timeout3)
+        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), C.LOCKSMITH_DEFAULT_TIMEOUTS if timeout3 is _NO_DEFAULT else timeout3)
     async def _wait_on(self, task, lock, /):
         try: return await task
         finally:
             if lock.locked() and iscoroutine(a := lock.release()): await a
     async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
     async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s properly', type(self).__qualname__, type(lock).__qualname__)
-    def wrap_task(self, task): return self._loop.create_task(task)
+    def wrap_task(self, a, /):
+        async def f(): return await a
+        return self._loop.create_task(f())
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)

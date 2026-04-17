@@ -6,6 +6,7 @@ from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys
 from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
+from asyncio.futures import Future
 from contextlib import _AsyncGeneratorContextManager
 from io import TextIOWrapper, _WrappedBuffer
 from mmap import mmap
@@ -261,11 +262,27 @@ class AUnzipConsumer[T]:
     def __aiter__(self) -> Self: ...
     async def __anext__(self) -> T: ...
     def close(self) -> None: '''Shut down the underlying queue, such that this consumer no longer receives the values at its position.'''
-@final
+@type_check_only
+class ToSyncFromLoopRV(Protocol):
+    '''The signature of the return value of `util.to_sync_from_loop`.'''
+    def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: ...
+@type_check_only
+class TransientBlockFromLoopRV(Protocol):
+    '''The signature of the return value of `util.transient_block_from_loop`.'''
+    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
 class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''
     def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the asyncutils.constants namespace.''' # type: ignore[override]
+@final
+@type_check_only
+class NoDefaultType(Sentinel): ...
+@final
+@type_check_only
+class RaiseType(Sentinel): ...
+@final
+@type_check_only
+class SyncAwaitType(Sentinel): ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the int constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]

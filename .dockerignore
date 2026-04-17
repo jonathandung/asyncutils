@@ -3,10 +3,10 @@
 .github/
 **/__pycache__/
 **/*.py[codz]
-.pytest_cache
-.mypy_cache
-.ruff_cache
-.logs
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.logs/
 .secrets.baseline
 .Python
 venv
@@ -54,3 +54,4 @@ Dockerfile
 .markdownlint.json
 .pre-commit-config.yaml
 .editorconfig
+.out/

@@ -16,8 +16,8 @@ class VersionInfo(str): # noqa: FURB189
     __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionInfo')
-    def __hash__(self, f=lambda x, y, /: y*y+x if x < y else x*x+x+y):
-        if (x := f(f(*self[:2]), self[2]))&1: x = ~x
+    def __hash__(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y):
+        if (x := _(_(*self[:2]), self[2]))&1: x = ~x
         x >>= 1; return x+(x > -2)
     @classmethod
     def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError('hash cannot be -1')):
@@ -29,7 +29,7 @@ class VersionInfo(str): # noqa: FURB189
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
     def to_complex(self): return complex(*self[:2])
-    def __float__(self, r=.01): return sum((j*r**i for i, j in enumerate(self)), start=.0) # type: ignore
+    def __float__(self, _=.01): return sum((j*_**i for i, j in enumerate(self)), start=.0) # type: ignore
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)

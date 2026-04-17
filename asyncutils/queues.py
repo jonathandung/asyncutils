@@ -34,12 +34,12 @@ class Q:
         if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
-    # ruff: disable[ARG002,B008,PLR6301]
+    # ruff: disable[B008,PLR6301]
     def __init_subclass__(cls, /, _=exc('subclass'), **k): raise _
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _
-    # ruff: enable[ARG002,B008,PLR6301]
+    # ruff: enable[B008,PLR6301]
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None)
     if protect_get:
@@ -174,7 +174,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
         async with _timeout(timeout):
             async for i in iter_to_aiter(it): await self.smart_put(i)
     def sync_put(self, item, *, timeout=None): return sync_await(self.smart_put(item, timeout=timeout), loop=self.loop)
-    def sync_get(self, *, timeout=None, default): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
+    def sync_get(self, *, timeout=None, default=_NO_DEFAULT): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
         try:
             if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
@@ -325,7 +325,7 @@ class SmartQueue(PotentQueueBase):
     def __bool__(self): return bool(self.__queue)
     def empty(self): return not self
 class SmartLifoQueue(PotentQueueBase):
-    def _init(self, maxsize): self.__queue = [] # noqa: ARG002
+    def _init(self, maxsize): self.__queue = []
     def _get(self): return self.__queue.pop()
     def _put(self, item): self.__queue.append(item)
     def peek(self, i=-1, /):
@@ -337,8 +337,8 @@ class SmartLifoQueue(PotentQueueBase):
     def qsize(self): return len(self.__queue)
     def __bool__(self): return bool(self.__queue)
     def empty(self): return not self
-    def pushpop(self): raise NotImplementedError
-    def pushpop_nowait(self): raise NotImplementedError
+    def pushpop(self, item, raising=True): raise NotImplementedError
+    def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
     async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]

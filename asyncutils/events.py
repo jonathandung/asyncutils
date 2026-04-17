@@ -4,17 +4,15 @@ from .constants import RAISE
 from .exceptions import EventValueError, ref
 from .mixins import EventMixin
 from _collections import deque  # type: ignore[import-not-found]
-from asyncio.events import get_running_loop
 from asyncio.tasks import wait, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic
 class SingleWaiterEventWithValue(EventMixin):
-    def __init__(self): self.clear()
+    __slots__ = '_waiter',
     def set(self, value):
-        self._set = True
-        if (w := self._waiter) and not w.done(): w.set_result(value); self._value = value
-    def clear(self): self._set, self._waiter = False, None; del self._value
-    def is_set(self): return self._set
+        if (w := self._waiter) is None or w.done(): self._waiter = w = self.make_fut()
+        w.set_result(value)
+    def is_set(self): return False if (w := self._waiter) is None else w.done()
     async def wait_for_next(self, timeout=None, *, strict=False):
         if w := self._waiter:
             if strict: raise RuntimeError('another waiter is waiting')
@@ -22,9 +20,13 @@ class SingleWaiterEventWithValue(EventMixin):
         try: return await wait_for(w, timeout)
         finally: self._waiter = None
     def get(self, default=RAISE):
-        if default is RAISE: raise EventValueError('no value is set')
-        return self._value if self._set else default
+        if (w := self._waiter) is None or not w.done():
+            if default is RAISE: raise EventValueError('no value is set')
+            return default
+        return w.result()
+    clear = __init__ = lambda self: setattr(self, '_waiter', None)
 class EventWithValue(EventMixin):
+    __slots__ = '_hist', '_value', '_waiters'
     def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is None else maxhist)
     def _record_hist(self): self._hist.append((monotonic(), ref(self._value)))
     def set(self, value, *, strict=True):
@@ -66,4 +68,4 @@ class EventWithValue(EventMixin):
         except TimeoutError:
             if force_transition: o = self.get(None); self.set(old); self.set(new); self.set(o, strict=False) # type: ignore[arg-type]
             return False
-    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(get_running_loop().create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))
+    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))
