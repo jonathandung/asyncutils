@@ -101,7 +101,7 @@ logger-objects = ["asyncutils._internal.log"]
 "asyncutils/_internal/compat.py" = ["F403"]
 "asyncutils/func.pyi" = ["N801"]
 "asyncutils/queues.pyi" = ["A001", "A002", "PYI011"]
-"asyncutils/_internal/log.pyi" = ["N802"]
+"asyncutils/_internal/log.pyi" = ["A001", "A002", "N802"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["__import__", "_functools.partial", "_operator.attrgetter", "_operator.itemgetter", "_operator.methodcaller", "asyncutils._internal.compat.partial", "asyncutils.exceptions.IgnoreErrors", "collections.namedtuple", "functools.partial", "globals", "itertools.count", "sys.intern", "type"]

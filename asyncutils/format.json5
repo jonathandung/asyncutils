@@ -10,6 +10,7 @@ Some keys can have various types, as detailed by the comments attached. */
   // corresponds to -n/--no-log
   V: 0, // increase logging verbosity; corresponds to -V
   Q: 0, // decrease logging verbosity; corresponds to -Q
+  // V and Q are not respected when running the console
   executor: "thread",
   /* choose the PEP 3148 executor class to use when required
   refer to `tools.get_cmd_help()` for possible values

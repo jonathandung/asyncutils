@@ -5,6 +5,7 @@ from ._internal.submodules import iters_all as __all__
 from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_batch, take
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
+from .context import getcontext
 from .iterclasses import achain, anullcontext
 from .util import aiter_from_f, safe_cancel
 import _operator as O, math as M
@@ -57,11 +58,11 @@ class _aunzip_consumer_base:
     def __init__(self): self.q = Queue()
     def __aiter__(self): return self
     def close(self): self.q.shutdown()
-async def aunzip(ait, put_batch=16, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
+async def aunzip(ait, put_batch=None, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
     audit('asyncutils.iters.aunzip', type(ait).__qualname__); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
     class aunzip_consumer(_b):
         __slots__ = ()
-        async def __anext__(self, L=Lock(), f=partial(take, ait, put_batch, default=RAISE)): # noqa: B008
+        async def __anext__(self, L=Lock(), f=partial(take, ait, getcontext().AUNZIP_DEFAULT_PUT_BATCH if put_batch is None else put_batch, default=RAISE)): # noqa: B008
             if self.q.empty():
                 async with L:
                     try:
@@ -641,7 +642,7 @@ async def mat_vec_mul(M, V):
 async def vecs_eq(u, v, cmpeq=check, *, strict=True):
     try: return await aall(cmpeq(i, j) async for i, j in azip(u, v, strict=strict))
     except ValueError: return False
-async def afrievalds(A, B, C, k=2, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(k))
+async def afrievalds(A, B, C, k=None, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(getcontext().AFRIEVALDS_DEFAULT_K if k is None else k))
 def basic_collect(it, n): return to_list(aislice(it, n))
 async def asubstrings(it):
     for i in (s := await to_tuple(it)): yield i,

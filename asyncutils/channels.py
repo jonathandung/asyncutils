@@ -3,7 +3,7 @@ from ._internal import log as L, patch as P
 from ._internal.compat import Queue, QueueEmpty, QueueShutDown
 from ._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable, fullname
 from ._internal.submodules import channels_all as __all__
-from .base import event_loop, adisembowel, iter_to_aiter, safe_cancel_batch
+from .base import event_loop, adisembowel, iter_to_aiter, safe_cancel_batch, yield_to_event_loop
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, potent_derive
 from .mixins import LoopContextMixin
@@ -73,11 +73,12 @@ class Observable(LoopContextMixin):
         else: self._to_remove.add(observer)
     def unsubscribe_nowait(self, observer, strict=False): (self._data.remove if strict else self._data.discard)(observer)
     def subscribe_syncf(self, observer): self._data.add(_ := to_async(observer, self.loop)[0]); return partial(self.unsubscribe_nowait, _)
-    def ntimes(self, observer, n=1):
+    def ntimes(self, observer, n=None):
+        if n is None: n = context.OBSERVABLE_DEFAULT_NTIMES_N
         if n <= 0: raise ValueError('n must be positive')
         async def wrapper(*a, **k):
-            nonlocal n; await observer(*a, **k); n -= 1
-            if not n: await self.unsubscribe(wrapper)
+            nonlocal n; await observer(*a, **k); n -= 1 # type: ignore
+            if n == 0: await self.unsubscribe(wrapper)
         self.subscribe_nowait(wrapper); return partial(self.unsubscribe_nowait, wrapper)
     def filter(self, pred, ret_exc=True):
         f = partial((_ := type(self)()).notify, _ret_exc_=ret_exc)
@@ -122,7 +123,9 @@ class Observable(LoopContextMixin):
         for o in obs: o._data.add(p)
         return _
 class EventBus(LoopContextMixin):
-    def __init__(self, name=None, *, handler=None, max_concurrent=128, tracking_stats=False): audit('asyncutils.channels.EventBus', max_concurrent); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+    def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False):
+        if max_concurrent is None: max_concurrent = context.EVENT_BUS_DEFAULT_MAX_CONCURRENT
+        audit('asyncutils.channels.EventBus', max_concurrent); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -272,11 +275,11 @@ class EventBus(LoopContextMixin):
     def clear_all(self): self.clear(); self.clear_stats()
     def clear_wildcards(self): return self.clear(None) # type: ignore[arg-type]
     def clear_stats(self): self._published.clear()
-    async def _safe_callback(self, callback, data, event_type=None, timeout=None):
+    async def _safe_callback(self, c, d, t=None, i=None):
         try:
             async with self._sem:
-                if iscoroutine(r := callback(*filter_out(event_type, s=_NO_DEFAULT), data)): await wait_for(r, timeout)
-        except TimeoutError: L.warning('callback %s timed out', callback.__qualname__)
+                if iscoroutine(r := c(*filter_out(t, s=_NO_DEFAULT), d)): await wait_for(r, i)
+        except TimeoutError: L.warning('callback %s timed out', c.__qualname__)
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
@@ -286,21 +289,24 @@ class EventBus(LoopContextMixin):
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
     def __init__(self, *, loop=None, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), get_loop_and_set() if loop is None else loop, Lock() if lock is None else lock; self._make_task()
-    async def _maintainer(self, f=sleep.__get__(60)): # noqa: B008
-        g = self.cleanup
+    async def _maintainer(self):
+        f, g = sleep.__get__(context.RENDEZVOUS_MAINTENANCE_INTERVAL), self.cleanup
         while True: await f(); await g()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
         except (CancelledError, TimeoutError): return False
     async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
-    async def get(self, default=_NO_DEFAULT, *, timeout=None):
-        f = (p := self._putters).popleft
+    async def get(self, default=_NO_DEFAULT, *, timeout=None, _=100):
+        f, i = (p := self._putters).popleft, 0
         try:
             async with _timeout(timeout):
                 async with self._lock:
                     while p:
                         v, F = f()
-                        if not F.done(): F.set_result(None); return v
+                        if F.done():
+                            i += 1
+                            if i == _: L.info('Rendezvous: 100 stale putters skipped'); i = 0; await yield_to_event_loop
+                        else: F.set_result(None); return v
                     if timeout is None and default is not _NO_DEFAULT: return default
                     self._getters.append(F := self._loop.create_future())
                 return await F
