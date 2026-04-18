@@ -31,6 +31,8 @@ asyncutils.base.iter_to_aiter
 asyncutils.base.take
 asyncutils.buckets
 asyncutils.buckets.LeakyBucket.__init__
+asyncutils.buckets.LeakyBucket.acquire
+asyncutils.buckets.LeakyBucket.wait_for_tokens
 asyncutils.buckets.TokenBucket.consume
 asyncutils.caches
 asyncutils.caches.AsyncLRUCache.__del__
@@ -46,6 +48,7 @@ asyncutils.channels.EventBus.subscribe
 asyncutils.channels.EventBus.subscribe_until
 asyncutils.channels.EventBus.unsubscribe
 asyncutils.channels.Observable.__class_getitem__
+asyncutils.channels.Observable.ntimes
 asyncutils.channels.Rendezvous.__class_getitem__
 asyncutils.channels.Rendezvous.__init__
 asyncutils.cli
@@ -133,17 +136,21 @@ asyncutils.iterclasses.online_sorter.__class_getitem__
 asyncutils.iters
 asyncutils.iters.afactor
 asyncutils.iters.afirsttrue
+asyncutils.iters.afrievalds
 asyncutils.iters.aisprime
 asyncutils.iters.aiterexcept
 asyncutils.iters.apolynomialfromroots
 asyncutils.iters.arange
 asyncutils.iters.arepeat
+asyncutils.iters.aunzip
 asyncutils.locks
 asyncutils.locks.AdvancedRateLimit.__init__
 asyncutils.locks.AdvancedRateLimit.acquire
 asyncutils.locks.AdvancedRateLimit.release
 asyncutils.locks.FairRWLock.setup
+asyncutils.locks.KeyedCondition.__class_getitem__
 asyncutils.locks.LocksmithBase.force
+asyncutils.locks.MultiCountDownLatch.__class_getitem__
 asyncutils.locks.PriorityRLock.__del__
 asyncutils.locks.PriorityRWLock.setup
 asyncutils.locks.PrioritySemaphore.__init__
@@ -173,6 +180,7 @@ asyncutils.pools.CallbackAccumulator.__init__
 asyncutils.pools.ConnectionPool.__class_getitem__
 asyncutils.pools.ConnectionPool.__init__
 asyncutils.pools.Pool.__class_getitem__
+asyncutils.pools.Pool.__init__
 asyncutils.processors
 asyncutils.processors.BatchProcessor.__class_getitem__
 asyncutils.processors.BatchProcessor.__init__

@@ -50,6 +50,7 @@ docker-compose*.yaml
 *.sqlite
 *.sqlite3
 Dockerfile
+allowlist.txt
 .dockerignore
 .markdownlint.json
 .pre-commit-config.yaml

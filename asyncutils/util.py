@@ -28,9 +28,10 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     if (c := _get_()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
     if loop is (loop := _get_running_loop()):
         if f: loop = new_event_loop(); set_event_loop(loop)
-        try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
-        finally:
-            if f: loop.stop(); loop.close(); set_event_loop(None)
+        if not loop.is_running():
+            try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
+            finally:
+                if f: loop.stop(); loop.close(); set_event_loop(None)
     async def wrapper(): return await aw
     return run_coroutine_threadsafe(wrapper(), loop).result(timeout)
 def semaphore(bounded=False, workers=None): from . import context as C; return (BoundedSemaphore if bounded else Semaphore)(C.SEMAPHORE_DEFAULT_VALUE if workers is None else workers)

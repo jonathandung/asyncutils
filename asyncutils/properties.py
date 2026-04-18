@@ -19,7 +19,7 @@ class AsyncProperty:
     def __delete__(self, obj, /):
         self._raise_for_unbound()
         if (f := self.fdel) is None:
-            if self._strict: raise AttributeError('undeletable attribute')
+            if self._strict: raise AttributeError('undeletable attribute', name=self._name)
             return self._deleted.add(obj)
         self._helper(f, obj, c='delete')
     def __set_name__(self, typ, name, /): self._name, self._cls = name, typ
@@ -60,6 +60,6 @@ class coercedmethod: # noqa: N801
     def __set_name__(self, typ, name, /): self.__owner, self.__name = typ, name
     def __getattr__(self, n, /): return getattr(self.__f, n)
     def __get__(self, obj, typ=None, /):
-        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__name!r}') if typ is self.__owner else RuntimeError('incorrectly bound coercedmethod')
+        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__name!r}', name=self.__name) if typ is self.__owner else RuntimeError('incorrectly bound coercedmethod')
         if not (typ is None or isinstance(obj, typ)): raise TypeError('coercedmethod.__get__ called incorrectly')
         return lambda *a, **k: self.__f(obj, *a, **k)

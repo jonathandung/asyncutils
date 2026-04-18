@@ -17,7 +17,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     STATEMENT_FAILED: ClassVar[object]
-    '''This is present if `_pyrepl.console.InteractiveColoredConsol`e is used as the base class.'''
+    '''This is present if `_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]

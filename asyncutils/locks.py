@@ -1,7 +1,7 @@
 # type: ignore
 from . import context as C, mixins as M
 from ._internal import log
-from ._internal.helpers import check_methods, fullname
+from ._internal.helpers import check_methods, fullname, subscriptable
 from ._internal.submodules import locks_all as __all__
 from .base import safe_cancel_batch
 from .constants import _NO_DEFAULT
@@ -51,45 +51,75 @@ class PrioritySemaphore(M.LockMixin):
     def reset(self):
         for *_, e in self._waiters: e.set()
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
-class KeyedCondition(M.LockMixin, M.LoopContextMixin, M.AwaitableMixin):
-    __slots__ = '__lock', '_specific_waiters', '_waiters'
-    def __init__(self, lock=None): self.__lock, self._waiters, self._specific_waiters = lock or Lock(), set(), defaultdict(set)
+@subscriptable
+class KeyedCondition(M.LockMixin, M.LoopContextMixin):
+    __slots__ = '__lock', '_specific_waiters'
+    def __init__(self, lock=None): super().__init__(); self.__lock, self._specific_waiters = lock or Lock(), defaultdict(set)
     async def acquire(self): await self.__lock.acquire(); return True
     async def release(self):
         if iscoroutine(r := self.__lock.release()): await r
     def locked(self): return self.__lock.locked()
-    async def wait(self, key=None, timeout=None):
-        (s := self._waiters if key is None else self._specific_waiters[key]).add(F := self.loop.create_future())
+    async def wait(self, key, timeout=None):
+        self.assert_locked(); (s := self._specific_waiters[key]).add(F := self.make_fut())
         try: await wait_for(F, timeout)
         finally: s.discard(F)
-    async def wait_all(self): await gather(*map(self.wait, self._specific_waiters), return_exceptions=True)
+    async def wait_for(self, key, pred, per_wait_timeout=None):
+        self.assert_locked(); f, g, h, F = (s := self._specific_waiters[key]).add, s.discard, self.make_fut, None
+        try:
+            while not pred(): f(F := h()); await wait_for(F, per_wait_timeout); g(F)
+        finally: g(F)
+    async def wait_all(self, timeout=None): self.assert_locked(); await wait_for(gather(*frozenset().union(*self._specific_waiters.values()), return_exceptions=True), timeout)
     def assert_locked(self):
         if not self.locked(): raise RuntimeError('must acquire condition to notify')
-    def notify(self, n=1, key=None, strict=False):
-        self.assert_locked(); i = 0
-        for i, F in enumerate((s := self._waiters if (c := key is None) else self._specific_waiters[key]).copy()):
-            if i >= n: break
-            if not F.done(): F.set_result(None)
-            s.discard(F)
-            if not (c or s): del self._specific_waiters[key]
-        else:
-            if strict and i+1 < n: raise ValueError(f'{fullname(self)}: not enough parties to notify')
+    def notify(self, key, n=1, strict=False):
+        if n <= 0:
+            if strict: raise ValueError(f'{fullname(self)}: n must be positive')
+            return
+        self.assert_locked()
+        if (s := (S := self._specific_waiters).pop(key, None)) is None:
+            if strict: raise ValueError(f'{fullname(self)}: no parties waiting for key {key!r}')
+            return
+        p = s.pop
+        while s:
+            if not (F := p()).done(): F.set_result(None); n -= 1
+            if n == 0: break
+        if s: S[key] = s
+        if strict and n > 0: raise ValueError(f'{fullname(self)}: not enough parties to notify')
     def notify_all(self, key=None):
         self.assert_locked()
-        for F in (s := self._waiters if key is None else self._specific_waiters.pop(key)):
-            if not F.done(): F.set_result(None)
-        l = len(s); s.clear(); return l
+        l = 0
+        for k in self._specific_waiters if key is None else (key,):
+            if (s := self._specific_waiters.pop(k, None)) is None: break
+            p = s.pop
+            while s:
+                if not (F := p()).done(): F.set_result(None)
+            l += len(s); s.clear()
+        return l
+@subscriptable
 class MultiCountDownLatch:
     __slots__ = '_cond', '_counts'
-    def __init__(self, counts): self._cond, self._counts = KeyedCondition(), dict(counts)
-    async def count_down(self, key):
-        async with (C := self._cond):
-            if (c := (d := self._counts).get(key)) is None or c <= 0: del d[key]; raise KeyError(key)
-            if c == 1: C.notify_all(key); del d[key]
-            else: d[key] = c-1
-    async def wait(self, key):
-        async with (C := self._cond): await C.wait(key)
-    async def wait_all(self): await self._cond.wait_all()
+    def __init__(self, counts): self._cond, self._counts = KeyedCondition(), {k: v for k, v in counts.items() if v > 0}
+    def _count_down_lock_held(self, key, strict):
+        if (c := (d := self._counts).get(key)) is None:
+            if strict: raise KeyError(f'{fullname(self)}: cannot count down key {key!r} further')
+            return
+        if c > 1: d[key] = c-1
+        else: del d[key]
+        if c == 1: self._cond.notify_all(key)
+    async def count_down(self, key, strict=False):
+        async with self._cond: self._count_down_lock_held(key, strict)
+    async def count_down_all(self, strict=False):
+        f = self._count_down_lock_held
+        async with self._cond:
+            for key in self._counts: f(key, strict)
+    async def wait(self, key, strict=False):
+        if key in self._counts:
+            async with (C := self._cond): await C.wait(key)
+        elif strict: raise KeyError(f'{fullname(self)}: no count for key {key!r}')
+    async def wait_all(self, timeout=None):
+        async with (C := self._cond): await C.wait_all(timeout)
+    @property
+    def broken(self): return not self._counts
 class Base:
     __slots__ = '__wrapped__', 'reader', 'reading', 'writer', 'writing'
     def __init__(self, l, f, /, _=__slots__[1:]):

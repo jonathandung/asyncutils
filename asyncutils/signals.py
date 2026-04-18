@@ -43,7 +43,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         except possible_errors as e: logger.exception('wait_for_signal processor %r encountered expected %s for signal %s', p, type(e).__qualname__, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
         except CRITICAL: raise Critical
         except BaseException as e: raise RuntimeError('wait_for_signal: unexpected %s in processor %r for signal %s: %s', type(e).__qualname__, p, s, e) from None # noqa: BLE001
-        return s
+        return r
     finally:
         await safe_cancel(F)
         if c: c.__exit__(*sys.exc_info()) # type: ignore[arg-type]
