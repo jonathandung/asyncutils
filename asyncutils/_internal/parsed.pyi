@@ -2,4 +2,4 @@
 import argparse
 import typing
 p: typing.Final[argparse.ArgumentParser]
-'''The `argparse.ArgumentParser` instance shared by `asyncutils`.'''
+'''The :class:`argparse.ArgumentParser` instance shared by :mod:`asyncutils`.'''

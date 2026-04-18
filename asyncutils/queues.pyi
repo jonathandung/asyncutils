@@ -1,4 +1,4 @@
-'''Non-inheriting extensions of `asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
+'''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
@@ -10,20 +10,20 @@ from contextlib import _AsyncGeneratorContextManager
 from typing import Any, Final, Literal, Self, overload
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'ignore_valerrs', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
-'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown.'''
 ignore_qempty: Final[IgnoreErrors]
-'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown and asyncio.QueueEmpty.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown and asyncio.QueueEmpty.'''
 ignore_qfull: Final[IgnoreErrors]
-'''Instance of IgnoreErrors that suppresses asyncio.QueueShutDown and asyncio.QueueFull.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown and asyncio.QueueFull.'''
 ignore_qerrs: Final[IgnoreErrors]
-'''Instance of IgnoreErrors that suppresses all asyncio queue-related errors.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses all asyncio queue-related errors.'''
 ignore_valerrs: Final[IgnoreErrors]
-'''Instance of IgnoreErrors that suppresses ValueError.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses ValueError.'''
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[]) -> P[R, T]:
-    '''Returns a password-protected queue, the type of which does not inherit from `asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    If `protect_get` is True, get and get_nowait will require a password, specified by password_get or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
-    If `protect_put` is True, put and put_nowait will require a password, specified by password_put or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
+    '''Returns a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
+    If `protect_get` is True, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
+    If `protect_put` is True, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''
 @overload
 def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> P[R, T]: ... # type: ignore[assignment]
@@ -42,11 +42,11 @@ def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], pro
 class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
-    def _init(self, maxsize: int) -> None: '''Initialize the queue given `maxsize`; called in `__init__`.'''
+    def _init(self, maxsize: int) -> None: '''Initialize the queue given `maxsize`; called in :meth:`__init__`.'''
     @abstractmethod
-    def _get(self) -> T: '''Get an item from the queue if not empty; called in `get` and `get_nowait`.'''
+    def _get(self) -> T: '''Get an item from the queue if not empty; called in :meth:`get` and :meth:`get_nowait`.'''
     @abstractmethod
-    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called in `put` and `put_nowait`.'''
+    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called in :meth:`put` and :meth:`put_nowait`.'''
     @abstractmethod
     def peek_all(self) -> list[T]: '''Return a list of all the items in the queue.'''
     @abstractmethod
@@ -74,11 +74,11 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     @property
     def can_get_now(self) -> bool: '''Whether items can be get from the queue without blocking at this instant.'''
     @property
-    def fully_functional(self) -> bool: '''queue.fully_functional == queue.can_put_now and queue.can_get_now.'''
+    def fully_functional(self) -> bool: '''`queue.fully_functional == queue.can_put_now and queue.can_get_now` holds.'''
     @property
-    def capacity(self) -> int|float: '''The capacity of the queue. Can be float('inf').'''
+    def capacity(self) -> int|float: '''The capacity of the queue. Can be `float('inf')`.'''
     @property
-    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be float('inf').'''
+    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be `float('inf')`.'''
     @property
     def utilization_rate(self) -> float: '''The number of items the queue divided by its capacity.'''
     def pushpop_nowait(self, item: T, raising: bool=...) -> T: '''Push an item into the queue and pop from the other end immediately.'''

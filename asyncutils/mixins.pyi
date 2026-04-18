@@ -10,9 +10,8 @@ from functools import cached_property
 from types import TracebackType
 from typing import Any, Literal, Self, overload
 __all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'EventualLoopMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopBoundMixin', 'LoopContextMixin'
-class EventualLoopMixin(LoopMixinBase): '''An alternative to `LoopContextMixin` when `__aenter__` and `__aexit__` are used for other purposes (e.g. lock-like objects such as RLock, KeyedCondition)'''
 class LoopContextMixin(LoopMixinBase):
-    '''`__setup__` will be called when the context is entered and `__cleanup__` when it is exited.'''
+    ''':meth:`__setup__` will be called when the context is entered and :meth:`__cleanup__` when it is exited.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     async def __aenter__(self) -> Self: ...
@@ -20,13 +19,14 @@ class LoopContextMixin(LoopMixinBase):
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+class EventualLoopMixin(LoopMixinBase): '''An alternative to :class:`LoopContextMixin` when :meth:`__aenter__` and :meth:`__aexit__` are used for other purposes (e.g. lock-like objects such as :class:`RLock`, :class:`KeyedCondition`)'''
 class AwaitableMixin[T](ABC):
-    '''A subclass that implements the `wait` async method automatically becomes awaitable, resolving to the return value of that method.'''
+    '''A subclass that implements the :meth:`wait` async method automatically becomes awaitable, resolving to the return value of that method.'''
     def __await__(self) -> Generator[Any, None, T]: ...
     @abstractmethod
     def wait(self) -> Awaitable[T]: ...
 class AsyncContextMixin[T](ABC):
-    '''Derive `__aenter__` and `__aexit__` from `__enter__` and `__exit__` of subclasses. `__exit__` is the only abstract method (`__enter__` returns self by default, but that cannot be typed accurately).'''
+    '''Derive :meth:`__aenter__` and :meth:`__aexit__` from :meth:`__enter__` and :meth:`__exit__` of subclasses. :meth:`__exit__` is the only abstract method (:meth:`__enter__` returns self by default, but that cannot be typed accurately).'''
     def __enter__(self) -> T: ...
     @overload
     @abstractmethod
@@ -56,7 +56,7 @@ class ExecutorRequiredAsyncContextMixin[T](ABC):
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]|None: ...
 class LockMixin[T, R: (None, Coroutine[Any, Any, None])](ABC):
-    '''Derive `__aenter__` and `__aexit__` from `acquire` and `release` of subclasses.'''
+    '''Derive :meth:`__aenter__` and :meth:`__aexit__` from :meth:`acquire` and :meth:`release` of subclasses.'''
     def __init_subclass__(cls, *, _lock_factory: Callable[[Self], T]=..., **k: Any) -> None: ...
     @abstractmethod
     async def acquire(self) -> bool: ...
@@ -71,7 +71,7 @@ class LockMixin[T, R: (None, Coroutine[Any, Any, None])](ABC):
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None, T]):
-    '''Mixin for locks that can report their owner. `is_owner` should return True if the current task is the owner of the lock, and `release` will wrap `_release` to throw `RuntimeError` if the current task is not the owner.'''
+    '''Mixin for locks that can report their owner. :meth:`is_owner` should return True if the current task is the owner of the lock, and :meth:`release` will wrap :meth:`_release` to throw :exc:`RuntimeError` if the current task is not the owner.'''
     @property
     @abstractmethod
     def is_owner(self) -> bool: ...

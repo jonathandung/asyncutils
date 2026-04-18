@@ -12,7 +12,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
     import sys; sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs))); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
-    if sys.platform == 'win32': # pragma: no cover
+    if sys.platform == 'win32':
         logger.info('wait_for_signal has limited functionality on windows')
         for s in S:
             try: o = _s(s := _c(s), h)

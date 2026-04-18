@@ -21,7 +21,7 @@ class partial: # noqa: N801
                 e(a)
                 if P:
                     if (N := len(a)) < P: e(Placeholder for _ in range(P-N))
-                    A = list(f._mg(A)) # type: ignore
+                    A = list(f._mg(A))
                     if N > P: A.extend(a[P:])
                 C, M = _get_merger(A)
             else: C, M = P, f._mg
@@ -30,11 +30,11 @@ class partial: # noqa: N801
         (_ := object.__new__(cls)).func, _.args, _.keywords, _._phs, _._mg = f, tuple(A), k, C, M; return _
     def __call__(self, /, *a, **k):
         if (c := self._phs):
-            try: A, a = self._mg(self.args+a), a[c:] # type: ignore
+            try: A, a = self._mg(self.args+a), a[c:]
             except IndexError: raise TypeError(f"missing positional arguments in 'partial' call; expected at least {c}, got {len(a)}") from None
         else: A = self.args
         return self.func(*A, *a, **self.keywords, **k)
-    def __get__(self, o, _=None): return self if o is None else type(self.__get__)(self, o) # type: ignore
+    def __get__(self, o, _=None): return self if o is None else type(self.__get__)(self, o)
     def __reduce__(self): return type(self), (self.func,), (self.func, self.args, self.keywords or None)
     def __setstate__(self, s, /):
         f, a, k = s

@@ -1,15 +1,14 @@
-'''Asynchronous descriptors, mimicking `property`. Optionally apply a lock.'''
+'''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
 from ._internal.types import AsyncLockLike
 from _collections_abc import Awaitable, Callable
-from asyncio.events import AbstractEventLoop
 from asyncio.locks import Lock
 from typing import Any, Concatenate, Self, final, overload
 __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 class AsyncProperty[T, R]:
     @overload
-    def __new__(cls, *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, *, doc: str|None=..., strict: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
-    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=...) -> Self: ...
+    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=...) -> Self: ...
     @overload
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Self|T: ...
     @overload
@@ -28,9 +27,9 @@ class AsyncLockProperty[T, R](AsyncProperty[T, R]):
     @staticmethod
     def _new_lock(_: R) -> Lock: '''Default way to create a new lock for the given object. The implementation should not cache the locks for each instance, since that is done by this class already.'''
     @overload
-    def __new__(cls, *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
-    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., loop: AbstractEventLoop|None=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
+    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
     def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a memory-address based cache.'''
 @final
 class coercedmethod[T, R, **P]: # noqa: N801

@@ -38,9 +38,8 @@ def time_since_boot() -> float: '''The time in milliseconds since the module beg
 __version__: Final[VersionInfo]
 '''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
 __hexversion__: Final[int]
-'''``0x12070e`` -> version 18.7.14'''
+'''For example, `0x12070e` corresponds to version 18.7.14'''
 preloaded_submodules: Final[frozenset[str]]
-'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.
-This avoids attribute access later on randomly triggering the asyncio import, which would take 160 ms.'''
+'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
 '''A dictionary mapping submodule names to the corresponding submodule objects, which may not actually be instances of :class:`types.ModuleType` at runtime (implementation-defined).'''

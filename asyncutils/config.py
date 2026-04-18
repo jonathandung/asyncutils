@@ -48,7 +48,6 @@ def g(e, a=False, t=(str, int, bytes), c=c, k=k):
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
 match logging_to := g('log_to'):
-    # ruff: disable[BLE001,SIM115]
     case 'NULL': l.disabled = True
     case 'MAKE':
         T = 'asyncutils_log%d.log'
@@ -75,7 +74,6 @@ match logging_to := g('log_to'):
         except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
-    # ruff: enable[BLE001,SIM115]
 if M: s.write('Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))

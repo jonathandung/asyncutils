@@ -1,9 +1,8 @@
-# type: ignore
-_s = type('info', (), {'__slots__': ('_c', '_s'), '__init__': lambda _: setattr(_, '_c', None) or setattr(_, '_s', False)})()
+_ = [None, False]
 def __getattr__(name, /): return getattr(_get_(), name)
-def _get_(_s=_s): return _s._c
-def _set_(c, /, _s=_s): _s._c = c
-def _unset_(_s=_s): _s._c, r = None, _s._c; return r
-def _request_write_load_all_(_s=_s): _s._s = True
-def _should_write_load_all_(_s=_s): return _s._s
-del _s
+def _get_(_=_): return _[0]
+def _set_(c, /, _=_): _[0] = c
+def _unset_(_=_): _[0], r = None, _[0]; return r
+def _request_write_load_all_(_=_): _[1] = True
+def _should_write_load_all_(_=_): return _[1]
+del _

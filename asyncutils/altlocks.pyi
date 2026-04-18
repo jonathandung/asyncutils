@@ -9,7 +9,7 @@ from typing import Any, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class DynamicBoundedSemaphore(BoundedSemaphore):
     '''A subclass of :class:`asyncio.BoundedSemaphore` whose bound can be set by the user via the `bound` property.'''
-    def __init__(self, value: int=...): '''`value`, the initial value of the semaphore, defaults to `context.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE`.'''
+    def __init__(self, value: int=...): '''`value`, the initial value of the semaphore, defaults to :const:`context.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE`.'''
     @property
     def bound(self) -> int: ...
     @bound.setter
@@ -19,7 +19,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     @property
     def guarded(self) -> bool: ...
     def __init__(self, action: str=..., rname: object=...): ...
-    def __enter__(self) -> None: '''Throw `self` as an exception (inherits from `RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
+    def __enter__(self) -> None: '''Throw :obj:`self` as an exception (inherits from :exc:`RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
@@ -30,14 +30,14 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
 class UniqueResourceGuard(ResourceGuard):
     '''A subclass of :class:`ResourceGuard` that only allows one guard per object. Cannot be further subclassed.
     The object does not have to be hashable, but a strong reference will be held to it for the lifetime of the guard.
-    Note that this does not stop the object from having an instance of ResourceGuard (or subclass thereof) from guarding it simultaneously.'''
-    def __new__(cls, /, *a: Any, **k: Any) -> NoReturn: '''Use the `guard` class method instead.'''
+    Note that this does not stop the object from having an instance of :class:`ResourceGuard` (or subclass thereof) from guarding it simultaneously.'''
+    def __new__(cls, /, *a: Any, **k: Any) -> NoReturn: '''Use the :meth:`guard` class method instead.'''
     @classmethod
     def clear_cache(cls) -> None: '''Clear the internal cache mapping guarded objects to their guards. Call only when you are sure no guards are in use.'''
     @classmethod
     def guard(cls, obj: object, /, *, action: str=...) -> Self:
-        '''Each object only has one guard.
-        If the object already has a guard, return that guard, regardless of whether it is held. In that case, the `action` parameter is ignored.
+        '''If the object already has a guard, return that guard, regardless of whether it is held. In that case, the `action` parameter is ignored.
+        Otherwise, create and return a new guard for the object, using the `action` parameter in error messages. Note that the guard is not held upon creation.
         The error will be seen by the user only when they actually try to acquire the guard if it is already held.'''
 class Releasing:
     '''An async context manager that releases the given lock on entry and re-acquires it on exit.'''
@@ -57,14 +57,14 @@ class CircuitBreaker:
         '''Construct a circuit breaker, whose circuit is initially closed.
         If `name` is passed, use it as the name; return a function wrapping `f` otherwise, with the name of the circuit breaker (for debugging) derived from the name of the function.
         Pass exceptions that are expected to happen through the `exc` parameter.
-        When the decorated function fails more than `max_fails` times (default `context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers (opens the circuit) and disallows further
+        When the decorated function fails more than `max_fails` times (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers (opens the circuit) and disallows further
         calls of the wrapped functions by throwing an exception.
-        This state persists until the `reset` timeout expires (default `context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the half-open state.
+        This state persists until the `reset` timeout expires (default :const:`context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the half-open state.
         If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]:
         '''Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature but strictly returning a coroutine.
         Care should be taken when applying the same circuit breaker to multiple functions, as they will not be able to run concurrently, and the calls counters will be shared.
-        `timer` (default `time.monotonic`) is used to get the current time for timeout calculation.
+        `timer` (default :func:`time.monotonic`) is used to get the current time for timeout calculation.
         `default` is returned if an expected exception is raised, also suppressing that exception.'''
     @property
     def fails(self) -> int: '''Current count of conseuctive failures.'''
@@ -81,11 +81,11 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `maxstate`: maximum length of state to store; older state will be expelled'''
     async def wait(self, state: T=..., *, timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
-        If the barrier has already been aborted or broken, raise `asyncio.BrokenBarrierError`.
+        If the barrier has already been aborted or broken, raise :exc:`asyncio.BrokenBarrierError`.
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
         and `pos` is the number of parties having arrived before this one.'''
-    async def abort(self) -> None: '''Abort the barrier, signalling `asyncio.BrokenBarrierError` to present waiting parties.'''
-    def raise_for_abort(self) -> None: '''Throw `asyncio.BrokenBarrierError` if the barrier has been aborted.'''
+    async def abort(self) -> None: '''Abort the barrier, signalling :exc:`asyncio.BrokenBarrierError` to present waiting parties.'''
+    def raise_for_abort(self) -> None: '''Throw :exc:`asyncio.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
     @property
@@ -95,7 +95,7 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     @property
     def n_waiting(self) -> int: '''Number of parties currently waiting.'''
 class DynamicThrottle:
-    '''An async context manager used to limit the rate of a function being called. See also: `func.RateLimited`, `locks.AdvancedRateLimit`'''
+    '''An async context manager used to limit the rate of a function being called. See also: :class:`func.RateLimited`, :class:`locks.AdvancedRateLimit`'''
     def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):
         '''`init_rate` (required): The initial rate in calls per second.
         `min_rate`: The minimum rate.

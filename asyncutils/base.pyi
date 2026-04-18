@@ -1,4 +1,4 @@
-'''The most useful patterns and helpers core to this module and are therefore required by the `console` submodule, among many others.'''
+'''The most useful patterns and helpers core to this module and are therefore required by the :mod:`console` submodule, among many others.'''
 from ._internal.types import GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
 from _collections_abc import AsyncGenerator, AsyncIterable, AsyncIterator, Awaitable, Callable, Generator, Iterable, Iterator
 from asyncio.events import AbstractEventLoop
@@ -21,7 +21,7 @@ class event_loop: # noqa: N801
     def __exit__(self, t: ValidExcType, v: BaseException, b: TracebackType, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
-    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this, but managing a different event loop.'''
+    def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]=...) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
@@ -43,7 +43,7 @@ def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: boo
     If `it` is already an async iterator, it is returned as is.
     Values sent to the return async generator will be passed to the original.
     The async generator will stop when it encounters an item identical to `sentinel`.
-    When `True` is passed for `use_existing_executor` (default `context.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR`), the function will attempt to use
+    When `use_existing_executor=True` is passed (default `context.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR`), the function will attempt to use
     an existing executor as created by previous calls specifying `create_executor=True` (default `context.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR`) to
     advance the iterable, and fall back to blocking the event loop every step without an executor.
     When `create_executor` is `True`, the function will create a new executor to run the `__next__` calls if needed.'''
@@ -56,7 +56,7 @@ def aiter_to_iter[I: Iterator[Any]](ait: I, *, use_futures: bool=..., loop: Abst
 @overload
 def aiter_to_iter[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> Iterator[T]:
     '''Convert an async iterable `ait` to a sync generator, or return the native iterator for the object if it is already a sync iterable.
-    If the event loop is currently running and `use_futures` is `False` (default `context.AITER_TO_ITER_DEFAULT_ALLOW_FUTURES`), raise `RuntimeError` to clarify that `concurrent.futures.Future` must be used in this case, one future per item yielded, which is inefficient.'''
+    If the event loop is currently running and `use_futures` is `False` (default :const:`context.AITER_TO_ITER_DEFAULT_ALLOW_FUTURES`), raise :exc:`RuntimeError` to clarify that :class:`concurrent.futures.Future` must be used in this case, one future per item yielded, which is inefficient.'''
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
 def adisembowelleft[T](it: SupportsPopLeft[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the left using its popleft method and yield its items from left to right,'''
 @overload
@@ -69,9 +69,9 @@ async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[
     If `raising` is True, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int=..., *, default: T|RaiseType=...) -> list[T]:
     '''Collect `n` items from the (async) iterable into a list and return that list.
-    When `n` is not passed, equivalent to `iters.to_list` but slower.
-    Refer to `iters.basic_collect` for a marginally faster variant that doesn't accept a default.
-    If default is `constants.RAISE` and there are less than `n` items to collect, throw `exceptions.ItemsExhausted`.
+    When `n` is not passed, equivalent to :func:`iters.to_list` but slower.
+    Refer to :func:`iters.basic_collect` for a marginally faster variant that doesn't accept a default.
+    If default is :const:`constants.RAISE` and there are less than `n` items to collect, throw :exc:`exceptions.ItemsExhausted`.
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''
 @overload
@@ -80,12 +80,13 @@ def take[T](it: SupportsIteration[T], n: int, *, default: T|RaiseType) -> AsyncG
 def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T]:
     '''Yield `n` items from the (async) iterable.
     To ensure there are exactly `n` items in the resultant async generator, pass a default value.
-    In particular, pass `constants.RAISE` as `default` to cause `exceptions.ItemsExhausted` to be thrown in the case that there are not enough items.
+    In particular, pass :const:`constants.RAISE` as `default` to cause :exc:`exceptions.ItemsExhausted` to be thrown in the case that there are not enough items.
     If `n` is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, *, raising: bool=...) -> AsyncGenerator[T]: '''Discard `n` items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw `exceptions.ItemsExhausted`.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class and additionally supports the `step` parameter.'''
 async def sleep_forever() -> NoReturn: '''A coroutine that never completes (unless an exception is thrown in, of course).'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
-'''An awaitable object that completes immediately and is also an exhausted generator, with the `CO_ITERABLE_COROUTINE` flag set.'''
+'''An awaitable object that completes immediately and is also an exhausted generator.
+Implementation detail: This is achieved by setting the :const:`inspect.CO_ITERABLE_COROUTINE` flag on the code of a generator function.'''
 yield_to_event_loop: Awaitable[None]
 '''An awaitable object that yields control to the event loop for one iteration when awaited.'''

@@ -34,12 +34,10 @@ class Q:
         if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
-    # ruff: disable[B008,PLR6301]
     def __init_subclass__(cls, /, _=exc('subclass'), **k): raise _
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _
-    # ruff: enable[B008,PLR6301]
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None)
     if protect_get:
@@ -102,7 +100,6 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if full(): raise QueueFull
         if _ is not b: v(P)
         p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
-    # ruff: disable[E722]
     def change_get_password(old_pwd, new_pwd):
         if not can_change_get: return False
         if not isinstance(new_pwd, gettyp): return False
@@ -117,7 +114,6 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         except _.CRITICAL: raise _.Critical
         except: return False
         nonlocal password_put; password_put = new_pwd; return True
-    # ruff: enable[E722]
     def task_done():
         nonlocal U
         if U == 0: raise ValueError('task_done() called too many times')
@@ -180,7 +176,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
-    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)): # noqa: B008
+    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
         m, c = abs(max or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
         with _:
             while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
@@ -205,9 +201,9 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     @property
     def capacity(self): return m if (m := self.maxsize) > 0 else float('inf')
     @property
-    def remaining_capacity(self): return self.capacity-self.qsize() # type: ignore
+    def remaining_capacity(self): return self.capacity-self.qsize()
     @property
-    def utilization_rate(self): return self.qsize()/self.maxsize # type: ignore
+    def utilization_rate(self): return self.qsize()/self.maxsize
     def pushpop_nowait(self, item, raising=True):
         if self.is_shutdown:
             if raising: raise QueueShutDown
@@ -242,7 +238,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             raise
         finally: audit(s%'end', i)
     def empty(self): return self.qsize() == 0
-    def __bool__(self): return self.qsize() >= 0 # type: ignore
+    def __bool__(self): return self.qsize() >= 0
     def map(self, f, stop_when=None, *, lifo=False):
         audit(f'{fullname(self)}.map', id(self), fullname(f))
         if stop_when is None:
@@ -297,8 +293,8 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
             with ignore_qempty:
                 while True: await q.smart_put((i, await self.get())); i += 1
         self.make(feed()); return q
-    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*map(f, self.peek_all()))) # type: ignore
-    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*starmap(f, self.peek_all()))) # type: ignore
+    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*map(f, self.peek_all())))
+    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*starmap(f, self.peek_all())))
     def filter_nowait(self, pred=bool, /):
         f, g = (k := []).append, (r := []).append
         with ignore_qempty:

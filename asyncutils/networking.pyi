@@ -8,10 +8,10 @@ from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, EventualLoopMixin):
-    '''An implementation of `asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
+    '''An implementation of :class:`asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
     The idea was originally introduced in PEP 3153, but did not see eventual adaptation in the standard library.
-    This particular implementation is designed to be used with `SocketTransport`, though other transports can enforce it too.
-    Instantiating this class will give an `LFProtocol` or `CRLFProtocol` depending on `os.linesep`.'''
+    This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
+    Instantiating this class will give an :class:`LFProtocol` or :class:`CRLFProtocol` depending on :data:`os.linesep`.'''
     NEWLINE: ClassVar[bytes]
     '''The newline sequence used by this protocol as bytes.'''
     CARRIAGE_RETURN: ClassVar[bytes]
@@ -19,7 +19,7 @@ class LineProtocol(Protocol, EventualLoopMixin):
     @property
     def transport(self) -> WriteTransport|None: '''The transport associated with this protocol, or None if not connected.'''
     @property
-    def connected_transport(self) -> WriteTransport: '''The transport associated with this protocol; raises ConnectionError if not connected.'''
+    def connected_transport(self) -> WriteTransport: '''The transport associated with this protocol; raises :exc:`ConnectionError` if not connected.'''
     def connection_made(self, transport: WriteTransport) -> None: ... # type: ignore[override]
     def connection_lost(self, exc: Exception|None) -> None: ...
     def close(self) -> bool: '''Close the transport and return success.'''
@@ -40,7 +40,7 @@ class LFProtocol(LineProtocol): '''Line Feed protocol for Unix-like systems.'''
 class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed protocol for Windows.'''
 class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9.'''
 class SocketTransport(Transport):
-    '''A thread-unsafe transport that connects `LineProtocol`s to sockets.'''
+    '''A thread-unsafe transport that connects :class:`LineProtocol`s to sockets.'''
     @classmethod
     def make_protocol(cls) -> LineProtocol: ...
     @property

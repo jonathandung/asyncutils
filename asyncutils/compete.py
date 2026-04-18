@@ -13,7 +13,7 @@ async def first_completed(*C, ret_exc=False, timeout=None, loop=None, A=A):
         async with A.timeout(timeout):
             for _ in (await A.wait(t := tuple(map(loop.create_task, C)), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := _.exception()) else _.result()
     finally:
-        if c: c.__exit__(*exc_info()) # type: ignore
+        if c: c.__exit__(*exc_info())
         audit('asyncutils.compete.first_completed/end', L); await safe_cancel_batch(t)
 async def race_with_callback(*C, winner=None, loser=None, timeout=None, _=A):
     if not C: raise TypeError('pass in at least one coroutine to race_with_callback')
@@ -37,13 +37,13 @@ async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, 
             except CRITICAL: raise Critical
         return r
     finally: audit('asyncutils.compete.multi_winner_race_with_callback/end', L); await safe_cancel_batch(p, callback=loser)
-def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscoroutine, futwrap=A.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods): # type: ignore
+def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscoroutine, futwrap=A.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods):
     if handle_iter is None: from .iters import to_list as handle_iter
     if handle_aiter is None: from .iters import to_list as handle_aiter
     if skip_invalid is None: from .context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid # noqa: N811
     for i in aiter_to_iter(cfs, loop=loop):
         if corocheck(i): yield i; continue
-        try: i = futwrap(i, loop) # noqa: PLW2901
+        try: i = futwrap(i, loop=loop) # noqa: PLW2901
         except CRITICAL: raise Critical
         except (AssertionError, TypeError):
             if not _c(i, '__await__'):

@@ -29,7 +29,7 @@ class VersionInfo(str): # noqa: FURB189
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
     def to_complex(self): return complex(*self[:2])
-    def __float__(self, _=.01): return sum((j*_**i for i, j in enumerate(self)), start=.0) # type: ignore
+    def __float__(self, _=.01): return sum((j*_**i for i, j in enumerate(self)), start=.0)
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)

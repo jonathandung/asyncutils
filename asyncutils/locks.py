@@ -371,7 +371,6 @@ class LocksmithBase:
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)
-    # ruff: disable[ARG002]
     def throw_fallback(self, lock, /): return True
     def eager_fallback(self, lock, /): return True
     def release_returned_false(self, lock, /): return False
@@ -382,5 +381,4 @@ class LocksmithBase:
     def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
     def task_raised_critical(self, lock, exc, /): raise exc from None
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())
-    # ruff: enable[ARG002]
 del Base

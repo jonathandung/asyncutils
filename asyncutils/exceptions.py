@@ -33,11 +33,11 @@ def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppres
     if cause is None is e.__context__: e.__context__ = context or _()
     else: e.__cause__ = cause
     e.__suppress_context__ = suppress; return e.with_traceback(traceback)
-def raise_(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
+def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
     if isinstance(e, type): e = e(*a, **k)
-    elif a or k: _s_.write('raise_: no additional arguments were expected\n')
-    _a_('asyncutils.exceptions.raise_', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
-patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
+    elif a or k: _s_.write('raise_exc: no additional arguments were expected\n')
+    _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
+patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
@@ -147,7 +147,6 @@ class PasswordMissing(PasswordQueueError, TypeError):
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(name, /):
-    # ruff: disable[PLW0603]
     match name:
         case 'WarningToError':
             global WarningToError
@@ -179,5 +178,4 @@ def __getattr__(name, /):
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
     return globals()[name]
-    # ruff: enable[PLW0603]
 del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception

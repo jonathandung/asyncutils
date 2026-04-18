@@ -1,5 +1,6 @@
 from ._internal import helpers as H, patch as P
 from ._internal.submodules import io_all as __all__
+from . import context
 from .mixins import LoopContextMixin
 from .util import sync_await
 import sys as S
@@ -22,7 +23,6 @@ double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'),
 P.patch_function_signatures(*((_, s) for _ in t))
 @H.subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
-    # ruff: disable[PLR6301]
     __slots__ = 'executor', 'reader', 'writer'
     def __init__(self, r, w, /): super().__init__(); self.loop.set_task_factory(eager_task_factory); self._init_executor(); self.reader, self.writer = r, w
     async def _run(self, f, *a): return await self.loop.run_in_executor(self.executor, f, *a)
@@ -49,23 +49,18 @@ class AsyncReadWriteCouple(LoopContextMixin):
         except AttributeError as a:
             try: return getattr(self.writer, name)
             except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {name!r}', (a, b)) from None
-    # ruff: enable[PLR6301]
 class File(LoopContextMixin):
     __slots__ = '_f', '_fn', 'mmap'
     if S.platform != 'win32':
         def madvise(self, option, start=0, length=None, _=H.filter_out): return self.mmap.madvise(option, start, *_(length))
-    async def reg(self, m, /):
-        async with self.lock: self.mgr.add(m)
-    async def unreg(self, m, /):
-        async with self.lock: self.mgr.discard(m)
     def read(self, offset=0, size=-1): return self.run(self._read, offset, size)
     def write(self, data, offset=0): return self.run(self._write, data, offset)
     async def readline(self, offset=0, size=None, incl_newline=False): return (await self.run(self._readline, offset, size, incl_newline))[0]
     async def readlines(self, hint=-1): return list(await self.run(self._readlines, hint))
     async def flush(self, offset=0, size=None, /): return await self.run(self._flush, offset, size)
     def move(self, dest, src, count): return self.run(self._move, dest, src, count)
-    async def __setup__(self): self.mmap = m = mmap(self._fn, 0, access=2).__enter__(); await self.reg(m)
-    async def __cleanup__(self): await gather(self.aclose(), self.unreg(self.mmap))
+    async def __setup__(self): self.mmap = m = mmap(self._fn, 0, access=2).__enter__(); self.mgr.add(m)
+    async def __cleanup__(self): await self.aclose(); self.mgr.discard(self.mmap)
     def seek(self, pos, whence=0): return self.run(self.mmap.seek, pos, whence)
     def __new__(cls, file, /):
         if (r := (f := cls.open_files.get)((file, 'r+b'))) is None is (r := f((file, 'w+b'))) is (r := f((file, 'x+b'))): (r := super().__new__(cls))._f, r._fn = file, file.fileno()
@@ -138,20 +133,16 @@ class File(LoopContextMixin):
     async def compact(self):
         for i in range(len(c := await self.read())-1, -1, -1):
             if c[i]: await self.run(self.resize, i+1); break
-    def __init_subclass__(cls, *, m, l, r, e):
+    def __init_subclass__(cls, *, m, r, e):
         @staticmethod
         async def run(f, /, *a, r=r): return await r(f, *a)
-        @staticmethod
-        def exit(*_): return e() # noqa: A001
-        cls.mgr, cls.lock, cls.run, cls.exit, cls.open_files = m, l, run, exit, {}
+        cls.mgr, cls.run, cls.exit, cls.open_files = m, run, staticmethod(lambda *_, e=e: e()), {}
 class MemoryMappedIOManager(LoopContextMixin):
-    __slots__ = '_factory',
+    __slots__ = '_factory', '_lock'
     def __init__(self, executor=None, f=(File,), n=H.create_executor):
-        super().__init__(); self._factory = type('_factory', f, {}, m=__import__('_weakrefset').WeakSet(), l=Lock(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter)
+        super().__init__(); self._factory, self._lock = type('_factory', f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter), Lock()
     @property
     def open_mmaps(self): return self._factory.mgr
-    @property
-    def _lock(self): return self._factory.lock
     def _run(self, f, /, *a): return self._factory.run(f, *a)
     @property
     def currently_open(self): return len(self.open_mmaps)
@@ -176,8 +167,8 @@ class MemoryMappedIOManager(LoopContextMixin):
     def __del__(self): sync_await(self.__cleanup__(), loop=(l := self.loop)); l.stop(); l.close()
     async def copy_file(self, srcp, destp):
         async with self.open(srcp) as src, self.create(destp) as dest: await dest.write(await src.read()); await dest.flush()
-    async def checksum(self, path, alg='blake2s'):
-        async with self.open(path) as f: return __import__('hashlib').new(alg, await f.read()).hexdigest()
+    async def checksum(self, path, alg=None):
+        async with self.open(path) as f: return __import__('hashlib').new(context.MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
     async def approx_memory_usage(self):
         async with self._lock: return await self._run(lambda: sum(m.size() for m in self.open_mmaps))
     @asynccontextmanager
@@ -202,14 +193,14 @@ class MemoryMappedIOManager(LoopContextMixin):
         async with self.create(path, size, exclusive=exclusive) as f:
             f = f.smart_write
             for o, d in chunks.items(): await f(d, o)
-    async def _checksum_helper(self, path, alg='blake2s'): return path, await self.checksum(path, alg)
+    async def _checksum_helper(self, alg, path): return path, await self.checksum(path, alg)
     async def _resize_helper(self, path, size):
         async with self.open(path) as f: await self._run(f.resize, size)
     async def _compact_helper(self, path):
         async with self.open(path) as f: await f.compact()
     async def bulk_read(self, file_offsets): return dict(await gather(*starmap(self._bulk_reader, file_offsets.items())))
     async def bulk_write(self, file_data): await gather(*starmap(self._bulk_writer, file_data.items()))
-    async def bulk_checksum(self, paths, alg='blake2s'): return dict(await gather(*map(partial(self._checksum_helper, alg=alg), paths)))
+    async def bulk_checksum(self, paths, alg=None): return dict(await gather(*map(partial(self._checksum_helper, context.MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg), paths)))
     async def bulk_copy(self, pairs): await gather(*starmap(self.copy_file, pairs))
     async def bulk_resize(self, sizes): await gather(*starmap(self._resize_helper, sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))

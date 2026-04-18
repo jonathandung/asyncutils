@@ -116,7 +116,7 @@ this table take inspiration.
     - Raised when :func:`asyncutils.exceptions.unnest_reverse` is called, with ``n`` being a sloppy lower bound on the number of exception( group)s.
   * - asyncutils.exceptions.raise\_
     - ``exc``: :class:`BaseException`
-    - Raised when :func:`asyncutils.exceptions.raise_` is about to raise ``exc``, such that hooks may process the instance or perform validation outside the scope of :func:`asyncutils.exceptions.prepare_exception`.
+    - Raised when :func:`asyncutils.exceptions.raise_exc` is about to raise ``exc``, such that hooks may process the instance or perform validation outside the scope of :func:`asyncutils.exceptions.prepare_exception`.
   * - asyncutils.func.benchmark
     - ``fname``: :class:`str`, ``total_rounds``: :class:`int`
     - Raised when :func:`asyncutils.func.benchmark` is called, with ``fname`` being the name of the function being benchmarked, and ``total_rounds`` the total number of rounds to be executed, including warmup rounds.

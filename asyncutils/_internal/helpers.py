@@ -15,7 +15,7 @@ def check_methods(obj, /, *meth):
     return True
 def stop_and_closer(loop, _=lambda l: l.stop() or l.close()): return _.__get__(loop)
 def copy_and_clear(l): r = l.copy(); l.clear(); return r
-def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # noqa: B008 # type: ignore
+def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # noqa: B008
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)
 def coerce_callable(o, /): return o if callable(o) else type(o)
 def create_executor(f, /, save=True):

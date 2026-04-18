@@ -1,4 +1,4 @@
-'''A special module used to set up the asyncutils module namespace.
+'''A special module used to set up the :mod:`asyncutils` module namespace.
 **Do not modify its contents or reload it at runtime.**'''
 from .types import All, Submodule
 from types import ModuleType

@@ -11,7 +11,7 @@ def test_ver(ver, tmp_path):
     ver.assert_valid()
     assert type(ver) is VersionInfo
     assert ver.__floor__() == ver.__trunc__() == ver.major == ver[0] == ver.__ceil__()-1
-    with raises(AttributeError, match=r"attribute 'parts' cannot be set to \(0, 0, 0\) on VersionInfo object"): ver.parts = 0, 0, 0 # type: ignore
+    with raises(AttributeError, match=r"attribute 'parts' cannot be set to \(0, 0, 0\) on VersionInfo object"): ver.parts = 0, 0, 0
     with raises(OverflowError, match=r'cannot pack version \d+\.\d+\.\d+ into an integer'): int(ver)
     assert ((ver := VersionInfo(float(round(ver, 2))))+3).patch == len(ver) == 3
     tmp_path /= 'shelved.bin'

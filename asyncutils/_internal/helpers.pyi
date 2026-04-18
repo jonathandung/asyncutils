@@ -1,4 +1,4 @@
-'''Miscellaneous helper functions for `asyncutils` submodules that are not meant to be seen by the user.
+'''Miscellaneous helper functions for :mod:`asyncutils` submodules that are not meant to be seen by the user.
 These are undocumented and will remain so; neither will they be stable.
 The stub file exists for the convenience of development only.'''
 from .types import CanClearAndCopy
@@ -23,7 +23,7 @@ def coerce_callable[T](o: T, /) -> type[T]: ...
 def fullname(f: object, /, rmpref: bool=...) -> str: ...
 def audit_fullname(f: object, /, rmpref: bool=...) -> None: ...
 class LoopMixinBase:
-    def make[T](self, coro: Coroutine[Any, Any, T]) -> Task[T]: '''Create a Task for the given coroutine that runs in the underlying loop.'''
+    def make[T](self, coro: Coroutine[Any, Any, T]) -> Task[T]: '''Create a :class:`~asyncio.Task` for the given coroutine that runs in the underlying loop.'''
     @property
     def loop(self) -> AbstractEventLoop: ...
     @property

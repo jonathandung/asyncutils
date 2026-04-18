@@ -23,7 +23,7 @@ class LoopBoundMixin:
 @subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
-    def __await__(self): yield from self.wait().__await__() # type: ignore
+    def __await__(self): yield from self.wait().__await__()
     @abstractmethod
     def wait(self): ...
 @subscriptable
@@ -59,7 +59,7 @@ class LockMixin(metaclass=ABCMeta):
         if await self.acquire(): return self._lock_factory()
         raise RuntimeError('failed to acquire lock')
     async def __aexit__(self, *_):
-        if iscoroutine(a := self.release()): await a # type: ignore
+        if iscoroutine(a := self.release()): await a
     def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
 @subscriptable
 class LockWithOwnerMixin(LockMixin):

@@ -161,7 +161,7 @@ class EventBus(LoopContextMixin):
     @cached_property
     def _published(self): return defaultdict(int)
     def start_audit(self):
-        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True # type: ignore
+        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self._auditing = False
     @cached_property
     def _middlewares(self): return {}
@@ -284,7 +284,7 @@ class EventBus(LoopContextMixin):
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
     def __cleanup__(self): return self.shutdown(immediate=True)
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008 # type: ignore
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'

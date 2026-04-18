@@ -358,7 +358,7 @@ async def to_list(it, /): return [_ async for _ in iter_to_aiter(it)]
 async def aconsume(it, n=None, _=check_methods):
     if n == 0: return
     if n: it = take(it, n)
-    if _(it, '__iter__'): await get_loop_and_set().run_in_executor(create_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0) # type: ignore
+    if _(it, '__iter__'): await get_loop_and_set().run_in_executor(create_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0)
     else:
         async for _ in it: ...
 def anth(it, n, default=_NO_DEFAULT): return anext(aislice(it, n, None), *filter_out(default, s=_NO_DEFAULT))
@@ -583,7 +583,7 @@ async def apolynomialeval(coeff, x):
     if not (n := len(t := await to_tuple(coeff))): return type(x)(0)
     return await asumprod(t, areversed(await collect(apowers(x), n-1)))
 async def areshape(mat, shape):
-    if isinstance(shape, int): I = batch(aflatten(mat), shape, None) # type: ignore
+    if isinstance(shape, int): I = batch(aflatten(mat), shape, None)
     else: d = anext(shape := iter_to_aiter(shape)); from .func import areduce as f; I = aislice(await f(batch, areversed(shape), aflattentensor(mat), await_=False), d)
     async for i in I: yield i
 async def _factor_pollard(n):
@@ -736,8 +736,9 @@ async def adft(a, /, _=_dfthelper):
 async def aidft(A, /, _=_dfthelper):
     R, N, A = await _(A, True)
     async for k in arange(N): yield await asumprod(A, (R[k*n%N] async for n in arange(N)))/N
-async def aargmin(it, key=_identity, default=_NO_DEFAULT): return (await amin(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
-async def aargmax(it, key=_identity, default=_NO_DEFAULT): return (await amax(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0] # type: ignore
+async def _aargminmax(it, key, default, f): return (await f(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0]
+def aargmin(it, key=_identity, default=_NO_DEFAULT): return _aargminmax(it, key, default, amin)
+def aargmax(it, key=_identity, default=_NO_DEFAULT): return _aargminmax(it, key, default, amax)
 def arunningmean(it): return amap(O.truediv, aaccumulate(it), acount(1))
 async def apowersetofsets(it, *, frozen=True):
     S = tuple(dict.fromkeys(await to_list(amap(frozenset, azip(it)))))

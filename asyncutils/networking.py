@@ -18,7 +18,7 @@ class LineProtocol(Protocol, EventualLoopMixin):
     def connection_made(self, transport): self.transport = transport
     def connection_lost(self, exc):
         if t := self.transport:
-            with self._handler: t.abort() # type: ignore
+            with self._handler: t.abort()
         self._lines.shutdown(); self._closed = True
         if w := self._drain_waiter:
             if not w.done(): w.set_exception(ConnectionError('transport connection lost') if exc is None else exc)

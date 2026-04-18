@@ -43,7 +43,6 @@ class event_loop: # noqa: N801
         if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
-        # ruff: disable[E722]
         N = self._istr
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
@@ -77,7 +76,6 @@ class event_loop: # noqa: N801
             set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
-        # ruff: enable[E722]
     def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'):
         b, N = not (f := self._flags)&2, self._istr
         if f&self._ENTERED:
@@ -106,7 +104,6 @@ async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False
         L = len(r := await gather(*map(f, r), return_exceptions=True))
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': 'it', '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,C901,PLR0912,PLR0915
-    # ruff: disable[RUF029]
     audit('asyncutils.base.iter_to_aiter', a(it)); f, C = sentinel is _NO_DEFAULT, getcontext()
     if use_existing_executor is None: use_existing_executor = C.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR
     if create_executor is None: create_executor = C.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR
@@ -148,7 +145,6 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                 async def iterator(_=it.__next__, c=c):
                     while not c((l := _()), sentinel): yield l
         else:
-            # ruff: disable[B008]
             def r(*a, _=h().run_in_executor, e=e): return partial(_, e, *a)
             if f:
                 if g:
@@ -171,10 +167,8 @@ def iter_to_aiter(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, creat
                     while True:
                         if c((l := await _()), sentinel): break
                         yield l
-            # ruff: enable[B008]
     else: raise TypeError(f'iter_to_aiter: cannot iterate over {it!r} synchronously or asynchronously')
     return iterator()
-    # ruff: enable[RUF029]
 def aiter_to_iter(ait, *, use_futures=None, loop=None, a=c, b=b):
     audit('asyncutils.base.aiter_to_iter', a(ait))
     if b(ait, '__iter__') and b(ait := ait.__iter__(), '__next__'): yield from ait; return

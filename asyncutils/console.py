@@ -5,9 +5,9 @@ from ._internal.submodules import console_all as __all__
 import sys as S
 from os import getenv as g
 try: from _pyrepl.console import InteractiveColoredConsole as B
-except ImportError: from code import InteractiveConsole as B; C.basic_repl = True # type: ignore
+except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
 _f, _s = ('',), object()
-class ConsoleBase(B): # type: ignore
+class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %r'; default_local_exit = _unsubclassable = False # noqa: B008
     match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False

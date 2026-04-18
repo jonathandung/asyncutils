@@ -9,9 +9,8 @@ from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'CallbackAccumulator', 'ConnectionPool', 'Pool'
 class Pool[T, R](LoopContextMixin):
-    '''Apply `func` to each item in `it` with limited concurrency and yield results as they come.
-    Use instances of this class as async context managers only.'''
-    def __init__(self, func: Callable[[T], R], it: SupportsIteration[T], /, workers: int=...): ...
+    '''Use instances of this class as async context managers only.'''
+    def __init__(self, func: Callable[[T], R], it: SupportsIteration[T], /, workers: int=...): '''Apply `func` to each item in `it` with limited concurrency and yield results as they come.'''
     async def process(self, item: T) -> None: ...
     def __aiter__(self) -> Self: ...
     async def __anext__(self) -> R: ...
@@ -106,8 +105,8 @@ class ConnectionPool[T, **P]:
     def maxlife(self) -> float: ...
 class CallbackAccumulator[T, **P](AsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class store callbacks and call them at once when the context manager exits.
-    To iterate through the callbacks at this moment safely, use the `callbacks` attribute.
-    The behaviour of this class as a `collections.deque` is an implementation detail.'''
+    To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
+    The behaviour of this class as a :class:`collections.deque` is an implementation detail.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload

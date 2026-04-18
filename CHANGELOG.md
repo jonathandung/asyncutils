@@ -215,7 +215,7 @@ Submodules:
   - unnest_reverse
   - potent_derive
   - prepare_exception
-  - raise_
+  - raise_exc
   - exception_occurred
   - wrap_exc
   - unwrap_exc
@@ -414,7 +414,7 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
-## [0.8.26] - 2026-04-17: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.26] - 2026-04-18: newest; [unstable](https://semver.org/#spec-item-4)
 
 Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
 
