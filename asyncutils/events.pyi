@@ -1,10 +1,10 @@
-'''Classes that extend the functionality of :exc:`asyncio.locks.Event` but do not inherit from it.'''
+'''Classes that extend the functionality of :class:`asyncio.locks.Event` without inheriting from it.'''
 from .mixins import EventMixin
 from _collections_abc import Generator
 from typing import Literal, overload
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
-    '''Wraps a future in the event interface.'''
+    '''Essentially wraps a future in the event interface.'''
     def set(self, value: T) -> None: '''Set the result of the event to `value`, awakening the waiter.'''
     def clear(self) -> None: '''Unset the result of the event.'''
     def is_set(self) -> bool: '''Whether the result is currently set.'''

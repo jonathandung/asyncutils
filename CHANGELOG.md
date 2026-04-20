@@ -238,6 +238,8 @@ Submodules:
   - debounce
   - measure
   - benchmark
+  - star
+  - unstar
 
 - futures
 
@@ -418,7 +420,11 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
-## [0.8.26] - 2026-04-20: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.27] - 2026-04-21: newest; [unstable](https://semver.org/#spec-item-4)
+
+Added more tests and fixed stubtest errors; abolished slow markdownlint step in pre-commit; various API additions.
+
+## [0.8.26] - 2026-04-18 (release skipped)
 
 Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
 

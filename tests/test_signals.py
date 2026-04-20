@@ -7,7 +7,7 @@ async def kill(sig):
     os.kill(os.getpid(), sig)
 async def processor(sig): return sig.value
 async def bad_processor(sig): return 1/0
-@mark.skipif(W := sys.platform == 'win32', reason='difficult to test signal handling on windows')
+@(dec := mark.skipif(sys.platform == 'win32', reason='difficult to test signal handling on windows'))
 @mark.parametrize('res', range(1, 8, 3))
 async def test_signal(res):
     _ = asyncio.create_task(kill(sig := Signals(res)))
@@ -19,7 +19,7 @@ def ignore(*_): ...
 def mock_logger(): return type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore) # type: ignore
 @fixture(scope='module')
 def wait_partial(mock_logger): return __import__('_functools').partial(wait_for_signal, processor, logger=mock_logger)
-@mark.skipif(sys.platform != 'linux', reason='these tests are only for linux')
+@dec
 async def test_signal_log(wait_partial):
     with raises(Log, match='invalid signal None: .*'): await wait_partial(None)
     with raises(Log, match='wait_for_signal timed out'): await wait_partial(4, timeout=0.05)

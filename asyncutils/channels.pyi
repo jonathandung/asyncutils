@@ -229,4 +229,4 @@ class Rendezvous[T]:
         '''Put in a value to the rendezvous and get a different one back.
         If `asap` is `True`, return without necessarily having completed the put.'''
     async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning an :class:`asyncio.Future`. When cancelled, the put is cancelled as well. When done, the value has been handed off to a getter.'''
-    async def _maintainer(self) -> NoReturn: '''Periodically clean up done getters and putters.'''
+    async def _maintainer(self) -> NoReturn: '''Periodically clean up done getters and putters, according to :const:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`.'''

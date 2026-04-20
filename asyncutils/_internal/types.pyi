@@ -317,11 +317,11 @@ type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'c
 type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
-'''Names of algorithms used for calculating checksums. The default is blake2s, which is fast and somewhat secure with a low probability of collision.'''
+'''Names of algorithms used for calculating checksums. The default is :const:`context.MMIOMGR_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
 type OpenRV = _AsyncGeneratorContextManager[MemoryMappedFile, None]
-'''The type of the return values of the `open`, `create` and `create_sparsef` methods of `io.MemoryMappedIOManager`.'''
+'''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
-'''The type of the `open_files` property of :class:`io.MemoryMappedIOManager`.'''
+'''The type of the :attr:`open_files` property of :class:`io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]
 '''The type of subscribers for :class:`channels.EventBus`.'''
 type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]

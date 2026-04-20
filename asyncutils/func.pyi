@@ -4,11 +4,13 @@ from _collections_abc import Awaitable, Callable, Coroutine, Iterable, Mapping
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from typing import Any, Literal, Self, overload
-__all__ = 'RateLimited', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'measure', 'retry', 'throttle', 'timer'
+__all__ = 'RateLimited', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'measure', 'retry', 'star', 'throttle', 'timer', 'unstar'
 @overload
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: '''Async version of `functools.reduce` that takes an async function and possibly async iterable. If the function is sync, specify `await_=False`.'''
 @overload
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: ...
+def star[T](f: Callable[..., Awaitable[T]], /) -> Callable[[Iterable[Any], Mapping[str, Any]], Coroutine[Any, Any, T]]: '''Convert a function taking variadic parameters and returning an awaitable into a coroutine function taking two arguments: an iterable of positional arguments and a mapping of keyword arguments.'''
+def unstar[T](f: Callable[[Iterable[Any], Mapping[str, Any]], Awaitable[T]], /) -> Callable[..., Coroutine[Any, Any, T]]: '''The inverse of `star`.'''
 @overload
 def every(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> EveryRV[Any]: ...
 @overload
@@ -36,15 +38,15 @@ def everymethod[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., sto
 def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
-    `timer` (default `time.perf_counter`) is used to count `elapsed`, the time required to execute the function.
+    `timer` (default :func:`time.perf_counter`) is used to count `elapsed`, the time required to execute the function.
     `res_or_exc` is the awaited result of the wrapped function, or the exception thrown as wrapped by `exceptions.wrap_exc`.
-    `precision` is the number of digits after the decimal point to keep in the time in logging, and `ns` whether the return value of the timer indicates time in nanoseconds.
+    `precision` (default :const:`context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and `ns` whether the return value of the timer indicates time in nanoseconds.
     Any exception the wrapped function emits whose type is not in `expected` is propagated directly.'''
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
     '''A decorator factory that retries the wrapped function with exponential backoff, returning once the function succeeds.
-    If the function does not succeed within `tries` attempts, the last exception is propagated.
-    `backoff` is the multiplier applied to the delay (initially `delay`) after each failed attempt, which can never exceed `max_delay`.
-    `jitter` is the maximum random jitter added to the delay.
+    If the function does not succeed within `tries` attempts (default :const:`context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
+    `backoff` (default :const:`context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially `delay` which defaults to :const:`context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed `max_delay` (default :const:`context.RETRY_DEFAULT_MAX_DELAY`).
+    `jitter` (default :const:`context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
     `exc` specifies which exceptions to catch and retry on; if an exception not in `exc` is raised, it is propagated immediately.
     `on_retry` and `on_success` are callbacks called before each retry and after a successful call, with the attempt number (zero-based) as the first
     argument and the exception caught or the time taken for the successful call respectively as the second. Thus, `on_success` is only called once.'''
@@ -53,8 +55,8 @@ def debounce(wait: float) -> DecoratorFactoryRV: ...
 async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=...) -> BenchmarkResult:
     '''`f` is the function to benchmark, which should take no arguments and return an awaitable.
-    `times` is how many times the function should be run, which defaults to 1.
-    `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default `0`.'''
+    `times` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
+    `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.'''
 class RateLimited[T, **P]:
     '''The rate limiter pattern as a decorator (factory). See `locks.AdvancedRateLimit` for the async context manager version.'''
     @overload

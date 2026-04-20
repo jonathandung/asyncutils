@@ -1,5 +1,4 @@
 asyncutils.__all__
-asyncutils.__dir__
 asyncutils.__main__
 asyncutils._internal.helpers.filter_out
 asyncutils._internal.initialize.Module

@@ -6,12 +6,12 @@ from .base import adisembowel, aenumerate, collect, iter_to_aiter, safe_cancel_b
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE, RECIP_E
 from .context import getcontext
-from .iterclasses import achain, anullcontext
+from .iterclasses import achain
 from .util import aiter_from_f, safe_cancel
 import _operator as O, math as M
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
-from asyncio.locks import Event, Lock, Semaphore
+from asyncio.locks import Lock
 from asyncio.tasks import gather, sleep, wait_for
 from collections import Counter, defaultdict, deque
 from functools import lru_cache, partial
@@ -50,16 +50,16 @@ def tee(it, n=2, *, maxqsize=0, put_exc=True, loop=None):
         finally: await helper(a)
     t = loop.create_task(feed()); return tuple(map(iterator, Q))
 async def _aunzip_put(Q, t):
-    from .queues import ignore_qshutdown
+    from .queues import ignore_qshutdown as c
     for q, i in zip(Q, t):
-        with ignore_qshutdown: await q.put(i)
+        with c: await q.put(i)
 class _aunzip_consumer_base:
     __slots__ = 'q',
     def __init__(self): self.q = Queue()
     def __aiter__(self): return self
     def close(self): self.q.shutdown()
 async def aunzip(ait, put_batch=None, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_aunzip_consumer_base):
-    audit('asyncutils.iters.aunzip', type(ait).__qualname__); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
+    audit('asyncutils.iters.aunzip', fullname(ait)); l = len(t := await anext(ait := iter_to_aiter(ait), ()))
     class aunzip_consumer(_b):
         __slots__ = ()
         async def __anext__(self, L=Lock(), f=partial(take, ait, getcontext().AUNZIP_DEFAULT_PUT_BATCH if put_batch is None else put_batch, default=RAISE)): # noqa: B008
@@ -75,31 +75,30 @@ async def aunzip(ait, put_batch=None, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=
             except QueueShutDown: raise StopAsyncIteration from None
     await _a(Q := tuple(aunzip_consumer() for _ in range(l)), t); return Q
 async def merge(*I, reverse=False):
-    audit('asyncutils.iters.merge', I); q, c, e, l, a = (LifoQueue if reverse else Queue)(), None, Event(), get_loop_and_set(), _NO_DEFAULT
+    audit('asyncutils.iters.merge', I); q, c, F, a = (LifoQueue if reverse else Queue)(), None, (l := get_loop_and_set()).create_future(), object()
     async def drain(i, f=q.put):
         async for _ in i: await f(_)
     async def close():
-        if reverse: await q.put(a); e.set()
+        if reverse: await q.put(a); F.set_result(None)
         await gather(*(l.create_task(drain(iter_to_aiter(i))) for i in I))
-        if not reverse: await q.put(a); e.set()
-    l.create_task(close()); await e.wait()
+        if not reverse: await q.put(a); F.set_result(None)
+    l.create_task(close()); await F
     while True:
         if (c := await q.get()) is a: break
         yield c
 def aflatten(it): return achain.from_iterable(it).__aiter__()
-async def batch(it, size, max_concurrent_batches=None, timeout=None, strict=False):
-    f, s, g, _ = iter_to_aiter(it).__anext__, anullcontext() if max_concurrent_batches is None else Semaphore(max_concurrent_batches), (b := []).append, 0
+async def batch(it, size, *, timeout=None, strict=False):
+    f, g, _ = iter_to_aiter(it).__anext__, (b := []).append, 0
     while True:
         try:
             for _ in range(size):
-                try: x = await wait_for(f(), timeout)
+                try: g(await wait_for(f(), timeout))
                 except StopAsyncIteration: break
                 except TimeoutError:
                     if b: break
-                g(x)
             if b:
                 if strict and _ < size-1: raise ValueError('incomplete batch')
-                async with s: yield copy_and_clear(b)
+                yield copy_and_clear(b)
         except CancelledError:
             if b: yield copy_and_clear(b)
             raise
@@ -144,12 +143,6 @@ def asliced(seq, n, strict=False):
             if len(s) != n: raise ValueError(f'length of {seq!r} is not divisible by {n}')
             yield s
     return ret()
-def batch_buffer(items, batch_size, buffer_size, *, loop=None):
-    d = deque(maxlen=buffer_size)
-    if loop is None: loop = get_loop_and_set()
-    async def consumer(f=d.extend):
-        async for b in batch(items, batch_size): f(b)
-    loop.create_task(consumer()); return d
 def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
     q = Queue(maxsize)
     if loop is None: loop = get_loop_and_set()
@@ -286,10 +279,10 @@ async def aiterindex(it, value, start=0, stop=None, _=check):
         if _(j, value): yield i
 async def asieve(n):
     if n < 2: return
-    yield 2; s, d = 3, bytearray(range(2))*(n>>1)
+    yield 2; s, d = 3, bytearray((0, 1))*(n>>1)
     async for p in aiterindex(d, 1, s, M.isqrt(n)+1):
-        async for i in aiterindex(d, 1, s, q := p*p): yield i
-        d[q:n:x], s = bytes(len(range(q, n, x := p<<1))), q
+        async for i in aiterindex(d, 1, s, s := p*p): yield i
+        d[s:n:x] = bytes(len(range(s, n, x := p<<1)))
     async for i in aiterindex(d, 1, s): yield i
 async def apairwise(it):
     try: a = await anext(I := iter_to_aiter(it))
@@ -321,14 +314,14 @@ def asquaresum(it): return asumprod(*tee(it))
 async def aziplongest(*its, fillvalue=None):
     n = len(I := list(map(iter_to_aiter, its)))
     while True:
-        v = []
+        f = (v := []).append
         for i, a in enumerate(I):
             try: _ = await anext(a)
             except StopAsyncIteration:
                 n -= 1
                 if not n: return
                 I[i], _ = arepeat(fillvalue), fillvalue
-            v.append(_)
+            f(_)
         yield tuple(v)
 def asumprod(p, q, /): return asum(amap(O.mul, p, q, strict=True))
 async def aconvolve(signal, kernel):
@@ -385,7 +378,7 @@ async def acombinations_with_replacement(it, r):
         for i in reversed(range(r)):
             if I[i] != n-1: break
         else: return
-        I[i:] = [I[i]+1]*(r-i); yield tuple(p[i] for i in I)
+        I[i:] = (I[i]+1,)*(r-i); yield tuple(p[i] for i in I)
 async def apermutations(it, r=None):
     n = len(p := await to_tuple(it))
     if (r := n if r is None else r) > n: return
@@ -411,13 +404,13 @@ async def aroundrobin2(*its):
         for x in X:
             if x is not _NO_DEFAULT: yield x
 async def aunique_everseen(it, key=_identity):
-    A, a, C, c = (S := set()).add, (s := []).append, *map(O.attrgetter('__contains__'), (S, s))
+    A, a = (S := set()).add, (s := []).append
     async for i in iter_to_aiter(it):
         k = key(i)
         try:
-            if not C(k): A(k); yield i
+            if k not in S: A(k); yield i
         except TypeError:
-            if not c(k): a(k); yield i
+            if k not in s: a(k); yield i
 def aunique_justseen(it, key=_identity, _=O.itemgetter): return amap(_(0), agroupby(it)) if key is None else amap(anext, amap(_(1), agroupby(it, key)), await_=True)
 async def aunique(it, key=None, reverse=False):
     async for _ in aunique_justseen(await asorted(it, key=key, reverse=reverse), key): yield _
@@ -425,10 +418,15 @@ async def ancycles(it, n):
     async for _ in achain.from_iterable(arepeat(await to_tuple(it), n)): yield _
 def apartition(pred, it):
     if pred is None: pred = bool
-    s, t, p = tee(iter_to_aiter(it), 3); u, v = tee(amap(pred, p)); return acompress(s, amap(O.not_, u)), acompress(t, v)
+    async def agen(q, _=iter_to_aiter(it).__anext__): # noqa: B008
+        while True:
+            while q: yield q.popleft()
+            try: (T if pred(v := await _()) else F).append(v)
+            except StopAsyncIteration: return
+    return map(agen, (F := deque(), T := deque()))
 async def aiterexcept(f, exc, first=None):
     with E.IgnoreErrors(exc):
-        if first is not None: yield first()
+        if first is not None: yield await first()
         while True: yield await f()
 async def ailen(it):
     i = 0
@@ -448,32 +446,33 @@ async def asorted(it, *, key=_identity, reverse=False):
     return r
 def acanonical(it): return asorted(it, key=id, reverse=True)
 async def adistinctpermutations(it, r=None):
-    async def _full(A):
-        while True:
-            yield tuple(A)
-            for i in range(_-2, -1, -1):
-                if A[i] < A[i+1]: break
-            else: return
-            for j in range(j := _-1, i, -1): # noqa: B020
-                if A[i] < A[j]: break
-            A[i], A[j] = A[j], A[i]; A[i+1:] = A[:i-_:-1]
-    async def _partial(A):
-        h, R, l = A[:_], range(_-1, -1, -1), range(len(t := A[_:]))
-        while True:
-            yield tuple(h); p = t[-1]
-            for i in R:
-                if h[i] < p: break
-                p = h[i]
-            else: return
-            for j in l:
-                if t[j] > h[i]: h[i], t[j] = t[j], h[i]; break
-            else:
-                for j in R:
-                    if h[j] > h[i]: h[i], h[j] = h[j], h[i]; break
-            t += h[:-(x := _-i):-1]; i += 1; h[i:], t[:] = t[:x], t[x:]
     if (S := len(I := await to_list(it))) < (_ := S if r is None else r): yield (); return
     if _ <= 0: return
-    a = _full if _ == S else _partial
+    if _ == S:
+        async def a(A):
+            while True:
+                yield tuple(A)
+                for i in range(_-2, -1, -1):
+                    if A[i] < A[i+1]: break
+                else: return
+                for j in range(j := _-1, i, -1): # noqa: B020
+                    if A[i] < A[j]: break
+                A[i], A[j] = A[j], A[i]; A[i+1:] = A[:i-_:-1]
+    else:
+        async def a(A):
+            h, R, l = A[:_], range(_-1, -1, -1), range(len(t := A[_:]))
+            while True:
+                yield tuple(h); p = t[-1]
+                for i in R:
+                    if h[i] < p: break
+                    p = h[i]
+                else: return
+                for j in l:
+                    if t[j] > h[i]: h[i], t[j] = t[j], h[i]; break
+                else:
+                    for j in R:
+                        if h[j] > h[i]: h[i], h[j] = h[j], h[i]; break
+                t += h[:-(x := _-i):-1]; i += 1; h[i:], t[:] = t[:x], t[x:]
     try: I.sort(); R = a(I)
     except TypeError:
         d = defaultdict(list)
@@ -494,7 +493,7 @@ def aspy(it, n=1): p, q = tee(it); return take(q, n), p
 async def ainterleaveevenly(its, lengths=None):
     I = await to_tuple(its)
     try:
-        if (X := len(I)) != len(L := await to_tuple(lengths or map(len, I))): raise ValueError('mismatch in length of its and lengths')
+        if (X := len(I)) != len(L := await to_tuple(lengths or map(len, I))): raise ValueError('ainterleaveevenly: mismatch in length of its and lengths')
     except TypeError: raise ValueError('ainterleaveevenly: cannot determine lengths of (async) iterables') from None
     A, *a = map(f := L.__getitem__, _ := sorted(range(X), key=f, reverse=True)); B, *b = (iter_to_aiter(I[i]) for i in _); E, t = [A//X]*len(a), sum(L)
     while t:
@@ -583,7 +582,7 @@ async def apolynomialeval(coeff, x):
     if not (n := len(t := await to_tuple(coeff))): return type(x)(0)
     return await asumprod(t, areversed(await collect(apowers(x), n-1)))
 async def areshape(mat, shape):
-    if isinstance(shape, int): I = batch(aflatten(mat), shape, None)
+    if isinstance(shape, int): I = batch(aflatten(mat), shape)
     else: d = anext(shape := iter_to_aiter(shape)); from .func import areduce as f; I = aislice(await f(batch, areversed(shape), aflattentensor(mat), await_=False), d)
     async for i in I: yield i
 async def _factor_pollard(n):
@@ -592,7 +591,7 @@ async def _factor_pollard(n):
         x = y = 2; d = 1
         while (d := M.gcd((x := (x*x+b)%n)-(y := ((z := (y*y+b)%n)*z+b)%n), n)) == 1: ...
         if d != n: return d
-    raise ValueError(f'{n} is prime')
+    raise ValueError(f'afactor: internal error: {n} is prime')
 @lru_cache
 def _shift_to_odd(n):
     if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError('invalid n')
@@ -606,7 +605,7 @@ async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable
     else: _ = (r(2, n-1) for _ in range(64))
     return await aall(amap(partial(f, n), _))
 async def afactor(n, _=_littleprimes, F=_factor_pollard):
-    if n < 2: raise ValueError('no prime factors')
+    if n < 2: raise ValueError('afactor: no prime factors')
     for p in _:
         while not n%p: yield p; n //= p
     if n < 2: return
@@ -618,7 +617,7 @@ async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
         r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import _heappush_max as a, heappush as b, _heappushpop_max as c # type: ignore
         while True: a(l, await r()); yield l[0]; b(h, c(l, await r())); yield (l[0]+h[0])/2
-    if (m := O.index(maxlen)) <= 0: raise ValueError('window size should be positiive')
+    if (m := O.index(maxlen)) <= 0: raise ValueError('arunningmedian: window size should be positive')
     w, o = deque(), []; from bisect import bisect_left as b, insort_right as f
     async for i in iter_to_aiter(it):
         w.append(i); f(o, i)
@@ -627,7 +626,7 @@ async def arunningmedian(it, *, maxlen=None):
 async def arandomderangement(it, _=_randinst.shuffle):
     s = await to_tuple(it)
     if (l := len(s)) < 2:
-        if s: raise IndexError('no derangements to choose from')
+        if s: raise IndexError('arandomderangement: no derangements to choose from')
         return ()
     i = tuple(p := list(range(l)))
     while True:

@@ -1,5 +1,5 @@
 '''Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes,
-and memory maps. Does not depend on `aiofiles` or any such library, using executors as determined by the module configuration.'''
+and memory maps. Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.'''
 from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
 from .config import Executor
 from .mixins import LoopContextMixin
@@ -10,9 +10,9 @@ from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
-    '''Return a tuple of two `AsyncReadWriteCouple`s, such that each can read what the other writes. Two os-level pipes must be created.
-    Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default os.pipe) to customize this behaviour.'''
-def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: ...
+    '''Return a tuple of two :class:`AsyncReadWriteCouple`s in text mode, such that each can read what the other writes. Two os-level pipes must be created.
+    Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default :func:`os.pipe`) to customize this behaviour.'''
+def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: '''The above, but in binary mode.'''
 class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     '''An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
     The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
@@ -32,27 +32,26 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at `size` (or the current position if not passed), and return the new file size.'''
     async def write(self, s: R, /) -> int: '''Write `s` into the writer, returning the number of characters written.'''
     async def writelines(self, lines: Iterable[R], /) -> None: '''Write the lines from the iterable into the writer without adding newline as separators.'''
-    def fileno(self) -> NoReturn: '''Raise `OSError`.'''
+    def fileno(self) -> NoReturn: '''Raise :exc:`OSError`.'''
     def isatty(self) -> bool: '''Whether at least one of the reader or the writer is connected to a terminal.'''
     def readable(self) -> bool: '''Whether the reader can be read from.'''
-    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise `OSError`.'''
+    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise :exc:`OSError`.'''
     def seekable(self) -> bool: '''Whether both streams support random access.'''
-    def tell(self) -> NoReturn: '''Raise `OSError`.'''
+    def tell(self) -> NoReturn: '''Raise :exc:`OSError`.'''
     def writable(self) -> bool: '''Whether the writer can be written into.'''
     @property
     def closed(self) -> bool: '''Whether the file has been closed.'''
     __cleanup__ = aclose
 class MemoryMappedIOManager(LoopContextMixin):
     '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
-    You will probably only ever need one instance of this.
-    In the docstrings below, `mgr` will be an instance of this class.'''
+    You will probably only ever need one instance of this.'''
     def __init__(self, executor: Executor|None=...): ...
     @property
-    def open_mmaps(self) -> WeakSet[mmap]: '''Instance of `weakref.WeakSet` containing the maps managed by this manager.'''
+    def open_mmaps(self) -> WeakSet[mmap]: '''Instance of :class:`weakref.WeakSet` containing the maps managed by this manager.'''
     @property
     def currently_open(self) -> int: '''Number of currently open memory maps.'''
     @property
-    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b', 'x+b']]: '''Dictionary mapping file paths as passed to `mgr.open`, `mgr.create` or `mgr.create_sparsef` to the mode the file was opened with.'''
+    def open_paths(self) -> dict[Openable, Literal['r+b', 'w+b', 'x+b']]: '''Dictionary mapping file paths as passed to :meth:`open`, :meth:`create` or :meth:`create_sparsef` to the mode the file was opened with.'''
     @property
     def open_files(self) -> OpenFiles: '''Dictionary mapping tuples of the form `(file, mode)` to the managed file objects.'''
     def open(self, path: Openable, init_size: int=...) -> OpenRV: '''An async context manager that opens a file at `path` for memory-mapped reading and writing on entry and closes it on exit. The file must exist and is not truncated.'''
