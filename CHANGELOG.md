@@ -414,7 +414,7 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
-## [0.8.26] - 2026-04-18: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.8.26] - 2026-04-20: newest; [unstable](https://semver.org/#spec-item-4)
 
 Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
 
@@ -452,7 +452,7 @@ Created dev branch for python 3.15 features.
 
 ## [0.8.17] - 2026-03-24
 
-Started using detect-secrets and markdownlint.
+Started using detect-secrets.
 
 ## [0.8.16] - 2026-03-22
 

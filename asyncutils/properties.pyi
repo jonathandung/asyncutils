@@ -1,10 +1,11 @@
 '''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
 from ._internal.types import AsyncLockLike
-from _collections_abc import Awaitable, Callable
+from _collections_abc import Awaitable, Callable, Hashable
 from asyncio.locks import Lock
 from typing import Any, Concatenate, Self, final, overload
 __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 class AsyncProperty[T, R]:
+    '''A property with asynchronous getters, setters and deleters.'''
     @overload
     def __new__(cls, *, doc: str|None=..., strict: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
@@ -19,7 +20,7 @@ class AsyncProperty[T, R]:
     def getter(self, fget: Callable[[R], Awaitable[T]], /) -> Self: ...
     def setter(self, fset: Callable[[R, T], Awaitable[None]], /) -> Self: ...
     def deleter(self, fdel: Callable[[R], Awaitable[None]], /) -> Self: ...
-class AsyncLockProperty[T, R](AsyncProperty[T, R]):
+class AsyncLockProperty[T, R: Hashable](AsyncProperty[T, R]):
     @overload
     @staticmethod
     def _new_lock[L: AsyncLockLike[Any]](_: R, *, lock_impl: type[L]) -> L: ...
@@ -30,7 +31,7 @@ class AsyncLockProperty[T, R](AsyncProperty[T, R]):
     def __new__(cls, *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
-    def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a(n error-prone) memory-address based cache.'''
+    def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a cache that unfortunately requires the object to be hashable and weakly referencable.'''
 @final
 class coercedmethod[T, R, **P]: # noqa: N801
     '''Interpret any callable as a regular function in a class body so that access on instance returns something like a bound method.'''

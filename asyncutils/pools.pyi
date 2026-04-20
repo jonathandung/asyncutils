@@ -9,7 +9,7 @@ from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'CallbackAccumulator', 'ConnectionPool', 'Pool'
 class Pool[T, R](LoopContextMixin):
-    '''Use instances of this class as async context managers only.'''
+    '''Maps a function over an (async) iterable. Use instances of this class as async context managers only.'''
     def __init__(self, func: Callable[[T], R], it: SupportsIteration[T], /, workers: int=...): '''Apply `func` to each item in `it` with limited concurrency and yield results as they come.'''
     async def process(self, item: T) -> None: ...
     def __aiter__(self) -> Self: ...

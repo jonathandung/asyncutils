@@ -6,7 +6,6 @@
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.logs/
 .secrets.baseline
 .Python
 venv
@@ -52,7 +51,6 @@ docker-compose*.yaml
 Dockerfile
 allowlist.txt
 .dockerignore
-.markdownlint.json
 .pre-commit-config.yaml
 .editorconfig
 .out/

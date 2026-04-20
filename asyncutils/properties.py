@@ -1,8 +1,10 @@
 from ._internal.compat import Placeholder, partial
 from ._internal.helpers import fullname, get_loop_and_set, subscriptable
 from ._internal.submodules import properties_all as __all__
+from asyncio.futures import _chain_future # type: ignore[import-not-found]
 from asyncio.locks import Lock
-from weakref import finalize
+from concurrent.futures import Future
+from weakref import WeakKeyDictionary
 @subscriptable
 class AsyncProperty:
     __slots__ = '__doc__', '_cls', '_deleted', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'
@@ -28,7 +30,8 @@ class AsyncProperty:
         if self._strict: raise AttributeError(msg, name=self._name)
         return self
     def _helper(self, f, *a, c='get'):
-        try: return self._loop.run_until_complete(f(*a))
+        async def t(): return await f(*a)
+        try: _chain_future(self._loop.create_task(t()), F := Future()); return F.result()
         except BaseException as e: raise AttributeError(f'failed to {c} attribute {self._name}') from e
     def _set_helper(self, msg, val):
         if self._strict: raise AttributeError(msg, name=self._name)
@@ -40,16 +43,14 @@ class AsyncLockProperty(AsyncProperty):
     __slots__ = '_cache', '_lock_getter'
     @staticmethod
     def _new_lock(_, *, lock_impl=Lock): return lock_impl()
-    def __init__(self, *a, lock_getter=None, **k): super().__init__(*a, **k); self._lock_getter, self._cache = lock_getter or self._new_lock, {}
+    def __init__(self, *a, lock_getter=None, **k): super().__init__(*a, **k); self._lock_getter, self._cache = lock_getter or self._new_lock, WeakKeyDictionary()
     def __repr__(self): return f'{super().__repr__()[:-1]}, lock_getter={self._lock_getter!r})'
     def _helper(self, f, *a, c='get'):
         async def _():
             async with self.get_lock(a[0]): await f(*a)
         return super()._helper(_, c=c)
     def get_lock(self, obj):
-        if (r := (c := self._cache).get(i := id(obj))) is None: c[i] = r = self._lock_getter(obj)
-        try: finalize(obj, c.pop, i, None) # noqa: SIM105
-        except TypeError: ...
+        if (r := (c := self._cache).get(obj)) is None: c[obj] = r = self._lock_getter(obj)
         return r
 class coercedmethod: # noqa: N801
     __slots__ = '__f', '__name', '__owner'

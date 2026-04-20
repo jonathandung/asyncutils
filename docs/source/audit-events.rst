@@ -73,8 +73,8 @@ this table take inspiration.
     - ``maxsize``: :class:`int|None`
     - Raised when :class:`asyncutils.channels.Observable` is instantiated, with ``maxsize`` being the maximum number of subscribers or ``None`` if there is no such limit.
   * - asyncutils.channels.EventBus
-    - ``max_concurrent``: :class:`int`
-    - Raised when :class:`asyncutils.channels.EventBus` is instantiated, with ``max_concurrent`` being the maximum number of event handlers allowed to run concurrently.
+    - ``name``: :class:`str`
+    - Raised when :class:`asyncutils.channels.EventBus` is instantiated, with ``name`` being its name or ``None`` if not passed.
   * - asyncutils.channels.EventBus.start_audit
     - ``addr``: :class:`int`
     - Raised when the :meth:`start_audit` method of :class:`asyncutils.channels.EventBus` is called, with the memory address of the instance as argument.

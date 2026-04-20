@@ -77,7 +77,7 @@ class CircuitBreaker:
                     if default is _NO_DEFAULT: raise
                     return default
                 except CRITICAL: raise Critical
-                except BaseException as e: raise CircuitBreakerError(f'unexpected {type(e).__qualname__} in {fullname(f)} under CircuitBreaker {self.name!r}: {e}') from None # noqa: BLE001
+                except BaseException as e: raise CircuitBreakerError(f'unexpected {type(e).__qualname__} in {fullname(f)} under {type(self).__qualname__} {self.name!r}: {e}') from None # noqa: BLE001
                 else:
                     if s == 1: self._half_open_calls = 0; self._set(0)
                     return r

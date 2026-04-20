@@ -64,9 +64,10 @@ async def safe_cancel_batch[T](t: SupportsIteration[Future[T]], *, callback: Cal
 @overload
 async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[[T|BaseException], object]|None=..., disembowel: Literal[True], raising: bool=...) -> None:
     '''Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
-    Afterwards, if disembowel is True, clear the iterable using its pop() method repeatedly, falling back to clear().
+    The batch cancellation itself can be reliably cancelled.
+    Afterwards, if `disembowel` is `True`, clear the iterable using its :meth:`pop` method repeatedly, falling back to :meth:`clear`.
     The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
-    If `raising` is True, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
+    If `raising` is `True`, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int=..., *, default: T|RaiseType=...) -> list[T]:
     '''Collect `n` items from the (async) iterable into a list and return that list.
     When `n` is not passed, equivalent to :func:`iters.to_list` but slower.

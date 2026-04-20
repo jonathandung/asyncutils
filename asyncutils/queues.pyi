@@ -1,4 +1,4 @@
-'''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a PotentQueueBase ABC.'''
+'''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
 from .mixins import EventualLoopMixin
@@ -22,8 +22,8 @@ ignore_valerrs: Final[IgnoreErrors]
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[]) -> P[R, T]:
     '''Returns a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    If `protect_get` is True, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
-    If `protect_put` is True, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
+    If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
+    If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''
 @overload
 def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> P[R, T]: ... # type: ignore[assignment]
@@ -64,7 +64,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     def empty(self) -> bool: '''Whether the queue is empty.'''
     def __bool__(self) -> bool: '''Whether there are items in the queue.'''
     __iter__, __aiter__ = drain_until_empty, drain_persistent # noqa: PYI017
-    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is True, pending gets raise immediately even if the queue is not empty.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is `True`, pending gets raise immediately even if the queue is not empty.'''
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''
     @is_shutdown.setter
@@ -74,7 +74,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     @property
     def can_get_now(self) -> bool: '''Whether items can be get from the queue without blocking at this instant.'''
     @property
-    def fully_functional(self) -> bool: '''`queue.fully_functional == queue.can_put_now and queue.can_get_now` holds.'''
+    def fully_functional(self) -> bool: '''`queue.fully_functional == queue.can_put_now and queue.can_get_now`.'''
     @property
     def capacity(self) -> int|float: '''The capacity of the queue. Can be `float('inf')`.'''
     @property
@@ -109,7 +109,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     def map_nowait[R](self, f: Callable[[T], Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
     def starmap_nowait[R](self, f: Callable[..., Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
     def filter_nowait(self, pred: Callable[[T], bool]=..., /) -> tuple[list[T], int]: '''Filter items in the queue by a predicate and return a list of removed items and an integer; the items in the returned list after the index corresponding to that integer were items rejected from the queue due to the queue being full.'''
-    def enumerate_nowait(self) -> Generator[tuple[int, T], None, None]: '''Equivalent to `await iters.to_list(queue.drain_persistent())`.'''
+    def enumerate_nowait(self) -> Generator[tuple[int, T], None, None]: '''`queue.enumerate_nowait()` is equivalent to `await iters.to_list(queue.drain_persistent())`.'''
 class SmartQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
@@ -126,7 +126,7 @@ class SmartLifoQueue[T](PotentQueueBase[T]):
     def peek_all(self) -> list[T]: ...
     def qsize(self) -> int: ...
 class SmartPriorityQueue[T](PotentQueueBase[T]):
-    '''A priority queue, where the priority of each item is determined by comparing it to other items, meaning each item should at least implement `__lt__`.'''
+    '''A priority queue, where the priority of each item is determined by comparing it to other items, meaning each item should at least implement :meth:`__lt__`.'''
     def __init__(self, maxsize: int=..., *, init_items: SupportsIteration[T]=[]): ...
     async def start(self, maxsize: int, init_items: SupportsIteration[T]) -> None: ...
     def _init(self, maxsize: int) -> None: ...

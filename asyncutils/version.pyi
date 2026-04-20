@@ -44,13 +44,13 @@ class VersionInfo(str): # noqa: FURB189
     @overload # type: ignore[override]
     def __add__(self, n: int, /) -> Self: ...
     @overload
-    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or `delta`.'''
+    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
     @overload
     def __sub__(self, n: int, /) -> Self: ...
     @overload
     def __sub__(self, delta: VersionDelta, /) -> Self: ...
     @overload
-    def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or `delta`, or the delta between `self` and `other`.'''
+    def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or the delta `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, value: Any, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: str, /) -> str:
         """Format specification and corresponding return value: (using 123.4.0 as example)
@@ -72,7 +72,7 @@ class VersionInfo(str): # noqa: FURB189
     def __floor__(self) -> int: '''Returns the major version.'''
     def __ceil__(self) -> int: '''Returns the major version, adding one if there is a minor or patch version.'''
     def __float__(self) -> float: '''Assumes minor and patch are less than 100.'''
-    def to_complex(self) -> complex: '''Loses the patch version. Since this class is a `str` subclass, an implementation of `__complex__` will not be recognized.'''
+    def to_complex(self) -> complex: '''Loses the patch version. Since this class is a :class:`str` subclass, an implementation of :meth:`__complex__` will not be recognized.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''
     def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
     def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: '''Whether this version is compatible with the other, given the major and minor tolerances.'''
@@ -83,7 +83,7 @@ class VersionInfo(str): # noqa: FURB189
     @classmethod
     def unshelve(cls, path: Openable, little: bool=...) -> Self: '''Recover a stored version.'''
     @classmethod
-    def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to asyncutils.__version__.'''
+    def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to :data:`asyncutils.__version__`.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     @property
     def representation(self) -> str:
@@ -92,9 +92,9 @@ class VersionInfo(str): # noqa: FURB189
         asyncutils v4.2.0
         ```'''
     @property
-    def is_unstable(self) -> Literal[False]: '''True only in development, so should be considered always False.'''
+    def is_unstable(self) -> Literal[False]: '''`True` only in alpha and beta versions, so should be considered always `False`.'''
     @property
-    def parts(self) -> tuple[int, int, int]: '''The tuple (major, minor, patch).'''
+    def parts(self) -> tuple[int, int, int]: '''The tuple `(major, minor, patch)`.'''
     @property
     def major(self) -> int: '''The major part of the version.'''
     @property

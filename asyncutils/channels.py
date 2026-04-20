@@ -35,11 +35,11 @@ class Observable(LoopContextMixin):
     async def notify_sequential(self, *a, _silent_=False, _persistent_=False, **k):
         for observer in self._data.copy():
             try: yield await observer(*a, **k)
-            except Exception as e:
+            except Exception:
                 if _silent_:
                     if _persistent_: continue
                     break
-                elif _persistent_: L.exception('%s in observer', type(e).__qualname__)
+                elif _persistent_: L.exception('error in observer')
                 else: raise
     async def wait_for_next(self, timeout=None, strict=False):
         async def one_time(*a, **k): F.set_result((a, k)) # noqa: RUF029
@@ -125,7 +125,9 @@ class Observable(LoopContextMixin):
 class EventBus(LoopContextMixin):
     def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False):
         if max_concurrent is None: max_concurrent = context.EVENT_BUS_DEFAULT_MAX_CONCURRENT
-        audit('asyncutils.channels.EventBus', max_concurrent); self._subscribers = s = defaultdict(WeakSet); self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+        def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):
+            if f(): _(*a)
+        audit('asyncutils.channels.EventBus', name); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), {}, set(), f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -140,9 +142,9 @@ class EventBus(LoopContextMixin):
     @property
     def total_subscribers(self): return sum(map(len, self._subscribers.values()))
     @property
-    def wildcards(self): return self.subscribers_for(None).copy()
+    def wildcards(self): return self.subscribers_for(None)
     @property
-    def wildcard_count(self): return len(self.wildcards)
+    def wildcard_count(self): return len(self._subscribers[None])
     @property
     def active_tasks(self): return self._sem._value
     @property
@@ -153,18 +155,9 @@ class EventBus(LoopContextMixin):
     def stream_queue(self, val, /): self._stream_queue = val
     def is_auditing(self): return self._auditing
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
-    @cached_property
-    def auditor(self):
-        def f(e, a, f=self.is_auditing, _=self.sync_start_publish, /):
-            if f(): _(e, a)
-        return f # type: ignore
-    @cached_property
-    def _published(self): return defaultdict(int)
     def start_audit(self):
         if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self._auditing = False
-    @cached_property
-    def _middlewares(self): return {}
     def add_middleware(self, middleware): self._middlewares[middleware] = None
     def remove_middleware(self, middleware, *, result=None, strict=False):
         if (F := self._middlewares.pop(middleware, *(() if strict else (None,)))) is not None:
@@ -210,8 +203,6 @@ class EventBus(LoopContextMixin):
             L.info('%s: publishing of event %r succeeded', self.name, event_type); L.debug('final data: %r', data)
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally: await safe_cancel(p)
-    @cached_property
-    def _publishers(self): return set()
     def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
         async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if chaperone is None else chaperone, D=data):

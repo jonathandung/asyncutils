@@ -12,12 +12,12 @@ _ignore_cancellation: IgnoreErrors
 '''Context manager to ignore asyncio.CancelledError. This annotation is for module-internal use only.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''Wrap an arbitrary awaitable in a task under the provided event loop `loop`, creating one and setting if required, and begin waiting on it.
-    Critical exceptions are wrapped in `Critical`.
-    This is as opposed to `loop.create_task`, which only takes coroutines.'''
+    Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
+    This is as opposed to :meth:`~asyncio.BaseEventLoop.create_task`, which only takes coroutines.'''
 def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''A version of `to_sync` that is a decorator factory, returning its partial under `loop=loop`.'''
-def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use `asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
+def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use :func:`asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
 @overload
 def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: ...
 @overload
@@ -27,13 +27,15 @@ def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable
 def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of `sync_lock`, where `binder` is a function returning a suitable lock from the instance.'''
 def to_async[T, **P](f: Callable[P, T], /, loop: AbstractEventLoop|None=...) -> tuple[Callable[P, Coroutine[Any, Any, T]], Callable[[], None]]: '''Returns a tuple (asyncf, shutdown). asyncf is the async version of the original function (runs in an executor) and shutdown is a function to shut down the executor.'''
 def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin `iter` function in async, which the `aiter` function does not have.'''
-async def safe_cancel(t: Future[Any]) -> None: '''Cancel a single future and wait for the request to complete asynchronously. See `safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''
+async def safe_cancel(fut: Future[Any], /) -> None:
+    '''Cancel a single future and wait for the cancellation to complete asynchronously. The cancellation itself can be cancelled.
+    See :func:`base.safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload
 def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any, _threadsafe_: Literal[True], **k: Any) -> Future[T]: # type: ignore[overload-cannot-match]
     '''Run a function `f`, with the provided parameters passed straight through, in the event loop `loop`, and return a future for it.
-    Assumes the loop is already running, so that the `run_in_executor` method is not used.
-    Instead, schedule the function to run at the next iteration of the loop. The function should thus return fast.
+    Assumes the loop is already running, so that its :meth:`run_in_executor` method is not used.
+    Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.
     If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of `transient_block` under the specified `loop`.'''

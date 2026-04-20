@@ -27,7 +27,7 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], /, *S: int, time
     `processor` should be a function that takes the signal occurred, preferrably returning an awaitable object.
     If `raise_on_timeout` is True, throw :exc:`TimeoutError` on timeout. Otherwise, return `None`.
     If `loop` was passed, its :meth:`add_signal_handler` and :meth:`remove_signal_handler` methods will be used.
-    Errors whose types are included in `possible_errors` will cause the logger :const:`logger` to emit an error and the function to return `default_on_processor_failure` (or None if not passed).
+    Errors whose types are included in `possible_errors` will cause the logger :const:`logger` to emit an error and the function to return `default_on_processor_failure` (or `None` if not passed).
     Some info related to the progress of the wait also goes to the logger.
     The return value of the processor is returned through this function.
-    Note: since there is very limited support for signals on Windows, this function may not work as expected even with the limited signals it provides.'''
+    Note that since there is very limited support for signals on Windows, this function may not work as expected even with the little signals it provides.'''

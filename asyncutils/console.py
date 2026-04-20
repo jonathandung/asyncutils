@@ -13,7 +13,7 @@ class ConsoleBase(B):
         case '1': CAN_USE_PYREPL = False
         case str() as s:
             if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
-            from _pyrepl.main import CAN_USE_PYREPL
+            from _pyrepl.main import CAN_USE_PYREPL; del s
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
         S.audit(fullname(t := type(self)), loop)
         if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')

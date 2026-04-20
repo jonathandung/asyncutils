@@ -71,6 +71,11 @@ async def aiter_from_f(f, s=_NO_DEFAULT, /):
     while True:
         if (r := await f()) is s or r == s: break
         yield r
-async def safe_cancel(t):
+async def safe_cancel(t, /):
+    F = t.get_loop().create_future()
+    def cb(_):
+        if not F.done(): F.set_result(None)
+    t.add_done_callback(cb)
     if not t.done(): t.cancel()
-    with _ignore_cancellation: await t
+    try: await F
+    finally: t.remove_done_callback(cb)
