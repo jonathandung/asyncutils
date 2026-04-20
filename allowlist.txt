@@ -16,7 +16,7 @@ asyncutils._internal.patch.__all__
 (asyncutils\._internal\.py313\.Placeholder)?
 (asyncutils\._internal\.py313\.__all__)?
 (asyncutils\._internal\.py313\.apargs)?
-asyncutils._internal.py313.partial
+(asyncutils\._internal\.py313\.partial)?
 asyncutils._internal.types
 asyncutils.altlocks
 asyncutils.altlocks.CircuitBreaker.__new__
@@ -58,7 +58,7 @@ asyncutils.config
 asyncutils.config.Executor
 (asyncutils\.config\.Executor\.BROKEN)?
 asyncutils.config.Executor.__init__
-asyncutils.config.Executor.prepare_context
+(asyncutils\.config\.Executor\.prepare_context)?
 asyncutils.console
 (asyncutils\.console\.ConsoleBase\.__init__)?
 (asyncutils\.console\.ConsoleBase\.__init_subclass__)?

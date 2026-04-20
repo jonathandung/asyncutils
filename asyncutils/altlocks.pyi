@@ -101,7 +101,7 @@ class DynamicThrottle:
         `min_rate`: The minimum rate.
         `max_rate`: The maximum rate.
         `window`: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted.
-        `ubound`: Lower bound of the ratio (successes: total calls) such that the rate is multiplied by `ufactor` and clamped to `min_rate` and `max_rate`.
+        `ubound`: Lower bound of the ratio successes: total calls such that the rate is multiplied by `ufactor` and clamped to `min_rate` and `max_rate`.
         `lbound`: Upper bound of the above ratio such that the rate is multiplied by `lfactor` and clamped similarly.
         `jitter`: The jitter in calculation of the wait time before the context can enter.
         `timer`: Function to return current time as a float.

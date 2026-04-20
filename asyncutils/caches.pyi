@@ -21,8 +21,8 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
     def should_refresh(self, key: T) -> bool: '''Whether the key should be refreshed at this instant.'''
     def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
-    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re)configure the cache.'''
-    def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising LookupError if there is none.'''
+    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re)configure the cache with the given `ttl`, `refresh` and `processor`.'''
+    def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising :exc:`LookupError` if there is none.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
@@ -40,7 +40,7 @@ class AsyncLRUCache(LoopContextMixin):
         `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
         `typed` (optional): Whether to cache different argument types separately.'''
     @overload
-    def __call__[T: Coroutine[Any, Any, Any], **P](self, f: Callable[P, T], /) -> Callable[P, T]: '''The calls of the returned async function will now be cached in this cache.'''
+    def __call__[T: Coroutine[Any, Any, Any], **P](self, f: Callable[P, T], /) -> Callable[P, T]: ...
     @overload
-    def __call__[T, **P](self, f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
+    def __call__[T, **P](self, f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]: '''The calls of the returned async function will now be cached in this cache.'''
     def cache_clear(self) -> None: '''Clear all cache entries.'''

@@ -21,6 +21,13 @@ This section documents the symbols defined at the top level of this package.
 
   :note: Equivalent to ``int(__version__)``
 
+.. data:: console_preloaded_submodules
+  :no-index:
+  :module: asyncutils
+  :annotation: frozenset[str]
+
+  A :class:`frozenset` of submodule names which are loaded when starting the interactive console of this module. A strict superset of :data:`preloaded_submodules`.
+
 .. data:: preloaded_submodules
   :no-index:
   :module: asyncutils

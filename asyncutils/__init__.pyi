@@ -1,5 +1,5 @@
 '''A feature-rich asynchronous utilities library with CLI and REPL support.'''
-__all__ = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version', 'preloaded_submodules', 'submodules_map', 'time_since_boot'] # noqa: RUF022
+__all__ = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version', 'console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'] # noqa: RUF022
 from ._internal.types import Submodule
 from .altlocks import *
 from .base import *
@@ -38,7 +38,9 @@ def time_since_boot() -> float: '''The time in milliseconds since the module beg
 __version__: Final[VersionInfo]
 '''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
 __hexversion__: Final[int]
-'''For example, `0x12070e` corresponds to version 18.7.14'''
+'''For example, `0x12070e` corresponds to version 18.7.14.'''
+console_preloaded_submodules: Final[frozenset[str]]
+'''Below, but including `'base'`, `'cli'` and `'console'`.'''
 preloaded_submodules: Final[frozenset[str]]
 '''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.'''
 submodules_map: Final[dict[Submodule, ModuleType]]

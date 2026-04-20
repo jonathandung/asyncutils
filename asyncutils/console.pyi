@@ -90,7 +90,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     @abstractmethod
     def prehook(self, max_memerrs: int) -> None:
         '''Called by `run_console` before beginning the interaction logic. Can raise errors.
-        When implementing, call `super().prehook(max_memerrs)` before everything.
+        When implementing, call `super().prehook(max_memerrs)` before everything. This allows subclasses to provide their own value of `max_memerrs` and change the signature of the `prehook`.
         Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
     def posthook(self) -> None:

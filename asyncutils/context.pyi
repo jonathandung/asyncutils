@@ -3,7 +3,7 @@ from ._internal.types import HashAlgorithm, ValidExcType
 from _collections_abc import Sequence
 from types import TracebackType
 from typing import Any, Final, NamedTuple, final, overload
-__all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'setcontext'
+__all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
 @final
 class Context(NamedTuple):
     '''A `collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is,
@@ -110,7 +110,7 @@ def getcontext() -> Context: '''Return the current context for the active thread
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
-These names will not be listed in the :func:`__dir__` function of this submodule, since there are so many of them (currently 73) and more may be added in the future.'''
+These names will not be listed in the :func:`__dir__` function of this submodule, since there are so many of them and more may be added in the future.'''
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]

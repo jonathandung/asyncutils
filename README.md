@@ -21,6 +21,8 @@ Takes pride in:
 
 ## Setup
 
+I am not sure how this package would work on alternate python implementations. However, it is set to be extensively tested on CPython.
+
 Since the name 'asyncutils' was somehow unavailable on PyPI, 'py-asyncutils' was chosen instead.
 
 This package is also [available on anaconda](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview) via the conda-forge channel.
@@ -58,8 +60,8 @@ features.
 Other resources if you're new to the world of async:
 
 - [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html)
-- [Real Python's Async IO Tutorial](https://realpython.com/async-io-python)
-- [Python Async Basics Video Guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
+- [Basic Tutorial](https://realpython.com/async-io-python)
+- [Basic Video Guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
 - [asyncio, threading, multiprocessing](https://www.youtube.com/watch?v=0vFgKr5bjWI)
 - [Event loop](https://www.youtube.com/watch?v=RIVcqT2OGPA)
 - [In-depth tutorial](https://www.youtube.com/watch?v=oAkLSJNr5zY)

@@ -4,12 +4,12 @@ from ..constants import POSSIBLE_EXECUTORS as C
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
-On both conda and pip as `py-asyncutils`.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
+On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line.
 This format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
-Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using `tools.get_cfg_json_format()`.
+Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
 Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, or tornado.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
@@ -25,10 +25,10 @@ a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable loggi
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')
 (a := h())('-e', '--executor', choices=C, metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
-thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default.
+thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
-The below options are third-party; ThreadPoolExecutor will be used instead if these are passed but not installed.
+The below options are third-party.
 loky_noreuse: Use a new loky.process_executor.ProcessPoolExecutor every time.
 loky: Reuse a loky.process_executor.ProcessPoolExecutor if possible.
 dask: Use dask.distributed.Client. May have API incompatibilities.
@@ -52,7 +52,7 @@ M defaults to 3.
 Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
-a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output.')
+a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output. Overrides verbosity flags. Other than that and marking the global debug context manager as entered, essentially shorthand for -VV.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
 del a, b, C, d, e, f, g, h, i, j, A, V

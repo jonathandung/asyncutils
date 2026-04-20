@@ -114,23 +114,22 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     @property
     def is_running(self, _='User tampered with console-internal state!\n'): # noqa: PLR0206
         if not self._loop.is_running(): self._internal_is_running = False; return False
-        if self._internal_is_running^(b := R._get_() is self):
+        if self._internal_is_running^(b := R.get() is self):
             if b: self._internal_is_running = True
             else: self.set_return_code(1)
             S.stderr.write(_); return False
         return b
     def _interact_hook(self, ps1, kcolor, reset, fcolor):
         super()._interact_hook(ps1, kcolor, reset, fcolor)
-        if R._should_write_load_all_(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
+        if R.should_write_load_all(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
     def write_special(self, msg, _=C.silent):
         if not _: self.write(msg)
-    def prehook(self, max_memerrs, _m=C.max_memerrs, _r='this console is already running', _a='another console is running'):
+    def prehook(self, max_memerrs, _=C.max_memerrs, _r='this console is already running', _a='another console is running'):
         if self._internal_is_running: raise RuntimeError(_r)
-        if (r := R._get_()) is None: R._set_(self)
-        else: raise RuntimeError(_r if r is self else _a)
-        super().prehook(_m if max_memerrs is None else max_memerrs)
+        if r := R.get(): raise RuntimeError(_r if r is self else _a)
+        R.set(self); super().prehook(_ if max_memerrs is None else max_memerrs)
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
-        if R._unset_() is not self: S.stderr.write(_m); del S.modules[__name__]
+        if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
         super().posthook()
     def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=32, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()

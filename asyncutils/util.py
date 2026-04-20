@@ -1,5 +1,5 @@
 from ._internal.helpers import check_methods, create_executor, get_loop_and_set, stop_and_closer, fullname
-from ._internal.running_console import _get_
+from ._internal.running_console import get
 from ._internal.submodules import util_all as __all__
 from .constants import _NO_DEFAULT, SYNC_AWAIT
 from .exceptions import CRITICAL, Critical, Deadlock, IgnoreErrors
@@ -25,7 +25,7 @@ def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsa
 def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     audit('asyncutils.util.sync_await', fullname(aw)); f = loop is None
-    if (c := _get_()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
+    if (c := get()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
     if loop is (loop := _get_running_loop()):
         if f: loop = new_event_loop(); set_event_loop(loop)
         if not loop.is_running():

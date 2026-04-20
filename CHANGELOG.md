@@ -140,12 +140,15 @@ Submodules:
   Classes:
   - Context
   - localcontext (context manager)
+  - nonreusablelocalcontext (context manager)
+
+  Constants:
+  - all_contextual_consts
+  - ... (every constant in the `all_contextual_consts` frozenset)
 
   Functions:
   - getcontext
   - setcontext
-
-  Configuration variables: Refer to the IDE autocomplete
 
 - events
 
@@ -269,7 +272,8 @@ Submodules:
 
 - iters
 
-  Refer to the IDE autocomplete
+  Functions:
+  - ... (There are too many of these, so just refer to the IDE autocomplete)
 
 - locks
 
