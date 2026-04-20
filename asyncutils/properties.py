@@ -1,9 +1,8 @@
 from ._internal.compat import Placeholder, partial
 from ._internal.helpers import fullname, get_loop_and_set, subscriptable
 from ._internal.submodules import properties_all as __all__
-from asyncio.futures import _chain_future # type: ignore[import-not-found]
+from .util import sync_await
 from asyncio.locks import Lock
-from concurrent.futures import Future
 from weakref import WeakKeyDictionary
 @subscriptable
 class AsyncProperty:
@@ -30,8 +29,7 @@ class AsyncProperty:
         if self._strict: raise AttributeError(msg, name=self._name)
         return self
     def _helper(self, f, *a, c='get'):
-        async def t(): return await f(*a)
-        try: _chain_future(self._loop.create_task(t()), F := Future()); return F.result()
+        try: return sync_await(f(*a), loop=self._loop).result()
         except BaseException as e: raise AttributeError(f'failed to {c} attribute {self._name}') from e
     def _set_helper(self, msg, val):
         if self._strict: raise AttributeError(msg, name=self._name)

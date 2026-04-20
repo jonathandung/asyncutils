@@ -1,4 +1,4 @@
-from ._internal.helpers import LoopMixinBase, create_executor, get_loop_and_set, subscriptable
+from ._internal.helpers import LoopMixinBase, create_executor, fullname, get_loop_and_set, subscriptable
 from ._internal.submodules import mixins_all as __all__
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
@@ -70,7 +70,7 @@ class LockWithOwnerMixin(LockMixin):
     @abstractmethod
     def _release(self): ...
     def release(self):
-        if not self.is_owner: raise RuntimeError(f'{type(self).__qualname__} is not acquired by current task')
+        if not self.is_owner: raise RuntimeError(f'{fullname(self)} is not acquired by current task')
         return self._release()
 @subscriptable
 class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):

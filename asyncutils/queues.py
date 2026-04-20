@@ -24,8 +24,7 @@ def _wakeup_next(W):
     while W:
         if not (w := P()).done(): w.set_result(None); break
 class Q:
-    exc = E.ForbiddenOperation
-    __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
+    exc = E.ForbiddenOperation; __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
     def __new__(cls, /, *A, _=f):
         s = super().__new__(cls)

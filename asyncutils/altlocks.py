@@ -34,7 +34,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
         while d and W:
             if not (w := f()).done(): w.set_result(None); d -= 1
 class ResourceGuard(RuntimeError, AsyncContextMixin):
-    __slots__ = 'guarded', ; _inc_cnt = staticmethod(count(1).__next__)
+    _inc_cnt = staticmethod(count(1).__next__); __slots__ = 'guarded',
     def __init__(self, action='using', rname=None): super().__init__(f'another task is already {action} resource{f" #{self._inc_cnt()}" if rname is None else f": {rname!r}"}'); self.guarded = False
     def __enter__(self):
         if self.guarded: raise self

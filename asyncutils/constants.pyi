@@ -10,10 +10,10 @@ POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 '''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity, which is also the order
 in which the executor options appear in the CLI help.'''
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]
-'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)` to allow faster membership testing.'''
+'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)`. Allows for faster membership testing.'''
 class sentinel_base:
     '''Base class for sentinel values.'''
-    def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change `NoReturn` to `Self`) if and only if your subclass can be instantiated by the user.'''
+    def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change :class:`~typing.NoReturn` to :class:`~typing.Self`) if and only if your subclass can be instantiated by the user.'''
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
     def __init_subclass__(cls, lock_impl: Callable[[], Lock]=...) -> None: '''`lock_impl` is a callable that takes no arguments and returns a **synchronous** lock (e.g. :func:`_thread.allocate_lock`).'''

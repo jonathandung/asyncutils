@@ -6,10 +6,9 @@ from .constants import _NO_DEFAULT
 from .context import getcontext
 from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
 from .mixins import AsyncContextMixin, LoopContextMixin
-from .util import safe_cancel
+from .util import safe_cancel, sync_await
 from _functools import partial  # type: ignore[import-not-found]
 from asyncio.locks import Event, Lock, Semaphore
-from asyncio.futures import _chain_future # type: ignore[import-not-found]
 from asyncio.tasks import gather, sleep, wait_for
 from asyncio.timeouts import timeout
 from concurrent.futures import Future
@@ -51,18 +50,17 @@ class AdvancedPool(LoopContextMixin):
     def _threadsafe_task_done(self):
         with self._tlock: self._queue.task_done()
     def _worker_loop(self, _):
-        x, g = 0, self.loop.call_soon_threadsafe
+        x, g, G = 0, self.loop.call_soon_threadsafe, self._threadsafe_get
         try:
             while not self._shutdown:
-                _chain_future(self.make(self._threadsafe_get()), F := Future())
-                if (F := (F.result()[2])) is None: self._threadsafe_task_done(); break
+                if (F := sync_await(G(), loop=self.loop)[2]) is None: self._threadsafe_task_done(); break
                 f, a, k, F = F
                 try: F.set_result(f(*a, **k))
                 except BaseException as e: F.set_exception(e) # noqa: BLE001
                 finally:
                     self._threadsafe_task_done(); x += 1
                     with self._tlock: self.completed += 1; self._pending -= 1
-        except CRITICAL as e: g(_.set_exception, Critical(e)) # type: ignore
+        except CRITICAL as e: g(_.set_exception, Critical(e))
         else: g(_.set_result, x)
     async def _adjust_workers(self):
         if not self._scaling: return
@@ -114,7 +112,7 @@ class AdvancedPool(LoopContextMixin):
                 with self._tlock: self._queue.shutdown(True)
                 await self.join(); await self.drain(); return self.uptime
         except TimeoutError: self.exiter(); raise TimeoutError('kill exceeded timeout, forced shutdown') from None
-    async def join(self): await gather(*self._futures, return_exceptions=True)
+    async def join(self): return await gather(*self._futures, return_exceptions=True)
     async def map(self, f, /, *its, priority=0, strict=False): return await gather(*map(partial(self.complete, f, _priority_=priority), *its, strict=strict))
     async def starmap(self, f, it, /, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))

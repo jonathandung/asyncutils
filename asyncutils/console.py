@@ -19,8 +19,8 @@ class ConsoleBase(B):
         if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
-        def stop(p=None, /, _o=loop.stop, *, asap=False):
-            if p is _s: _o() if asap else loop.call_soon_threadsafe(_o)
+        def stop(p=None, /, _=loop.stop, *, asap=False):
+            if p is _s: _() if asap else loop.call_soon_threadsafe(_)
             else: raise RuntimeError(_m%'stop')
         def close(p=None, /, _o=loop.close):
             if p is _s: _o()

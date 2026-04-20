@@ -282,7 +282,7 @@ class Rendezvous:
     def __init__(self, *, loop=None, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), get_loop_and_set() if loop is None else loop, Lock() if lock is None else lock; self._make_task()
     async def _maintainer(self):
         f, g = sleep.__get__(context.RENDEZVOUS_MAINTENANCE_INTERVAL), self.cleanup
-        while True: await f(); await g()
+        while True: await f(); g()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
         except (CancelledError, TimeoutError): return False
@@ -305,12 +305,8 @@ class Rendezvous:
             if default is _NO_DEFAULT: raise
             return default
     def __length_hint__(self): return len(self._getters)+len(self._putters)
-    async def state_snapshot(self, _=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')):
-        await self.cleanup()
-        async with self._lock: t = len(self._getters), len(self._putters)
-        return _(*t, sum(t), not any(t))
-    async def cleanup(self):
-        async with self._lock: self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
+    def state_snapshot(self, _=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')): self.cleanup(); t = len(self._getters), len(self._putters); return _(*t, sum(t), not any(t))
+    def cleanup(self): self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
     async def exchange(self, v, /, *, timeout=None, asap=False):
         g, f = self._getters, True
         async with _timeout(timeout):

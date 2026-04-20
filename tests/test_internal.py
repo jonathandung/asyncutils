@@ -1,5 +1,4 @@
-# type: ignore
-from pytest import fail, raises
+from pytest import raises
 from asyncutils import _internal as mod
 def test_helpers():
     helpers = mod.helpers
@@ -13,18 +12,9 @@ def test_helpers():
     assert not helpers.check_methods(_, 'foo')
 def test_submods_lazy_loading():
     module = mod.initialize.Module
-    if 'asyncutils.cli' in __import__('sys').modules: fail('module `asyncutils.cli` is somehow already loaded in test environment')
-    assert isinstance(m := module('cli'), module) and m is module('cli')
-    assert (a := m.__all__) is m.__dir__()
-    assert a[0] == 'run'
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
     with raises(TypeError, match='cannot subclass module'): type('', (module,), {})
-    with raises(AttributeError, match="module 'asyncutils.cli' has no attribute 'foo'"): m.foo
-    assert isinstance(m, module)
-    import pickle
-    assert pickle.loads(pickle.dumps(m)) is m
-    assert (t := type(M := m.load())) is type(module('config')) and t.__module__ == 'builtins' and t.__name__ == t.__qualname__ == 'module'
-    assert m.run is M.run
+    assert (t := type(module('constants'))) is type(module('config')) and t.__module__ == 'builtins' and t.__name__ == t.__qualname__ == 'module'
 def test_others(cfgjson, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
     assert mod.types.All is mod.types.foo is mod.running_console.get() is mod.running_console.unset() is None

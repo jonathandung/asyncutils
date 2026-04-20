@@ -1,9 +1,9 @@
 from ._internal import patch as P
 from ._internal.helpers import fullname
 from ._internal.submodules import constants_all as __all__
-RECIP_E, EXECUTORS_FROZENSET = 0.3678794411714423, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
+RECIP_E, EXECUTORS_FROZENSET = float.fromhex('0x1.78b56362cef38p-2'), frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
 class sentinel_base:
-    _can_instantiate, __slots__ = False, '__name'
+    _can_instantiate = False; __slots__ = '__name',
     def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframe):
         cls._assert_can_instantiate()
         if name is None: return super().__new__(cls)

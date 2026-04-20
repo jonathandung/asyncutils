@@ -29,11 +29,11 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
             async with self._lock: self._set_tokens(); self._adjust()
             await sleep(min(1/(self._leak*self._factor), 1))
     async def acquire(self, amount=None):
-        async with self._lock: self._set_tokens(); return self._add_tokens(float(getcontext().LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS if amount is None else amount))
+        async with self._lock: self._set_tokens(); return self._add_tokens(getcontext().LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS if amount is None else amount)
     async def wait_for_tokens(self, amount=None):
         c = getcontext()
-        if amount is None: amount = float(c.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS)
-        w, m = 0.0, float(c.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK)
+        if amount is None: amount = c.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS
+        w, m = 0.0, c.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK
         while True:
             async with self._lock:
                 self._set_tokens(); self._adjust()
@@ -44,7 +44,7 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
     @factor.setter
     def factor(self, value, /):
         if self._external_factor_settable: self._factor = max(self._min_factor, min(self._max_factor, value))
-        else: raise ValueError('LeakyBucket.factor is read-only')
+        else: raise ValueError('asyncutils.buckets.LeakyBucket.factor is read-only')
     @factor.deleter
     def factor(self): self._factor = 1
     def _adjust(self):
@@ -55,4 +55,4 @@ class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
         if self._drainer is None: self._drainer = self.make(self._drain())
         return self
     def __exit__(self, /, *_):
-        if self._drainer: self._drainer.cancel(); self._drainer = None
+        if d := self._drainer: d.cancel(); self._drainer = None

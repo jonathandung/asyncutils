@@ -9,8 +9,8 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     This ensures availability of fresh data without blocking get operations.'''
     @overload
     def __init__(self, ttl: float|None=..., refresh: float|None=..., *, default_loader: Callable[[T], R], processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
-        '''`ttl` (optional): Time-to-live in seconds; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
-        `refresh` (optional): Time before TTL expires to begin the refresh; default `context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
+        '''`ttl` (optional): Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
+        `refresh` (optional): Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         `processor` (optional): Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
         `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         `default_loader` (optional): The loader to load values from keys for which specific loaders have not been registered.'''
@@ -36,7 +36,7 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
 class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., *, typed: bool=..., timer: Timer=...):
-        '''`maxsize` (optional): Maximum number of entries to cache; default `context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE`.
+        '''`maxsize` (optional): Maximum number of entries to cache; default :const:`context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE`.
         `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
         `typed` (optional): Whether to cache different argument types separately.'''
     @overload

@@ -3,6 +3,7 @@ from ._internal.submodules import iterclasses_all as __all__
 from .base import iter_to_aiter
 from .constants import _NO_DEFAULT
 from .mixins import EventualLoopMixin, LoopContextMixin
+from .util import sync_await
 import heapq as Q
 from _collections import defaultdict, deque  # type: ignore[import-not-found]
 from _functools import partial  # type: ignore[import-not-found]
@@ -25,10 +26,11 @@ class achain:
         except RuntimeError: ...
 @H.subscriptable
 class apeekable(EventualLoopMixin):
+    __slots__ = '_cache', '_it'
     def __init__(self, it=()): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
     def __aiter__(self): return self
     def __bool__(self):
-        try: self.loop.run_until_complete(self.peek()); return True
+        try: sync_await(self.peek(), loop=self.loop); return True
         except StopAsyncIteration: return False
     async def peek(self, default=_NO_DEFAULT):
         if not (c := self._cache):
@@ -77,9 +79,10 @@ class abucket(LoopContextMixin):
         try: self._cache[v].appendleft(_await_later(anext(self[v]))); return True
         except StopIteration: return False
     async def __aiter__(self):
+        K, V, C = self._key, self._validator, self._cache
         async for i in self._it:
-            if self._validator(v := self._key(i)): self._cache[v].append(i)
-        for k in self._cache: yield k
+            if V(v := K(i)): C[v].append(i)
+        for k in C: yield k
     async def __getitem__(self, val, /):
         if not self._validator(val): return
         while True:

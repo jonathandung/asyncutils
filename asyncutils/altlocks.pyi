@@ -19,7 +19,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     @property
     def guarded(self) -> bool: ...
     def __init__(self, action: str=..., rname: object=...): ...
-    def __enter__(self) -> None: '''Throw :obj:`self` as an exception (inherits from :exc:`RuntimeError`) if the resource is already being guarded; mark the resource as guarded otherwise.'''
+    def __enter__(self) -> None: '''Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
@@ -60,7 +60,7 @@ class CircuitBreaker:
         When the decorated function fails more than `max_fails` times (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers (opens the circuit) and disallows further
         calls of the wrapped functions by throwing an exception.
         This state persists until the `reset` timeout expires (default :const:`context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the half-open state.
-        If the function completes successfully when the breaker is half-open under `max_half_open_calls` tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
+        If the function completes successfully when the breaker is half-open under `max_half_open_calls` (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS`) tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]:
         '''Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature but strictly returning a coroutine.
         Care should be taken when applying the same circuit breaker to multiple functions, as they will not be able to run concurrently, and the calls counters will be shared.
@@ -81,11 +81,11 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `maxstate`: maximum length of state to store; older state will be expelled'''
     async def wait(self, state: T=..., *, timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
-        If the barrier has already been aborted or broken, raise :exc:`asyncio.BrokenBarrierError`.
+        If the barrier has already been aborted or broken, raise :exc:`asyncio.exceptions.BrokenBarrierError`.
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
         and `pos` is the number of parties having arrived before this one.'''
-    async def abort(self) -> None: '''Abort the barrier, signalling :exc:`asyncio.BrokenBarrierError` to present waiting parties.'''
-    def raise_for_abort(self) -> None: '''Throw :exc:`asyncio.BrokenBarrierError` if the barrier has been aborted.'''
+    async def abort(self) -> None: '''Abort the barrier, signalling :exc:`asyncio.exceptions.BrokenBarrierError` to present waiting parties.'''
+    def raise_for_abort(self) -> None: '''Throw :exc:`asyncio.exceptions.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
     @property
@@ -97,13 +97,14 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
 class DynamicThrottle:
     '''An async context manager used to limit the rate of a function being called. See also: :class:`func.RateLimited`, :class:`locks.AdvancedRateLimit`'''
     def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):
-        '''`init_rate` (required): The initial rate in calls per second.
-        `min_rate`: The minimum rate.
-        `max_rate`: The maximum rate.
-        `window`: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted.
-        `ubound`: Lower bound of the ratio successes: total calls such that the rate is multiplied by `ufactor` and clamped to `min_rate` and `max_rate`.
-        `lbound`: Upper bound of the above ratio such that the rate is multiplied by `lfactor` and clamped similarly.
-        `jitter`: The jitter in calculation of the wait time before the context can enter.
+        '''`init_rate`: The initial rate in calls per second.
+        Below arguments are optional:
+        `min_rate`: The minimum rate; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE`.
+        `max_rate`: The maximum rate; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE`.
+        `window`: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_WINDOW`.
+        `ubound`: Lower bound of the ratio successes: total calls such that the rate is multiplied by `ufactor` (default :const:`context.DYNAMIC_THROTTLE_DEFAULT_UFACTOR`) and clamped to `min_rate` and `max_rate`; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_UBOUND`.
+        `lbound`: Upper bound of the above ratio such that the rate is multiplied by `lfactor` (default :const:`context.DYNAMIC_THROTTLE_DEFAULT_LFACTOR`) and clamped similarly; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_LBOUND`.
+        `jitter`: The jitter in calculation of the wait time before the context can enter; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_JITTER`.
         `timer`: Function to return current time as a float.
         `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''

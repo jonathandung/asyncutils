@@ -45,8 +45,7 @@ def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: boo
     The async generator will stop when it encounters an item identical to `sentinel`.
     When `use_existing_executor=True` is passed (default :const:`context.ITER_TO_AITER_DEFAULT_USE_EXISTING_EXECUTOR`), the function will attempt to use
     an existing executor as created by previous calls specifying `create_executor=True` (default :const:`context.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR`) to
-    advance the iterable, and fall back to blocking the event loop every step without an executor.
-    When `create_executor` is `True`, the function will create a new executor to run the `__next__` calls if needed.'''
+    advance the iterable, and fall back to blocking the event loop every step without an executor.'''
 @overload
 def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
 @overload

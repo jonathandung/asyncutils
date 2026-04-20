@@ -130,7 +130,7 @@ class Base:
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 def _rwlock_sub_new(cls, /): (_ := object.__new__(cls)).setup(); return _
 class RWLock:
-    __slots__ = ('_wa',)
+    __slots__ = '_wa',
     def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock)
     @coercedmethod
     class reader(Base):
