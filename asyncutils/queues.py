@@ -6,7 +6,7 @@ from ._internal.submodules import queues_all as __all__
 from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
 from .futures import AsyncCallbacksFuture
-from .mixins import EventualLoopMixin
+from .mixins import LoopBoundMixin
 from .util import safe_cancel, sync_await
 from _collections import deque  # type: ignore[import-not-found]
 from abc import ABCMeta, abstractmethod
@@ -68,8 +68,8 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(__import__('heapq'), f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     def full(): return 0 < maxsize <= len(l)
-    async def get(*p, _=G.append):
-        u(p)
+    async def get(*p):
+        u(p); _ = G.append
         while not l:
             if S: raise QueueShutDown
             try: _(F := m()); await F
@@ -83,8 +83,8 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not l: raise QueueShutDown if S else QueueEmpty
         if _ is not b: u(p)
         i = g(); _wakeup_next(P); return i
-    async def put(item, *p, _=P.append):
-        v(p)
+    async def put(item, *p):
+        v(p); _ = P.append
         while full():
             if S: raise QueueShutDown
             _(F := m())
@@ -135,7 +135,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             async for i in iter_to_aiter(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
     return q
-class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
+class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     @abstractmethod
     def _init(self, maxsize): ...
     @abstractmethod
@@ -146,7 +146,7 @@ class PotentQueueBase(Queue, EventualLoopMixin, metaclass=ABCMeta):
     def peek_all(self): ...
     @abstractmethod
     def qsize(self): ...
-    def __init__(self, maxsize=0): super().__init__(maxsize); self._event = Event()
+    def __init__(self, maxsize=0): super().__init__(maxsize); self._event, self.make = Event(), self.loop.create_task
     def reset(self): super().__init__(self.maxsize); self._event.clear()
     async def smart_put(self, item, *, timeout=None, raising=True):
         try: self.put_nowait(item); return True

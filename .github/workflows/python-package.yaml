@@ -18,7 +18,9 @@ jobs:
         pip install -e .[dev]
         pip check
     - name: Lint with ruff
-      run: ruff check . --output-format=github
+      run: |
+        uv tool install ruff
+        uvx ruff check . --output-format=github
     - name: Run mypy
       run: mypy asyncutils
     - name: Run stubtest

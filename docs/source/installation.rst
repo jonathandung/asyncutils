@@ -34,17 +34,18 @@ Next, install py-asyncutils from pip:
 
   pip install py-asyncutils==0.8.26
 
+or directly from the github repository (still requires pip):
+
+.. code-block:: bash
+
+  pip install git+https://github.com/jonathandung/asyncutils.git#egg=py-asyncutils
+
 or if you are installing for development, and wish to obtain the corresponding :ref:`extras`:
 
 .. code-block:: bash
 
   pip install py-asyncutils[all]
-
-or directly from the github repository using pip:
-
-.. code-block:: bash
-
-  pip install git+https://github.com/jonathandung/asyncutils.git#egg=py-asyncutils
+  uv tool install ruff
 
 alternatively, after:
 
@@ -59,7 +60,7 @@ do:
 
   pip install .
 
-or without pip (not recommended; requires build and installer):
+or if you don't have pip for some reason (you should really install it; build and installer are still required):
 
 .. code-block:: bash
 
@@ -104,7 +105,7 @@ Extras
 
 The all :term:`extra` includes the dev, docs, pub and json extras, mainly for development.
 
-The dev extra installs ruff, pytest and some required plugins thereof.
+The dev extra installs uv (for ruff), pytest and some required plugins thereof. Please use uv to install ruff yourself.
 
 The docs extra includes sphinx and some plugins for readthedocs builds.
 
