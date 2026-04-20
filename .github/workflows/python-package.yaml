@@ -24,7 +24,7 @@ jobs:
     - name: Run mypy
       run: mypy asyncutils
     - name: Run stubtest
-      run: stubtest asyncutils --strict-type-check-only --allowlist=allowlist.txt --ignore-unused-allowlist
+      run: stubtest asyncutils --strict-type-check-only --allowlist=allowlist.txt
   test:
     needs: lint
     runs-on: ${{matrix.os}}
