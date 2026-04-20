@@ -84,10 +84,12 @@ class Context(NamedTuple):
     BATCH_PROCESSOR_DEFAULT_MAX_TIME: float = ...
     BULKHEAD_DEFAULT_MAX_QUEUE: int = ...
     BULKHEAD_DEFAULT_MAX_REJ: int = ...
+    PASSWORD_QUEUE_DEFAULT_GET_FROM: str = ...
+    PASSWORD_QUEUE_DEFAULT_PUT_FROM: str = ...
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
 class localcontext:
-    '''Context manager for temporarily setting the context to a modified version of the provided context. Not reentrant.'''
+    '''Context manager for temporarily setting the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same `new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''
     @property
     def new_ctx(self) -> Context: '''The new context to be set on context manager entry.'''
@@ -97,12 +99,18 @@ class localcontext:
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
+class nonreusablelocalcontext(localcontext):
+    '''Version of localcontext that is not reusable.'''
+    @overload
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 def getcontext() -> Context: '''Return the current context for the active thread.'''
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
 all_contextual_consts: frozenset[str]
-'''A `frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
-These names will not be listed in the `__dir__` function of this submodule, since there are so many of them (currently 60) and more may be added in the future.'''
+'''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
+These names will not be listed in the :func:`__dir__` function of this submodule, since there are so many of them (currently 73) and more may be added in the future.'''
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
@@ -172,5 +180,7 @@ BATCH_PROCESSOR_DEFAULT_MAX_SIZE: Final[int]
 BATCH_PROCESSOR_DEFAULT_MAX_TIME: Final[float]
 BULKHEAD_DEFAULT_MAX_QUEUE: Final[int]
 BULKHEAD_DEFAULT_MAX_REJ: Final[int]
+PASSWORD_QUEUE_DEFAULT_GET_FROM: Final[str]
+PASSWORD_QUEUE_DEFAULT_PUT_FROM: Final[str]
 WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Final[Sequence[int]]
 SEMAPHORE_DEFAULT_VALUE: Final[int]

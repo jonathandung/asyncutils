@@ -1,4 +1,4 @@
-'''Implementation of an interactive console base class, as well as an `AsyncUtilsConsole` class derived from it.'''
+'''Implementation of an interactive console base class, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.types import ValidExcType
 from _collections_abc import Callable, Coroutine, Iterable
 from _contextvars import Context
@@ -12,12 +12,12 @@ from types import CodeType, ModuleType
 from typing import Any, ClassVar, Self, TypeGuard, final, overload
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles deriving from `code.InteractiveConsole`, or `_pyrepl.console.InteractiveColoredConsole` if available.
+    '''A base class for async consoles. Derives from :class:`code.InteractiveConsole`, or :class:`_pyrepl.console.InteractiveColoredConsole` if available.
     Inspired by asyncio/__main__.py. Highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     STATEMENT_FAILED: ClassVar[object]
-    '''This is present if `_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
+    '''This is present if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
     CAN_USE_PYREPL: ClassVar[bool]
@@ -26,22 +26,22 @@ class ConsoleBase(InteractiveConsole, ABC):
     '''module name -> (locals of console of corresponding type -> Any)
     Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
-    '''Functions called when `KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
+    '''Functions called when :exc:`KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_interrupt_hooks`.'''
     memerr_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
-    '''Functions called when a `MemoryError` occurs, in that order, besides essential hardcoded logic.
+    '''Functions called when a :exc:`MemoryError` occurs, in that order, besides essential hardcoded logic.
     Add hooks using `additional_memerr_hooks`.'''
     default_local_exit: ClassVar[bool]
-    '''Whether python should continue running after the console exits by default, as opposed to the console raising `SystemExit` directly.'''
+    '''Whether python should continue running after the console exits by default, as opposed to the console raising :exc:`SystemExit` directly.'''
     disallow_subclass_msg: ClassVar[str]
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
     @property
-    def context(self) -> Context: '''The `contextvars.Context` instance passed to methods of the underlying asyncio event loop.'''
+    def context(self) -> Context: '''The :class:`contextvars.Context` instance passed to methods of the underlying asyncio event loop.'''
     @property
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
     @final
     @property
-    def memory_errors(self) -> int: '''The number of `MemoryError`s that have occurred.'''
+    def memory_errors(self) -> int: '''The number of :exc:`MemoryError`s that have occurred.'''
     @final
     @property
     def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in `is_running` for state consistency checks.'''
@@ -102,13 +102,13 @@ class ConsoleBase(InteractiveConsole, ABC):
     @overload
     def set_return_code(self, code: int, /) -> None: ...
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None:
-        '''Called to write code with emulated color (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing sys.ps1
+        '''Called to write code with emulated color (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing :data:`sys.ps1`
         and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
-    '''A derived class of `ConsoleBase`, used to implement the asyncutils REPL.'''
+    '''A subclass of :class:`ConsoleBase`, used to implement the asyncutils REPL.'''
     @property
-    def is_running(self) -> bool: '''Performs internal state consistency checks and returns whether the console is currently running. Only one `AsyncUtilsConsole` can be running at a time.'''
+    def is_running(self) -> bool: '''Performs internal state consistency checks and returns whether the console is currently running. Only one :class:`AsyncUtilsConsole` can be running at a time.'''
     def prehook(self, max_memerrs: int) -> None: '''Ensures the console will be the only one running.'''
     def posthook(self) -> None: '''Ensures that the console is not left running after unset.'''
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: ...

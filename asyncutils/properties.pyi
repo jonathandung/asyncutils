@@ -30,7 +30,7 @@ class AsyncLockProperty[T, R](AsyncProperty[T, R]):
     def __new__(cls, *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
-    def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a memory-address based cache.'''
+    def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a(n error-prone) memory-address based cache.'''
 @final
 class coercedmethod[T, R, **P]: # noqa: N801
     '''Interpret any callable as a regular function in a class body so that access on instance returns something like a bound method.'''

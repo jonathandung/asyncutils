@@ -67,7 +67,7 @@ class EventBus(LoopContextMixin):
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
         '''`name`: The name of this event bus, which will appear in error messages.
         `handler`: A function that takes an exception having occurred in a subscribers and handles it.
-        `max_concurrent`: The maximum number of concurrent callbacks; default 128.
+        `max_concurrent`: The maximum number of concurrent callbacks; default :const:`context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
         `tracking_stats`: Whether to remember the amount of published data to subscribers of each event type.'''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''

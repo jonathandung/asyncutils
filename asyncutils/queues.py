@@ -5,6 +5,7 @@ from ._internal.log import info
 from ._internal.submodules import queues_all as __all__
 from .base import collect, iter_to_aiter
 from .constants import _NO_DEFAULT
+from .context import getcontext
 from .futures import AsyncCallbacksFuture
 from .mixins import LoopBoundMixin
 from .util import safe_cancel, sync_await
@@ -38,18 +39,16 @@ class Q:
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from='password', put_from='password', gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
-    audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None)
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
+    audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C = getcontext()
+    try: F = _getframe(1)
+    except ValueError: F = None
     if protect_get:
-        try:
-            if password_get is _NO_DEFAULT and (password_get := (F := _getframe(1)).f_locals.get(get_from := get_from.strip(), o := object())) is o is (password_get := F.f_globals.get(get_from, o)): raise _.GetPasswordRetrievalError(get_from)
-        except ValueError: raise _.GetPasswordRetrievalError(get_from) from None
+        if password_get is _NO_DEFAULT and (F is None or (password_get := F.f_locals.get(get_from := (C.PASSWORD_QUEUE_DEFAULT_GET_FROM if get_from is None else get_from).strip())) is None is (password_get := F.f_globals.get(get_from))): raise _.GetPasswordRetrievalError(get_from)
         if not isinstance(password_get, gettyp): raise _.WrongPasswordType(None, type(password_get), None, gettyp)
         if isinstance(password_get, str): password_get, strict = intern(password_get), False
     if protect_put:
-        try:
-            if password_put is _NO_DEFAULT and (password_put := (F := _getframe(1)).f_locals.get(put_from := put_from.strip(), o := object())) is o is (password_put := F.f_globals.get(put_from, o)): raise _.PutPasswordRetrievalError(put_from)
-        except ValueError: raise _.GetPasswordRetrievalError(get_from) from None
+        if password_put is _NO_DEFAULT and (F is None or (password_put := F.f_locals.get(put_from := (C.PASSWORD_QUEUE_DEFAULT_PUT_FROM if put_from is None else put_from).strip())) is None is (password_put := F.f_globals.get(put_from))): raise _.PutPasswordRetrievalError(put_from)
         if not isinstance(password_put, puttyp): raise _.WrongPasswordType(None, type(password_put), None, puttyp)
         if isinstance(password_put, str): password_put, strict = intern(password_put), False
     def u(pwd):
