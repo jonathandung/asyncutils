@@ -1,5 +1,5 @@
 from ._internal import log
-from ._internal.helpers import get_loop_and_set, fullname
+from ._internal.helpers import fullname, get_loop_and_set
 from ._internal.submodules import func_all as __all__
 from . import context as C
 from .base import iter_to_aiter
@@ -95,12 +95,12 @@ def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=pe
         s = timer()
         try:
             r = await f(*a, **k); e = timer()-s
-            if should_log: log.info('function %s executed in %.*f %sseconds.', f.__qualname__, precision, e, 'nano'*ns)
+            if should_log: log.info('function %s executed in %.*f %sseconds.', fullname(f), precision, e, 'nano'*ns)
             return r, e
         except CRITICAL: raise Critical
         except expected as _:
             e = timer()-s
-            if should_log: log.warning('function %s encountered %s after %.*f %sseconds: %s', f.__qualname__, type(_).__qualname__, precision, e, 'nano'*ns, _)
+            if should_log: log.warning('function %s encountered %s after %.*f %sseconds: %s', fullname(f), fullname(type(_)), precision, e, 'nano'*ns, _)
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=(_ := lambda *_: None), on_success=_, random=_randinst.random):

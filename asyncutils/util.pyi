@@ -26,10 +26,10 @@ def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=
 def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable[P, Awaitable[T]]], Callable[P, T]]: '''Decorator factory to ensure a function returning an awaitable only be called if a lock is acquired within `timeout`, also converting it to a sync function.'''
 def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of :func:`sync_lock`, where `binder` is a function returning a suitable lock from the instance.'''
 def to_async[T, **P](f: Callable[P, T], /, loop: AbstractEventLoop|None=...) -> tuple[Callable[P, Coroutine[Any, Any, T]], Callable[[], None]]: '''Returns a tuple `(asyncf, shutdown)`. asyncf is the async version of the original function (runs in an executor) and shutdown is a function to shut down the executor.'''
-def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin `iter` function in async, which the `aiter` function does not have.'''
+def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulates the second form of the builtin :func:`iter` function in async, which the :func:`aiter` function does not have.'''
 async def safe_cancel(fut: Future[Any], /) -> None:
     '''Cancel a single future and wait for the cancellation to complete asynchronously. The cancellation itself can be reliably cancelled.
-    See :func:`base.safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''
+    See :func:`~base.safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload

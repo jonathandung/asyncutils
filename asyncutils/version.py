@@ -29,6 +29,11 @@ class VersionInfo(str): # noqa: FURB189
         return cls(*f(b), c)
     @classmethod
     def from_rep(cls, rep): return cls(rep.removeprefix('asyncutils v'))
+    @classmethod
+    def get_current_version(cls, _=E.StateCorrupted):
+        from . import __version__ as V
+        if isinstance(V, cls): V.assert_valid(); return V
+        raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
     def __round__(self, n=None, /): return __class__(self[:n])
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
@@ -44,11 +49,6 @@ class VersionInfo(str): # noqa: FURB189
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # type: ignore
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
-    @classmethod
-    def get_current_version(cls, _=E.StateCorrupted):
-        from . import __version__ as V
-        if isinstance(V, cls): V.assert_valid(); return V
-        raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])

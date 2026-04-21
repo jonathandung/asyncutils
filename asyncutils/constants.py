@@ -17,22 +17,22 @@ class sentinel_base:
     def name(self): return self.__name
     @classmethod
     def _assert_can_instantiate(cls):
-        if not cls._can_instantiate: raise TypeError(f'cannot instantiate {cls.__qualname__!r}') from None
-    def __repr__(self): return f'<{type(self).__qualname__} {self.__name!r} at {id(self):#x}>'
+        if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}') from None
+    def __repr__(self): return f'<{fullname(self)} {self.__name!r} at {id(self):#x}>'
     def __str__(self): return getattr(self, '_sentinel_base__name', '<unbound>')+(' <private>'*self.is_private)
     def __set_name__(self, owner, name, /, _='NOTE: The following is considered bad practice:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, consider:\nclass {0}:\n{1} = {2}()\n'.format):
         N = f'{fullname(owner)}.{name}'.replace('<locals>.', '').replace('<lambda>.', '')
         with self._lock:
             if (n := getattr(self, '__name', None)) is None:
-                if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{type(self).__qualname__} name collision', name=N)
+                if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{fullname(self)} name collision', name=N)
                 self.__name = N
             elif n == N and self._cache.get(N) is self:
-                if b := self.bound_to: __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, type(self).__qualname__, N))
-                else: raise NameError(f'cannot bind named unbound {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)
-            else: raise NameError(f'cannot bind named {type(self).__qualname__} to class {owner.__qualname__!r}', name=N)
+                if b := self.bound_to: __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, fullname(self), N))
+                else: raise NameError(f'cannot bind named unbound {fullname(self)} to class {fullname(owner)!r}', name=N)
+            else: raise NameError(f'cannot bind named {fullname(self)} to class {fullname(owner)!r}', name=N)
     def __reduce__(self):
         try: return type(self), (self.__name,)
-        except AttributeError: raise TypeError(f'cannot pickle unbound instance of {type(self).__qualname__}') from None
+        except AttributeError: raise TypeError(f'cannot pickle unbound instance of {fullname(self)}') from None
     def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
         if getattr(cls, '__slots__', True): raise TypeError('sentinel classes should have empty __slots__')
         cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True

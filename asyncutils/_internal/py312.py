@@ -1,4 +1,4 @@
-from .helpers import subscriptable
+from .helpers import fullname, subscriptable
 from ..mixins import LoopBoundMixin
 import _heapq as H
 from _collections import deque # type: ignore[import-not-found]
@@ -16,8 +16,8 @@ class Queue(LoopBoundMixin):
     def _wakeup_next(W, /, w=None):
         while W and (w := W.popleft()).done(): ...
         if w: w.set_result(None)
-    def __repr__(self): return f'<{type(self).__qualname__} at {id(self):#x} {self._format()}>'
-    def __str__(self): return f'<{type(self).__qualname__} {self._format()}>'
+    def __repr__(self): return f'<{fullname(self)} at {id(self):#x} {self._format()}>'
+    def __str__(self): return f'<{fullname(self)} {self._format()}>'
     def _format(self):
         f = (p := [f'maxsize={self.maxsize!r}']).append
         if l := self._getters: f(f'_getters[{len(l)}]')

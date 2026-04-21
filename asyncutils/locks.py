@@ -127,7 +127,7 @@ class RLock(M.LockWithOwnerMixin):
             async with self.__lock:
                 if self._owner is None: self._owner, self._count = current_task(), 1; return True
     def _release(self):
-        if (c := self._count) <= 0: raise RuntimeError(f'release called too many times on {type(self).__qualname__}')
+        if (c := self._count) <= 0: raise RuntimeError(f'release called too many times on {fullname(self)}')
         if c == 1: self._owner = None
         self._count = c-1
     def locked(self): return self._owner is not None
@@ -148,7 +148,7 @@ class PriorityLock(M.LoopBoundMixin, M.LockWithOwnerMixin):
         self._owner, w = None, self._waiters
         while w:
             if not (F := heappop(w)[-1]).done(): return F.set_result(True)
-        if raise_: raise RuntimeError('release called too many times on PriorityLock')
+        if raise_: raise RuntimeError(f'release called too many times on {fullname(self)}')
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is current_task()
@@ -223,7 +223,7 @@ class LocksmithBase:
         finally:
             if lock.locked() and iscoroutine(a := lock.release()): await a
     async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
-    async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s properly', type(self).__qualname__, type(lock).__qualname__)
+    async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(lock), id(lock))
     def wrap_task(self, a, /):
         async def f(): return await a
         return self._loop.create_task(f())
@@ -235,7 +235,7 @@ class LocksmithBase:
     def release_returned_false(self, lock, /): return False
     def answer_received(self, lock, answer, /): log.info('%r received answer %r from %r', self, answer, lock)
     def raised_other(self, lock, exc, /):
-        if not isinstance(exc, RuntimeError): log.error('error encountered in attempt to force %s at %#x', type(lock).__qualname__, id(lock), exc_info=exc)
+        if not isinstance(exc, RuntimeError): log.error('error encountered in attempt to force %s at %#x', fullname(lock), id(lock), exc_info=exc)
     async def get_info(self, lock, /): return 'potential deadlock situation'
     def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
     def task_raised_critical(self, lock, exc, /): raise exc from None

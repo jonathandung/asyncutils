@@ -1,3 +1,4 @@
+# type: ignore
 '''Compatibility shims for older Python versions.'''
 import sys as s, typing as t
 from functools import partial

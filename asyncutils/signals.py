@@ -1,4 +1,5 @@
 from ._internal import log
+from ._internal.helpers import fullname
 from ._internal.patch import patch_function_signatures as f
 from ._internal.submodules import signals_all as __all__
 from .base import event_loop
@@ -6,13 +7,14 @@ from .constants import _NO_DEFAULT
 from .context import getcontext
 from .exceptions import CRITICAL, Critical, IgnoreErrors
 from .util import safe_cancel
+import sys as M
 from asyncio.tasks import wait_for
 from signal import Signals, getsignal, signal
 async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=None, logger=log, _i=IgnoreErrors(TypeError), _c=Signals, _s=signal, _g=getsignal): # noqa: PLR0912,PLR0915
-    import sys; sys.audit('asyncutils.signals.wait_for_signal', S := (*S, *(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs))); c, x = None, 0
+    M.audit('asyncutils.signals.wait_for_signal', S := (*S, *(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs))); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
-    if sys.platform == 'win32':
+    if M.platform == 'win32':
         logger.info('wait_for_signal has limited functionality on windows')
         for s in S:
             try: o = _s(s := _c(s), h)
@@ -40,12 +42,12 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         try:
             r = p(s)
             with _i: r = await r
-        except possible_errors as e: logger.exception('wait_for_signal processor %r encountered expected %s for signal %s', p, type(e).__qualname__, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
+        except possible_errors: logger.exception('wait_for_signal processor %r encountered expected error for signal %s', p, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
         except CRITICAL: raise Critical
-        except BaseException as e: raise RuntimeError('wait_for_signal: unexpected %s in processor %r for signal %s: %s', type(e).__qualname__, p, s, e) from None # noqa: BLE001
+        except BaseException as e: raise RuntimeError(f'wait_for_signal: unexpected {fullname(e)} in processor %r for signal %s', p, s) from e
         return r
     finally:
         await safe_cancel(F)
-        if c: c.__exit__(*sys.exc_info()) # type: ignore[arg-type]
+        if c: c.__exit__(*M.exc_info()) # type: ignore[arg-type]
 f((wait_for_signal, 'processor, /, *signals, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))
 del signal, getsignal, Signals, f

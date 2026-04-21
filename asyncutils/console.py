@@ -104,7 +104,7 @@ class ConsoleBase(B):
                 except MemoryError: self.memoryerror()
         else: self.write_special(self.BANNER); self.runcode(compile((l := S.stdin).read(), getattr(l, 'name', '<stdin>'), 'exec'))
         try: self.posthook()
-        except BaseException as e: w(f'{type(e).__qualname__} occurred in posthook of {self!r}: {e}\n') # noqa: BLE001
+        except BaseException as e: w(f'{fullname(e)} occurred in posthook of {self!r}: {e}\n') # noqa: BLE001
         if suppress_asyncio_warnings: P.patch_asyncio_warnings()
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode

@@ -1,5 +1,5 @@
 from ._internal.compat import PriorityQueue, Queue
-from ._internal.helpers import filter_out, subscriptable
+from ._internal.helpers import filter_out, fullname, subscriptable
 from ._internal.submodules import pools_all as __all__
 from .base import iter_to_aiter, aiter_to_iter, event_loop, take
 from .constants import _NO_DEFAULT
@@ -44,7 +44,7 @@ class AdvancedPool(LoopContextMixin):
     @property
     def _tiebreak(self): return self.__cnt.__next__()
     def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._lock, self._adjustment, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, Lock(), None, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
-    def __repr__(self): return f'{type(self).__qualname__}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
+    def __repr__(self): return f'{fullname(self)}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
     async def _threadsafe_get(self):
         with self._tlock: return await self._queue.get()
     def _threadsafe_task_done(self):
@@ -79,9 +79,9 @@ class AdvancedPool(LoopContextMixin):
     def _put_nowait_priority(self, priority, item): self._queue.put_nowait((priority, self._tiebreak, item))
     def set_adjuster(self, raising=False):
         if self._scaling: self._adjustment = self.make(self._adjust_workers())
-        elif raising: raise PoolError(f'{type(self).__qualname__} is non-scaling')
+        elif raising: raise PoolError(f'{fullname(self)} is non-scaling')
     def raise_for_shutdown(self):
-        if self._shutdown: raise PoolShutDown(f'{type(self).__qualname__} is shutting down')
+        if self._shutdown: raise PoolShutDown(f'{fullname(self)} is shutting down')
     def submit_nowait(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         if self.full: raise PoolFull('task queue full')

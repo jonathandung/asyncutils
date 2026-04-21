@@ -270,7 +270,7 @@ class EventBus(LoopContextMixin):
         try:
             async with self._sem:
                 if iscoroutine(r := c(*filter_out(t, s=_NO_DEFAULT), d)): await wait_for(r, i)
-        except TimeoutError: L.warning('callback %s timed out', c.__qualname__)
+        except TimeoutError: L.warning('callback %s timed out', fullname(c), exc_info=True)
         except CRITICAL: self.exiter(); raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()

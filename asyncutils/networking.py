@@ -1,5 +1,5 @@
 from ._internal.compat import Queue
-from ._internal.helpers import audit_fullname
+from ._internal.helpers import audit_fullname, fullname
 from ._internal.log import warning
 from ._internal.submodules import networking_all as __all__
 from . import context as C
@@ -73,7 +73,7 @@ class SocketTransport(Transport):
     def _reset_extra(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def _sock_transport_read_ready(self, sock, size=None):
         try: self._protocol.data_received(d) if (d := sock.recv(C.LINE_PROTOCOL_DEFAULT_BUFFER_SIZE if size is None else size)) else (self._protocol.eof_received() or self.close())
-        except OSError as e: warning(f'{type(self).__qualname__}: read error'); self.close(e)
+        except OSError as e: warning('%s: read error', fullname(self)); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None and (sock := self._socket) is None: return
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname()
@@ -93,7 +93,7 @@ class SocketTransport(Transport):
         if len(b) > bufsize:
             if (s := self._socket) is None: return
             try: s.sendall(b); b.clear()
-            except OSError as e: warning(f'{type(self).__qualname__}: write error'); self.close(e)
+            except OSError as e: warning('%s: write error', fullname(self)); self.close(e)
     def write(self, data): self.loop.call_soon(self._writer, data)
     def get_write_buffer_size(self): return len(self._buffer)
     def get_write_buffer_limits(self): return self._limits

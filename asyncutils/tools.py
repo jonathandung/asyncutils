@@ -3,10 +3,11 @@ from ._internal.submodules import tools_all as __all__
 import shlex as s
 ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
 def json_to_argv(p, /, *, d='.', c='json'):
-    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {type(p).__qualname__} instead of str or bytes')
+    from ._internal.helpers import fullname
+    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {fullname(p)} instead of str or bytes')
     if isinstance(p, bytes): p = p.decode()
     if not isinstance(p, int):
-        if not isinstance(p, str): raise TypeError(f'path must be instance of str, bytes or int, not {type(p).__qualname__}')
+        if not isinstance(p, str): raise TypeError(f'path must be instance of str, bytes or int, not {fullname(p)}')
         _, b, _ = p.rpartition(d)
         if b: c = _
         else: __import__('sys').stderr.write(f'json_to_argv: path {p!r} has no file extension; assuming .json\n')

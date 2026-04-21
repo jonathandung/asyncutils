@@ -32,7 +32,7 @@ Next, install py-asyncutils from pip:
 
 .. code-block:: bash
 
-  pip install py-asyncutils==0.8.26
+  pip install py-asyncutils==0.8.27
 
 or directly from the github repository (still requires pip):
 
@@ -71,13 +71,13 @@ or with pipx:
 
 .. code-block:: bash
 
-  pipx install py-asyncutils==0.8.26
+  pipx install py-asyncutils==0.8.27
 
 or with conda:
 
 .. code-block:: bash
 
-  conda install -c conda-forge py-asyncutils=0.8.26
+  conda install -c conda-forge py-asyncutils=0.8.27
 
 alternatively:
 
@@ -85,13 +85,13 @@ alternatively:
 
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.8.26
+  conda install py-asyncutils==0.8.27
 
 or with uv:
 
 .. code-block:: bash
 
-  uv pip install 'py-asyncutils==0.8.26'
+  uv pip install 'py-asyncutils==0.8.27'
 
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI.

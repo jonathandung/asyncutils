@@ -45,7 +45,7 @@ class VersionInfo(str): # noqa: FURB189
     def __add__(self, n: int, /) -> Self: ...
     @overload
     def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
-    @overload # type: ignore[override]
+    @overload
     def __radd__(self, n: int, /) -> Self: ...
     @overload
     def __radd__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
@@ -86,6 +86,8 @@ class VersionInfo(str): # noqa: FURB189
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
     def shelve(self, path: Openable, little: bool=...) -> None: '''Store this version into the specified `path`.'''
+    @classmethod
+    def from_rep(cls, rep: str) -> Self: '''Parse a version from the string representation.'''
     @classmethod
     def unshelve(cls, path: Openable, little: bool=...) -> Self: '''Recover a stored version.'''
     @classmethod

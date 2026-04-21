@@ -1,5 +1,15 @@
 asyncutils.__all__
 asyncutils.__main__
+asyncutils._internal.compat.__all__
+asyncutils._internal.compat.LifoQueue
+asyncutils._internal.compat.Placeholder
+asyncutils._internal.compat.PriorityQueue
+asyncutils._internal.compat.Queue
+asyncutils._internal.compat.QueueEmpty
+asyncutils._internal.compat.QueueFull
+asyncutils._internal.compat.QueueShutDown
+asyncutils._internal.compat.apargs
+asyncutils._internal.compat.partial
 asyncutils._internal.helpers.filter_out
 asyncutils._internal.initialize.Module
 asyncutils._internal.initialize.Module.__getattr__
@@ -184,6 +194,7 @@ asyncutils.properties.AsyncProperty.fdel
 asyncutils.properties.AsyncProperty.fget
 asyncutils.properties.AsyncProperty.fset
 asyncutils.queues
+asyncutils.queues.PotentQueueBase.__iter__
 (asyncutils\.queues\.PotentQueueBase\.__aiter__)?
 (asyncutils\.queues\.SmartLifoQueue\.pushpop)?
 (asyncutils\.queues\.SmartPriorityQueue\.__init__)?

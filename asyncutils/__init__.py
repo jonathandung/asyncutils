@@ -4,7 +4,7 @@ if I.version < (3, 12): raise ImportError('asyncutils currently only supports py
 from time import monotonic as T
 def time_since_boot(t=T(), T=T): return round(T()-t, 7)*1000 # noqa: B008
 from .version import VersionInfo as V
-__hexversion__, console_preloaded_submodules = int(__version__ := V('0.8.26')), (preloaded_submodules := frozenset(('config', 'constants', 'context', 'exceptions', 'version'))).union(('base', 'cli', 'console'))
+__hexversion__, console_preloaded_submodules = int(__version__ := V('0.8.27')), (preloaded_submodules := frozenset(('config', 'constants', 'context', 'exceptions', 'version'))).union(('base', 'cli', 'console'))
 def __getattr__(name, /, _=globals()):
     from ._internal import initialize as I; _.update(__getattr__=I.Module, __all__=I.a, submodules_map=I.s); del I
     try: return _[name]
