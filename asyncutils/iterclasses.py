@@ -4,7 +4,7 @@ from .base import iter_to_aiter
 from .constants import _NO_DEFAULT
 from .mixins import LoopBoundMixin, LoopContextMixin
 from .util import sync_await
-import heapq as Q
+import _heapq as Q
 from _collections import defaultdict, deque # type: ignore[import-not-found]
 from _functools import partial # type: ignore[import-not-found]
 from sys import audit, maxsize as INF

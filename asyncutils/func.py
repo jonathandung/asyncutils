@@ -136,11 +136,11 @@ def throttle(lim, timer=perf_counter):
     return dec
 def debounce(wait):
     def dec(f, l=None):
-        (L := get_loop_and_set()).set_task_factory(eager_task_factory)
+        (L := get_loop_and_set()).set_task_factory(eager_task_factory); g, h = L.create_task, sleep.__get__(wait)
         async def wrapper(*a, **k):
             nonlocal l
             if l: await safe_cancel(l)
-            l = L.create_task(sleep(wait))
+            l = g(h())
             with _ignore_cancellation: await l; return await f(*a, **k)
         return wraps(f)(wrapper)
     return dec

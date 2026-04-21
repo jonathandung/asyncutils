@@ -11,7 +11,7 @@ def _get_merger(A, _=__import__('_operator').itemgetter):
 class partial: # noqa: N801
     __slots__ = '_mg', '_phs', 'args', 'func', 'keywords'
     @__import__('reprlib').recursive_repr()
-    def __repr__(self): (f := (A := [repr(self.func)]).extend)(map(repr, self.args)); f(f'{k}={v!r}' for k, v in self.keywords.items()); return f'asyncutils._internal.compat.partial({', '.join(A)})'
+    def __repr__(self): (f := (A := [repr(self.func)]).extend)(map(repr, self.args)); f(f'{k}={v!r}' for k, v in self.keywords.items()); return f'asyncutils._internal.py313.partial({', '.join(A)})'
     def __new__(cls, f, /, *a, **k):
         if a and a[-1] is Placeholder: raise TypeError('trailing Placeholders are not allowed')
         if any(v is Placeholder for v in k.values()): raise TypeError('Placeholder cannot be passed as a keyword argument')

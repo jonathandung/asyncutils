@@ -41,7 +41,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
     @final
     @property
-    def memory_errors(self) -> int: '''The number of :exc:`MemoryError`s that have occurred.'''
+    def memory_errors(self) -> int: '''The number of :exc:`MemoryError`'s that have occurred.'''
     @final
     @property
     def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in `is_running` for state consistency checks.'''

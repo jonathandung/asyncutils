@@ -438,7 +438,7 @@ async def with_aiter(actxmgr):
     async with actxmgr as I:
         async for i in iter_to_aiter(I): yield i
 async def asorted(it, *, key=_identity, reverse=False):
-    from heapq import heappop as g, heappush as f
+    from _heapq import heappop as g, heappush as f
     m, a = [], (r := []).append
     async for i, j in aenumerate(it): f(m, (key(j), i, j))
     while m: a(g(m))

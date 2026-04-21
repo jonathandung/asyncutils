@@ -74,7 +74,7 @@ class EventBus(LoopContextMixin):
     @overload
     def subscribers_for(self, event_type: str) -> WeakSet[SpecificSubscriber]: ...
     @overload
-    def subscribers_for(self, event_type: WildcardType) -> WeakSet[WildcardSubscriber]: '''A WeakSet of subscribers for the event type.'''
+    def subscribers_for(self, event_type: WildcardType) -> WeakSet[WildcardSubscriber]: '''A :class:`weakref.WeakSet` of subscribers for the event type.'''
     def event_names(self) -> set[str]: '''A set of the current event types.'''
     def has_subscribers(self, event_type: str|WildcardType) -> bool: '''Whether the event type has any subscribers.'''
     @staticmethod
@@ -101,15 +101,15 @@ class EventBus(LoopContextMixin):
         The items in the queue are tuples `(event_type, data)` if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type.'''
     @stream_queue.setter
     def stream_queue(self, val: Queue[tuple[str, Any]|Any], /) -> None: ...
-    def is_auditing(self) -> bool: '''Whether the event bus is connected to `sys.audit`.'''
+    def is_auditing(self) -> bool: '''Whether the event bus is connected to :func:`sys.audit`.'''
     @property
-    def auditing(self) -> bool: '''Get/set property for `is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
+    def auditing(self) -> bool: '''Get/set property for :meth:`is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
     @auditing.setter
     def auditing(self, val: bool, /) -> None: ...
     def auditor(self, event: str, args: tuple[object, ...], /) -> None:
         '''The auditor of the event bus. You probably don't want to call this directly.
         Not an instance method at runtime, just a function as an attribute of the instance.'''
-    def start_audit(self) -> None: '''Connect the bus' audit hook to `sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
+    def start_audit(self) -> None: '''Connect the bus' audit hook to :func:`sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the bus' audit hook. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
     def add_middleware(self, middleware: Middleware) -> None:
         '''Append a middleware to the back of the pipe of middlewares. The middleware must be a hashable callable taking the event type as the first argument and the associated data as the second.
@@ -118,13 +118,13 @@ class EventBus(LoopContextMixin):
         When publishing occurs, the first middleware takes the initial data, does some processing asynchronously, and passes the modified data to the second middleware, and so on.
         The output of the final middleware is broadcast to each subscriber concurrently. They cannot see the initial data.'''
     def remove_middleware(self, middleware: Middleware, *, result: Any=..., strict: bool=...) -> Any:
-        '''Remove a previously added middleware, via `add_middleware` or `add_middleware_once`, and return its result. Runs in O(1) time.
-        If `strict` is True and the middleware was never added, throw a KeyError.
-        If the middleware has an associated future `add_middleware_once` and it is done, return its result. Otherwise, set its result to `result` and return it.'''
+        '''Remove a previously added middleware, via :meth:`add_middleware` or :meth:`add_middleware_once`, and return its result. Runs in O(1) time.
+        If `strict` is `True` and the middleware was never added, throw a KeyError.
+        If the middleware has an associated future :meth:`add_middleware_once` and it is done, return its result. Otherwise, set its result to `result` and return it.'''
     def add_middleware_once(self, middleware: Middleware, until: Future[Any]) -> bool:
         '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
         If the middleware has already been associated with another future, do nothing and return False.'''
-    def audit_context(self) -> AbstractContextManager[None, None]: '''Start receiving publications from and sending publications to `sys.audit` upon entry and stop on exit. Use as a context manager.'''
+    def audit_context(self) -> AbstractContextManager[None, None]: '''Start receiving publications from and sending publications to :func:`sys.audit` upon entry and stop on exit. Use as a context manager.'''
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> AbstractContextManager[None, None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''
     @overload
@@ -147,10 +147,10 @@ class EventBus(LoopContextMixin):
     async def publish(self, event_type: str, data: Any=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None:
         '''Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout `timeout`.
         Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
-        If `wait` is False (default True), don't wait for the publication to complete.
-        If `safe` is False (default True), don't wrap callbacks with proper error handling.
-        `chaperone`, if passed, should be a function processing non-severe exceptions (instances of Exception and ExceptionGroup) in the callbacks. Otherwise, these
-        exception( group)s are flattened and collected into an ExceptionGroup and finally thrown, which the caller should be prepared to handle.'''
+        If `wait` is `False` (default `True`), don't wait for the publication to complete.
+        If `safe` is `False` (default `True`), don't wrap callbacks with proper error handling.
+        `chaperone`, if passed, should be a function processing non-severe exceptions (instances of :class:`Exception` and :class:`ExceptionGroup`) in the callbacks. Otherwise, these
+        exception( group)s are flattened and collected into an :class:`ExceptionGroup` and finally thrown, which the caller should be prepared to handle.'''
     async def wait_for_event(self, event_type: str, *, timeout: bool|None=..., condition: Callable[[Any], object]=...) -> Task[Any]:
         '''Wait for an event of the specified event type that satisfies the condition to occur.
         Note that the function completes once the subscription has registered and returns a task, which will be cancelled on timeout.'''
@@ -158,7 +158,7 @@ class EventBus(LoopContextMixin):
     async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, till_permanent: float|None=...) -> Task[T]: ...
     @overload
     async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., till_permanent: float|None=...) -> Task[T]:
-        '''Add the subscriber under the event type (as a wildcard if `event_type` is `WILDCARD` or not passed) and return a task.
+        '''Add the subscriber under the event type (as a wildcard if `event_type` is :const:`WILDCARD` or not passed) and return a task.
         The subscriber is removed once `fut` completes, and its result returned through the returned task.
         After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
     @overload
@@ -177,7 +177,7 @@ class EventBus(LoopContextMixin):
         After the shutdown, publications fail fast and middlewares are cleared.
         This waits for as many subscriber callbacks to complete as possible, within `timeout` seconds if specified.
         If `immediate` is `True`, getters for the queue for the event stream will error immediately.
-        If `preserve_stats` is `True`, the event publication statistics will be saved and accessible with `get_event_stats()`.'''
+        If `preserve_stats` is `True`, the event publication statistics will be saved and accessible with :meth:`get_event_stats`.'''
     async def handle_exception(self, e: BaseException) -> None: '''Asynchronously handle an exception according to the `handler` initialization parameter, which can be a sync or async function.'''
     @overload
     def clear(self, event_type: str) -> WeakSet[SpecificSubscriber]|None: ...
@@ -187,7 +187,7 @@ class EventBus(LoopContextMixin):
     def clear(self) -> None: '''Remove all subscribers for the event type, or all subscribers if not passed.'''
     def clear_all(self) -> None: '''Remove all subscribers and clear statistics.'''
     def subscriber_count(self, event_type: str|WildcardType) -> int: '''The number of subscribers for that event type.'''
-    def clear_wildcards(self) -> WeakSet[WildcardSubscriber]|None: '''Equivalent to bus.clear(EventBus.WILDCARD).'''
+    def clear_wildcards(self) -> WeakSet[WildcardSubscriber]|None: '''Equivalent to `bus.clear(EventBus.WILDCARD)`.'''
     def clear_stats(self) -> None: '''Clear the event publication statistics.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...

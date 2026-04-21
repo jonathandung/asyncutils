@@ -369,7 +369,7 @@ Submodules:
   - ReadPreferredRWLock
   - WritePreferredRWLock
   - PriorityRWLock
-  - ReadPreferredPriorityRWLock
+  - FairPriorityRWLock
   - WritePreferredPriorityRWLock
 
 - signals

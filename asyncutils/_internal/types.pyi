@@ -318,9 +318,9 @@ type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'lok
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MMIOMGR_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
-'''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`io.MemoryMappedIOManager`.'''
+'''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
-'''The type of the :attr:`open_files` property of :class:`io.MemoryMappedIOManager`.'''
+'''The type of the :attr:`~asyncutils.io.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]
 '''The type of subscribers for :class:`channels.EventBus`.'''
 type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]

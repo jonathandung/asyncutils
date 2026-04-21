@@ -1,7 +1,7 @@
 import pytest
 from asyncio import create_task, sleep
 from asyncutils.rwlocks import *
-@pytest.mark.parametrize('lockt', (RWLock, ReadPreferredRWLock, WritePreferredRWLock, FairRWLock, PriorityRWLock, ReadPreferredPriorityRWLock, WritePreferredPriorityRWLock))
+@pytest.mark.parametrize('lockt', (RWLock, ReadPreferredRWLock, WritePreferredRWLock, FairRWLock, PriorityRWLock, FairPriorityRWLock, WritePreferredPriorityRWLock))
 async def test_rwlock(lockt):
     lock = lockt()
     async with lock.reading():

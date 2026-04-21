@@ -10,7 +10,7 @@ from _collections import defaultdict, deque
 from asyncio.coroutines import iscoroutine
 from asyncio.locks import Lock
 from asyncio.tasks import current_task, gather, wait, wait_for
-from heapq import heappop, heappush
+from _heapq import heappop, heappush
 from time import monotonic
 class AdvancedRateLimit(M.LoopBoundMixin, M.LockMixin):
     __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'

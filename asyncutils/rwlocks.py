@@ -110,7 +110,7 @@ class FairRWLock(RWLock):
             async with C: self._wa = False; C.notify_all()
 class PriorityRWLock(RWLock):
     __slots__ = '_cond', '_count', '_ilock', '_qd', '_readers'
-    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredPriorityRWLock)
+    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else FairPriorityRWLock)
     def __init_subclass__(cls, /, **_):
         if getattr(cls, '__slots__', None) != (): raise TypeError('__slots__ must be an empty tuple')
         cls.__new__ = _rwlock_sub_new
@@ -148,6 +148,6 @@ class PriorityRWLock(RWLock):
         try: yield
         finally:
             async with C: self._wa = False; C.notify_all()
-class ReadPreferredPriorityRWLock(PriorityRWLock): __slots__ = ()
+class FairPriorityRWLock(PriorityRWLock): __slots__ = ()
 class WritePreferredPriorityRWLock(PriorityRWLock): __slots__ = ()
 del Base

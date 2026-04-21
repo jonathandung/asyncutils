@@ -63,7 +63,8 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def drain_retlist(self, max: int|None=...) -> list[T]: '''Empty the queue and return a list of the items within.'''
     def empty(self) -> bool: '''Whether the queue is empty.'''
     def __bool__(self) -> bool: '''Whether there are items in the queue.'''
-    __iter__, __aiter__ = drain_until_empty, drain_persistent # noqa: PYI017
+    def __iter__(self) -> Generator[T]: '''Equivalent to :meth:`drain_until_empty`.'''
+    def __aiter__(self) -> AsyncGenerator[T]: '''Equivalent to :meth:`drain_persistent`.'''
     def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is `True`, pending gets raise immediately even if the queue is not empty.'''
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''

@@ -12,7 +12,7 @@ __all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusE
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (SystemExit, SystemError, KeyboardInterrupt), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
-    '''Flatten exceptions that may be nested in `BaseExceptionGroup`s, with priority for those just sent in. Use this when you must preserve the order.
+    '''Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in. Use this when you must preserve the order.
     Keyword arguments are as in `potent_derive`.'''
 def unnest_reverse(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
 @overload

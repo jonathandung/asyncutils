@@ -1,5 +1,5 @@
-'''A versioning scheme for `asyncutils`. Inspired by `torch/torch_version.py`, but with quite some differences.
-`asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
+'''A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
+:mod:`asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
 - MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.
 - MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINOR VERSIONS.'''
 from ._internal.types import IntCompatible, Openable, ValidSlice
@@ -11,21 +11,21 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __new__(cls, from_: object, /) -> Self: ...
     @overload
-    def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as (major, minor, patch), zero-padding if required. Throws an appropriate exception if not possible.'''
+    def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
-        '''A perfect hash function for versions! May produce larger integers than __int__ in some cases, and may also produce negative integers.
-        Of course, since `builtins.hash` stupidly returns the output of `__hash__` modulo 2^61-1 (largest Mersenne prime within 64 bits), the
+        '''A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
+        Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo 0x1FFFFFFFFFFFFFFF (largest Mersenne prime within 64 bits), the
         reasonable limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
-    def __iter__(self) -> Iterator[int]: '''An iterator yielding `major`, `minor`, `patch` sequentially.''' # type: ignore[override]
+    def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # type: ignore[override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload # type: ignore[override]
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: # type: ignore[overload-overlap]
         '''Depending on the value of `idx`, corresponds to the following attributes:
-        0 -> `major`
-        1 -> `minor`
-        2 -> `patch`'''
+        0 -> :attr:`major`
+        1 -> :attr:`minor`
+        2 -> :attr:`patch`'''
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: ...
     @overload
@@ -45,6 +45,10 @@ class VersionInfo(str): # noqa: FURB189
     def __add__(self, n: int, /) -> Self: ...
     @overload
     def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
+    @overload # type: ignore[override]
+    def __radd__(self, n: int, /) -> Self: ...
+    @overload
+    def __radd__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
     @overload
     def __sub__(self, n: int, /) -> Self: ...
     @overload
@@ -68,10 +72,12 @@ class VersionInfo(str): # noqa: FURB189
         h, hash: `'116380397'`
         n, majmin: `'123.4'`
         <anything else>: `'123.4.0'`"""
-    def __int__(self) -> int: '''Assumes minor and patch are less than 256.'''
+    def __int__(self) -> int: '''Assumes :attr:`minor` and :attr:`patch` are less than 256.'''
+    def __index__(self) -> int: '''The same as :meth:`__int__`.'''
     def __floor__(self) -> int: '''Returns the major version.'''
+    def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __ceil__(self) -> int: '''Returns the major version, adding one if there is a minor or patch version.'''
-    def __float__(self) -> float: '''Assumes minor and patch are less than 100.'''
+    def __float__(self) -> float: '''Assumes :attr:`minor` and :attr:`patch` are less than 100.'''
     def to_complex(self) -> complex: '''Loses the patch version. Since this class is a :class:`str` subclass, an implementation of :meth:`__complex__` will not be recognized.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''
     def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
@@ -101,7 +107,6 @@ class VersionInfo(str): # noqa: FURB189
     def minor(self) -> int: '''The minor part of the version.'''
     @property
     def patch(self) -> int: '''The patch part of the version.'''
-    __index__, __trunc__, __radd__ = __int__, __floor__, __add__ # noqa: PYI017
 @final
 class VersionDelta(NamedTuple):
     '''A named tuple representing the difference between versions. Can be taken by the + or - operators.'''
@@ -112,7 +117,7 @@ class VersionDelta(NamedTuple):
     patch: int = ...
     '''The patch part of the version.'''
     def __floor__(self) -> int: '''The major part of the delta.'''
-    def __trunc__(self) -> int: '''The same as `__floor__`.'''
+    def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
 def normalize(o: object, /) -> tuple[int, int, int]:
     '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.

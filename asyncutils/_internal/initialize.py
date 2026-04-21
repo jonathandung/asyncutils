@@ -2,7 +2,7 @@ from . import patch as P, running_console as R
 from .log import debug as l
 from .submodules import __dict__ as d
 from .. import cli as L, config as C, constants as D, context as F, exceptions as E, time_since_boot as T, version as V
-if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (ImportError,), {})('asyncutils: cannot reload internal initialization module')
+if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (BaseException,), {})('asyncutils: cannot reload internal initialization module')
 _a, _u, _f, _s, _i, s, t = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
 for _k, _v in _i:
     if _k[0] != '_': break

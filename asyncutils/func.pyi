@@ -10,7 +10,7 @@ async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration
 @overload
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: ...
 def star[T](f: Callable[..., Awaitable[T]], /) -> Callable[[Iterable[Any], Mapping[str, Any]], Coroutine[Any, Any, T]]: '''Convert a function taking variadic parameters and returning an awaitable into a coroutine function taking two arguments: an iterable of positional arguments and a mapping of keyword arguments.'''
-def unstar[T](f: Callable[[Iterable[Any], Mapping[str, Any]], Awaitable[T]], /) -> Callable[..., Coroutine[Any, Any, T]]: '''The inverse of `star`.'''
+def unstar[T](f: Callable[[Iterable[Any], Mapping[str, Any]], Awaitable[T]], /) -> Callable[..., Coroutine[Any, Any, T]]: '''The inverse of :func:`star`.'''
 @overload
 def every(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> EveryRV[Any]: ...
 @overload
@@ -21,13 +21,13 @@ def every[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_e
 def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., loop: AbstractEventLoop|None=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryRV[T]:
     '''A decorator factory, useful for periodic monitoring tasks.
     The resultant function will run every `intvl` seconds, as determined by `timer`, at most `max_iterations` times. If `count_f` is True, this time includes the execution time of the function.
-    If `wait_first` is True, sleep for `intvl` seconds before the first execution.
-    If `stop_on_exc` is True, the function returns once the decorated function throws any exception or `stop_when` is cancelled.
+    If `wait_first` is `True`, sleep for `intvl` seconds before the first execution.
+    If `stop_on_exc` is `True`, the function returns once the decorated function throws any exception or `stop_when` is cancelled.
     `verbose` makes the function treat exceptions more severely output-wise.
     Once the result of `stop_when` is set, the function returns that result, which should be None or the same type as the return type of the decorated function after awaiting.
     However, the task is guaranteed to be run at least once.
     When using the `supplied_args` and `supplied_kwargs` parameters, maintain a reference to them so that you can edit the parameters fed to the function on the fly.
-    Finally, the function returns `default` or None if it was not passed, unless `stop_on_exc` is True or `default` is `constants.RAISE`, in which case `MaxIterationsError` is thrown.'''
+    Finally, the function returns `default` or None if it was not passed, unless `stop_on_exc` is True or `default` is :const:`constants.RAISE`, in which case :exc:`exceptions.MaxIterationsError` is thrown.'''
 @overload
 def everymethod(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> EveryMethodRV[Any, Any]: ...
 @overload
@@ -35,7 +35,7 @@ def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future
 @overload
 def everymethod[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryMethodRV[T, Any]: ...
 @overload
-def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: '''The method version of `every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in `every`.'''
+def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: '''The method version of :func:`every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in :func:`every`.'''
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
     `timer` (default :func:`time.perf_counter`) is used to count `elapsed`, the time required to execute the function.
@@ -48,17 +48,16 @@ def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: fl
     `backoff` (default :const:`context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially `delay` which defaults to :const:`context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed `max_delay` (default :const:`context.RETRY_DEFAULT_MAX_DELAY`).
     `jitter` (default :const:`context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
     `exc` specifies which exceptions to catch and retry on; if an exception not in `exc` is raised, it is propagated immediately.
-    `on_retry` and `on_success` are callbacks called before each retry and after a successful call, with the attempt number (zero-based) as the first
-    argument and the exception caught or the time taken for the successful call respectively as the second. Thus, `on_success` is only called once.'''
-def throttle(lim: float, timer: Timer=...) -> DecoratorFactoryRV: ...
-def debounce(wait: float) -> DecoratorFactoryRV: ...
+    `on_retry` and `on_success` are callbacks called before each retry and after a successful call, with the attempt number (zero-based) as the first argument and the exception caught or the time taken for the successful call respectively as the second. Thus, `on_success` is only called once.'''
+def throttle(lim: float, timer: Timer=...) -> DecoratorFactoryRV: '''A decorator factory that throttles the wrapped function, such that it can only be called once every `lim` seconds, as determined by `timer`.'''
+def debounce(wait: float) -> DecoratorFactoryRV: '''A decorator factory that debounces the wrapped function, such that it is only called after it has not been called for `wait` seconds.'''
 async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of `timer` for functions taking no arguments and returning awaitables.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=...) -> BenchmarkResult:
     '''`f` is the function to benchmark, which should take no arguments and return an awaitable.
     `times` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
     `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.'''
 class RateLimited[T, **P]:
-    '''The rate limiter pattern as a decorator (factory). See `locks.AdvancedRateLimit` for the async context manager version.'''
+    '''The rate limiter pattern as a decorator (factory). See :class:`locks.AdvancedRateLimit` for the async context manager version.'''
     @overload
     def __new__(cls, calls: int, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload

@@ -2,7 +2,7 @@ from sys import implementation as I, modules as M
 if I.name != 'cpython': __import__('_warnings').warn('asyncutils is not yet tested in this python implementation', ImportWarning)
 if I.version < (3, 12): raise ImportError('asyncutils currently only supports python 3.12 or above')
 from time import monotonic as T
-def time_since_boot(t=T(), T=T): return (T()-t)*1000 # noqa: B008
+def time_since_boot(t=T(), T=T): return round(T()-t, 7)*1000 # noqa: B008
 from .version import VersionInfo as V
 __hexversion__, console_preloaded_submodules = int(__version__ := V('0.8.26')), (preloaded_submodules := frozenset(('config', 'constants', 'context', 'exceptions', 'version'))).union(('base', 'cli', 'console'))
 def __getattr__(name, /, _=globals()):

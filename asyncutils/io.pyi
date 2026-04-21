@@ -10,7 +10,7 @@ from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
-    '''Return a tuple of two :class:`AsyncReadWriteCouple`s in text mode, such that each can read what the other writes. Two os-level pipes must be created.
+    '''Return a tuple of two :class:`AsyncReadWriteCouple`'s in text mode, such that each can read what the other writes. Two os-level pipes must be created.
     Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default :func:`os.pipe`) to customize this behaviour.'''
 def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: '''The above, but in binary mode.'''
 class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
@@ -22,7 +22,7 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     def writer(self) -> IO[R]: '''The underlying writer.'''
     @property
     def executor(self) -> Executor: '''The underlying executor.'''
-    def __init__(self, reader: IO[T], writer: IO[R], /): ...
+    def __init__(self, reader: IO[T], writer: IO[R], /): '''Initialize the couple with the given reader and writer.'''
     def __getattr__(self, name: str, /) -> Any: ...
     async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
     async def flush(self) -> None: '''Asynchronously flush the writer.'''

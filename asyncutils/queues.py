@@ -63,7 +63,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(pwd, puttyp): raise _.WrongPasswordType(pwd, type(pwd), q, puttyp)
         if pwd is not password_put and (strict or pwd != password_put): raise _.WrongPassword(q, pwd)
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
-    if priority: l, s = [], '_max'*lifo; g, p = (partial(getattr(__import__('heapq'), f'heapp{_}{s}'), l) for _ in ('op', 'ush'))
+    if priority: l, s = [], '_heapp%s_max'if lifo else 'heapp%s'; import heapq as M; g, p = (partial(getattr(M, s%_), l) for _ in ('op', 'ush'))
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     def full(): return 0 < maxsize <= len(l)
     async def get(*p):
@@ -335,7 +335,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
+    async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)
