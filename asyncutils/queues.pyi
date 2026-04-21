@@ -1,12 +1,12 @@
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
-from .mixins import EventualLoopMixin
+from .mixins import LoopBoundMixin
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from abc import ABC, abstractmethod
 from asyncio.futures import Future
 from asyncio.queues import Queue
-from contextlib import _AsyncGeneratorContextManager
+from contextlib import AbstractContextManager
 from typing import Any, Final, Literal, Self, overload
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'ignore_valerrs', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
@@ -22,8 +22,8 @@ ignore_valerrs: Final[IgnoreErrors]
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[]) -> P[R, T]:
     '''Returns a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default `password`).
-    If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default `password`).
+    If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
+    If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''
 @overload
 def password_queue[T, R](*, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> P[R, T]: ... # type: ignore[assignment]
@@ -39,7 +39,7 @@ def password_queue[T, R, V](password_put: V, *, maxsize: int=..., protect_get: L
 def password_queue[T, R, V](*, password_get: R, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=..., puttyp: type[V]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ... # type: ignore[assignment]
 @overload
 def password_queue[T, R, V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., gettyp: type[R]=object, puttyp: type[V]=object, init_items: SupportsIteration[T]=[], strict: bool=...) -> B[R, V, T]: ... # type: ignore[assignment]
-class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
+class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
     def _init(self, maxsize: int) -> None: '''Initialize the queue given `maxsize`; called in :meth:`__init__`.'''
@@ -86,7 +86,7 @@ class PotentQueueBase[T](Queue[T], EventualLoopMixin, ABC):
     async def pushpop(self, item: T) -> T: '''The above, but done asynchronously and not immediately.'''
     async def poppush(self, item: T) -> T: '''Similar.'''
     def clear(self) -> None: '''Clear all the entries from the queue.'''
-    def transaction(self) -> _AsyncGeneratorContextManager[Self]:
+    def transaction(self) -> AbstractContextManager[Self, None]:
         '''Return an async context manager which begins a transaction on entry.
         If an error occurs within the context, the original items in the queue are restored and the error reraised, unless the error is critical and
         deemed to require immediate exit; otherwise, the transaction completes successfully and changes are committed on exit.'''

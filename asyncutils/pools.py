@@ -7,7 +7,7 @@ from .context import getcontext
 from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
 from .mixins import AsyncContextMixin, LoopContextMixin
 from .util import safe_cancel, sync_await
-from _functools import partial  # type: ignore[import-not-found]
+from _functools import partial # type: ignore[import-not-found]
 from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import gather, sleep, wait_for
 from asyncio.timeouts import timeout

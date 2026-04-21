@@ -8,6 +8,7 @@ need_sphinx = '9.1.0'
 pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 extensions = ['sphinx.ext.viewcode', 'autoapi.extension']
+default_role = 'py:obj'
 autoapi_dirs = ['../../asyncutils']
 autoapi_file_patterns = ['*.pyi']
 autoapi_root = 'api'

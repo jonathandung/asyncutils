@@ -25,7 +25,7 @@ def create_executor(f, /, save=True):
 def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): f = coerce_callable(f); n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if rmpref else n
 def audit_fullname(f, /, rmpref=False): audit(fullname(f, rmpref))
 class LoopMixinBase:
-    __slots__ = 'exiter', 'loop', 'make_fut', 'running_tasks'
-    def __init__(self): self.exiter, self.loop, self.make_fut, self.running_tasks = stop_and_closer(l := get_loop_and_set()), l, l.create_future, set()
-    def make(self, coro): (_ := self.running_tasks).add(t := self.loop.create_task(coro)); t.add_done_callback(_.discard); return t
+    __slots__ = ()
+    def make(self, coro): return self.loop.create_task(coro)
+    def make_fut(self): return self.loop.create_future()
     def make_multiple(self, C): yield from map(self.make, C)

@@ -9,7 +9,7 @@ from .context import getcontext
 from .futures import AsyncCallbacksFuture
 from .mixins import LoopBoundMixin
 from .util import safe_cancel, sync_await
-from _collections import deque  # type: ignore[import-not-found]
+from _collections import deque # type: ignore[import-not-found]
 from abc import ABCMeta, abstractmethod
 from asyncio.locks import Event
 from asyncio.tasks import gather, wait_for
@@ -144,7 +144,7 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     def peek_all(self): ...
     @abstractmethod
     def qsize(self): ...
-    def __init__(self, maxsize=0): super().__init__(maxsize); self._event, self.make = Event(), self.loop.create_task
+    def __init__(self, maxsize=0): super().__init__(maxsize); self._event = Event()
     def reset(self): super().__init__(self.maxsize); self._event.clear()
     async def smart_put(self, item, *, timeout=None, raising=True):
         try: self.put_nowait(item); return True

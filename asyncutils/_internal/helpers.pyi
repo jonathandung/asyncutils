@@ -24,12 +24,5 @@ def fullname(f: object, /, rmpref: bool=...) -> str: ...
 def audit_fullname(f: object, /, rmpref: bool=...) -> None: ...
 class LoopMixinBase:
     def make[T](self, coro: Coroutine[Any, Any, T]) -> Task[T]: '''Create a :class:`~asyncio.Task` for the given coroutine that runs in the underlying loop.'''
-    @property
-    def loop(self) -> AbstractEventLoop: ...
-    @property
-    def exiter(self) -> Callable[[], None]: '''A function that stops the underlying loop when called.'''
-    @property
-    def make_fut(self) -> Callable[[], Future[Any]]: '''A function that returns a new future attached to the underlying loop.'''
-    @property
-    def running_tasks(self) -> set[Task[Any]]: '''A set of all tasks currently running in the underlying loop.'''
+    def make_fut(self) -> Future[Any]: '''Create a :class:`~asyncio.Future` attached to the underlying loop.'''
     def make_multiple[T](self, C: Iterable[Coroutine[Any, Any, T]]) -> Generator[Task[T]]: '''Return an iterator over instances of Task created for each coroutine in C, in that order.'''

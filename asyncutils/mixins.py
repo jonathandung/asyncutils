@@ -1,25 +1,26 @@
-from ._internal.helpers import LoopMixinBase, create_executor, fullname, get_loop_and_set, subscriptable
+from ._internal.helpers import LoopMixinBase, stop_and_closer, create_executor, fullname, get_loop_and_set, subscriptable
 from ._internal.submodules import mixins_all as __all__
+from .base import safe_cancel_batch
 from abc import ABCMeta, abstractmethod
 from asyncio.coroutines import iscoroutine
 from asyncio.events import _get_running_loop
 from asyncio.timeouts import timeout as _timeout
 from functools import cached_property, partial
-class EventualLoopMixin(LoopMixinBase): __slots__ = ()
 class LoopContextMixin(LoopMixinBase):
-    __slots__ = ()
+    __slots__ = 'exiter', 'loop', 'running_tasks'
+    def __init__(self): self.exiter, self.loop, self.running_tasks = stop_and_closer(l := get_loop_and_set()), l, set()
+    def make(self, coro): (_ := self.running_tasks).add(t := super().make(coro)); t.add_done_callback(_.discard); return t
     async def __setup__(self): ...
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
-    async def __aexit__(self, *_): await self.__cleanup__(); self.exiter()
-class LoopBoundMixin:
+    async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(*self.running_tasks); self.exiter()
+class LoopBoundMixin(LoopMixinBase):
     __slots__ = '_loop',
     @property
     def loop(self):
         if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
         elif l is not _get_running_loop(): raise RuntimeError('could not bind loop')
         return l
-    def make_fut(self): return self.loop.create_future()
 @subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()

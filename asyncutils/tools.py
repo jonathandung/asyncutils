@@ -15,7 +15,7 @@ def json_to_argv(p, /, *, d='.', c='json'):
     elif l != s:
         f('-l')
         if l != 'MAKE': f(l)
-    f('-c' if d in (s := p('executor', l := 'thread')) else '-e'); f(s)
+    f('-c' if d in (s := p('executor', 'thread')) else '-e'); f(s)
     if isinstance(l := p('max_memerrs', None), int): f('-m'); f(str(l))
     if p('quiet', False): f('-q')
     if p('basic_repl', False): f('-b')

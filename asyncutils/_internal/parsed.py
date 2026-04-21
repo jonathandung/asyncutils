@@ -5,8 +5,7 @@ import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
 On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
-The file should have one argument per line.
-This format differs from that described below.
+The file should have one argument per line; this format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
 Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
@@ -17,8 +16,8 @@ When FILE is passed (interpreted as an integer file descriptor if possible), the
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
 Most of the logging output is created in debug mode only, to prevent cluttering of the stream.
 If FILE is 'MEMORY', logs are stored in memory and returned and voided whenever get_past_logs is called.
-If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log'
-in the current directory for logging, for number from 1 to 4095.
+If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log' in the
+current working directory for logging, for number from 1 to 4096. (If you have more than 4096 log files, you should probably clean them up.)
 If FILE is 'STDOUT', logs to stdout.
 If FILE is 'STDERR', logs to stderr (also the default behaviour and fallback if the above steps fail).''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
@@ -52,7 +51,7 @@ M defaults to 3.
 Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
-a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output. Overrides verbosity flags. Other than that and marking the global debug context manager as entered, essentially shorthand for -VV.')
+a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
 del a, b, C, d, e, f, g, h, i, j, A, V

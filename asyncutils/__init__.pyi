@@ -1,5 +1,5 @@
 '''A feature-rich asynchronous utilities library with CLI and REPL support.'''
-__all__ = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version', 'console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'] # noqa: RUF022
+__all__ = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version', 'console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'] # noqa: RUF022
 from ._internal.types import Submodule
 from .altlocks import *
 from .base import *
@@ -27,6 +27,7 @@ from .pools import *
 from .processors import *
 from .properties import *
 from .queues import *
+from .rwlocks import *
 from .signals import *
 from .tools import *
 from .util import *

@@ -1,13 +1,13 @@
 '''Some asyncio protocols and a transport. See [the documentation page](https://docs.python.org/3/library/asyncio-protocol.html).'''
-from .mixins import EventualLoopMixin
+from .mixins import LoopBoundMixin
 from asyncio.events import AbstractEventLoop
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport, WriteTransport
-from contextlib import _GeneratorContextManager
+from contextlib import AbstractContextManager
 from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
-class LineProtocol(Protocol, EventualLoopMixin):
+class LineProtocol(Protocol, LoopBoundMixin):
     '''An implementation of :class:`asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
     The idea was originally introduced in PEP 3153, but did not see eventual adaptation in the standard library.
     This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
@@ -40,7 +40,7 @@ class LFProtocol(LineProtocol): '''Line Feed protocol for Unix-like systems.'''
 class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed protocol for Windows.'''
 class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9.'''
 class SocketTransport(Transport):
-    '''A thread-unsafe transport that connects :class:`LineProtocol`s to sockets.'''
+    '''A thread-unsafe transport that connects :class:`LineProtocol`'s to sockets.'''
     @classmethod
     def make_protocol(cls) -> LineProtocol: ...
     @property
@@ -49,7 +49,7 @@ class SocketTransport(Transport):
     def _reset_extra(self) -> None: ...
     def connect_sock(self, sock: socket=...) -> None: ...
     def disconnect_sock(self) -> socket|None: ...
-    def sock_context(self, sock: socket) -> _GeneratorContextManager[None, None, None]: ...
+    def sock_context(self, sock: socket) -> AbstractContextManager[None, None]: ...
     def write(self, data: bytes) -> None: ...
     def get_write_buffer_size(self) -> int: ...
     def get_write_buffer_limits(self) -> tuple[int, int]: ...

@@ -6,12 +6,19 @@ from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Gen
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
+from asyncio.tasks import Task
 from functools import cached_property
 from types import TracebackType
 from typing import Any, Literal, Self, overload
-__all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'EventualLoopMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopBoundMixin', 'LoopContextMixin'
+__all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopBoundMixin', 'LoopContextMixin'
 class LoopContextMixin(LoopMixinBase):
     ''':meth:`__setup__` will be called when the context is entered and :meth:`__cleanup__` when it is exited.'''
+    @property
+    def loop(self) -> AbstractEventLoop: ...
+    @property
+    def exiter(self) -> Callable[[], None]: '''A function that stops and closes the underlying loop when called.'''
+    @property
+    def running_tasks(self) -> set[Task[Any]]: '''A set of all tasks currently running in the underlying loop.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     async def __aenter__(self) -> Self: ...
@@ -19,7 +26,6 @@ class LoopContextMixin(LoopMixinBase):
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
-class EventualLoopMixin(LoopMixinBase): '''An alternative to :class:`LoopContextMixin` when :meth:`__aenter__` and :meth:`__aexit__` are used for other purposes (e.g. lock-like objects such as :class:`RLock`, :class:`KeyedCondition`)'''
 class AwaitableMixin[T](ABC):
     '''A subclass that implements the :meth:`wait` async method automatically becomes awaitable, resolving to the return value of that method.'''
     def __await__(self) -> Generator[Any, None, T]: ...
@@ -78,11 +84,10 @@ class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None, T
     @abstractmethod
     def _release(self) -> T: ...
     def release(self) -> T: ...
-class LoopBoundMixin:
+class LoopBoundMixin(LoopMixinBase):
     '''Mixin to bind event loops lazily for classes that need to create futures.'''
     @property
     def loop(self) -> AbstractEventLoop: ...
-    def make_fut(self) -> Future[Any]: ...
 class EventMixin[T](AwaitableMixin[T], LoopBoundMixin, ABC):
     @abstractmethod
     async def wait_for_next(self, timeout: float|None=..., **k: Any) -> T: ...

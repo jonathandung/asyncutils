@@ -3,7 +3,7 @@ from ._internal.submodules import events_all as __all__
 from .constants import RAISE
 from .exceptions import EventValueError, ref
 from .mixins import EventMixin
-from _collections import deque  # type: ignore[import-not-found]
+from _collections import deque # type: ignore[import-not-found]
 from asyncio.tasks import wait, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic

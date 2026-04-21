@@ -92,7 +92,7 @@ class VersionInfo(str): # noqa: FURB189
         asyncutils v4.2.0
         ```'''
     @property
-    def is_unstable(self) -> Literal[False]: '''`True` only in alpha and beta versions, so should be considered always `False`.'''
+    def is_unstable(self) -> bool: '''`True` only in alpha and beta versions.'''
     @property
     def parts(self) -> tuple[int, int, int]: '''The tuple `(major, minor, patch)`.'''
     @property

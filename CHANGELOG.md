@@ -288,11 +288,6 @@ Submodules:
   - PriorityRLock
   - LocksmithBase
   - MultiCountDownLatch
-  - RWLock
-  - ReadPreferringRWLock
-  - WritePreferringRWLock
-  - FairRWLock
-  - PriorityRWLock
 
 - misc
 
@@ -305,7 +300,6 @@ Submodules:
 - mixins
 
   Interfaces/Mixins:
-  - EventualLoopMixin
   - LoopBoundMixin
   - LoopContextMixin
   - AwaitableMixin
@@ -366,6 +360,17 @@ Submodules:
   - ignore_qfull
   - ignore_qerrs
   - ignore_valerrs
+
+- rwlocks
+
+  Classes:
+  - RWLock
+  - FairRWLock
+  - ReadPreferredRWLock
+  - WritePreferredRWLock
+  - PriorityRWLock
+  - ReadPreferredPriorityRWLock
+  - WritePreferredPriorityRWLock
 
 - signals
 

@@ -4,7 +4,7 @@ from . import context
 from .mixins import LoopContextMixin
 from .util import sync_await
 import sys as S
-from _functools import partial  # type: ignore[import-not-found]
+from _functools import partial # type: ignore[import-not-found]
 from asyncio.locks import Lock
 from asyncio.tasks import eager_task_factory, gather
 from contextlib import asynccontextmanager

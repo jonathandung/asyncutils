@@ -1,5 +1,4 @@
 '''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
-Pseudo-stable (deprecation periods will span at least 2 minor versions).
 This is a fake module in the sense that the names in this stub are all `None` at runtime, so do not inherit from its 'protocols'.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
@@ -9,7 +8,7 @@ from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, C
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from concurrent.futures import Future as SyncFuture
-from contextlib import _AsyncGeneratorContextManager
+from contextlib import AbstractContextManager
 from io import TextIOWrapper, _WrappedBuffer
 from mmap import mmap
 from types import FunctionType, TracebackType
@@ -73,7 +72,7 @@ class SupportsPopLeft[T](Protocol):
     def popleft(self) -> T: ...
 @type_check_only
 class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
-    '''Objects such as those returned by :dec:`types.coroutine`-decorated generator functions.'''
+    '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
     def send(self, val: S, /) -> Y: ...
     @overload # type: ignore[override]
     def throw(self, typ: ValidExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
@@ -157,7 +156,7 @@ class P[R, T](Q[R, T], Protocol):
 class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both `get` and `put` are protected by passwords, which may or may not be the same.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
-    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`locks.RWLock`.'''
+    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`locks.RWLock` and subclasses thereof.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> Coroutine[Any, Any, T]: ...
     def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: ...
     def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: ...
@@ -301,7 +300,7 @@ type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing the < or > operator.'''
 type ValidExcType = type[BaseException]
-'''The type of exc_typ in `__exit__` and `__aexit__` methods.'''
+'''The type of exc_typ in :meth:`__exit__` and :meth:`__aexit__` methods.'''
 type Exceptable = ValidExcType|tuple[ValidExcType, ...]
 '''Objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
@@ -312,13 +311,13 @@ type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''
 type All = tuple[str, ...]
 '''Type of the `__all__` attributes of the submodules of :mod:`asyncutils`.'''
-type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'signals', 'tools', 'util', 'version']
+type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
 type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MMIOMGR_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
-type OpenRV = _AsyncGeneratorContextManager[MemoryMappedFile, None]
+type OpenRV = AbstractContextManager[MemoryMappedFile, None]
 '''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`open_files` property of :class:`io.MemoryMappedIOManager`.'''

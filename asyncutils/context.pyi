@@ -1,4 +1,4 @@
-'''Contextual configuration system, inspired by the `decimal` module.'''
+'''Contextual configuration system, inspired by the :mod:`decimal` module.'''
 from ._internal.types import HashAlgorithm, ValidExcType
 from _collections_abc import Sequence
 from types import TracebackType
@@ -6,13 +6,13 @@ from typing import Any, Final, NamedTuple, final, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
 @final
 class Context(NamedTuple):
-    '''A `collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is,
-    not loading `dataclasses`, which loads `inspect` and triggers a cascade of imports.
+    '''A :func:`collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is,
+    not loading :mod:`dataclasses`, which loads :mod:`inspect` and triggers a cascade of imports.
     This class can technically be instantiated with positional arguments, but since the order of the fields are kept in alphabetical order of submodule
     and new fields may be added in the future, only keyword arguments should be used to avoid subtle bugs.
     For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed
     by a concise description of what it configures.
-    Of course, this class is not related to instantiating a certain class, as in the `decimal` module, but rather a convenient way to store configuration
+    Of course, this class is not related to instantiating a certain class, as in the :mod:`decimal` module, but rather a convenient way to store configuration
     for the various utilities and patterns this library bundles, especially to dynamically get default values in function signatures.
     The behaviour of this class as a tuple at runtime is an implementation detail.'''
     CIRCUIT_BREAKER_DEFAULT_RESET: float = ...
@@ -63,7 +63,6 @@ class Context(NamedTuple):
     AFRIEVALDS_DEFAULT_K: int = ...
     ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: float = ...
     PRIORITY_SEMAPHORE_DEFAULT_VALUE: int = ...
-    RWLOCK_DEFAULT_PREFER_WRITERS: bool = ...
     LOCKSMITH_DEFAULT_TIMEOUTS: tuple[float|None, float|None, float|None] = ...
     GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT: int = ...
     LINE_PROTOCOL_DEFAULT_BUFFER_SIZE: int = ...
@@ -86,6 +85,7 @@ class Context(NamedTuple):
     BULKHEAD_DEFAULT_MAX_REJ: int = ...
     PASSWORD_QUEUE_DEFAULT_GET_FROM: str = ...
     PASSWORD_QUEUE_DEFAULT_PUT_FROM: str = ...
+    RWLOCK_DEFAULT_PREFER_WRITERS: bool = ...
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
 class localcontext:
@@ -101,7 +101,7 @@ class localcontext:
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
 class nonreusablelocalcontext(localcontext):
-    '''Version of localcontext that is not reusable.'''
+    '''Version of :class:`localcontext` that is not reusable. Use this to avoid subtle bugs.'''
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
@@ -159,7 +159,6 @@ AUNZIP_DEFAULT_PUT_BATCH: Final[int]
 AFRIEVALDS_DEFAULT_K: Final[int]
 ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: Final[float]
 PRIORITY_SEMAPHORE_DEFAULT_VALUE: Final[int]
-RWLOCK_DEFAULT_PREFER_WRITERS: Final[bool]
 LOCKSMITH_DEFAULT_TIMEOUTS: Final[tuple[float|None, float|None, float|None]]
 GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT: Final[int]
 LINE_PROTOCOL_DEFAULT_BUFFER_SIZE: Final[int]
@@ -182,5 +181,6 @@ BULKHEAD_DEFAULT_MAX_QUEUE: Final[int]
 BULKHEAD_DEFAULT_MAX_REJ: Final[int]
 PASSWORD_QUEUE_DEFAULT_GET_FROM: Final[str]
 PASSWORD_QUEUE_DEFAULT_PUT_FROM: Final[str]
+RWLOCK_DEFAULT_PREFER_WRITERS: Final[bool]
 WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Final[Sequence[int]]
 SEMAPHORE_DEFAULT_VALUE: Final[int]

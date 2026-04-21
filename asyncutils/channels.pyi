@@ -9,7 +9,7 @@ from asyncio.locks import Lock
 from asyncio.queues import Queue
 from asyncio.tasks import Task
 from collections import defaultdict
-from contextlib import _GeneratorContextManager
+from contextlib import AbstractContextManager
 from typing import Any, Literal, NoReturn, Self, TypeGuard, overload
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
@@ -124,8 +124,8 @@ class EventBus(LoopContextMixin):
     def add_middleware_once(self, middleware: Middleware, until: Future[Any]) -> bool:
         '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
         If the middleware has already been associated with another future, do nothing and return False.'''
-    def audit_context(self) -> _GeneratorContextManager[None, None, None]: '''Start receiving publications from and sending publications to `sys.audit` upon entry and stop on exit. Use as a context manager.'''
-    def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> _GeneratorContextManager[None, None, None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
+    def audit_context(self) -> AbstractContextManager[None, None]: '''Start receiving publications from and sending publications to `sys.audit` upon entry and stop on exit. Use as a context manager.'''
+    def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> AbstractContextManager[None, None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''
     @overload
     def stop_tracking(self, ret_stats: Literal[False]=...) -> None: '''Stop tracking event publication statistics.'''

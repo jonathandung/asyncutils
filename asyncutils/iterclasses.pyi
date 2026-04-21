@@ -1,6 +1,6 @@
 '''Object-oriented (async) iteration helpers.'''
 from ._internal.types import SupportsIteration, ValidExcType, ValidSlice
-from .mixins import EventualLoopMixin, LoopContextMixin
+from .mixins import LoopBoundMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
 from types import TracebackType
 from typing import Any, Self, SupportsIndex, overload
@@ -18,7 +18,7 @@ class achain[T]:
     def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self: '''Construct an :class:`achain` from `its`, an (async) iterable of (async) iterables to chain.'''
     def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an :class:`achain` from the (async) iterables.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
-class apeekable[T](EventualLoopMixin):
+class apeekable[T](LoopBoundMixin):
     '''Async version of :class:`more_itertools.peekable`.'''
     def __init__(self, it: SupportsIteration[T]=[]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
     def __aiter__(self) -> Self: '''Return the :class:`apeekable` instance itself.'''

@@ -1,7 +1,7 @@
 from .helpers import subscriptable
 from ..mixins import LoopBoundMixin
 import heapq as H
-from _collections import deque  # type: ignore[import-not-found]
+from _collections import deque # type: ignore[import-not-found]
 from asyncio.locks import Event
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
 class QueueEmpty(Exception): ...

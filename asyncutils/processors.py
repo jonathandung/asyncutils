@@ -6,7 +6,7 @@ from .context import getcontext
 from .exceptions import BulkheadFull, BulkheadShutDown
 from .mixins import LoopContextMixin
 from .util import safe_cancel
-from _functools import partial  # type: ignore[import-not-found]
+from _functools import partial # type: ignore[import-not-found]
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Event, Lock, Semaphore
 from asyncio.tasks import sleep, wait_for

@@ -641,7 +641,7 @@ async def mat_vec_mul(M, V):
 async def vecs_eq(u, v, cmpeq=check, *, strict=True):
     try: return await aall(cmpeq(i, j) async for i, j in azip(u, v, strict=strict))
     except ValueError: return False
-async def afrievalds(A, B, C, k=None, _r=_randinst.randint): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(0, 1) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(getcontext().AFRIEVALDS_DEFAULT_K if k is None else k))
+async def afreivalds(A, B, C, k=None, _r=_randrange): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(2) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(getcontext().AFRIEVALDS_DEFAULT_K if k is None else k))
 def basic_collect(it, n): return to_list(aislice(it, n))
 async def asubstrings(it):
     for i in (s := await to_tuple(it)): yield i,

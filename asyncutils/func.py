@@ -18,10 +18,10 @@ from time import perf_counter
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
-def star(f):
+def star(f, /):
     async def wrapper(a=(), k=None, /): return await f(*a, **(k or {}))
     return wraps(f)(wrapper)
-def unstar(f):
+def unstar(f, /):
     async def wrapper(*a, **k): return await f(a, k)
     return wraps(f)(wrapper)
 def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='periodic coroutine %s reached the maximum of %d iterations'):

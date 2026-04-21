@@ -1,7 +1,7 @@
 from ._internal.submodules import misc_all as __all__
 from . import context as C
 from .exceptions import IgnoreErrors
-from _collections import defaultdict  # type: ignore
+from _collections import defaultdict # type: ignore[import-not-found]
 from asyncio.locks import Lock, Semaphore
 from asyncio.tasks import gather
 from sys import intern

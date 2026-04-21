@@ -1,8 +1,8 @@
 from ._internal.helpers import copy_and_clear, fullname
 from ._internal.submodules import futures_all as __all__
 from _contextvars import copy_context
-from asyncio.futures import Future, _PyFuture  # type: ignore[import-not-found]
-from asyncio.tasks import Task, _PyTask, eager_task_factory  # type: ignore[import-not-found]
+from asyncio.futures import Future, _PyFuture # type: ignore[import-not-found]
+from asyncio.tasks import Task, _PyTask, eager_task_factory # type: ignore[import-not-found]
 from sys import audit
 class Base:
     def __init__(self): self._creation_time = self.get_loop().time() # type: ignore[attr-defined]

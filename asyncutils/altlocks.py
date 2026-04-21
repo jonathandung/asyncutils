@@ -6,7 +6,7 @@ from .constants import _NO_DEFAULT
 from .context import getcontext
 from .exceptions import CRITICAL, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical
 from .mixins import AsyncContextMixin, AwaitableMixin
-from _collections import deque  # type: ignore[import-not-found]
+from _collections import deque # type: ignore[import-not-found]
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import BrokenBarrierError
 from asyncio.locks import BoundedSemaphore, Condition, Lock

@@ -1,6 +1,6 @@
 from .context import getcontext
 from ._internal.submodules import buckets_all as __all__
-from .mixins import AsyncContextMixin, EventualLoopMixin
+from .mixins import AsyncContextMixin, LoopBoundMixin
 from asyncio.locks import Lock
 from asyncio.tasks import sleep
 from sys import audit
@@ -16,7 +16,7 @@ class TokenBucket:
             else: await sleep(-d/self._rate); self._tokens = 0
     @property
     def capacity(self): return self._capacity
-class LeakyBucket(AsyncContextMixin, EventualLoopMixin):
+class LeakyBucket(AsyncContextMixin, LoopBoundMixin):
     def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit('asyncutils.buckets.LeakyBucket', capacity, leak); C = getcontext(); self._leak, self._last, self._lock, self._drainer, self._factor, self._min_factor, self._max_factor, self._external_factor_settable, self._timer = leak, timer(), Lock(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self._capacity = self._tokens = capacity
     def _adjust_from_params(self, a, b, c, d, /):
         if (f := self._factor) < abs((n := min(f*b, self._max_factor) if (r := self._tokens/self._capacity) <= a else max(f*d, self._min_factor) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self._factor = n

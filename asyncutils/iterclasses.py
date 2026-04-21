@@ -2,11 +2,11 @@ from ._internal import helpers as H
 from ._internal.submodules import iterclasses_all as __all__
 from .base import iter_to_aiter
 from .constants import _NO_DEFAULT
-from .mixins import EventualLoopMixin, LoopContextMixin
+from .mixins import LoopBoundMixin, LoopContextMixin
 from .util import sync_await
 import heapq as Q
-from _collections import defaultdict, deque  # type: ignore[import-not-found]
-from _functools import partial  # type: ignore[import-not-found]
+from _collections import defaultdict, deque # type: ignore[import-not-found]
+from _functools import partial # type: ignore[import-not-found]
 from sys import audit, maxsize as INF
 class anullcontext:
     async def __aenter__(self): ...
@@ -25,7 +25,7 @@ class achain:
                 except RuntimeError: ...
         except RuntimeError: ...
 @H.subscriptable
-class apeekable(EventualLoopMixin):
+class apeekable(LoopBoundMixin):
     __slots__ = '_cache', '_it'
     def __init__(self, it=()): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
     def __aiter__(self): return self

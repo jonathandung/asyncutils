@@ -4,7 +4,7 @@ from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFile
 from .config import Executor
 from .mixins import LoopContextMixin
 from _collections_abc import Callable, Iterable, Mapping
-from contextlib import _AsyncGeneratorContextManager
+from contextlib import AbstractAsyncContextManager
 from mmap import mmap
 from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
@@ -57,7 +57,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     def open(self, path: Openable, init_size: int=...) -> OpenRV: '''An async context manager that opens a file at `path` for memory-mapped reading and writing on entry and closes it on exit. The file must exist and is not truncated.'''
     def create(self, path: Openable, init_size: int=..., *, exclusive: bool=...) -> OpenRV: '''An async context manager that opens a file at `path` for memory-mapped writing and reading on entry and closes it on exit. The file is truncated to the beginning, and must not exist if `exclusive` is `True` (the default behaviour).'''
     def create_sparsef(self, path: Openable, total_size: int, chunks: Mapping[int, bytes|str]) -> OpenRV: '''An async context manager that creates a file of size `total_size` at `path`, with `chunks` mapping offsets to the data to be written there. Though it is technically undefined behaviour to have overlapping chunks, the implementation overwrites data from old chunks with that from new ones.'''
-    def prefetch_files(self, *paths: Openable, init_size: int=...) -> _AsyncGeneratorContextManager[list[MemoryMappedFile], None]: '''Prefetch existing files at `paths` for memory-mapped I/O into memory at once, closing them simultaneously on exit.'''
+    def prefetch_files(self, *paths: Openable, init_size: int=...) -> AbstractAsyncContextManager[list[MemoryMappedFile], None]: '''Prefetch existing files at `paths` for memory-mapped I/O into memory at once, closing them simultaneously on exit.'''
     async def __cleanup__(self) -> None: ...
     async def copy_file(self, srcp: Openable, destp: Openable) -> None: ...
     async def checksum(self, path: Openable, alg: HashAlgorithm=...) -> str: ...
