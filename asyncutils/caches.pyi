@@ -4,7 +4,7 @@ from _collections_abc import Callable, Coroutine
 from typing import Any, NoReturn, overload
 __all__ = 'AsyncLRUCache', 'CacheWithBackgroundRefresh'
 class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
-    '''A cache that automatically refreshes entries in the background before expiry. Use as a context manager.
+    '''A cache that automatically refreshes entries in the background before expiry. Use as an async context manager only.
     Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
     This ensures availability of fresh data without blocking get operations.'''
     @overload

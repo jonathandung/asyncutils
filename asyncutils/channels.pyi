@@ -149,8 +149,8 @@ class EventBus(LoopContextMixin):
         Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
         If `wait` is `False` (default `True`), don't wait for the publication to complete.
         If `safe` is `False` (default `True`), don't wrap callbacks with proper error handling.
-        `chaperone`, if passed, should be a function processing non-severe exceptions (instances of :class:`Exception` and :class:`ExceptionGroup`) in the callbacks. Otherwise, these
-        exception( group)s are flattened and collected into an :class:`ExceptionGroup` and finally thrown, which the caller should be prepared to handle.'''
+        `chaperone`, if passed, should be a function processing non-severe exceptions (instances of :exc:`Exception` and :exc:`ExceptionGroup`) in the callbacks. Otherwise, these
+        exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and finally thrown, which the caller should be prepared to handle.'''
     async def wait_for_event(self, event_type: str, *, timeout: bool|None=..., condition: Callable[[Any], object]=...) -> Task[Any]:
         '''Wait for an event of the specified event type that satisfies the condition to occur.
         Note that the function completes once the subscription has registered and returns a task, which will be cancelled on timeout.'''
@@ -192,29 +192,11 @@ class EventBus(LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
 class Rendezvous[T]:
-    '''A rendezvous object, emulating Golang's unbuffered channels. Usage:
-    ```python
-    >>> rdv = Rendezvous()
-    >>> (await asyncio.gather(*map(rdv.put, range(5, 10)), rdv.exchange(10), *map(rdv.exchange, range(1, 5)), *(rdv.get() for _ in range(5))))[-10:]
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    >>> task = rdv._loop.create_task(rdv.put(0))
-    >>> rdv.state_snapshot()
-    StateSnapshot(num_getters=0, num_putters=1, num_ops=1, idle=False)
-    >>> await rdv.get()
-    0
-    >>> await rdv.get('default')
-    'default'
-    >>> await task
-    True
-    >>> task = rdv._loop.create_task(rdv.get())
-    >>> await rdv.reset()
-    >>> task.cancelled()
-    True
-    ```'''
+    '''A rendezvous object, emulating Golang's unbuffered channels.'''
     def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...): '''Instantiate a rendezvous object. If `loop` is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''Put in `value` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
-        Also be prepared to intercept or reraise :exc:`CancelledError` resulting from reset.'''
+        Also be prepared to intercept or reraise :exc:`~asyncio.exceptions.CancelledError` resulting from reset.'''
     async def put(self, value: T, /, *, timeout: float|None=...) -> bool: '''Like :meth:`raising_put`, but returns a boolean representing if the put succeeded. The recommended interface.'''
     async def get(self, default: T|None=..., *, timeout: float|None=...) -> T:
         '''Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.
@@ -222,11 +204,11 @@ class Rendezvous[T]:
     def cleanup(self) -> None: '''Clean up the internal getter and putter stacks.'''
     async def reset(self) -> None:
         '''Hard reset the rendezvous. Call from a monitoring task when a deadlock appears to have occurred.
-        This cancels all pending gets, puts and exchanges; their callers will see :exc:`CancelledError`.'''
+        This cancels all pending gets, puts and exchanges; their callers will see :exc:`~asyncio.exceptions.CancelledError`.'''
     def __length_hint__(self) -> int: '''Approximate number of operations pending for :func:`_operator.length_hint`.'''
     def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
         '''Put in a value to the rendezvous and get a different one back.
         If `asap` is `True`, return without necessarily having completed the put.'''
-    async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning an :class:`asyncio.Future`. When cancelled, the put is cancelled as well. When done, the value has been handed off to a getter.'''
+    async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning a :class:`~asyncio.futures.Future`, which cancels the put when cancelled, and when done, the value is guaranteed to have been handed off to a getter.'''
     async def _maintainer(self) -> NoReturn: '''Periodically clean up done getters and putters, according to :const:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`.'''

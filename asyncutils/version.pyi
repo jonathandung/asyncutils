@@ -91,14 +91,10 @@ class VersionInfo(str): # noqa: FURB189
     @classmethod
     def unshelve(cls, path: Openable, little: bool=...) -> Self: '''Recover a stored version.'''
     @classmethod
-    def get_current_version(cls) -> Self: '''Return the current version number of asyncutils; equivalent to :data:`asyncutils.__version__`.'''
+    def get_current_version(cls) -> Self: '''Return the current version number of :mod:`asyncutils`; equivalent to :data:`asyncutils.__version__`.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     @property
-    def representation(self) -> str:
-        '''```python
-        >>> print(VersionInfo(4, 2).representation)
-        asyncutils v4.2.0
-        ```'''
+    def representation(self) -> str: '''String representation of the version for pretty printing, as displayed when using ``asyncutils --version``.'''
     @property
     def is_unstable(self) -> bool: '''`True` only in alpha and beta versions.'''
     @property
@@ -128,23 +124,7 @@ def normalize(o: object, /) -> tuple[int, int, int]:
     Unregister normalizers using unregister_normalizer, which returns the previous normalizer (if any) and None otherwise.
     Get the normalizer to be used to normalize an object using dispatch_normalizer.
     A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of VersionInfo will delegate to that object.
-    If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.
-    >>> normalize('1.2.3')
-    (1, 2, 3)
-    >>> normalize(19.0203)
-    (19, 2, 3)
-    >>> normalize(0x10F0203)
-    (271, 2, 3)
-    >>> normalize((1, 3, 5, 7))
-    (1, 3, 5)
-    >>> normalize(1.2+3.4j)
-    (1, 3, 0)
-    >>> autogenerate_normalizers()
-    True
-    >>> normalize(Decimal('1.2345'))
-    (1, 23, 45)
-    >>> normalize(Fraction(1, 3))
-    (1, 3, 0)'''
+    If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.'''
 def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
 @overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
