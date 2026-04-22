@@ -9,7 +9,7 @@ from .util import safe_cancel
 from _functools import partial # type: ignore[import-not-found]
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Event, Lock, Semaphore
-from asyncio.tasks import sleep, wait_for
+from asyncio.tasks import gather, sleep, wait_for
 from asyncio.timeouts import timeout as _timeout
 from time import monotonic
 @subscriptable
@@ -44,7 +44,13 @@ class BatchProcessor(LoopContextMixin):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
     __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdevt', '_sem'
-    def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None): super().__init__(); C = getcontext(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(C.BULKHEAD_DEFAULT_MAX_QUEUE if max_queue is None else max_queue), 0, max_concurrent, exc, processor, Event(), Event(), C.BULKHEAD_DEFAULT_MAX_REJ if max_rej is None else max_rej
+    def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
+        if max_concurrent <= 0: raise ValueError('max_concurrent must be positive')
+        C = getcontext()
+        if max_queue is None: max_queue = C.BULKHEAD_DEFAULT_MAX_QUEUE
+        if max_rej is None: max_rej = C.BULKHEAD_DEFAULT_MAX_REJ
+        if max_queue <= 0: raise ValueError('max_queue must be positive')
+        super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
         except QueueFull as e:
@@ -75,11 +81,15 @@ class Bulkhead(LoopContextMixin):
     @property
     def rejected(self): return self._rejected
     def wait_until_idle(self, timeout=None): return wait_for(self._mtevt.wait(), timeout)
+    def wait_for_shutdown(self, timeout=None): return wait_for(self._sdevt.wait(), timeout)
     async def shutdown(self, timeout=None):
-        self._sdevt.set(); f, g, h = (r := []).append, (q := self._queue).get_nowait, q.shutdown; h()
+        self._sdevt.set(); (h := (q := self._queue).shutdown)(); r = []
         try:
-            async with _timeout(timeout): await self._mtevt.wait(); await safe_cancel_batch(self.running_tasks, disembowel=True)
+            async with _timeout(timeout):
+                await self._mtevt.wait(); a = (s := self._sem).acquire
+                while s._value: await a()
         except TimeoutError:
+            f, g = r.append, q.get_nowait
             while True:
                 try: f(g())
                 except: h(True); break # noqa: E722

@@ -39,7 +39,7 @@ def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, Coroutine[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''Convert the function that returns an awaitable object into an async function that returns a tuple `(res_or_exc, elapsed)`.
     `timer` (default :func:`time.perf_counter`) is used to count `elapsed`, the time required to execute the function.
-    `res_or_exc` is the awaited result of the wrapped function, or the exception thrown as wrapped by `exceptions.wrap_exc`.
+    `res_or_exc` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`exceptions.wrap_exc`.
     `precision` (default :const:`context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and `ns` whether the return value of the timer indicates time in nanoseconds.
     Any exception the wrapped function emits whose type is not in `expected` is propagated directly.'''
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:

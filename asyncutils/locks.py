@@ -155,7 +155,6 @@ class PriorityLock(M.LoopBoundMixin, M.LockWithOwnerMixin):
 class PriorityRLock(RLock):
     __slots__ = ()
     def __init__(self): super().__init__(PriorityLock())
-    def __del__(self): self.__lock.exiter()
     @property
     def owner(self): o = self.__lock._owner = self._owner; return o
     @owner.setter

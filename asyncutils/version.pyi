@@ -14,8 +14,8 @@ class VersionInfo(str): # noqa: FURB189
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
         '''A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
-        Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo 0x1FFFFFFFFFFFFFFF (largest Mersenne prime within 64 bits), the
-        reasonable limit for versions that can be hashed and unhashed losslessly lies around version `46340.41707.2147483645`.'''
+        Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64 bits), the
+        reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
     @classmethod
     def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # type: ignore[override]
@@ -118,14 +118,15 @@ class VersionDelta(NamedTuple):
     def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
 def normalize(o: object, /) -> tuple[int, int, int]:
-    '''Returns a tuple of three integers: major, minor, patch, from the information provided by the object, to be extracted by registered normalizers.
-    Normalization is hardcoded for str, complex, int, float. For iterables, the default is to take the first three items and pad zeros behind if necessary.
-    Register normalizers using register_normalizer, which returns False if there is already a normalizer registered.
-    Unregister normalizers using unregister_normalizer, which returns the previous normalizer (if any) and None otherwise.
-    Get the normalizer to be used to normalize an object using dispatch_normalizer.
-    A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of VersionInfo will delegate to that object.
+    '''Returns a tuple of three integers `(major, minor, patch)` from the information provided by the object, to be extracted by registered normalizers.
+    Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
+    For iterables, the default behaviour is to take the first three items and pad zeros behind if necessary.
+    Register normalizers using :func:`register_normalizer`, which returns `False` if there is already a normalizer registered.
+    Unregister normalizers using :func:`unregister_normalizer`, which returns the previous normalizer for that type (if any) and `None` otherwise.
+    Get the normalizer to be used to normalize an object using :func:`dispatch_normalizer`.
+    A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to that object.
     If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.'''
-def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as `normalize`, but return None if a normalizer is not found.'''
+def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as :func:`normalize`, but return None if a normalizer is not found.'''
 @overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
 @overload
@@ -138,4 +139,4 @@ def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
 def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
 @overload
 def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
-def autogenerate_normalizers() -> bool: '''Registers normalizers for decimal.Decimal and fractions.Fraction. Returns if both normalizers were successfully registered (including re-registration of the same normalizer).'''
+def autogenerate_normalizers() -> bool: '''Registers normalizers for :class:`~decimal.Decimal` and :class:`~fractions.Fraction`. Returns if both normalizers were successfully registered (including re-registration of the same normalizer).'''

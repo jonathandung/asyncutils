@@ -13,7 +13,7 @@ class LoopContextMixin(LoopMixinBase):
     async def __setup__(self): ...
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
-    async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(*self.running_tasks); self.exiter()
+    async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(self.running_tasks); self.exiter()
 class LoopBoundMixin(LoopMixinBase):
     __slots__ = '_loop',
     @property

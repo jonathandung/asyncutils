@@ -7,13 +7,13 @@ from contextvars import Context
 from typing import Any, Self
 __all__ = 'AsyncCallbacksFuture', 'AsyncCallbacksTask', 'EagerAsyncCallbacksFuture', 'EagerAsyncCallbacksTask', 'EagerTimeAwareAsyncCallbacksFuture', 'EagerTimeAwareAsyncCallbacksTask', 'TimeAwareAsyncCallbacksFuture', 'TimeAwareAsyncCallbacksTask', 'TimeAwareFuture', 'TimeAwareTask'
 class TimeAwareFuture[T](Future[T]):
-    '''A subclass of :class:`asyncio.Future` that can be compared to other :class:`TimeAwareFuture`'s based on the time they were created.'''
+    '''A subclass of :class:`~asyncio.futures.Future` that can be compared to other :class:`TimeAwareFuture`'s based on the time they were created.'''
     def __lt__(self, other: Self, /) -> bool: ...
 class TimeAwareTask[T](Task[T]):
-    '''A subclass of :class:`asyncio.Task` that can be compared to other :class:`TimeAwareTask`'s based on the time they were created.'''
+    '''A subclass of :class:`~asyncio.tasks.Task` that can be compared to other :class:`TimeAwareTask`'s based on the time they were created.'''
     def __lt__(self, other: Self, /) -> bool: ...
 class AsyncCallbacksFuture[T](Future[T]):
-    '''A subclass of :class:`asyncio.Future` that supports calling asynchronous callbacks and callbacks with no arguments on completion.
+    '''A subclass of :class:`~asyncio.futures.Future` that supports calling asynchronous callbacks and callbacks with no arguments on completion.
     To hook into the callbacks mechanism, subclassing :class:`_asyncio.Future` (the C-accelerated version) is impossible; i.e., this future is noticeably slow.'''
     def __init__(self, *, loop: AbstractEventLoop|None=...): ...
     def add_async_callback(self, fn: Callable[[Self], Coroutine[Any, Any, Any]], /, *, context: Context|None=...) -> None: ...

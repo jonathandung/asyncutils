@@ -1,5 +1,5 @@
-__all__ = 'Placeholder', 'apargs', 'partial'
-apargs, Placeholder = {}, 'Placeholder'
+__all__ = 'Placeholder', 'pargs', 'partial'
+pargs, Placeholder = {}, 'Placeholder'
 def _get_merger(A, _=__import__('_operator').itemgetter):
     if not A: return 0, None
     j = n = len(A)

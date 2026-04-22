@@ -1,10 +1,10 @@
 '''This module provides various pool implementations for concurrent execution and resource management in asynchronous contexts.'''
 from ._internal.types import SupportsIteration, ValidExcType
 from .config import Executor
-from .mixins import AsyncContextMixin, LoopContextMixin
+from .mixins import AsyncContextMixin, LoopBoundMixin, LoopContextMixin
 from _collections_abc import Callable, Generator, Iterable, Mapping
-from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
+from collections import deque
 from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'CallbackAccumulator', 'ConnectionPool', 'Pool'
@@ -68,7 +68,7 @@ class AdvancedPool(LoopContextMixin):
     def uptime(self) -> float: ...
     @property
     def completed(self) -> int: ...
-class ConnectionPool[T, **P]:
+class ConnectionPool[T, **P](LoopBoundMixin):
     '''A pool managing resources in a simple and intuitive lock interface, with support for health checking, auto-recycling and dynamic rescaling.
     Use instances of this class as async context managers only.'''
     def __init__(self, factory: Callable[P, T], maxsize: int=..., minsize: int=..., maxlife: float=..., healthchecker: Callable[[T], bool]|None=..., cleaner: Callable[[T], None]|None=...): ...
@@ -88,10 +88,6 @@ class ConnectionPool[T, **P]:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     @property
-    def loop(self) -> AbstractEventLoop: ...
-    @loop.setter
-    def loop(self, val: AbstractEventLoop, /) -> None: ...
-    @property
     def currsize(self) -> int: ...
     @property
     def available(self) -> int: ...
@@ -103,15 +99,17 @@ class ConnectionPool[T, **P]:
     def minsize(self) -> int: ...
     @property
     def maxlife(self) -> float: ...
-class CallbackAccumulator[T, **P](AsyncContextMixin[CallbackAccumulator[T, P]]):
+class CallbackAccumulator[T, **P](deque, AsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class store callbacks and call them at once when the context manager exits.
     To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
-    The behaviour of this class as a :class:`collections.deque` is an implementation detail.'''
+    The behaviour of this class as a :class:`~collections.deque` is an implementation detail.
+    This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload
     def __init__(self, name: str, *, maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     def __call__(self, *a: P.args, **k: P.kwargs) -> None: ...
+    def __enter__(self) -> Self: ...
     @overload
     def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload

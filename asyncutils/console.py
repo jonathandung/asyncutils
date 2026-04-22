@@ -8,7 +8,7 @@ try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
 _f, _s = ('',), object()
 class ConsoleBase(B):
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %r'; default_local_exit = _unsubclassable = False # noqa: B008
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
     match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
         case '1': CAN_USE_PYREPL = False
         case str() as s:
@@ -78,7 +78,7 @@ class ConsoleBase(B):
         self.refresh()
     def set_return_code(self, e, /, _s=_s): self.retcode = e if isinstance(e, int) else e.code; self._loop.stop(_s)
     def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
-        if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%cls.__qualname__)
+        if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%fullname(cls))
         if name is None: name = cls.__qualname__.lower().removesuffix('console')
         if other_handlers is None: other_handlers = {}
         k['name'] = cls.NAME = name; (f := k.setdefault)('version', 'unknown'); f('description', 'Enjoy!'); cls.BANNER, cls.LOCALS_HANDLERS, cls.interrupt_hooks, cls.memerr_hooks, cls.default_local_exit, cls._unsubclassable, other_handlers[name] = template%k, cls.LOCALS_HANDLERS.new_child(other_handlers), (*cls.interrupt_hooks, *additional_interrupt_hooks), (*cls.memerr_hooks, *additional_memerr_hooks), default_local_exit, disallow_subclass_msg is not None, native_handler

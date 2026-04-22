@@ -3,6 +3,6 @@ import sys
 if sys.version_info < (3, 14):
     from functools import partial
     from typing import Any, Final
-    __all__ = 'Placeholder', 'apargs', 'partial'
-    apargs: dict[str, Any]
+    __all__ = 'Placeholder', 'pargs', 'partial'
+    pargs: dict[str, Any]
     Placeholder: Final[object]

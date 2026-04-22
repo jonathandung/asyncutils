@@ -5,11 +5,11 @@ from ._internal.submodules import networking_all as __all__
 from . import context as C
 from .exceptions import IgnoreErrors
 from .mixins import LoopBoundMixin
-from .util import _ignore_cancellation
+from .util import ignore_cancellation
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport
 class LineProtocol(Protocol, LoopBoundMixin):
-    NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', _ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
+    NEWLINE, CARRIAGE_RETURN, _handler = __import__('os').linesep.encode(), b'\r', ignore_cancellation.combined(__import__('asyncio.exceptions', fromlist=('',)).InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
     def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):

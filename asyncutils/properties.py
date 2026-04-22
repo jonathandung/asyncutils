@@ -52,7 +52,7 @@ class AsyncLockProperty(AsyncProperty):
         return r
 class coercedmethod: # noqa: N801
     __slots__ = '__f', '__name', '__owner'
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass coercedmethod')
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.properties.coercedmethod')
     def __init__(self, f, /): self.__f = f
     def __set_name__(self, typ, name, /): self.__owner, self.__name = typ, name
     def __getattr__(self, n, /): return getattr(self.__f, n)

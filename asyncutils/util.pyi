@@ -1,4 +1,4 @@
-'''Functions of utility one tier below the `base` submodule, such that they are not worth preloading but still quite useful.'''
+'''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
 from ._internal.types import AsyncLockLike, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
@@ -7,9 +7,9 @@ from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'get_future', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
-_ignore_cancellation: IgnoreErrors
-'''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`. This annotation is for module-internal use only.'''
+__all__ = 'aiter_from_f', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
+ignore_cancellation: IgnoreErrors
+'''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     Critical exceptions are wrapped in :exc:`~exceptions.Critical`.

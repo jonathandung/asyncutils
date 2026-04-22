@@ -9,7 +9,7 @@ for _k, _v in _i:
 try:
     while True: _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
 except StopIteration: ...
-class Module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function __getattr__ at {id(_):#x}>'})):
+class Module:
     __slots__ = '_fs', '_name'
     def __new__(cls, name, /, _d=_d, _a=_a, _=s):
         if name in _a: return _[name]
@@ -23,7 +23,7 @@ class Module(metaclass=type('', (type,), {'__repr__': lambda _, /: f'<function _
         if name in self._fs: return getattr(self.load(), name)
         raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {name!r}") from None
     def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass module')
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.get, _f=_f, _l=l, _n=_s):
         if not isinstance(m := _s.get(n := self._name), type(self)): return m
         if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__

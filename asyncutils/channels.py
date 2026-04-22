@@ -7,7 +7,7 @@ from .base import event_loop, adisembowel, iter_to_aiter, safe_cancel_batch, yie
 from .constants import _NO_DEFAULT
 from .exceptions import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, potent_derive
 from .mixins import LoopContextMixin
-from .util import _ignore_cancellation, safe_cancel, sync_await, to_async, to_sync
+from .util import ignore_cancellation, safe_cancel, sync_await, to_async, to_sync
 from _weakrefset import WeakSet
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
@@ -95,7 +95,7 @@ class Observable(LoopContextMixin):
             nonlocal t
             if t is not None: await safe_cancel(t)
             async def _notifier():
-                with _ignore_cancellation: await sleep(delay); await f(*a, **k)
+                with ignore_cancellation: await sleep(delay); await f(*a, **k)
             t = self.make(_notifier())
         self.subscribe_nowait(debounced); return _
     def throttle(self, interval, ret_exc=True):
@@ -226,7 +226,7 @@ class EventBus(LoopContextMixin):
             if iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    async def subscribe_until(self, fut, subscriber, event_type=None, till_permanent=None, _=_ignore_cancellation.combined(TimeoutError)): # noqa: B008
+    async def subscribe_until(self, fut, subscriber, event_type=None, till_permanent=None, _=ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
             with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
@@ -271,7 +271,7 @@ class EventBus(LoopContextMixin):
             async with self._sem:
                 if iscoroutine(r := c(*filter_out(t, s=_NO_DEFAULT), d)): await wait_for(r, i)
         except TimeoutError: L.warning('callback %s timed out', fullname(c), exc_info=True)
-        except CRITICAL: self.exiter(); raise Critical
+        except CRITICAL: raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
     def __cleanup__(self): return self.shutdown(immediate=True)

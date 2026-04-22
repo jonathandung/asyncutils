@@ -194,7 +194,7 @@ def aiter_to_iter(ait, *, use_futures=None, loop=None, a=c, b=b, e=__import__('a
     except StopAsyncIteration: ...
     finally:
         if c: c.__exit__(*exc_info())
-async def collect(it, n=None, *, default=_NO_DEFAULT, __reti=False, _=L.warning, m='collect ran out of items'):
+async def collect(it, n=None, *, default=_NO_DEFAULT, __reti=False, _=L.info, m='base.collect ran out of items'):
     f, i = (r := []).append, 0
     async for i, _ in aenumerate(it):
         if i == n: break
@@ -214,20 +214,19 @@ async def take(it, n, *, default=_NO_DEFAULT):
         if i >= n: break
         yield j
     else:
-        if default is RAISE: raise ItemsExhausted('take ran out of items')
+        if default is RAISE: raise ItemsExhausted('base.take ran out of items')
         if default is not _NO_DEFAULT:
             for _ in range(n-i): yield default
 async def drop(it, n, *, raising=False):
     i = 0
     async for i, _ in aenumerate(it):
         if i >= n: yield _
-    if raising and i < n: raise ItemsExhausted('drop ran out of items')
+    if raising and i < n: raise ItemsExhausted('base.drop ran out of items')
 async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_aiter(it): yield start, _; start += step
-async def sleep_forever(_=float('inf')): await sleep(_)
 P.patch_function_signatures((iter_to_aiter, 'it, sentinel={}'), (aiter_to_iter, 'ait'), (collect, 'it, n=None, default={}'), (take, 'it, n, default={}'))
 def a(_, r='asyncutils.base.yield_to_event_loop'): return r
-yield_to_event_loop = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), '__repr__': a, '__str__': a, '__reduce__': a}))
+yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), '__repr__': a, '__str__': a, '__reduce__': a})), sleep.__get__(float('inf'))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
 _.__qualname__ = _.__name__ = 'dummy_task'
 del f, _, P, L, b, c, H

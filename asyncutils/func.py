@@ -6,7 +6,7 @@ from .base import iter_to_aiter
 from .config import _randinst
 from .constants import _NO_DEFAULT, RAISE
 from .exceptions import CRITICAL, Critical, MaxIterationsError, RateLimitExceeded, wrap_exc
-from .util import _ignore_cancellation, safe_cancel
+from .util import ignore_cancellation, safe_cancel
 from asyncio.coroutines import iscoroutine
 from asyncio.exceptions import CancelledError
 from asyncio.locks import Lock
@@ -141,7 +141,7 @@ def debounce(wait):
             nonlocal l
             if l: await safe_cancel(l)
             l = g(h())
-            with _ignore_cancellation: await l; return await f(*a, **k)
+            with ignore_cancellation: await l; return await f(*a, **k)
         return wraps(f)(wrapper)
     return dec
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s

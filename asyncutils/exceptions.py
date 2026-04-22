@@ -45,7 +45,7 @@ class ExceptionWrapper:
         (s := super().__new__(cls)).__exc = e; return s
     def __getattr__(self, name, /): return getattr(self.__exc, name)
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
-    def __init_subclass__(cls): raise TypeError('cannot subclass ExceptionWrapper')
+    def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
 exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
 @subscriptable
 class ref: # noqa: N801
@@ -55,7 +55,7 @@ class ref: # noqa: N801
         try: return r(obj)
         except TypeError: (_ := object.__new__(cls)).__obj = obj; return _
     def __call__(self): return self.__obj
-    def __init_subclass__(cls): raise TypeError('cannot subclass ref')
+    def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @subscriptable
 class Critical(BaseException):
     def __new__(cls, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception):
@@ -151,10 +151,9 @@ def __getattr__(name, /):
         case 'WarningToError':
             global WarningToError
             class WarningToError:
-                lock = __import__('asyncio.locks', fromlist=('',)).Lock(); __slots__ = '_cm', '_warn'
+                __slots__ = '_cm', '_warn'
                 def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
-                async def __aenter__(self, _=__import__('warnings')):
-                    async with self.lock: self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore[arg-type]
+                async def __aenter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore[arg-type]
                 async def __aexit__(self, t, /, *_):
                     if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
                     c.__exit__(t, *_); return issubclass(t or object, Warning)

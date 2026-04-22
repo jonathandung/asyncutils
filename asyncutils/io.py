@@ -133,14 +133,14 @@ class File(LoopContextMixin):
     async def compact(self):
         for i in range(len(c := await self.read())-1, -1, -1):
             if c[i]: await self.run(self.resize, i+1); break
-    def __init_subclass__(cls, *, m, r, e):
+    def __init_subclass__(cls, *, m, r):
         @staticmethod
         async def run(f, /, *a, r=r): return await r(f, *a)
-        cls.mgr, cls.run, cls.exit, cls.open_files = m, run, staticmethod(lambda *_, e=e: e()), {}
+        cls.mgr, cls.run, cls.open_files = m, run, {}
 class MemoryMappedIOManager(LoopContextMixin):
     __slots__ = '_factory', '_lock'
     def __init__(self, executor=None, f=(File,), n=H.create_executor):
-        super().__init__(); self._factory, self._lock = type('_factory', f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor), e=self.exiter), Lock()
+        super().__init__(); self._factory, self._lock = type('_factory', f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor)), Lock()
     @property
     def open_mmaps(self): return self._factory.mgr
     def _run(self, f, /, *a): return self._factory.run(f, *a)

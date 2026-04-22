@@ -394,6 +394,8 @@ Submodules:
   - print_cmd_help
 
 - util
+  Context managers (ignore_*):
+  - ignore_cancellation
 
   Functions:
   - get_future

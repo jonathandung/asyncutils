@@ -87,31 +87,22 @@ async def merge(*I, reverse=False):
         if (c := await q.get()) is a: break
         yield c
 def aflatten(it): return achain.from_iterable(it).__aiter__()
-async def batch(it, size, *, timeout=None, strict=False):
+async def batch(it, n, *, item_timeout=None, strict=False):
     f, g, _ = iter_to_aiter(it).__anext__, (b := []).append, 0
     while True:
         try:
-            for _ in range(size):
-                try: g(await wait_for(f(), timeout))
+            for _ in range(n):
+                try: g(await wait_for(f(), item_timeout))
                 except StopAsyncIteration: break
                 except TimeoutError:
                     if b: break
             if b:
-                if strict and _ < size-1: raise ValueError('incomplete batch')
+                if strict and _ < n-1: raise ValueError('incomplete batch')
                 yield copy_and_clear(b)
         except CancelledError:
             if b: yield copy_and_clear(b)
             raise
-def achunked(it, n, strict=False):
-    I = aiter_from_f(partial(collect, it, n), [])
-    if strict:
-        if n is None: raise ValueError('n cannot be None when strict is True')
-        async def ret():
-            async for c in I:
-                if len(c) != n: raise ValueError('length of iterable is not divisible by n')
-                yield c
-        return ret()
-    return I
+def batch2(it, n, strict=False): return aiter_from_f(partial(collect, it, n, default=RAISE if strict else _NO_DEFAULT), [])
 async def asideeffect(f, it, /, *, size=None, before=None, after=None):
     try:
         if before is not None: before()
@@ -138,45 +129,45 @@ async def asideeffect(f, it, /, *, size=None, before=None, after=None):
 def asliced(seq, n, strict=False):
     I = atakewhile(None, (seq[i:i+n] async for i in acount(step=n)))
     if not strict: return I
-    async def ret():
+    async def r():
         async for s in I:
             if len(s) != n: raise ValueError(f'length of {seq!r} is not divisible by {n}')
             yield s
-    return ret()
-def buffer(it, maxsize=0, timeout=None, cooldown=0.1, *, loop=None):
+    return r()
+def buffer(it, maxsize=0, timeout=None, cooldown=0, *, loop=None):
     q = Queue(maxsize)
-    if loop is None: loop = get_loop_and_set()
-    async def producer():
-        try:
-            async for _ in it:
-                try: await wait_for(q.put(_), timeout)
-                except TimeoutError: break
-        finally: await c.aclose()
     async def consumer():
         try:
             while True:
                 try: yield await q.get(); q.task_done()
                 except QueueEmpty: await sleep(cooldown)
         finally: await safe_cancel(t)
-    t, c = loop.create_task(producer()), consumer(); return c
+    c = consumer()
+    async def producer():
+        try:
+            async for _ in iter_to_aiter(it):
+                try: await wait_for(q.put(_), timeout)
+                except TimeoutError: break
+        finally: await c.aclose()
+    if loop is None: loop = get_loop_and_set()
+    t = loop.create_task(producer()); return c
 async def asplitat(it, pred, maxsplit=-1, keep_sep=False):
-    I = iter_to_aiter(it)
+    I, f = iter_to_aiter(it), (b := []).append
     if not maxsplit: yield await to_list(I); return
-    b = []
     async for i in I:
         if pred(i):
             yield b
             if keep_sep: yield [i]
             if maxsplit == 1: yield await to_list(I); return
-            b = []; maxsplit -= 1
-        else: b.append(i)
+            f = (b := []).append; maxsplit -= 1
+        else: f(i)
     yield b
 async def batch_process(items, size, processor):
     async for b in batch(items, size): yield await processor(b)
 async def window(it, size, step=1):
     if not size >= 1 <= step: raise ValueError('size and step should both be >=1')
     b, c = deque(maxlen=size), 0
-    async for i in it:
+    async for i in iter_to_aiter(it):
         b.append(i)
         if len(b) == size:
             if not c%step: size, step = (yield tuple(b)) or (size, step)
@@ -197,8 +188,8 @@ async def _aextreme(it, key, default, cmp):
     async for i in I:
         if cmp(x := key(i), k): k, r = x, i
     return r
-def amax(it, *, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.gt)
-def amin(it, *, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.lt)
+def amax(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it[0] if len(it) == 1 else it, key, default, O.gt)
+def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it[0] if len(it) == 1 else it, key, default, O.lt)
 async def azip(*I, strict=False):
     I = tuple(map(iter_to_aiter, I))
     try:

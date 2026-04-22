@@ -10,7 +10,7 @@ from asyncio.tasks import eager_task_factory, ensure_future, run_coroutine_threa
 from asyncio.timeouts import timeout as _timeout
 from functools import partial, wraps
 from sys import audit
-_ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
+ignore_cancellation = IgnoreErrors(__import__('asyncio.exceptions', fromlist=('',)).CancelledError)
 def get_future(aw, loop=None):
     if loop is None: loop = get_loop_and_set()
     async def wrapper():

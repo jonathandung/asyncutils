@@ -1,4 +1,4 @@
-'''Classes that extend the functionality of :class:`asyncio.locks.Event` without inheriting from it.'''
+'''Classes that extend the functionality of :class:`~asyncio.locks.Event` without inheriting from it.'''
 from .mixins import EventMixin
 from _collections_abc import Generator
 from typing import Literal, overload
@@ -12,7 +12,7 @@ class SingleWaiterEventWithValue[T](EventMixin[T]):
     def get(self, default: T=...) -> T: '''Get the result of the event immediately if set, otherwise returning `default` if passed or throw :exc:`RuntimeError`.'''
 class EventWithValue[T](EventMixin[T]):
     '''An event that can store a value and maintains a history of past values.'''
-    def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of `maxhist` entries, which defaults to :const:`context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results are stored.'''
+    def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of `maxhist` entries, which defaults to :const:`context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results, are stored.'''
     @overload
     def set(self, value: None, *, strict: Literal[False]=...) -> None: ...
     @overload

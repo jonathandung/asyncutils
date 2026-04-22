@@ -70,7 +70,7 @@ class _await_later:
     def __getattr__(self, name, /): return getattr(self.aw, name)
     def __repr__(self): return f'<proxy at {id(self):#x} to awaitable at {id(self.aw):#x}>'
     def __setattr__(self, name, /): raise AttributeError('attribute aw is read-only' if name == 'aw' else f'cannot set attribute {name!r} through proxy')
-    def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass type of awaitable proxy')
+    def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass the type of proxies to awaitables')
 @H.subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict(deque), validator or (lambda _: True)

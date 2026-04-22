@@ -6,15 +6,16 @@ from typing import Any, Final, NamedTuple, final, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
 @final
 class Context(NamedTuple):
-    '''A :func:`collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is,
-    not loading :mod:`dataclasses`, which loads :mod:`inspect` and triggers a cascade of imports.
-    This class can technically be instantiated with positional arguments, but since the order of the fields are kept in alphabetical order of submodule
-    and new fields may be added in the future, only keyword arguments should be used to avoid subtle bugs.
-    For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed
-    by a concise description of what it configures.
-    Of course, this class is not related to instantiating a certain class, as in the :mod:`decimal` module, but rather a convenient way to store configuration
-    for the various utilities and patterns this library bundles, especially to dynamically get default values in function signatures.
-    The behaviour of this class as a tuple at runtime is an implementation detail.'''
+    '''A :func:`collections.namedtuple` storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses`
+    for :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
+    This class can technically be instantiated with positional arguments, but since the order of the fields are kept in alphabetical order of submodule and new fields may be added in the
+    future, only keyword arguments should be used to avoid subtle bugs.
+    For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what
+    it configures.
+    Of course, this class is not related to instantiating a certain class, as in the :mod:`decimal` module, but rather a convenient way to store configuration for the various utilities
+    and patterns this library bundles, especially to dynamically get default values in function signatures.
+    No documentation will be provided here. If you need to use any setting here, you can find usage in the docstrings of the relevant utilities that use that setting.
+    The behaviour of this class as a tuple at runtime is an implementation detail and should not be relied upon.'''
     CIRCUIT_BREAKER_DEFAULT_RESET: float = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
@@ -89,7 +90,7 @@ class Context(NamedTuple):
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
 class localcontext:
-    '''Context manager for temporarily setting the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same `new_ctx`.'''
+    '''Context manager for temporarily setting the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''
     @property
     def new_ctx(self) -> Context: '''The new context to be set on context manager entry.'''

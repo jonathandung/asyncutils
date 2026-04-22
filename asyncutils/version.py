@@ -80,14 +80,14 @@ class VersionInfo(str): # noqa: FURB189
 class VersionDelta(tuple):
     __slots__ = ()
     def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass VersionDelta')
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionDelta')
     def __neg__(self): return __class__(*map(int.__neg__, self))
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
-    if isinstance(o, VersionInfo): return o.parts
-    if isinstance(o, str): o = o.split('.')
-    elif isinstance(o, complex): o = o.real, o.imag, 0
-    if isinstance(o, int): o = o>>16, (o>>8)&m, o&m
-    elif isinstance(o, float):
+    if (T := type(o)) is VersionInfo: return o.parts
+    if T is str: o = o.split('.')
+    elif T is complex: o = o.real, o.imag, 0
+    if T is int: o = o>>16, (o>>8)&m, o&m
+    elif T is float:
         if (o := format(o, '.4f')) in s: return
         o, _ = o.split('.', 1); o = map(int, (o, _[:2], _[2:]))
     elif f := dispatch_normalizer(o, type):

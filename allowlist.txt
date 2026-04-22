@@ -8,10 +8,9 @@ asyncutils._internal.compat.Queue
 asyncutils._internal.compat.QueueEmpty
 asyncutils._internal.compat.QueueFull
 asyncutils._internal.compat.QueueShutDown
-asyncutils._internal.compat.apargs
+asyncutils._internal.compat.pargs
 asyncutils._internal.compat.partial
 asyncutils._internal.helpers.filter_out
-asyncutils._internal.initialize.Module
 asyncutils._internal.initialize.Module.__getattr__
 asyncutils._internal.log
 asyncutils._internal.patch.__all__
@@ -24,7 +23,7 @@ asyncutils._internal.patch.__all__
 (asyncutils\._internal\.py312\.__all__)?
 (asyncutils\._internal\.py313\.Placeholder)?
 (asyncutils\._internal\.py313\.__all__)?
-(asyncutils\._internal\.py313\.apargs)?
+(asyncutils\._internal\.py313\.pargs)?
 (asyncutils\._internal\.py313\.partial)?
 asyncutils._internal.types
 asyncutils.altlocks
@@ -80,6 +79,9 @@ asyncutils.constants
 asyncutils.constants.sentinel_base
 asyncutils.constants.sentinel_base.__new__
 asyncutils.context
+asyncutils.context.Context
+asyncutils.context.Context.__doc__
+asyncutils.context.Context.__new__
 asyncutils.context.localcontext.__init__
 asyncutils.events
 asyncutils.exceptions
@@ -158,7 +160,6 @@ asyncutils.locks
 asyncutils.locks.KeyedCondition.__class_getitem__
 (asyncutils\.locks\.LocksmithBase\.force)?
 asyncutils.locks.MultiCountDownLatch.__class_getitem__
-asyncutils.locks.PriorityRLock.__del__
 asyncutils.locks.PrioritySemaphore.__init__
 asyncutils.misc
 asyncutils.misc.gather_with_limited_concurrency

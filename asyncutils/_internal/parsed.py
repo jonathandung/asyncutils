@@ -1,4 +1,4 @@
-from .compat import apargs as j
+from .compat import pargs as j
 from .. import __version__ as V
 from ..constants import POSSIBLE_EXECUTORS as C
 import argparse as A
