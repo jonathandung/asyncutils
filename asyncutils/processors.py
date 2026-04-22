@@ -43,14 +43,14 @@ class BatchProcessor(LoopContextMixin):
     async def __cleanup__(self):
         if (f := self._flusher) is not None: await safe_cancel(f)
 class Bulkhead(LoopContextMixin):
-    __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdevt', '_sem'
+    __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdfut', '_sem'
     def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
         if max_concurrent <= 0: raise ValueError('max_concurrent must be positive')
         C = getcontext()
         if max_queue is None: max_queue = C.BULKHEAD_DEFAULT_MAX_QUEUE
         if max_rej is None: max_rej = C.BULKHEAD_DEFAULT_MAX_REJ
         if max_queue <= 0: raise ValueError('max_queue must be positive')
-        super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdevt, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, Event(), Event(), max_rej
+        super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdfut, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
         except QueueFull as e:
@@ -77,13 +77,13 @@ class Bulkhead(LoopContextMixin):
     @property
     def is_available(self): return bool(self.available_slots and self.available_qslots)
     @property
-    def is_shutdown(self): return self._sdevt.is_set()
+    def is_shutdown(self): return self._sdfut.done()
     @property
     def rejected(self): return self._rejected
     def wait_until_idle(self, timeout=None): return wait_for(self._mtevt.wait(), timeout)
-    def wait_for_shutdown(self, timeout=None): return wait_for(self._sdevt.wait(), timeout)
+    def wait_for_shutdown(self, timeout=None): return wait_for(self._sdfut, timeout)
     async def shutdown(self, timeout=None):
-        self._sdevt.set(); (h := (q := self._queue).shutdown)(); r = []
+        self._sdfut.set_result(None); (h := (q := self._queue).shutdown)(); r = []
         try:
             async with _timeout(timeout):
                 await self._mtevt.wait(); a = (s := self._sem).acquire

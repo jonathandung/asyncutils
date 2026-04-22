@@ -10,22 +10,28 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
 def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
-N, t = {}, lambda o, /: o if isinstance(o, type) else type(o)
+N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xFF
+def b(z): return ~z if (z := z<<1) < 0 else z
+def c(key, _=_, f=b): return (key := f(key))&_, key>>18, (key>>10)&_, key>>9&1
 @a
 class VersionInfo(str): # noqa: FURB189
     __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionInfo')
-    def __hash__(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y):
-        if (x := _(_(*self[:2]), self[2]))&1: x = ~x
-        x >>= 1; return x+(x > -2)
-    def shelve(self, path, little=False): open(path, 'wb').write((h := self.__hash__()).to_bytes((h.bit_length()>>3)+1, 'little' if little else 'big', signed=True)) # noqa: SIM115
+    def __hash__(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return (x := f(_(_(*self[:2]), self[2])))+(x > -2)
+    def shelve(self, path, key=5, _=_, g=c):
+        x, h, y, l = g(key); y ^= self.__hash__()
+        with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
-    def unshelve(cls, path, little=False): return cls.from_hash(int.from_bytes(open(path, 'rb').read(), 'little' if little else 'big', signed=True))
+    def unshelve(cls, path, key=5, _=_, g=c):
+        x, h, y, l = g(key)
+        with open(path, 'rb') as f:
+            if (r := f.read)(1)[0] != h: raise ValueError('bad key')
+            return cls.from_hash(int.from_bytes(((i+x)&_ for i in r()), 'little' if l else 'big', signed=True)^y)
     @classmethod
-    def from_hash(cls, c, /, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError('hash cannot be -1')):
+    def from_hash(cls, c, /, _=b, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError('hash cannot be -1')):
         if c == -1: raise e
-        b, c = f(~c if (c := (c-(c > -1))<<1) < 0 else c)
+        b, c = f(_(c-(c > -1)))
         return cls(*f(b), c)
     @classmethod
     def from_rep(cls, rep): return cls(rep.removeprefix('asyncutils v'))
@@ -68,9 +74,9 @@ class VersionInfo(str): # noqa: FURB189
     def next_major(self): return __class__(self[0]+1, 0)
     def change_sep(self, sep): return self.replace('.', sep)
     def __setattr__(self, name, value, /): raise AttributeError(f'attribute {name!r} cannot be set to {value!r} on {__class__.__name__} object')
-    def __int__(self):
+    def __int__(self, _=0x100):
         M, m, p = self
-        if not 0 <= p < 0x100 > m >= 0: raise OverflowError(f'cannot pack version {self} into an integer')
+        if not 0 <= p < _ > m >= 0: raise OverflowError(f'cannot pack version {self} into an integer')
         return p|m<<8|M<<16
     @property
     def is_unstable(self): return self[0] == 0
@@ -108,4 +114,4 @@ def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('_decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))
-del _, N, t, P, p, E, a
+del _, N, t, P, p, E, a, b, c

@@ -21,7 +21,7 @@ ignore_valerrs: Final[IgnoreErrors]
 '''Instance of :class:`exceptions.IgnoreErrors` that suppresses ValueError.'''
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., put_from: str=..., puttyp: type[R]=..., init_items: SupportsIteration[T]=[]) -> P[R, T]:
-    '''Returns a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
+    '''Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
     If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
     If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
     If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''

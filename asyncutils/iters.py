@@ -229,7 +229,7 @@ async def arepeat(elem, n=None):
     if n is None or n < 0:
         while True: yield elem
     else:
-        while n > 0: yield elem; n -= 1
+        while n: yield elem; n -= 1
 async def aaccumulate(it, func=O.add, *, initial=None):
     it = iter_to_aiter(it)
     if initial is None:
@@ -316,8 +316,8 @@ async def aziplongest(*its, fillvalue=None):
         yield tuple(v)
 def asumprod(p, q, /): return asum(amap(O.mul, p, q, strict=True))
 async def aconvolve(signal, kernel):
-    w = deque((0,), n := len(K := await to_tuple(areversed(kernel))))*n
-    async for x in achain(signal, arepeat(0, n-1)): w.append(x); yield await asumprod(K, w)
+    f = (w := deque((0,), n := len(K := await to_tuple(areversed(kernel))))*n).append
+    async for x in achain(signal, arepeat(0, n-1)): f(x); yield await asumprod(K, w)
 def atabulate(f, start=0, step=1, /, *, await_=False): return amap(f, acount(start, step), await_=await_)
 async def asum(it, start=0):
     async for i in iter_to_aiter(it): start += i
@@ -332,8 +332,8 @@ def atail(n, it, /):
     try: return aislice(it, max(0, len(it)-n), None)
     except TypeError:
         async def f():
-            d = deque(maxlen=n)
-            async for _ in iter_to_aiter(it): d.append(_)
+            g = (d := deque(maxlen=n)).append
+            async for _ in iter_to_aiter(it): g(_)
             for _ in d: yield _
         return f()
 def amultinomial(*c): return aprod(amap(M.comb, aaccumulate(c), c))
@@ -471,10 +471,11 @@ async def adistinctpermutations(it, r=None):
         R = amap(lambda i, E={k: acycle(v) for k, v in d.items()}: to_tuple(await anext(E[_]) for _ in i), a(sorted(map(I.index, I))), await_=True) # noqa: B008
     async for t in R: yield t
 async def auniquetoeach(*its):
-    p = await to_tuple(amap(to_tuple, its, await_=True))
-    async for _ in amap(partial(afilter, frozenset(i for i, j in Counter(await to_list(aflatten(map(frozenset, p)))).items() if j == 1).__contains__), p): yield _
+    p = frozenset(await to_list(amap(to_tuple, its, await_=True)))
+    for i, j in Counter(await to_list(aflatten(map(frozenset, p)))).items():
+        if j == 1 and i in p: yield i
 async def aderangements(it, r=None):
-    async for _ in acompress(apermutations(X := await to_tuple(it), r), amap(aall, amap(amap, arepeat(O.is_not), arepeat(Y := tuple(range(len(X)))), apermutations(Y, r)), await_=True)): yield _
+    async for _ in acompress(apermutations(X := await to_tuple(it), r), amap(aall, amap(partial(amap, O.is_not), arepeat(Y := tuple(range(len(X)))), apermutations(Y, r)), await_=True)): yield _
 def aintersperse(e, it, n=1):
     if n <= 0: raise ValueError('n must be positive')
     return aislice(ainterleave_stopearly(arepeat(e), it), 1, None) if n == 1 else aflatten(aislice(ainterleave_stopearly(arepeat((e,)), batch(it, n)), 1, None))
@@ -499,7 +500,7 @@ async def ainterleaverandomly(its, _=_randrange):
         except StopAsyncIteration: I[i] = I[-1]; del I[-1]; x -= 1
 async def acollapse(it, base_typ=(str, bytes), levels=None):
     if levels is None: levels = float('inf')
-    (S := deque()).appendleft((0, arepeat(iter_to_aiter(it), 1))); f, g = S.popleft, S.appendleft
+    (g := (S := deque()).appendleft)((0, arepeat(iter_to_aiter(it), 1))); f = S.popleft
     while S:
         l, n = N = f()
         if l > levels:
@@ -529,23 +530,23 @@ async def afirst(it, default=_NO_DEFAULT):
         async for i in it: return i
     except TypeError:
         for i in it: return i
-    if default is _NO_DEFAULT: raise ValueError('afirst() called on empty iterable without default value')
+    if default is _NO_DEFAULT: raise ValueError('iters.afirst called on empty iterable without default value')
     return default
 async def alast(it, default=_NO_DEFAULT, _=check_methods):
     try:
         if _(it, '__getitem__'): return it[-1]
         return (await to_list(it))[-1] if (f := getattr(it, '__reversed__', None)) is None else f().__next__()
     except (IndexError, TypeError, StopIteration, StopAsyncIteration):
-        if default is _NO_DEFAULT: raise ValueError('alast() called on empty iterable without default value') from None
+        if default is _NO_DEFAULT: raise ValueError('iters.alast called on empty iterable without default value') from None
         return default
 def anthorlast(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)
 def abeforeandafter(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
 async def anthcombination(it, r, idx):
-    if not 0 <= r <= (n := len(p := await to_tuple(it))): raise ValueError(f'r={r} is out of range')
+    if not 0 <= r <= (n := len(p := await to_tuple(it))): raise IndexError(f'iters.anthcombination: r={r} is out of range')
     c, k = 1, min(r, n-r)
     for i in range(1, k+1): c = c*(n-k+i)//i
     if idx < 0: idx += c
-    if idx < 0 or idx >= c: raise IndexError('inappropriate value of idx')
+    if idx < 0 or idx >= c: raise IndexError(f'iters.anthcombination: idx={idx} is out of range')
     while r:
         c, n, r = c*r//n, n-1, r-1
         while idx >= c: idx -= c; c, n = c*(n-r)//n, n-1
@@ -596,7 +597,7 @@ async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable
     else: _ = (r(2, n-1) for _ in range(64))
     return await aall(amap(partial(f, n), _))
 async def afactor(n, _=_littleprimes, F=_factor_pollard):
-    if n < 2: raise ValueError('afactor: no prime factors')
+    if n < 2: raise ValueError('iters.afactor: no prime factors')
     for p in _:
         while not n%p: yield p; n //= p
     if n < 2: return
@@ -608,21 +609,19 @@ async def arunningmedian(it, *, maxlen=None):
     if maxlen is None:
         r, l, h = iter_to_aiter(it).__aiter__().__anext__, [], []; from heapq import _heappush_max as a, heappush as b, _heappushpop_max as c # type: ignore
         while True: a(l, await r()); yield l[0]; b(h, c(l, await r())); yield (l[0]+h[0])/2
-    if (m := O.index(maxlen)) <= 0: raise ValueError('arunningmedian: window size should be positive')
+    if (m := O.index(maxlen)) <= 0: raise ValueError('iters.arunningmedian: window size should be positive')
     w, o = deque(), []; from bisect import bisect_left as b, insort_right as f
     async for i in iter_to_aiter(it):
         w.append(i); f(o, i)
         if (n := len(o)) > m: del o[b(o, w.popleft())]; n -= 1
         m = n>>1; yield o[m] if n&1 else (o[m-1]+o[m])/2
 async def arandomderangement(it, _=_randinst.shuffle):
-    s = await to_tuple(it)
-    if (l := len(s)) < 2:
-        if s: raise IndexError('arandomderangement: no derangements to choose from')
+    if (l := len(s := await to_tuple(it))) < 2:
+        if s: raise ValueError('iters.arandomderangement: no derangements to choose from')
         return ()
     i = tuple(p := list(range(l)))
-    while True:
-        _(p)
-        if not await aany(amap(O.is_, i, p)): return O.itemgetter(*p)(s)
+    while any(map(O.is_, i, p)): _(p)
+    return O.itemgetter(*p)(s)
 async def amatmul(M, N):
     M, N = map(iter_to_aiter, (M, N)); N = aprepend(t := await to_tuple(await anext(N)), N)
     async for i in batch(astarmap(asumprod, aproduct(M, atranspose(N)), True), len(t)): yield i
@@ -683,11 +682,11 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
     if setatend is not None: setatend.add_done_callback(lambda _: L.run_until_complete(gather(safe_cancel(c), safe_cancel_batch(r))))
     audit('asyncutils.iters.agetitems_from_indices', fullname(it)); return r
 async def aintersend(i1, i2):
-    audit('asyncutils.iters.aintersend', fullname(i1), fullname(i2)); a, b = await gather(anext(i1), anext(i2))
-    while True: yield a, b; a, b = await gather(i1.asend(b), i2.asend(a))
+    audit('asyncutils.iters.aintersend', fullname(i1), fullname(i2)); t = None, None; f, g = i1.asend, i2.asend
+    while True: yield (t := tuple(await gather(f(t[1]), g(t[0]))))
 async def asendstream(i1, i2):
-    audit('asyncutils.iters.asendstream', fullname(i1), fullname(i2))
-    async for v in iter_to_aiter(i2): yield await i1.asend(v)
+    audit('asyncutils.iters.asendstream', fullname(i1), fullname(i2)); f = i1.asend
+    async for v in iter_to_aiter(i2): yield await f(v)
 async def acat(first=None):
     audit('asyncutils.iters.acat', first)
     while True: first = yield first
@@ -704,7 +703,7 @@ async def _aguess(it, estlen, key, default, finish_event, cmp, f=_aextreme):
             if cmp(key(i), k): return i
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (f := (l := get_loop_and_set()).create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t, l=l: t.cancel() or stop_and_closer(l))
+        if not (finish_event is None or finish_event.is_set()): (t := (f := get_loop_and_set().create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); f(finish_event.wait()).add_done_callback(lambda _, t=t: t.cancel())
 def aguessmax(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.gt)
 def aguessmin(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.lt)
 async def apowersoftwo(*, init=1, init_shift=0):

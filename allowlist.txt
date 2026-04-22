@@ -37,6 +37,7 @@ asyncutils.base.aiter_to_iter
 asyncutils.base.collect
 asyncutils.base.event_loop.__del__
 asyncutils.base.iter_to_aiter
+asyncutils.base.sleep_forever
 asyncutils.base.take
 asyncutils.buckets
 asyncutils.buckets.LeakyBucket.__init__

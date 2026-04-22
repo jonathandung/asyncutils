@@ -23,7 +23,7 @@ class debugging:
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''
-def get_past_logs() -> str: '''Returns all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
+def get_past_logs() -> str: '''Return all stored logs as a string. Logs are only stored if asyncutils was started with -l MEMORY, otherwise an empty string is returned.'''
 debug: Final[debugging]
 '''A global instance of the :class:`debugging` context manager.'''
 silent: Final[bool]
