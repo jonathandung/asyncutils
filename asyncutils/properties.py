@@ -1,7 +1,7 @@
-from ._internal.compat import Placeholder, partial
-from ._internal.helpers import fullname, get_loop_and_set, subscriptable
-from ._internal.submodules import properties_all as __all__
-from .util import sync_await
+from asyncutils import sync_await
+from asyncutils._internal.compat import Placeholder, partial
+from asyncutils._internal.helpers import fullname, get_loop_and_set, subscriptable
+from asyncutils._internal.submodules import properties_all as __all__
 from asyncio.locks import Lock
 from weakref import WeakKeyDictionary
 @subscriptable

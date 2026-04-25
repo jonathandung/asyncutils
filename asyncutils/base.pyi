@@ -1,11 +1,11 @@
 '''The most useful and fundamental patterns and helpers core to this module and are therefore required by the :mod:`console` submodule, among many others.'''
 from ._internal.types import GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft, ValidExcType
-from _collections_abc import AsyncGenerator, AsyncIterable, AsyncIterator, Awaitable, Callable, Generator, Iterable, Iterator
+from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from types import TracebackType
 from typing import Any, ClassVar, Literal, NoReturn, Self, overload
-__all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_iter', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_aiter', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
+__all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 class event_loop: # noqa: N801
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
     _ENTERED: ClassVar[int]
@@ -26,19 +26,13 @@ class event_loop: # noqa: N801
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]=...) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
 @overload
-def iter_to_aiter[T, R](it: AsyncGenerator[T, R]) -> AsyncGenerator[T, R]: ...
+def iter_to_agen[T, R](it: AsyncGenerator[T, R], sentinel: T=...) -> AsyncGenerator[T, R]: ...
 @overload
-def iter_to_aiter[T, R](it: AsyncGenerator[T, R], sentinel: T) -> AsyncGenerator[T, R]: ...
+def iter_to_agen[T](it: AsyncIterable[T], sentinel: T=...) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[I: AsyncIterator[Any]](it: I) -> I: ...
+def iter_to_agen[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: ...
 @overload
-def iter_to_aiter[T](it: AsyncIterable[T], sentinel: T) -> AsyncGenerator[T]: ...
-@overload
-def iter_to_aiter[T](it: AsyncIterable[T]) -> AsyncIterator[T]: ...
-@overload
-def iter_to_aiter[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]: ...
-@overload
-def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]:
+def iter_to_agen[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=...) -> AsyncGenerator[T]:
     '''Convert the (async) iterable `it` to an async generator as non-blockingly as possible.
     If `it` is already an async iterator, it is returned as is.
     Values sent to the return async generator will be passed to the original.
@@ -47,13 +41,11 @@ def iter_to_aiter[T](it: Iterable[T], sentinel: T, *, use_existing_executor: boo
     an existing executor as created by previous calls specifying `create_executor=True` (default :const:`context.ITER_TO_AITER_DEFAULT_MAY_CREATE_EXECUTOR`) to
     advance the iterable, and fall back to blocking the event loop every step without an executor.'''
 @overload
-def aiter_to_iter[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
+def aiter_to_gen[T, R](ait: AsyncGenerator[T, R]) -> Generator[T, R]: ...
 @overload
-def aiter_to_iter[T](ait: AsyncIterable[T]) -> Generator[T]: ...
+def aiter_to_gen[T](ait: AsyncIterable[T]) -> Generator[T]: ...
 @overload
-def aiter_to_iter[I: Iterator[Any]](ait: I, *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> I: ...
-@overload
-def aiter_to_iter[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> Iterator[T]:
+def aiter_to_gen[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=...) -> Generator[T]:
     '''Convert an async iterable `ait` to a sync generator, or return the native iterator for the object if it is already a sync iterable.
     If the event loop is currently running and `use_futures` is `False` (default :const:`context.AITER_TO_ITER_DEFAULT_ALLOW_FUTURES`), raise :exc:`RuntimeError` to clarify that :class:`concurrent.futures.Future` must be used in this case, one future per item yielded, which is inefficient.'''
 def adisembowel[T](it: SupportsPop[T], /) -> AsyncGenerator[T]: '''Asynchronously disembowel an iterable from the right using its pop method and yield its items from right to left.'''
@@ -67,10 +59,10 @@ async def safe_cancel_batch[T](t: SupportsPop[Future[T]], *, callback: Callable[
     Afterwards, if `disembowel` is `True`, clear the iterable using its :meth:`pop` method repeatedly, falling back to :meth:`clear`.
     The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
     If `raising` is `True`, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
-async def collect[T](it: SupportsIteration[T], n: int=..., *, default: T|RaiseType=...) -> list[T]:
+async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> list[T]:
     '''Collect `n` items from the (async) iterable into a list and return that list.
-    When `n` is not passed, equivalent to :func:`iters.to_list` but slower.
-    Refer to :func:`iters.basic_collect` for a marginally faster variant that doesn't accept a default.
+    When `n` is not passed, equivalent to :func:`iters.to_list` but marginally slower.
+    Refer to :func:`iters.basic_collect` for a slightly faster variant that doesn't accept a default.
     If default is :const:`constants.RAISE` and there are less than `n` items to collect, throw :exc:`exceptions.ItemsExhausted`.
     When default is not passed, a warning is still emitted by the logger in that case.
     Otherwise, pad the behind of the list with copies of the default.'''

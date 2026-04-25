@@ -1,8 +1,6 @@
 # type: ignore
-from ._internal.submodules import rwlocks_all as __all__
-from . import context as C
-from .properties import coercedmethod
-from .queues import ignore_valerrs
+from asyncutils import coercedmethod, getcontext, ignore_valerrs
+from asyncutils._internal.submodules import rwlocks_all as __all__
 from _collections import deque
 from asyncio.locks import Condition, Lock
 from contextlib import asynccontextmanager
@@ -18,7 +16,7 @@ class Base:
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 class RWLock:
     __slots__ = '_wa',
-    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock)
+    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredRWLock if (getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else ReadPreferredRWLock)
     @coercedmethod
     class reader(Base):
         __slots__ = ()
@@ -33,6 +31,7 @@ class RWLock:
     def __init_subclass__(cls, /, **_):
         if not isinstance(getattr(cls, '__slots__', None), tuple): raise TypeError('__slots__ must be a tuple')
         if cls.__new__ is __class__.__new__: cls.__new__ = _rwlock_sub_new
+        super().__init_subclass__(**_)
 class ReadPreferredRWLock(RWLock):
     __slots__ = '_cm', '_readers'
     def setup(self): self._readers, self._cm, self._wa = 0, Lock(), Lock()
@@ -110,10 +109,10 @@ class FairRWLock(RWLock):
             async with C: self._wa = False; C.notify_all()
 class PriorityRWLock(RWLock):
     __slots__ = '_cond', '_count', '_ilock', '_qd', '_readers'
-    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (C.RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else FairPriorityRWLock)
+    def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else FairPriorityRWLock)
     def __init_subclass__(cls, /, **_):
         if getattr(cls, '__slots__', None) != (): raise TypeError('__slots__ must be an empty tuple')
-        cls.__new__ = _rwlock_sub_new
+        cls.__new__ = _rwlock_sub_new; super().__init_subclass__(**_)
     def setup(self): self._cond, self._count, self._ilock, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
     async def _push_item(self, priority, is_writer):
         async with self._ilock: self._count = (c := self._count)+1

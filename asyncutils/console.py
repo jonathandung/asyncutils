@@ -1,8 +1,10 @@
-from . import __version__ as V, config as C
-from ._internal import patch as P, running_console as R
-from ._internal.helpers import fullname
-from ._internal.submodules import console_all as __all__
+from asyncutils import __version__ as V, config as C
+from asyncutils._internal import patch as P, running_console as R
+from asyncutils._internal.helpers import fullname
+from asyncutils._internal.submodules import console_all as __all__
 import sys as S
+from asyncio import iscoroutine
+from asyncio.futures import _chain_future # type: ignore[import-not-found]
 from os import getenv as g
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
@@ -29,7 +31,7 @@ class ConsoleBase(B):
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
     def refresh(self):
         if not ((F := self._fut) is None or F.done()): F.cancel()
-    def __callback(self, fut, code, /, *, makef=type(refresh), corocheck=__import__('asyncio.coroutines', fromlist=_f).iscoroutine, futchain=__import__('asyncio.futures', fromlist=_f)._chain_future):
+    def __callback(self, fut, code, /, *, makef=type(refresh), corocheck=iscoroutine, futchain=_chain_future):
         try: c = makef(code, self.locals)()
         except SystemExit as e: return self.set_return_code(e)
         except BaseException as e: # noqa: BLE001
@@ -86,7 +88,7 @@ class ConsoleBase(B):
     def __repr__(self): return f'{fullname(self)}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
-    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False):
+    def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))):
         self.prehook(max_memerrs); S.audit(f'{fullname(self)}.run', id(self)); l = self._loop
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = S.stderr.write
@@ -94,9 +96,9 @@ class ConsoleBase(B):
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
                 except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
-                if always_install_completer or (h.__module__ == 'site' and h.__name__ == 'register_readline'):
-                    try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete) # noqa: SIM105
-                    except ImportError: ...
+                if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == 'register_readline'):
+                    try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete)
+                    except ImportError: w('Failed to install readline completer\n')
             elif h is not None: w('Removing sys.__interactivehook__ because it is not callable\n'); delattr(S, i)
             while True:
                 try: l.run_forever(); break
@@ -109,16 +111,19 @@ class ConsoleBase(B):
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode
     P.patch_method_signatures((interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
-class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as sync_await in this REPL, they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f: d.update(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or setattr(f := lambda m=m, /: m.update({k: v if (g := getattr(v, 'load', None)) is None else g() for k, v in m.items()}), '__qualname__', l := 'load_all') or setattr(f, '__name__', l) or d.update(__version__=v, load_all=f), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
+def _(d):
+    def load_all():
+        for k, v in d.items(): d[k] = v if (g := getattr(v, 'load', None)) is None else g()
+    return load_all
+class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as util.sync_await in this REPL, since they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{"running" if self.is_running else "idle"} asyncutils console at {id(self):#x}>'
     @property
     def is_running(self, _='User tampered with console-internal state!\n'): # noqa: PLR0206
         if not self._loop.is_running(): self._internal_is_running = False; return False
-        if self._internal_is_running^(b := R.get() is self):
-            if b: self._internal_is_running = True
-            else: self.set_return_code(1)
-            S.stderr.write(_); return False
-        return b
+        if self._internal_is_running == (b := R.get() is self): return b
+        if b: self._internal_is_running = True
+        else: self.set_return_code(1)
+        S.stderr.write(_); return False
     def _interact_hook(self, ps1, kcolor, reset, fcolor):
         super()._interact_hook(ps1, kcolor, reset, fcolor)
         if R.should_write_load_all(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
@@ -131,7 +136,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
         if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
         super().posthook()
-    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=32, _mn=S.intern('__callback')):
+    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=34, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         if b is None: return
         try:
@@ -142,4 +147,4 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))
-del _f, _s, g, C, V, B
+del _f, _s, g, C, V, B, _, iscoroutine

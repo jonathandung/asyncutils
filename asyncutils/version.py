@@ -1,6 +1,6 @@
-from . import exceptions as E
-from ._internal import patch as P
-from ._internal.submodules import version_all as __all__
+from asyncutils import exceptions as E
+from asyncutils._internal import patch as P
+from asyncutils._internal.submodules import version_all as __all__
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     a, i = (r := []).append, 0
     for i, j in enumerate(I):
@@ -37,7 +37,7 @@ class VersionInfo(str): # noqa: FURB189
     def from_rep(cls, rep): return cls(rep.removeprefix('asyncutils v'))
     @classmethod
     def get_current_version(cls, _=E.StateCorrupted):
-        from . import __version__ as V
+        from asyncutils import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
     def __round__(self, n=None, /): return __class__(self[:n])

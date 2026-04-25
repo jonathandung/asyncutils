@@ -1,5 +1,5 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, ToSyncFromLoopRV, TransientBlockFromLoopRV
+from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from asyncio.events import AbstractEventLoop
@@ -7,7 +7,7 @@ from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
+__all__ = 'aiter_from_f', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
@@ -39,3 +39,4 @@ def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any,
     Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.
     If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of :func:`transient_block` under the specified `loop`.'''
+def dualcontextmanager[T, **P](func: Callable[P, SupportsIteration[T]], /) -> Callable[P, DualContextManager[T]]: '''Convert a callable that returns an (async) iterable, usually an (async) generator function, over exactly one item, into a function returning a non-reusable sync- and async-compatible context manager. Essentially combines :func:`contextlib.contextmanager` and :func:`contextlib.asynccontextmanager` into one decorator.'''

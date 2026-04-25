@@ -51,12 +51,12 @@ this table take inspiration.
   * - asyncutils.base.safe_cancel_batch
     - ``ityp``: :class:`str`
     - Raised when :func:`asyncutils.base.safe_cancel_batch` is called on the (possibly async) iterable with exact type of name ``ityp``.
-  * - asyncutils.base.iter_to_aiter
+  * - asyncutils.base.iter_to_agen
     - ``tname``: :class:`str`
-    - Raised when :func:`asyncutils.base.iter_to_aiter` is called on an iterable of type with name ``tname``.
-  * - asyncutils.base.aiter_to_iter
+    - Raised when :func:`asyncutils.base.iter_to_agen` is called on an iterable of type with name ``tname``.
+  * - asyncutils.base.aiter_to_gen
     - ``tname``: :class:`str`
-    -  Raised when :func:`asyncutils.base.aiter_to_iter` is called on an async iterable of type with name ``tname``.
+    -  Raised when :func:`asyncutils.base.aiter_to_gen` is called on an async iterable of type with name ``tname``.
   * - asyncutils.buckets.TokenBucket
     - ``rate``: :class:`float`, ``capacity``: :class:`float`
     - Raised when :class:`asyncutils.buckets.TokenBucket` is instantiated, with ``rate`` being the token refill rate and ``capacity`` the maximum number of tokens.
@@ -86,7 +86,7 @@ this table take inspiration.
     - Raised when the :meth:`event_stream` method of :class:`asyncutils.channels.EventBus` is called. ``addr`` is the memory address of the instance, and ``event_type`` is the event type the stream was opened for or ``None`` for catch-all streams.
   * - asyncutils.cli.run
     - \
-    - Raised with no arguments when the command-line interface of this library is first invoked through the entry point ``[python [-m ]]asyncutils``, even if just asking for the version or help.
+    - Raised with no arguments when the command-line interface of this library is first invoked through the entry point ``asyncutils``, even if just asking for the version or help.
   * - asyncutils.compete.first_completed/start
     - ``ntasks``: :class:`int`
     - Raised when :func:`asyncutils.compete.first_completed` is called, with ``ntasks`` coroutines.

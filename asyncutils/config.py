@@ -1,8 +1,10 @@
-from ._internal import log as l, patch as P
-from ._internal.submodules import config_all as __all__
-from ._internal.unparsed import N
+__lazy_modules__ = frozenset(('asyncutils.exceptions',))
+from asyncutils._internal import log as l, patch as P
+from asyncutils._internal.submodules import config_all as __all__
+from asyncutils._internal.unparsed import N
+from asyncutils.exceptions import FaultyConfig
 import logging as L, sys as S
-if S._xoptions.get('asyncutils_run_as_main'): from ._internal.parsed import p; N.update(p.parse_args().__dict__); del p
+if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; N.update(p.parse_args().__dict__); del p
 def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
@@ -32,19 +34,18 @@ def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
     s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-def c(*a): from .exceptions import FaultyConfig; raise FaultyConfig(*a)
-def k(e, a=False, N=N, c=c):
+def k(e, a=False, N=N):
     if isinstance(x := N[e], str):
         try: return int(x, 0)
         except ValueError:
-            if a: c(e, str, int)
+            if a: raise FaultyConfig(e, str, int)
     return x
-def g(e, a=False, t=(str, int, bytes), c=c, k=k):
+def g(e, a=False, t=(str, int, bytes), k=k):
     if isinstance(x := k(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
-        try: x = x[2:-1].encode() # noqa: SIM105
+        try: x = x.encode()[2:-1] # noqa: SIM105
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
-    c(e, type(x), t)
+    raise FaultyConfig(e, type(x), t)
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
 silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
 match logging_to := g('log_to'):
@@ -108,4 +109,4 @@ def __getattr__(name, /, _=e, r=r):
     if name != '_randinst': r(name)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, c, l # noqa: F821
+del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, l # noqa: F821

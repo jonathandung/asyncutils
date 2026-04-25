@@ -1,22 +1,24 @@
-from ._internal import log
-from ._internal.helpers import fullname, get_loop_and_set
-from ._internal.submodules import func_all as __all__
-from . import context as C
-from .base import iter_to_aiter
-from .config import _randinst
-from .constants import _NO_DEFAULT, RAISE
-from .exceptions import CRITICAL, Critical, MaxIterationsError, RateLimitExceeded, wrap_exc
-from .util import ignore_cancellation, safe_cancel
-from asyncio.coroutines import iscoroutine
-from asyncio.exceptions import CancelledError
-from asyncio.locks import Lock
-from asyncio.tasks import eager_task_factory, sleep, wait_for
+__lazy_modules__ = frozenset(('asyncio', 'functools'))
+from asyncutils import Critical, MaxIterationsError, RateLimitExceeded, getcontext, iter_to_agen, safe_cancel, wrap_exc, CRITICAL, RAISE, ignore_cancellation
+from asyncutils.config import _randinst
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal import log
+from asyncutils._internal.helpers import fullname, get_loop_and_set
+from asyncutils._internal.submodules import func_all as __all__
+from asyncio import CancelledError, Lock, eager_task_factory, iscoroutine, sleep, wait_for
 from collections import deque, namedtuple
 from functools import partial, wraps
 from sys import audit, maxsize as I
 from time import perf_counter
+def acompose(*F, wrap_last=True):
+    async def composed(*a, **k):
+        if iscoroutine(r := next(I := reversed(F))(*a, **k)): r = await r
+        for f in I:
+            if iscoroutine(r := f(r)): r = await r
+        return r
+    return wraps(F[-1])(composed) if wrap_last else composed
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
-    async for _ in iter_to_aiter(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
+    async for _ in iter_to_agen(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
 def star(f, /):
     async def wrapper(a=(), k=None, /): return await f(*a, **(k or {}))
@@ -28,9 +30,9 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
-        if stop_when and stop_when.done(): log.warning('every: future to stop periodic coroutine %s is already done', n)
+        if stop_when and stop_when.done(): log.warning('func.every: future to stop periodic coroutine %s is already done', n)
         async def wrapper(*a, **k):
-            log.debug('every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
+            log.debug('func.every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
             if wait_first: await sleep(intvl)
             for _ in range(max_iterations):
@@ -42,13 +44,13 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    (log.error if verbose else log.warning)('every: error in periodic coroutine %s on iteration %d', n, _, exc_info=True)
+                    (log.error if verbose else log.warning)('func.every: error in periodic coroutine %s on iteration %d', n, _, exc_info=True)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    (log.info if verbose else log.debug)('every: future to stop periodic coroutine %s was cancelled on iteration %d', n, _, exc_info=True); stop_when = loop.create_future()
+                    (log.info if verbose else log.debug)('func.every: future to stop periodic coroutine %s was cancelled on iteration %d', n, _, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 T = n, max_iterations
@@ -57,13 +59,13 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
             if not q: return default
         return wraps(f)(wrapper)
     return dec
-def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='everymethod: periodic coroutine %s reached the maximum of %d iterations'):
+def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
         async def wrapper(self, /, *a, **k):
-            log.debug('everymethod: periodic task started'); q = default is _NO_DEFAULT
-            if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('everymethod: future to stop periodic coroutine %s is already done', n)
+            log.debug('func.everymethod: periodic task started'); q = default is _NO_DEFAULT
+            if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('func.everymethod: future to stop periodic coroutine %s is already done', n)
             if wait_first: await sleep(intvl)
             for _ in range(max_iterations):
                 t = timer()
@@ -74,13 +76,13 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
                         if stop_when.done(): return stop_when.result()
                         if verbose: raise
                         break
-                    (log.error if verbose else log.warning)('everymethod: error in periodic coroutine %s on iteration %d', n, _, exc_info=True)
+                    (log.error if verbose else log.warning)('func.everymethod: error in periodic coroutine %s on iteration %d', n, _, exc_info=True)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
                     if stop_on_exc:
                         if verbose: raise
                         break
-                    (log.info if verbose else log.debug)('everymethod: future to stop periodic coroutine %s was cancelled on iteration %d', n, _, exc_info=True); stop_when = loop.create_future()
+                    (log.info if verbose else log.debug)('func.everymethod: future to stop periodic coroutine %s was cancelled on iteration %d', n, _, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
                 T = n, max_iterations
@@ -90,21 +92,21 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
         return wraps(f)(wrapper)
     return dec
 def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=perf_counter, ns=False):
-    if precision is None: precision = C.TIMER_DEFAULT_PRECISION-ns*9
+    if precision is None: precision = getcontext().TIMER_DEFAULT_PRECISION-ns*9
     async def wrapper(*a, **k):
         s = timer()
         try:
             r = await f(*a, **k); e = timer()-s
-            if should_log: log.info('function %s executed in %.*f %sseconds.', fullname(f), precision, e, 'nano'*ns)
+            if should_log: log.info('func.timer: function %s executed in %.*f %sseconds.', fullname(f), precision, e, 'nano' if ns else '')
             return r, e
         except CRITICAL: raise Critical
         except expected as _:
             e = timer()-s
-            if should_log: log.warning('function %s encountered %s after %.*f %sseconds: %s', fullname(f), fullname(type(_)), precision, e, 'nano'*ns, _)
+            if should_log: log.warning('func.timer: function %s encountered expected error after %.*f %sseconds: %s', fullname(f), precision, e, 'nano' if ns else '', _, exc_info=True)
             return wrap_exc(_), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=(_ := lambda *_: None), on_success=_, random=_randinst.random):
-    c = C.getcontext()
+    c = getcontext()
     if tries is None: tries = c.RETRY_DEFAULT_TRIES
     if delay is None: delay = c.RETRY_DEFAULT_DELAY
     if backoff is None: backoff = c.RETRY_DEFAULT_BACKOFF
@@ -144,18 +146,25 @@ def debounce(wait):
             with ignore_cancellation: await l; return await f(*a, **k)
         return wraps(f)(wrapper)
     return dec
+def iterf(n, /):
+    def dec(f, /):
+        async def wrapper(x, /):
+            for _ in range(n): x = await f(x)
+            return x
+        return wraps(f)(wrapper)
+    return dec
 async def measure(f, timer=perf_counter): s = timer(); return await f(), timer()-s
 async def benchmark(f, /, times=None, warmup=None, *, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
-    c = C.getcontext()
+    c = getcontext()
     if times is None: times = c.BENCHMARK_DEFAULT_TIMES
     if warmup is None: warmup = c.BENCHMARK_DEFAULT_WARMUP
     for _ in range(warmup): await f()
     g = measure.__get__(f); audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [(await g())[1] for _ in range(times)]), max(t), S := sum(t), S/times, T)
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
-    def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=Lock, _=partial):
-        if period is None: return _(cls, calls=f, period=calls, raise_=raise_, timer=timer)
-        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), lock_impl(), int(calls), raise_, timer; return _
+    def __new__(cls, f, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):
+        if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
+        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, A, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
         async with self._lock: # type: ignore
@@ -167,5 +176,5 @@ class RateLimited:
                 await sleep(p()-d)
             T.append(n)
         return await f(*a, **k)
-    def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r})'
-del _, I, perf_counter, partial, Lock
+    def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r}, lock_impl={fullname(self._lock)})'
+del _, I, perf_counter

@@ -1,11 +1,9 @@
-from . import context
-from ._internal.submodules import events_all as __all__
-from .constants import RAISE
-from .exceptions import EventValueError, ref
-from .mixins import EventMixin
+__lazy_modules__ = frozenset(('asyncio', 'time'))
+from asyncutils import EventMixin, EventValueError, ref, getcontext
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal.submodules import events_all as __all__
 from _collections import deque # type: ignore[import-not-found]
-from asyncio.tasks import wait, wait_for
-from asyncio.timeouts import timeout as _timeout
+from asyncio import timeout as _timeout, wait, wait_for
 from time import monotonic
 class SingleWaiterEventWithValue(EventMixin):
     __slots__ = '_waiter',
@@ -19,15 +17,15 @@ class SingleWaiterEventWithValue(EventMixin):
         else: self._waiter = w = self.make_fut()
         try: return await wait_for(w, timeout)
         finally: self._waiter = None
-    def get(self, default=RAISE):
+    def get(self, default=_NO_DEFAULT):
         if (w := self._waiter) is None or not w.done():
-            if default is RAISE: raise EventValueError('no value is set')
+            if default is _NO_DEFAULT: raise EventValueError('no value is set')
             return default
         return w.result()
     clear = __init__ = lambda self: setattr(self, '_waiter', None)
 class EventWithValue(EventMixin):
     __slots__ = '_hist', '_value', '_waiters'
-    def __init__(self, *, maxhist=None): self._waiters, self._value, self._hist = set(), None, deque(maxlen=context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is None else maxhist)
+    def __init__(self, *, maxhist=_NO_DEFAULT): self._waiters, self._value, self._hist = set(), None, deque(maxlen=getcontext().EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is _NO_DEFAULT else maxhist)
     def _record_hist(self): self._hist.append((monotonic(), ref(self._value)))
     def set(self, value, *, strict=True):
         if value != self._value: self._value = value; self._record_hist()
@@ -40,9 +38,9 @@ class EventWithValue(EventMixin):
     def remove_done_waiters(self): (W := self._waiters).difference_update(filter(lambda w: w.done(), W))
     def set_once(self, value): v = self._value; self.set(value); self.set(v)
     def clear(self): self.set(None, strict=False)
-    def get(self, default=RAISE):
+    def get(self, default=_NO_DEFAULT):
         if (v := self._value) is None:
-            if default is RAISE: raise EventValueError('no value is set')
+            if default is _NO_DEFAULT: raise EventValueError('no value is set')
             return default
         return v
     async def wait_for_next(self, timeout=None):
@@ -55,7 +53,7 @@ class EventWithValue(EventMixin):
     @property
     def history_asdict(self): return {t: q for t, s in self._hist if (q := s()) is not None}
     def recent_history(self, duration=None):
-        if duration is None: duration = context.EVENT_WITH_VALUE_DEFAULT_RECENT
+        if duration is None: duration = getcontext().EVENT_WITH_VALUE_DEFAULT_RECENT
         x, I = monotonic()-duration, iter(self._hist)
         for t, _ in I:
             if t >= x: yield t, _; yield from I

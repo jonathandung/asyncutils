@@ -93,7 +93,7 @@ class PartialInterface(metaclass=PartialInterfaceMeta):
     def __getattr__(self, name: str, /) -> Any: ...
 @type_check_only
 class DumpType(Protocol):
-    '''Represents the type of simple json-dumping functions accepted by tools.argv_to_json and tools.argstr_to_json.'''
+    '''Represents the type of simple json-dumping functions accepted by :func:`tools.argv_to_json` and :func:`tools.argstr_to_json`.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
@@ -156,7 +156,7 @@ class P[R, T](Q[R, T], Protocol):
 class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both `get` and `put` are protected by passwords, which may or may not be the same.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
-    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`locks.RWLock` and subclasses thereof.'''
+    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`rwlocks.RWLock` and subclasses thereof.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> Coroutine[Any, Any, T]: ...
     def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: ...
     def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: ...
@@ -170,12 +170,15 @@ class EveryMethodFT[T, R](Protocol):
     def __call__(self, _: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
 @type_check_only
 class DecoratorFactoryRV(Protocol):
+    '''The return type of various decorator factories in :mod:`func`, including :func:`~func.debounce`, :func:`~func.throttle` and :func:`~func.debounce`.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
 @type_check_only
 class EveryRV[T](Protocol):
+    '''The return type of :func:`func.every`.'''
     def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
 @type_check_only
 class SubscriptionRV(Protocol):
+    '''Return type of :func:`channels.Observable.subscribe`, :func:`channels.Observable.subscribe_nowait` and :func:`channels.Observable.ntimes`.'''
     def __call__(self, strict: bool=...) -> None: ...
 @type_check_only
 class StateSnapshot(NamedTuple):
@@ -276,6 +279,19 @@ class TransientBlockFromLoopRV(Protocol):
     '''The signature of the return value of :func:`util.transient_block_from_loop`.'''
     def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
+class DualContextManager[T]:
+    '''Return type of :deco:`util.dualcontextmanager`.'''
+    def __enter__(self) -> T: ...
+    @overload
+    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
+    @overload
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool: ...
+    async def __aenter__(self) -> T: ...
+    @overload
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool: ...
+@type_check_only
 class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''
     def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the :mod:`asyncutils.constants` namespace.''' # type: ignore[override]
@@ -298,9 +314,9 @@ type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 '''Objects that support (async) iteration.'''
 type SupportsRichComparison = SupportsLT|SupportsGT
-'''Objects implementing the < or > operator.'''
+'''Objects implementing one of the operators < and >.'''
 type ValidExcType = type[BaseException]
-'''The type of exc_typ in :meth:`__exit__` and :meth:`__aexit__` methods.'''
+'''The type of `exc_typ` in :meth:`__exit__` and :meth:`__aexit__` methods.'''
 type Exceptable = ValidExcType|tuple[ValidExcType, ...]
 '''Objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]

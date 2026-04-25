@@ -1,16 +1,10 @@
-from ._internal.compat import PriorityQueue, Queue
-from ._internal.helpers import filter_out, fullname, subscriptable
-from ._internal.submodules import pools_all as __all__
-from .base import iter_to_aiter, aiter_to_iter, take
-from .constants import _NO_DEFAULT
-from .context import getcontext
-from .exceptions import CRITICAL, Critical, PoolError, PoolFull, PoolShutDown, exception_occurred, unwrap_exc, wrap_exc
-from .mixins import AsyncContextMixin, LoopBoundMixin, LoopContextMixin
-from .util import safe_cancel, sync_await
+from asyncutils import AsyncContextMixin, Critical, PoolError, LoopBoundMixin, LoopContextMixin, PoolFull, PoolShutDown, aiter_to_gen, exception_occurred, getcontext, iter_to_agen, safe_cancel, sync_await, take, unwrap_exc, wrap_exc, CRITICAL
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal.compat import PriorityQueue, Queue
+from asyncutils._internal.helpers import filter_out, fullname, subscriptable
+from asyncutils._internal.submodules import pools_all as __all__
 from _functools import partial # type: ignore[import-not-found]
-from asyncio.locks import Event, Lock, Semaphore
-from asyncio.tasks import gather, sleep, wait_for
-from asyncio.timeouts import timeout
+from asyncio import Event, Lock, Semaphore, gather, sleep, timeout, wait_for
 from itertools import count, starmap
 from sys import exc_info
 from threading import Thread, Lock as TLock
@@ -24,7 +18,7 @@ class Pool(LoopContextMixin):
     def __aiter__(self):
         async def consumer():
             try:
-                async for _ in iter_to_aiter(self._it): await self.process(_)
+                async for _ in iter_to_agen(self._it): await self.process(_)
             finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
         self._task = self.make(consumer()); return self
     async def __anext__(self):
@@ -88,7 +82,7 @@ class AdvancedPool(LoopContextMixin):
         self._put_nowait_priority(_priority_, (f, a, k, F := self.make_fut())); self.set_adjuster(); return F
     def revive(self): self.__init__(self._max, self._min, self._queue.maxsize, self._scaling, self._kill_at_exit)
     async def _kill_helper(self):
-        from .queues import ignore_qempty as C; f, g = (q := self._queue).get_nowait, q.task_done
+        from asyncutils import ignore_qempty as C; f, g = (q := self._queue).get_nowait, q.task_done
         with self._tlock, C:
             while True:
                 if (F := f()[2]) is not None: await safe_cancel(F[-1])
@@ -186,7 +180,7 @@ class ConnectionPool(LoopBoundMixin):
     @property
     def in_use(self): return len(self._in_use)
 class CallbackAccumulator(__import__('_collections').deque, AsyncContextMixin):
-    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_iter(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
+    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_gen(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
     def __enter__(self): return self

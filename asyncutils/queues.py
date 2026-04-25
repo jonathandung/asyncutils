@@ -1,19 +1,12 @@
-from . import exceptions as E
-from ._internal.compat import Placeholder, Queue, QueueEmpty, QueueFull, QueueShutDown, partial
-from ._internal.helpers import get_loop_and_set, fullname
-from ._internal.log import info
-from ._internal.submodules import queues_all as __all__
-from .base import collect, iter_to_aiter
-from .constants import _NO_DEFAULT
-from .context import getcontext
-from .futures import AsyncCallbacksFuture
-from .mixins import LoopBoundMixin
-from .util import safe_cancel, sync_await
+from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, getcontext, iter_to_agen, safe_cancel, sync_await
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial, Placeholder
+from asyncutils._internal.helpers import get_loop_and_set, fullname
+from asyncutils._internal.log import info
+from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque # type: ignore[import-not-found]
 from abc import ABCMeta, abstractmethod
-from asyncio.locks import Event
-from asyncio.tasks import gather, wait_for
-from asyncio.timeouts import timeout as _timeout
+from asyncio import Event, gather, timeout as _timeout, wait_for
 from contextlib import asynccontextmanager
 from itertools import count, starmap
 from sys import _getframe, audit, intern
@@ -63,7 +56,10 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not isinstance(pwd, puttyp): raise _.WrongPasswordType(pwd, type(pwd), q, puttyp)
         if pwd is not password_put and (strict or pwd != password_put): raise _.WrongPassword(q, pwd)
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
-    if priority: l, s = [], '_heapp%s_max'if lifo else 'heapp%s'; import heapq as M; g, p = (partial(getattr(M, s%_), l) for _ in ('op', 'ush'))
+    if priority:
+        if lifo: from asyncutils._internal import compat as M
+        else: import _heapq as M
+        g, p = partial(M.heappop, l := []), partial(M.heappush, l)
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     def full(): return 0 < maxsize <= len(l)
     async def get(*p):
@@ -130,7 +126,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     q = Q(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
         async def extend(f=partial(put, Placeholder, password_put)):
-            async for i in iter_to_aiter(init_items): await f(i)
+            async for i in iter_to_agen(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
     return q
 class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
@@ -166,7 +162,7 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     async def extend(self, it, timeout=None):
         info(f'extending {fullname(self)} with iterable {it!r}')
         async with _timeout(timeout):
-            async for i in iter_to_aiter(it): await self.smart_put(i)
+            async for i in iter_to_agen(it): await self.smart_put(i)
     def sync_put(self, item, *, timeout=None): return sync_await(self.smart_put(item, timeout=timeout), loop=self.loop)
     def sync_get(self, *, timeout=None, default=_NO_DEFAULT): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
@@ -291,8 +287,8 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
             with ignore_qempty:
                 while True: await q.smart_put((i, await self.get())); i += 1
         self.make(feed()); return q
-    def map_nowait(self, f, /): return self.loop.run_until_complete(gather(*map(f, self.peek_all())))
-    def starmap_nowait(self, f, /): return self.loop.run_until_complete(gather(*starmap(f, self.peek_all())))
+    def map_nowait(self, f, /): return sync_await(gather(*map(f, self.peek_all())), loop=self.loop)
+    def starmap_nowait(self, f, /): return sync_await(gather(*starmap(f, self.peek_all())), loop=self.loop)
     def filter_nowait(self, pred=bool, /):
         f, g = (k := []).append, (r := []).append
         with ignore_qempty:
@@ -335,7 +331,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q, n = await collect(I := iter_to_aiter(init_items), maxsize, __reti=True); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), n, q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
+    async def start(self, maxsize, init_items): q = await collect(I := iter_to_agen(init_items), maxsize); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)
@@ -347,7 +343,7 @@ class SmartPriorityQueue(PotentQueueBase):
 class UserPriorityQueue(SmartPriorityQueue):
     @classmethod
     def from_iter_of_tuples(cls, items, maxsize=0, _=SmartPriorityQueue): _.__init__(Q := object.__new__(cls), maxsize, init_items=items); Q.__tiebreak = count(); return Q
-    def __init__(self, maxsize=0, *, init_items=(), init_priority=0): self.__tiebreak = count(); super().__init__(maxsize, init_items=((init_priority, self._tiebreak, j) async for j in iter_to_aiter(init_items)))
+    def __init__(self, maxsize=0, *, init_items=(), init_priority=0): self.__tiebreak = count(); super().__init__(maxsize, init_items=((init_priority, self._tiebreak, j) async for j in iter_to_agen(init_items)))
     @property
     def _tiebreak(self): return next(self.__tiebreak)
     def put_nowait(self, item, priority=0): super().put_nowait((priority, self._tiebreak, item))

@@ -1,5 +1,6 @@
-from ._internal.helpers import copy_and_clear, fullname
-from ._internal.submodules import futures_all as __all__
+__lazy_modules__ = frozenset(('_contextvars', 'asyncutils._internal.helpers'))
+from asyncutils._internal.helpers import copy_and_clear, fullname
+from asyncutils._internal.submodules import futures_all as __all__
 from _contextvars import copy_context
 from asyncio.futures import Future, _PyFuture # type: ignore[import-not-found]
 from asyncio.tasks import Task, _PyTask, eager_task_factory # type: ignore[import-not-found]

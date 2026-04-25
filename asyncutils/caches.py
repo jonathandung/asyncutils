@@ -1,20 +1,14 @@
-from .context import getcontext
-from ._internal.submodules import caches_all as __all__
-from .base import event_loop
-from .exceptions import CRITICAL, Critical
-from .mixins import LoopContextMixin
-from .util import safe_cancel, to_async
-import collections as C
-from asyncio.coroutines import iscoroutine
-from asyncio.exceptions import CancelledError
-from asyncio.locks import Event, Lock
-from asyncio.tasks import gather, sleep
+__lazy_modules__ = frozenset(('asyncio', 'functools'))
+from asyncutils import CRITICAL, Critical, LoopContextMixin, event_loop, getcontext, safe_cancel, to_async
+from asyncutils._internal.submodules import caches_all as __all__
+from asyncio import CancelledError, Event, Lock, gather, iscoroutine, sleep
+from collections import defaultdict, namedtuple
 from functools import lru_cache, wraps
 from sys import audit
 from time import monotonic
 class CacheWithBackgroundRefresh(LoopContextMixin):
     __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_timer', '_ttl'
-    def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic, _=C.defaultdict):
+    def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic, _=defaultdict):
         C = getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
@@ -40,7 +34,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         if self._task is None: self._event.clear(); self._task = self.make(self.refresh_loop())
     async def __cleanup__(self):
         if self._task: self._event.set(); await safe_cancel(self._task); self._task = None
-    async def load_item(self, key, _=C.namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.caches')):
+    async def load_item(self, key, _=namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.caches')):
         _ = _(await self.get_loader(key)(key), self._timer(), False)
         async with self._lock: self._cache[key] = _
     async def refresh_item(self, key):
@@ -86,4 +80,4 @@ class AsyncLRUCache:
     def __del__(self): self._loopctx.__exit__(None, None, None)
     @property
     def loop(self): return self._loopctx.__enter__()
-del C
+del defaultdict, namedtuple

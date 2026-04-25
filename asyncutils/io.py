@@ -1,22 +1,14 @@
-from ._internal import helpers as H, patch as P
-from ._internal.submodules import io_all as __all__
-from . import context
-from .mixins import LoopContextMixin
-from .util import sync_await
-import sys as S
+from asyncutils import LoopContextMixin, getcontext, sync_await
+from asyncutils._internal import helpers as H, patch as P
+from asyncutils._internal.submodules import io_all as __all__
+import os as O, sys as S
 from _functools import partial # type: ignore[import-not-found]
-from asyncio.locks import Lock
-from asyncio.tasks import eager_task_factory, gather
+from asyncio import Lock, eager_task_factory, gather
 from contextlib import asynccontextmanager
 from itertools import starmap
 from mmap import mmap
-if not (m := S.modules.get('os')):
-    N = S.builtin_module_names
-    for n in ('nt', 'posix'):
-        if n in N: m = __import__(n); break
-    else: raise ImportError('cannot find pipe and fsync implementations')
-def f(a, b, m=m, f=S.audit, /):
-    def double_ended_pipe(*, pipe_impl=m.pipe, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
+def f(a, b, f=S.audit, _=O.pipe, /):
+    def double_ended_pipe(*, pipe_impl=_, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
     return double_ended_pipe
 _, I, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, S.maxsize, '*, pipe_impl={}'
 double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'), ('w', 'wb')))
@@ -68,11 +60,11 @@ class File(LoopContextMixin):
     def __iter__(self): return self._f.__iter__()
     async def __aiter__(self):
         for l in self._f: yield l
-    def __del__(self): self.loop.run_until_complete(self.aclose())
+    def __del__(self): sync_await(self.aclose(), loop=self.loop)
     @property
     def closed(self): return self._f.closed
     def fileno(self): return self._fn
-    def sync(self, _=m.fsync): self._flush(0, None); _(self._fn)
+    def sync(self, _=O.fsync): self._flush(0, None); _(self._fn)
     async def aclose(self): await gather(*map(self.run, (self.mmap.close, self._f.close)))
     def close(self): self.mmap.close(); self._f.close()
     def read_byte(self): return self.mmap.read_byte()
@@ -128,8 +120,8 @@ class File(LoopContextMixin):
         for _ in range(max_results):
             if (offset := await f(offset)) == -1: break
             yield offset
-    def search(self, pattern, offset=0, max_results=I): from .iters import to_list as f; return f(self.search_lazy(pattern, offset, max_results))
-    def search_nonoverlapping(self, pattern, offset=0, max_results=I): from .iters import to_list as f; return f(self.search_lazy_nonoverlapping(pattern, offset, max_results))
+    def search(self, pattern, offset=0, max_results=I): from asyncutils import to_list as f; return f(self.search_lazy(pattern, offset, max_results))
+    def search_nonoverlapping(self, pattern, offset=0, max_results=I): from asyncutils import to_list as f; return f(self.search_lazy_nonoverlapping(pattern, offset, max_results))
     async def compact(self):
         for i in range(len(c := await self.read())-1, -1, -1):
             if c[i]: await self.run(self.resize, i+1); break
@@ -168,7 +160,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def copy_file(self, srcp, destp):
         async with self.open(srcp) as src, self.create(destp) as dest: await dest.write(await src.read()); await dest.flush()
     async def checksum(self, path, alg=None):
-        async with self.open(path) as f: return __import__('hashlib').new(context.MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
+        async with self.open(path) as f: return __import__('hashlib').new(getcontext().MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
     async def approx_memory_usage(self):
         async with self._lock: return await self._run(lambda: sum(m.size() for m in self.open_mmaps))
     @asynccontextmanager
@@ -200,7 +192,7 @@ class MemoryMappedIOManager(LoopContextMixin):
         async with self.open(path) as f: await f.compact()
     async def bulk_read(self, file_offsets): return dict(await gather(*starmap(self._bulk_reader, file_offsets.items())))
     async def bulk_write(self, file_data): await gather(*starmap(self._bulk_writer, file_data.items()))
-    async def bulk_checksum(self, paths, alg=None): return dict(await gather(*map(partial(self._checksum_helper, context.MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg), paths)))
+    async def bulk_checksum(self, paths, alg=None): return dict(await gather(*map(partial(self._checksum_helper, getcontext().MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg), paths)))
     async def bulk_copy(self, pairs): await gather(*starmap(self.copy_file, pairs))
     async def bulk_resize(self, sizes): await gather(*starmap(self._resize_helper, sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))
@@ -208,4 +200,4 @@ class MemoryMappedIOManager(LoopContextMixin):
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
-del f, H, P, S, _, m, I, File
+del f, H, P, S, _, I, File, O

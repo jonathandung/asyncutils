@@ -1,8 +1,7 @@
-from ._internal import helpers as H
-from ._internal.submodules import compete_all as __all__
-from .base import aiter_to_iter, event_loop, safe_cancel_batch
-from .exceptions import CRITICAL, Critical
-from .util import new_tasks
+__lazy_modules__ = frozenset(('asyncutils',))
+from asyncutils import CRITICAL, Critical, event_loop, aiter_to_gen, safe_cancel_batch, new_tasks
+from asyncutils._internal import helpers as H
+from asyncutils._internal.submodules import compete_all as __all__
 import asyncio as A
 from asyncio.staggered import staggered_race
 from sys import audit, exc_info
@@ -38,10 +37,10 @@ async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, 
         return r
     finally: audit('asyncutils.compete.multi_winner_race_with_callback/end', L); await safe_cancel_batch(p, callback=loser)
 def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscoroutine, futwrap=A.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods):
-    if handle_iter is None: from .iters import to_list as handle_iter
-    if handle_aiter is None: from .iters import to_list as handle_aiter
-    if skip_invalid is None: from .context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid # noqa: N811
-    for i in aiter_to_iter(cfs, loop=loop):
+    if handle_iter is None: from asyncutils import to_list as handle_iter
+    if handle_aiter is None: from asyncutils import to_list as handle_aiter
+    if skip_invalid is None: from asyncutils.context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid # noqa: N811
+    for i in aiter_to_gen(cfs, loop=loop):
         if corocheck(i): yield i; continue
         try: i = futwrap(i, loop=loop) # noqa: PLW2901
         except CRITICAL: raise Critical

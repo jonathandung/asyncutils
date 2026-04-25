@@ -1,6 +1,6 @@
-from ._internal.helpers import subscriptable
-from ._internal.patch import patch_function_signatures
-from ._internal.submodules import exceptions_all as __all__
+from asyncutils._internal.helpers import subscriptable
+from asyncutils._internal.patch import patch_function_signatures
+from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 t, a = lambda _: True, lambda _: None
@@ -158,7 +158,7 @@ def __getattr__(name, /):
                     if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
                     c.__exit__(t, *_); return issubclass(t or object, Warning)
         case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
-            from ._internal.helpers import check_methods as c; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
+            from asyncutils._internal.helpers import check_methods as c; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
             def f(*_): a, b = map(frozenset, _); return map(tuple, (a-b, b-a))
             class IgnoreErrors:
                 __slots__ = 'but', 'exc'
@@ -173,7 +173,7 @@ def __getattr__(name, /):
                 def excluding(self, *O, f=f): A, B = f(self.exc, self._combine(O, True)); return type(self)(*A, exclude=B)
                 def combined(self, *O): return type(self)(*self._combine(O))
                 def _combine(self, O, /, e=False, c=c, _=__import__('itertools').chain): t = type(self); return _(self.but if e else self.exc, _.from_iterable((o,) if isinstance(o, type) else o.exc if isinstance(o, t) else o if c(o, '__iter__') else () for o in O))
-            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(CRITICAL), IgnoreErrors(Exception)
+            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(CRITICAL), IgnoreErrors()
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
     return globals()[name]

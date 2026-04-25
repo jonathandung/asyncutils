@@ -1,15 +1,5 @@
 asyncutils.__all__
 asyncutils.__main__
-asyncutils._internal.compat.__all__
-asyncutils._internal.compat.LifoQueue
-asyncutils._internal.compat.Placeholder
-asyncutils._internal.compat.PriorityQueue
-asyncutils._internal.compat.Queue
-asyncutils._internal.compat.QueueEmpty
-asyncutils._internal.compat.QueueFull
-asyncutils._internal.compat.QueueShutDown
-asyncutils._internal.compat.pargs
-asyncutils._internal.compat.partial
 asyncutils._internal.helpers.filter_out
 asyncutils._internal.initialize.Module.__getattr__
 asyncutils._internal.log
@@ -33,10 +23,10 @@ asyncutils.altlocks.DynamicThrottle.__init__
 asyncutils.altlocks.ResourceGuard.__exit__
 asyncutils.altlocks.StatefulBarrier.__init__
 asyncutils.base
-asyncutils.base.aiter_to_iter
+asyncutils.base.aiter_to_gen
 asyncutils.base.collect
 asyncutils.base.event_loop.__del__
-asyncutils.base.iter_to_aiter
+asyncutils.base.iter_to_agen
 asyncutils.base.sleep_forever
 asyncutils.base.take
 asyncutils.buckets
@@ -139,7 +129,6 @@ asyncutils.io.MemoryMappedIOManager.checksum
 asyncutils.iterclasses
 asyncutils.iterclasses.abucket.__class_getitem__
 asyncutils.iterclasses.achain.__class_getitem__
-asyncutils.iterclasses.achain.its
 asyncutils.iterclasses.apeekable.__class_getitem__
 asyncutils.iterclasses.apeekable.__getitem__
 asyncutils.iterclasses.apeekable.__init__
@@ -238,3 +227,5 @@ asyncutils.version.VersionInfo.__lt__
 asyncutils.version.VersionInfo.__ne__
 asyncutils.version.VersionInfo.__trunc__
 asyncutils.version.VersionInfo.replace_parts
+asyncutils.version.VersionInfo.shelve
+asyncutils.version.VersionInfo.unshelve

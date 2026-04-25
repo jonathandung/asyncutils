@@ -7,7 +7,7 @@ from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import Any, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_typical', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_typical', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: tuple[ValidExcType, ...]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
@@ -42,7 +42,7 @@ def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in
 def unwrap_exc(wrapper: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
 def exception_occurred(obj: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class Deadlock(BaseException):
-    '''Raised when a potential deadlock situation is noticed by this module.'''
+    '''Raised when a potential async deadlock situation is noticed by this module.'''
     def __init__(self, /, *args: str, noticer: Any=...): ...
     @property
     def noticer(self) -> Any: ...
@@ -108,10 +108,10 @@ class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut d
 class PoolError(RuntimeError): '''Raised when a task pool encounters a miscellaneous error.'''
 class PoolFull(PoolError): '''Raised when the task queue in a task pool is filled.'''
 class PoolShutDown(PoolError): '''Raised when submissions are sent to a shutting down pool.'''
-class BusError(RuntimeError): '''Raised when an operation on an event bus fails.'''
-class BusTimeout(BusError): '''Raised when an event bus takes too long to publish an event.'''
-class BusShutDown(BusError): '''Raised when subscription or publishing operations are called on an event bus that is closing down.'''
-class BusStatsError(BusError): '''Raised when attempting to access publishing statistics on an event bus whose statistics are not tracked.'''
+class BusError(RuntimeError): '''Raised when an operation on an :class:`~channels.EventBus` fails.'''
+class BusTimeout(BusError): '''Raised when an :class:`~channels.EventBus` takes too long to publish an event.'''
+class BusShutDown(BusError): '''Raised when subscription or publishing operations are called on an :class:`~channels.EventBus` that is closing down.'''
+class BusStatsError(BusError): '''Raised when attempting to access publishing statistics on an :class:`~channels.EventBus` whose statistics are not tracked.'''
 class CircuitBreakerError(RuntimeError): '''Base class for circuit breaker errors.'''
 class CircuitHalfOpen(CircuitBreakerError): '''Raised when a circuit exceeds its maximum calls in the half-open state.'''
 class CircuitOpen(CircuitBreakerError): '''Raised when a circuit is open in a :class:`~altlocks.CircuitBreaker` (but shouldn't be).'''
@@ -121,7 +121,7 @@ class MaxIterationsError(RuntimeError): '''Raised when a function has reached th
 class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
 class RateLimitExceeded(RuntimeError):
     '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
-    The initialization signature is considered an implementation detail. It may change without notice, and is therefore not documented here.'''
+    The initialization signature is considered an implementation detail, may change without notice, and is therefore not documented here.'''
     async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
@@ -202,8 +202,8 @@ class WarningToError:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]: ...
 ignore_all: IgnoreErrors
-'''Instance of :class:`IgnoreErrors` that ignores all errors.'''
+'''Instance of :class:`IgnoreErrors` that ignores all errors; that is, `IgnoreErrors(BaseException)`. Use with caution!'''
 ignore_noncritical: IgnoreErrors
-'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`.'''
+'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to `ignore_all.excluding(CRITICAL)`.'''
 ignore_typical: IgnoreErrors
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof. Equivalent to `IgnoreErrors()`.'''

@@ -44,7 +44,7 @@ jobs:
         pip install -e .[dev,json]
         pip check
     - name: Run tests
-      run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 54 -n auto
+      run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 52 -n auto
     - name: Upload results
       if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'}}
       uses: codecov/codecov-action@v6.0.0

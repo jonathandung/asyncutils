@@ -1,33 +1,32 @@
-from ._internal.helpers import LoopMixinBase, stop_and_closer, create_executor, fullname, get_loop_and_set, subscriptable
-from ._internal.submodules import mixins_all as __all__
-from .base import safe_cancel_batch
+__lazy_modules__ = frozenset(('asyncio',))
+from asyncutils import safe_cancel_batch
+from asyncutils._internal import helpers as H
+from asyncutils._internal.submodules import mixins_all as __all__
 from abc import ABCMeta, abstractmethod
-from asyncio.coroutines import iscoroutine
-from asyncio.events import _get_running_loop
-from asyncio.timeouts import timeout as _timeout
+from asyncio import _get_running_loop, iscoroutine, timeout as _timeout
 from functools import cached_property, partial
-class LoopContextMixin(LoopMixinBase):
+class LoopContextMixin(H.LoopMixinBase):
     __slots__ = 'exiter', 'loop', 'running_tasks'
-    def __init__(self): self.exiter, self.loop, self.running_tasks = stop_and_closer(l := get_loop_and_set()), l, set()
+    def __init__(self): self.exiter, self.loop, self.running_tasks = H.stop_and_closer(l := H.get_loop_and_set()), l, set()
     def make(self, coro): (_ := self.running_tasks).add(t := super().make(coro)); t.add_done_callback(_.discard); return t
     async def __setup__(self): ...
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(self.running_tasks); self.exiter()
-class LoopBoundMixin(LoopMixinBase):
+class LoopBoundMixin(H.LoopMixinBase):
     __slots__ = '_loop',
     @property
     def loop(self):
-        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
+        if (l := getattr(self, '_loop', None)) is None: self._loop = l = H.get_loop_and_set()
         elif l is not _get_running_loop(): raise RuntimeError('could not bind loop')
         return l
-@subscriptable
+@H.subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
     def __await__(self): yield from self.wait().__await__()
     @abstractmethod
     def wait(self): ...
-@subscriptable
+@H.subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     __slots__ = ()
     def __enter__(self): return self
@@ -35,21 +34,21 @@ class AsyncContextMixin(metaclass=ABCMeta):
     def __exit__(self, /, *_): ...
     async def __aenter__(self): return self.__enter__()
     async def __aexit__(self, /, *_): return self.__exit__(*_)
-@subscriptable
+@H.subscriptable
 class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     @cached_property
     def runner(self):
-        if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): l = get_loop_and_set()
-        return partial(l.run_in_executor, create_executor(self, False)) # type: ignore[attr-defined]
+        if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): self.loop = l = H.get_loop_and_set()
+        return partial(l.run_in_executor, H.create_executor(self, False)) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...
     async def __aenter__(self): return await self.runner(self.__enter__)
     async def __aexit__(self, /, *_): return await self.runner(self.__exit__, *_)
-@subscriptable
+@H.subscriptable
 class LockMixin(metaclass=ABCMeta):
     __slots__ = ()
-    def __init_subclass__(cls, *, _lock_factory=lambda _: None, **_): cls._lock_factory = _lock_factory
+    def __init_subclass__(cls, *, _lock_factory=lambda _: None, **_): cls._lock_factory = _lock_factory; super().__init_subclass__(**_)
     @abstractmethod
     async def acquire(self): ...
     @abstractmethod
@@ -62,7 +61,7 @@ class LockMixin(metaclass=ABCMeta):
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a
     def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
-@subscriptable
+@H.subscriptable
 class LockWithOwnerMixin(LockMixin):
     __slots__ = ()
     @property
@@ -71,9 +70,9 @@ class LockWithOwnerMixin(LockMixin):
     @abstractmethod
     def _release(self): ...
     def release(self):
-        if not self.is_owner: raise RuntimeError(f'{fullname(self)} is not acquired by current task')
+        if not self.is_owner: raise RuntimeError(f'{H.fullname(self)} is not acquired by current task')
         return self._release()
-@subscriptable
+@H.subscriptable
 class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
     __slots__ = ()
     @abstractmethod

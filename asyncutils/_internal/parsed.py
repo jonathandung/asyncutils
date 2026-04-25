@@ -1,8 +1,8 @@
-from .compat import pargs as j
-from .. import __version__ as V
-from ..constants import POSSIBLE_EXECUTORS as C
+from asyncutils import __version__ as V
+from asyncutils.constants import POSSIBLE_EXECUTORS as C
+from asyncutils._internal.compat import pargs as j
 import argparse as A
-i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='python [-m] asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
+i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
 On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line; this format differs from that described below.

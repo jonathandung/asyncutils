@@ -1,8 +1,12 @@
-'''Backport of :class:`functools.partial` that supports placeholders to python 3.13 or under.'''
-import sys
-if sys.version_info < (3, 14):
-    from functools import partial
-    from typing import Any, Final
-    __all__ = 'Placeholder', 'pargs', 'partial'
-    pargs: dict[str, Any]
-    Placeholder: Final[object]
+'''Backport of :class:`functools.partial` that supports placeholders and max-heap variants of :mod:`heapq` functions to python 3.13 or under.'''
+from functools import partial
+from typing import Any, Final
+from .types import SupportsRichComparison
+__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'pargs', 'partial'
+pargs: dict[str, Any]
+Placeholder: Final[object]
+def heapify(heap: list[SupportsRichComparison], /) -> None: ...
+def heappop[C: SupportsRichComparison](heap: list[C], /) -> C: ...
+def heappush[C: SupportsRichComparison](heap: list[C], item: C, /) -> None: ...
+def heappushpop[C: SupportsRichComparison](heap: list[C], item: C, /) -> C: ...
+def heapreplace[C: SupportsRichComparison](heap: list[C], item: C, /) -> C: ...

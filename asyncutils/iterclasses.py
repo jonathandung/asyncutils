@@ -1,10 +1,8 @@
-from ._internal import helpers as H
-from ._internal.submodules import iterclasses_all as __all__
-from .base import iter_to_aiter
-from .constants import _NO_DEFAULT
-from .mixins import LoopBoundMixin, LoopContextMixin
-from .util import sync_await
-import _heapq as Q
+__lazy_modules__ = frozenset(('_collections', '_functools'))
+from asyncutils import LoopBoundMixin, LoopContextMixin, iter_to_agen, sync_await
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal import helpers as H
+from asyncutils._internal.submodules import iterclasses_all as __all__
 from _collections import defaultdict, deque # type: ignore[import-not-found]
 from _functools import partial # type: ignore[import-not-found]
 from sys import audit, maxsize as INF
@@ -13,21 +11,21 @@ class anullcontext:
     async def __aexit__(*_): ...
 @H.subscriptable
 class achain:
-    __slots__ = 'its',
+    __slots__ = '_its',
     @classmethod
-    def from_iterable(cls, it_of_its): (self := super().__new__(cls)).its = it_of_its; return self
+    def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
         try:
-            async for i in iter_to_aiter(self.its):
+            async for i in iter_to_agen(self._its):
                 try:
-                    async for _ in iter_to_aiter(i): yield _
+                    async for _ in iter_to_agen(i): yield _
                 except RuntimeError: ...
         except RuntimeError: ...
 @H.subscriptable
 class apeekable(LoopBoundMixin):
     __slots__ = '_cache', '_it'
-    def __init__(self, it=()): self._it, self._cache = iter_to_aiter(it), deque(); super().__init__()
+    def __init__(self, it=()): self._it, self._cache = iter_to_agen(it), deque(); super().__init__()
     def __aiter__(self): return self
     def __bool__(self):
         try: sync_await(self.peek(), loop=self.loop); return True
@@ -50,16 +48,16 @@ class apeekable(LoopBoundMixin):
             elif c < 0: a, b = -1 if (_ := idx.start) is None else int(_), i if (_ := idx.stop) is None else int(_)
             else: raise ValueError('slice step cannot be zero')
             if a < 0 or b < 0:
-                async for _ in iter_to_aiter(self._it): f(_)
+                async for _ in iter_to_agen(self._it): f(_)
             elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
-                from .iters import aislice as g
+                from asyncutils import aislice as g
                 async for _ in g(self._it, d): f(_)
             return tuple(C)[a:b:c]
         l, idx = len(C), int(idx)
         if idx < 0:
-            async for _ in iter_to_aiter(self._it): f(_)
+            async for _ in iter_to_agen(self._it): f(_)
         elif idx >= l:
-            from .iters import aislice as s
+            from asyncutils import aislice as s
             async for _ in s(self._it, idx-l+1): f(_)
         return C[idx]
 class _await_later:
@@ -73,7 +71,7 @@ class _await_later:
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass the type of proxies to awaitables')
 @H.subscriptable
 class abucket(LoopContextMixin):
-    def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_aiter(it), key, defaultdict(deque), validator or (lambda _: True)
+    def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
     def __contains__(self, v):
         if not self._validator(v): return False
         try: self._cache[v].appendleft(_await_later(anext(self[v]))); return True
@@ -98,7 +96,7 @@ class online_sorter:
     __slots__ = '_it', '_loop', '_popper', '_pusher', '_runner'
     def __init__(self, it=()): audit('asyncutils.iterclasses.online_sorter'); self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
     def __aiter__(self):
-        if not hasattr(self, '_popper'): from .iters import to_list; F = __import__('concurrent.futures', fromlist=('',)).Future(); self._loop.create_task(to_list(self._it)).add_done_callback(lambda t: F.set_result(t.result())); Q.heapify(h := F.result()); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)
+        if not hasattr(self, '_popper'): from asyncutils import to_list; import _heapq as Q; F = __import__('concurrent.futures', fromlist=('',)).Future(); self._loop.create_task(to_list(self._it)).add_done_callback(lambda t: F.set_result(t.result())); Q.heapify(h := F.result()); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)
         return self
     async def __anext__(self): return await self._runner(self._popper)
     async def asend(self, item): return await self._runner(self._pusher, item)

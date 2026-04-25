@@ -10,7 +10,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-54% coverage, 51 tests
+52% coverage, 51 tests
 
 ### Docs
 
@@ -51,8 +51,8 @@ Submodules:
   - adisembowelleft
   - adisembowel
   - safe_cancel_batch
-  - iter_to_aiter
-  - aiter_to_iter
+  - iter_to_agen
+  - aiter_to_gen
   - collect
   - take
   - drop
@@ -188,6 +188,8 @@ Submodules:
   - PoolError
   - PoolFull
   - PoolShutDown
+  - Deadlock
+  - RateLimitExceeded
   - BusError
   - BusTimeout
   - BusShutDown
@@ -427,11 +429,20 @@ Submodules:
   - dispatch_normalizer
   - autogenerate_normalizers
 
-## [0.8.27] - 2026-04-21: newest; [unstable](https://semver.org/#spec-item-4)
+## [0.9.0] - 2026-04-27: newest; [unstable](https://semver.org/#spec-item-4)
+
+Add `__lazy_modules__` attribute to submodules where appropriate; marked python -m support as experimental; added some iteration, functional
+programming and context management utilities.
+
+## [0.8.28] - 2026-04-24
+
+Rewrote submodules loading mechanism; removed fragile relative imports; compressed asyncio and sibling imports to avoid overhead.
+
+## [0.8.27] - 2026-04-21
 
 Added more tests and fixed stubtest errors; abolished slow markdownlint step in pre-commit; various API additions.
 
-## [0.8.26] - 2026-04-18 (release skipped)
+## [0.8.26] - 2026-04-18
 
 Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
 
@@ -511,7 +522,7 @@ Created [GitHub repository](https://github.com/jonathandung/asyncutils.git); add
 
 ## [0.7.0] - 2026-02-09
 
-Implemented `channels.Rendezvous`; began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
+Began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
 
 ## [0.6.0] - 2026-01-1x
 
@@ -519,7 +530,8 @@ Completed migration from inline annotations to separated stubs; perfected `base.
 
 ## [0.5.0] - 2025-12-0x
 
-Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule; began separation of type annotations from .py into .pyi.
+Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule;
+began separation of type annotations from .py into .pyi.
 
 ## [0.4.0] - 2025-10-0x
 
@@ -535,7 +547,7 @@ Began reorganizing single file containing all functions into submodules.
 
 ## [0.1.0] - 2025-06-xx
 
-Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_aiter` and `base.sync_await`.
+Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `base.sync_await`.
 
 ## [0.0.0] - 2025-05-xx
 

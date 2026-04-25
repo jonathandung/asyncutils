@@ -81,11 +81,11 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
         `maxstate`: maximum length of state to store; older state will be expelled'''
     async def wait(self, state: T=..., *, timeout: float|None=...) -> tuple[int, deque[T]]:
         '''Note that the calling party is waiting for the barrier, optionally adding some state.
-        If the barrier has already been aborted or broken, raise :exc:`asyncio.exceptions.BrokenBarrierError`.
+        If the barrier has already been aborted or broken, raise :exc:`~asyncio.exceptions.BrokenBarrierError`.
         Once enough parties are waiting, all callers receive a tuple `(pos, states)`, where `states` is the deque of stored state
         and `pos` is the number of parties having arrived before this one.'''
-    async def abort(self) -> None: '''Abort the barrier, signalling :exc:`asyncio.exceptions.BrokenBarrierError` to present waiting parties.'''
-    def raise_for_abort(self) -> None: '''Throw :exc:`asyncio.exceptions.BrokenBarrierError` if the barrier has been aborted.'''
+    async def abort(self) -> None: '''Abort the barrier, signalling :exc:`~asyncio.exceptions.BrokenBarrierError` to present waiting parties.'''
+    def raise_for_abort(self) -> None: '''Throw :exc:`~asyncio.exceptions.BrokenBarrierError` if the barrier has been aborted.'''
     @property
     def broken(self) -> bool: '''Whether the barrier is broken.'''
     @property

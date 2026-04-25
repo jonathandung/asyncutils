@@ -1,17 +1,11 @@
-from ._internal.helpers import fullname
-from ._internal.submodules import altlocks_all as __all__
-from .base import iter_to_aiter
-from .config import _randinst
-from .constants import _NO_DEFAULT
-from .context import getcontext
-from .exceptions import CRITICAL, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical
-from .mixins import AsyncContextMixin, AwaitableMixin
+__lazy_modules__ = frozenset(('functools',))
+from asyncutils import AsyncContextMixin, AwaitableMixin, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical, getcontext, iter_to_agen, CRITICAL
+from asyncutils.config import _randinst
+from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal.helpers import fullname
+from asyncutils._internal.submodules import altlocks_all as __all__
 from _collections import deque # type: ignore[import-not-found]
-from asyncio.coroutines import iscoroutine
-from asyncio.exceptions import BrokenBarrierError
-from asyncio.locks import BoundedSemaphore, Condition, Lock
-from asyncio.tasks import sleep
-from asyncio.timeouts import timeout as _timeout
+from asyncio import BoundedSemaphore, BrokenBarrierError, Condition, Lock, iscoroutine, sleep, timeout as _timeout
 from functools import wraps
 from itertools import count
 from sys import audit
@@ -91,7 +85,7 @@ class StatefulBarrier(AwaitableMixin):
             async with _timeout(timeout), (C := self._cond):
                 self.raise_for_abort(); f = (S := self._state).append
                 if (s := self._initstate) is not None:
-                    async for _ in iter_to_aiter(s): f(_)
+                    async for _ in iter_to_agen(s): f(_)
                     self._initstate = None
                 self._count = (c := self._count)+1
                 if state is not None: f(state)

@@ -1,9 +1,9 @@
-from ._internal.parsed import p
-from ._internal.submodules import tools_all as __all__
+from asyncutils._internal.parsed import p
+from asyncutils._internal.submodules import tools_all as __all__
 import shlex as s
 ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
 def json_to_argv(p, /, *, d='.', c='json'):
-    from ._internal.helpers import fullname
+    from asyncutils._internal.helpers import fullname
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {fullname(p)} instead of str or bytes')
     if isinstance(p, bytes): p = p.decode()
     if not isinstance(p, int):

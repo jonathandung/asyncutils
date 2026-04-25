@@ -1,8 +1,7 @@
-from .context import getcontext
-from ._internal.submodules import buckets_all as __all__
-from .mixins import AsyncContextMixin, LoopBoundMixin
-from asyncio.locks import Lock
-from asyncio.tasks import sleep
+__lazy_modules__ = frozenset(('asyncio',))
+from asyncutils import AsyncContextMixin, LoopBoundMixin, getcontext
+from asyncutils._internal.submodules import buckets_all as __all__
+from asyncio import Lock, sleep
 from sys import audit
 from time import monotonic
 class TokenBucket:

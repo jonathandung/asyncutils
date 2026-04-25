@@ -1,23 +1,16 @@
-from ._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown
-from ._internal.helpers import copy_and_clear, fullname, subscriptable
-from ._internal.submodules import processors_all as __all__
-from .base import collect, iter_to_aiter, safe_cancel_batch
-from .context import getcontext
-from .exceptions import BulkheadFull, BulkheadShutDown
-from .mixins import LoopContextMixin
-from .util import safe_cancel
+from asyncutils import BulkheadFull, BulkheadShutDown, LoopContextMixin, collect, getcontext, iter_to_agen, safe_cancel
+from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown
+from asyncutils._internal.helpers import copy_and_clear, fullname, subscriptable
+from asyncutils._internal.submodules import processors_all as __all__
 from _functools import partial # type: ignore[import-not-found]
-from asyncio.exceptions import CancelledError
-from asyncio.locks import Event, Lock, Semaphore
-from asyncio.tasks import gather, sleep, wait_for
-from asyncio.timeouts import timeout as _timeout
+from asyncio import CancelledError, Event, Lock, Semaphore, sleep, timeout as _timeout, wait_for
 from time import monotonic
 @subscriptable
 class BoundedBatchProcessor:
     __slots__ = '_batch', '_processor', '_sem'
     def __init__(self, processor, batch=None, max_concurrent=None): C = getcontext(); self._processor, self._batch, self._sem = processor, C.BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE if batch is None else batch, Semaphore(C.BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT if max_concurrent is None else max_concurrent)
     async def process(self, items):
-        f, p, s = partial(collect, iter_to_aiter(items), self._batch), self._processor, self._sem
+        f, p, s = partial(collect, iter_to_agen(items), self._batch), self._processor, self._sem
         while b := await f():
             async with s: yield await p(b)
 @subscriptable
