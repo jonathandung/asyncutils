@@ -49,10 +49,10 @@ class UniqueResourceGuard(ResourceGuard):
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
 class CircuitBreaker:
     __slots__ = '_exc', '_half_open_calls', '_lock', '_max_fails', '_max_half_open_calls', '_opened', '_reset', '_unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
-    def __new__(cls, name, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
+    def __new__(cls, n, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
-        if callable(name) and (name := getattr(f := getattr(getattr(name, '__func__', name), '__wrapped__', name), '__qualname__', None)) is None is (name := getattr(f, '__name__', None)): name = _%cls._inc_cnt()
-        audit('asyncutils.altlocks.CircuitBreaker', name, max_fails); self, C = super().__new__(cls), getcontext(); self.name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._unlock, self._lock = name, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := Lock()), l; self._set(0); return self if f is None else self(f)
+        if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls._inc_cnt()
+        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); self, C = super().__new__(cls), getcontext(); self.name, self._max_fails, self._reset, self._exc, self._opened, self._half_open_calls, self._max_half_open_calls, self._unlock, self._lock = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), 0, C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := Lock()), l; self._set(0); return self if f is None else self(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def wrapper(*a, **k):

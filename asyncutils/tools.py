@@ -1,13 +1,13 @@
+from asyncutils._internal.helpers import fullname as _
 from asyncutils._internal.parsed import p
 from asyncutils._internal.submodules import tools_all as __all__
 import shlex as s
 ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
-def json_to_argv(p, /, *, d='.', c='json'):
-    from asyncutils._internal.helpers import fullname
-    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {fullname(p)} instead of str or bytes')
+def json_to_argv(p, /, *, d='.', c='json', e=_):
+    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {e(p)} instead of str or bytes')
     if isinstance(p, bytes): p = p.decode()
     if not isinstance(p, int):
-        if not isinstance(p, str): raise TypeError(f'path must be instance of str, bytes or int, not {fullname(p)}')
+        if not isinstance(p, str): raise TypeError(f'path must be instance of str, bytes or int, not {e(p)}')
         _, b, _ = p.rpartition(d)
         if b: c = _
         else: __import__('sys').stderr.write(f'json_to_argv: path {p!r} has no file extension; assuming .json\n')
@@ -27,7 +27,7 @@ def json_to_argstr(p, /, *, join=s.join): return join(json_to_argv(p))
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=p.parse_args):
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
-def get_cfg_json_format(): return __import__('importlib.resources', fromlist=('',)).files('asyncutils').joinpath('format.json5').read_text()
+def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
 def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
 def print_cmd_help(file=None): print(get_cmd_help(), file=file, flush=True)
-del p, s
+del p, s, _

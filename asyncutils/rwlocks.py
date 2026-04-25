@@ -108,14 +108,14 @@ class FairRWLock(RWLock):
         finally:
             async with C: self._wa = False; C.notify_all()
 class PriorityRWLock(RWLock):
-    __slots__ = '_cond', '_count', '_ilock', '_qd', '_readers'
+    __slots__ = '_cnt', '_cond', '_il', '_qd', '_readers'
     def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else FairPriorityRWLock)
     def __init_subclass__(cls, /, **_):
         if getattr(cls, '__slots__', None) != (): raise TypeError('__slots__ must be an empty tuple')
         cls.__new__ = _rwlock_sub_new; super().__init_subclass__(**_)
-    def setup(self): self._cond, self._count, self._ilock, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
+    def setup(self): self._cond, self._cnt, self._il, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
     async def _push_item(self, priority, is_writer):
-        async with self._ilock: self._count = (c := self._count)+1
+        async with self._il: self._cnt = (c := self._cnt)+1
         heappush(self._qd, E := (priority, *((is_writer, c) if isinstance(self, WritePreferredPriorityRWLock) else (c, is_writer)), self._cond._get_loop().create_future())); return E
     @asynccontextmanager
     async def reading(self, priority=0):

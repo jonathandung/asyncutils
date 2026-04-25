@@ -1,5 +1,5 @@
 _ = [None, False]
-def __getattr__(name, /): return getattr(get(), name)
+def __getattr__(n, /): return getattr(get(), n)
 def get(_=_): return _[0]
 def set(c, /, _=_): _[0] = c # noqa: A001
 def unset(_=_): _[0], r = None, _[0]; return r

@@ -103,10 +103,10 @@ class debugging:
 debug = debugging()
 if N.debug: debug.__enter__()
 l.debug('hi')
-__import__('atexit').register(lambda s=s, d=l.debug: None if s.closed else d('bye') or s.flush() or s.close())
-def r(name, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {name!r}")
-def __getattr__(name, /, _=e, r=r):
-    if name != '_randinst': r(name)
+__import__('atexit').register(lambda s=s, _=l.debug: None if s.closed else _('bye') or s.flush() or s.close())
+def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
+def __getattr__(n, /, _=e, r=r):
+    if n != '_randinst': r(n)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
 del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, l # noqa: F821

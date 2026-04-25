@@ -43,7 +43,7 @@ class ExceptionWrapper:
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
         (s := super().__new__(cls)).__exc = e; return s
-    def __getattr__(self, name, /): return getattr(self.__exc, name)
+    def __getattr__(self, n, /): return getattr(self.__exc, n)
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
 exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
@@ -91,7 +91,7 @@ class VersionNormalizerFault(VersionConversionError):
     def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(t(*a))
 class VersionCorrupted(VersionError, RuntimeError):
     def __init__(self, o, /, t='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._refo = ref(o); super().__init__(t%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
-    def __getattr__(self, name, /): return getattr(self.obj, name)
+    def __getattr__(self, n, /): return getattr(self.obj, n)
 class BulkheadError(RuntimeError): ...
 class BulkheadFull(BulkheadError): ...
 class BulkheadShutDown(BulkheadError): ...
@@ -146,8 +146,8 @@ class PasswordMissing(PasswordQueueError, TypeError):
     def __init_subclass__(cls, *, m): cls.__init__ = lambda self: BaseException.__init__(self, m) # type: ignore[assignment]
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
-def __getattr__(name, /):
-    match name:
+def __getattr__(n, /):
+    match n:
         case 'WarningToError':
             global WarningToError
             class WarningToError:
@@ -174,7 +174,7 @@ def __getattr__(name, /):
                 def combined(self, *O): return type(self)(*self._combine(O))
                 def _combine(self, O, /, e=False, c=c, _=__import__('itertools').chain): t = type(self); return _(self.but if e else self.exc, _.from_iterable((o,) if isinstance(o, type) else o.exc if isinstance(o, t) else o if c(o, '__iter__') else () for o in O))
             ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(CRITICAL), IgnoreErrors()
-        case str(): raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
-        case _: raise TypeError(f'unexpected non-string attribute name: {name!r}')
-    return globals()[name]
+        case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
+        case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
+    return globals()[n]
 del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception

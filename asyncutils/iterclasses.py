@@ -6,9 +6,6 @@ from asyncutils._internal.submodules import iterclasses_all as __all__
 from _collections import defaultdict, deque # type: ignore[import-not-found]
 from _functools import partial # type: ignore[import-not-found]
 from sys import audit, maxsize as INF
-class anullcontext:
-    async def __aenter__(self): ...
-    async def __aexit__(*_): ...
 @H.subscriptable
 class achain:
     __slots__ = '_its',
@@ -16,12 +13,8 @@ class achain:
     def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        try:
-            async for i in iter_to_agen(self._its):
-                try:
-                    async for _ in iter_to_agen(i): yield _
-                except RuntimeError: ...
-        except RuntimeError: ...
+        async for i in iter_to_agen(self._its):
+            async for _ in iter_to_agen(i): yield _
 @H.subscriptable
 class apeekable(LoopBoundMixin):
     __slots__ = '_cache', '_it'

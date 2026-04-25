@@ -232,6 +232,8 @@ Submodules:
 
   Functions:
   - areduce
+  - iterf
+  - acompose
   - every
   - everymethod
   - timer
@@ -268,7 +270,6 @@ Submodules:
 - iterclasses
 
   Classes:
-  - anullcontext (context manager)
   - achain
   - apeekable
   - abucket
@@ -396,8 +397,12 @@ Submodules:
   - print_cmd_help
 
 - util
+
   Context managers (ignore_*):
   - ignore_cancellation
+
+  Context manager classes:
+  - anullcontext
 
   Functions:
   - get_future
@@ -409,6 +414,7 @@ Submodules:
   - sync_lock
   - sync_lock_from_binder
   - lockf
+  - dualcontextmanager
   - semaphore
   - aiter_from_f
   - safe_cancel

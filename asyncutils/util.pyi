@@ -1,15 +1,23 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
+from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV, ValidExcType
 from .exceptions import IgnoreErrors
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
+from types import TracebackType
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
+__all__ = 'aiter_from_f', 'anullcontext', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
+class anullcontext: # noqa: N801
+    '''Simple async-only version of :class:`contextlib.nullcontext`, implemented here to avoid importing :mod:`contextlib`.'''
+    async def __aenter__(self) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     Critical exceptions are wrapped in :exc:`~exceptions.Critical`.

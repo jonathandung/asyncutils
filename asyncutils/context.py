@@ -20,7 +20,7 @@ class localcontext:
 class nonreusablelocalcontext(localcontext):
     __slots__ = ()
     def __exit__(self, /, *_): super().__exit__(*_); del self.new_ctx
-def __getattr__(name, /):
-    if name in all_contextual_consts: return getattr(getcontext(), name)
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+def __getattr__(n, /):
+    if n in all_contextual_consts: return getattr(getcontext(), n)
+    raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
 del _, f, r

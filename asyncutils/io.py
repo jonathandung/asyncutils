@@ -1,22 +1,26 @@
-from asyncutils import LoopContextMixin, getcontext, sync_await
+from asyncutils import LoopContextMixin, collect, getcontext, iter_to_agen, sync_await
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import io_all as __all__
 import os as O, sys as S
 from _functools import partial # type: ignore[import-not-found]
-from asyncio import Lock, eager_task_factory, gather
+from asyncio import Lock, gather
 from contextlib import asynccontextmanager
-from itertools import starmap
+from itertools import count, starmap
 from mmap import mmap
 def f(a, b, f=S.audit, _=O.pipe, /):
     def double_ended_pipe(*, pipe_impl=_, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
     return double_ended_pipe
-_, I, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, S.maxsize, '*, pipe_impl={}'
+_, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, '*, pipe_impl={}'
 double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'), ('w', 'wb')))
 P.patch_function_signatures(*((_, s) for _ in t))
 @H.subscriptable
 class AsyncReadWriteCouple(LoopContextMixin):
     __slots__ = 'executor', 'reader', 'writer'
-    def __init__(self, r, w, /): super().__init__(); self.loop.set_task_factory(eager_task_factory); self._init_executor(); self.reader, self.writer = r, w
+    def __init__(self, r, w, /, executor=None):
+        super().__init__()
+        if executor is None: self._init_executor()
+        else: self.executor = executor
+        self.reader, self.writer = r, w
     async def _run(self, f, *a): return await self.loop.run_in_executor(self.executor, f, *a)
     def read(self, n=-1, /): return self._run(self.reader.read, n)
     def readline(self, limit=-1, /): return self._run(self.reader.readline, limit)
@@ -36,13 +40,13 @@ class AsyncReadWriteCouple(LoopContextMixin):
     __cleanup__, _init_executor = aclose, H.create_executor
     @property
     def closed(self): return self.reader.closed and self.writer.closed
-    def __getattr__(self, name, /):
-        try: return getattr(self.reader, name)
+    def __getattr__(self, n, /):
+        try: return getattr(self.reader, n)
         except AttributeError as a:
-            try: return getattr(self.writer, name)
-            except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {name!r}', (a, b)) from None
+            try: return getattr(self.writer, n)
+            except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {n!r}', (a, b)) from None
 class File(LoopContextMixin):
-    __slots__ = '_f', '_fn', 'mmap'
+    __slots__ = '_f', '_fn', '_mmap'
     if S.platform != 'win32':
         def madvise(self, option, start=0, length=None, _=H.filter_out): return self.mmap.madvise(option, start, *_(length))
     def read(self, offset=0, size=-1): return self.run(self._read, offset, size)
@@ -50,48 +54,46 @@ class File(LoopContextMixin):
     async def readline(self, offset=0, size=None, incl_newline=False): return (await self.run(self._readline, offset, size, incl_newline))[0]
     async def readlines(self, hint=-1): return list(await self.run(self._readlines, hint))
     async def flush(self, offset=0, size=None, /): return await self.run(self._flush, offset, size)
-    def move(self, dest, src, count): return self.run(self._move, dest, src, count)
-    async def __setup__(self): self.mmap = m = mmap(self._fn, 0, access=2).__enter__(); self.mgr.add(m)
-    async def __cleanup__(self): await self.aclose(); self.mgr.discard(self.mmap)
-    def seek(self, pos, whence=0): return self.run(self.mmap.seek, pos, whence)
+    def move(self, dest, src, count): return self.run(self._mmap.move, dest, src, count)
+    async def __setup__(self): self._mmap = m = mmap(self._fn, 0, access=2).__enter__(); self.mgr.add(m)
+    async def __cleanup__(self): await self.aclose(); self.mgr.discard(self._mmap)
+    def seek(self, pos, whence=0): return self.run(self._mmap.seek, pos, whence)
     def __new__(cls, file, /):
         if (r := (f := cls.open_files.get)((file, 'r+b'))) is None is (r := f((file, 'w+b'))) is (r := f((file, 'x+b'))): (r := super().__new__(cls))._f, r._fn = file, file.fileno()
         return r
     def __iter__(self): return self._f.__iter__()
-    async def __aiter__(self):
-        for l in self._f: yield l
-    def __del__(self): sync_await(self.aclose(), loop=self.loop)
+    def __aiter__(self): return iter_to_agen(self._f)
+    def __del__(self): self.make(self.aclose())
     @property
     def closed(self): return self._f.closed
     def fileno(self): return self._fn
     def sync(self, _=O.fsync): self._flush(0, None); _(self._fn)
-    async def aclose(self): await gather(*map(self.run, (self.mmap.close, self._f.close)))
-    def close(self): self.mmap.close(); self._f.close()
-    def read_byte(self): return self.mmap.read_byte()
-    def write_byte(self, b, /): self.mmap.write_byte(b)
-    def resize(self, newsize): self.mmap.resize(newsize)
-    def find(self, sub, start=None, end=None, _=_): return self.mmap.find(sub, **_(start=start, end=end))
-    def rfind(self, sub, start=None, end=None, _=_): return self.mmap.rfind(sub, **_(start=start, end=end))
-    def tell(self): return self.mmap.tell()
-    def size(self): return self.mmap.size()
+    async def aclose(self): await gather(*map(self.run, (self._mmap.close, self._f.close)))
+    def close(self): self._mmap.close(); self._f.close()
+    def read_byte(self): return self._mmap.read_byte()
+    def write_byte(self, b, /): self._mmap.write_byte(b)
+    def resize(self, newsize): self._mmap.resize(newsize)
+    def find(self, sub, start=None, end=None, _=_): return self._mmap.find(sub, **_(start=start, end=end))
+    def rfind(self, sub, start=None, end=None, _=_): return self._mmap.rfind(sub, **_(start=start, end=end))
+    def tell(self): return self._mmap.tell()
+    def size(self): return self._mmap.size()
     def isatty(self): return self._f.isatty()
     readable = writable = seekable = lambda _, /: True
-    def _flush(self, offset, size, _=H.filter_out): self._f.flush(); self.mmap.flush(offset, *_(size))
-    def _move(self, dest, src, count): self.mmap.move(dest, src, count)
-    def _trunc_from(self, data, offset): c = (m := self.mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
-    def _read(self, offset, size): return self.mmap[offset:None if size < 0 else offset+size]
-    def _write(self, data, offset): (m := self.mmap)[offset:self._trunc_from(data, offset)] = data; m.flush()
-    def _readline(self, offset, size, incl_newline): return (b'', 0) if offset >= (l := len(m := self.mmap)) else (m[offset:(q := p if (e := m.find(b'\n', offset, p := (l if size is None else min(offset+size, l)))) == -1 else e+incl_newline)], q)
+    def _flush(self, offset, size, _=H.filter_out): self._f.flush(); self._mmap.flush(offset, *_(size))
+    def _trunc_from(self, data, offset): c = (m := self._mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
+    def _read(self, offset, size): return self._mmap[offset:None if size < 0 else offset+size]
+    def _write(self, data, offset): (m := self._mmap)[offset:self._trunc_from(data, offset)] = data; m.flush()
+    def _readline(self, offset, size, incl_newline): return (b'', 0) if offset >= (l := len(m := self._mmap)) else (m[offset:(q := p if (e := m.find(b'\n', offset, p := (l if size is None else min(offset+size, l)))) == -1 else e+incl_newline)], q)
     def _readlines(self, hint, /):
-        if hint < 0: yield from map(bytes, self.mmap)
-        else:
-            while hint > 0: b, n = self._readline(0, hint, False); yield b; hint -= n
+        if hint < 0: yield from map(bytes, self._mmap); return
+        f = self._readline
+        while hint > 0: b, n = f(0, None, False); yield b; hint -= n
     async def writelines(self, lines, /, *, sep=b''):
         f = self.write
         for l in lines: await f(l+sep)
     async def read_str(self, offset=0, size=-1, encoding='utf-8', errors='strict'): return (await self.read(offset, size)).decode(encoding, errors)
     def write_str(self, text, offset=0, encoding='utf-8', errors='strict'): return self.write(text.encode(encoding, errors), offset)
-    def smart_write(self, data, offset=0): return self.write(data.encode('utf-8', 'replace') if isinstance(data, str) else data, offset)
+    def smart_write(self, data, offset=0, encoding='utf-8', errors='strict'): return self.write(data.encode(encoding, errors) if isinstance(data, str) else data, offset)
     async def copy_range(self, src_offset, dest_offset, size):
         try: await self.write(await self.read(src_offset, size), dest_offset); return True
         except: return False # noqa: E722
@@ -101,27 +103,27 @@ class File(LoopContextMixin):
     async def read_until(self, delim, offset=0, maxsize=-1): return (d, offset+len(d)) if (p := (d := await self.read(offset, maxsize)).find(delim)) == -1 else (d[:p+(l := len(delim))], offset+p+l)
     async def insert(self, data, offset): await self.write(data if offset > await self.run(self.size) else data+await self.read(offset), offset)
     async def delete(self, offset, size):
-        if size <= 0 or offset >= (s := await self.run(self.mmap.size)): return
+        if size <= 0 or offset >= (s := await self.run(self._mmap.size)): return
         if (t := offset+size) < s: await self.write(await self.read(t), offset)
         await self.run(self.resize, max(0, s-size))
-    async def replace(self, old, new, offset=0, count=I):
-        r, c, o, n, f, g, h = 0, offset, len(old), len(new), partial(self.run, self.find, old), self.delete, self.insert
-        while r < count:
+    async def replace(self, old, new, offset=0, count=None):
+        r, c, o, n, f, g, h, b = 0, offset, len(old), len(new), partial(self.run, self.find, old), self.delete, self.insert, count is None
+        while b or r < count:
             if (p := await f(c)) == -1: break
             await g(p, o); await h(new, p); r += 1; c = p+n
         return r
-    async def search_lazy(self, pattern, offset=0, max_results=I):
+    async def search_lazy(self, pattern, offset=0):
         f = partial(self.run, self.find, pattern)
-        for c in range(offset, offset+max_results):
+        for c in count(offset):
             if (p := await f(c)) == -1: break
             yield p
-    async def search_lazy_nonoverlapping(self, pattern, offset=0, max_results=I):
+    async def search_lazy_nonoverlapping(self, pattern, offset=0):
         f = partial(self.run, self.find, pattern)
-        for _ in range(max_results):
+        while True:
             if (offset := await f(offset)) == -1: break
             yield offset
-    def search(self, pattern, offset=0, max_results=I): from asyncutils import to_list as f; return f(self.search_lazy(pattern, offset, max_results))
-    def search_nonoverlapping(self, pattern, offset=0, max_results=I): from asyncutils import to_list as f; return f(self.search_lazy_nonoverlapping(pattern, offset, max_results))
+    def search(self, pattern, offset=0, max_results=None): return collect(self.search_lazy(pattern, offset), max_results)
+    def search_nonoverlapping(self, pattern, offset=0, max_results=None): return collect(self.search_lazy_nonoverlapping(pattern, offset), max_results)
     async def compact(self):
         for i in range(len(c := await self.read())-1, -1, -1):
             if c[i]: await self.run(self.resize, i+1); break
@@ -157,12 +159,15 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def __cleanup__(self):
         async with self._lock: self.open_mmaps.clear(); await gather(*(f.close() for f in self.open_files.values())); del self.open_files
     def __del__(self): sync_await(self.__cleanup__(), loop=(l := self.loop)); l.stop(); l.close()
-    async def copy_file(self, srcp, destp):
-        async with self.open(srcp) as src, self.create(destp) as dest: await dest.write(await src.read()); await dest.flush()
+    async def copy_file(self, srcp, destp, *, flush=False):
+        async with self.open(srcp) as src, self.create(destp) as dest:
+            await dest.write(await src.read())
+            if flush: await dest.flush()
     async def checksum(self, path, alg=None):
         async with self.open(path) as f: return __import__('hashlib').new(getcontext().MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
     async def approx_memory_usage(self):
-        async with self._lock: return await self._run(lambda: sum(m.size() for m in self.open_mmaps))
+        async with self._lock: return await self._run(self._memusage_helper)
+    def _memusage_helper(self): return sum(m.size() for m in self.open_mmaps)
     @asynccontextmanager
     async def prefetch_files(self, *P, init_size=0, _=S.exc_info):
         try: l = tuple(map(partial(self.open, init_size=init_size), P)); yield await gather(*(c.__aenter__() for c in l))
@@ -177,7 +182,9 @@ class MemoryMappedIOManager(LoopContextMixin):
         a = (r := []).append
         async with self.open(path) as f:
             f = f.read
-            for o, s in offsets: a(await f(o, s))
+            if offsets is None: a(await f())
+            else:
+                for o, s in offsets: a(await f(o, s))
         return path, r
     async def _bulk_writer(self, path, data):
         async with self.open(path) as f: await gather(*starmap(f.write, data))
@@ -196,8 +203,8 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def bulk_copy(self, pairs): await gather(*starmap(self.copy_file, pairs))
     async def bulk_resize(self, sizes): await gather(*starmap(self._resize_helper, sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))
-    async def find_in_files(self, pattern, paths, max_per_file=I, *, allow_overlapping=False):
+    async def find_in_files(self, pattern, paths, max_per_file=None, *, allow_overlapping=False):
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
-del f, H, P, S, _, I, File, O
+del f, H, P, S, _, File, O

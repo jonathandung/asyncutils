@@ -9,37 +9,49 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     else: r.extend(0 for _ in range(2-i))
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
-def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3))): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; return c
+def r(c, /, _='cannot subclass asyncutils.version.%s'):
+    def f(_=TypeError(_%c.__name__)): raise _
+    return f
+def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3)), _=r): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c.__init_subclass__ = _(c); return c
 N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xFF
 def b(z): return ~z if (z := z<<1) < 0 else z
 def c(key, _=_, f=b): return (key := f(key))&_, key>>18, (key>>10)&_, key>>9&1
+@a
+class VersionDelta(tuple):
+    __slots__ = ()
+    def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionDelta')
+    def __neg__(self): return __class__(*map(int.__neg__, self))
 @a
 class VersionInfo(str): # noqa: FURB189
     __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionInfo')
-    def __hash__(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return (x := f(_(_(*self[:2]), self[2])))+(x > -2)
+    def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
+    def __hash__(self): return (x := self._hash())+(x > -2)
     def shelve(self, path, key=5, _=_, g=c):
-        x, h, y, l = g(key); y ^= self.__hash__()
+        x, h, y, l = g(key); y ^= self._hash()
         with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
     def unshelve(cls, path, key=5, _=_, g=c):
         x, h, y, l = g(key)
         with open(path, 'rb') as f:
             if (r := f.read)(1)[0] != h: raise ValueError('bad key')
-            return cls.from_hash(int.from_bytes(((i+x)&_ for i in r()), 'little' if l else 'big', signed=True)^y)
+            return cls._unhash(int.from_bytes(((i+x)&_ for i in r()), 'little' if l else 'big', signed=True)^y)
     @classmethod
-    def from_hash(cls, c, /, _=b, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y), e=E.VersionValueError('hash cannot be -1')):
-        if c == -1: raise e
-        b, c = f(_(c-(c > -1)))
-        return cls(*f(b), c)
+    def from_hash(cls, hashed, _=E.VersionValueError('hash cannot be -1')):
+        if hashed == -1: raise _
+        return cls._unhash(hashed-(hashed > -1))
+    @classmethod
+    def _unhash(cls, c, /, _=b, f=lambda z, f=__import__('math').isqrt: (x, y) if (x := z-(y := f(z))*y) < y else (y, x-y)): b, c = f(_(c)); return cls(*f(b), c)
     @classmethod
     def from_rep(cls, rep): return cls(rep.removeprefix('asyncutils v'))
     @classmethod
-    def get_current_version(cls, _=E.StateCorrupted):
+    def get_current_version(cls, _=E.StateCorrupted('module-internal', 'asyncutils.__version__ is inconsistent with expectations')):
         from asyncutils import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
-        raise _('module-internal', 'asyncutils.__version__ is inconsistent with expectations')
+        raise _
+    def is_current_version(self): return __class__.get_current_version() == self
     def __round__(self, n=None, /): return __class__(self[:n])
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
@@ -82,12 +94,6 @@ class VersionInfo(str): # noqa: FURB189
     def is_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
     representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
-@a
-class VersionDelta(tuple):
-    __slots__ = ()
-    def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionDelta')
-    def __neg__(self): return __class__(*map(int.__neg__, self))
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
@@ -114,4 +120,4 @@ def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('_decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))
-del _, N, t, P, p, E, a, b, c
+del _, N, t, P, p, E, a, b, c, r

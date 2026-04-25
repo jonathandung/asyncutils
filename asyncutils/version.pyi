@@ -16,20 +16,18 @@ class VersionInfo(str): # noqa: FURB189
         '''A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
         Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64 bits), the
         reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
-    @classmethod
-    def from_hash(cls, hashed: int, /) -> Self: '''Reconstruct the version from its hash.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # type: ignore[override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload # type: ignore[override]
-    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: # type: ignore[overload-overlap]
+    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ... # type: ignore[overload-overlap]
+    @overload
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: ...
+    @overload
+    def __getitem__(self, idx: int, /) -> NoReturn:
         '''Depending on the value of `idx`, corresponds to the following attributes:
         0 -> :attr:`major`
         1 -> :attr:`minor`
         2 -> :attr:`patch`'''
-    @overload
-    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: ...
-    @overload
-    def __getitem__(self, idx: int, /) -> NoReturn: ...
     def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
     def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
     def __gt__(self, other: Any, /) -> bool: '''Whether self succeeds the other as a version.'''
@@ -86,13 +84,16 @@ class VersionInfo(str): # noqa: FURB189
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
     def shelve(self, path: Openable, key: int=...) -> None: '''Store this version into the specified `path` with `key`, which can be any integer.'''
+    def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
+    def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''
+    @classmethod
+    def from_hash(cls, hashed: int) -> Self: '''Reconstruct the version from its hash.'''
     @classmethod
     def from_rep(cls, rep: str) -> Self: '''Parse a version from the string representation.'''
     @classmethod
     def unshelve(cls, path: Openable, key: int=...) -> Self: '''Recover a stored version from `path`. A wrong key would usually raise an error, and even if it doesn't, the version would be wrong.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of :mod:`asyncutils`; equivalent to :data:`asyncutils.__version__`.'''
-    def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     @property
     def representation(self) -> str: '''String representation of the version for pretty printing, as displayed when using ``asyncutils --version``.'''
     @property
@@ -128,15 +129,15 @@ def normalize(o: object, /) -> tuple[int, int, int]:
     If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.'''
 def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as :func:`normalize`, but return None if a normalizer is not found.'''
 @overload
-def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
+def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: ...
 @overload
-def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: ...
+def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
 @overload
-def unregister_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: '''Unregister the normalizer for the object or type and return it if any.'''
+def unregister_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
 @overload
-def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
+def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''Unregister the normalizer for the object or type and return it if any.'''
 @overload
-def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
+def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
 @overload
-def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: ...
+def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
 def autogenerate_normalizers() -> bool: '''Registers normalizers for :class:`~decimal.Decimal` and :class:`~fractions.Fraction`. Return whether both normalizers were successfully registered (including re-registration of the same normalizer).'''

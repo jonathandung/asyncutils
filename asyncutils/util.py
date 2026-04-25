@@ -8,6 +8,9 @@ from asyncio import BoundedSemaphore, CancelledError, Lock, Semaphore, _get_runn
 from functools import partial, wraps
 from sys import audit
 ignore_cancellation = IgnoreErrors(CancelledError)
+class anullcontext: # noqa: N801
+    async def __aenter__(self): ...
+    async def __aexit__(*_): ...
 def get_future(aw, loop=None):
     if loop is None: loop = get_loop_and_set()
     async def wrapper():

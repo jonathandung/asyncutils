@@ -8,7 +8,8 @@ from asyncutils._internal.submodules import func_all as __all__
 from asyncio import CancelledError, Lock, eager_task_factory, iscoroutine, sleep, wait_for
 from collections import deque, namedtuple
 from functools import partial, wraps
-from sys import audit, maxsize as I
+from itertools import count
+from sys import audit
 from time import perf_counter
 def acompose(*F, wrap_last=True):
     async def composed(*a, **k):
@@ -26,7 +27,7 @@ def star(f, /):
 def unstar(f, /):
     async def wrapper(*a, **k): return await f(a, k)
     return wraps(f)(wrapper)
-def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='periodic coroutine %s reached the maximum of %d iterations'):
+def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
@@ -35,7 +36,7 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
             log.debug('func.every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
             if wait_first: await sleep(intvl)
-            for _ in range(max_iterations):
+            for _ in count() if max_iterations is None else range(max_iterations):
                 t = timer()
                 try: await f(*supplied_args, *a, **(supplied_kwargs or {}), **k)
                 except CRITICAL: raise Critical
@@ -59,7 +60,7 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
             if not q: return default
         return wraps(f)(wrapper)
     return dec
-def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=I, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
+def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, s='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
@@ -67,7 +68,7 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
             log.debug('func.everymethod: periodic task started'); q = default is _NO_DEFAULT
             if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('func.everymethod: future to stop periodic coroutine %s is already done', n)
             if wait_first: await sleep(intvl)
-            for _ in range(max_iterations):
+            for _ in count() if max_iterations is None else range(max_iterations):
                 t = timer()
                 try: await f(self, *supplied_args, *a, **(supplied_kwargs or {}), **k)
                 except CRITICAL: raise Critical
@@ -177,4 +178,4 @@ class RateLimited:
             T.append(n)
         return await f(*a, **k)
     def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r}, lock_impl={fullname(self._lock)})'
-del _, I, perf_counter
+del _, perf_counter

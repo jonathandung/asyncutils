@@ -4,14 +4,7 @@ from .mixins import LoopBoundMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
 from types import TracebackType
 from typing import Any, Self, SupportsIndex, overload
-__all__ = 'abucket', 'achain', 'anullcontext', 'apeekable', 'online_sorter'
-class anullcontext:
-    '''Simple async-only version of :class:`contextlib.nullcontext`, implemented here to avoid importing :mod:`contextlib`.'''
-    async def __aenter__(self) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+__all__ = 'abucket', 'achain', 'apeekable', 'online_sorter'
 class achain[T]:
     '''Async version of :class:`itertools.chain`, taking async or sync iterables.'''
     @classmethod

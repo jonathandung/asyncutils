@@ -16,10 +16,10 @@ class Module:
         try: return getattr(_[_d[name]], name)
         except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
-    def __getattr__(self, name, /, _=F.all_contextual_consts, f=frozenset()):
-        if name == '_fs': self._fs = s = (_ if name == 'context' else f).union(self.__dir__()); return s
-        if name in self._fs: return getattr(self.load(), name)
-        raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {name!r}") from None
+    def __getattr__(self, n, /, _=F.all_contextual_consts, f=frozenset()):
+        if n == '_fs': self._fs = s = (_ if n == 'context' else f).union(self.__dir__()); return s
+        if n in self._fs: return getattr(self.load(), n)
+        raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {n!r}") from None
     def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.get, _f=_f, _l=l, _n=_s):
