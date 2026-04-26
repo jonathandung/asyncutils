@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82.0.1", "wheel>=0.46.3"]
+requires = ["setuptools>=82.0.1", "wheel>=0.47.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -29,11 +29,14 @@ asyncutils = 'asyncutils.cli:run'
 autils = 'asyncutils.cli:run'
 
 [project.optional-dependencies]
-dev = ["uv>=0.11.7", "mypy>=1.20.2", "pytest>=9.0.3", "pytest-xdist>=3.8.0", "pytest-cov>=7.1.0", "pytest-local-badge>=1.0.3", "pytest-asyncio>=1.3.0"]
-docs = ["sphinx>=9.1.0", "sphinx-rtd-theme>=3.1.0", "sphinx-notfound-page>=1.1.0", "sphinx-autoapi>=3.8.0", "doc8>=2.0.0", "sphinx-lint>=1.0.2"]
-pub = ["build>=1.4.3", "twine>=6.2.0", "keyring>=25.7.0", "packaging>=26.1"]
+all = ["py-asyncutils[dev,json]>=0.8.28"]
+dev = ["pre-commit>=4.6.0", "py-asyncutils[docs,lint,pub,test,tools]>=0.8.28"]
+docs = ["sphinx>=9.1.0", "sphinx-rtd-theme>=3.1.0", "sphinx-notfound-page>=1.1.0", "sphinx-autoapi>=3.8.0"]
 json = ["json-with-comments>=1.2.10", "json5>=0.14.0", "hjson>=3.1.0"]
-all = ["py-asyncutils[dev,docs,pub,json]>=0.8.28"]
+lint = ["doc8>=2.0.0", "sphinx-lint>=1.0.2"]
+pub = ["build>=1.4.4", "twine>=6.2.0", "keyring>=25.7.0", "packaging>=26.2"]
+test = ["json5>=0.14.0", "pytest>=9.0.3", "pytest-xdist>=3.8.0", "pytest-cov>=7.1.0", "pytest-local-badge>=1.0.3", "pytest-asyncio>=1.3.0"]
+tools = ["mypy>=1.20.2", "uv>=0.11.7"]
 
 [tool.setuptools]
 packages = ["asyncutils", "asyncutils._internal"]
@@ -81,12 +84,11 @@ exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env
 [tool.ruff.lint]
 ignore = ["ANN401", "ASYNC109", "B904", "B905", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "N803", "N806", "N812", "N818", "PLC0415", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
 select = ["A", "ARG", "ANN", "ASYNC", "B", "BLE001", "COM819", "C4", "C901", "E", "EM103", "ERA001", "EXE", "F", "FIX002", "FLY002", "FURB", "G", "ISC", "LOG", "N", "PERF", "PIE", "PGH004", "PL", "PYI", "RET", "RSE102", "RUF", "S", "SIM", "SLOT", "T100", "T201", "TRY", "UP", "W", "YTT"]
+logger-objects = ["asyncutils._internal.log"]
 preview = true
 typing-extensions = false
-logger-objects = ["asyncutils._internal.log"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
 "**/*.py" = ["ANN", "FURB180", "PYI"]
 "**/*.pyi" = ["PYI021", "PYI036", "PYI042"]
 "**/__init__.py" = ["RUF067"]
@@ -95,7 +97,9 @@ logger-objects = ["asyncutils._internal.log"]
 "asyncutils/iterclasses.py*" = ["N801"]
 "asyncutils/_internal/compat.py*" = ["F403", "F405"]
 "asyncutils/_internal/py31*.py" = ["E402"]
+"tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
 "asyncutils/__init__.py" = ["E402"]
+"asyncutils/_internal/py312.py" = ["ARG002", "SIM105"]
 "asyncutils/base.py" = ["B008", "E722", "RUF029"]
 "asyncutils/config.py" = ["BLE001", "SIM115"]
 "asyncutils/exceptions.py" = ["PLW0603"]
@@ -105,10 +109,9 @@ logger-objects = ["asyncutils._internal.log"]
 "asyncutils/queues.py" = ["A001", "A002", "ARG002", "B008", "E722", "PLR6301"]
 "asyncutils/rwlocks.py" = ["N801"]
 "asyncutils/version.py" = ["B008", "FURB101", "FURB103", "PLR2004"]
-"asyncutils/_internal/py312.py" = ["ARG002", "SIM105"]
+"asyncutils/_internal/log.pyi" = ["A001", "A002", "N802"]
 "asyncutils/func.pyi" = ["N801"]
 "asyncutils/queues.pyi" = ["A001", "A002", "PYI011"]
-"asyncutils/_internal/log.pyi" = ["A001", "A002", "N802"]
 "tests/test_signals.py" = ["RUF006"]
 
 [tool.ruff.lint.flake8-bugbear]

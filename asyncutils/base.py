@@ -78,7 +78,7 @@ class event_loop: # noqa: N801
             if f&1: self._flags = f^0x400
             if self.__exit__(*exc_info()) and b: _g(_w, N)
         elif b: _f(_d, N)
-    def __reduce__(self, /): return self.from_flags.__func__, (self.__class__, self._flags)
+    def __reduce__(self, /): return self.from_flags, (self._flags,)
     P.patch_method_signatures((__enter__, ''), (__exit__, 'typ, val, tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}'))
 def f(n):
     async def adisembowel(it, /):

@@ -1,7 +1,7 @@
 __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools'))
 from asyncutils import CRITICAL, SYNC_AWAIT, Critical, Deadlock, IgnoreErrors, aiter_to_gen, getcontext, iter_to_agen
 from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, stop_and_closer, fullname
+from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, fullname
 from asyncutils._internal.running_console import get
 from asyncutils._internal.submodules import util_all as __all__
 from asyncio import BoundedSemaphore, CancelledError, Lock, Semaphore, _get_running_loop, eager_task_factory, ensure_future, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, timeout as _timeout, wait_for
@@ -66,7 +66,7 @@ def to_async(f, /, loop=None):
     async def wrapper(*a, **k):
         if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
         return await loop.run_in_executor(e, partial(f, *a, **k))
-    return wraps(f)(wrapper), stop_and_closer(loop)
+    return wraps(f)(wrapper)
 async def aiter_from_f(f, s=_NO_DEFAULT, /):
     while True:
         if (r := await f()) is s or r == s: break

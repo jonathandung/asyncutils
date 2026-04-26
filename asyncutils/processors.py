@@ -68,12 +68,10 @@ class Bulkhead(LoopContextMixin):
     @property
     def available_qslots(self): return m-self.curr_qsize if (m := self.max_qsize) > 0 else float('inf')
     @property
-    def is_available(self): return bool(self.available_slots and self.available_qslots)
-    @property
     def is_shutdown(self): return self._sdfut.done()
     @property
     def rejected(self): return self._rejected
-    def wait_until_idle(self, timeout=None): return wait_for(self._mtevt.wait(), timeout)
+    async def wait_until_idle(self, timeout=None): await wait_for(self._mtevt.wait(), timeout)
     def wait_for_shutdown(self, timeout=None): return wait_for(self._sdfut, timeout)
     async def shutdown(self, timeout=None):
         self._sdfut.set_result(None); (h := (q := self._queue).shutdown)(); r = []

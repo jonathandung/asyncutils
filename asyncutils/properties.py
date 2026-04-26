@@ -51,12 +51,12 @@ class AsyncLockProperty(AsyncProperty):
         if (r := (c := self._cache).get(obj)) is None: c[obj] = r = self._lock_getter(obj)
         return r
 class coercedmethod: # noqa: N801
-    __slots__ = '__f', '__name', '__owner'
+    __slots__ = '__f', '__n', '__o'
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.properties.coercedmethod')
     def __init__(self, f, /): self.__f = f
-    def __set_name__(self, typ, name, /): self.__owner, self.__name = typ, name
+    def __set_name__(self, typ, name, /): self.__o, self.__n = typ, name
     def __getattr__(self, n, /): return getattr(self.__f, n)
     def __get__(self, obj, typ=None, /):
-        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__name!r}', name=self.__name) if typ is self.__owner else RuntimeError('incorrectly bound coercedmethod')
+        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__n!r}', name=self.__n) if typ is self.__o else RuntimeError('incorrectly bound coercedmethod')
         if not (typ is None or isinstance(obj, typ)): raise TypeError('coercedmethod.__get__ called incorrectly')
         return lambda *a, **k: self.__f(obj, *a, **k)

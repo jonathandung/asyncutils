@@ -69,7 +69,7 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''
     @is_shutdown.setter
-    def is_shutdown(self, val: bool, /) -> None: ...
+    def is_shutdown(self, val: bool, /) -> None: '''If set to `True`, shut down the queue; if set to `False`, restart the queue.'''
     @property
     def can_put_now(self) -> bool: '''Whether items can be put into the queue without blocking at this instant.'''
     @property
@@ -137,7 +137,8 @@ class SmartPriorityQueue[T](PotentQueueBase[T]):
     def peek_all(self) -> list[T]: ...
     def qsize(self) -> int: ...
 class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
-    '''A priority queue, where you put in items with an integer priority and the items are retrieved in ascending order of priority, with earlier items taking precedence in case of ties.'''
+    '''A priority queue, where you put in items with an integer priority and the items are retrieved in ascending order of priority, with earlier items taking precedence in case of ties.
+    The :meth:`put` and :meth:`put_nowait` methods of this class take an additional `priority` parameter.'''
     @classmethod
     def from_iter_of_tuples(cls, items: SupportsIteration[tuple[int, int, T]], maxsize: int=...) -> Self: '''Build a queue from the (async) iterable of tuples (priority, tiebreak, item).'''
     def __init__(self, maxsize: int=..., *, init_priority: int=..., init_items: SupportsIteration[T]=[]): ...

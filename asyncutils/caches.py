@@ -1,5 +1,6 @@
 __lazy_modules__ = frozenset(('asyncio', 'functools'))
 from asyncutils import CRITICAL, Critical, LoopContextMixin, event_loop, getcontext, safe_cancel, to_async
+from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import caches_all as __all__
 from asyncio import CancelledError, Event, Lock, gather, iscoroutine, sleep
 from collections import defaultdict, namedtuple
@@ -12,7 +13,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         C = getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
-        audit('asyncutils.caches.CacheWithBackgroundRefresh', ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event, self._timer = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(), timer; self.configure(ttl, refresh, processor)
+        audit(fullname(self), ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event, self._timer = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(), timer; self.configure(ttl, refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
@@ -62,11 +63,11 @@ class AsyncLRUCache:
     __slots__ = '_caches', '_factory', '_loopctx', '_make_key', '_timer', '_timestamps', '_ttl'
     def __init__(self, maxsize=None, ttl=None, *, typed=False, timer=monotonic):
         if maxsize is None: maxsize = getcontext().ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE
-        audit('asyncutils.caches.AsyncLRUCache', maxsize, ttl)
+        audit(fullname(self), maxsize, ttl)
         self._ttl, self._factory, self._timestamps, self._caches, self._loopctx, self._timer = ttl, lru_cache(maxsize, typed), {}, {}, event_loop.from_flags(0x200), timer
     def __call__(self, f, /, _=lambda f, a, k, s=0x3d, t=0x7a: id(f)<<t|hash(a)<<s|hash(frozenset(k.items()))):
         self._caches[f] = c = self._factory(f)
-        if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)[0]
+        if not hasattr(self, '_make_key'): self._make_key = to_async(_, self.loop)
         async def wrapper(*a, **k):
             K, t, T, S = await self._make_key(f, a, k), self._ttl, self._timer, self._timestamps
             if None is not t < T()-S.get(K, 0.0): c.cache_clear(); del S[K]

@@ -15,12 +15,10 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -U pip
-        pip install -e .[dev]
+        pip install -e .[tools]
         pip check
     - name: Lint with ruff
-      run: |
-        uv tool install ruff
-        uvx ruff check . --output-format=github
+      run: uv tool install ruff && uvx ruff check . --output-format=github
     - name: Run mypy
       run: mypy asyncutils
     - name: Run stubtest
@@ -32,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.12, 3.14]
+        python-version: [3.12, 3.15]
     steps:
     - uses: actions/checkout@v6.0.2
     - uses: actions/setup-python@v6.2.0
@@ -41,7 +39,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -U pip
-        pip install -e .[dev,json]
+        pip install -e .[json,test]
         pip check
     - name: Run tests
       run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 52 -n auto

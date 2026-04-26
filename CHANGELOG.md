@@ -16,7 +16,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 48% complete
 
-### Added
+### Public API
 
 - Top level:
 
@@ -440,9 +440,11 @@ Submodules:
 Add `__lazy_modules__` attribute to submodules where appropriate; marked python -m support as experimental; added some iteration, functional
 programming and context management utilities.
 
+BREAKING: changed version shelving and unshelving schema; added `'cli'` to `preloaded_submodules`.
+
 ## [0.8.28] - 2026-04-24
 
-Rewrote submodules loading mechanism; removed fragile relative imports; compressed asyncio and sibling imports to avoid overhead.
+Rewrote submodules loading mechanism; removed fragile relative imports; compressed asyncio and sibling module imports to avoid overhead.
 
 ## [0.8.27] - 2026-04-21
 

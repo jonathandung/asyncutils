@@ -1,12 +1,13 @@
 __lazy_modules__ = frozenset(('asyncio',))
 from asyncutils import AsyncContextMixin, LoopBoundMixin, getcontext
+from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import buckets_all as __all__
 from asyncio import Lock, sleep
 from sys import audit
 from time import monotonic
 class TokenBucket:
     __slots__ = '_capacity', '_last_update', '_lock', '_rate', '_timer', '_tokens'
-    def __init__(self, rate, capacity, timer=monotonic): audit('asyncutils.buckets.TokenBucket', rate, capacity); self._capacity = self._tokens = capacity; self._rate, self._lock, self._last_update, self._timer = rate, Lock(), timer(), timer
+    def __init__(self, rate, capacity, timer=monotonic): audit(fullname(self), rate, capacity); self._capacity = self._tokens = capacity; self._rate, self._lock, self._last_update, self._timer = rate, Lock(), timer(), timer
     async def consume(self, tokens=None):
         if tokens is None: tokens = float(getcontext().TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS)
         async with self._lock:
@@ -16,7 +17,7 @@ class TokenBucket:
     @property
     def capacity(self): return self._capacity
 class LeakyBucket(AsyncContextMixin, LoopBoundMixin):
-    def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit('asyncutils.buckets.LeakyBucket', capacity, leak); C = getcontext(); self._leak, self._last, self._lock, self._drainer, self._factor, self._min_factor, self._max_factor, self._external_factor_settable, self._timer = leak, timer(), Lock(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self._capacity = self._tokens = capacity
+    def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit(fullname(self), capacity, leak); C = getcontext(); self._leak, self._last, self._lock, self._drainer, self._factor, self._min_factor, self._max_factor, self._external_factor_settable, self._timer = leak, timer(), Lock(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self._capacity = self._tokens = capacity
     def _adjust_from_params(self, a, b, c, d, /):
         if (f := self._factor) < abs((n := min(f*b, self._max_factor) if (r := self._tokens/self._capacity) <= a else max(f*d, self._min_factor) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self._factor = n
     def _add_tokens(self, amount):
@@ -43,7 +44,7 @@ class LeakyBucket(AsyncContextMixin, LoopBoundMixin):
     @factor.setter
     def factor(self, value, /):
         if self._external_factor_settable: self._factor = max(self._min_factor, min(self._max_factor, value))
-        else: raise ValueError('asyncutils.buckets.LeakyBucket.factor is read-only')
+        else: raise ValueError(f'{fullname(self)}.factor is read-only')
     @factor.deleter
     def factor(self): self._factor = 1
     def _adjust(self):

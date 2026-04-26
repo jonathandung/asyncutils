@@ -51,7 +51,3 @@ Current version: 0.8.28
 ## [6.0] - 2029-10
 
 - Drop support for python 3.13 entirely as it reaches EOL
-
-## [7.0] - 2030-10
-
-- Drop support for python 3.14; integrate lazy imports fully

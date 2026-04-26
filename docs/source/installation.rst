@@ -44,7 +44,7 @@ or if you are installing for development, and wish to obtain the corresponding :
 
 .. code-block:: bash
 
-  pip install py-asyncutils[all]
+  pip install py-asyncutils[dev]
   uv tool install ruff
 
 alternatively, after:

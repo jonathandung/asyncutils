@@ -22,7 +22,7 @@ class SupportsGT(Protocol):
     def __gt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class AsyncContextManager[T](Protocol):
-    '''An asynchronous context manager. Basically :class:`contextlib.AbstractAsyncContextManager` with proper overloads, as a protocol.'''
+    '''An asynchronous context manager. Basically a protocol version of :class:`contextlib.AbstractAsyncContextManager` with proper overloads.'''
     async def __aenter__(self) -> T: ...
     @overload
     async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
@@ -36,6 +36,7 @@ class AsyncLockLike[T](AsyncContextManager[T], Protocol):
     def locked(self) -> bool: ...
 @type_check_only
 class FutWrapType(Protocol):
+    '''The type of the `futwrap` parameter in :func:`~compete.convert_to_coro_iter`.'''
     def __call__(self, future: Future[Any]|SyncFuture[Any], *, loop: AbstractEventLoop|None) -> Future[Any]: ...
 @type_check_only
 class GenericSized[T](Protocol):
@@ -92,7 +93,7 @@ class PartialInterface(metaclass=PartialInterfaceMeta):
     def __getattr__(self, name: str, /) -> Any: ...
 @type_check_only
 class DumpType(Protocol):
-    '''Represents the type of simple json-dumping functions accepted by :func:`tools.argv_to_json` and :func:`tools.argstr_to_json`.'''
+    '''Represents the type of simple json-dumping functions accepted by :func:`~tools.argv_to_json` and :func:`~tools.argstr_to_json`.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
@@ -105,7 +106,7 @@ class SigPatcher(Protocol):
     def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...
 @type_check_only
 class Middleware(Protocol):
-    '''Represents a middleware accepted by :class:`channels.EventBus`.
+    '''Represents a middleware accepted by :class:`~channels.EventBus`.
     To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
     Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
     def __call__(self, event_type: str, data: Any, /) -> Any: ...

@@ -110,8 +110,8 @@ class AdvancedPool(LoopContextMixin):
     async def starmap(self, f, it, /, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))
     async def starmap_withkwds(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(*a, **k) for a, k in it))
-    async def resize(self, min, max): # noqa: A002
-        async with self._lock: M = max(max, m := max(1, min)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
+    async def resize(self, min_workers, max_workers):
+        async with self._lock: M = max(max_workers, m := max(1, min_workers)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
     def drain(self): return self._queue.join()
     async def wait_for_slot(self, timeout=None):
         self.raise_for_shutdown()

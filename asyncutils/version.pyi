@@ -108,7 +108,7 @@ class VersionInfo(str): # noqa: FURB189
     def patch(self) -> int: '''The patch part of the version.'''
 @final
 class VersionDelta(NamedTuple):
-    '''A named tuple-like class representing the difference between versions. Can be taken by the + or - operators.'''
+    '''A named tuple-like class representing the difference between versions. Not actually created by :func:`collections.namedtuple`. Can be taken by the + or - operators.'''
     major: int = ...
     '''The major part of the version.'''
     minor: int = ...
