@@ -1,5 +1,5 @@
 '''Implementation of an interactive console base class, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
-from ._internal.types import ValidExcType
+from ._internal.types import ExcType
 from _collections_abc import Callable, Coroutine, Iterable
 from _contextvars import Context
 from abc import ABC, abstractmethod
@@ -44,9 +44,9 @@ class ConsoleBase(InteractiveConsole, ABC):
     def memory_errors(self) -> int: '''The number of :exc:`MemoryError`'s that have occurred.'''
     @final
     @property
-    def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in `is_running` for state consistency checks.'''
+    def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in :attr:`is_running` for state consistency checks.'''
     @property
-    def is_running(self) -> bool: '''Whether the console is running. The default implementation uses `_internal_is_running` only.'''
+    def is_running(self) -> bool: '''Whether the console is running. The default implementation uses :attr:`_internal_is_running` only.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
         '''`loop`: Event loop used by console interaction.
         `mod` (optional): The module to import within the console, determined by the subclass name by default.
@@ -65,45 +65,42 @@ class ConsoleBase(InteractiveConsole, ABC):
         `template` (optional): the console banner to use, with %-placeholders for name, version and description
         Additional keyword arguments are passed to `template.__mod__`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
-    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ValidExcType, ...]=..., threadsafe: bool=...) -> Any|None:
-        '''Run `code`, an instance of `types.CodeType`.
-        `futimpl` is a function that returns an instance of `concurrent.futures.Future`.
+    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None:
+        '''Run `code`, an instance of :class:`types.CodeType`.
+        `futimpl` is a function that returns an instance of :class:`concurrent.futures.Future`.
         `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
-        `threadsafe` dictates whether to run the code in the event loop using `call_soon_threadsafe` instead of `call_soon`.'''
+        `threadsafe` dictates whether to run the code in the event loop using :meth:`call_soon_threadsafe` instead of :meth:`call_soon`.'''
     def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # type: ignore[override]
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''Run the console and return the integer return code.
         The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
-        Pass a negative value for `max_memerrs` to disable the stop after certain number of MemoryErrors behaviour.
+        Pass a negative value for `max_memerrs` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
         If `always_install_completer` is True, set the completer on readline as long as readline is available.
-        Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and
-        warnings for garbage-collected coroutines not being awaited respectively.
+        Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
         If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start
         python with the -i flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing (this differs from the superclass behaviour).'''
     @final
-    def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a `KeyboardInterrupt`, instead of touching this method.'''
+    def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a :exc:`KeyboardInterrupt`, instead of touching this method.'''
     @final
-    def memoryerror(self) -> None: '''Pass `additional_memerr_hooks` to the subclass constructor to change the behaviour when encountering a `MemoryError`, instead of touching this method.'''
+    def memoryerror(self) -> None: '''Pass `additional_memerr_hooks` to the subclass constructor to change the behaviour when encountering a :exc:`MemoryError`, instead of touching this method.'''
     def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than `write`.'''
-    def refresh(self) -> None: '''Callback in `interrupt` and `memoryerror`.'''
+    def refresh(self) -> None: '''Callback in :meth:`interrupt` and :meth:`memoryerror`.'''
     @abstractmethod
     def prehook(self, max_memerrs: int) -> None:
-        '''Called by `run_console` before beginning the interaction logic. Can raise errors.
+        '''Called by :meth:`run` before beginning the interaction logic. Can raise errors.
         When implementing, call `super().prehook(max_memerrs)` before everything. This allows subclasses to provide their own value of `max_memerrs` and change the signature of the `prehook`.
         Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
     def posthook(self) -> None:
-        '''Called by `run_console` after the interaction has ended before writing the exit message. Should not raise errors.
+        '''Called by :meth:`run` after the interaction has ended before writing the exit message. Should not raise errors.
         When implementing, call `super().posthook()` after everything.
         Not really an abstract method, but implementing is highly recommended.'''
     @overload
-    def set_return_code(self, exc: SystemExit, /) -> None: '''Set the return code of this console from an instance of `SystemExit` or an integer return code and exit the console.'''
+    def set_return_code(self, exc: SystemExit, /) -> None: ...
     @overload
-    def set_return_code(self, code: int, /) -> None: ...
-    def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None:
-        '''Called to write code with emulated color (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing :data:`sys.ps1`
-        and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
+    def set_return_code(self, code: int, /) -> None: '''Set the return code of this console from an instance of :exc:`SystemExit` or an integer return code and exit the console.'''
+    def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: '''Called to write code with emulated color (such as import statements to represent the namespace) after the banner has been written, with parameters `ps1` representing :data:`sys.ps1` and `kcolor`, `reset` and `fcolor` representing the ANSI escape codes for the keyword color, color reset and the function color respectively.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
     '''A subclass of :class:`ConsoleBase`, used to implement the asyncutils REPL.'''

@@ -34,7 +34,9 @@ def verify_compat(v, /, _='This module is only for python %s or under'):
             break
     raise ImportError(_%v)
 class LoopMixinBase:
-    __slots__ = ()
+    __slots__ = '_loop',
+    @property
+    def loop(self): return self._loop
     def make(self, coro): return self.loop.create_task(coro)
     def make_fut(self): return self.loop.create_future()
     def make_multiple(self, C): yield from map(self.make, C)

@@ -16,7 +16,18 @@ This project uses [Semantic Versioning](https://semver.org).
 
 48% complete
 
-### Public API
+## Below versions are [unstable](https://semver.org/#spec-item-4)
+
+## [0.9.0] - 2026-04-27: newest
+
+Add `__lazy_modules__` attribute to submodules where appropriate; marked python -m support as experimental; added some iteration, functional
+programming and context management utilities.
+
+### BREAKING
+
+Changed version shelving and unshelving schema; added `'cli'` to `preloaded_submodules`.
+
+Added the following to the public API:
 
 - Top level:
 
@@ -34,7 +45,6 @@ Submodules:
 - altlocks
 
   Classes:
-  - DynamicBoundedSemaphore
   - ResourceGuard
   - UniqueResourceGuard
   - CircuitBreaker
@@ -273,17 +283,17 @@ Submodules:
   - achain
   - apeekable
   - abucket
-  - online_sorter
 
 - iters
 
   Functions:
-  - ... (There are too many of these, so just refer to the IDE autocomplete)
+  - ... (There are too many of these, so just refer to the IDE autocomplete or read the stub)
 
 - locks
 
   Classes:
   - AdvancedRateLimit
+  - DynamicBoundedSemaphore
   - PrioritySemaphore
   - KeyedCondition
   - RLock
@@ -434,13 +444,6 @@ Submodules:
   - unregister_normalizer
   - dispatch_normalizer
   - autogenerate_normalizers
-
-## [0.9.0] - 2026-04-27: newest; [unstable](https://semver.org/#spec-item-4)
-
-Add `__lazy_modules__` attribute to submodules where appropriate; marked python -m support as experimental; added some iteration, functional
-programming and context management utilities.
-
-BREAKING: changed version shelving and unshelving schema; added `'cli'` to `preloaded_submodules`.
 
 ## [0.8.28] - 2026-04-24
 

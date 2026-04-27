@@ -164,7 +164,7 @@ class MemoryMappedIOManager(LoopContextMixin):
             await dest.write(await src.read())
             if flush: await dest.flush()
     async def checksum(self, path, alg=None):
-        async with self.open(path) as f: return __import__('hashlib').new(getcontext().MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
+        async with self.open(path) as f: return __import__('hashlib').new(getcontext().MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
     async def approx_memory_usage(self):
         async with self._lock: return await self._run(self._memusage_helper)
     def _memusage_helper(self): return sum(m.size() for m in self.open_mmaps)
@@ -199,7 +199,7 @@ class MemoryMappedIOManager(LoopContextMixin):
         async with self.open(path) as f: await f.compact()
     async def bulk_read(self, file_offsets): return dict(await gather(*starmap(self._bulk_reader, file_offsets.items())))
     async def bulk_write(self, file_data): await gather(*starmap(self._bulk_writer, file_data.items()))
-    async def bulk_checksum(self, paths, alg=None): return dict(await gather(*map(partial(self._checksum_helper, getcontext().MMIOMGR_DEFAULT_CHECKSUM_ALG if alg is None else alg), paths)))
+    async def bulk_checksum(self, paths, alg=None): return dict(await gather(*map(partial(self._checksum_helper, getcontext().MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG if alg is None else alg), paths)))
     async def bulk_copy(self, pairs): await gather(*starmap(self.copy_file, pairs))
     async def bulk_resize(self, sizes): await gather(*starmap(self._resize_helper, sizes.items()))
     async def compact_files(self, paths): await gather(*map(self._compact_helper, paths))

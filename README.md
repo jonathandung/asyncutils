@@ -8,6 +8,7 @@
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
 [![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
 [![Docs](https://app.readthedocs.org/projects/asyncutils/badge)](https://asyncutils.readthedocs.io/en/stable)
+[![blazingly fast](https://www.blazingly.fast/api/badge.svg?repo=jonathandung%2Fasyncutils)](https://www.blazingly.fast)
 
 A python library abstracting all the common patterns I can think of that somehow always pop up in async code.
 
@@ -39,7 +40,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) fo
 
 ## Version
 
-This is asyncutils v0.8.28.
+This is asyncutils v0.9.0.
 
 This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)

@@ -5,7 +5,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import altlocks_all as __all__
 from _collections import deque # type: ignore[import-not-found]
-from asyncio import BoundedSemaphore, BrokenBarrierError, Condition, Lock, iscoroutine, sleep, timeout as _timeout
+from asyncio import BrokenBarrierError, Condition, Lock, iscoroutine, sleep, timeout as _timeout
 from functools import wraps
 from itertools import count
 from sys import audit
@@ -17,16 +17,6 @@ class Releasing:
         if iscoroutine(r := self._lock.release()): r = await r
         return r
     async def __aexit__(self, *_): await self._lock.acquire()
-class DynamicBoundedSemaphore(BoundedSemaphore):
-    def __init__(self, value=None): super().__init__(getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque() # type: deque
-    @property
-    def bound(self): return self._bound_value
-    @bound.setter
-    def bound(self, value, /):
-        if value < 0: raise ValueError('bound must be non-negative')
-        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft
-        while d and W:
-            if not (w := f()).done(): w.set_result(None); d -= 1
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     _inc_cnt = staticmethod(count(1).__next__); __slots__ = 'guarded',
     def __init__(self, action='using', rname=None): super().__init__(f'another task is already {action} resource{f" #{self._inc_cnt()}" if rname is None else f": {rname!r}"}'); self.guarded = False

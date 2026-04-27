@@ -4,8 +4,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H
 from asyncutils._internal.submodules import iterclasses_all as __all__
 from _collections import defaultdict, deque # type: ignore[import-not-found]
-from _functools import partial # type: ignore[import-not-found]
-from sys import audit, maxsize as INF
+from sys import maxsize as INF
 @H.subscriptable
 class achain:
     __slots__ = '_its',
@@ -53,7 +52,7 @@ class apeekable(LoopBoundMixin):
             from asyncutils import aislice as s
             async for _ in s(self._it, idx-l+1): f(_)
         return C[idx]
-class _await_later:
+class await_later:
     __slots__ = 'aw',
     def __new__(cls, aw, /, _=type((lambda: (yield))())): # noqa: B008,PLC3002
         if H.check_methods(aw, '__await__') or isinstance(aw, _) and aw.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', aw); return _ # noqa: RUF021
@@ -65,33 +64,23 @@ class _await_later:
 @H.subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
-    def __contains__(self, v):
+    def __contains__(self, v, /, _=await_later):
         if not self._validator(v): return False
-        try: self._cache[v].appendleft(_await_later(anext(self[v]))); return True
+        try: self._cache[v].appendleft(_(anext(self[v]))); return True
         except StopIteration: return False
     async def __aiter__(self):
         K, V, C = self._key, self._validator, self._cache
         async for i in self._it:
             if V(v := K(i)): C[v].append(i)
         for k in C: yield k
-    async def __getitem__(self, val, /):
-        if not self._validator(val): return
+    async def __getitem__(self, v, /, a=await_later):
+        if not (V := self._validator)(v): return
+        C, I, K = self._cache, self._it, self._key
         while True:
-            if (_ := self._cache[val]): yield (await _.aw) if isinstance(_ := _.popleft(), _await_later) else _
+            if _ := C[v]: yield (await _.aw) if isinstance(_ := _.popleft(), a) else _
             else:
                 while True:
-                    try: i = await anext(self._it)
+                    try: i = await anext(I)
                     except StopAsyncIteration: return
-                    if (v := self._key(i)) == val: yield i; break
-                    elif self._validator(v): self._cache[v].append(i)
-@H.subscriptable
-class online_sorter:
-    __slots__ = '_it', '_loop', '_popper', '_pusher', '_runner'
-    def __init__(self, it=()): audit('asyncutils.iterclasses.online_sorter'); self._it, self._runner, self._loop = it, partial(type(l := H.get_loop_and_set()).run_in_executor, l, H.create_executor(self, False)), l
-    def __aiter__(self):
-        if not hasattr(self, '_popper'): from asyncutils import to_list; import _heapq as Q; F = __import__('concurrent.futures', fromlist=('',)).Future(); self._loop.create_task(to_list(self._it)).add_done_callback(lambda t: F.set_result(t.result())); Q.heapify(h := F.result()); self._popper, self._pusher = partial(Q.heappop, h), partial(Q.heappushpop, h)
-        return self
-    async def __anext__(self): return await self._runner(self._popper)
-    async def asend(self, item): return await self._runner(self._pusher, item)
-    async def athrow(self, typ, val=None, tb=None, /): return await self._runner(self._it.throw, typ, val, tb)
-    async def aclose(self): r = self._runner(self._it.close); del self._it, self._runner, self._popper, self._pusher, self._loop; return await r
+                    if (k := K(i)) == v: yield i; break
+                    elif V(k): C[k].append(i)

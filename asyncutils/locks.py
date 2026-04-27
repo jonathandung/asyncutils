@@ -3,12 +3,22 @@ __lazy_modules__ = frozenset(('_heapq', 'asyncio'))
 from asyncutils import Critical, LoopBoundMixin, LockForceRequest, LockMixin, LockWithOwnerMixin, getcontext, safe_cancel_batch, CRITICAL
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log
-from asyncutils._internal.helpers import check_methods, fullname, subscriptable
+from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set, subscriptable
 from asyncutils._internal.submodules import locks_all as __all__
 from _collections import defaultdict, deque
 from _heapq import heappop, heappush
-from asyncio import Lock, current_task, gather, iscoroutine, wait, wait_for
+from asyncio import BoundedSemaphore, Lock, current_task, gather, iscoroutine, wait, wait_for
 from time import monotonic
+class DynamicBoundedSemaphore(BoundedSemaphore):
+    def __init__(self, value=None): super().__init__(getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque() # type: deque
+    @property
+    def bound(self): return self._bound_value
+    @bound.setter
+    def bound(self, value, /):
+        if value < 0: raise ValueError('bound must be non-negative')
+        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft
+        while d and W:
+            if not (w := f()).done(): w.set_result(None); d -= 1
 class AdvancedRateLimit(LoopBoundMixin, LockMixin):
     __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._lu = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
@@ -102,10 +112,10 @@ class MultiCountDownLatch:
         if c == 1: self._cond.notify_all(key)
     async def count_down(self, key, strict=False):
         async with self._cond: self._count_down_lock_held(key, strict)
-    async def count_down_all(self, strict=False):
+    async def count_down_all(self):
         f = self._count_down_lock_held
         async with self._cond:
-            for key in self._counts: f(key, strict)
+            for key in self._counts: f(key, True)
     async def wait(self, key, strict=False):
         if key in self._counts:
             async with (C := self._cond): await C.wait(key)
@@ -172,14 +182,14 @@ class LocksmithBase:
         return register
     @property
     def currently_recognized(self): return frozenset(self._recognized)
-    def __init__(self, loop, ltyp=Lock): self._recognized, self._loop, self._lock = __import__('_weakrefset').WeakSet(), loop, ltyp()
+    def __init__(self, loop=None, ltyp=Lock): self._recognized, self._loop, self._lock = __import__('_weakrefset').WeakSet(), loop or get_loop_and_set(), ltyp()
     async def recognize_lock(self, lock, /):
         if not self.preliminary_check_lock(lock): return False
         async with self._lock:
             if lock in (r := self._recognized): return False
             if callable(f := getattr(lock, 'acknowledge_locksmith_lock_held', None)):
                 try: return bool((await f) if iscoroutine(f := f(self)) else f)
-                except: return False # noqa: E722
+                except: return False
             r.add(lock); return True
     async def force(self, lock, /, info=None, *, purge_waiters=True):
         async with self._lock:
@@ -188,7 +198,7 @@ class LocksmithBase:
         try:
             if iscoroutine(r := lock.release()): r = await r
         except CRITICAL: raise Critical
-        except: # noqa: E722
+        except:
             if self.find_owner(lock) is (o := current_task()):
                 if o is None: return self.throw_fallback(lock)
                 if (c := o.get_coro()) is None: return self.eager_fallback(lock)
@@ -198,7 +208,7 @@ class LocksmithBase:
                 except LockForceRequest as e:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
                     else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self))
-                except BaseException as e: self.raised_other(lock, e) # noqa: BLE001
+                except BaseException as e: self.raised_other(lock, e)
                 else: self.answer_received(lock, await F)
             if callable(f := self.handlers.get(type(lock))) and iscoroutine(r := f(lock)): await r
             return True

@@ -14,7 +14,7 @@ class EventWithValue[T](EventMixin[T]):
     '''An event class that can store a value and maintains a history of past values.'''
     def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of `maxhist` entries, which defaults to :const:`context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results, are stored.'''
     @overload
-    def set(self, value: None, *, strict: Literal[False]=...) -> None: ...
+    def set(self, value: None, *, strict: Literal[False]) -> None: ...
     @overload
     def set(self, value: T, *, strict: bool=...) -> None: '''Set the result of the event and wake up waiters. If `strict` is `True`, throws an error when the value is `None`.'''
     def remove_done_waiters(self) -> None: '''Should be run periodically to cleanup the internal queue of waiters, removing those having already completed.'''

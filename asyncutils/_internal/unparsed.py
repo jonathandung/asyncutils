@@ -1,13 +1,28 @@
 from asyncutils._internal.helpers import fullname as g, subscriptable as s
-N = s(type('Namespace', (dict,), {'__getattr__': dict.__getitem__, '__setattr__': dict.__setitem__, '__delattr__': dict.__delitem__}))(log_to='STDERR', executor='thread', Q=0, V=0, quiet=False, basic_repl=False, max_memerrs=3, load_all=False, seed=None, debug=False)
-if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\''):
-    import sys as S; S.audit('asyncutils/read_config', p)
-    if not p.endswith(('.json', '.jsonl')): S.stderr.write('WARNING: AUTILSCFGPATH should point to a json file; proceeding anyway\n')
-    with open(p.strip()) as f:
-        if (t := type(f := __import__('json').load(f))) is not dict: raise TypeError(f'incorrent json format for asyncutils configuration at {p}; top-level structure should be an object, not {g(t)!r}; see format.json5')
-        if isinstance(v := f.pop('next_config', p), str): S.audit('asyncutils/set_next_config', p, v); E[k] = v
-        elif v is None: S.audit('asyncutils/discontinue_config', p); del E[k]
-        else: raise TypeError(f'key "next_config" in {p} should point to a string or null, not {v!r}; see format.json5')
-        N.update(f)
-    del S, f, v, t
+N, C, D = s(type('Namespace', (dict,), {'__getattr__': dict.__getitem__, '__setattr__': dict.__setitem__, '__delattr__': dict.__delitem__, '__slots__': ()}))(log_to='STDERR', executor='thread', Q=0, V=0, quiet=False, basic_repl=False, max_memerrs=3, load_all=False, seed=None, debug=False), {'CIRCUIT_BREAKER_DEFAULT_MAX_FAILS': 3, 'CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS': 5, 'CIRCUIT_BREAKER_DEFAULT_RESET': 30.0, 'DYNAMIC_THROTTLE_DEFAULT_JITTER': 0.2, 'DYNAMIC_THROTTLE_DEFAULT_LBOUND': 0.25, 'DYNAMIC_THROTTLE_DEFAULT_LFACTOR': 0.75, 'DYNAMIC_THROTTLE_DEFAULT_MAX_RATE': 100.0, 'DYNAMIC_THROTTLE_DEFAULT_MIN_RATE': 100.0, 'DYNAMIC_THROTTLE_DEFAULT_UBOUND': 0.75, 'DYNAMIC_THROTTLE_DEFAULT_UFACTOR': 1.25, 'DYNAMIC_THROTTLE_DEFAULT_WINDOW': 100, 'AITER_TO_GEN_DEFAULT_ALLOW_FUTURES': True, 'AITER_TO_GEN_DEFAULT_STRICT': False, 'ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR': False, 'ITER_TO_AGEN_DEFAULT_STRICT': False, 'ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR': False, 'LEAKY_BUCKET_ADJMAP': ((256, (0.15, 1.1, 0.85, 0.9)), (128, (0.23, 1.2, 0.77, 0.81)), (0, (0.3, 1.4, 0.7, 0.73))), 'LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS': 1.0, 'LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR': True, 'LEAKY_BUCKET_DEFAULT_MAX_FACTOR': 10.0, 'LEAKY_BUCKET_DEFAULT_MIN_FACTOR': 0.1, 'LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS': 1.0, 'LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK': 0.1, 'TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS': 1.0, 'ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE': 128, 'BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH': 15.0, 'BACKGROUND_REFRESH_CACHE_DEFAULT_TTL': 60.0, 'EVENT_BUS_DEFAULT_MAX_CONCURRENT': 64, 'EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE': 100, 'EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT': 3.0, 'EVENT_BUS_STREAM_DEFAULT_TIMEOUT': 5.0, 'OBSERVABLE_DEFAULT_NTIMES_N': 1, 'RENDEZVOUS_MAINTENANCE_INTERVAL': 30.0, 'CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID': True, 'EVENT_WITH_VALUE_DEFAULT_MAX_HIST': 128, 'EVENT_WITH_VALUE_DEFAULT_RECENT': 5.0, 'BENCHMARK_DEFAULT_TIMES': 3, 'BENCHMARK_DEFAULT_WARMUP': 0, 'RETRY_DEFAULT_BACKOFF': 2.0, 'RETRY_DEFAULT_DELAY': 0.5, 'RETRY_DEFAULT_JITTER': 0.2, 'RETRY_DEFAULT_MAX_DELAY': 30.0, 'RETRY_DEFAULT_TRIES': 3, 'TIMER_DEFAULT_PRECISION': 7, 'MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG': 'blake2s', 'AFRIEVALDS_DEFAULT_K': 2, 'AUNZIP_DEFAULT_PUT_BATCH': 16, 'TEE_DEFAULT_PUT_EXC': True, 'ADVANCED_RATE_LIMIT_DEFAULT_TOKENS': 1.0, 'DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE': 1, 'LOCKSMITH_DEFAULT_TIMEOUTS': (1.0, 0.1, None), 'PRIORITY_SEMAPHORE_DEFAULT_VALUE': 1, 'GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT': 8, 'LINE_PROTOCOL_DEFAULT_BUFFER_SIZE': 4096, 'SOCKET_TRANSPORT_LIMITS': (2048, 8192), 'ADVANCED_POOL_DEFAULT_MAX_WORKERS': 5, 'ADVANCED_POOL_DEFAULT_MIN_WORKERS': 1, 'ADVANCED_POOL_FACTOR': 0.3, 'ADVANCED_POOL_THRESHOLD_HI': 1.5, 'ADVANCED_POOL_THRESHOLD_LO': 0.5, 'CONNECTION_POOL_DEFAULT_MAX_LIFE': 3600.0, 'CONNECTION_POOL_DEFAULT_MAX_SIZE': 10, 'CONNECTION_POOL_DEFAULT_MIN_SIZE': 1, 'CONNECTION_POOL_MAINTENANCE_INTERVAL': 30.0, 'POOL_DEFAULT_WORKERS': 4, 'BATCH_PROCESSOR_DEFAULT_MAX_SIZE': 128, 'BATCH_PROCESSOR_DEFAULT_MAX_TIME': 1.0, 'BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE': 10, 'BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT': 5, 'BULKHEAD_DEFAULT_MAX_QUEUE': 32, 'BULKHEAD_DEFAULT_MAX_REJ': -1, 'PASSWORD_QUEUE_DEFAULT_GET_FROM': 'password', 'PASSWORD_QUEUE_DEFAULT_PUT_FROM': 'password', 'RWLOCK_DEFAULT_PREFER_WRITERS': True, 'WAIT_FOR_SIGNAL_DEFAULT_SIGNALS': (2, 15), 'SEMAPHORE_DEFAULT_VALUE': 1}, {'jsonl': 'json', 'json': 'json', 'jsonc': 'jsonc', 'json5': 'json5', 'hjson': 'hjson', 'toml': 'tomllib', 'yml': 'yaml', 'yaml': 'yaml', 'ini': 'configparser'} # pragma: allowlist secret
+def l(p, e=None, /):
+    with open(p) as F:
+        match D[e or p.partition('.')[-1]]:
+            case 'yaml':
+                try: import yaml as Y; f = Y.load(F, Y.CSafeLoader)
+                except ImportError: raise RuntimeError('PyYAML library is required to load YAML configuration files for asyncutils') from None
+            case 'tomllib': f = __import__('tomllib').loads(F.read())
+            case 'configparser': raise RuntimeError('cannot parse ini format due to type ambiguities; use toml instead')
+            case m:
+                try: f = __import__(m, fromlist=('',)).load(F)
+                except ImportError as a: raise RuntimeError(f'{v} library must be installed for asyncutils to accept configuration from {p!r}') from a
+    if type(f) is dict: return f
+    raise TypeError(f'incorrent json format for asyncutils configuration at {p}; top-level structure should be an object')
+if p := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\' \t\r\n\v\f'):
+    from sys import audit as a; a('asyncutils/read_config', p); K = V = None
+    if isinstance(v := (P := (d := l(p)).pop)('next_config', p), str): a('asyncutils/set_next_config', p, v); E[k] = v
+    elif v is None: a('asyncutils/discontinue_config', p); del E[k]
+    else: raise TypeError(f'key "next_config" in {p} should point to a string or null, not {v!r}; see format.json5')
+    for E in () if (c := P('context', None)) is None else c.values():
+        if (a := type(E)) is not dict: raise TypeError(f'incorrent json format for asyncutils configuration at {p}; "context" should be an object mapping to objects, not {g(a)!r}; see format.json5')
+        for K, V in E.items():
+            if type(V) is dict:
+                for k, v in V.items(): C[f'{K}_{k}'.upper()] = v
+            elif (K := K.upper()) in C: C[K] = V
+    N.update(d); del a, d, v, c, P, K, V
 del p, E, k, s, g

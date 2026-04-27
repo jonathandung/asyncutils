@@ -16,7 +16,7 @@ async def test_kcond():
         assert await task == [None, None]
         cond.notify('c')
         with pytest.raises(ValueError, match=r"asyncutils\.locks\.KeyedCondition: no parties waiting for key 'd'"): cond.notify('d', strict=True)
-        with pytest.raises(ValueError, match=r"asyncutils\.locks\.KeyedCondition: n must be positive"): cond.notify('e', -1, strict=True)
+        with pytest.raises(ValueError, match=r'asyncutils\.locks\.KeyedCondition: n must be positive'): cond.notify('e', -1, strict=True)
         await cond.wait_all()
 async def test_mcdlatch():
     async with timeout(1):

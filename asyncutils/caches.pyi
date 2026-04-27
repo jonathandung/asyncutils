@@ -8,14 +8,14 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
     This ensures availability of fresh data without blocking get operations.'''
     @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, default_loader: Callable[[T], R], processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, default_loader: Callable[[T], R], processor: Callable[[BaseException, bool], object]=..., timer: Timer=...): ...
+    @overload
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
         '''`ttl` (optional): Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
         `refresh` (optional): Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         `processor` (optional): Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
         `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         `default_loader` (optional): The loader to load values from keys for which specific loaders have not been registered.'''
-    @overload
-    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...): ...
     def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''

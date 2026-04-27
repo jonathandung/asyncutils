@@ -1,4 +1,4 @@
-from ._internal.types import Timer, ValidExcType
+from ._internal.types import Timer, ExcType
 from .mixins import AsyncContextMixin, LoopBoundMixin
 from types import TracebackType
 from typing import overload
@@ -26,9 +26,9 @@ class LeakyBucket(AsyncContextMixin[LeakyBucket], LoopBoundMixin):
         `max_factor` (optional): Maximum adaptive factor; default :const:`context.LEAKY_BUCKET_DEFAULT_MAX_FACTOR`.
         `external_factor_settable` (optional): Whether the factor attribute can be modified; default :const:`context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: '''Stop draining the tokens in the bucket.'''
+    def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop draining the tokens in the bucket.'''
     async def acquire(self, amount: float=...) -> bool: '''Attempt to add `amount` tokens to the bucket immediately (default :const:`context.LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS`); return success.'''
     async def wait_for_tokens(self, amount: float=...) -> float: '''Asynchronously busy wait with a maximum interval of :const:`context.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK` until `amount` tokens can be added to the bucket **at once** (default :const:`context.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS`) and do so. Return the total wait time.'''
     @property

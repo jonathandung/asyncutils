@@ -1,14 +1,15 @@
 '''Object-oriented (async) iteration helpers.'''
-from ._internal.types import SupportsIteration, ValidExcType, ValidSlice
+from ._internal.types import SupportsIteration, ValidSlice
 from .mixins import LoopBoundMixin, LoopContextMixin
 from _collections_abc import AsyncGenerator, Callable
-from types import TracebackType
-from typing import Any, Self, SupportsIndex, overload
-__all__ = 'abucket', 'achain', 'apeekable', 'online_sorter'
+from typing import Self, SupportsIndex, overload
+__all__ = 'abucket', 'achain', 'apeekable'
 class achain[T]:
-    '''Async version of :class:`itertools.chain`, taking async or sync iterables.'''
+    '''Async version of :class:`itertools.chain` that takes async or sync iterables.'''
     @classmethod
-    def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self: '''Construct an :class:`achain` from `its`, an (async) iterable of (async) iterables to chain.'''
+    def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self:
+        '''Construct an :class:`achain` from `its`, an (async) iterable of (async) iterables to chain.
+        The outer iterable is advanced on demand, so it can combine items from different sources.'''
     def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an :class:`achain` from the (async) iterables.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
 class apeekable[T](LoopBoundMixin):
@@ -20,7 +21,7 @@ class apeekable[T](LoopBoundMixin):
     def prepend(self, /, *items: T) -> None: '''Make the apeekable yield the prepended items first instead of advancing the underlying iterable.'''
     async def __anext__(self) -> T: '''Return the next item, advancing the iterable.'''
     @overload
-    async def __getitem__(self, idx: ValidSlice, /) -> tuple[T, ...]: '''Slice access. Must be awaited.'''
+    async def __getitem__(self, idx: ValidSlice, /) -> tuple[T, ...]: ...
     @overload
     async def __getitem__(self, idx: SupportsIndex, /) -> T: '''Index access. Must be awaited.'''
 class abucket[T, R](LoopContextMixin):
@@ -29,17 +30,3 @@ class abucket[T, R](LoopContextMixin):
     def __contains__(self, v: R) -> bool: ...
     def __aiter__(self) -> AsyncGenerator[T]: ...
     def __getitem__(self, val: R, /) -> AsyncGenerator[T]: ...
-class online_sorter[T]:
-    '''A class implementing an async generator-like interface that sorts items as they arrive.'''
-    @overload
-    def __init__(self) -> None: ...
-    @overload
-    def __init__(self, it: SupportsIteration[T]): '''Instantiate the :class:`online_sorter`, optionally noting to sort the items from `it`.'''
-    def __aiter__(self) -> Self: ...
-    async def __anext__(self) -> T: ...
-    async def asend(self, item: T) -> None: ...
-    @overload
-    async def athrow(self, typ: ValidExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Any: ...
-    @overload
-    async def athrow(self, exc: BaseException, /) -> Any: ...
-    async def aclose(self) -> None: ...

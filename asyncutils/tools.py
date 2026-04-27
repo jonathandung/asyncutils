@@ -1,17 +1,13 @@
 from asyncutils._internal.helpers import fullname as _
 from asyncutils._internal.parsed import p
+from asyncutils._internal.unparsed import l
 from asyncutils._internal.submodules import tools_all as __all__
 import shlex as s
-ext2modname, get_cmd_help = {'jsonl': 'json'}, p.format_help
-def json_to_argv(p, /, *, d='.', c='json', e=_):
+get_cmd_help = p.format_help
+def loadf(p, e='json', /, _=l): return _(p.decode() if isinstance(p, bytes) else p, e if isinstance(p, int) else None)
+def json_to_argv(p, /, *, d='.', e=_):
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {e(p)} instead of str or bytes')
-    if isinstance(p, bytes): p = p.decode()
-    if not isinstance(p, int):
-        if not isinstance(p, str): raise TypeError(f'path must be instance of str, bytes or int, not {e(p)}')
-        _, b, _ = p.rpartition(d)
-        if b: c = _
-        else: __import__('sys').stderr.write(f'json_to_argv: path {p!r} has no file extension; assuming .json\n')
-    with open(p) as f: f, l = (r := []).append, (p := __import__(ext2modname.get(c, c)).load(f).pop)('log_to', s := 'STDERR') # noqa: PLW2901
+    l, f = (p := loadf(p).pop)('log_to', s := 'STDERR'), (r := []).append
     if p('no_log', False) or l == 'NULL': f('-n')
     elif l != s:
         f('-l')
@@ -30,4 +26,4 @@ def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
 def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
 def print_cmd_help(file=None): print(get_cmd_help(), file=file, flush=True)
-del p, s, _
+del p, s, _, l

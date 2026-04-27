@@ -9,11 +9,7 @@ def test_rguard(obj):
     g = ResourceGuard.guard(obj)
     with g:
         assert g.guarded
-        try:
-            with g: pytest.fail('should have raised')
-        except ResourceGuard as e:
-            assert e is g
-            assert str(e) == f'another task is already using resource: {obj!r}'
+        with pytest.raises(ResourceGuard, check=lambda e: e is g and str(e) == f'another task is already using resource: {obj!r}'), g: ...
     assert not g.guarded
     G = ResourceGuard.guard(obj)
     assert G is not g

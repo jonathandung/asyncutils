@@ -2,13 +2,13 @@ __lazy_modules__ = frozenset(('asyncio', 'asyncutils._internal.compat'))
 from asyncutils import exceptions as E, achain, adisembowel, aenumerate, aiter_from_f, areduce, collect, getcontext, iter_to_agen, iterf, safe_cancel, safe_cancel_batch, take, RAISE, RECIP_E, ignore_qshutdown
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown
+from asyncutils._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown, partial, Placeholder
 from asyncutils._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, fullname, get_loop_and_set
 from asyncutils._internal.submodules import iters_all as __all__
 import _operator as O, math as M
 from asyncio import CancelledError, Lock, gather, iscoroutine, sleep, wait_for
 from collections import Counter, defaultdict, deque
-from functools import lru_cache, partial
+from functools import lru_cache
 from sys import audit
 _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _littleprimes[:5]), (0x32907381cdf, _littleprimes[:6]), (1<<64, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _littleprimes[:13]), (0x4c16c7697197146a6b8eb49518c5, _littleprimes[:18])), lambda _, /: _
 async def fmap(fs, /, *a, **k): return await gather(*[f(*a, **k) async for f in iter_to_agen(fs)])
@@ -806,8 +806,8 @@ async def aidft(A, /, _=_dfthelper):
     R, N, A = await _(A, True)
     async for k in arange(N): yield await asumprod(A, (R[k*n%N] async for n in arange(N)))/N
 async def _aargminmax(it, key, default, f): return (await f(aenumerate(amap(key, it)), key=O.itemgetter(1), default=default))[0]
-def aargmin(it, key=_identity, default=-1): return _aargminmax(it, key, default, amin)
-def aargmax(it, key=_identity, default=-1): return _aargminmax(it, key, default, amax)
+def aargmin(it, key=_identity, default=-1, _=_aargminmax): return _(it, key, default, amin)
+def aargmax(it, key=_identity, default=-1, _=_aargminmax): return _(it, key, default, amax)
 def arunningmean(it): return amap(O.truediv, aaccumulate(it), acount(1))
 async def apowersetofsets(it, *, frozen=True):
     S = tuple(dict.fromkeys(await to_list(amap(frozenset, azip(it)))))
@@ -816,4 +816,10 @@ async def aserialize(it):
     l, n = Lock(), iter_to_agen(it).__anext__
     while True:
         async with l: yield await n()
-del _aunzip_consumer_base, _aunzip_put, _aguess, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+async def aonlinesorter(it=None):
+    audit('asyncutils.iters.aonlinesorter'); from _heapq import heapify, heappop, heappush
+    if (e := getattr(aonlinesorter, 'executor', None)) is None: e = create_executor(aonlinesorter)
+    await (f := partial(get_loop_and_set().run_in_executor, e, Placeholder, h := [] if it is None else await to_list(it)))(heapify)
+    while h:
+        if (i := (yield await f(heappop))) is not None: await f(heappush, i)
+del _aunzip_consumer_base, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity

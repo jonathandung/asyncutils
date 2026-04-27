@@ -10,7 +10,7 @@ from asyncio.queues import Queue
 from asyncio.tasks import Task
 from collections import defaultdict
 from contextlib import AbstractContextManager
-from typing import Any, Literal, NoReturn, Self, TypeGuard, overload
+from typing import Any, Literal, Self, TypeGuard, overload
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
     @property
@@ -128,21 +128,21 @@ class EventBus(LoopContextMixin):
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> AbstractContextManager[None, None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''
     @overload
-    def stop_tracking(self, ret_stats: Literal[False]=...) -> None: '''Stop tracking event publication statistics.'''
+    def stop_tracking(self, ret_stats: Literal[False]=...) -> None: ...
     @overload
-    def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: ...
+    def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: '''Stop tracking event publication statistics. If `ret_stats` is `True`, return a dictionary of the stats up to that point, with keys corresponding to event types and values the number of publications.'''
     @overload
-    async def subscribe[C: SpecificSubscriber](self, subscriber: C, /, event_type: str) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
+    async def subscribe[C: SpecificSubscriber](self, subscriber: C, /, event_type: str) -> C: ...
     @overload
-    async def subscribe[C: WildcardSubscriber](self, subscriber: C, /, event_type: WildcardType=...) -> C: ...
+    async def subscribe[C: WildcardSubscriber](self, subscriber: C, /, event_type: WildcardType=...) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
     @overload
-    async def unsubscribe(self, subscriber: SpecificSubscriber, /, event_type: str) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred.'''
+    async def unsubscribe(self, subscriber: SpecificSubscriber, /, event_type: str) -> bool: ...
     @overload
-    async def unsubscribe(self, subscriber: WildcardSubscriber, /, event_type: WildcardType=...) -> bool: ...
+    async def unsubscribe(self, subscriber: WildcardSubscriber, /, event_type: WildcardType=...) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred.'''
     @overload
-    def subscribe_to[C: SpecificSubscriber](self, event_type: str) -> Callable[[C], C]: '''A decorator factory for functions to subscribe to this event bus under the specified event type.'''
+    def subscribe_to[C: SpecificSubscriber](self, event_type: str) -> Callable[[C], C]: ...
     @overload
-    def subscribe_to[C: WildcardSubscriber](self, event_type: WildcardType) -> Callable[[C], C]: ...
+    def subscribe_to[C: WildcardSubscriber](self, event_type: WildcardType) -> Callable[[C], C]: '''A decorator factory for functions to subscribe to this event bus under the specified event type.'''
     def sync_start_publish(self, event_type: str, data: Any=..., *, safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None: '''Begin a publication synchronously. Parameters are as in `publish`, below.'''
     async def publish(self, event_type: str, data: Any=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None:
         '''Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout `timeout`.
@@ -162,9 +162,9 @@ class EventBus(LoopContextMixin):
         The subscriber is removed once `fut` completes, and its result returned through the returned task.
         After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
     @overload
-    async def feed_event(self, data: Any, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
+    async def feed_event(self, data: Any, *, timeout: float|None=...) -> None: ...
     @overload
-    async def feed_event(self, event_type: str, data: Any, *, timeout: float|None=...) -> None: ...
+    async def feed_event(self, event_type: str, data: Any, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
     @overload
     def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[Any]: ...
     @overload
@@ -193,7 +193,7 @@ class EventBus(LoopContextMixin):
     async def __cleanup__(self) -> None: ...
 class Rendezvous[T]:
     '''A rendezvous object, emulating Golang's unbuffered channels.'''
-    def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...): '''Instantiate a rendezvous object. If `loop` is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
+    def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...): '''Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically, according to :const:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`. If `loop` is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''Put in `value` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
         Also be prepared to intercept or reraise :exc:`~asyncio.exceptions.CancelledError` resulting from reset.'''
@@ -210,5 +210,3 @@ class Rendezvous[T]:
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
         '''Put in a value to the rendezvous and get a different one back.
         If `asap` is `True`, return without necessarily having completed the put.'''
-    async def _put_helper(self, value: T, /) -> Future[None]: '''Request a value be put into the rendezvous, returning a :class:`~asyncio.futures.Future`, which cancels the put when cancelled, and when done, the value is guaranteed to have been handed off to a getter.'''
-    async def _maintainer(self) -> NoReturn: '''Periodically clean up done getters and putters, according to :const:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`.'''

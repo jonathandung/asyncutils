@@ -1,4 +1,3 @@
-__all__ = 'patch_asyncio_warnings', 'patch_classmethod_signatures', 'patch_function_signatures', 'patch_method_signatures', 'patch_unawaited_coroutine_warnings'
 def patch_asyncio_warnings(): __import__('logging').getLogger('asyncio').disabled = True
 def patch_unawaited_coroutine_warnings(): __import__('warnings').filterwarnings('ignore', "coroutine '.*' was never awaited", RuntimeWarning)
 def _(t, d, a='__text_signature__', u='<unrepresentable>', w='__wrapped__', f='__func__'):

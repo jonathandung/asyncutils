@@ -1,5 +1,4 @@
-'''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
-This is a fake module in the sense that the names in this stub are all `None` at runtime, so do not inherit from its 'protocols'.'''
+'''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
@@ -12,6 +11,9 @@ from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from io import TextIOWrapper, _WrappedBuffer
 from types import FunctionType, TracebackType
 from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+__all__ = ()
+'''This is a fake module in the sense that the names in this stub are all `None` at runtime, so do not inherit from its 'protocols'.
+Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -25,7 +27,7 @@ class AsyncContextManager[T](Protocol):
     '''An asynchronous context manager. Basically a protocol version of :class:`contextlib.AbstractAsyncContextManager` with proper overloads.'''
     async def __aenter__(self) -> T: ...
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool|None: ...
 @type_check_only
@@ -75,7 +77,7 @@ class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
     '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
     def send(self, val: S, /) -> Y: ...
     @overload # type: ignore[override]
-    def throw(self, typ: ValidExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
+    def throw(self, typ: ExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
     @overload
     def throw(self, val: BaseException, /) -> Y: ...
     def close(self) -> None: ...
@@ -284,12 +286,12 @@ class DualContextManager[T]:
     '''Return type of :deco:`util.dualcontextmanager`.'''
     def __enter__(self) -> T: ...
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
+    def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool: ...
     async def __aenter__(self) -> T: ...
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> bool: ...
 @type_check_only
@@ -316,9 +318,9 @@ type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 '''Objects that support (async) iteration.'''
 type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing one of the operators < and >.'''
-type ValidExcType = type[BaseException]
+type ExcType = type[BaseException]
 '''The type of `exc_typ` in :meth:`__exit__` and :meth:`__aexit__` methods.'''
-type Exceptable = ValidExcType|tuple[ValidExcType, ...]
+type Exceptable = ExcType|tuple[ExcType, ...]
 '''Objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to the built-in :func:`open` function.'''
@@ -333,7 +335,7 @@ type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'c
 type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
-'''Names of algorithms used for calculating checksums. The default is :const:`context.MMIOMGR_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
+'''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
 '''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]

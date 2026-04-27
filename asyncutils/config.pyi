@@ -1,5 +1,5 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.types import PartialInterface, ValidExcType
+from ._internal.types import PartialInterface, ExcType
 from concurrent.futures._base import Executor as _
 from random import Random
 from types import TracebackType
@@ -19,7 +19,7 @@ class debugging:
     def entered(self) -> bool: '''Whether the context is entered.'''
     def __enter__(self) -> Self: '''Start debugging. More output is produced; where to depends on the user's own configuration, accessible via :data:`logging_to` and :attr:`debug.level`.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger.'''

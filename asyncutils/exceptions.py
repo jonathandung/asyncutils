@@ -74,7 +74,7 @@ class FaultyConfig(BaseException):
 class VersionError(Exception): ...
 for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
     def _(self, a=A, b=B):
-        if (r := getattr(self, b, None)) is None: raise AttributeError(f"object of type {type(self).__qualname__!r} has no attribute {a!r}")
+        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {type(self).__qualname__!r} has no attribute {a!r}')
         if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
         return r
     _.__name__, _.__qualname__ = A, f'VersionError.{A}'; setattr(VersionError, A, property(_))
@@ -151,29 +151,36 @@ def __getattr__(n, /):
         case 'WarningToError':
             global WarningToError
             class WarningToError:
-                __slots__ = '_cm', '_warn'
-                def __init__(self, /, *_): self._warn, self._cm = _ or (Warning,), None
-                async def __aenter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._warn) # type: ignore[arg-type]
-                async def __aexit__(self, t, /, *_):
+                __slots__ = '_cm', '_w'
+                def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
+                def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # type: ignore[arg-type]
+                def __exit__(self, t, /, *_):
                     if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
-                    c.__exit__(t, *_); return issubclass(t or object, Warning)
+                    c.__exit__(t, *_)
+                async def __aenter__(self): return self.__enter__()
+                async def __aexit__(self, /, *_): self.__exit__(*_)
         case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
-            from asyncutils._internal.helpers import check_methods as c; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
-            def f(*_): a, b = map(frozenset, _); return map(tuple, (a-b, b-a))
+            from asyncutils._internal.helpers import check_methods; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
             class IgnoreErrors:
                 __slots__ = 'but', 'exc'
-                def __init__(self, /, *_, exclude=(), d=frozenset((Exception,)), f=f): self.exc, self.but = f(_ or d, exclude)
+                def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
                 def __enter__(self): return self
-                def __exit__(self, t, /, *_):
-                    if t is None: return False
-                    return issubclass(t, self.exc) and not issubclass(t, self.but)
+                def __exit__(self, t, /, *_): return False if t is None else issubclass(t, self.exc) and not issubclass(t, self.but)
                 def __repr__(self): return f'IgnoreErrors{self.exc!r}.excluding{self.but!r}'
                 async def __aenter__(self): return self
-                async def __aexit__(self, *_): return self.__exit__(*_)
-                def excluding(self, *O, f=f): A, B = f(self.exc, self._combine(O, True)); return type(self)(*A, exclude=B)
-                def combined(self, *O): return type(self)(*self._combine(O))
-                def _combine(self, O, /, e=False, c=c, _=__import__('itertools').chain): t = type(self); return _(self.but if e else self.exc, _.from_iterable((o,) if isinstance(o, type) else o.exc if isinstance(o, t) else o if c(o, '__iter__') else () for o in O))
-            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(CRITICAL), IgnoreErrors()
+                async def __aexit__(self, /, *_): return self.__exit__(*_)
+                def excluding(self, *O, _=__import__('itertools').chain): return type(self)(*self.exc, exclude=_(self.but, O))
+                def combined(self, *O, _=check_methods):
+                    f, g, h, j, p = (S := set()).update, (P := set()).update, S.add, (d := []).append, d.pop
+                    for o in O:
+                        if isinstance(o, IgnoreErrors): f(o.exc); g(o.but)
+                        elif isinstance(o, type): h(o)
+                        elif _(o, '__iter__'): j(o)
+                    while d:
+                        if isinstance(o := p(), type): h(o)
+                        else: f(o.exc); g(o.but)
+                    return type(self)(*S, exclude=P)
+            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
     return globals()[n]

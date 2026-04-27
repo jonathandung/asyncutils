@@ -39,4 +39,144 @@ Some keys can have various types, as detailed by the comments attached. */
   Cycles can be created to switch between flags periodically.
   Ensure %AUTILSCFGPATH% is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
   in a previous config. By that logic, you should also remember to update this correctly when the config file is moved. */
+  context: {
+    // configures individual submodules (contextual constants)
+    altlocks: {
+      circuit_breaker: {
+        default_reset: 30.0,
+        default_max_half_open_calls: 5,
+        default_max_fails: 3
+      },
+      dynamic_throttle: {
+        default_min_rate: 1e2,
+        default_max_rate: 100.0,
+        default_window: 100,
+        default_ubound: 0.75,
+        default_lbound: 0.25,
+        default_ufactor: 1.25,
+        default_lfactor: 0.75,
+        default_jitter: 0.2
+      }
+    },
+    base: {
+      iter_to_agen: {
+        default_use_existing_executor: false,
+        default_may_create_executor: false,
+        default_strict: false
+      },
+      aiter_to_gen: {
+        default_allow_futures: true,
+        default_strict: false
+      }
+    },
+    buckets: {
+      token_bucket_default_consume_tokens: 1.0,
+      leaky_bucket: {
+        default_min_factor: 0.1,
+        default_max_factor: 10.0,
+        default_acquire_tokens: 1.0,
+        default_wait_for_tokens_tokens: 1.0,
+        wait_for_tokens_tick: 0.1,
+        default_ext_can_set_factor: true,
+        adjmap: [
+          [256, [0.15, 1.1, 0.85, 0.9]],
+          [128, [0.23, 1.2, 0.77, 0.81]],
+          [0, [0.3, 1.4, 0.7, 0.73]]
+        ]
+      }
+    },
+    caches: {
+      async_lru_cache_default_maxsize: 128,
+      background_refresh_cache: {
+        default_ttl: 60.0,
+        default_refresh: 15.0
+      }
+    },
+    channels: {
+      observable_default_ntimes_n: 1,
+      event_bus: {
+        default_max_concurrent: 64,
+        stream_default_buffer_size: 100,
+        stream_default_item_timeout: 3.0,
+        stream_default_timeout: 5.0
+      },
+      rendezvous_maintenance_interval: 30.0
+    },
+    compete: {convert_to_coro_iter_default_skip_invalid: true},
+    events: {
+      event_with_value: {
+        default_max_hist: 128,
+        default_recent: 5.0
+      }
+    },
+    func: {
+      timer_default_precision: 7,
+      retry: {
+        default_tries: 3,
+        default_delay: 0.5,
+        default_max_delay: 30.0,
+        default_backoff: 2.0,
+        default_jitter: 0.2
+      },
+      benchmark: {
+        default_times: 3,
+        default_warmup: 0
+      }
+    },
+    io: {memory_mapped_io_manager_default_checksum_alg: "blake2s"},
+    iters: {
+      aunzip_default_put_batch: 16,
+      afrievalds_default_k: 2,
+      tee_default_put_exc: true
+    },
+    locks: {
+      advanced_rate_limit_default_tokens: 1.0,
+      dynamic_bounded_semaphore_default_value: 1,
+      priority_semaphore_default_value: 1,
+      locksmith_default_timeouts: [1.0, 0.1, null]
+    },
+    misc: {gather_with_limited_concurrency_default_max_concurrent: 8},
+    networking: {
+      line_protocol_default_buffer_size: 4096,
+      socket_transport_limits: [2048, 8192]
+    },
+    pool: {
+      pool_default_workers: 4,
+      advanced_pool: {
+        default_max_workers: 5,
+        default_min_workers: 1,
+        threshold_hi: 1.5,
+        threshold_lo: 0.5
+      },
+      connection_pool: {
+        default_max_size: 10,
+        default_min_size: 1,
+        default_max_life: 3600.0,
+        maintenance_interval: 30.0
+      }
+    },
+    processors: {
+      bounded_batch_processor: {
+        default_batch_size: 10,
+        default_max_concurrent: 5
+      },
+      batch_processor: {
+        default_max_size: 128,
+        default_max_time: 1.0
+      },
+      bulkhead: {
+        default_max_queue: 32,
+        default_max_rej: -1
+      }
+    },
+    queues: {
+      password_queue: {
+        default_get_from: "password",
+        default_put_from: "password"
+      }
+    },
+    rwlocks: {rwlock_default_prefer_writers: true},
+    signals: {wait_for_signals_default_signals: [2, 15]},
+    util: {semaphore_default_value: 1}
+  }
 }

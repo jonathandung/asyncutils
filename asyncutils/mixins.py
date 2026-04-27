@@ -6,15 +6,15 @@ from abc import ABCMeta, abstractmethod
 from asyncio import _get_running_loop, iscoroutine, timeout as _timeout
 from functools import cached_property, partial
 class LoopContextMixin(H.LoopMixinBase):
-    __slots__ = 'exiter', 'loop', 'running_tasks'
-    def __init__(self): self.exiter, self.loop, self.running_tasks = H.stop_and_closer(l := H.get_loop_and_set()), l, set()
+    __slots__ = 'exiter', 'running_tasks'
+    def __init__(self): self.exiter, self._loop, self.running_tasks = H.stop_and_closer(l := H.get_loop_and_set()), l, set()
     def make(self, coro): (_ := self.running_tasks).add(t := super().make(coro)); t.add_done_callback(_.discard); return t
     async def __setup__(self): ...
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(self.running_tasks); self.exiter()
 class LoopBoundMixin(H.LoopMixinBase):
-    __slots__ = '_loop',
+    __slots__ = ()
     @property
     def loop(self):
         if (l := getattr(self, '_loop', None)) is None: self._loop = l = H.get_loop_and_set()

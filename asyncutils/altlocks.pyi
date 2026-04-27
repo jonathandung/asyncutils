@@ -1,19 +1,11 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
-from ._internal.types import AsyncLockLike, Exceptable, SupportsIteration, Timer, ValidExcType
+from ._internal.types import AsyncLockLike, Exceptable, SupportsIteration, Timer, ExcType
 from .mixins import AsyncContextMixin, AwaitableMixin
 from _collections_abc import Awaitable, Callable, Coroutine
-from asyncio.locks import BoundedSemaphore
 from collections import deque
 from types import TracebackType
 from typing import Any, NoReturn, Self, final, overload
-__all__ = 'CircuitBreaker', 'DynamicBoundedSemaphore', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
-class DynamicBoundedSemaphore(BoundedSemaphore):
-    '''A subclass of :class:`asyncio.BoundedSemaphore` whose bound can be set by the user via the `bound` property.'''
-    def __init__(self, value: int=...): '''`value`, the initial value of the semaphore, defaults to :const:`context.DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE`.'''
-    @property
-    def bound(self) -> int: ...
-    @bound.setter
-    def bound(self, value: int, /) -> None: ...
+__all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync- and async-compatible context manager.'''
     @property
@@ -21,7 +13,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     def __init__(self, action: str=..., rname: object=...): ...
     def __enter__(self) -> None: '''Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception if the resource is already being guarded; mark the resource as guarded otherwise.'''
     @overload
-    def __exit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
     @classmethod
@@ -44,7 +36,7 @@ class Releasing:
     def __init__(self, lock: AsyncLockLike[Any], /) -> None: ...
     async def __aenter__(self) -> Any: '''Return the return value of the release method of the lock, awaited if it is a coroutine.'''
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Re-enter the lock, propagating errors.'''
 class CircuitBreaker:
@@ -109,7 +101,7 @@ class DynamicThrottle:
         `rand`: Function that takes a float (the jitter) and returns a random number within the interval `jitter` and `-jitter`.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
     def reset(self) -> None: '''Reset the successes and fails.'''

@@ -1,5 +1,5 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV, ValidExcType
+from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV, ExcType
 from .exceptions import IgnoreErrors
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from asyncio.events import AbstractEventLoop
@@ -15,7 +15,7 @@ class anullcontext: # noqa: N801
     '''Simple async-only version of :class:`contextlib.nullcontext`, implemented here to avoid importing :mod:`contextlib`.'''
     async def __aenter__(self) -> None: ...
     @overload
-    async def __aexit__(self, exc_typ: ValidExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:

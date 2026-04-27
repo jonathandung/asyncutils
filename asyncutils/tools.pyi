@@ -1,10 +1,8 @@
 '''Utilities related to the command-line interface and getting metadata for package configuration.'''
 from ._internal.types import CanWriteAndFlush, DumpType, Openable
+from ._internal.unparsed import l as loadf
 from _collections_abc import Callable, Sequence
-__all__ = 'argstr_to_json', 'argv_to_json', 'ext2modname', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'print_cfg_json_format', 'print_cmd_help'
-ext2modname: dict[str, str]
-'''A dictionary mapping file extensions (without the .) to module names to use to parse files of that type as JSON.
-The default module name for a file extension not in this registry is just the extension itself, besides .jsonl files, which should only have one line, being parsed with the standard library :mod:`json`.'''
+__all__ = 'argstr_to_json', 'argv_to_json', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'print_cfg_json_format', 'print_cmd_help'
 def json_to_argv(path: Openable, /) -> list[str]:
     '''Return a list of strings representing the command-line arguments for this module from `path` to the corresponding json file, with as little items as possible.
     For integer file descriptors as `path`, the format is assumed to be plain JSON.
