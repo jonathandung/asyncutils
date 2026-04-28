@@ -3,10 +3,10 @@ from ._internal.types import HashAlgorithm, ExcType
 from _collections_abc import Sequence
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Any, Final, NamedTuple, overload
+from typing import Any, Final, Self, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
-@dataclass(slots=True)
-class Context(NamedTuple):
+@dataclass(slots=True, kw_only=True, match_args=False)
+class Context:
     '''An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
     :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports. :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like
     a sequence. Type annotated as a dataclass for convenience.
@@ -94,6 +94,11 @@ class Context(NamedTuple):
     RWLOCK_DEFAULT_PREFER_WRITERS: bool = ...
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
+    def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
+    @classmethod
+    def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
+    def replace(self, /, **k: Any) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
+    def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''
@@ -117,75 +122,75 @@ def setcontext(ctx: Context, /) -> None: '''Set the current context to for the a
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 These names will not be listed in the :func:`__dir__` function of this submodule, since there are so many of them and more may be added in the future.'''
-CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
-CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
-DYNAMIC_THROTTLE_DEFAULT_MIN_RATE: Final[float]
-DYNAMIC_THROTTLE_DEFAULT_MAX_RATE: Final[float]
-DYNAMIC_THROTTLE_DEFAULT_WINDOW: Final[int]
-DYNAMIC_THROTTLE_DEFAULT_UBOUND: Final[float]
-DYNAMIC_THROTTLE_DEFAULT_LBOUND: Final[float]
-DYNAMIC_THROTTLE_DEFAULT_UFACTOR: Final[float]
-DYNAMIC_THROTTLE_DEFAULT_LFACTOR: Final[float]
+CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
+CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
 DYNAMIC_THROTTLE_DEFAULT_JITTER: Final[float]
-ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR: Final[bool]
-ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR: Final[bool]
-ITER_TO_AGEN_DEFAULT_STRICT: Final[bool]
+DYNAMIC_THROTTLE_DEFAULT_LBOUND: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_LFACTOR: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_MAX_RATE: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_MIN_RATE: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_UBOUND: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_UFACTOR: Final[float]
+DYNAMIC_THROTTLE_DEFAULT_WINDOW: Final[int]
 AITER_TO_GEN_DEFAULT_ALLOW_FUTURES: Final[bool]
 AITER_TO_GEN_DEFAULT_STRICT: Final[bool]
-TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS: Final[float]
-LEAKY_BUCKET_DEFAULT_MIN_FACTOR: Final[float]
-LEAKY_BUCKET_DEFAULT_MAX_FACTOR: Final[float]
+ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR: Final[bool]
+ITER_TO_AGEN_DEFAULT_STRICT: Final[bool]
+ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR: Final[bool]
+LEAKY_BUCKET_ADJMAP: Sequence[tuple[float, tuple[float, float, float, float]]]
 LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS: Final[float]
+LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR: Final[bool]
+LEAKY_BUCKET_DEFAULT_MAX_FACTOR: Final[float]
+LEAKY_BUCKET_DEFAULT_MIN_FACTOR: Final[float]
 LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS: Final[float]
 LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK: Final[float]
-LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR: Final[bool]
-LEAKY_BUCKET_ADJMAP: Final[Sequence[tuple[float, tuple[float, float, float, float]]]]
+TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS: Final[float]
 ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE: Final[int]
-BACKGROUND_REFRESH_CACHE_DEFAULT_TTL: Final[float]
 BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH: Final[float]
-OBSERVABLE_DEFAULT_NTIMES_N: Final[int]
+BACKGROUND_REFRESH_CACHE_DEFAULT_TTL: Final[float]
 EVENT_BUS_DEFAULT_MAX_CONCURRENT: Final[int]
 EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE: Final[int]
 EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT: Final[float|None]
 EVENT_BUS_STREAM_DEFAULT_TIMEOUT: Final[float|None]
+OBSERVABLE_DEFAULT_NTIMES_N: Final[int]
 RENDEZVOUS_MAINTENANCE_INTERVAL: Final[float]
 CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID: Final[bool]
 EVENT_WITH_VALUE_DEFAULT_MAX_HIST: Final[int]
 EVENT_WITH_VALUE_DEFAULT_RECENT: Final[float]
-TIMER_DEFAULT_PRECISION: Final[int]
-RETRY_DEFAULT_TRIES: Final[int]
-RETRY_DEFAULT_DELAY: Final[float]
-RETRY_DEFAULT_MAX_DELAY: Final[float]
-RETRY_DEFAULT_BACKOFF: Final[float]
-RETRY_DEFAULT_JITTER: Final[float]
 BENCHMARK_DEFAULT_TIMES: Final[int]
 BENCHMARK_DEFAULT_WARMUP: Final[int]
+RETRY_DEFAULT_BACKOFF: Final[float]
+RETRY_DEFAULT_DELAY: Final[float]
+RETRY_DEFAULT_JITTER: Final[float]
+RETRY_DEFAULT_MAX_DELAY: Final[float]
+RETRY_DEFAULT_TRIES: Final[int]
+TIMER_DEFAULT_PRECISION: Final[int]
 MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: Final[HashAlgorithm]
-AUNZIP_DEFAULT_PUT_BATCH: Final[int]
 AFRIEVALDS_DEFAULT_K: Final[int]
+AUNZIP_DEFAULT_PUT_BATCH: Final[int]
 TEE_DEFAULT_PUT_EXC: Final[bool]
 ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: Final[float]
 DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE: Final[int]
-PRIORITY_SEMAPHORE_DEFAULT_VALUE: Final[int]
 LOCKSMITH_DEFAULT_TIMEOUTS: Final[tuple[float|None, float|None, float|None]]
+PRIORITY_SEMAPHORE_DEFAULT_VALUE: Final[int]
 GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT: Final[int]
 LINE_PROTOCOL_DEFAULT_BUFFER_SIZE: Final[int]
 SOCKET_TRANSPORT_LIMITS: Final[tuple[int, int]]
-POOL_DEFAULT_WORKERS: Final[int]
 ADVANCED_POOL_DEFAULT_MAX_WORKERS: Final[int]
 ADVANCED_POOL_DEFAULT_MIN_WORKERS: Final[int]
+ADVANCED_POOL_FACTOR: Final[float]
 ADVANCED_POOL_THRESHOLD_HI: Final[float]
 ADVANCED_POOL_THRESHOLD_LO: Final[float]
-ADVANCED_POOL_FACTOR: Final[float]
+CONNECTION_POOL_DEFAULT_MAX_LIFE: Final[float]
 CONNECTION_POOL_DEFAULT_MAX_SIZE: Final[int]
 CONNECTION_POOL_DEFAULT_MIN_SIZE: Final[int]
-CONNECTION_POOL_DEFAULT_MAX_LIFE: Final[float]
 CONNECTION_POOL_MAINTENANCE_INTERVAL: Final[float]
-BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE: Final[int]
-BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT: Final[int]
+POOL_DEFAULT_WORKERS: Final[int]
 BATCH_PROCESSOR_DEFAULT_MAX_SIZE: Final[int]
 BATCH_PROCESSOR_DEFAULT_MAX_TIME: Final[float]
+BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE: Final[int]
+BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT: Final[int]
 BULKHEAD_DEFAULT_MAX_QUEUE: Final[int]
 BULKHEAD_DEFAULT_MAX_REJ: Final[int]
 PASSWORD_QUEUE_DEFAULT_GET_FROM: Final[str]

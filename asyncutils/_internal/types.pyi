@@ -12,7 +12,7 @@ from io import TextIOWrapper, _WrappedBuffer
 from types import FunctionType, TracebackType
 from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 __all__ = ()
-'''This is a fake module in the sense that the names in this stub are all `None` at runtime, so do not inherit from its 'protocols'.
+'''This is a fake module, and none of its symbols exist at runtime.
 Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used.'''
 @type_check_only
 class SupportsLT(Protocol):

@@ -150,6 +150,7 @@ The extras are listed below for reference:
 * dlint: Dependencies for linting documentation source files
 * docs: Documentation dependencies, including sphinx and some of its plugins, along with dlint
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
+* ptw: pytest-watch
 * json5: The JSON5 parser, specifically used to read format.json5 in tests.
 * pub: Dependencies for building and publishing packages to PyPI
 * test: Test dependencies, including pytest and related plugins

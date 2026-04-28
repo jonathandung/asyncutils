@@ -4,9 +4,10 @@ from asyncutils._internal.unparsed import l
 from asyncutils._internal.submodules import tools_all as __all__
 import shlex as s
 get_cmd_help = p.format_help
-def loadf(p, e='json', /, _=l): return _(p.decode() if isinstance(p, bytes) else p, e if isinstance(p, int) else None)
-def json_to_argv(p, /, *, d='.', e=_):
-    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'__fspath__ returned {e(p)} instead of str or bytes')
+def loadf(p, e='json', /, l=l, _=_):
+    if (f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes)): return l(p.decode() if isinstance(p, bytes) else p, e if isinstance(p, int) else None)
+    raise TypeError(f'__fspath__ returned {_(p)} instead of str or bytes')
+def json_to_argv(p, /, *, d='.'):
     l, f = (p := loadf(p).pop)('log_to', s := 'STDERR'), (r := []).append
     if p('no_log', False) or l == 'NULL': f('-n')
     elif l != s:

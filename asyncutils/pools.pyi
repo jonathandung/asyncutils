@@ -99,7 +99,7 @@ class ConnectionPool[T, **P](LoopBoundMixin):
     def minsize(self) -> int: ...
     @property
     def maxlife(self) -> float: ...
-class CallbackAccumulator[T, **P](deque, AsyncContextMixin[CallbackAccumulator[T, P]]):
+class CallbackAccumulator[T, **P](deque[T], AsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class store callbacks and call them at once when the context manager exits.
     To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
     The behaviour of this class as a :class:`~collections.deque` is an implementation detail.

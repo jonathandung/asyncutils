@@ -17,7 +17,7 @@ def test_submods_lazy_loading():
     assert (t := type(module('constants'))) is type(module('config')) and t.__module__ == 'builtins' and t.__name__ == t.__qualname__ == 'module'
 def test_others(cfgjson, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
-    assert mod.types.All is mod.types.foo is mod.running_console.get() is mod.running_console.unset() is None
+    assert mod.running_console.get() is mod.running_console.unset() is None
     assert mod.submodules.cli_all == ('run',)
     monkeypatch.setenv('AUTILSCFGPATH', cfgjson)
     N = __import__('importlib').reload(mod.unparsed).N

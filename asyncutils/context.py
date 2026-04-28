@@ -6,6 +6,9 @@ class Context:
     __slots__ = tuple(C); exec(f'''def __new__(cls, /, *, {", ".join(f"{k}={v!r}" for k, v in C.items())}):\n\t(_ := object.__new__(cls)).{"\n\t_.".join(f"{k} = {k}" for k in __slots__)}\n\treturn _''') # noqa: S102
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.context.Context')
     def __getattr__(self, n, /): return object.__getattribute__(self, n.upper())
+    def __setattr__(self, n, v, /):
+        if (n := n.upper()) in all_contextual_consts: object.__setattr__(self, n, v)
+        else: raise AttributeError(f'{type(self).__name__!r} object has no attribute {n!r}')
     def replace_from_dct(self, d, /, _=all_contextual_consts):
         D = self.asdict()
         for n, v in d.items():

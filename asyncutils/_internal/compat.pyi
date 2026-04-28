@@ -1,4 +1,4 @@
-# mypy: disable-error-code="assignment"
+# mypy: disable-error-code="assignment,attr-defined"
 '''Compatibility shims for older Python versions.'''
 import sys as s, typing as t
 from functools import partial
