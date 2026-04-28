@@ -22,7 +22,7 @@ def test_ver(ver, tmp_path):
 def test_fmt(ver):
     assert (_ := str(ver)) == f'{ver:0}.{ver:1}.{ver:2}' == f'{ver:maj}.{ver:min}.{ver:patch}' == ver.representation.removeprefix('asyncutils v')
     assert ver == VersionInfo(_)
-    assert not (ver := ver.next_major()).is_unstable
+    assert not (ver := ver.next_major()).is_api_unstable
     assert ver[0] == (ver := ver.next_minor())[0]
     assert (ver[0], ver[1]) == (ver := ver.next_patch())[:2]
     assert hex(int(_ := f'{ver:x}', 0)) == _ == f'{ver:hex}'

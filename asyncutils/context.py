@@ -22,6 +22,7 @@ class Context:
     def from_dct(cls, d, /): return cls(**{k.upper(): v for k, v in d.items()})
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
     def replace(self, /, **k): return self.replace_from_dct(k)
+    def pprint(self, *, file=__import__('sys').stdout, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True)): print(f'Context(\n {pp.pformat(self.asdict())[1:-1]}\n)', file=file) # noqa: B008
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
 def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
@@ -29,7 +30,6 @@ def getcontext(_=_, d=Context()): # noqa: B008
 def setcontext(c, /, _=_):
     if not isinstance(c, Context): raise TypeError('setcontext: ctx must be an instance of asyncutils.context.Context')
     _.set(c)
-f((getcontext, ''), (setcontext, 'ctx, /'))
 class localcontext:
     __slots__ = 'new_ctx', 'saved_ctx'
     def __init__(self, ctx=None, **k):
@@ -42,4 +42,5 @@ class nonreusablelocalcontext(localcontext):
     __slots__ = ()
     def __exit__(self, /, *_): super().__exit__(*_); del self.new_ctx
 def __getattr__(n, /, _=getcontext): return getattr(_(), n)
+f((getcontext, ''), (setcontext, 'ctx, /'), (__getattr__, 'name, /'))
 del _, f, k, C

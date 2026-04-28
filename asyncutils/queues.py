@@ -275,9 +275,9 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     def filter(self, pred=bool, *, lifo=False):
         audit(f'{fullname(self)}.filter', id(self), fullname(pred))
         q = (SmartLifoQueue if lifo else SmartQueue)(self.maxsize)
-        async def feed():
+        async def feed(f=self.smart_put, g=q.smart_put, h=self.get, _=pred):
             with ignore_qshutdown:
-                while True: await (self if pred(i := await self.get()) else q).smart_put(i)
+                while True: await (f if _(i := await h()) else g)(i)
         self.make(feed()); return q
     def enumerate(self, *, lifo=False):
         audit(f'{fullname(self)}.enumerate', id(self))

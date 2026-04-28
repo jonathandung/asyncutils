@@ -7,9 +7,11 @@ from asyncutils._internal.patch import patch_function_signatures as f
 from asyncutils._internal.submodules import signals_all as __all__
 from asyncio.tasks import wait_for
 async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=None, logger=log, _i=IgnoreErrors(TypeError)): # noqa: PLR0912,PLR0915
-    import sys as M; from signal import Signals as C, signal as _s, getsignal as _g; M.audit('asyncutils.signals.wait_for_signal', S := (*S, *(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs))); c, x = None, 0
+    import sys as M; from signal import Signals as C, signal as _s, getsignal as _g
+    (S := set(S)).update(getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs)
+    M.audit('asyncutils.signals.wait_for_signal', S); c, x = None, 0
     if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
-    a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(s)
+    a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(C(s))
     if M.platform == 'win32':
         logger.info('signals.wait_for_signal has limited functionality on windows')
         for s in S:

@@ -416,7 +416,7 @@ Submodules:
 
   Functions:
   - get_future
-  - new_tasks
+  - new_eager_tasks
   - to_sync
   - to_async
   - to_sync_from_loop
@@ -430,6 +430,7 @@ Submodules:
   - safe_cancel
   - transient_block
   - transient_block_from_loop
+  - wrap_in_coro
 
 - version
 

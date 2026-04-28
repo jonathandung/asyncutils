@@ -1,8 +1,8 @@
-'''Miscellaneous public constants.'''
+'''Exports sentinels and public constants.'''
 from ._internal.types import Executor, RaiseType, SyncAwaitType, NoDefaultType
 from _collections_abc import Callable
 from threading import Lock
-from typing import Final, Literal, NoReturn, Self, overload
+from typing import Final, NoReturn, Self
 __all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`iters.aguessmin` and :func:`iters.aguessmax`.'''
@@ -25,10 +25,7 @@ class sentinel_base:
     def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, or `None` if there is none.'''
     @property
     def back(self) -> str|None: '''The unqualified name of the sentinel, or `None` if there is none.'''
-    @overload
-    def is_(self, other: Self, /) -> bool: ... # type: ignore[overload-overlap]
-    @overload
-    def is_(self, other: object, /) -> Literal[False]: ''':func:`operator.is_` for sentinels.'''
+    def is_(self, other: object, /) -> bool: ''':func:`operator.is_` for sentinels.'''
 RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
 SYNC_AWAIT: Final[SyncAwaitType]

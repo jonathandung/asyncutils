@@ -26,15 +26,15 @@ class event_loop: # noqa: N801
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]=...) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
 @overload
-def iter_to_agen[T, R](it: AsyncGenerator[T, R], sentinel: T=..., *, strict: Literal[False]=...) -> AsyncGenerator[T, R]: ...
+def iter_to_agen[T, R](it: AsyncGenerator[T, R], sentinel: T=..., *, use_existing_executor: bool=..., create_executor: bool=..., strict: Literal[False]=...) -> AsyncGenerator[T, R]: ...
 @overload
-def iter_to_agen[T](it: AsyncIterable[T], sentinel: T=..., *, strict: Literal[False]=...) -> AsyncGenerator[T]: ...
+def iter_to_agen[T](it: AsyncIterable[T], sentinel: T=..., *, use_existing_executor: bool=..., create_executor: bool=..., strict: Literal[False]=...) -> AsyncGenerator[T]: ...
 @overload
 def iter_to_agen[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGenerator[T]: ...
 @overload
 def iter_to_agen[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGenerator[T]:
     '''Convert the (async) iterable `it` to an async generator as non-blockingly as possible.
-    If `it` is already an async iterator, it is returned as is.
+    If `it` is an async generator and `sentinel` is not passed, it is returned as is.
     Values sent to the return async generator will be passed to the original.
     The async generator will stop when it encounters an item identical to `sentinel`.
     When `use_existing_executor=True` is passed (default :const:`context.ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR`), the function will attempt to use
@@ -46,8 +46,8 @@ def aiter_to_gen[T, R](ait: AsyncGenerator[T, R], *, use_futures: bool=..., loop
 @overload
 def aiter_to_gen[T](ait: AsyncIterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=..., strict: bool=...) -> Generator[T]: ...
 @overload
-def aiter_to_gen[T](ait: Iterable[T], *, strict: Literal[False]=...) -> Generator[T]:
-    '''Convert an async iterable `ait` to a sync generator, or return the native iterator for the object if it is already a sync iterable.
+def aiter_to_gen[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=..., strict: Literal[False]=...) -> Generator[T]:
+    '''Convert an async iterable `ait` to a sync generator
     If the event loop is currently running and `use_futures` is `False` (default :const:`context.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES`), raise :exc:`RuntimeError` to clarify that :class:`concurrent.futures.Future` must be used in this case, one per item yielded,
     which is somewhat inefficient, but that can't be helped.
     If `strict` is `True` (default :const:`context.AITER_TO_GEN_DEFAULT_STRICT`), only async iterables are accepted.'''

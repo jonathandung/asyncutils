@@ -1,6 +1,6 @@
 # type: ignore
 __lazy_modules__ = frozenset(('_heapq', 'asyncio'))
-from asyncutils import Critical, LoopBoundMixin, LockForceRequest, LockMixin, LockWithOwnerMixin, getcontext, safe_cancel_batch, CRITICAL
+from asyncutils import Critical, LoopBoundMixin, LockForceRequest, LockMixin, LockWithOwnerMixin, getcontext, safe_cancel_batch, wrap_in_coro, CRITICAL
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set, subscriptable
@@ -230,9 +230,7 @@ class LocksmithBase:
             if lock.locked() and iscoroutine(a := lock.release()): await a
     async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
     async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(lock), id(lock))
-    def wrap_task(self, a, /):
-        async def f(): return await a
-        return self._loop.create_task(f())
+    def wrap_task(self, a, /): return self._loop.create_task(wrap_in_coro(a))
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)

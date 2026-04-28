@@ -1,7 +1,7 @@
 from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import constants_all as __all__
-RECIP_E, EXECUTORS_FROZENSET = 0.36787944117144233, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
+RECIP_E, EXECUTORS_FROZENSET = 0.36787944117144233, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
 class sentinel_base:
     _can_instantiate = False; __slots__ = '__name',
     def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframe):
@@ -17,7 +17,7 @@ class sentinel_base:
     def name(self): return self.__name
     @classmethod
     def _assert_can_instantiate(cls):
-        if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}') from None
+        if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')
     def __repr__(self): return f'<{fullname(self)} {self.__name!r} at {id(self):#x}>'
     def __str__(self): return getattr(self, '_sentinel_base__name', '<unbound>')+(' <private>'*self.is_private)
     def __set_name__(self, owner, name, /, _='NOTE: The following is considered bad practice:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, consider:\nclass {0}:\n{1} = {2}()\n'.format):
@@ -43,7 +43,7 @@ class sentinel_base:
     @property
     def back(self): return getattr(self, '_sentinel_base__name', '').rpartition('.')[2] or None
     def is_(self, o, /): return self is o
-    P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}'))
+    P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}')); P.patch_method_signatures((__set_name__, 'owner, name, /'))
 class _sentinel(sentinel_base):
     __slots__ = ()
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
@@ -51,4 +51,4 @@ class _sentinel(sentinel_base):
 _NO_DEFAULT, RAISE, SYNC_AWAIT = map(_sentinel, ('_NO_DEFAULT', 'RAISE', 'SYNC_AWAIT'))
 CLOSED, HALF_OPEN, OPEN = range(3)
 _sentinel._can_instantiate = False
-del _sentinel
+del _sentinel, P

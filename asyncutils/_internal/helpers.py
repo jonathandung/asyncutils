@@ -33,10 +33,11 @@ def verify_compat(v, /, _='This module is only for python %s or under'):
             if (c := frame.f_back.f_code).co_filename.endswith(('mypy/stubtest.py', 'mypy\\stubtest.py')) and c.co_qualname == 'silent_import_module': return True
             break
     raise ImportError(_%v)
+async def simple_wrap(aw, /): return await aw
 class LoopMixinBase:
     __slots__ = '_loop',
     @property
     def loop(self): return self._loop
-    def make(self, coro): return self.loop.create_task(coro)
+    def make(self, aw): return self.loop.create_task(simple_wrap(aw))
     def make_fut(self): return self.loop.create_future()
-    def make_multiple(self, C): yield from map(self.make, C)
+    def make_multiple(self, aws): yield from map(self.make, aws)

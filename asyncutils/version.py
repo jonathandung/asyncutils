@@ -91,7 +91,7 @@ class VersionInfo(str): # noqa: FURB189
         if not 0 <= p < _ > m >= 0: raise OverflowError(f'cannot pack version {self} into an integer')
         return p|m<<8|M<<16
     @property
-    def is_unstable(self): return self[0] == 0
+    def is_api_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
     representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):

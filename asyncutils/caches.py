@@ -1,5 +1,6 @@
 __lazy_modules__ = frozenset(('asyncio', 'functools'))
 from asyncutils import CRITICAL, Critical, LoopContextMixin, event_loop, getcontext, safe_cancel, to_async
+from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import caches_all as __all__
 from asyncio import CancelledError, Event, Lock, gather, iscoroutine, sleep
@@ -59,6 +60,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         async with self._lock: return self._cache.pop(key, None)
     async def clear(self):
         async with self._lock: self._cache.clear()
+    P.patch_method_signatures((__init__, 'ttl=None, refresh=None, *, processor=None, default_loader=None, timer={}'), (configure, 'ttl, refresh, processor=None'), (load_item, 'key'))
 class AsyncLRUCache:
     __slots__ = '_caches', '_factory', '_loopctx', '_make_key', '_timer', '_timestamps', '_ttl'
     def __init__(self, maxsize=None, ttl=None, *, typed=False, timer=monotonic):
@@ -81,4 +83,5 @@ class AsyncLRUCache:
     def __del__(self): self._loopctx.__exit__(None, None, None)
     @property
     def loop(self): return self._loopctx.__enter__()
+    P.patch_method_signatures((__init__, 'maxsize=None, ttl=None, *, typed=False, timer={}'), (__call__, 'func, /'))
 del defaultdict, namedtuple

@@ -86,9 +86,9 @@ class Observable(LoopContextMixin):
         async def debounced(*a, **k):
             nonlocal t
             if t is not None: await safe_cancel(t)
-            async def _notifier():
+            async def notifier():
                 with ignore_cancellation: await sleep(delay); await f(*a, **k)
-            t = self.make(_notifier())
+            t = self.make(notifier())
         self.subscribe_nowait(debounced); return _
     def throttle(self, interval, ret_exc=True):
         f, t = partial((_ := type(self)()).notify, _ret_exc_=ret_exc), 0
@@ -218,7 +218,7 @@ class EventBus(LoopContextMixin):
             if iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    async def subscribe_until(self, fut, subscriber, event_type=None, till_permanent=None, _=ignore_cancellation.combined(TimeoutError)): # noqa: B008
+    async def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
             with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
@@ -239,7 +239,7 @@ class EventBus(LoopContextMixin):
         except QueueShutDown: L.info('event stream of %s has been shut down', self.name, exc_info=True)
         except TimeoutError: L.exception('event stream of %s is stopping because of timeout in waiting for item', self.name)
         finally: F.set_result(None); await t
-    async def shutdown(self, immediate=False, timeout=None, preserve_stats=False):
+    async def shutdown(self, immediate=False, *, timeout=None, preserve_stats=False):
         if self._is_shutdown: return
         self._is_shutdown, f = True, self._sem.acquire; self.stop_audit(); self._middlewares.clear()
         async with self._lock: self.clear()
@@ -267,7 +267,7 @@ class EventBus(LoopContextMixin):
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
     def __cleanup__(self): return self.shutdown(immediate=True)
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False'), (subscribe_until, 'fut, subscriber, event_type=None, *, till_permanent=None')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'

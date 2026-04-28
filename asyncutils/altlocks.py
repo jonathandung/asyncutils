@@ -2,6 +2,7 @@ __lazy_modules__ = frozenset(('functools',))
 from asyncutils import AsyncContextMixin, AwaitableMixin, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical, getcontext, iter_to_agen, CRITICAL
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import altlocks_all as __all__
 from _collections import deque # type: ignore[import-not-found]
@@ -10,6 +11,7 @@ from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
+s = 'exc_typ, exc_val, exc_tb, /'
 class Releasing:
     __slots__ = '_lock',
     def __init__(self, lock, /): self._lock = lock
@@ -28,6 +30,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
         self.guarded = False
     @classmethod
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
+    P.patch_method_signatures((__exit__, s))
 class UniqueResourceGuard(ResourceGuard):
     _cache, __slots__ = {}, ()
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.altlocks.UniqueResourceGuard')
@@ -67,6 +70,7 @@ class CircuitBreaker:
                     return r
         return wraps(f)(wrapper)
     def _set(self, state, /): self.state, self.fails = state, 0
+    P.patch_classmethod_signatures((__new__, 'name, /, max_fails=None, reset=None, *, exc={}, max_half_open_calls=None'))
 class StatefulBarrier(AwaitableMixin):
     __slots__ = '_broken', '_cond', '_count', '_exc', '_initstate', '_parties', '_state'
     def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._cond, self._initstate, self._broken = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Condition(), initstate, False
@@ -122,10 +126,11 @@ class DynamicThrottle:
     @property
     def fails(self): return self._fails
     async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._last_call)*(1.0+self._randf(self._jitter))); self._last_call = self.ctime
-    async def __aexit__(self, e, *_):
+    async def __aexit__(self, e, /, *_):
         async with self._lock:
             if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._ufactor if (r := s/t) > self._ubound else self._lfactor if r < self._lbound else 1.0; self._successes = self._fails = 0
             if e is None: self._successes += 1
             else: self._fails += 1
     def reset(self): self._successes = self._fails = 0; self._last_call = self.ctime-1.0/self._rate
-del _randinst, count
+    P.patch_function_signatures((__aexit__, s))
+del _randinst, count, P

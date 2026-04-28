@@ -19,15 +19,14 @@ class VersionInfo(str): # noqa: FURB189
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # type: ignore[override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload # type: ignore[override]
-    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ... # type: ignore[overload-overlap]
+    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
     @overload
-    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: ...
-    @overload
-    def __getitem__(self, idx: int, /) -> NoReturn:
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]:
         '''Depending on the value of `idx`, corresponds to the following attributes:
         0 -> :attr:`major`
         1 -> :attr:`minor`
-        2 -> :attr:`patch`'''
+        2 -> :attr:`patch`
+        Sliced accordingly.'''
     def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
     def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
     def __gt__(self, other: Any, /) -> bool: '''Whether self succeeds the other as a version.'''
@@ -83,7 +82,7 @@ class VersionInfo(str): # noqa: FURB189
     def next_patch(self) -> Self: '''The patch version following this version.'''
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
     def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
-    def shelve(self, path: Openable, key: int=...) -> None: '''Store this version into the specified `path` with `key`, which can be any integer.'''
+    def shelve(self, path: Openable, key: int=...) -> None: '''Store this version into the specified `path`, non-cryptographically transforming the bytes with `key`, which can be any integer.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''
     @classmethod
@@ -97,7 +96,7 @@ class VersionInfo(str): # noqa: FURB189
     @property
     def representation(self) -> str: '''String representation of the version for pretty printing, as displayed when using ``asyncutils --version``.'''
     @property
-    def is_unstable(self) -> bool: '''`True` only in alpha and beta versions.'''
+    def is_api_unstable(self) -> bool: '''Return whether the version is before v1.0.'''
     @property
     def parts(self) -> tuple[int, int, int]: '''The tuple `(major, minor, patch)`.'''
     @property

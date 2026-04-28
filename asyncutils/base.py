@@ -23,10 +23,10 @@ class event_loop: # noqa: N801
     @classmethod
     def from_flags(cls, flags, /, _=c): r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19) # noqa: PLR0913
-    def __enter__(self, _m='event_loop context already entered'):
+    def __enter__(self, _='event_loop context already entered'):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop
-            raise RuntimeError(_m)
+            raise RuntimeError(_)
         if (l := _get_running_loop()) is None: set_event_loop(l := self._get_unclosed_loop())
         elif f&4 and l.is_running(): l = self._get_unclosed_loop()
         else: f |= self._SHOULD_CLOSE
@@ -79,7 +79,7 @@ class event_loop: # noqa: N801
             if self.__exit__(*exc_info()) and b: _g(_w, N)
         elif b: _f(_d, N)
     def __reduce__(self, /): return self.from_flags, (self._flags,)
-    P.patch_method_signatures((__enter__, ''), (__exit__, 'typ, val, tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}'))
+    P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'), (__del__, ''), (_get_unclosed_loop, 'factory={}')); P.patch_classmethod_signatures((from_flags, 'flags, /'))
 def f(n):
     async def adisembowel(it, /):
         if callable(p := getattr(it, n, None)):
@@ -89,7 +89,7 @@ def f(n):
             async for i in iter_to_agen(it): yield i
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
-async def safe_cancel_batch(t, *, callback=None, disembowel=False, raising=False, _=c):
+async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=False, _=c):
     audit('asyncutils.base.safe_cancel_batch', _(t)); f = (l := []).append
     async for _ in (adisembowel if disembowel else iter_to_agen)(t):
         if not _.done(): _.cancel(); f(_)
@@ -196,7 +196,7 @@ async def drop(it, n, *, raising=False, _=L.debug, m='base.drop ran out of items
         else: _(m)
 async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_agen(it): yield start, _; start += step
-P.patch_function_signatures((iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))
+P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))
 yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)})), sleep.__get__(float('inf'))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
 _.__qualname__ = _.__name__ = 'dummy_task'

@@ -80,11 +80,9 @@ class EventBus(LoopContextMixin):
     @staticmethod
     def is_valid_event_type(event_type: object) -> TypeGuard[str|WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
     @overload
-    def is_subscribed(self, subscriber: SpecificSubscriber, event_type: str=...) -> bool: ... # type: ignore[overload-overlap]
+    def is_subscribed(self, subscriber: SpecificSubscriber, event_type: str=...) -> bool: ...
     @overload
-    def is_subscribed(self, subscriber: WildcardSubscriber, event_type: WildcardType=...) -> bool: ... # type: ignore[overload-overlap]
-    @overload
-    def is_subscribed(self, subscriber: object, event_type: object=...) -> Literal[False]: '''Whether the callback is subscribed for the event type, or subscribed for any event type if event_type is not passed.'''
+    def is_subscribed(self, subscriber: WildcardSubscriber, event_type: WildcardType=...) -> bool: '''Whether the callback is subscribed for the event type, or subscribed for any event type if event_type is not passed.'''
     @property
     def total_subscribers(self) -> int: '''The total number of subscribers for any event type.'''
     @property
@@ -155,9 +153,9 @@ class EventBus(LoopContextMixin):
         '''Wait for an event of the specified event type that satisfies the condition to occur.
         Note that the function completes once the subscription has registered and returns a task, which will be cancelled on timeout.'''
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, till_permanent: float|None=...) -> Task[T]: ...
+    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, *, till_permanent: float|None=...) -> Task[T]: ...
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., till_permanent: float|None=...) -> Task[T]:
+    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., *, till_permanent: float|None=...) -> Task[T]:
         '''Add the subscriber under the event type (as a wildcard if `event_type` is :const:`WILDCARD` or not passed) and return a task.
         The subscriber is removed once `fut` completes, and its result returned through the returned task.
         After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
@@ -172,7 +170,7 @@ class EventBus(LoopContextMixin):
         '''Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
         If `event_type` is not passed, the stream will include the event type in the output.
         `timeout`, `item_timeout` and `bufsize` default to :const:`context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :const:`context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :const:`context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.'''
-    async def shutdown(self, immediate: bool=..., timeout: float|None=..., preserve_stats: bool=...) -> None:
+    async def shutdown(self, immediate: bool=..., *, timeout: float|None=..., preserve_stats: bool=...) -> None:
         '''Gracefully shut down the event bus.
         After the shutdown, publications fail fast and middlewares are cleared.
         This waits for as many subscriber callbacks to complete as possible, within `timeout` seconds if specified.
@@ -208,5 +206,5 @@ class Rendezvous[T]:
     def __length_hint__(self) -> int: '''Approximate number of operations pending for :func:`_operator.length_hint`.'''
     def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
-        '''Put in a value to the rendezvous and get a different one back.
-        If `asap` is `True`, return without necessarily having completed the put.'''
+        '''Put in a value to the rendezvous and get and return a different one.
+        If `asap` is `True`, return once a value is available, without necessarily having completed the put.'''

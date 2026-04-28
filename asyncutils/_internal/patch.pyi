@@ -10,5 +10,5 @@ patch_method_signatures: Final[SigPatcher]
 ''':func:`patch_function_signatures`, but for instance methods.
 A `self` parameter (positional-only) is automatically prepended to each of the passed signatures.'''
 patch_classmethod_signatures: Final[SigPatcher]
-''':func:`patch_function_signatures`, but for class methods.
+''':func:`patch_function_signatures`, but for class methods. `classmethod` objects, though not callable, are supported.
 A `cls` parameter (positional-only) is automatically prepended to each of the passed signatures.'''

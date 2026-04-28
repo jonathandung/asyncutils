@@ -14,8 +14,6 @@ __all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequired
 class LoopContextMixin(LoopMixinBase):
     ''':meth:`__setup__` will be called when the context is entered and :meth:`__cleanup__` when it is exited.'''
     @property
-    def exiter(self) -> Callable[[], None]: '''A function that stops and closes the underlying loop when called.'''
-    @property
     def running_tasks(self) -> set[Task[Any]]: '''A set of all tasks currently running in the underlying loop.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...

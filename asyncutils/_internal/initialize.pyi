@@ -13,7 +13,7 @@ class Module:
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: ...
     def load(self) -> ModuleType: '''Load the submodule and replace the dummy with the actual submodule in :data:`~asyncutils.submodules_map`. Triggered on attribute access or an explicit call.'''
     @property
-    def __all__(self) -> All: ...
-    def __dir__(self) -> All: ...
+    def __all__(self) -> All: '''The names that go into the global namespace when `from asyncutils.submod import *` is executed.'''
+    def __dir__(self) -> All: '''Return :attr:`__all__`, as opposed to also the default behaviour of returning the dunder attributes each module has.'''
 a: Final[list[str]]
 s: Final[dict[Submodule, Module|ModuleType]]

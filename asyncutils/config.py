@@ -88,15 +88,15 @@ class debugging:
     def entered(self): return self.orig_level is not None
     def __init__(self): self.orig_level = self.orig_name = None
     def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l, _d=D):
-        if self.entered: _l.warning('debugging: context manager already entered')
+        if self.entered: _l.warning('config.debugging: context manager already entered')
         else:
             self.orig_name, self.orig_level = _m(l := _l.level), l; _s(_d)
-            if l != _d: _l.debug('debugging: debug mode entered')
+            if l != _d: _l.debug('config.debugging: debug mode entered')
         return self
     def __exit__(self, /, *_, _s=set_logger_level, _l=l, _L=D):
-        if not self.entered: return _l.warning('debugging: context manager not entered')
-        if (l := self.orig_level) != _l.level == _L: _l.debug('debugging: exiting debug mode'); _s(l)
-        else: _l.warning('debugging: user already exited debug mode; original level was %s', self.orig_name)
+        if not self.entered: return _l.warning('config.debugging: context manager not entered')
+        if (l := self.orig_level) != _l.level == _L: _l.debug('config.debugging: exiting debug mode'); _s(l)
+        else: _l.warning('config.debugging: user already exited debug mode; original level was %s', self.orig_name)
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))

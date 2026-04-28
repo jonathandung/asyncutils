@@ -1,16 +1,17 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, DualContextManager, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV, ExcType
+from ._internal.types import AsyncLockLike, DualContextManager, ToSyncFromLoopRV, TransientBlockFromLoopRV, ExcType
 from .exceptions import IgnoreErrors
-from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
+from _collections_abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Coroutine, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Lock, Semaphore
 from asyncio.tasks import Task
 from types import TracebackType
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'anullcontext', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop'
+__all__ = 'aiter_from_f', 'anullcontext', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
+async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable `aw`, such that it can be passed to :func:`asyncio.create_task`.'''
 class anullcontext: # noqa: N801
     '''Simple async-only version of :class:`contextlib.nullcontext`, implemented here to avoid importing :mod:`contextlib`.'''
     async def __aenter__(self) -> None: ...
@@ -22,7 +23,7 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
     '''Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
     This is as opposed to :meth:`~asyncio.base_events.BaseEventLoop.create_task`, which only takes coroutines.'''
-def new_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
+def new_eager_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''A version of :func:`to_sync` that is a decorator factory, returning its partial under `loop=loop`.'''
 def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use :func:`asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
@@ -47,4 +48,7 @@ def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any,
     Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.
     If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of :func:`transient_block` under the specified `loop`.'''
-def dualcontextmanager[T, **P](func: Callable[P, SupportsIteration[T]], /) -> Callable[P, DualContextManager[T]]: '''Convert a callable that returns an (async) iterable, usually an (async) generator function, over exactly one item, into a function returning a non-reusable sync- and async-compatible context manager. Essentially combines :func:`contextlib.contextmanager` and :func:`contextlib.asynccontextmanager` into one decorator.'''
+@overload
+def dualcontextmanager[T, **P](gfunc: Callable[P, Iterable[T]], /, *, use_existing_executor: bool=..., create_executor: bool=...) -> Callable[P, DualContextManager[T]]: ...
+@overload
+def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /) -> Callable[P, DualContextManager[T]]: '''Convert a callable that returns an (async) iterable, usually an (async) generator function, over exactly one item, into a function returning a non-reusable sync- and async-compatible context manager. Essentially combines :func:`contextlib.contextmanager` and :func:`contextlib.asynccontextmanager` into one decorator.'''

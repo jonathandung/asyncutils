@@ -11,13 +11,11 @@ ignore_cancellation = IgnoreErrors(CancelledError)
 class anullcontext: # noqa: N801
     async def __aenter__(self): ...
     async def __aexit__(*_): ...
-def get_future(aw, loop=None):
-    if loop is None: loop = get_loop_and_set()
-    async def wrapper():
-        try: return await aw
-        except CRITICAL: raise Critical
-    return loop.create_task(wrapper())
-def new_tasks(*C): (l := get_loop_and_set()).set_task_factory(eager_task_factory); yield from map(l.create_task, C)
+async def wrap_in_coro(aw, /):
+    try: return await aw
+    except CRITICAL: raise Critical
+def get_future(aw, loop=None): return (get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
+def new_eager_tasks(*aws): (l := get_loop_and_set()).set_task_factory(eager_task_factory); yield from map(partial(get_future, loop=l), aws)
 def to_sync(f, /, timeout=None, loop=None): audit('asyncutils.util.to_sync', fullname(f)); return wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop))
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
 def _set_call(F, f, /): F.set_result(f())
@@ -80,12 +78,12 @@ async def safe_cancel(t, /):
     try: await F
     finally: t.remove_done_callback(f)
 class DualContextManager:
-    __slots__ = '_aentered', '_entered', '_gen'
-    def __init__(self, g, /): self._gen = g; self._entered = self._aentered = False
+    __slots__ = '_aentered', '_ce', '_entered', '_gen', '_ue'
+    def __init__(self, g, u, c, /): self._gen, self._ce, self._ue = g, c, u; self._entered = self._aentered = False
     def __enter__(self):
         if self._aentered: raise RuntimeError('context manager already entered asynchronously')
         if self._entered: raise RuntimeError('context manager already entered')
-        try: self._gen = g = aiter_to_gen(self._gen); self._entered = True; return next(g)
+        try: self._gen = g = aiter_to_gen(self._gen, strict=False, use_futures=True); self._entered = True; return next(g)
         except StopIteration: raise RuntimeError("generator didn't yield") from None
     def __exit__(self, t, v, b, /):
         if self._aentered: raise RuntimeError('cannot exit async context manager synchronously')
@@ -108,7 +106,7 @@ class DualContextManager:
     def __aenter__(self):
         if self._aentered: raise RuntimeError('async context manager already entered')
         if self._entered: raise RuntimeError('async context manager already entered synchronously')
-        try: self._gen = g = iter_to_agen(self._gen); self._aentered = True; return anext(g)
+        try: self._gen = g = iter_to_agen(self._gen, strict=False, use_existing_executor=self._ue, create_executor=self._ce); self._aentered = True; return anext(g)
         except StopAsyncIteration: raise RuntimeError("async generator didn't yield") from None
     async def __aexit__(self, t, v, b, /):
         if self._entered: raise RuntimeError('cannot exit sync context manager asynchronously')
@@ -128,5 +126,5 @@ class DualContextManager:
             raise
         try: raise RuntimeError("async generator didn't stop after athrow")
         finally: await g.aclose()
-def dualcontextmanager(f, /, _=DualContextManager): return wraps(f)(lambda *a, **k: _(f(*a, **k)))
+def dualcontextmanager(f, /, _=DualContextManager, *, use_existing_executor=True, create_executor=False): return wraps(f)(lambda *a, **k: _(f(*a, **k), use_existing_executor, create_executor))
 del DualContextManager

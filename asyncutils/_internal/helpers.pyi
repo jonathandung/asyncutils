@@ -2,7 +2,7 @@
 These are undocumented and unstable, and will remain so. This stub file exists for the convenience of development only.'''
 from .types import CanClearAndCopy
 from ..config import Executor
-from _collections_abc import Callable, Coroutine, Generator, Iterable
+from _collections_abc import Awaitable, Callable, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.tasks import Task
@@ -25,6 +25,6 @@ def verify_compat(version: str, /) -> bool: ...
 class LoopMixinBase:
     @property
     def loop(self) -> AbstractEventLoop: '''The underlying event loop.'''
-    def make[T](self, coro: Coroutine[Any, Any, T]) -> Task[T]: '''Create a :class:`~asyncio.tasks.Task` for the given coroutine that runs in the underlying loop.'''
+    def make[T](self, aw: Awaitable[T]) -> Task[T]: '''Create a :class:`~asyncio.tasks.Task` for the given awaitable that runs in the underlying loop.'''
     def make_fut(self) -> Future[Any]: '''Create a :class:`~asyncio.futures.Future` attached to the underlying loop.'''
-    def make_multiple[T](self, C: Iterable[Coroutine[Any, Any, T]]) -> Generator[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.tasks.Task` created for each coroutine in C, in that order.'''
+    def make_multiple[T](self, aws: Iterable[Awaitable[T]]) -> Generator[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.tasks.Task` created for each coroutine in C, in that order.'''

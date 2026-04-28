@@ -8,7 +8,8 @@ from asyncio.futures import _chain_future # type: ignore[import-not-found]
 from os import getenv as g
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
-_f, _s = ('',), object()
+_s = object()
+_f = '',
 class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
     match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
@@ -17,30 +18,30 @@ class ConsoleBase(B):
             if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
             from _pyrepl.main import CAN_USE_PYREPL; del s
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
-        S.audit(fullname(t := type(self)), loop)
-        if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; please subclass instead')
+        S.audit(fullname(t := type(self)), loop); g = globals()
+        if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
         def stop(p=None, /, _=loop.stop, *, asap=False):
             if p is _s: _() if asap else loop.call_soon_threadsafe(_)
             else: raise RuntimeError(_m%'stop')
-        def close(p=None, /, _o=loop.close):
-            if p is _s: _o()
+        def close(p=None, /, _=loop.close):
+            if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.retcode, self._fut, (d := {'__name__': '__main__', '__doc__': 'A console with top-level await support.', '__package__': __package__, '__loader__': __loader__, '__spec__': __spec__, '__builtins__': __builtins__, '__file__': __file__})[modname] = stop, close, False, 0, loop, context_factory(), 0, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.retcode, self._fut, (d := {k: g.get(k) for k in ('__builtins__', '__file__', '__loader__', '__spec__')})[modname] = stop, close, False, 0, loop, context_factory(), 0, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __package__=__spec__.parent)
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
     def refresh(self):
         if not ((F := self._fut) is None or F.done()): F.cancel()
     def __callback(self, fut, code, /, *, makef=type(refresh), corocheck=iscoroutine, futchain=_chain_future):
         try: c = makef(code, self.locals)()
         except SystemExit as e: return self.set_return_code(e)
-        except BaseException as e: # noqa: BLE001
+        except BaseException as e:
             if isinstance(e, KeyboardInterrupt): self.interrupt()
             elif isinstance(e, MemoryError): self.memoryerror()
             return fut.set_exception(e)
         if not corocheck(c): return fut.set_result(c)
         try: self._fut = _ = self._loop.create_task(c, context=self.context); futchain(_, fut)
-        except BaseException as e: fut.set_exception(e) # noqa: BLE001
+        except BaseException as e: fut.set_exception(e)
     def showtraceback(self):
         t, v, b = S.exc_info()
         try:
@@ -50,7 +51,7 @@ class ConsoleBase(B):
         getattr(self._loop, 'call_soon_threadsafe' if threadsafe else 'call_soon')(self.__callback, F := futimpl(), code, context=self.context)
         try: return F.result()
         except SystemExit as e: self.set_return_code(e)
-        except BaseException as e: # noqa: BLE001
+        except BaseException as e:
             if not isinstance(e, dont_show_traceback): self.showtraceback()
             return getattr(self, 'STATEMENT_FAILED', None)
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g): # noqa: B008
@@ -81,7 +82,7 @@ class ConsoleBase(B):
     def set_return_code(self, e, /, _s=_s): self.retcode = e if isinstance(e, int) else e.code; self._loop.stop(_s)
     def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%fullname(cls))
-        if name is None: name = cls.__qualname__.lower().removesuffix('console')
+        if name is None: name = cls.__qualname__.casefold().removesuffix('console')
         if other_handlers is None: other_handlers = {}
         k['name'] = cls.NAME = name; (f := k.setdefault)('version', 'unknown'); f('description', 'Enjoy!'); cls.BANNER, cls.LOCALS_HANDLERS, cls.interrupt_hooks, cls.memerr_hooks, cls.default_local_exit, cls._unsubclassable, other_handlers[name] = template%k, cls.LOCALS_HANDLERS.new_child(other_handlers), (*cls.interrupt_hooks, *additional_interrupt_hooks), (*cls.memerr_hooks, *additional_memerr_hooks), default_local_exit, disallow_subclass_msg is not None, native_handler
         if disallow_subclass_msg: cls.disallow_subclass_msg = disallow_subclass_msg
@@ -99,22 +100,22 @@ class ConsoleBase(B):
                 if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == 'register_readline'):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete)
                     except ImportError: w('Failed to install readline completer\n')
-            elif h is not None: w('Removing sys.__interactivehook__ because it is not callable\n'); delattr(S, i)
+            elif h is not None: w('Removing sys.__interactivehook__ since it is not callable\n'); delattr(S, i)
             while True:
                 try: l.run_forever(); break
                 except KeyboardInterrupt: self.interrupt()
                 except MemoryError: self.memoryerror()
         else: self.write_special(self.BANNER); self.runcode(compile((l := S.stdin).read(), getattr(l, 'name', '<stdin>'), 'exec'))
         try: self.posthook()
-        except BaseException as e: w(f'{fullname(e)} occurred in posthook of {self!r}: {e}\n') # noqa: BLE001
+        except BaseException as e: w(f'{fullname(e)} occurred in posthook of {self!r}: {e}\n')
         if suppress_asyncio_warnings: P.patch_asyncio_warnings()
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode
-    P.patch_method_signatures((interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
+    P.patch_method_signatures((run, '*, exitmsg=None, threadname=None, max_memerrs=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
 def _(d, /):
     def load_all(_=d):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
-    load_all.__qualname__, load_all.__module__ = load_all.__name__, 'asyncutils'; return load_all
+    load_all.__qualname__, load_all.__module__ = load_all.__name__, 'asyncutils'; P.patch_function_signatures((load_all, '')); return load_all
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as util.sync_await in this REPL, since they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{"running" if self.is_running else "idle"} asyncutils console at {id(self):#x}>'
     @property
@@ -136,11 +137,11 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
         if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
         super().posthook()
-    def showtraceback(self, _skip_frames=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=34, _mn=S.intern('__callback')):
+    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=35, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         if b is None: return
         try:
-            for _ in range(_skip_frames):
+            for _ in range(_sf):
                 if (b := b.tb_next) is None: break
             else:
                 if (c := b.tb_frame.f_code).co_filename.endswith(_suf) and c.co_firstlineno == _fln and c.co_name == _mn: b = b.tb_next

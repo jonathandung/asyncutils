@@ -15,12 +15,11 @@ class Pool(LoopContextMixin):
     def __init__(self, f, it, /, workers=None): self._func, self._it, self._sem, self._queue, self._task, self._event = f, it, Semaphore(getcontext().POOL_DEFAULT_WORKERS if workers is None else workers), Queue(1), None, Event()
     async def process(self, item):
         async with self._sem: await self._queue.put(await self._func(item))
-    def __aiter__(self):
-        async def consumer():
-            try:
-                async for _ in iter_to_agen(self._it): await self.process(_)
-            finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
-        self._task = self.make(consumer()); return self
+    async def _consumer(self):
+        try:
+            async for _ in iter_to_agen(self._it): await self.process(_)
+        finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
+    def __aiter__(self): self._task = self.make(self._consumer()); return self
     async def __anext__(self):
         if self._event.is_set() and self._queue.empty(): raise StopAsyncIteration('pool ran out of items')
         try:

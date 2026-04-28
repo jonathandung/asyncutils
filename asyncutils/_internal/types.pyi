@@ -38,7 +38,7 @@ class AsyncLockLike[T](AsyncContextManager[T], Protocol):
     def locked(self) -> bool: ...
 @type_check_only
 class FutWrapType(Protocol):
-    '''The type of the `futwrap` parameter in :func:`~compete.convert_to_coro_iter`.'''
+    '''The signature of the functions accepted for the `futwrap` parameter in :func:`~compete.convert_to_coro_iter`.'''
     def __call__(self, future: Future[Any]|SyncFuture[Any], *, loop: AbstractEventLoop|None) -> Future[Any]: ...
 @type_check_only
 class GenericSized[T](Protocol):
@@ -79,7 +79,7 @@ class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
     @overload # type: ignore[override]
     def throw(self, typ: ExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
     @overload
-    def throw(self, val: BaseException, /) -> Y: ...
+    def throw(self, exc: BaseException, /) -> Y: ...
     def close(self) -> None: ...
     def __await__(self) -> Generator[Any, None, R]: ...
 @type_check_only
@@ -103,9 +103,19 @@ class CanWriteAndFlush[T](Protocol):
     def flush(self) -> None: ...
     def write(self, s: T, /) -> int|None: ...
 @type_check_only
+class _FuncWrapper[W](Protocol):
+    @property
+    def __wrapped__(self) -> W: ...
+@type_check_only
+class _FuncProxy[W](Protocol):
+    @property
+    def __func__(self) -> W: ...
+type WrapsFunc[W] = _FuncWrapper[W]|_FuncProxy[W]
+type FW = FunctionType|WrapsFunc[FW|FunctionType]
+@type_check_only
 class SigPatcher(Protocol):
     '''Type of functions with a specific signature in the semi-public API of this module, used to alter function signatures.'''
-    def __call__(self, *to_patch: tuple[FunctionType, str]) -> None: ...
+    def __call__(self, *to_patch: tuple[FW, str]) -> None: ...
 @type_check_only
 class Middleware(Protocol):
     '''Represents a middleware accepted by :class:`~channels.EventBus`.
@@ -240,6 +250,8 @@ class MemoryMappedFile(LoopContextMixin):
     def size(self) -> int: '''Return the size of the file in bytes.'''
     def isatty(self) -> bool: '''Return whether the file is connected to a TTY device.'''
     def readable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
+    def writable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
+    def seekable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
     async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=...) -> None: '''Write each line in `lines`, followed by `sep`, into the file.'''
     async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified `encoding` and `errors`.'''
     async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified `encoding` and `errors`.'''
@@ -260,7 +272,6 @@ class MemoryMappedFile(LoopContextMixin):
     async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Return a list of the offsets of the first `max_results` occurrences of `pattern` in the file starting from `offset`.'''
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
     async def compact(self) -> None: '''Reduce the size of the file by stripping all contiguous null bytes at the end.'''
-    writable = seekable = readable # noqa: PYI017
 @type_check_only
 class Bag(dict[str, Any]): # noqa: FURB189
     '''A thin dictionary subclass that supports attribute access.'''
@@ -283,7 +294,7 @@ class TransientBlockFromLoopRV(Protocol):
     def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
 class DualContextManager[T]:
-    '''Return type of :deco:`util.dualcontextmanager`.'''
+    '''Return type of :deco:`util.dualcontextmanager`. The initialization signature is not documented intentionally.'''
     def __enter__(self) -> T: ...
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...
@@ -332,7 +343,7 @@ type All = tuple[str, ...]
 '''Type of the `__all__` attributes of the submodules of :mod:`asyncutils`.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
-type Executor = Literal['thread', 'process', 'interpreter', 'loky_noreuse', 'loky', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
+type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
@@ -363,6 +374,6 @@ type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], EveryMethodRVRV[T, R]
 type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]
 '''The type of :class:`channels.Observable` observers.'''
 type RWLockCM = AbstractAsyncContextManager[None, None]
-'''The type of the context managers returned by the :meth:`reader` and :meth:`writer` methods of :class:`rwlocks.RWLock` and subclasses thereof.'''
+'''The type of the context managers returned by the :meth:`reader` and :meth:`writer` methods of :class:`~rwlocks.RWLock` and subclasses thereof.'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''The return type of :func:`exceptions.wrap_exc`.'''

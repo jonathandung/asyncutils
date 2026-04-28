@@ -1,7 +1,8 @@
 '''Contextual configuration system, inspired by the :mod:`decimal` module.'''
-from ._internal.types import HashAlgorithm, ExcType
+from ._internal.types import ExcType, HashAlgorithm, CanWriteAndFlush
 from _collections_abc import Sequence
 from dataclasses import dataclass
+from pprint import PrettyPrinter
 from types import TracebackType
 from typing import Any, Final, Self, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
@@ -97,7 +98,9 @@ class Context:
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
+    def pprint(self, *, file: CanWriteAndFlush[str], pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
     def replace(self, /, **k: Any) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
+    def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
