@@ -39,8 +39,8 @@ def raise_exc(exc_typ: ExcType, /, *args: Any, traceback: TracebackType|None=...
 @overload
 def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload. Remaining args are as in `potent_derive`.'''
 def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns `True`.'''
-def unwrap_exc(wrapper: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
-def exception_occurred(obj: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
+def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
+def exception_occurred(instance: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class Deadlock(BaseException):
     '''Raised when a potential async deadlock situation is noticed by this module.'''
     def __init__(self, /, *args: str, noticer: Any=...): ...
@@ -65,9 +65,9 @@ class FaultyConfig(BaseException):
 class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     '''Raised when a critical error is encountered by exception-handling middleware.'''
     @overload
-    def __init__(self, exc: E): ...
+    def __new__(cls, exc: E) -> Self: ...
     @overload
-    def __init__(self, exc: None=...): '''Initialize the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
+    def __new__(cls, exc: None=...) -> Self: '''Construct the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
     @property
     def exc(self) -> E: '''The exception that occurred, determined by the raising scope by default.'''
     @property
@@ -152,7 +152,7 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
     @property
     def op(self) -> str: '''A string representing the operation type.'''
-    def __init__(self, op: str, *a: Any): ...
+    def __init__(self, op: str, *a: Any): '''Substitute in the arguments to the string (if any) to derive the name of the forbidden operation.'''
 class PasswordError(PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
     @property
@@ -162,16 +162,17 @@ class PasswordError(PasswordQueueError):
 class WrongPassword(PasswordError, ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
     def __init__(self, queue: Q[Any, Any], pwd: Any, /): ...
-class WrongPasswordType[T](PasswordError, TypeError):
+class WrongPasswordType[T, R: type](PasswordError, TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, pwd: T, wrongtyp: type[T], queue: Q[Any, Any]|None, correcttyp: type, /): ...
+    def __init__(self, pwd: T, wrongtyp: type[T], queue: Q[Any, Any]|None, correcttyp: R, /): ...
     @property
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
     @property
-    def correcttype(self) -> type|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
+    def correcttype(self) -> R|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of :exc:`GetPasswordMissing` and :exc:`PutPasswordMissing`.'''
     def __init__(self) -> None: ...
+    def __init_subclass__(cls, *, m: str=...) -> None: ...
 class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
 class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:

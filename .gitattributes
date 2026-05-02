@@ -1,0 +1,6 @@
+* text=auto
+Dockerfile text eol=lf
+Makefile text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.bat text eol=crlf

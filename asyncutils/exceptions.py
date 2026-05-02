@@ -1,5 +1,5 @@
-from asyncutils._internal.helpers import subscriptable
-from asyncutils._internal.patch import patch_function_signatures
+from asyncutils._internal import patch as P
+from asyncutils._internal.helpers import check_methods, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
@@ -37,7 +37,7 @@ def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False
     if isinstance(e, type): e = e(*a, **k)
     elif a or k: _s_.write('raise_exc: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
-patch_function_signatures((unnest, s := 'group, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
+P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
@@ -82,16 +82,20 @@ class VersionConversionError(VersionError): ...
 class VersionValueError(VersionConversionError, ValueError): ...
 @subscriptable
 class VersionNormalizerMissing(VersionConversionError, TypeError):
-    def __init__(self, o, /, t='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._refo = ref(o); super().__init__(t(o))
+    def __init__(self, o, /, _='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._refo = ref(o); super().__init__(_(o))
+    P.patch_method_signatures((__init__, 'obj, /'))
 @subscriptable
 class VersionNormalizerTypeError(VersionConversionError, TypeError):
-    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._refn, self._refo = map(ref, a); super().__init__(t(*a))
+    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._refn, self._refo = map(ref, a); super().__init__(_(*a))
+    P.patch_method_signatures((__init__, 'normalizer, obj, /'))
 @subscriptable
 class VersionNormalizerFault(VersionConversionError):
-    def __init__(self, /, *a, t='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(t(*a))
+    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(_(*a))
+    P.patch_method_signatures((__init__, 'normalizer, obj, exc, /'))
 class VersionCorrupted(VersionError, RuntimeError):
-    def __init__(self, o, /, t='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._refo = ref(o); super().__init__(t%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
+    def __init__(self, o, /, _='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._refo = ref(o); super().__init__(_%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
     def __getattr__(self, n, /): return getattr(self.obj, n)
+    P.patch_method_signatures((__init__, 'obj, /'))
 class BulkheadError(RuntimeError): ...
 class BulkheadFull(BulkheadError): ...
 class BulkheadShutDown(BulkheadError): ...
@@ -103,11 +107,12 @@ class BusTimeout(BusError, TimeoutError): ...
 class BusShutDown(BusError): ...
 class BusStatsError(BusError): ...
 class BusPublishingError(BusError):
-    def __init__(self, /, *_, t='{.name}: severe error in middleware {!r}'.format): self._rb, self._rm = map(ref, _); super().__init__(t(*_))
+    def __init__(self, /, *a, _='{.name}: severe error in middleware {!r}'.format): self._rb, self._rm = map(ref, a); super().__init__(_(*a))
     @property
     def bus(self): return self._rb()
     @property
     def middleware(self): return self._rm()
+    P.patch_method_signatures((__init__, 'bus, mw, /'))
 class CircuitBreakerError(RuntimeError): ...
 class CircuitHalfOpen(CircuitBreakerError): ...
 class CircuitOpen(CircuitBreakerError): ...
@@ -133,17 +138,17 @@ class PasswordError(PasswordQueueError):
     @property
     def queue(self): return self._refq() # type: ignore[attr-defined]
 class WrongPassword(PasswordError, ValueError):
-    def __init__(self, *_): self._refq, self._refp = map(ref, _); super().__init__('failure to modify queue because %r received incorrect password: %r'%_) # noqa: UP031
+    def __init__(self, *a, _='failure to modify queue because %r received incorrect password: %r'): self._refq, self._refp = map(ref, a); super().__init__(_%a)
 @subscriptable
 class WrongPasswordType(PasswordError, TypeError):
-    def __init__(self, *_): self._refp, self._reft, self._refq, self._refc = map(ref, _); super().__init__('password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format(*_))
+    def __init__(self, *a, _='password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format): self._refp, self._reft, self._refq, self._refc = map(ref, a); super().__init__(_(*a))
     @property
     def wrongtype(self): return self._reft()
     @property
     def correcttype(self): return self._refc()
 class PasswordMissing(PasswordQueueError, TypeError):
     def __init__(self): raise TypeError('use GetPasswordMissing or PutPasswordMissing instead')
-    def __init_subclass__(cls, *, m): cls.__init__ = lambda self: BaseException.__init__(self, m) # type: ignore[assignment]
+    def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # type: ignore[assignment]
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(n, /):
@@ -159,8 +164,9 @@ def __getattr__(n, /):
                     c.__exit__(t, *_)
                 async def __aenter__(self): return self.__enter__()
                 async def __aexit__(self, /, *_): self.__exit__(*_)
+                P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
         case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
-            from asyncutils._internal.helpers import check_methods; global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
+            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
             class IgnoreErrors:
                 __slots__ = 'but', 'exc'
                 def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
@@ -180,8 +186,9 @@ def __getattr__(n, /):
                         if isinstance(o := p(), type): h(o)
                         else: f(o.exc); g(o.but)
                     return type(self)(*S, exclude=P)
+                P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.xsig), (__aexit__, P.xsig)); del r
             ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
     return globals()[n]
-del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception
+del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception, subscriptable

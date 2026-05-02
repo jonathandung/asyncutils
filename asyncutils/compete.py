@@ -53,5 +53,5 @@ def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscor
         yield wrap_in_coro(i)
 def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs, loop=loop)), delay, loop=loop)
 def enhanced_gather(it, return_exceptions=False, *, loop=None, _=A.gather): return _(*convert_to_coro_iter(it, loop=loop), return_exceptions=return_exceptions)
-P.patch_function_signatures((first_completed, '*coros, ret_exc=False, timeout=None, loop=None'), (race_with_callback, '*coros, winner=None, loser=None, timeout=None'), (multi_winner_race_with_callback, '*coros, timeout, winner=None, loser=None'), (convert_to_coro_iter, 'cfgs, *, loop=None, skip_invalid=None, corocheck={0}, futwrap={0}, handle_aiter=None, handle_iter=None'), (enhanced_gather, 'it, return_exceptions=False, *, loop=None'))
+P.patch_function_signatures((first_completed, '*coros, ret_exc=False, timeout=None, loop=None'), (race_with_callback, '*coros, winner=None, loser=None, timeout=None'), (multi_winner_race_with_callback, '*coros, timeout, winner=None, loser=None'), (convert_to_coro_iter, 'cfs, *, loop=None, skip_invalid=None, corocheck={0}, futwrap={0}, handle_aiter=None, handle_iter=None'), (enhanced_gather, 'it, return_exceptions=False, *, loop=None'))
 del H, A, P

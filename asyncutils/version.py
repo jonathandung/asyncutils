@@ -12,28 +12,26 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
 def r(c, /, _='cannot subclass asyncutils.version.%s'):
     def f(_=TypeError(_%c.__name__)): raise _
     return f
-def a(c, /, t=tuple(property(lambda o, i=i: o[i]) for i in range(3)), _=r): c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c.__init_subclass__ = _(c); return c
+def a(c, /, t=tuple(property(lambda o, _=i: o[_]) for i in range(3)), _=r, f=('major', 'minor', 'patch')): c._fields, c._asdict = f, lambda self, _=f: dict(zip(_, self)); c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c._replace = c.__replace__ = lambda self, **k: c(**self._asdict(), **k); c.__init_subclass__ = _(c); return c
 N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xFF
 def b(z): z <<= 1; return ~z if z < 0 else z
 def c(key, _=_, f=b): return (key := f(key))&_, key>>18, (key>>10)&_, key>>9&1
 @a
 class VersionDelta(tuple):
-    __slots__ = ()
-    def __new__(cls, major=0, minor=0, patch=0): return super().__new__(cls, (major, minor, patch))
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionDelta')
+    __slots__ = (); _make = classmethod(tuple.__new__)
+    def __new__(cls, major=0, minor=0, patch=0): return cls._make((major, minor, patch))
     def __neg__(self): return __class__(*map(int.__neg__, self))
 @a
 class VersionInfo(str): # noqa: FURB189
     __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.version.VersionInfo')
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
     def __hash__(self): return (x := self._hash())+(x > -2)
-    def shelve(self, path, key=5, _=_, g=c):
+    def shelve(self, path, /, key=5, _=_, g=c):
         x, h, y, l = g(key); y ^= self._hash()
         with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
-    def unshelve(cls, path, key=5, _=_, g=c):
+    def unshelve(cls, path, /, key=5, _=_, g=c):
         x, h, y, l = g(key)
         with open(path, 'rb') as f:
             if (r := f.read)(1)[0] != h: raise ValueError('bad key')
@@ -93,7 +91,7 @@ class VersionInfo(str): # noqa: FURB189
     @property
     def is_api_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed, /')); P.patch_method_signatures((__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None'))
+    representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
@@ -119,5 +117,5 @@ def unregister_normalizer(o, /, _=t, f=N.pop): return f(_(o), None)
 def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('_decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
 P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
-for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, m=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else m(self.parts, other))
+for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, _=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else _(self.parts, other))
 del _, N, t, P, p, E, a, b, c, r

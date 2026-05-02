@@ -2,7 +2,7 @@ from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError,
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log as L, patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueShutDown
-from asyncutils._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, stop_and_closer, subscriptable, fullname
+from asyncutils._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, subscriptable, fullname
 from asyncutils._internal.submodules import channels_all as __all__
 from _functools import partial # type: ignore[import-not-found]
 from _weakrefset import WeakSet
@@ -52,7 +52,7 @@ class Observable(LoopContextMixin):
     def __iter__(self): return self._data.__iter__()
     def __aiter__(self): return iter_to_agen(self)
     async def __setup__(self): LoopContextMixin.__init__(self)
-    async def __cleanup__(self): await gather(self.handle_notifications(), self.handle_unsubscriptions()); (l := self.loop).call_soon(stop_and_closer(l))
+    async def __cleanup__(self): await gather(self.handle_notifications(), self.handle_unsubscriptions())
     def start_accumulation(self): return self.restart_accumulation() or True if self._queue is None else False
     def restart_accumulation(self, flush=False):
         if flush: self.flush_notifications()
@@ -115,6 +115,7 @@ class Observable(LoopContextMixin):
         for o in obs: o._data.add(p)
         return _
 class EventBus(LoopContextMixin):
+    __slots__ = '_auditing', '_handler', '_is_shutdown', '_lock', '_middlewares', '_published', '_publishers', '_sem', '_subscribers', '_tracking', 'auditor', 'name'
     def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False):
         if max_concurrent is None: max_concurrent = getcontext().EVENT_BUS_DEFAULT_MAX_CONCURRENT
         def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):

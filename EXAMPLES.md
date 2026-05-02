@@ -1,6 +1,6 @@
 # Examples
 
-Below are some examples of how the asyncutils module can be used, demonstrated right in the tailor-made asyncutils REPL console.
+Below are some examples of how the asyncutils module can be used, demonstrated right in the tailor-made async-native asyncutils REPL console.
 
 ```python
 >>> # example 1: Rendezvous
@@ -40,4 +40,16 @@ True
 (1, 23, 45)
 >>> normalize(Fraction(1, 3))
 (1, 3, 0)
+```
+
+The following commands can all enter the console to verify the above, ordered in approximately descending order of preference. They have no known
+behavioural differences:
+
+```bash
+asyncutils
+python -m asyncutils
+python asyncutils
+python -m asyncutils.__main__
+python asyncutils/__main__.py
+python -m asyncutils/__main__.py
 ```

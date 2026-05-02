@@ -8,12 +8,13 @@ from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
-from io import TextIOWrapper, _WrappedBuffer
-from types import FunctionType, TracebackType
+from io import _WrappedBuffer, TextIOWrapper
+from types import CodeType, FrameType, FunctionType, TracebackType
 from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 __all__ = ()
 '''This is a fake module, and none of its symbols exist at runtime.
-Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used.'''
+Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
+It is, however, difficult to cause linters to emit diagnostics with other usage patterns of this module, so bear this in mind.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -66,11 +67,11 @@ class PathLike[T](Protocol):
     def __fspath__(self) -> T: ...
 @type_check_only
 class SupportsPop[T](Protocol):
-    '''Types with a `pop` method.'''
+    '''Types with a :meth:`pop` method.'''
     def pop(self) -> T: ...
 @type_check_only
 class SupportsPopLeft[T](Protocol):
-    '''Types with a `popleft` method.'''
+    '''Types with a :meth:`popleft` method.'''
     def popleft(self) -> T: ...
 @type_check_only
 class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
@@ -80,7 +81,21 @@ class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
     def throw(self, typ: ExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
     @overload
     def throw(self, exc: BaseException, /) -> Y: ...
-    def close(self) -> None: ...
+    def close(self) -> R|None: ... # type: ignore[override]
+    @property
+    def gi_code(self) -> CodeType: ...
+    @property
+    def gi_frame(self) -> FrameType|None: ...
+    @property
+    def gi_running(self) -> bool: ...
+    @property
+    def gi_yieldfrom(self) -> Iterator[Y] | None: ...
+    @property
+    def gi_suspended(self) -> bool: ...
+    @property
+    def __name__(self) -> str: ... # type: ignore[override]
+    @property
+    def __qualname__(self) -> str: ... # type: ignore[override]
     def __await__(self) -> Generator[Any, None, R]: ...
 @type_check_only
 class PartialInterfaceMeta(type):
@@ -103,19 +118,21 @@ class CanWriteAndFlush[T](Protocol):
     def flush(self) -> None: ...
     def write(self, s: T, /) -> int|None: ...
 @type_check_only
-class _FuncWrapper[W](Protocol):
+class FuncWrapper[W](Protocol):
+    '''Intermediate protocol to build the recursive definition of :type:`Wrapper`.'''
     @property
     def __wrapped__(self) -> W: ...
 @type_check_only
-class _FuncProxy[W](Protocol):
+class FuncProxy[W](Protocol):
+    '''Same as above.'''
     @property
     def __func__(self) -> W: ...
-type WrapsFunc[W] = _FuncWrapper[W]|_FuncProxy[W]
-type FW = FunctionType|WrapsFunc[FW|FunctionType]
+type Wrapper = FunctionType|FuncProxy[FunctionType|Wrapper]|FuncWrapper[FunctionType|Wrapper]
+'''A function or wrapper of any depth thereof.'''
 @type_check_only
 class SigPatcher(Protocol):
     '''Type of functions with a specific signature in the semi-public API of this module, used to alter function signatures.'''
-    def __call__(self, *to_patch: tuple[FW, str]) -> None: ...
+    def __call__(self, *to_patch: tuple[Wrapper, str]) -> None: ...
 @type_check_only
 class Middleware(Protocol):
     '''Represents a middleware accepted by :class:`~channels.EventBus`.
@@ -125,12 +142,13 @@ class Middleware(Protocol):
     def __hash__(self) -> int: ...
 @type_check_only
 class SupportsMatMul(Protocol):
-    '''A class that supports matrix multiplication.'''
-    def __matmul__(self, other: Self) -> Self: ...
+    '''Objects that supports matrix multiplication, returning an instance of its own type.'''
+    def __matmul__(self, other: Self, /) -> Self: ...
 @type_check_only
 class Q[R, T](Protocol):
     '''A base protocol representing password-protected queues.'''
     exc: type[ForbiddenOperation]
+    '''Convenience alias for :exc:`~exceptions.ForbiddenOperation`.'''
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Asynchronously put an item into the queue; if the queue is full, wait until a free slot is available.'''
     def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`asyncio.QueueEmpty` if impossible.'''
@@ -144,31 +162,31 @@ class Q[R, T](Protocol):
     def full(self) -> bool: '''Check if the queue is full.'''
     async def join(self) -> None: '''Wait until :meth:`task_done` has been called for each item put into the queue.'''
     def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. This functionality was introduced to :class:`asyncio.queues.Queue` in python 3.13, so a backport to 3.12 is required.'''
-    def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the get password of the password-protected queue to new_pwd; returns success.'''
-    def change_put_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempts to change the put password of the password-protected queue to new_pwd; returns success.'''
+    def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempt to change the get password of the password-protected queue to new_pwd; return success.'''
+    def change_put_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempt to change the put password of the password-protected queue to new_pwd; return success.'''
 @type_check_only
 class G[R, T](Q[R, T], Protocol):
-    '''Queues for which `get` is protected by a password.'''
+    '''Queues for which :meth:`get` is protected by a password.'''
     async def get(self, pwd: R) -> T: # type: ignore[override]
-        '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises :exc:`WrongPassword` otherwise.
-        If the queue is empty, waits until an item is available.'''
+        '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
+        If the queue is empty, wait until an item is available.'''
     def get_nowait(self, pwd: R) -> T: # type: ignore[override]
-        '''Removes and returns an item from the password-protected queue, if the password provided was correct; raises :exc:`WrongPassword` otherwise.
-        If the queue is empty, raises :exc:`asyncio.QueueEmpty`.'''
+        '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
+        If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
 @type_check_only
 class P[R, T](Q[R, T], Protocol):
-    '''Queues for which `put` is protected by a password.'''
+    '''Queues for which :meth:`put` is protected by a password.'''
     async def put(self, item: T, pwd: R) -> None: # type: ignore[override]
-        '''Puts an item into the password-protected queue, if the password provided was correct; raises :exc:`WrongPassword` otherwise.
-        If the queue is full, waits until a free slot is available.'''
+        '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
+        If the queue is full, wait until a free slot is available.'''
     def put_nowait(self, item: T, pwd: R) -> None: # type: ignore[override]
-        '''Puts an item into the password-protected queue, if the password provided was correct; raises :exc:`WrongPassword` otherwise.
-        If the queue is full, raises :exc:`asyncio.QueueFull`.'''
+        '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
+        If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both `get` and `put` are protected by passwords, which may or may not be the same.'''
+class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords, which may or may not be the same.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
-    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`rwlocks.RWLock` and subclasses thereof.'''
+    '''The return type of the :meth:`reader` and :meth:`writer` methods of :class:`~rwlocks.RWLock` and subclasses thereof.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> Coroutine[Any, Any, T]: ...
     def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: ...
     def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: ...

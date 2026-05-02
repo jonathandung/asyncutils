@@ -1,9 +1,9 @@
 from atexit import register
 from sys import audit, _getframe, version_info
-def filter_out(*a, s=None, f=__import__('_operator').is_not): yield from filter(lambda x, s=s: f(s, x), a)
-def get_loop_and_set():
+def filter_out(*a, s=None): yield from filter(lambda x, s=s: s is not x, a)
+def get_loop_and_set(_=(lambda l: l.stop() or l.close()).__get__):
     import asyncio.events as E
-    if (l := E._get_running_loop()) is None: register(stop_and_closer(l := E.new_event_loop())); E.set_event_loop(l)
+    if (l := E._get_running_loop()) is None: register(_(l := E.new_event_loop())); E.set_event_loop(l)
     audit('asyncutils/get_loop_and_set', l); return l
 def check_methods(obj, /, *meth):
     M = obj.__class__.__mro__
@@ -13,7 +13,6 @@ def check_methods(obj, /, *meth):
             if _ is not obj: break
         else: return False
     return True
-def stop_and_closer(loop, _=lambda l: l.stop() or l.close()): return _.__get__(loop)
 def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls # noqa: B008
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e)

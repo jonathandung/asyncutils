@@ -2,7 +2,7 @@
 
 Thank you for using asyncutils! This document outlines how to get help with this project.
 
-Before jumping to seek support, please read through **[README.md](https://github.com/jonathandung/asyncutils/blob/main/README.md)**.
+Before jumping to seek support, do skim through **[README.md](https://github.com/jonathandung/asyncutils/blob/main/README.md)**.
 
 ## Bug Reports
 
@@ -53,7 +53,11 @@ pip install -U py-asyncutils
 
 # Check for dependency shenanigans
 pip check
-echo $? # Should be 0
+
+# I personally also use:
+pip install -U pipdeptree
+pipdeptree # Prettily print the dependency graph
+pipdeptree --packages py-asyncutils # Show only the dependents and dependencies of this package
 
 # Clean install
 pip uninstall py-asyncutils
@@ -86,8 +90,8 @@ If the package is not working with python, perform the steps below:
 python -c "print(*__import__('sys').path, sep='\n')"
 # Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console
 # constants, context, events, exceptions, ... separated by newlines
-python -c "print(*dir(__import__('asyncutils')), sep='\n')"
-# If not loading site, repeat the above steps w/ python -S -c
+python -c "print(*__import__('asyncutils').__all__, sep='\n')"
+# If not loading site, repeat the above steps w/ python -Sc
 ```
 
 ## Version Compatibility
@@ -103,12 +107,10 @@ As fast as I can; that is:
 - Bug reports: 3 days
 - Feature requests: Reviewed biweekly
 - Security issues: 1 day
-- General questions: Hopefully community-driven
+- General questions: Community-driven
 
-At this stage, presume me dead if:
-
-- promises above are not met, and
-- there was no relevant post on the discussions page (e.g. hiatus announcement) or my status was not set to 'On vacation'
+If the promises above are not met, and there was no relevant post on the discussions page (e.g. hiatus announcement) or my status was not set to 'On
+vacation', that must have been a major oversight on my end.
 
 ## Closing remarks
 

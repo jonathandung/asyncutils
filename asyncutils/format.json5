@@ -2,11 +2,11 @@
 The values associated with the keys are their defaults.
 Some keys can have various types, as detailed by the comments attached. */
 {
-  log_to: "STDERR",
+  logging_to: "STDERR",
   // string file path or integer file descriptor, to which the logging is dumped
   // corresponds to -l/--log-to
   no_log: false,
-  // disable logging; conflicts with log_to if true
+  // disable logging; conflicts with logging_to if true
   // corresponds to -n/--no-log
   V: 0, // increase logging verbosity; corresponds to -V
   Q: 0, // decrease logging verbosity; corresponds to -Q
@@ -25,13 +25,16 @@ Some keys can have various types, as detailed by the comments attached. */
   // protect resource integrity by exiting the console on the MemoryError at the index after this
   // corresponds to -m/--max-memerrs
   debug: false,
-  // turn on debug mode by entering the global debug context manager; may incur performance penalty
+  // turn on debug mode by entering the global debug context manager
+  // incurs performance penalty due to excessive logging, so do not use outside testing
   // corresponds to -d/--debug
   load_all: false,
   // load all submodules when the console starts; corresponds to -p/--load-all
   seed: null,
   // string, integer, float or bytestring literal to seed the module-global random device
   // corresponds to -s/--seed
+  pdb: false,
+  // whether to bring the user into the pdb debugger on SystemExit with non-zero status from the console; corresponds to -P/--pdb
   next_config: null,
   /* string file path to the json to be used for the next time this module is to be configured
   This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.

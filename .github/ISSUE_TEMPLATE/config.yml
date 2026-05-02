@@ -1,7 +1,10 @@
 contact_links:
   - name: GitHub Community Support
     url: https://github.com/orgs/community/discussions
-    about: Please ask and answer questions here.
+    about: Please ask and answer general GitHub-related questions here.
   - name: GitHub Security Bug Bounty
     url: https://bounty.github.com
-    about: Please report security vulnerabilities here.
+    about: Please report security vulnerabilities here and possibly be rewarded.
+  - name: Creator's profile
+    url: https://github.com/jonathandung
+    about: More of the work of the owner of this project can be found here.

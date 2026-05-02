@@ -28,8 +28,9 @@ class ConsoleBase(B):
         def close(p=None, /, _=loop.close):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.retcode, self._fut, (d := {k: g.get(k) for k in ('__builtins__', '__file__', '__loader__', '__spec__')})[modname] = stop, close, False, 0, loop, context_factory(), 0, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __package__=__spec__.parent)
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {k: g.get(k) for k in ('__builtins__', '__file__', '__loader__', '__spec__')})[modname] = stop, close, False, None, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __package__=__spec__.parent)
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
+        elif h is not None: raise TypeError(f'asyncutils.console.ConsoleBase: locals handler for module {modname!r} should be callable, not {fullname(h)!r}')
     def refresh(self):
         if not ((F := self._fut) is None or F.done()): F.cancel()
     def __callback(self, fut, code, /, *, makef=type(refresh), corocheck=iscoroutine, futchain=_chain_future):
@@ -75,11 +76,11 @@ class ConsoleBase(B):
         elif (x := __import__('_pyrepl.simple_interact', fromlist=_)._get_reader().threading_hook): x.add('')
         self.refresh()
     def memoryerror(self):
-        if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(1)
+        if (m := self.memory_errors) == self._max_memerrs: self.write_special(_ := f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(_)
         self.memory_errors = m+1
         for _ in self.memerr_hooks: _(self)
         self.refresh()
-    def set_return_code(self, e, /, _s=_s): self.retcode = e if isinstance(e, int) else e.code; self._loop.stop(_s)
+    def set_return_code(self, e, /, _s=_s): self.exc = e if isinstance(e, SystemExit) else SystemExit(*(e.args if isinstance(e, BaseException) else (e,))); self._loop.stop(_s)
     def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%fullname(cls))
         if name is None: name = cls.__qualname__.casefold().removesuffix('console')
@@ -111,7 +112,9 @@ class ConsoleBase(B):
         if suppress_asyncio_warnings: P.patch_asyncio_warnings()
         if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
         self.write_special(exitmsg%n); return self.retcode
-    P.patch_method_signatures((run, '*, exitmsg=None, threadname=None, max_memerrs=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '"))
+    @property
+    def retcode(self): return 0 if (e := self.exc) is None else e.code
+    P.patch_method_signatures((run, '*, exitmsg=None, threadname=None, max_memerrs=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '")); P.patch_classmethod_signatures((__init_subclass__, '*, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template={}, version=None, description=None, **k'))
 def _(d, /):
     def load_all(_=d):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
@@ -123,7 +126,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if not self._loop.is_running(): self._internal_is_running = False; return False
         if self._internal_is_running == (b := R.get() is self): return b
         if b: self._internal_is_running = True
-        else: self.set_return_code(1)
+        else: self.set_return_code(_)
         S.stderr.write(_); return False
     def _interact_hook(self, ps1, kcolor, reset, fcolor):
         super()._interact_hook(ps1, kcolor, reset, fcolor)
@@ -134,8 +137,9 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if self._internal_is_running: raise RuntimeError(_r)
         if r := R.get(): raise RuntimeError(_r if r is self else _a)
         R.set(self); super().prehook(_ if max_memerrs is None else max_memerrs)
-    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n'):
+    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb):
         if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
+        if _ and getattr(e := self.exc, 'code', None): __import__('pdb').post_mortem(e.__traceback__)
         super().posthook()
     def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=35, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()

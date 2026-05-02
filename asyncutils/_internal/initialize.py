@@ -3,11 +3,11 @@ from asyncutils._internal import patch as P, running_console as R
 from asyncutils._internal.log import debug as l
 from asyncutils._internal.submodules import __dict__ as d
 if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (BaseException,), {})('asyncutils: cannot reload internal initialization module')
-_a, _u, _f, _s, _i, s, t = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all'
+_a, _u, _f, _s, _i, s, t, U = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all', (S := list(a)).extend
 for _k, _v in _i:
     if _k[0] != '_': break
 try:
-    while True: _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
+    while True: U(_v); _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
 except StopIteration: ...
 class Module:
     __slots__ = '_fs', '_name'
@@ -16,11 +16,11 @@ class Module:
         try: return getattr(_[_d[name]], name)
         except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._name,)
-    def __getattr__(self, n, /, _=F.all_contextual_consts, f=frozenset()):
-        if n == '_fs': self._fs = s = (_ if n == 'context' else f).union(self.__dir__()); return s
+    def __getattr__(self, n, /, _=F.all_contextual_consts):
+        if n == '_fs': self._fs = s = _.union(self.__dir__()) if n == 'context' else frozenset(self.__dir__()); return s
         if n in self._fs: return getattr(self.load(), n)
         raise AttributeError(f"module 'asyncutils.{self._name}' has no attribute {n!r}") from None
-    def __repr__(self, _s=_s): return f"<module '{_s}{self._name}' (not loaded)>"
+    def __repr__(self, _=_s): return f"<module '{_}{self._name}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.get, _f=_f, _l=l, _n=_s):
         if (t := type(self)) is not __class__: return self
@@ -28,7 +28,7 @@ class Module:
         if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__
         if l := getattr(_g(), 'locals', None): l[n] = m
         _s[n] = m; return m
-    __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._name+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''))
+    __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._name+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''), (__repr__, ''), (__getattr__, 'name, /'))
 f = object.__new__
 for _ in a: r._name, s[_] = _, (r := f(Module))
 l('all submodules initialized in %.2f milliseconds', T())
@@ -38,5 +38,5 @@ if C.loaded_all:
     f = Module.load
     for _ in s.values(): f(_)
     l('all submodules loaded in %.2f milliseconds', T())
-a.extend(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del C, P, R, E, V, F, L, T, l, d, f, r, t, _d, _k, _v, _a, _f, _s, _u, _i, _
+U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
+del C, P, R, E, V, F, L, T, U, l, d, f, r, t, _d, _k, _v, _a, _f, _s, _u, _i, _

@@ -18,10 +18,13 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-## [0.9.0] - 2026-04-27: newest
+## [0.9.1] - 2026-05-01; newest
 
-Add `__lazy_modules__` attribute to submodules where appropriate; marked python -m support as experimental; added some iteration, functional
-programming and context management utilities.
+Declare full support for python [-m]; patched function, method and class method signatures where appropriate; added -P/--pdb option; use furo theme.
+
+## [0.9.0] - 2026-04-27
+
+Added `__lazy_modules__` attribute to submodules where appropriate; added some iteration, functional programming and context management utilities.
 
 ### BREAKING
 

@@ -44,7 +44,7 @@ jobs:
     - name: Run tests
       run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 52 -n auto
     - name: Upload results
-      if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'}}
+      if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15'}}
       uses: codecov/codecov-action@v6.0.0
       with:
         disable_search: true

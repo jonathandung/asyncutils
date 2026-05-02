@@ -1,24 +1,24 @@
-.wy-nav-content {
+.wide-page .wy-nav-content {
     max-width: none !important;
     padding: 1.5rem 2rem !important;
 }
 
-.wy-table-responsive {
+.wide-page .wy-table-responsive {
     overflow-x: auto !important;
     overflow-y: hidden !important;
     margin: 1em 0;
 }
 
-.wy-table-responsive table {
+.wide-page .wy-table-responsive table {
     width: auto !important;
     min-width: 100% !important;
 }
 
-.wy-table-responsive {
+.wide-page .wy-table-responsive {
     position: relative;
 }
 
-.wy-table-responsive::after {
+.wide-page .wy-table-responsive::after {
     content: "↔ Scroll horizontally →";
     position: absolute;
     bottom: -25px;

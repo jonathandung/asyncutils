@@ -44,3 +44,4 @@ class AsyncLRUCache(LoopContextMixin):
     @overload
     def __call__[T, **P](self, f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]: '''The calls of the returned async function will now be cached in this cache.'''
     def cache_clear(self) -> None: '''Clear all cache entries.'''
+    def __del__(self) -> None: ...

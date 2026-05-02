@@ -53,15 +53,15 @@ def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: fl
 def throttle(lim: float, timer: Timer=...) -> DecoratorFactoryRV: '''A decorator factory that throttles the wrapped function, such that it can only be called once every `lim` seconds, as determined by `timer`.'''
 def debounce(wait: float) -> DecoratorFactoryRV: '''A decorator factory that debounces the wrapped function, such that it is only called after it has not been called for `wait` seconds.'''
 def iterf[T](n: int, /) -> Callable[[Callable[[T], Awaitable[T]]], Callable[[T], Coroutine[Any, Any, T]]]: '''A decorator factory that applies the decorated function `n` times to its argument.'''
-async def measure[T](f: Callable[[], Awaitable[T]], timer: Timer=...) -> tuple[T, float]: '''A simple version of :func:`timer` for functions taking no arguments and returning awaitables.'''
+async def measure[T](f: Callable[[], Awaitable[T]], /, timer: Timer=...) -> tuple[T, float]: '''A simple version of :func:`timer` for functions taking no arguments and returning awaitables.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=...) -> BenchmarkResult:
     '''`f` is the function to benchmark, which should take no arguments and return an awaitable.
     `times` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
     `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.'''
 class RateLimited[T, **P]:
-    '''The rate limiter pattern as a decorator (factory). See :class:`locks.AdvancedRateLimit` for the async context manager version.'''
+    '''The rate limiter pattern as a decorator (factory). See :class:`~locks.AdvancedRateLimit` for the async context manager version.'''
     @overload
-    def __new__(cls, calls: int, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, calls: int, /, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload
-    def __new__(cls, f: Callable[P, Awaitable[T]], calls: int, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Self: '''Limit the rate of calls of a function `f`, such that only `calls` calls within `period` seconds, as determined by `timer`, are allowed.'''
+    def __new__(cls, f: Callable[P, Awaitable[T]], /, calls: int, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Self: '''Limit the rate of calls of a function `f`, such that only `calls` calls within `period` seconds, as determined by `timer`, are allowed.'''
     async def __call__(self, *a: P.args, **k: P.kwargs) -> T: ...

@@ -1,12 +1,14 @@
 '''Utilities related to the command-line interface and getting metadata for package configuration.'''
 from ._internal.types import CanWriteAndFlush, DumpType, Openable
-from ._internal.unparsed import l as loadf
 from _collections_abc import Callable, Sequence
+from typing import Any
 __all__ = 'argstr_to_json', 'argv_to_json', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'print_cfg_json_format', 'print_cmd_help'
+def loadf(path: Openable, ext: str=..., /) -> dict[str, Any]: ...
 def json_to_argv(path: Openable, /) -> list[str]:
     '''Return a list of strings representing the command-line arguments for this module from `path` to the corresponding json file, with as little items as possible.
     For integer file descriptors as `path`, the format is assumed to be plain JSON.
-    The module, name as determined by `ext2modname`, should have a `load` function that takes `path` and returns a dict of its contents.'''
+    The module, should have a :func:`load` function that takes `path` and returns a dict of its contents.
+    Perfect round-trip conversion with :func:`argv_to_json` is not guaranteed, but with no other configuration file active, the behaviour would be the same.'''
 def json_to_argstr(path: Openable, /, *, join: Callable[[list[str]], str]=...) -> str: '''Essentially the output of :func:`json_to_argv`, but joined into a shell-escaped string with `join`.'''
 def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) -> None:
     '''Writes the sequence of strings, parsed as command-line arguments for this module, into `path` in JSON format.

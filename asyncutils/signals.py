@@ -47,5 +47,5 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
     finally:
         F.cancel()
         if c: c.__exit__(*M.exc_info()) # type: ignore[arg-type]
-f((wait_for_signal, 'processor, /, *signals, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))
+f((wait_for_signal, 'processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))
 del f

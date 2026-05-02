@@ -133,8 +133,7 @@ class File(LoopContextMixin):
         cls.mgr, cls.run, cls.open_files = m, run, {}
 class MemoryMappedIOManager(LoopContextMixin):
     __slots__ = '_factory', '_lock'
-    def __init__(self, executor=None, f=(File,), n=H.create_executor):
-        super().__init__(); self._factory, self._lock = type('_factory', f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, n(self, False) if executor is None else executor)), Lock()
+    def __init__(self, executor=None, _f=(File,), _=H.create_executor): super().__init__(); self._factory, self._lock = type('_factory', _f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, _(self, False) if executor is None else executor)), Lock()
     @property
     def open_mmaps(self): return self._factory.mgr
     def _run(self, f, /, *a): return self._factory.run(f, *a)
@@ -147,13 +146,13 @@ class MemoryMappedIOManager(LoopContextMixin):
     @open_files.deleter
     def open_files(self): self.open_files.clear()
     @asynccontextmanager
-    async def _open(self, init_size, *k):
-        if (x := self.open_files.get(k)): yield x; return
+    async def _open(self, s, /, *k):
+        if (x := (F := self.open_files).get(k)): yield x; return
         try:
             with await (r := self._run)(open, *k) as f:
-                if init_size > 0: await r(f.truncate, init_size)
-                async with self._factory(f) as x: self.open_files[k] = x; yield x
-        finally: self.open_files.pop(k, None)
+                if s > 0: await r(f.truncate, s)
+                async with self._factory(f) as x: F[k] = x; yield x
+        finally: F.pop(k, None)
     def open(self, path, init_size=0): return self._open(init_size, path, 'r+b')
     def create(self, path, init_size=0, *, exclusive=True): return self._open(init_size, path, 'x+b' if exclusive else 'w+b')
     async def __cleanup__(self):
@@ -207,4 +206,5 @@ class MemoryMappedIOManager(LoopContextMixin):
         async def searchf(p, o):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
+    P.patch_method_signatures((__init__, 'executor=None'), (prefetch_files, '*paths, init_size=0'), (_open, 'init_size, path, mode, /'))
 del f, H, P, S, _, File, O

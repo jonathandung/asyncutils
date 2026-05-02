@@ -15,5 +15,6 @@ class Module:
     @property
     def __all__(self) -> All: '''The names that go into the global namespace when `from asyncutils.submod import *` is executed.'''
     def __dir__(self) -> All: '''Return :attr:`__all__`, as opposed to also the default behaviour of returning the dunder attributes each module has.'''
-a: Final[list[str]]
+a: Final[tuple[Submodule, ...]]
 s: Final[dict[Submodule, Module|ModuleType]]
+S: Final[list[str]]

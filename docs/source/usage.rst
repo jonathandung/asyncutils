@@ -20,7 +20,7 @@ Command used:
 
 .. code-block:: bash
 
-  python -S -E -I -m timeit -n 1 -r 1 "
+  python -SEIm timeit -n 1 -r 1 "
   ... the above code ...
   "
 

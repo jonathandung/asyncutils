@@ -40,12 +40,12 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) fo
 
 ## Version
 
-This is asyncutils v0.9.0.
+This is asyncutils v0.9.1.
 
-This library is currently in the alpha stage, meaning the public API is subject to change even between patch versions, and changes made may be
-backward-incompatible. (Of course, this isn't a significant issue, seeing as though nobody currently uses it.)
+This library is currently in the beta stage, meaning the public API is subject to change even between patch versions, and changes made may be
+backward-incompatible. See [the compatibility page](https://asyncutils.readthedocs.io/en/stable/compat.html).
 
-See [this page](https://github.com/jonathandung/asyncutils/tags) for the currently available tags.
+See [this page](https://github.com/jonathandung/asyncutils/tags) for the version tags up to now. Many older tags are obsolete and were deleted.
 
 ## Configuration
 
@@ -61,8 +61,8 @@ features.
 Other resources if you're new to the world of async:
 
 - [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html)
-- [Basic Tutorial](https://realpython.com/async-io-python)
-- [Basic Video Guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
+- [Basic tutorial](https://realpython.com/async-io-python)
+- [Basic video guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
 - [asyncio, threading, multiprocessing](https://www.youtube.com/watch?v=0vFgKr5bjWI)
 - [Event loop](https://www.youtube.com/watch?v=RIVcqT2OGPA)
 - [In-depth tutorial](https://www.youtube.com/watch?v=oAkLSJNr5zY)
@@ -71,7 +71,7 @@ Other resources if you're new to the world of async:
 
 If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
 
-For more, check out the [Contributing Guide](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md).
+For more, check out the [contributing guide](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md).
 
 ## License
 
@@ -86,6 +86,6 @@ Have fun!
 | ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social) | ![PyPI - Wheel](https://img.shields.io/pypi/wheel/py-asyncutils) | ![Mypy](https://img.shields.io/badge/mypy-checked-blue?logo=python&&logoColor=blue) | ![Read the Docs](https://img.shields.io/badge/docs-Read_the_Docs-green?logo=readthedocs) | ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) |
 | ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils) | ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social) | ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils) | ![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver) | ![Actionlint](https://img.shields.io/badge/actions-actionlint-yellow) | ![Beta](https://img.shields.io/badge/stage-beta-yellow.svg) |
 | ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![User stars](https://img.shields.io/github/stars/jonathandung) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils) | ![Sphinx](https://img.shields.io/badge/docs-sphinx-265094?logo=sphinx) | ![setuptools](https://img.shields.io/badge/packaged_with-setuptools-brightgreen?logo=setuptools) | |
-| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | ![doc8](https://img.shields.io/badge/ReST-doc8-blue.svg) | ![PyPI](https://img.shields.io/badge/on-pypi-blue?logo=pypi) | |
+| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | | ![PyPI](https://img.shields.io/badge/on-pypi-blue?logo=pypi) | |
 | ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Conda-forge](https://img.shields.io/conda/v/conda-forge/py-asyncutils?logo=condaforge) | ![Stubtest](https://img.shields.io/badge/stubtest-checked-blue) | ![Conda](https://img.shields.io/badge/on-conda-green?logo=anaconda) | |
 | ![Commits since last release](https://img.shields.io/github/commits-since/jonathandung/asyncutils/latest.svg) | | | ![detect-secrets](https://img.shields.io/badge/detect--secrets-checked-blue?logo=yelp) | ![conda-forge](https://img.shields.io/badge/via-conda--forge-blue?logo=conda-forge) | |

@@ -1,5 +1,5 @@
 '''A feature-rich asynchronous utilities library with CLI and REPL support.'''
-__all__ = ['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version', 'console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'] # noqa: RUF022
+__all__ = 'altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version'
 from ._internal.types import Submodule
 from .altlocks import *
 from .base import *
@@ -34,7 +34,7 @@ from .util import *
 from .version import *
 from types import ModuleType
 from typing import Final
-def __dir__() -> tuple[str, ...]: '''The names of all the public submodules of :mod:`asyncutils`, along with `'preloaded_submodules'`, `'submodules_map'` and `'time_since_boot'`.'''
+def __dir__() -> tuple[str, ...]: '''All the public names exported by this library, including the names of the submodules.'''
 def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]
 '''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
@@ -43,6 +43,6 @@ __hexversion__: Final[int]
 console_preloaded_submodules: Final[frozenset[str]]
 '''Below, but including `'base'`, `'cli'` and `'console'`.'''
 preloaded_submodules: Final[frozenset[str]]
-'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup, which also loads :mod:`asyncio`.'''
+'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
 '''A dictionary mapping submodule names to the corresponding submodule objects, which may not actually be instances of :class:`types.ModuleType` at runtime (implementation-defined).'''

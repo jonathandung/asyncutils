@@ -11,7 +11,6 @@ from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
-s = 'exc_typ, exc_val, exc_tb, /'
 class Releasing:
     __slots__ = '_lock',
     def __init__(self, lock, /): self._lock = lock
@@ -30,14 +29,14 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
         self.guarded = False
     @classmethod
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
-    P.patch_method_signatures((__exit__, s))
+    P.patch_method_signatures((__exit__, P.xsig))
 class UniqueResourceGuard(ResourceGuard):
     _cache, __slots__ = {}, ()
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.altlocks.UniqueResourceGuard')
     @classmethod
     def guard(cls, obj, /, *, action='using'):
         if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
-        audit('asyncutils.altlocks.UniqueResourceGuard', fullname(type(obj))); return r
+        audit('asyncutils.altlocks.UniqueResourceGuard', fullname(obj)); return r
     @classmethod
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
 class CircuitBreaker:
@@ -103,13 +102,13 @@ class StatefulBarrier(AwaitableMixin):
     @property
     def n_waiting(self): return self._count
 class DynamicThrottle:
-    __slots__ = '_fails', '_jitter', '_last_call', '_lbound', '_lfactor', '_lock', '_max', '_min', '_randf', '_rate', '_successes', '_timer', '_ubound', '_ufactor', '_window'
+    __slots__ = '_fails', '_jitter', '_lb', '_lc', '_lf', '_lock', '_max', '_min', '_randf', '_rate', '_successes', '_timer', '_ub', '_uf', '_window'
     def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):
         C = getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
         if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates')
-        self._min, self._max, self._window, self._lock, self._timer, self._ubound, self._lbound, self._ufactor, self._lfactor, self.jitter, self._randf = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand; self.rate = init_rate; self.reset()
+        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand; self.rate = init_rate; self.reset()
     @property
     def rate(self): return self._rate
     @rate.setter
@@ -125,12 +124,12 @@ class DynamicThrottle:
     def successes(self): return self._successes
     @property
     def fails(self): return self._fails
-    async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._last_call)*(1.0+self._randf(self._jitter))); self._last_call = self.ctime
+    async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._lc)*(1.0+self._randf(self._jitter))); self._lc = self.ctime
     async def __aexit__(self, e, /, *_):
         async with self._lock:
-            if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._ufactor if (r := s/t) > self._ubound else self._lfactor if r < self._lbound else 1.0; self._successes = self._fails = 0
+            if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._uf if (r := s/t) > self._ub else self._lf if r < self._lb else 1.0; self._successes = self._fails = 0
             if e is None: self._successes += 1
             else: self._fails += 1
-    def reset(self): self._successes = self._fails = 0; self._last_call = self.ctime-1.0/self._rate
-    P.patch_function_signatures((__aexit__, s))
+    def reset(self): self._successes = self._fails = 0; self._lc = self.ctime-1.0/self._rate
+    P.patch_method_signatures((__aexit__, P.xsig))
 del _randinst, count, P

@@ -7,8 +7,9 @@ from weakref import WeakKeyDictionary
 @subscriptable
 class AsyncProperty:
     __slots__ = '__doc__', '_cls', '_deleted', '_loop', '_name', '_strict', 'fdel', 'fget', 'fset'
-    def __new__(cls, fget=None, *a, **k): return partial(cls, Placeholder, *a, **k) if fget is None else super().__new__(cls)
-    def __init__(self, fget=None, fset=None, fdel=None, *, doc=None, strict=True): super().__init__(); self.fget, self.fset, self.fdel, self.__doc__, self._deleted, self._loop, self._strict = fget, fset, fdel, doc or getattr(fget, '__doc__', None), set(), get_loop_and_set(), strict
+    def __new__(cls, fget=None, fset=None, fdel=None, *, doc=None, strict=True):
+        if fget is None: return partial(cls, Placeholder, fset, fdel, doc=doc, strict=strict)
+        (_ := super().__new__(cls)).fget, _.fset, _.fdel, _.__doc__, _._deleted, _._loop, _._strict = fget, fset, fdel, doc or getattr(fget, '__doc__', None), set(), get_loop_and_set(), strict; return _
     def __get__(self, obj, _=None, /): self._raise_for_unbound(); return self._get_helper(f'unreadable attribute: {self._name}') if (f := self.fget) is None else self if obj is None else self._get_helper('cannot get deleted attribute') if obj in self._deleted else self._helper(f, obj)
     def __set__(self, obj, val, /):
         self._raise_for_unbound()
@@ -41,7 +42,9 @@ class AsyncLockProperty(AsyncProperty):
     __slots__ = '_cache', '_lock_getter'
     @staticmethod
     def _new_lock(_, *, lock_impl=Lock): return lock_impl()
-    def __init__(self, *a, lock_getter=None, **k): super().__init__(*a, **k); self._lock_getter, self._cache = lock_getter or self._new_lock, WeakKeyDictionary()
+    def __new__(cls, *a, lock_getter=None, **k):
+        if isinstance(_ := super().__new__(cls, *a, **k), cls): _._lock_getter, _._cache = lock_getter or _._new_lock, WeakKeyDictionary()
+        return _
     def __repr__(self): return f'{super().__repr__()[:-1]}, lock_getter={self._lock_getter!r})'
     def _helper(self, f, *a, c='get'):
         async def _():

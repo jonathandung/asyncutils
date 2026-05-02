@@ -4,8 +4,9 @@ from _collections_abc import Sequence
 from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType
-from typing import Any, Final, Self, overload
+from typing import Any, Final, Self, final, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
+@final
 @dataclass(slots=True, kw_only=True, match_args=False)
 class Context:
     '''An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
@@ -96,12 +97,14 @@ class Context:
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
+    def copy(self) -> Self: '''Return a copy of the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
-    def pprint(self, *, file: CanWriteAndFlush[str], pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
+    def pprint(self, *, file: CanWriteAndFlush[str]=..., pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
     def replace(self, /, **k: Any) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
+    def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''

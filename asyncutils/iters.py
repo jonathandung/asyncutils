@@ -4,6 +4,7 @@ from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown, partial, Placeholder
 from asyncutils._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, fullname, get_loop_and_set
+from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.submodules import iters_all as __all__
 import _operator as O, math as M
 from asyncio import CancelledError, Lock, gather, iscoroutine, sleep, wait_for
@@ -80,7 +81,7 @@ async def merge(*I, reverse=False):
     while True:
         if (c := await q.get()) is a: break
         yield c
-def aflatten(it): return achain.from_iterable(it).__aiter__()
+def aflatten(it, _=achain.from_iterable): return _(it).__aiter__()
 def acountdown(n, step=1, *, include_zero=False): return arange(n, -include_zero, -step)
 async def abfs(start, neighbours, *, include_start=True):
     a, c, f, g = (v := {start}).add, v.__contains__, (q := deque((start,))).popleft, q.append
@@ -92,21 +93,21 @@ async def adfs(start, neighbours, *, include_start=True):
     if include_start: yield start
     while s:
         async for _ in afilterfalse(c, areversed(neighbours(f()))): a(_); g(_); yield _
-async def asattolo(it, _=_randrange):
+async def asattolo(it, /, _=_randrange):
     i = len(a := await to_list(it))
     while i > 1:
         i -= 1
         a[j], a[i] = a[i], a[j := _(i)]
     return a
 async def abrent(f, start, /):
-    p = l = 1; t, h = start, await f(start)
+    p = l = 1; t, h, m = start, await f(start), 0
     while t is not h:
         if p == l: t, l, p = h, 0, p<<1
         h, l = await f(h), l+1
-    a, m = (start, await iterf(l)(f)(start)), 0
+    a = start, await iterf(l)(f)(start)
     while a[0] is not a[1]: a, m = await gather(*map(f, a)), m+1
     return a[0], l, m
-async def asampleweighted(it, k, rrange=_randrange, rand=_randinst.random):
+async def asampleweighted(it, k, *, rrange=_randrange, rand=_randinst.random):
     W, u, p = 0.0, rand(), 1.0
     async def agen(it):
         nonlocal W
@@ -121,29 +122,28 @@ async def asampleweighted(it, k, rrange=_randrange, rand=_randinst.random):
 async def astarfilter(pred, it):
     if pred is None: pred = bool
     async for t in iter_to_agen(it):
-        if iscoroutine(r := pred(*await to_list(t))): r = await r
-        if r: yield t
+        if (await r) if iscoroutine(r := pred(*await to_list(t))) else r: yield t
 async def astarfilterfalse(pred, it):
     if pred is None: pred = bool
     async for t in iter_to_agen(it):
         if iscoroutine(r := pred(*await to_list(t))): r = await r
         if not r: yield t
-async def amultistarfilter(pred, *its, strict=False):
+async def amultistarfilter(pred, /, *its, strict=False):
     if pred is None: pred = bool
     async for t in azip(*its, strict=strict):
         if iscoroutine(r := pred(*await to_list(t))): r = await r
         if r: yield t
-async def amultistarfilterfalse(pred, *its, strict=False):
+async def amultistarfilterfalse(pred, /, *its, strict=False):
     if pred is None: pred = bool
     async for t in azip(*its, strict=strict):
         if iscoroutine(r := pred(*await to_list(t))): r = await r
         if not r: yield t
-def amultifilter(pred, *its, strict=False): return afilter(pred, azip(*its, strict=strict))
-def amultifilterfalse(pred, *its, strict=False): return afilterfalse(pred, azip(*its, strict=strict))
+def amultifilter(pred, /, *its, strict=False): return afilter(pred, azip(*its, strict=strict))
+def amultifilterfalse(pred, /, *its, strict=False): return afilterfalse(pred, azip(*its, strict=strict))
 def ahammingdist(i1, i2, /, cmpeq=check): return ailen(amultistarfilterfalse(cmpeq, i1, i2))
 async def amergesortedby(its, *, key=_identity, await_=False, reverse=False):
     f = (h := []).append
-    for i, it in enumerate(its := await to_tuple(map(iter_to_agen, its))):
+    for i, it in enumerate(its := await to_tuple(amap(iter_to_agen, its))):
         try:
             k = key(v := await anext(it))
             f(((await k) if await_ else k, i, v))
@@ -394,9 +394,9 @@ async def aziplongest(*its, fillvalue=None):
             f(_)
         yield tuple(v)
 def asumprod(p, q, /): return asum(amap(O.mul, p, q, strict=True))
-async def aconvolve(signal, kernel):
+async def aconvolve(signal, kernel, _=achain):
     f = (w := deque((0,), n := len(K := await to_tuple(areversed(kernel))))*n).append
-    async for x in achain(signal, arepeat(0, n-1)): f(x); yield await asumprod(K, w)
+    async for x in _(signal, arepeat(0, n-1)): f(x); yield await asumprod(K, w)
 def atabulate(f, start=0, step=1, /, *, await_=False): return amap(f, acount(start, step), await_=await_)
 async def asum(it, start=0):
     async for i in iter_to_agen(it): start += i
@@ -463,7 +463,7 @@ async def apowerset(it):
     s = await to_tuple(it)
     async for _ in aflatten(acombinations(s, r) for r in range(len(s)+1)): yield _
 def aquantify(it, pred=bool): return asum(amap(pred, it))
-def apadnone(it): return achain(it, arepeat(None)).__aiter__()
+def apadnone(it, _=achain): return _(it, arepeat(None)).__aiter__()
 def agrouper(it, n, fillvalue=_NO_DEFAULT): I = (iter_to_agen(it),)*n; return azip(*I, strict=fillvalue is RAISE) if isinstance(fillvalue, type(RAISE)) else aziplongest(*I, fillvalue=fillvalue)
 async def aroundrobin(*its):
     I = (iter_to_agen(i) for i in its)
@@ -592,7 +592,7 @@ async def acollapse(it, base_typ=(str, bytes), levels=None):
                 try: t = iter_to_agen(_); g((l+1, t)); g(N); break
                 except TypeError: yield _
 def afirsttrue(it, default=_NO_DEFAULT, pred=None): return anext(afilter(pred, it), *filter_out(default, s=_NO_DEFAULT))
-def aprepend(val, it): return achain((val,), it).__aiter__()
+def aprepend(val, it, _=achain): return _((val,), it).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):
     async for i in ancycles(amap(to_tuple, a, await_=True), n): yield _(i)
 async def arandomcombination(it, r, _=_sample):
@@ -634,18 +634,18 @@ async def anthcombination(it, r, idx):
 async def asubslices(it):
     async for _ in astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2)))): yield _
 def arepeatfunc(f, times=None, *a): return astarmap(f, arepeat(a, times), True)
-async def apolynomialfromroots(roots, p=(1,)):
-    async for r in iter_to_agen(roots): p = aconvolve(p, (1, -r))
-    async for _ in iter_to_agen(p): yield _
+async def apolynomialfromroots(roots, _=(1,)):
+    async for r in iter_to_agen(roots): _ = aconvolve(_, (1, -r))
+    async for i in iter_to_agen(_): yield i
 async def atranspose(it):
     async for _ in azip(*await to_tuple(it), strict=True): yield _
-async def aflattentensor(tensor, base_typ=(str, bytes), _c=check_methods):
+async def aflattentensor(tensor, base_typ=(str, bytes), _=check_methods):
     I = iter_to_agen(tensor)
     while True:
         try: v = await anext(I)
         except StopAsyncIteration: break
         I = aprepend(v, I)
-        if isinstance(v, base_typ) or not (_c(v, '__iter__') or _c(v, '__aiter__')): break
+        if isinstance(v, base_typ) or not (_(v, '__iter__') or _(v, '__aiter__')): break
         I = aflatten(I)
     async for i in I: yield i
 async def apolynomialderivative(coeff):
@@ -712,7 +712,7 @@ async def vecs_eq(u, v, cmpeq=check, *, strict=True):
     try: return await aall(cmpeq(i, j) async for i, j in azip(u, v, strict=strict))
     except ValueError: return False
 async def afreivalds(A, B, C, k=None, _r=_randrange): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := tuple(_r(2) for _ in range(n)))), mat_vec_mul(C, r), int.__eq__) async for _ in arange(getcontext().AFRIEVALDS_DEFAULT_K if k is None else k))
-def basic_collect(it, n): return to_list(aislice(it, n))
+def basic_collect(*_): return to_list(aislice(*_))
 async def asubstrings(it):
     for i in (s := await to_tuple(it)): yield i,
     async for n in arange(2, c := len(s)+1):
@@ -724,7 +724,7 @@ def asubstrindices(seq, reverse=False):
 def iter_future(it, summaryf=aconsume):
     async def task(): t = L.time(); await summaryf(it); F.set_result(L.time()-t)
     F = (L := get_loop_and_set()).create_future(); L.create_task(task()); return F
-def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable {!r}'.format):
+def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r beyond the ends of (async) iterable {!r}'.format, _c=achain):
     L, r, I = get_loop_and_set(), [], iter_to_agen(it)
     async def consume():
         s, M, m, d = L.time(), 0, 0, defaultdict(list)
@@ -741,7 +741,7 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
         try:
             if M is None:
                 async def helper2(i, j): await helper(i, j); b.append(j)
-                await aconsume(achain(astarmap(helper2, aenumerate(I)), amap(helper, acount(-1, -1), adisembowel(b := deque(maxlen=-m)), await_=True)))
+                await aconsume(_c(astarmap(helper2, aenumerate(I)), amap(helper, acount(-1, -1), adisembowel(b := deque(maxlen=-m)), await_=True)))
             else: await aconsume(astarmap(helper, aenumerate(take(I, M)), True))
         except E.CRITICAL: raise E.Critical
         except BaseException as e:
@@ -822,4 +822,5 @@ async def aonlinesorter(it=None):
     await (f := partial(get_loop_and_set().run_in_executor, e, Placeholder, h := [] if it is None else await to_list(it)))(heapify)
     while h:
         if (i := (yield await f(heappop))) is not None: await f(heappush, i)
-del _aunzip_consumer_base, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity
+patch_function_signatures((aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_future, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'))
+del achain, _aunzip_consumer_base, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _randinst, _identity, _

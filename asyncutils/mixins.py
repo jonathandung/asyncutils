@@ -8,7 +8,7 @@ from functools import cached_property, partial
 class LoopContextMixin(H.LoopMixinBase):
     __slots__ = 'running_tasks',
     def __init__(self): self._loop, self.running_tasks = H.get_loop_and_set(), set()
-    def make(self, coro): (_ := self.running_tasks).add(t := super().make(coro)); t.add_done_callback(_.discard); return t
+    def make(self, aw): (_ := self.running_tasks).add(t := super().make(aw)); t.add_done_callback(_.discard); return t
     async def __setup__(self): ...
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self

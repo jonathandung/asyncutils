@@ -12,3 +12,5 @@ D: Final[dict[str, str]]
 def l(path: int, ext: str, /) -> dict[str, Any]: ...
 @overload
 def l(path: str, ext: str|None=..., /) -> dict[str, Any]: '''Load a config file from the given string path or file descriptor (in which case the file extension is should be passed but defaults to json), from which the file extension and thus appropriate parser is determined.'''
+c: Final[str]
+'''The path to the config file used, or an empty string if no config file was read.'''

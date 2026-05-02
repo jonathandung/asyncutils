@@ -19,11 +19,11 @@ If FILE is 'MEMORY', logs are stored in memory and returned and voided whenever 
 If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log' in the
 current working directory for logging, for number from 1 to 4096. (If you have more than 4096 log files, you should probably clean them up.)
 If FILE is 'STDOUT', logs to stdout.
-If FILE is 'STDERR', logs to stderr (also the default behaviour and fallback if the above steps fail).''')
+If FILE is 'STDERR', logs to stderr. This is also the default behaviour and fallback if the above steps fail.''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')
-(a := h())('-e', '--executor', choices=C, metavar=j, help='''Chooses a PEP 3148 executor class to use when necessary depending on the value of ETYP:
+(a := h())('-e', '--executor', choices=C, metavar=j, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
@@ -52,6 +52,7 @@ Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
+a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
-a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
+a('-?', '-h', '--help', action='help', help='Print this help message and exit. The NO_COLOR environment variable is respected by all output of this parser.')
 del a, b, C, d, e, f, g, h, i, j, A, V

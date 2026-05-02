@@ -8,4 +8,5 @@ def _(t, d, a='__text_signature__', u='<unrepresentable>', c=('__wrapped__', '__
             setattr(k, a, t%v.format(u) if v else d)
     return patch
 patch_function_signatures, patch_method_signatures, patch_classmethod_signatures = map(_, ('(%s)', '($self, %s)', '($cls, %s)'), ('()', '($self)', '($cls)'))
+xsig = 'exc_typ, exc_val, exc_tb, /'
 del _

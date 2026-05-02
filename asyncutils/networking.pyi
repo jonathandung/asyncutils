@@ -9,7 +9,7 @@ from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, LoopBoundMixin):
     '''An implementation of :class:`~asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
-    The idea was originally introduced in PEP 3153, but did not see eventual adaptation in the standard library.
+    The idea was originally introduced in :pep:`3153`, but did not see eventual adaptation in the standard library.
     This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
     Instantiating this class will give an :class:`LFProtocol` or :class:`CRLFProtocol` depending on :data:`os.linesep`.'''
     NEWLINE: ClassVar[bytes]
@@ -38,7 +38,7 @@ class LineProtocol(Protocol, LoopBoundMixin):
     async def write_literal_with_backpressure(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline, after draining it.'''
 class LFProtocol(LineProtocol): '''Line Feed protocol for Unix-like systems.'''
 class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed protocol for Windows.'''
-class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9.'''
+class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems no longer officially supported by python, such as Mac OS 9, such that this will never be chosen as the default.'''
 class SocketTransport(Transport):
     '''A thread-unsafe transport that connects :class:`LineProtocol`'s to sockets.'''
     @classmethod

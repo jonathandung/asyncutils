@@ -8,15 +8,14 @@ __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'Que
 class QueueEmpty(Exception): ...
 class QueueFull(Exception): ...
 class QueueShutDown(Exception): ...
+def _wakeup_next(W, /, w=None):
+    while W and (w := W.popleft()).done(): ...
+    if w: w.set_result(None)
 @subscriptable
 class Queue(LoopBoundMixin):
     def __init__(self, maxsize=0):
         self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown = maxsize, deque(), deque(), 0, False
         self._finished = e = Event(); e.set(); self._init(maxsize)
-    @staticmethod
-    def _wakeup_next(W, /, w=None):
-        while W and (w := W.popleft()).done(): ...
-        if w: w.set_result(None)
     def __repr__(self): return f'<{fullname(self)} at {id(self):#x} {self._format()}>'
     def __str__(self): return f'<{fullname(self)} {self._format()}>'
     def _format(self):
@@ -42,13 +41,13 @@ class Queue(LoopBoundMixin):
                 p.cancel()
                 try: P.remove(p)
                 except ValueError: ...
-                if not (f() or p.cancelled()): self._wakeup_next(P)
+                if not (f() or p.cancelled()): _wakeup_next(P)
                 raise
         return self.put_nowait(item)
     def put_nowait(self, item):
         if self._is_shutdown: raise QueueShutDown
         if self.full(): raise QueueFull
-        self._put(item); self._unfinished_tasks += 1; self._finished.clear(); self._wakeup_next(self._getters)
+        self._put(item); self._unfinished_tasks += 1; self._finished.clear(); _wakeup_next(self._getters)
     async def get(self):
         A, e = (G := self._getters).append, self.empty
         while e():
@@ -59,12 +58,12 @@ class Queue(LoopBoundMixin):
                 g.cancel()
                 try: G.remove(g)
                 except ValueError: ...
-                if not (e() or g.cancelled()): self._wakeup_next(G)
+                if not (e() or g.cancelled()): _wakeup_next(G)
                 raise
         return self.get_nowait()
     def get_nowait(self):
         if self.empty(): raise QueueShutDown if self._is_shutdown else QueueEmpty
-        r = self._get(); self._wakeup_next(self._putters); return r
+        r = self._get(); _wakeup_next(self._putters); return r
     def task_done(self):
         if (U := self._unfinished_tasks) <= 0: raise ValueError('task_done() called too many times')
         self._unfinished_tasks = U-1

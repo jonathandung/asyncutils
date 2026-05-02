@@ -1,3 +1,8 @@
+:html_theme_options:
+  :body_max_width: 1200px
+
+.. cssclass:: wide-page
+
 Audit events table
 ==================
 

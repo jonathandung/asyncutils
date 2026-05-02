@@ -39,6 +39,8 @@ class ConsoleBase(InteractiveConsole, ABC):
     def context(self) -> Context: '''The :class:`contextvars.Context` instance passed to methods of the underlying asyncio event loop.'''
     @property
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
+    @property
+    def exc(self) -> SystemExit|None: '''The :exc:`SystemExit` instance that caused the console to exit, or `None` if the console has not exited.'''
     @final
     @property
     def memory_errors(self) -> int: '''The number of :exc:`MemoryError`'s that have occurred.'''
@@ -57,14 +59,9 @@ class ConsoleBase(InteractiveConsole, ABC):
         `name`: name of the module using the console
         `version`: version of the module using the console
         `description`: description of the module using the console
-        `default_local_exit`: see above
-        `disallow_subclass_msg`: see above
-        `native_handler`: see above
-        `other_handlers`: see above
-        `additional_interrupt_hooks`: see above
-        `additional_memerr_hooks`: see above
+        `default_local_exit`, `disallow_subclass_msg`, `native_handler`, `other_handlers`, `additional_interrupt_hooks`, `additional_memerr_hooks`: see above
         `template`: the console banner to use, with %-placeholders for name, version and description
-        Additional keyword arguments are passed to `template.__mod__`.'''
+        Additional keyword arguments are passed to :meth:`template.__mod__`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None:
         '''Run `code`, an instance of :class:`types.CodeType`.

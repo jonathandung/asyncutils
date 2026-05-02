@@ -1,53 +1,53 @@
 __lazy_modules__ = frozenset(('asyncutils.exceptions',))
 from asyncutils._internal import log as l, patch as P
 from asyncutils._internal.submodules import config_all as __all__
-from asyncutils._internal.unparsed import N
-from asyncutils.exceptions import FaultyConfig
+from asyncutils._internal.unparsed import N, c
+from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; N.update(p.parse_args().__dict__); del p
-def f(e, _=('',), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)):
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
-        try: return getattr(__import__(d, fromlist=_), w)
+        try: return getattr(_(d), w)
         except ImportError: ...
     else:
         d = 'loky'
-        if e in f: return getattr(__import__('concurrent.futures.'+e, fromlist=_), e.title()+'PoolExecutor')
+        if e in f: return getattr(_('concurrent.futures.'+e), e.title()+'PoolExecutor')
         if e == 'dask':
-            try: return __import__('distributed.client', fromlist=_).Client
+            try: return _('distributed.client').Client
             except ImportError: d = 'dask.distributed'
         elif e == 'loky_noreuse':
-            try: return __import__('loky.process_executor', fromlist=_).ProcessPoolExecutor
+            try: return _('loky.process_executor').ProcessPoolExecutor
             except ImportError: ...
         elif e == d:
-            try: (r := __import__('loky.reusable_executor', fromlist=_)._ReusablePoolExecutor).__new__ = lambda cls, *a, **k: cls.get_reusable_executor(*a, **k)[0]; return r
+            try: (r := _('loky.reusable_executor')._ReusablePoolExecutor).__new__ = lambda cls, *a, **k: cls.get_reusable_executor(*a, **k)[0]; return r
             except ImportError: ...
-        elif e == 'ipython': return __import__('ipyparallel.client.view', fromlist=_).ViewExecutor
+        elif e == 'ipython': return _('ipyparallel.client.view').ViewExecutor
         else:
             d, *a = e.split('_')
             if d == 'elib':
-                try: a, e = a; return getattr(__import__('executorlib.executor.'+a, fromlist=_), f'{a.title()}{e.title()}Executor')
+                try: a, e = a; return getattr(_('executorlib.executor.'+a), f'{a.title()}{e.title()}Executor')
                 except ImportError: d = 'executorlib'
             elif d == 'pebble':
-                try: a = a[0]; return getattr(__import__('pebble.pool.'+a, fromlist=_), a.title()+'Pool')
+                try: a = a[0]; return getattr(_('pebble.pool.'+a), a.title()+'Pool')
                 except ImportError: ...
             else: raise ValueError('invalid custom executor: '+e)
-    s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return __import__('concurrent.futures.thread', fromlist=_).ThreadPoolExecutor
-def k(e, a=False, N=N):
+    s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return _('concurrent.futures.thread').ThreadPoolExecutor
+def k(e, a=False, N=N, _=E):
     if isinstance(x := N[e], str):
         try: return int(x, 0)
         except ValueError:
-            if a: raise FaultyConfig(e, str, int)
+            if a: raise _(e, str, int)
     return x
-def g(e, a=False, t=(str, int, bytes), k=k):
+def g(e, a=False, t=(str, int, bytes), k=k, _=E):
     if isinstance(x := k(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
         try: x = x.encode()[2:-1] # noqa: SIM105
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
-    raise FaultyConfig(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'x', False, __import__('os').name == 'posix' # type: ignore[no-redef]
-silent, basic_repl, loaded_all = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all))
+    raise _(e, type(x), t)
+max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'a', False, __import__('os').name == 'posix' # type: ignore[no-redef]
+silent, basic_repl, loaded_all, pdb = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all, N.pdb))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
     case 'MAKE':
@@ -55,7 +55,7 @@ match logging_to := g('log_to'):
         for h in range(1, 0x1001):
             try: logging_to = (s := open(T%h, m)).name; break
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
-            except AttributeError: raise SystemError('python opened a file with no `name` attribute') from None
+            except AttributeError: raise SystemError("python opened a file with no 'name' attribute") from None
             except Exception: ...
         else: M = True
         del T, h
@@ -72,14 +72,12 @@ match logging_to := g('log_to'):
     case str()|int()|bytes():
         try: M = True; logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
-        except FileExistsError: s.write('ERROR: log file already exists\n')
         except OSError as b: s.write(f'ERROR: {b}\n')
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
-if M: s.write('Failed to create log file; falling back to stderr\n')
+if M: s.write('ERROR: Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 (set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))((D := 10)*min(max(3-N.V+N.Q, 1), 5))
-get_past_logs.handler = _
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
@@ -98,15 +96,17 @@ class debugging:
         if (l := self.orig_level) != _l.level == _L: _l.debug('config.debugging: exiting debug mode'); _s(l)
         else: _l.warning('config.debugging: user already exited debug mode; original level was %s', self.orig_name)
         self.orig_name = self.orig_level = None
-    def __repr__(self): return f'<asyncutils debug mode context manager at {id(self):#x}>'
-    P.patch_method_signatures((__enter__, ''), (__exit__, 'exc_typ, exc_val, exc_tb, /'))
-debug = debugging()
-if N.debug: debug.__enter__()
-l.debug('hi')
-__import__('atexit').register(lambda s=s, _=l.debug: None if s.closed else _('bye') or s.flush() or s.close())
+    def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'
+    P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig))
+get_past_logs.handler, d, debug = _, l.debug, debugging()
+if N.debug:
+    debug.__enter__(); d('python %s', S.version)
+    if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
+    if c: d('config file path: %s', c)
+__import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
 def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, l # noqa: F821
+del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, l, E, c, d # noqa: F821

@@ -2,12 +2,7 @@
 
 This file provides an overview of the direction towards which this project is heading.
 
-Current version: 0.9.0
-
-## [0.9] - 2026-04
-
-- Complete skeleton of test suite for the module
-- Further enrich the command line
+Current version: 0.9.1
 
 ## [1.0] - 2026-06
 

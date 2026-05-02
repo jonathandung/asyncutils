@@ -1,5 +1,6 @@
 from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, getcontext, iter_to_agen, safe_cancel, sync_await
 from asyncutils.constants import _NO_DEFAULT
+from asyncutils._internal import patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial, Placeholder
 from asyncutils._internal.helpers import get_loop_and_set, fullname
 from asyncutils._internal.log import info
@@ -31,7 +32,8 @@ class Q:
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _
-def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=E, Q=Q): # noqa: C901,PLR0913,PLR0915
+    P.patch_method_signatures((_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__new__, 'maxsize, empty, qsize, full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, cancel_extend, /'))
+def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=E, _q=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C = getcontext()
     try: F = _getframe(1)
     except ValueError: F = None
@@ -123,7 +125,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             f = D.popleft
             while D:
                 if not (F := f()).done(): F.set_result(None)
-    q = Q(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
+    q = _q(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
         async def extend(f=partial(put, Placeholder, password_put)):
             async for i in iter_to_agen(init_items): await f(i)
@@ -327,7 +329,7 @@ class SmartLifoQueue(PotentQueueBase):
     def qsize(self): return len(self.__queue)
     def __bool__(self): return bool(self.__queue)
     def empty(self): return not self
-    def pushpop(self, item, raising=True): raise NotImplementedError
+    def pushpop(self, item): raise NotImplementedError
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))

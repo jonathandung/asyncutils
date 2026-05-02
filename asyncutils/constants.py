@@ -3,18 +3,20 @@ from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import constants_all as __all__
 RECIP_E, EXECUTORS_FROZENSET = 0.36787944117144233, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process'))
 class sentinel_base:
-    _can_instantiate = False; __slots__ = '__name',
-    def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframe):
+    _can_instantiate = False; __slots__ = '__mod', '__name'
+    def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframemodulename):
         cls._assert_can_instantiate()
         if name is None: return super().__new__(cls)
         if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('invalid name')
-        if (p := g(1).f_globals.get('__name__')): name = f'{p}.{name}'
-        if (o := (c := cls._cache).get(name)) is None:
-            (o := super().__new__(cls)).__name = name
+        if (m := g(1)) is not None: name = f'{m}.{name}'
+        if (o := (c := cls._cache).get(name := f'{g(1)}.{name}')) is None:
+            (o := super().__new__(cls)).__name, o.__mod = name, m
             with cls._lock: c[name] = o
         return o
     @property
     def name(self): return self.__name
+    @property
+    def __module__(self): return self.__mod
     @classmethod
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')

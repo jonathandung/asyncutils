@@ -2,7 +2,7 @@
 import logging as L
 from _collections_abc import Mapping
 from typing import Final
-name: str
+name: Final[str]
 level: int
 parent: None
 propagate: bool

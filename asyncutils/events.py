@@ -22,7 +22,8 @@ class SingleWaiterEventWithValue(EventMixin):
             if default is _NO_DEFAULT: raise EventValueError('no value is set')
             return default
         return w.result()
-    clear = __init__ = lambda self: setattr(self, '_waiter', None)
+    def clear(self): self._waiter = None
+    __init__ = clear
 class EventWithValue(EventMixin):
     __slots__ = '_hist', '_value', '_waiters'
     def __init__(self, *, maxhist=_NO_DEFAULT): self._waiters, self._value, self._hist = set(), None, deque(maxlen=getcontext().EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is _NO_DEFAULT else maxhist)

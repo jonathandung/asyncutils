@@ -59,6 +59,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     def create_sparsef(self, path: Openable, total_size: int, chunks: Mapping[int, bytes|str]) -> OpenRV: '''An async context manager that creates a file of size `total_size` at `path`, with `chunks` mapping offsets to the data to be written there. Data from old chunks is overwritten by that from new ones.'''
     def prefetch_files(self, *paths: Openable, init_size: int=...) -> AbstractAsyncContextManager[list[MemoryMappedFile], None]: '''Prefetch existing files at `paths` for memory-mapped I/O into memory at once, closing them simultaneously on exit.'''
     async def __cleanup__(self) -> None: ...
+    def __del__(self) -> None: ...
     async def copy_file(self, srcp: Openable, destp: Openable, *, flush: bool=...) -> None: '''Copy the contents of the file at `srcp` into that at `destp` asynchronously and flush it if `flush` is `True`. Uses :meth:`open` and :meth:`create` internally.'''
     async def checksum(self, path: Openable, alg: HashAlgorithm=...) -> str: '''Compute a checksum from the file at `path` using the specified algorithm, defaulting to :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`.'''
     async def approx_memory_usage(self) -> int: '''Compute the approximate memory used by the currently open memory maps in bytes.'''
