@@ -9,14 +9,14 @@ class sentinel_base:
         if name is None: return super().__new__(cls)
         if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('invalid name')
         if (m := g(1)) is not None: name = f'{m}.{name}'
-        if (o := (c := cls._cache).get(name := f'{g(1)}.{name}')) is None:
+        if (o := (c := cls._cache).get(name)) is None:
             (o := super().__new__(cls)).__name, o.__mod = name, m
             with cls._lock: c[name] = o
         return o
     @property
     def name(self): return self.__name
     @property
-    def __module__(self): return self.__mod
+    def module(self): return self.__mod
     @classmethod
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')

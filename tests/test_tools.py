@@ -1,7 +1,7 @@
 from _io import StringIO
 from asyncutils.tools import *
 @(dec := __import__('pytest').fixture(scope='module'))
-def argstr(): return '-pVVe thread -m 5'
+def argstr(): return '-pVVm 5'
 @dec
 def argv(argstr): return argstr.split(' ')
 def test_json_argv_conv(cfgjson, argv):

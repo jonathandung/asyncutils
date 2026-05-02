@@ -115,6 +115,7 @@ class VersionDelta(NamedTuple):
     '''The minor part of the version.'''
     patch: int = ...
     '''The patch part of the version.'''
+    def __replace__(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Alias for :meth:`_replace`.'''
     def __floor__(self) -> int: '''The major part of the delta.'''
     def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''

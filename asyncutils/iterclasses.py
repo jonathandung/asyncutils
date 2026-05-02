@@ -50,7 +50,7 @@ class apeekable(LoopBoundMixin):
         elif i >= l:
             async for s in take(self._it, i-l+1): f(s)
         return C[i]
-    P.patch_function_signatures((__getitem__, 'idx, /'))
+    P.patch_method_signatures((__getitem__, 'idx, /'))
 class await_later:
     __slots__ = 'aw',
     def __new__(cls, a, /, _=type(dummy_task)):
@@ -60,6 +60,7 @@ class await_later:
     def __repr__(self): return f'<proxy at {id(self):#x} to awaitable at {id(self.aw):#x}>'
     def __setattr__(self, n, /): raise AttributeError('attribute aw is read-only' if n == 'aw' else f'cannot set attribute {n!r} through proxy')
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass the type of proxies to awaitables')
+    P.patch_classmethod_signatures((__new__, 'aw, /'))
 @H.subscriptable
 class abucket(LoopContextMixin):
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
@@ -83,4 +84,5 @@ class abucket(LoopContextMixin):
                     except StopAsyncIteration: return
                     if (k := K(i)) == v: yield i; break
                     elif V(k): C[k].append(i)
-del await_later, dummy_task
+    P.patch_method_signatures((__contains__, _ := 'key, /'), (__getitem__, _)); del _
+del P, await_later, dummy_task
