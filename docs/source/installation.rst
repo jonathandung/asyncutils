@@ -3,147 +3,75 @@ Installation
 
 No setup is required, besides ensuring that your package manager is updated to the latest version as follows:
 
-pip:
-
 .. code-block:: bash
-
+  # pip:
   pip install -U pip
-
-pipx:
-
-.. code-block:: bash
-
+  # pipx:
   pip install -U pipx
-
-conda:
-
-.. code-block:: bash
-
+  # conda:
   conda update conda anaconda
   conda update --all # optional
-
-uv:
-
-.. code-block:: bash
-
+  # uv:
   uv self update # may not work if uv was installed with pip
   pip install -U uv # in that case
-
-poetry:
-
-.. code-block:: bash
-
+  # poetry:
   poetry self update
-
-pdm:
-
-.. code-block:: bash
-
+  # pdm:
   pip install -U pdm
-
-pipenv:
-
-.. code-block:: bash
-
+  # pipenv:
   pip install -U pipenv
 
 .. version-added:: 0.8.13
   Achieved distribution on conda-forge and by extension, conda installation support.
 
-Next, install py-asyncutils from pip:
+Next, install py-asyncutils:
 
 .. code-block:: bash
-
+  # from pip; recommended
   pip install py-asyncutils==0.9.1
+  # alternatively, after:
+  git clone https://github.com/jonathandung/asyncutils.git
+  cd asyncutils
+  # you have options (a):
+  pip install .
+  # (b):
+  make install # verbose
+  make install-silent # no clutter
+  # uses Make, though pip is still used under the hood
+  # or if you are not on a unix-like system and don't have pip for some reason:
+  python -m build
+  python -m installer dist/*.whl
+  # you should really install pip in this case, since build and installer are still required
 
-or directly from the github repository (still requires pip):
+or if you wish to obtain the :ref:`extras`:
 
 .. code-block:: bash
-
-  pip install git+https://github.com/jonathandung/asyncutils.git#egg=py-asyncutils
-
-or if you are installing for development, and wish to obtain the corresponding :ref:`extras`:
-
-.. code-block:: bash
-
+  # tools likely enough for developers
   pip install py-asyncutils[dev]
   uv tool install ruff # make ruff available with the uvx interface
 
-alternatively, after:
+other installation pathways:
 
 .. code-block:: bash
-
-  git clone https://github.com/jonathandung/asyncutils.git
-  cd asyncutils
-
-do:
-
-.. code-block:: bash
-
-  pip install .
-
-or using Make, though pip is still used under the hood:
-
-.. code-block:: bash
-
-  make install # verbose
-  make install-silent # no clutter
-
-.. version-added:: 0.9.0
-  Created a Makefile to simplify development chores.
-
-or if you are not on a unix-like system and don't have pip for some reason:
-
-.. code-block:: bash
-
-  python -m build
-  python -m installer dist/*.whl
-
-you should really install pip in this case, since build and installer are still required
-
-or with pipx:
-
-.. code-block:: bash
-
+  # pipx:
   pipx install py-asyncutils==0.9.1
-
-or with conda:
-
-.. code-block:: bash
-
+  # conda:
   conda install -c conda-forge py-asyncutils=0.9.1
-
-alternatively:
-
-.. code-block:: bash
-
+  # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
   conda install py-asyncutils==0.9.1
-
-or with uv:
-
-.. code-block:: bash
-
+  # uv:
   uv pip install 'py-asyncutils==0.9.1'
-
-or with poetry:
-
-.. code-block:: bash
-
+  # poetry:
   poetry add py-asyncutils@0.9.1
-
-or with pdm:
-
-.. code-block:: bash
-
+  # pdm:
   pdm add py-asyncutils==0.9.1
-
-or with pipenv:
-
-.. code-block:: bash
-
+  # pipenv:
   pipenv install py-asyncutils==0.9.1
+
+.. version-added:: 0.9.0
+  Created a Makefile to simplify development chores. We will never add setup.py, since only pyproject.toml is the modern way to go.
 
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m``.

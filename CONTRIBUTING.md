@@ -3,7 +3,7 @@
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this
 repository before making a change.
 
-Please note we have a [code of conduct](https://github.com/jonathandung/asyncutils/blob/main/CODE_OF_CONDUCT.md). Please follow it in all your
+Please note we have a [code of conduct](https://github.com/jonathandung/asyncutils/blob/main/CODE_OF_CONDUCT.md), which you should follow in all your
 interactions with the project.
 
 ## Pull Request Process

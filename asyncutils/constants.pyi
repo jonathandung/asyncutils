@@ -26,7 +26,7 @@ class sentinel_base:
     @property
     def back(self) -> str|None: '''The unqualified name of the sentinel, or `None` if there is none.'''
     @property
-    def module(self) -> str: '''The name of the module the sentinel is defined in.''' # type: ignore[override]
+    def module(self) -> str: '''The name of the module the sentinel is defined in.'''
     def is_(self, other: object, /) -> bool: ''':func:`operator.is_` for sentinels.'''
 RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
