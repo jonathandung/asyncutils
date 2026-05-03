@@ -1,4 +1,4 @@
-from asyncutils import __version__ as V, config as C
+from asyncutils import __version__ as V, config as C, StateCorrupted
 from asyncutils._internal import patch as P, running_console as R
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import console_all as __all__
@@ -17,9 +17,9 @@ class ConsoleBase(B):
         case str() as s:
             if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
             from _pyrepl.main import CAN_USE_PYREPL; del s
-    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL'):
-        S.audit(fullname(t := type(self)), loop); g = globals()
-        if t is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
+    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals()):
+        if (t := type(self)) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
+        S.audit(fullname(t), loop)
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f)
         def stop(p=None, /, _=loop.stop, *, asap=False):
@@ -137,11 +137,13 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if self._internal_is_running: raise RuntimeError(_r)
         if r := R.get(): raise RuntimeError(_r if r is self else _a)
         R.set(self); super().prehook(_ if max_memerrs is None else max_memerrs)
-    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb):
+    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=StateCorrupted('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
         if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
-        if _ and getattr(e := self.exc, 'code', None): __import__('pdb').post_mortem(e.__traceback__)
+        if _ and isinstance(e := self.exc, BaseException):
+            if not isinstance(e, SystemExit): raise _e
+            __import__('pdb').post_mortem(e.__traceback__)
         super().posthook()
-    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=35, _mn=S.intern('__callback')):
+    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=36, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         if b is None: return
         try:

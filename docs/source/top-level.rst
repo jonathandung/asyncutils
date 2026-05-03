@@ -9,7 +9,8 @@ This section documents the symbols defined at the top level of this package.
   :annotation: asyncutils.version.VersionInfo
 
   An instance of :class:`asyncutils.version.VersionInfo` representing the current pip/conda version of this library.
-  This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`_.
+
+  :note: This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`_.
 
 .. data:: __hexversion__
   :no-index:
@@ -26,14 +27,16 @@ This section documents the symbols defined at the top level of this package.
   :module: asyncutils
   :annotation: frozenset[str]
 
-  A :class:`frozenset` of submodule names which are loaded when starting the interactive console of this module. A strict superset of :data:`preloaded_submodules`.
+  A :class:`frozenset` of submodule names which are loaded when starting the interactive console of this module.
+
+  :note: It is a strict superset of :data:`preloaded_submodules`.
 
 .. data:: preloaded_submodules
   :no-index:
   :module: asyncutils
   :annotation: frozenset[str]
 
-  A :class:`frozenset` of submodule names which are preloaded when importing the library for essential initialization.
+  A :class:`frozenset` of names of submodules which are preloaded when importing the library for essential initialization.
 
 .. data:: submodules_map
   :no-index:
@@ -41,7 +44,8 @@ This section documents the symbols defined at the top level of this package.
   :annotation: dict[str, types.ModuleType]
 
   A :class:`dict` mapping submodule names to the corresponding submodule objects.
-  For submodules that are already loaded, these are exact instances of :class:`types.ModuleType`.
+
+  :tip: For submodules that are already loaded, these are exact instances of :class:`types.ModuleType`.
 
   :note:
     For submodules that are not yet loaded, the value is an instance of an internal class with the same behaviour but not inserted into
@@ -49,20 +53,18 @@ This section documents the symbols defined at the top level of this package.
     replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object. For attribute accesses, it acts
     as a proxy to the real submodule, loading it when strictly required.
 
-  :warning: The exact deference mechanism is an implementation detail.
+  :caution: The exact deference mechanism is an implementation detail.
 
-.. function:: time_since_boot()
+.. function:: time_since_boot() -> float
   :no-index:
   :module: asyncutils
 
   Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.
   Useful for benchmarking the module's performance.
 
-Besides the contextually configured constants in :mod:`asyncutils.context`:
----------------------------------------------------------------------------
+The remarks below are inapplicable to the contextually configured constants in :mod:`asyncutils.context`:
 
-One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule. The submodule
-objects, loaded or unloaded, are also accessible by name.
-
-Also, each module has an :data:`__all__` attribute that is a tuple of strings, representing its public API. Anything not included in it is considered
-unstable, with the sole exceptions of :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.
+* One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
+* The submodule objects are also accessible as attributes of :mod:`asyncutils` without triggering the loading immediately if not loaded.
+* Each module has an :data:`__all__` attribute, a tuple of strings representing its public API. Anything not included in it is considered unstable or
+  private, except :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.

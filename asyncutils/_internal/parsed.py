@@ -54,5 +54,5 @@ a('-s', '--seed', help='Seed the random instance used internally by this module 
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
 a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero.')
 (a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
-a('-?', '-h', '--help', action='help', help='Print this help message and exit. The NO_COLOR environment variable is respected by all output of this parser.')
+a('-?', '-h', '--help', action='help', help='Print this help message and exit. The NO_COLOR and TERM environment variables are respected by all output of this parser.')
 del a, b, C, d, e, f, g, h, i, j, A, V

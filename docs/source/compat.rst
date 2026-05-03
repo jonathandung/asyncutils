@@ -21,7 +21,7 @@ asyncutils versions
 
 Due to this library being in an early stage of development, it is not suitable to make a 1.0 release, which is really when the backward compatibility
 concerns start flooding in. Currently, no guarantees regarding breaking changes or API stability are made, even in the same patch version, but
-hopefully that soon changes.
+hopefully that soon changes; this is currently planned to take place in late June.
 
 Support matrix
 --------------
@@ -29,6 +29,8 @@ Support matrix
 ================== ===============
 asyncutils version CPython version
 ================== ===============
-0.8.18+            3.12+
+6.0 - 6.11         3.14+
+5.0 - 5.11         3.13+
+0.8.18 - 4.11      3.12+
 0.8.0 - 0.8.17     3.14+
 ================== ===============

@@ -1,8 +1,3 @@
-:html_theme_options:
-  :body_max_width: 1200px
-
-.. cssclass:: wide-page
-
 Audit events table
 ==================
 
@@ -19,8 +14,6 @@ See the official documentation for :func:`sys.audit` and :func:`sys.addaudithook
 
 Also see `the standard library audit event table <https://docs.python.org/3/library/audit_events.html>`_, from which the inclustion and format of
 this table take inspiration.
-
-.. rst-class:: widepage
 
 .. list-table:: Audit events
   :header-rows: 1

@@ -14,8 +14,6 @@ be thrown as appropriate if the file is not found or contains values of the inco
 Automatic discovery of config files, as in other libraries or command-line tools, is not supported, because there is no standard location for it and
 determining a precedence for the different allowed file extensions would be arbitrary, non-trivial and difficult to maintain.
 
-New options will likely be added in the future, but every current option is considered stable and has a corresponding default value.
-
 The options are shown below, along with their default values and descriptions:
 
 .. literalinclude:: ../../asyncutils/format.json5
@@ -23,16 +21,36 @@ The options are shown below, along with their default values and descriptions:
   :caption: config file format
   :force:
 
+New options will likely be added in the future, but every current option is considered stable and has a corresponding default value.
+
 The above keys have a near one-to-one correspondence with the command line arguments, as the comments below each key explain; besides the contextual
 constants, due to the sheer magnitude of options making them infeasible to include. Use ``asyncutils -?`` to see detailed CLI usage.
 
-JSON and TOML are the native formats of the configuration file. Notably, INI is not supported because it is not strongly typed and outdated.
+JSON and TOML are the native formats of the configuration file.
 YAML, JSON5, JSONC and Hjson formats are also supported for the configuration file, though the corresponding pip libraries must be installed.
-To write the config in these formats, adhere to the analog of the same nested dictionary structure in the chosen language.
 
-The exact parsing method used by this module may allow object nesting deviating from that shown, but you should strictly adhere to it.
+.. attention::
+  :collapsible:
 
-To ensure all formats can be parsed, the ``pconf`` extra should be installed.
+  To write the config in each format, adhere to the analog of the nested dictionary structure shown in format.json5 in the chosen language.
+
+.. danger::
+
+  Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
+  Write your configs yourself to avoid malicious inputs exhausting computing resources.
+
+.. important::
+
+  INI is not supported because it is outdated and lacks strong typing; that is, all values are interpreted as strings.
+
+.. warning::
+
+  Though the exact parsing method used by this module may allow object nesting deviating from that shown, you should still strictly adhere to it.
+
+.. admonition::
+  :collapsible:
+
+  To ensure all formats can be parsed, the ``pconf`` extra should be installed.
 
 Modifying the context at runtime
 --------------------------------
@@ -48,5 +66,8 @@ On the other hand, one may find it useful to alter the context dynamically. This
     lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1 # fields do not have to be in order
   ) # check if a string is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
 
-For more detailed documentation on context usage, see the :mod:`context` page. You can think of it as similar to :mod:`decimal`, but with different
-methods and attributes.
+For more detailed documentation on context usage, see the :mod:`context` page.
+.. tip::
+  :collapsible:
+
+  You can think of the :class:`~asyncutils.context.Context` class as similar to :mod:`decimal`, but with different methods and attributes.

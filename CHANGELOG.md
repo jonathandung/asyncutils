@@ -18,9 +18,13 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-## [0.9.1] - 2026-05-01; newest
+## [0.9.2] - 2026-05-03; newest
 
-Declare full support for python [-m]; patched function, method and class method signatures where appropriate; added -P/--pdb option; use furo theme.
+Fixed failing tests and workflows; started using MyST.
+
+## [0.9.1] - 2026-05-01
+
+Declared full support for python[ -m]; patched function, method and class method signatures where appropriate; added -P/--pdb option; started using furo theme.
 
 ## [0.9.0] - 2026-04-27
 

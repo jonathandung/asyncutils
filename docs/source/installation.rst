@@ -4,6 +4,7 @@ Installation
 No setup is required, besides ensuring that your package manager is updated to the latest version as follows:
 
 .. code-block:: bash
+
   # pip:
   pip install -U pip
   # pipx:
@@ -27,6 +28,7 @@ No setup is required, besides ensuring that your package manager is updated to t
 Next, install py-asyncutils:
 
 .. code-block:: bash
+
   # from pip; recommended
   pip install py-asyncutils==0.9.1
   # alternatively, after:
@@ -46,6 +48,7 @@ Next, install py-asyncutils:
 or if you wish to obtain the :ref:`extras`:
 
 .. code-block:: bash
+
   # tools likely enough for developers
   pip install py-asyncutils[dev]
   uv tool install ruff # make ruff available with the uvx interface
@@ -53,6 +56,7 @@ or if you wish to obtain the :ref:`extras`:
 other installation pathways:
 
 .. code-block:: bash
+
   # pipx:
   pipx install py-asyncutils==0.9.1
   # conda:
