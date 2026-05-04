@@ -8,19 +8,39 @@ not at all heavy in terms of import time. In addition, you only pay for what you
 you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast, light and
 tightly coupled to the ever-evolving asyncio ecosystem, because of its design goals and philosophy, so have some concrete figures:
 
+Baseline:
+
+.. code-block:: bash
+
+  python -SEqX importtime -c "import asyncio"
+
+Cumulative import time of asyncio: 115.1 ± 12.4 ms; max 139.4 ms, min 103.3 ms; n = 10
+
 Below are obtained by running each of the following commands sequentially with no warmup:
 
 .. code-block:: bash
 
   python -SEqX importtime -c "import asyncutils"
 
-Cumulative import time of asyncutils: 7774 ± 653 μs; max 8786 μs, min 6708 μs, n = 12
+Cumulative import time of asyncutils: 7774 ± 653 μs; max 8786 μs, min 6708 μs, n = 10
 
 .. code-block:: bash
 
-  python -SEqX importtime -m asyncutils
+  python -SEqX importtime -c "import asyncutils._internal.initialize"
 
-Time taken to initialize all submodules (and import asyncio): 122.0 ± 9.5 ms; max 136.4 ms, min 109.1 ms, n = 10
+Actually initializing the submodules and importing asyncio:
+
+.. code-block:: bash
+
+  python -SEqm asyncutils -d
+
+Time taken to initialize all submodules (and import asyncio): 122.1 ± 9.5 ms; max 136.5 ms, min 109.2 ms, n = 10
+
+.. code-block:: bash
+
+  python -SEqm asyncutils -dp
+
+Time taken to actually import all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms, min 237.0 ms, n = 10
 
 .. note::
   :collapsible:

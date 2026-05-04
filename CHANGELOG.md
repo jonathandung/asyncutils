@@ -14,17 +14,19 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Docs
 
-48% complete
+49% complete
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-## [0.9.2] - 2026-05-03; newest
+## [0.9.2] - 2026-05-04; newest
 
-Fixed failing tests and workflows; started using MyST.
+Created symbolic links in docs directory linking to root .md files; fixed some bugs; respected some more environment variables and documented this
+behaviour; completed benchmarks; added myst_parser as an optional dependency.
 
 ## [0.9.1] - 2026-05-01
 
-Declared full support for python[ -m]; patched function, method and class method signatures where appropriate; added -P/--pdb option; started using furo theme.
+Declared full support for python[ -m] as an entry point; patched function, method and class method signatures where appropriate; added -P/--pdb
+option; started using furo theme.
 
 ## [0.9.0] - 2026-04-27
 

@@ -1,4 +1,6 @@
 '''Backport of :class:`asyncio.Queue` with a :meth:`shutdown` method to python 3.12 or under.'''
+import sys
+assert sys.version_info < (3, 13)
 from asyncio.queues import Queue as BaseQueue
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
 class QueueEmpty(Exception): ...

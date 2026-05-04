@@ -24,6 +24,7 @@ class partial: # noqa: N801
     @classmethod
     def _new(cls, f, a, k, /, _=_get_merger):
         if a and a[-1] is Placeholder: raise TypeError('trailing Placeholders are not allowed')
+        if k is None: k = {}
         if any(v is Placeholder for v in k.values()): raise TypeError('Placeholder cannot be passed as a keyword argument')
         if isinstance(f, partial):
             P, e = f._phs, (A := list(f.args)).extend
@@ -45,11 +46,5 @@ class partial: # noqa: N801
         else: A = self.args
         return self.func(*A, *a, **self.keywords, **k)
     def __get__(self, o, _=None): return self if o is None else type(self.__get__)(self, o)
-    def __reduce__(self): return type(self), (self.func,), (self.func, self.args, self.keywords or None)
-    def __setstate__(self, s, /, _=_get_merger):
-        f, a, k = s
-        if not (callable(f) and isinstance(a, tuple) and (k is None or isinstance(k, dict))): raise TypeError('invalid partial state')
-        if a and a[-1] is Placeholder: raise TypeError('trailing Placeholders are not allowed')
-        if k is None: k = {}
-        self.func, self.args, self.keywords = f, a, k; self._phs, self._mg = _(a)
+    def __reduce__(self): return type(self)._new, (self.func, self.args, self.keywords or None)
 del verify_compat, _get_merger

@@ -4,7 +4,7 @@ from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
 from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
-if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; N.update(p.parse_args().__dict__); del p
+if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; p.parse_args(namespace=N); del p
 def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
@@ -47,7 +47,7 @@ def g(e, a=False, t=(str, int, bytes), k=k, _=E):
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise _(e, type(x), t)
 max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'a', False, __import__('os').name == 'posix' # type: ignore[no-redef]
-silent, basic_repl, loaded_all, pdb = map(bool, (S.flags.quiet or N.quiet, N.basic_repl, N.load_all, N.pdb))
+silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
     case 'MAKE':

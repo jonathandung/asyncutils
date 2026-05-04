@@ -12,23 +12,25 @@ _s = object()
 _f = '',
 class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
-    match '1' if C.basic_repl else g('PYTHON_BASIC_REPL', '0'):
-        case '1': CAN_USE_PYREPL = False
-        case str() as s:
-            if s != '0': S.stderr.write(f'WARNING: unknown value associated with environment variable PYTHON_BASIC_REPL: {s!r}\n')
-            from _pyrepl.main import CAN_USE_PYREPL; del s
-    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals()):
+    if C.basic_repl: CAN_USE_PYREPL = False
+    else: from _pyrepl.main import CAN_USE_PYREPL
+    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}): # noqa: B006
         if (t := type(self)) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
         S.audit(fullname(t), loop)
         if modname is None: modname = self.NAME
-        if mod is None: mod = __import__(modname, fromlist=_f)
+        if mod is None: mod = __import__(modname, fromlist=_f if '.' in modname else ())
         def stop(p=None, /, _=loop.stop, *, asap=False):
             if p is _s: _() if asap else loop.call_soon_threadsafe(_)
             else: raise RuntimeError(_m%'stop')
         def close(p=None, /, _=loop.close):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {k: g.get(k) for k in ('__builtins__', '__file__', '__loader__', '__spec__')})[modname] = stop, close, False, None, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __package__=__spec__.parent)
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __spec__=__spec__, __annotations__={})
+        if (H := S.hexversion) > 0x30e00a0: d['__annotate__'] = g('__annotate__')
+        if H < 0x30f00a1:
+            for k in _: d[k] = g(k)
+        elif H < 0x30f00f0:
+            for k, v in _.items(): d[k] = getattr(__spec__, v)
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
         elif h is not None: raise TypeError(f'asyncutils.console.ConsoleBase: locals handler for module {modname!r} should be callable, not {fullname(h)!r}')
     def refresh(self):
@@ -55,10 +57,10 @@ class ConsoleBase(B):
         except BaseException as e:
             if not isinstance(e, dont_show_traceback): self.showtraceback()
             return getattr(self, 'STATEMENT_FAILED', None)
-    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), _g=g): # noqa: B008
-        x, p = False, None; self.write_special(self.BANNER if banner is None else banner)
+    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # noqa: B008
+        x = False; self.write_special(self.BANNER if banner is None else banner)
         try:
-            if p := _g('PYTHONSTARTUP'):
+            if p and not S.flags.ignore_environment:
                 with __import__('tokenize').open(p) as f:
                     if _q: S.stdout, _o = _o, S.stdout
                     S.audit('cpython.run_startup', p); exec(compile(f.read(), p, 'exec'), self.locals) # noqa: S102
@@ -76,7 +78,7 @@ class ConsoleBase(B):
         elif (x := __import__('_pyrepl.simple_interact', fromlist=_)._get_reader().threading_hook): x.add('')
         self.refresh()
     def memoryerror(self):
-        if (m := self.memory_errors) == self._max_memerrs: self.write_special(_ := f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(_)
+        if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(1)
         self.memory_errors = m+1
         for _ in self.memerr_hooks: _(self)
         self.refresh()
@@ -143,7 +145,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if not isinstance(e, SystemExit): raise _e
             __import__('pdb').post_mortem(e.__traceback__)
         super().posthook()
-    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=36, _mn=S.intern('__callback')):
+    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=38, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()
         if b is None: return
         try:

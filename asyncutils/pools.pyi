@@ -101,10 +101,10 @@ class ConnectionPool[T, **P](LoopBoundMixin):
     @property
     def maxlife(self) -> float: ...
 class CallbackAccumulator[T, **P](deque[T], AsyncContextMixin[CallbackAccumulator[T, P]]):
-    '''A utility class store callbacks and call them at once when the context manager exits.
+    '''A utility class to store callbacks and call them at once when the context manager exits.
     To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
     The behaviour of this class as a :class:`~collections.deque` is an implementation detail.
-    This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
+    Note that this class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload

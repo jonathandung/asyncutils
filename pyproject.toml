@@ -97,13 +97,15 @@ typing-extensions = false
 "asyncutils/con*" = ["N801"]
 "asyncutils/iterclasses.py*" = ["N801"]
 "asyncutils/_internal/compat.py*" = ["F403", "F405"]
-"asyncutils/_internal/py31*.py" = ["E402"]
+"asyncutils/_internal/py31*" = ["E402"]
+"asyncutils/_internal/py31*.pyi" = ["S101"]
 "tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
 "asyncutils/__init__.py" = ["E402"]
+"asyncutils/_internal/compat.py" = ["PLR2004"]
 "asyncutils/_internal/py312.py" = ["ARG002", "SIM105"]
 "asyncutils/base.py" = ["A002", "B008", "E722", "RUF029"]
 "asyncutils/config.py" = ["BLE001", "SIM115"]
-"asyncutils/console.py" = ["BLE001"]
+"asyncutils/console.py" = ["BLE001", "PLR2004"]
 "asyncutils/exceptions.py" = ["PLW0603"]
 "asyncutils/io.py" = ["PLR6301", "PLW2901"]
 "asyncutils/iters.py" = ["N801", "PLR2004", "RUF029"]
@@ -134,7 +136,7 @@ max-complexity = 24
 allowed-unused-imports = ["asyncutils._internal.submodules"]
 
 [tool.ruff.lint.pylint]
-allow-dunder-method-names = ["__setup__", "__cleanup__"]
+allow-dunder-method-names = ["__replace__", "__setup__", "__cleanup__"]
 max-returns = 10
 max-args = 13
 max-positional-args = 7

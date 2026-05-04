@@ -18,11 +18,21 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   config
   audit-events
   logging
-  compat
   top-level
   api/index
   benchmark
   glossary
+
+.. toctree::
+  :caption: About the project
+  :hidden:
+
+  examples
+  compat
+  contributing
+  support
+  changelog
+  roadmap
 
 .. toctree::
   :caption: Links
@@ -40,7 +50,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 .. hint::
   :collapsible:
 
-  Execute ``make help`` to see the available Makefile targets, more of which can and will be added on popular demand.
+  Execute ``make help`` to see the available Makefile targets. More of them will be added on popular demand.
 
 .. note::
   :collapsible: closed
