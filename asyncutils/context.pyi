@@ -12,8 +12,7 @@ class Context:
     '''An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
     :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports. :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like
     a sequence. Type annotated as a dataclass for convenience.
-    This class can technically be instantiated with positional arguments, but since the order of the fields are kept in alphabetical order of submodule and new fields may be added in the
-    future, only keyword arguments should be used to avoid subtle bugs.
+    The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
     For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what
     it configures. (It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.)
     Of course, this class is not related to instantiating a certain class, as in the :mod:`decimal` module, but rather a convenient way to store configuration for the various utilities
@@ -95,12 +94,14 @@ class Context:
     PASSWORD_QUEUE_DEFAULT_PUT_FROM: str = ...
     RWLOCK_DEFAULT_PREFER_WRITERS: bool = ...
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Sequence[int] = ...
+    DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR: bool = ...
+    DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
     def copy(self) -> Self: '''Return a copy of the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
-    def pprint(self, *, file: CanWriteAndFlush[str]=..., pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
+    def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
     def replace(self, /, **k: Any) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
@@ -127,7 +128,8 @@ def getcontext() -> Context: '''Return the current context for the active thread
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
-These names will not be listed in the :func:`__dir__` function of this submodule, since there are so many of them and more may be added in the future.'''
+These names are not listed by calling `dir` on this submodule, since there are so many of them (78 as of now!) and more may be added in the future,
+and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]
@@ -203,4 +205,6 @@ PASSWORD_QUEUE_DEFAULT_GET_FROM: Final[str]
 PASSWORD_QUEUE_DEFAULT_PUT_FROM: Final[str]
 RWLOCK_DEFAULT_PREFER_WRITERS: Final[bool]
 WAIT_FOR_SIGNAL_DEFAULT_SIGNALS: Final[Sequence[int]]
+DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR: Final[bool]
+DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: Final[bool]
 SEMAPHORE_DEFAULT_VALUE: Final[int]

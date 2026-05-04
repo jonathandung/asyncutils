@@ -11,7 +11,7 @@ The below environment variables directly affect what this library does, mostly i
 * ``PYTHONSTARTUP`` - Not executed with ``python -E``
 * ``NO_COLOR`` - Overrides ``FORCE_COLOR`` (python convention)
 * ``FORCE_COLOR`` - Overrides ``TERM``
-* ``TERM`` - Turn off smart terminal features when set to "dumb"
+* ``TERM`` - Turn off smart terminal features, including ANSI colour sequences when set to "dumb"
 
 Basic Customization
 -------------------

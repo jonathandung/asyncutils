@@ -341,6 +341,12 @@ class SyncAwaitType(Sentinel): ...
 class WildcardType:
     '''Type of :const:`channels.EventBus.WILDCARD`.'''
     def __bool__(self) -> Literal[False]: ...
+class EventProt(Protocol):
+    '''Protocol for event objects.'''
+    def is_set(self) -> bool: ...
+    def set(self) -> None: ...
+    def clear(self) -> None: ...
+    async def wait(self) -> Any: ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the :class:`int` constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
@@ -350,7 +356,7 @@ type SupportsRichComparison = SupportsLT|SupportsGT
 type ExcType = type[BaseException]
 '''The type of `exc_typ` in :meth:`__exit__` and :meth:`__aexit__` methods.'''
 type Exceptable = ExcType|tuple[ExcType, ...]
-'''Objects that may follow an except statement.'''
+'''The type of objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to the built-in :func:`open` function.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]

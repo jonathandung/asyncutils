@@ -180,6 +180,12 @@ Some keys can have various types, as detailed by the comments attached. */
     },
     rwlocks: {rwlock_default_prefer_writers: true},
     signals: {wait_for_signals_default_signals: [2, 15]},
-    util: {semaphore_default_value: 1}
+    util: {
+      dual_context_manager: {
+        default_may_create_executor: false,
+        default_use_existing_executor: true
+      },
+      semaphore_default_value: 1
+    }
   }
 }

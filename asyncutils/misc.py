@@ -18,6 +18,7 @@ class StateMachine:
             await self._helper('_exits'); self._state = state; await self._helper('_entries'); return True
     async def _helper(self, attr, _=IgnoreErrors(KeyError)):
         async with _: await getattr(self, attr)[self._state]()
+    _helper.__text_signature__ = '($self, attr)'
 async def gather_with_limited_concurrency(n=None, /, *coros, ret_exc=False):
     async def wrapped(c, s=Semaphore(getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # noqa: B008
         async with s: return await c

@@ -91,7 +91,7 @@ class VersionInfo(str): # noqa: FURB189
     @property
     def is_api_unstable(self): return self[0] == 0
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
-    representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (__hash__, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
+    representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (_hash, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
@@ -109,13 +109,13 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
             if not c(o): raise E.VersionNormalizerTypeError(f, o)
     elif not c(o): return
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
-def normalize(o, /, e=E.VersionNormalizerMissing):
-    if (r := normalize_allow_unimplemented(o)) is None: raise e(o)
+def normalize(o, /, _=E.VersionNormalizerMissing):
+    if (r := normalize_allow_unimplemented(o)) is None: raise _(o)
     return r
 def register_normalizer(o, n, /, _=t, f=N.setdefault): return f(_(o), n) is n
 def unregister_normalizer(o, /, _=t, f=N.pop): return f(_(o), None)
 def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))
 def autogenerate_normalizers(): return register_normalizer(__import__('_decimal').Decimal, lambda d, /: map(int, ((d := format(d, '.4f'))[:-4], d[-4:-2], d[-2:])))&register_normalizer(F := __import__('fractions').Fraction, F.as_integer_ratio)
-P.patch_function_signatures((normalize, t := 'o, /'), (normalize_allow_unimplemented, t), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
+P.patch_function_signatures((normalize_allow_unimplemented, t := 'o, /'), (unregister_normalizer, t), (dispatch_normalizer, t), (register_normalizer, 'o, f, /'))
 for _ in ('__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__'): setattr(VersionInfo, _, lambda self, other, /, _=getattr(tuple, _): NotImplemented if (other := normalize_allow_unimplemented(other)) is None else _(self.parts, other))
 del _, N, t, P, p, E, a, b, c, r

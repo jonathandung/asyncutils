@@ -1,14 +1,14 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, DualContextManager, ToSyncFromLoopRV, TransientBlockFromLoopRV, ExcType
+from ._internal.types import AsyncLockLike, DualContextManager, EventProt, ExcType, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from _collections_abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Coroutine, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
-from asyncio.locks import BoundedSemaphore, Lock, Semaphore
+from asyncio.locks import BoundedSemaphore, Event, Lock, Semaphore
 from asyncio.tasks import Task
 from types import TracebackType
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'anullcontext', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+__all__ = 'aiter_from_f', 'anullcontext', 'done_evt', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable `aw`, such that it can be passed to :func:`asyncio.create_task`.'''
@@ -19,6 +19,10 @@ class anullcontext: # noqa: N801
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+@overload
+def done_evt[E: EventProt](*, evtcls: type[E]) -> E: ...
+@overload
+def done_evt() -> Event: '''Return a new async event that is already set, with type `evtcls` if passed and :class:`asyncio.Event` otherwise.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     Critical exceptions are wrapped in :exc:`~exceptions.Critical`.

@@ -2,9 +2,9 @@ __lazy_modules__ = frozenset(('asyncio',))
 from asyncutils import safe_cancel_batch
 from asyncutils._internal import helpers as H
 from asyncutils._internal.submodules import mixins_all as __all__
+import functools as F
 from abc import ABCMeta, abstractmethod
 from asyncio import _get_running_loop, iscoroutine, timeout as _timeout
-from functools import cached_property, partial
 class LoopContextMixin(H.LoopMixinBase):
     __slots__ = 'running_tasks',
     def __init__(self): self._loop, self.running_tasks = H.get_loop_and_set(), set()
@@ -36,10 +36,10 @@ class AsyncContextMixin(metaclass=ABCMeta):
     async def __aexit__(self, /, *_): return self.__exit__(*_)
 @H.subscriptable
 class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
-    @cached_property
+    @F.cached_property
     def runner(self):
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): self.loop = l = H.get_loop_and_set()
-        return partial(l.run_in_executor, H.create_executor(self, False)) # type: ignore[attr-defined]
+        return F.partial(l.run_in_executor, H.create_executor(self, False)) # type: ignore[attr-defined]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

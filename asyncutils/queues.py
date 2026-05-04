@@ -172,15 +172,15 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
             if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
             self.put_nowait(item); return True
         except QueueShutDown: return False
-    async def drain_persistent(self, max=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
-        m, c = abs(max or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
+    async def drain_persistent(self, max_items=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
+        m, c = abs(max_items or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
         with _:
             while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
-    def drain_until_empty(self, max=None):
-        max, c = abs(max or float('inf')), 0; info(f'draining of {fullname(self)} started')
+    def drain_until_empty(self, max_items=None):
+        max_items, c = abs(max_items or float('inf')), 0; info(f'draining of {fullname(self)} started')
         with ignore_qempty:
-            while c < max: yield self.get_nowait(); c += 1
-    def drain_retlist(self, max=None): return list(self.drain_until_empty(max))
+            while c < max_items: yield self.get_nowait(); c += 1
+    def drain_retlist(self, max_items=None): return list(self.drain_until_empty(max_items))
     __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)
     def __str__(self): return f'{fullname(self)}({self.maxsize})'
@@ -304,6 +304,7 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
         i = 0
         with ignore_qempty:
             while True: yield i, self.get_nowait(); i += 1
+    P.patch_method_signatures((filter_nowait, 'pred=bool'), (transaction, ''), (drain_persistent, 'max=None, timeout=None'))
 class SmartQueue(PotentQueueBase):
     def _init(self, maxsize): self.__queue = deque(maxlen=maxsize if maxsize > 0 else None)
     def _get(self): return self.__queue.popleft()

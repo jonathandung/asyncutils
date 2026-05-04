@@ -2,9 +2,10 @@ __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools
 from asyncutils import CRITICAL, SYNC_AWAIT, Critical, Deadlock, IgnoreErrors, aiter_to_gen, getcontext, iter_to_agen
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, fullname
+from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.running_console import get
 from asyncutils._internal.submodules import util_all as __all__
-from asyncio import BoundedSemaphore, CancelledError, Lock, Semaphore, _get_running_loop, eager_task_factory, ensure_future, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, timeout as _timeout, wait_for
+from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, _get_running_loop, eager_task_factory, ensure_future, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, timeout as _timeout, wait_for
 from functools import partial, wraps
 from sys import audit
 ignore_cancellation = IgnoreErrors(CancelledError)
@@ -14,6 +15,7 @@ class anullcontext: # noqa: N801
 async def wrap_in_coro(aw, /):
     try: return await aw
     except CRITICAL: raise Critical
+def done_evt(*, evtcls=Event): (E := evtcls()).set(); return E
 def get_future(aw, loop=None): return (get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
 def new_eager_tasks(*aws): (l := get_loop_and_set()).set_task_factory(eager_task_factory); yield from map(partial(get_future, loop=l), aws)
 def to_sync(f, /, timeout=None, loop=None): audit('asyncutils.util.to_sync', fullname(f)); return wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop))
@@ -127,4 +129,5 @@ class DualContextManager:
         try: raise RuntimeError("async generator didn't stop after athrow")
         finally: await g.aclose()
 def dualcontextmanager(f, /, _=DualContextManager, *, use_existing_executor=True, create_executor=False): return wraps(f)(lambda *a, **k: _(f(*a, **k), use_existing_executor, create_executor))
+patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f, /, *, use_existing_executor=True, create_executor=False'))
 del DualContextManager

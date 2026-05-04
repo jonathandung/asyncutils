@@ -1,4 +1,4 @@
-from ._internal.types import Timer, ExcType
+from ._internal.types import ExcType, Timer
 from .mixins import AsyncContextMixin, LoopBoundMixin
 from types import TracebackType
 from typing import overload
