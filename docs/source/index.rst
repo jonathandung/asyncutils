@@ -32,6 +32,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   contributing
   support
   changelog
+  readme
   roadmap
 
 .. toctree::

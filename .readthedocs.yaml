@@ -5,6 +5,14 @@ build:
   os: ubuntu-26.04
   tools:
     python: "3.14"
+  jobs:
+    post_create_environment:
+      - cp CHANGELOG.md docs/source/changelog.md
+      - cp CONTRIBUTING.md docs/source/contributing.md
+      - cp SUPPORT.md docs/source/support.md
+      - cp EXAMPLES.md docs/source/examples.md
+      - cp ROADMAP.md docs/source/roadmap.md
+      - cp README.md docs/source/readme.md
 formats:
   - pdf
 python:
