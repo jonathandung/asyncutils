@@ -191,7 +191,7 @@ class LocksmithBase:
                 try: return bool((await f) if iscoroutine(f := f(self)) else f)
                 except: return False
             r.add(lock); return True
-    async def force(self, lock, /, info=None, *, purge_waiters=True):
+    async def force(self, lock, /, info=None, *, purge_waiters=True): # noqa: PLR0912
         async with self._lock:
             if not self.can_force_lock_held(lock): return False
         if info is None: info = await self.get_info(lock)
@@ -240,7 +240,7 @@ class LocksmithBase:
     def answer_received(self, lock, answer, /): log.info('%r received answer %r from %r', self, answer, lock)
     def raised_other(self, lock, exc, /):
         if not isinstance(exc, RuntimeError): log.error('error encountered in attempt to force %s at %#x', fullname(lock), id(lock), exc_info=exc)
-    async def get_info(self, lock, /): return 'potential deadlock situation'
+    async def get_info(self, lock, /): return f'potential deadlock situation involving {fullname(lock)} at {id(lock):#x}'
     def preliminary_check_lock(self, lock, /): return check_methods(lock, 'acquire', 'release', 'locked')
     def task_raised_critical(self, lock, exc, /): raise exc from None
     def can_force_lock_held(self, lock, /): return lock is self._lock or not (lock in self._recognized and lock.locked())

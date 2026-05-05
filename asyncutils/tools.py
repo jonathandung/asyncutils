@@ -26,7 +26,7 @@ def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=p.parse_args):
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
-def print_cfg_json_format(file=None): print(get_cfg_json_format(), file=file, flush=True)
-def print_cmd_help(file=None): print(get_cmd_help(), file=file, flush=True)
+def print_cfg_json_format(file=None, *, flush=True): print(get_cfg_json_format(), file=file, flush=flush)
+def print_cmd_help(file=None, *, flush=True): print(get_cmd_help(), file=file, flush=flush)
 f((loadf, "path, ext='json', /"), (json_to_argv, 'path, /'), (json_to_argstr, 'path, /, *, join={}'), (argv_to_json, 'argv, path, /, *, dump={}'), (argstr_to_json, 'argstr, path, /, *, dump={0}, split={0}'), (get_cfg_json_format, ''))
 del p, s, _, l, f

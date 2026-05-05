@@ -1,7 +1,8 @@
-'''A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
-:mod:`asyncutils` [uses a subset of SemVer](https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md), with two additional restrictions:
-- MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.
-- MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINOR VERSIONS.'''
+'''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
+| :mod:`asyncutils` `uses a subset of SemVer <https://github.com/jonathandung/asyncutils/blob/main/CONTRIBUTING.md>`__, with two additional restrictions:
+
+* MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.
+* MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINOR VERSIONS.'''
 from ._internal.types import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterable, Iterator
 from typing import Any, Literal, NamedTuple, NoReturn, Self, final, overload
@@ -13,9 +14,9 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
-        '''A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
-        Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64 bits), the
-        reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
+        '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
+        | Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64 bits), the
+        | reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # type: ignore[override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload # type: ignore[override]
@@ -23,9 +24,10 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]:
         '''Depending on the value of `idx`, corresponds to the following attributes:
-        0 -> :attr:`major`
-        1 -> :attr:`minor`
-        2 -> :attr:`patch`
+        * 0 -> :attr:`major`
+        * 1 -> :attr:`minor`
+        * 2 -> :attr:`patch`
+
         Sliced accordingly.'''
     def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
     def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
@@ -51,23 +53,23 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __sub__(self, delta: VersionDelta, /) -> Self: ...
     @overload
-    def __sub__(self, other: Self, /) -> VersionDelta: ''''Return this version decremented by `n` patches or the delta `delta`, or the delta between `self` and `other`.'''
+    def __sub__(self, other: Self, /) -> VersionDelta: '''Return this version decremented by `n` patches or the delta `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, value: Any, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: str, /) -> str:
         r"""Format specification and corresponding return value: (using version 123.4.0 as example)
-        x, hex: `'0x7b0400'`
-        o, oct: `'0o36602000'`
-        b, bin: `'0b11110110000010000000000'`
-        d, dec: `'8061952'`
-        0, major, maj: `'123'`
-        1, minor, min: `'4'`
-        2, patch: `'0'`
-        s, short: `'123.4'`
-        l, long: `'asyncutils version 123.4.0'`
-        c, chars: `'{\x04\x00'`
-        t, tuple: `'(123, 4, 0)'`
-        h, hash: `'116380397'`
-        n, majmin: `'123.4'`"""
+        * x, hex: `'0x7b0400'`
+        * o, oct: `'0o36602000'`
+        * b, bin: `'0b11110110000010000000000'`
+        * d, dec: `'8061952'`
+        * 0, major, maj: `'123'`
+        * 1, minor, min: `'4'`
+        * 2, patch: `'0'`
+        * s, short: `'123.4'`
+        * l, long: `'asyncutils version 123.4.0'`
+        * c, chars: `'{\x04\x00'`
+        * t, tuple: `'(123, 4, 0)'`
+        * h, hash: `'116380397'`
+        * n, majmin: `'123.4'`"""
     def __int__(self) -> int: '''Assumes :attr:`minor` and :attr:`patch` are less than 256.'''
     def __index__(self) -> int: '''The same as :meth:`__int__`.'''
     def __floor__(self) -> int: '''Return the major version.'''
@@ -120,14 +122,14 @@ class VersionDelta(NamedTuple):
     def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
 def normalize(o: object, /) -> tuple[int, int, int]:
-    '''Return a :class:`tuple` of three integers `(major, minor, patch)` from the information provided by the object, to be extracted by registered normalizers.
-    Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
-    For iterables, the default behaviour is to take the first three items and pad zeros behind if necessary.
-    Register normalizers using :func:`register_normalizer`, which returns `False` if there is already a normalizer registered.
-    Unregister normalizers using :func:`unregister_normalizer`, which returns the previous normalizer for that type (if any) and `None` otherwise.
-    Get the normalizer to be used to normalize an object using :func:`dispatch_normalizer`.
-    A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to that object.
-    If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.'''
+    '''| Return a :class:`tuple` of three integers `(major, minor, patch)` from the information provided by the object, to be extracted by registered normalizers.
+    | Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
+    | For iterables, the default behaviour is to take the first three items and pad zeros behind if necessary.
+    | Register normalizers using :func:`register_normalizer`, which returns `False` if there is already a normalizer registered.
+    | Unregister normalizers using :func:`unregister_normalizer`, which returns the previous normalizer for that type (if any) and `None` otherwise.
+    | Get the normalizer to be used to normalize an object using :func:`dispatch_normalizer`.
+    | A normalizer can return None for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to that object.
+    | If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.'''
 def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as :func:`normalize`, but return None if a normalizer is not found.'''
 @overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: ...

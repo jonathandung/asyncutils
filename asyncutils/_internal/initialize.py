@@ -6,9 +6,8 @@ if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationErr
 _a, _u, _f, _s, _i, s, t, U = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all', (S := list(a)).extend
 for _k, _v in _i:
     if _k[0] != '_': break
-try:
+with E.ignore_stopiteration:
     while True: U(_v); _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
-except StopIteration: ...
 class Module:
     __slots__ = '_fs', '_n'
     def __new__(cls, name, /, _d=_d, _a=_a, _=s):
@@ -18,17 +17,17 @@ class Module:
     def __reduce__(self): return type(self), (self._n,)
     def __getattr__(self, n, /, _=F.all_contextual_consts):
         if n == '_fs': self._fs = s = _.union(self.__dir__()) if n == 'context' else frozenset(self.__dir__()); return s
-        if n in self._fs: return getattr(self.load(), n)
+        if n == '__dict__' or n in self._fs: return getattr(self.load(), n)
         raise AttributeError(f"module 'asyncutils.{self._n}' has no attribute {n!r}") from None
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
-    def load(self, _s=s, _m=__import__('sys').modules, _g=R.get, _f=_f, _l=l, _n=_s):
+    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _l=l, _n=_s):
         if (t := type(self)) is not __class__: return self
         if type(m := _s.get(n := self._n)) is not t: return m
         if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__
         if l := getattr(_g(), 'locals', None): l[n] = m
         _s[n] = m; return m
-    __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._n+t]); P.patch_classmethod_signatures((__new__, 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''), (__repr__, ''), (__getattr__, 'name, /'))
+    __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._n+t]); P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''), (__repr__, ''), (__getattr__, _))
 f = object.__new__
 for _ in a: r._n, s[_] = _, (r := f(Module))
 for _ in (f := ('cli', 'config', 'constants', 'context', 'exceptions', 'version')): l('preloading: %s', _)

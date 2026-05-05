@@ -1,5 +1,5 @@
-'''Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes,
-and memory maps. Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.'''
+'''| Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes, and memory maps.
+| Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.'''
 from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
 from .config import Executor
 from .mixins import LoopContextMixin
@@ -10,12 +10,12 @@ from typing import IO, Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
-    '''Return a tuple of two :class:`AsyncReadWriteCouple`'s in text mode, such that each can read what the other writes. Two os-level pipes must be created.
-    Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default :func:`os.pipe`) to customize this behaviour.'''
+    '''| Return a tuple of two :class:`AsyncReadWriteCouple`'s in text mode, such that each can read what the other writes. Two os-level pipes must be created.
+    | Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default :func:`os.pipe`) to customize this behaviour.'''
 def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: '''The above, but in binary mode.'''
 class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
-    '''An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
-    The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
+    '''| An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
+    | The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
     @property
     def reader(self) -> IO[T]: '''The underlying reader.'''
     @property
@@ -44,7 +44,8 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     __cleanup__ = aclose
 class MemoryMappedIOManager(LoopContextMixin):
     '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
-    You will probably only ever need one instance of this.'''
+
+    .. tip:: You will probably only ever need one instance of this.'''
     def __init__(self, executor: Executor|None=...): '''Initialize the manager with the executor to be used for its operations.'''
     @property
     def open_mmaps(self) -> WeakSet[mmap]: '''Instance of :class:`~_weakrefset.WeakSet` containing the maps managed by this manager.'''

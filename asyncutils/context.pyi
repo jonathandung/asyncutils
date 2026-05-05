@@ -9,16 +9,16 @@ __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'non
 @final
 @dataclass(slots=True, kw_only=True, match_args=False)
 class Context:
-    '''An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
-    :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports. :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like
-    a sequence. Type annotated as a dataclass for convenience.
-    The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
-    For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what
-    it configures. (It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.)
-    Of course, this class is not related to instantiating a certain class, as in the :mod:`decimal` module, but rather a convenient way to store configuration for the various utilities
-    and patterns this library bundles, especially to dynamically get default values in function signatures.
-    No documentation will be provided here. If you need to use any setting here, you can find usage in the docstrings of the relevant utilities that use that setting.
-    Refer to format.json5 for the factory default values of each setting.'''
+    '''| An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
+    | :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
+    | :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like a sequence.
+    | Type annotated as a dataclass for convenience.
+    | The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
+    | For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what it configures.
+
+    .. tip:: If you need to use any of the settings, you can find the documentation under the API reference for the utilities that use that setting.
+    .. note:: Refer to format.json5 for the factory default values of each setting.
+    .. note:: It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.'''
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...
     CIRCUIT_BREAKER_DEFAULT_RESET: float = ...
@@ -128,8 +128,10 @@ def getcontext() -> Context: '''Return the current context for the active thread
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
-These names are not listed by calling `dir` on this submodule, since there are so many of them (78 as of now!) and more may be added in the future,
-and the recommended way to get their values is to query them on the actual context object anyway.'''
+
+.. attention::
+  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (78 as of now!) and more may be added in the future,
+  and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]

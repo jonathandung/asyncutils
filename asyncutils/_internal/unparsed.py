@@ -11,7 +11,7 @@ def l(p, e=None, /):
                 try: import yaml as Y; f = Y.load(F, Y.CSafeLoader)
                 except ImportError: raise RuntimeError('PyYAML library is required to load YAML configuration files for asyncutils') from None
             case 'tomllib': f = __import__('tomllib').loads(F.read())
-            case 'configparser': raise RuntimeError('cannot parse ini format due to type ambiguities; you should rewrite configuration in toml')
+            case 'configparser': raise RuntimeError('cannot parse ini format due to type ambiguities; you should rewrite the configuration in toml')
             case m:
                 try: f = __import__(m, fromlist=('',) if '.' in m else ()).load(F)
                 except ImportError as a: raise RuntimeError(f'{v} library must be installed for asyncutils to accept configuration from {p!r}') from a
@@ -29,4 +29,4 @@ if c := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\'
                 for k, v in V.items(): C[f'{K}_{k}'.upper()] = v
             elif (K := K.upper()) in C: C[K] = V
     N.update(d); del a, d, v, e, P, K, V
-del E, k, s, g, M
+del E, k, s, g, M, h

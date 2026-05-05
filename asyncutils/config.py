@@ -5,7 +5,7 @@ from asyncutils._internal.unparsed import N, c
 from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; p.parse_args(namespace=N); del p
-def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # pragma: no cover # noqa: B008,PLR0912
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -17,6 +17,9 @@ def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=froze
         if e == 'dask':
             try: return _('distributed.client').Client
             except ImportError: d = 'dask.distributed'
+        elif e == 'deadpool':
+            try: return __import__(e).DeadPool
+            except ImportError: ...
         elif e == 'loky_noreuse':
             try: return _('loky.process_executor').ProcessPoolExecutor
             except ImportError: ...
@@ -61,8 +64,8 @@ match logging_to := g('log_to'):
         del T, h
     case 'MEMORY':
         s = (j := __import__('_io').StringIO)()
-        def get_past_logs(j=j):
-            if r := (H := get_past_logs.handler).stream.getvalue(): H.setStream(j())
+        def get_past_logs(_=j):
+            if r := (H := get_past_logs.handler).stream.getvalue(): H.setStream(_())
             return r
         del j
     case 'STDOUT': s = S.stdout
@@ -76,7 +79,7 @@ match logging_to := g('log_to'):
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
 if M: s.write('ERROR: Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
-_.setFormatter(L.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+_.setFormatter(L.Formatter('%(asctime)s - asyncutils - %(levelname)s - %(message)s'))
 (set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))((D := 10)*min(max(3-N.V+N.Q, 1), 5))
 class debugging:
     __slots__ = 'orig_level', 'orig_name'

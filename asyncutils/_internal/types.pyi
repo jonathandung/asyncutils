@@ -12,9 +12,9 @@ from io import _WrappedBuffer, TextIOWrapper
 from types import CodeType, FrameType, FunctionType, TracebackType
 from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 __all__ = ()
-'''This is a fake module, and none of its symbols exist at runtime.
-Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
-It is, however, difficult to cause linters to emit diagnostics with other usage patterns of this module, so bear this in mind.'''
+'''| This is a fake module, and none of its symbols exist at runtime.
+| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
+| It is, however, difficult to cause linters to emit diagnostics with other usage patterns of this module, so bear this in mind.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -103,9 +103,9 @@ class PartialInterfaceMeta(type):
     def __getattr__(cls, name: str, /) -> Any: ...
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
-    '''Base class for partial interfaces.
-    If it is only known that a class implements an interface, type checkers might throw errors on unrecognized attributes that may actually exist on the object or class.
-    This is a simplistic fix that asks type checkers to assume those attributes always exist and make no attempt to infer their types.'''
+    '''| Base class for partial interfaces.
+    | If it is only known that a class implements an interface, type checkers might throw errors on unrecognized attributes that may actually exist on the object or class.
+    | This is a simplistic fix that asks type checkers to assume those attributes always exist and make no attempt to infer their types.'''
     def __init__(self, *a: Any, **k: Any): ...
     def __getattr__(self, name: str, /) -> Any: ...
 @type_check_only
@@ -129,15 +129,13 @@ class FuncProxy[W](Protocol):
     def __func__(self) -> W: ...
 type Wrapper = FunctionType|FuncProxy[FunctionType|Wrapper]|FuncWrapper[FunctionType|Wrapper]
 '''A function or wrapper of any depth thereof.'''
-@type_check_only
-class SigPatcher(Protocol):
-    '''Type of functions with a specific signature in the semi-public API of this module, used to alter function signatures.'''
-    def __call__(self, *to_patch: tuple[Wrapper, str]) -> None: ...
+type SigPatcherArg = tuple[Wrapper, str]
+'''The type of a positional argument passed to a signature-patching function in :mod:`asyncutils._internal.patch`.'''
 @type_check_only
 class Middleware(Protocol):
-    '''Represents a middleware accepted by :class:`~channels.EventBus`.
-    To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
-    Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
+    '''| Represents a middleware accepted by :class:`~channels.EventBus`.
+    | To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
+    | Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
     def __call__(self, event_type: str, data: Any, /) -> Any: ...
     def __hash__(self) -> int: ...
 @type_check_only
@@ -167,21 +165,13 @@ class Q[R, T](Protocol):
 @type_check_only
 class G[R, T](Q[R, T], Protocol):
     '''Queues for which :meth:`get` is protected by a password.'''
-    async def get(self, pwd: R) -> T: # type: ignore[override]
-        '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
-        If the queue is empty, wait until an item is available.'''
-    def get_nowait(self, pwd: R) -> T: # type: ignore[override]
-        '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
-        If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
+    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, wait until an item is available.''' # type: ignore[override]
+    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.''' # type: ignore[override]
 @type_check_only
 class P[R, T](Q[R, T], Protocol):
     '''Queues for which :meth:`put` is protected by a password.'''
-    async def put(self, item: T, pwd: R) -> None: # type: ignore[override]
-        '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
-        If the queue is full, wait until a free slot is available.'''
-    def put_nowait(self, item: T, pwd: R) -> None: # type: ignore[override]
-        '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise.
-        If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
+    async def put(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, wait until a free slot is available.''' # type: ignore[override]
+    def put_nowait(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.''' # type: ignore[override]
 @type_check_only
 class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords, which may or may not be the same.'''
 @type_check_only
@@ -367,7 +357,7 @@ type All = tuple[str, ...]
 '''Type of the `__all__` attributes of the submodules of :mod:`asyncutils`.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
-type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process']
+type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''

@@ -14,18 +14,18 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         __import__('warnings').warn('signals.wait_for_signal has limited functionality on windows', RuntimeWarning, 2)
         for s in S:
             try: o = _s(s := C(s), h)
-            except ValueError as e: logger.warning('signals.wait_for_signal: invalid signal %s: %s', s, e)
-            except OSError as e: logger.warning('signals.wait_for_signal: OS-level error for signal %s: %s', s.name, e)
+            except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s)
+            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name)
             else: a(lambda _, s=s, o=o: _s(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
     else:
         for s in S:
             try: o = _g(s := C(s))
-            except ValueError as e: logger.warning('signals.wait_for_signal: invalid signal %s: %s', s, e); continue
+            except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s); continue
             try: loop.add_signal_handler(s, h, s)
             except NotImplementedError: break
-            except PermissionError as e: logger.warning('signals.wait_for_signal: insufficient permissions for signal %s: %s', s.name, e)
-            except OSError as e: logger.warning('signals.wait_for_signal: OS-level error for signal %s: %s', s.name, e)
-            except RuntimeError as e: logger.warning('signals.wait_for_signal: error registering signal handler: %s', e)
+            except PermissionError: logger.exception('signals.wait_for_signal: insufficient permissions for signal %s', s.name)
+            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name)
+            except RuntimeError: logger.exception('signals.wait_for_signal: error registering signal handler for signal %s', s.name)
             else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
     try:
         if x: logger.info('signals.wait_for_signal: signal handler registered successfully for total of %d signals', x); del x
@@ -40,7 +40,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             with _i: r = await r
         except possible_errors: logger.exception('signals.wait_for_signal processor %r encountered expected error for signal %s', p, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
         except CRITICAL: raise Critical
-        except BaseException as e: raise RuntimeError(f'signals.wait_for_signal: unexpected {fullname(e)} in processor %r for signal %s', p, s) from e
+        except BaseException as e: raise RuntimeError(f'signals.wait_for_signal: unexpected {fullname(e)} in processor {p!r} for signal {s.name}') from e
         return r
     finally: await safe_cancel(F)
 f((wait_for_signal, 'processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0}'))

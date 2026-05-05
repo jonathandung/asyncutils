@@ -1,14 +1,14 @@
 asyncutils 0.9.1: makes async straightforward and enjoyable
 ===========================================================
 
-**PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`_
+**PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`__
 
 :mod:`asyncutils` is a Python library which, as the name suggests, contains helpful routines and types for asynchronous programming applications,
 organized under various submodules. It offers a simple and intuitive API and a colorful command line interface, and bundles a Makefile such that
 development is less dry and more smooth-sailing.
 
 This is partly also to compensate for the lack of a setup.py after adaptation of the standardized pyproject.toml; see :pep:`621` and `the guide
-<https://packaging.python.org/en/latest/guides/writing-pyproject-toml>`_ for more.
+<https://packaging.python.org/en/latest/guides/writing-pyproject-toml>`__ for more.
 
 .. toctree::
   :maxdepth: 2
@@ -44,9 +44,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   Issue Tracker <https://github.com/jonathandung/asyncutils/issues>
   PDF Documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
 
-.. note::
-
-  This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
+.. note:: This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
 
 .. hint::
   :collapsible:
@@ -56,4 +54,4 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 .. note::
   :collapsible: closed
 
-  The format of this page was inspired by `pytest <https://docs.pytest.org/en/stable>`_.
+  The format of this page was inspired by `pytest <https://docs.pytest.org/en/stable>`__.

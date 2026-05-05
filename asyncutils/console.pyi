@@ -12,25 +12,26 @@ from types import CodeType, ModuleType
 from typing import Any, ClassVar, Self, TypeGuard, final, overload
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`~_pyrepl.console.InteractiveColoredConsole` if available.
-    Inspired by asyncio/__main__.py. Highly adaptable.'''
+    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`~_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by :mod:`asyncio.__main__` and highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     STATEMENT_FAILED: ClassVar[object]
-    '''This is present if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
+    '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
     NAME: ClassVar[str]
-    '''The name of the module implementing this console, detected from the class name by default. Corresponds to the keyword argument `name`.'''
+    '''The name of the module implementing this console, detected from the class name if the keyword argument `name` is not provided to the subclass constructor.'''
     CAN_USE_PYREPL: ClassVar[bool]
     '''Whether :mod:`_pyrepl` enhancements are available and allowed.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
-    '''module name -> (locals of console of corresponding type -> Any)
-    Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
+    '''| module name -> (locals of console of corresponding type -> Any)
+    | Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
     '''Functions called when :exc:`KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
-    Add hooks using `additional_interrupt_hooks`.'''
+
+    .. note:: Add hooks using the `additional_interrupt_hooks` class construction parameter.'''
     memerr_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
     '''Functions called when a :exc:`MemoryError` occurs, in that order, besides essential hardcoded logic.
-    Add hooks using `additional_memerr_hooks`.'''
+
+    .. note:: Add hooks using the `additional_memerr_hooks` class construction parameter.'''
     default_local_exit: ClassVar[bool]
     '''Whether python should continue running after the console exits by default, as opposed to the console raising :exc:`SystemExit` directly.'''
     disallow_subclass_msg: ClassVar[str]
@@ -50,32 +51,32 @@ class ConsoleBase(InteractiveConsole, ABC):
     @property
     def is_running(self) -> bool: '''Whether the console is running. The default implementation uses :attr:`_internal_is_running` only.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
-        '''`loop` (required): Event loop used by console interaction.
-        `mod`: The module to import within the console, determined by the subclass name by default.
-        `modname`: The name of the above module.
-        `context_factory`: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.'''
+        '''| `loop` (required): Event loop used by console interaction.
+        | `mod`: The module to import within the console, determined by the subclass name by default.
+        | `modname`: The name of the above module.
+        | `context_factory`: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.'''
     def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], object]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], object]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], object]]=..., additional_memerr_hooks: Iterable[Callable[[Self], object]]=..., template: str=..., **k: Any) -> None:
-        '''All of the arguments below are optional.
-        `name`: name of the module using the console
-        `version`: version of the module using the console
-        `description`: description of the module using the console
-        `default_local_exit`, `disallow_subclass_msg`, `native_handler`, `other_handlers`, `additional_interrupt_hooks`, `additional_memerr_hooks`: see above
-        `template`: the console banner to use, with %-placeholders for name, version and description
-        Additional keyword arguments are passed to :meth:`template.__mod__`.'''
+        '''| All of the arguments below are optional.
+        | `name`: name of the module using the console
+        | `version`: version of the module using the console
+        | `description`: description of the module using the console
+        | `default_local_exit`, `disallow_subclass_msg`, `native_handler`, `other_handlers`, `additional_interrupt_hooks`, `additional_memerr_hooks`: see above
+        | `template`: the console banner to use, with %-placeholders for name, version and description
+        | Additional keyword arguments are passed to :meth:`template.__mod__`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None:
-        '''Run `code`, an instance of :class:`types.CodeType`.
-        `futimpl` is a function that returns an instance of :class:`concurrent.futures.Future`.
-        `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
-        `threadsafe` dictates whether to run the code in the event loop using :meth:`call_soon_threadsafe` instead of :meth:`call_soon`.'''
+        '''| Run `code`, an instance of :class:`types.CodeType`.
+        | `futimpl` is a function that returns an instance of :class:`concurrent.futures.Future`.
+        | `dont_show_traceback` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
+        | `threadsafe` dictates whether to run the code in the event loop using :meth:`call_soon_threadsafe` instead of :meth:`call_soon`.'''
     def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # type: ignore[override]
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
-        '''Run the console and return the integer return code.
-        The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
-        Pass a negative value for `max_memerrs` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
-        If `always_install_completer` is True, set the completer on readline as long as readline is available.
-        Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
-        If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start python with the -i flag.'''
+        '''| Run the console and return the integer return code.
+        | The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
+        | Pass a negative value for `max_memerrs` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
+        | If `always_install_completer` is True, set the completer on readline as long as readline is available.
+        | Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
+        | If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start python with the -i flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing (this differs from the superclass behaviour).'''
     @final
     def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a :exc:`KeyboardInterrupt`, instead of touching this method.'''
@@ -85,14 +86,14 @@ class ConsoleBase(InteractiveConsole, ABC):
     def refresh(self) -> None: '''Callback in :meth:`interrupt` and :meth:`memoryerror`.'''
     @abstractmethod
     def prehook(self, max_memerrs: int) -> None:
-        '''Called by :meth:`run` before beginning the interaction logic. Can raise errors.
-        When implementing, call `super().prehook(max_memerrs)` before everything. This allows subclasses to provide their own value of `max_memerrs` and change the signature of the `prehook`.
-        Not really an abstract method, but implementing is highly recommended.'''
+        '''| Called by :meth:`run` before beginning the interaction logic. Can raise errors.
+        | When implementing, call `super().prehook(max_memerrs)` before everything. This allows subclasses to provide their own value of `max_memerrs` and change the signature of the `prehook`.
+        | Not really an abstract method, but implementing is highly recommended.'''
     @abstractmethod
     def posthook(self) -> None:
-        '''Called by :meth:`run` after the interaction has ended before writing the exit message. Should not raise errors.
-        When implementing, call `super().posthook()` after everything.
-        Not really an abstract method, but implementing is highly recommended.'''
+        '''| Called by :meth:`run` after the interaction has ended before writing the exit message. Should not raise errors.
+        | When implementing, call `super().posthook()` after everything.
+        | Not really an abstract method, but implementing is highly recommended.'''
     @overload
     def set_return_code(self, exc: SystemExit, /) -> None: ...
     @overload

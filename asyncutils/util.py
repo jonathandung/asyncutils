@@ -3,7 +3,7 @@ from asyncutils import CRITICAL, SYNC_AWAIT, Critical, Deadlock, IgnoreErrors, a
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, fullname
 from asyncutils._internal.patch import patch_function_signatures
-from asyncutils._internal.running_console import get
+from asyncutils._internal.running_console import getc
 from asyncutils._internal.submodules import util_all as __all__
 from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, _get_running_loop, eager_task_factory, ensure_future, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, timeout as _timeout, wait_for
 from functools import partial, wraps
@@ -25,7 +25,7 @@ def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsa
 def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     audit('asyncutils.util.sync_await', fullname(aw)); f = loop is None
-    if (c := get()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call util.sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
+    if (c := getc()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call util.sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
     if loop is (loop := _get_running_loop()):
         if f: loop = new_event_loop(); set_event_loop(loop)
         if not loop.is_running():
@@ -128,6 +128,8 @@ class DualContextManager:
             raise
         try: raise RuntimeError("async generator didn't stop after athrow")
         finally: await g.aclose()
-def dualcontextmanager(f, /, _=DualContextManager, *, use_existing_executor=True, create_executor=False): return wraps(f)(lambda *a, **k: _(f(*a, **k), use_existing_executor, create_executor))
-patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f, /, *, use_existing_executor=True, create_executor=False'))
+def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor=None, create_executor=None):
+    if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor)
+    return wraps(f)(lambda *a, **k: _(f(*a, **k), getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR if create_executor is None else create_executor))
+patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None'))
 del DualContextManager

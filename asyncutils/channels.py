@@ -1,4 +1,4 @@
-from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, getcontext, iter_to_agen, potent_derive, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation, yield_to_event_loop
+from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, getcontext, iter_to_agen, potent_derive, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log as L, patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueShutDown
@@ -281,19 +281,13 @@ class Rendezvous:
         except (CancelledError, TimeoutError): return False
     async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
     async def get(self, default=_NO_DEFAULT, *, timeout=None, _=100):
-        f, i = (p := self._putters).popleft, 0
-        try:
-            async with _timeout(timeout):
-                async with self._lock:
-                    while p:
-                        v, F = f()
-                        if F.done():
-                            i += 1
-                            if i == _: L.info('Rendezvous: 100 stale putters skipped'); i = 0; await yield_to_event_loop
-                        else: F.set_result(None); return v
-                    if timeout is None and default is not _NO_DEFAULT: return default
-                    self._getters.append(F := self._loop.create_future())
-                return await F
+        f = (p := self._putters).popleft
+        while p:
+            v, F = f()
+            if not F.done(): F.set_result(None); return v
+        if timeout is None and default is not _NO_DEFAULT: return default
+        self._getters.append(F := self._loop.create_future())
+        try: return await wait_for(F, timeout)
         except TimeoutError:
             if default is _NO_DEFAULT: raise
             return default

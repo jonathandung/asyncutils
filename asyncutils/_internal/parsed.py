@@ -1,4 +1,3 @@
-from asyncutils import __version__ as V
 from asyncutils.constants import POSSIBLE_EXECUTORS as C
 from asyncutils._internal.compat import pargs as j
 import argparse as A
@@ -8,16 +7,17 @@ On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.S
 The file should have one argument per line; this format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
-Other json formats are not currently supported; see the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
+A --config option is not offered due to the complexity of implementation and ease to revert to a default config within a one-off config.
+See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
 Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, or tornado.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
-When FILE is passed (interpreted as an integer file descriptor if possible), the logging output goes to a file with that name.
-Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
+When FILE, interpreted as a file descriptor if an integer, is passed, the logging output goes to a file with that name.
 Most of the logging output is created in debug mode only, to prevent cluttering of the stream.
+Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
 If FILE is 'MEMORY', logs are stored in memory and returned and voided whenever get_past_logs is called.
 If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log' in the
-current working directory for logging, for number from 1 to 4096. (If you have more than 4096 log files, you should probably clean them up.)
+current working directory for logging, for number from 1 to 4096. If you have more than 4096 log files, you should probably clean them up.
 If FILE is 'STDOUT', logs to stdout.
 If FILE is 'STDERR', logs to stderr. This is also the default behaviour and fallback if the above steps fail.''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
@@ -30,7 +30,7 @@ interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experim
 The below options are third-party.
 loky_noreuse: Use a new loky.process_executor.ProcessPoolExecutor every time.
 loky: Reuse a loky.process_executor.ProcessPoolExecutor if possible.
-dask: Use dask.distributed.Client. May have API incompatibilities.
+dask: Use dask.distributed.Client, the API of which just so happens to be a superset of those of concurrent.futures executors.
 ipython: Use ipyparallel.ViewExecutor.
 elib_flux_cluster: Use executorlib.executor.flux.FluxClusterExecutor.
 elib_flux_job: Use executorlib.executor.flux.FluxJobExecutor.
@@ -39,7 +39,11 @@ elib_slurm_job: Use executorlib.executor.slurm.SlurmJobExecutor.
 elib_single_node: Use executorlib.executor.single.SingleNodeExecutor.
 pebble_thread: Use pebble.pool.thread.ThreadPool.
 pebble_process: Use pebble.pool.process.ProcessPool.
-More options may be added in the future.''')
+deadpool: Use deadpool.Deadpool.
+There are some implementations from niche libraries (found on a PyPI-wide search using the keyword "executor") that are intentionally excluded, because they
+either require prior configuration to be useful (as is the case with adaptive-executor), are too small (contextvars-executor), unmaintained (celery-executor),
+too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific backends seldom used for this
+purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified name to -c and bear the consequences.''')
 a('-c', '--custom-executor', dest='executor', metavar=j, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
 for _ in C: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')
@@ -52,7 +56,7 @@ Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
-a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero.')
-(a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=V.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
+a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero, or an uncaught error occurs in the console execution logic itself.')
+(a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
-del a, b, C, d, e, f, g, h, i, j, A, V
+del a, b, C, d, e, f, g, h, i, j, A

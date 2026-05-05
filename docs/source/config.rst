@@ -49,11 +49,11 @@ YAML, JSON5, JSONC and Hjson formats are also supported for the configuration fi
 .. danger::
 
   Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
-  Write your configs yourself to avoid malicious inputs exhausting computing resources.
+  Thus, write your configs yourself to avoid malicious inputs exhausting computing resources.
 
 .. important::
 
-  INI is not supported because it is outdated and lacks strong typing; that is, all values are interpreted as strings.
+  INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
 
 .. warning::
 
@@ -62,7 +62,7 @@ YAML, JSON5, JSONC and Hjson formats are also supported for the configuration fi
 .. tip::
   :collapsible:
 
-  To ensure all formats can be parsed, the ``pconf`` extra should be installed.
+  To ensure all formats can be parsed, install the ``pconf`` extra.
 
 Contextual "Constants"
 ----------------------

@@ -1,6 +1,6 @@
-'''Locking primitives, more advanced than or supplementing the functionality of those in :mod:`asyncio`.
-All classes strictly follow the asynchronous lock interface as defined by `asyncio.Lock` and made explicit in the `_internal.types.AsyncLockLike` protocol, besides
-:class:`MultiCountDownLatch`, since it uses :class:`KeyedCondition` internally and it is not desired for :mod:`altlocks` to import :mod:`locks` as well.'''
+'''| Locking primitives, more advanced than or supplementing the functionality of those in :mod:`asyncio`.
+| All classes strictly follow the asynchronous lock interface as defined by :class:`asyncio.Lock` and made explicit in the :class:`_internal.types.AsyncLockLike` protocol, besides
+| :class:`MultiCountDownLatch`, since it uses :class:`KeyedCondition` internally and it is not desired for :mod:`altlocks` to import :mod:`locks` as well.'''
 from ._internal.types import AsyncLockLike
 from .mixins import LoopBoundMixin, LockMixin, LockWithOwnerMixin, LoopContextMixin
 from _collections_abc import Awaitable, Callable, Hashable, Mapping
@@ -19,9 +19,9 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
 class AdvancedRateLimit(LoopBoundMixin, LockMixin[None]):
     '''A rate limiter that supports a mode in which waiters can cut the queue.'''
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):
-        '''`rate` (required): The initial rate at which tokens refill.
-        `capacity`: The maximum rate, defaulting to the current rate.
-        `fair`: Whether to maintain FIFO for waiters; default `True`.'''
+        '''| `rate` (required): The initial rate at which tokens refill.
+        | `capacity`: The maximum rate, defaulting to the current rate.
+        | `fair`: Whether to maintain FIFO for waiters; default `True`.'''
     async def acquire(self, tokens: float=..., timeout: float|None=...) -> Literal[True]: '''Acquire the specified number of tokens from the rate limiter (default :const:`context.ADVANCED_RATE_LIMIT_DEFAULT_TOKENS`), waiting until the timeout expires and signalling :exc:`TimeoutError` if necessary.'''
     async def release(self, tokens: float=...) -> None: ...
     async def set_rate(self, new: float) -> None: ...
@@ -76,11 +76,13 @@ class PriorityLock(LoopBoundMixin, LockWithOwnerMixin[None]):
     @property
     def is_owner(self) -> bool: ...
 class PriorityRLock(RLock):
+    '''A reentrant lock supporting priority.'''
     def __init__(self) -> None: ...
     @property
     def owner(self) -> Task[Any]|None: ...
     async def acquire(self, priority: int=..., timeout: float|None=...) -> bool: ... # type: ignore[override]
 class LocksmithBase:
+    '''Implements a locksmith that will attempt to force specific locks; especially useful in deadlock scenarios.'''
     handlers: ClassVar[dict[type[AsyncLockLike[Any]], Callable[[AsyncLockLike[Any]], Any]]]
     def __init__(self, loop: AbstractEventLoop|None=..., ltyp: type[AsyncLockLike[Any]]=...): ...
     @property

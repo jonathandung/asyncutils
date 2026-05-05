@@ -29,7 +29,7 @@ Next, install py-asyncutils:
 
 .. code-block:: bash
 
-  # from pip; recommended
+  # recommended: pip
   pip install py-asyncutils==0.9.1
   # alternatively, after:
   git clone https://github.com/jonathandung/asyncutils.git
@@ -37,7 +37,7 @@ Next, install py-asyncutils:
   # you have options (a):
   pip install .
   # (b):
-  make install # verbose
+  make install # verbose; or
   make install-silent # no clutter
   # uses Make, though pip is still used under the hood
   # or if you are not on a unix-like system and don't have pip for some reason:
@@ -80,7 +80,7 @@ other installation pathways:
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m``.
 
-Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`_ for steps to check the installation.
+Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`__ for steps to check the installation.
 
 .. _extras:
 
@@ -95,6 +95,7 @@ The extras are listed below for reference:
 * all: All the extras combined
 * dev: Packages one would want installed for development; superset of docs, json5, pub, test, tools
 * docs: Documentation dependencies, including sphinx and some of its plugins, along with sphinx-lint
+* executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
 * json5: The JSON5 parser, specifically used to read format.json5 in tests.
@@ -102,11 +103,14 @@ The extras are listed below for reference:
 * test: Test dependencies, including pytest and related plugins
 * tools: Development tools dependencies, including mypy and uv
 
+.. version-added:: 0.9.2
+  The executors group.
+
 .. version-added:: 0.9.1
-  Added the ptw group.
+  The ptw group.
 
 .. version-removed:: 0.9.1
-  Removed the dlint group, since doc8 no longer appears to be maintained.
+  The dlint group, since doc8 no longer appears to be maintained.
 
 .. version-changed:: 0.9.0
   Completely reorganized optional dependencies, moving them around among groups. Still no strictly required dependencies!

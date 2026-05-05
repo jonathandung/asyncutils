@@ -73,8 +73,8 @@ class LockMixin[T](ABC):
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None]):
-    '''Mixin for locks that can report their owner (the task currently holding it).
-    :meth:`is_owner` should return True if the current task is the owner of the lock, and :meth:`release` will wrap :meth:`_release` to throw :exc:`RuntimeError` if the current task is not the owner.'''
+    '''| Mixin for locks that can report their owner (the task currently holding it).
+    | :meth:`is_owner` should return True if the current task is the owner of the lock, and :meth:`release` will wrap :meth:`_release` to throw :exc:`RuntimeError` if the current task is not the owner.'''
     @property
     @abstractmethod
     def is_owner(self) -> bool: ...
@@ -86,6 +86,7 @@ class LoopBoundMixin(LoopMixinBase):
     @property
     def loop(self) -> AbstractEventLoop: ...
 class EventMixin[T](AwaitableMixin[T], LoopBoundMixin, ABC):
+    '''Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some extra mixin methods.'''
     @abstractmethod
     async def wait_for_next(self, timeout: float|None=..., **k: Any) -> T: ...
     @abstractmethod

@@ -189,6 +189,9 @@ Submodules:
   - ignore_all
   - ignore_noncritical
   - ignore_typical
+  - ignore_stopiteration
+  - ignore_stopaiteration
+  - ignore_valerrs
 
   Exception types:
   - Critical
@@ -381,7 +384,6 @@ Submodules:
   - ignore_qempty
   - ignore_qfull
   - ignore_qerrs
-  - ignore_valerrs
 
 - rwlocks
 

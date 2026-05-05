@@ -13,10 +13,7 @@ jobs:
       with:
         python-version: 3.12
     - name: Install dependencies
-      run: |
-        pip install -U pip
-        pip install -e .[tools]
-        pip check
+      run: pip install -U pip && pip install -e .[tools] && pip check
     - name: Lint with ruff
       run: uv tool install ruff && uvx ruff check . --output-format=github
     - name: Run mypy
@@ -37,10 +34,7 @@ jobs:
       with:
         python-version: ${{matrix.python-version}}
     - name: Install dependencies
-      run: |
-        pip install -U pip
-        pip install -e .[json,test]
-        pip check
+      run: pip install -U pip && pip install -e .[test] && pip check
     - name: Run tests
       run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 52 -n auto
     - name: Upload results

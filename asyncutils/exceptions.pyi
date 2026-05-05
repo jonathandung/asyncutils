@@ -5,14 +5,16 @@ from .locks import LocksmithBase
 from .version import VersionInfo
 from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
-from typing import Any, Literal, NoReturn, Self, TypeGuard, overload
+from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_typical', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
-CRITICAL: tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
-    '''Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in. Use this when you must preserve the order.
-    Keyword arguments are as in `potent_derive`.'''
+    '''| Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in.
+    | Keyword arguments are as in `potent_derive`.
+
+    .. tip:: Use this only when you must preserve the order, and the faster :func:`unnest_reverse` otherwise.'''
 def unnest_reverse(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
 @overload
 def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup: ...
@@ -22,18 +24,18 @@ def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ord
 def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
 def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
-    '''Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
-    The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
-    The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the predicate
-    and exceptions that are not in `keep` respectively. They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
-    If `raise_critical` is `True`, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and propagate it.
-    `notes` is attached to the group using :meth:`~BaseException.add_note`.
-    The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
-    They only have an effect when the first argument is not a group.'''
+    '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
+    | The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
+    | The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the predicate and exceptions that are not in `keep` respectively.
+    | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
+    | If `raise_critical` is `True`, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and propagate it.
+    | `notes` is attached to the group using :meth:`~BaseException.add_note`.
+    | The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
+    | They only have an effect when the first argument is not a group.'''
 def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> E:
-    '''Attach some info to the exception `exc` and return it.
-    `notes` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
-    The parameter `traceback` corresponds to the attribute :attr:`~BaseException.__traceback__`, `cause` to :attr:`~BaseException.__cause__`, `context` to :attr:`~BaseException.__context__` and `suppress` to :attr:`~BaseException.__suppress_context__`.'''
+    '''| Attach some info to the exception `exc` and return it.
+    | `notes` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
+    | The parameter `traceback` corresponds to the attribute :attr:`~BaseException.__traceback__`, `cause` to :attr:`~BaseException.__cause__`, `context` to :attr:`~BaseException.__context__` and `suppress` to :attr:`~BaseException.__suppress_context__`.'''
 @overload
 def raise_exc(exc_typ: ExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: ...
 @overload
@@ -121,7 +123,10 @@ class MaxIterationsError(RuntimeError): '''Raised when a function has reached th
 class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
 class RateLimitExceeded(RuntimeError):
     '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
-    The initialization signature is considered an implementation detail, may change without notice, and is therefore not documented here.'''
+
+    .. admonition:: Implementation detail
+
+      The initialization signature may change without notice, and is therefore not documented here.'''
     async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
@@ -176,7 +181,7 @@ class PasswordMissing(PasswordQueueError, TypeError):
 class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
 class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:
-    '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async.'''
+    '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async. More customizable than :class:`contextlib.suppress`, because some exception classes can be excluded from the suppression.'''
     @property
     def exc(self) -> tuple[ExcType, ...]: '''The exception types that are ignored.'''
     @property
@@ -195,7 +200,7 @@ class IgnoreErrors:
     def excluding(self, *others: ExcType) -> Self: '''Return a new :class:`IgnoreErrors` instance that ignores the error types from itself except those from the others.'''
     def combined(self, *others: Self|ExcType|Iterable[Self]|Iterable[ExcType]) -> Self: '''Return a combined :class:`IgnoreErrors` instance that ignores all the error types from itself and the others and respects their exclusions.'''
 class WarningToError:
-    '''Async context manager to convert specific warnings to errors.'''
+    '''Context manager to convert specific warnings to errors; works in both sync and async.'''
     def __init__(self, /, *typs: type[Warning]): '''Positional arguments represent warning types to convert to their corresponding error types if they are to occur within the context.'''
     def __enter__(self) -> Self: '''Note that an error is to be raised once one of the warning types is encountered within the context and return the context manager instance.'''
     @overload
@@ -207,9 +212,15 @@ class WarningToError:
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Async context support.'''
-ignore_all: IgnoreErrors
+ignore_all: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores all errors; that is, `IgnoreErrors(BaseException)`. Use with caution!'''
-ignore_noncritical: IgnoreErrors
+ignore_noncritical: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to `ignore_all.excluding(CRITICAL)`.'''
-ignore_typical: IgnoreErrors
+ignore_typical: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof. Equivalent to `IgnoreErrors()`.'''
+ignore_stopiteration: Final[IgnoreErrors]
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopIteration`. Equivalent to `IgnoreErrors(StopIteration)`.'''
+ignore_stopaiteration: Final[IgnoreErrors]
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopAsyncIteration`. Equivalent to `IgnoreErrors(StopAsyncIteration)`.'''
+ignore_valerrs: Final[IgnoreErrors]
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`ValueError`. Equivalent to `IgnoreErrors(ValueError)`.'''

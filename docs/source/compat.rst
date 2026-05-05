@@ -14,7 +14,7 @@ in :class:`functools.partial`, albeit slower than the C version. We also can't p
 internals crucial to how some utilities are written differ. However, the weaker promise to support all actively maintained versions of Python will
 be upheld; that is, users need not worry about support for the newest version and the one before it, along with the version the main branch
 corresponds to, which is the one in the development (alpha, beta, rc) phase. See :pep:`602` for a detailed explanation, and the `status of Python
-versions <https://devguide.python.org/versions>`_ here.
+versions <https://devguide.python.org/versions>`__ here.
 
 asyncutils versions
 -------------------

@@ -5,10 +5,15 @@ from random import Random
 from types import TracebackType
 from typing import Final, Self, overload
 __all__ = 'Executor', 'basic_repl', 'debug', 'debugging', 'get_past_logs', 'loaded_all', 'logging_to', 'pdb', 'set_logger_level', 'silent'
-class Executor(_, PartialInterface): '''A class that implements the :pep:`3148` Executor interface. The exact class is determined at runtime by command-line arguments.'''
+class Executor(_, PartialInterface):
+    '''A class that implements the :pep:`3148` executor interface.
+
+    .. note:: The exact class is determined at runtime by command-line arguments.
+    .. tip::
+      Since instances of this class are only ever passed into `loop.run_in_executor`, nothing stops you from monkey-patching the event loop itself
+      or policy thereof, and using a custom class that does not follow the interface. Only do so if you know what you're doing.'''
 class debugging:
-    '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally
-    within the context (using :func:`set_logger_level`).'''
+    '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally within the context using :func:`set_logger_level`.'''
     @property
     def level(self) -> int: '''The current level of the :mod:`asyncutils` logger, as an integer.'''
     @property
@@ -39,8 +44,7 @@ pdb: Final[bool]
 _randinst: Final[Random]
 '''The random number generator (instance of :class:`random.Random`) used internally by this module.'''
 logging_to: Final[str]
-'''A string indicating where the logging output of the program is going.
-It is the name (path; possibly relative) of the log file, with four exceptions:
+'''The name (path; possibly relative) of the log file currently used by this library as a string, with four exceptions:
 * `'NULL'`: no logging is taking place
 * `'MEMORY'`: the logs are not going to a physical file but can be retrieved by :func:`get_past_logs`
 * `'STDOUT'`: logging is going to :data:`sys.stdout`

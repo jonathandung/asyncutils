@@ -43,13 +43,10 @@ class ConsoleBase(B):
             elif isinstance(e, MemoryError): self.memoryerror()
             return fut.set_exception(e)
         if not corocheck(c): return fut.set_result(c)
-        try: self._fut = _ = self._loop.create_task(c, context=self.context); futchain(_, fut)
+        try: futchain(_ := self._loop.create_task(c, context=self.context), fut); self._fut = _
         except BaseException as e: fut.set_exception(e)
     def showtraceback(self):
-        t, v, b = S.exc_info()
-        try:
-            if b is not None: self._showtraceback(t, v, b, '')
-        finally: t = v = b = None
+        if (t := S.exc_info())[2] is not None: self._showtraceback(*t, '')
     def runcode(self, code, *, futimpl=__import__('concurrent.futures._base', fromlist=_f).Future, dont_show_traceback=(KeyboardInterrupt, MemoryError, SyntaxError), threadsafe=True):
         getattr(self._loop, 'call_soon_threadsafe' if threadsafe else 'call_soon')(self.__callback, F := futimpl(), code, context=self.context)
         try: return F.result()
@@ -78,7 +75,7 @@ class ConsoleBase(B):
         elif (x := __import__('_pyrepl.simple_interact', fromlist=_)._get_reader().threading_hook): x.add('')
         self.refresh()
     def memoryerror(self):
-        if (m := self.memory_errors) == self._max_memerrs: self.write_special(f'Exceeded MemoryError threshold: {m}\n'); return self.set_return_code(1)
+        if (m := self.memory_errors) == self._max_memerrs: return self.set_return_code(f'ERROR: Exceeded MemoryError threshold: {m}\n')
         self.memory_errors = m+1
         for _ in self.memerr_hooks: _(self)
         self.refresh()
@@ -110,26 +107,29 @@ class ConsoleBase(B):
                 except MemoryError: self.memoryerror()
         else: self.write_special(self.BANNER); self.runcode(compile((l := S.stdin).read(), getattr(l, 'name', '<stdin>'), 'exec'))
         try: self.posthook()
+        except SystemExit: raise
         except BaseException as e: w(f'{fullname(e)} occurred in posthook of {self!r}: {e}\n')
-        if suppress_asyncio_warnings: P.patch_asyncio_warnings()
-        if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
-        self.write_special(exitmsg%n); return self.retcode
+        finally:
+            if suppress_asyncio_warnings: P.patch_asyncio_warnings()
+            if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
+            self.write_special(exitmsg%n)
+        return self.retcode
     @property
     def retcode(self): return 0 if (e := self.exc) is None else e.code
     P.patch_method_signatures((run, '*, exitmsg=None, threadname=None, max_memerrs=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (__callback, 'fut, code, /, *, makef={0}, corocheck={0}, futchain={0}'), (interact, "banner=None, *, ps1='>>> '")); P.patch_classmethod_signatures((__init_subclass__, '*, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template={}, version=None, description=None, **k'))
 def _(d, /):
     def load_all(_=d):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
-    load_all.__qualname__, load_all.__module__ = load_all.__name__, 'asyncutils'; P.patch_function_signatures((load_all, '')); return load_all
+    load_all.__qualname__, load_all.__module__, load_all.__text_signature__ = load_all.__name__, 'asyncutils', '()'; return load_all
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as util.sync_await in this REPL, since they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{"running" if self.is_running else "idle"} asyncutils console at {id(self):#x}>'
     @property
-    def is_running(self, _='User tampered with console-internal state!\n'): # noqa: PLR0206
+    def is_running(self):
         if not self._loop.is_running(): self._internal_is_running = False; return False
-        if self._internal_is_running == (b := R.get() is self): return b
+        if self._internal_is_running == (b := R.getc() is self): return b
         if b: self._internal_is_running = True
-        else: self.set_return_code(_)
-        S.stderr.write(_); return False
+        else: self.set_return_code(1)
+        S.stderr.write('User tampered with console-internal state!\n'); return False
     def _interact_hook(self, ps1, kcolor, reset, fcolor):
         super()._interact_hook(ps1, kcolor, reset, fcolor)
         if R.should_write_load_all(): self.write_special(f'{ps1}{fcolor}load_all{reset}()\n')
@@ -137,13 +137,14 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if not _: self.write(msg)
     def prehook(self, max_memerrs, _=C.max_memerrs, _r='this console is already running', _a='another console is running'):
         if self._internal_is_running: raise RuntimeError(_r)
-        if r := R.get(): raise RuntimeError(_r if r is self else _a)
-        R.set(self); super().prehook(_ if max_memerrs is None else max_memerrs)
+        if r := R.getc(): raise RuntimeError(_r if r is self else _a)
+        R.setc(self); super().prehook(_ if max_memerrs is None else max_memerrs)
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=StateCorrupted('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
-        if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
+        if R.unsetc() is not self: S.stderr.write(_m); del S.modules[__name__]
         if _ and isinstance(e := self.exc, BaseException):
             if not isinstance(e, SystemExit): raise _e
-            __import__('pdb').post_mortem(e.__traceback__)
+            if (t := e.__traceback__) is None: raise e
+            __import__('pdb').post_mortem(t)
         super().posthook()
     def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=38, _mn=S.intern('__callback')):
         t, v, b = S.exc_info()

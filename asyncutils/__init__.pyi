@@ -37,7 +37,11 @@ from typing import Final
 def __dir__() -> tuple[str, ...]: '''All the public names exported by this library, including the names of the submodules.'''
 def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]
-'''The current :mod:`asyncutils` version as a string with magical properties for working with versions (refer to the IDE autocomplete for its methods).'''
+'''The current :mod:`asyncutils` version as a string with magical properties for working with versions.
+.. tip::
+  :collapsible:
+
+  Refer to the IDE autocomplete for its methods.'''
 __hexversion__: Final[int]
 '''For example, `0x12070e` corresponds to version 18.7.14.'''
 console_preloaded_submodules: Final[frozenset[str]]

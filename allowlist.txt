@@ -1,12 +1,12 @@
 asyncutils.__all__
 asyncutils.__main__
 (asyncutils\._internal\.types\..*)
+(asyncutils\._internal\.py31[23]\..*)
 (asyncutils\..*\.__class_getitem__)
 asyncutils._internal.log
 asyncutils.altlocks
 asyncutils.altlocks.CircuitBreaker.__new__
 asyncutils.altlocks.DynamicThrottle.__init__
-asyncutils.altlocks.StatefulBarrier.__init__
 asyncutils.base
 asyncutils.base.aiter_to_gen
 asyncutils.base.event_loop.__del__
@@ -87,7 +87,6 @@ asyncutils.io.MemoryMappedIOManager.bulk_checksum
 asyncutils.io.MemoryMappedIOManager.checksum
 asyncutils.io.MemoryMappedIOManager.find_in_files
 asyncutils.iterclasses
-asyncutils.iterclasses.apeekable.__init__
 asyncutils.iters
 asyncutils.iters.afirsttrue
 asyncutils.iters.afreivalds
@@ -123,8 +122,6 @@ asyncutils.properties
 asyncutils.queues
 asyncutils.queues.PotentQueueBase.__aiter__
 asyncutils.queues.PotentQueueBase.__iter__
-asyncutils.queues.SmartPriorityQueue.__init__
-asyncutils.queues.UserPriorityQueue.__init__
 asyncutils.queues.password_queue
 asyncutils.rwlocks
 asyncutils.rwlocks.PriorityRWLock
@@ -139,6 +136,7 @@ asyncutils.signals
 asyncutils.signals.wait_for_signal
 asyncutils.tools
 asyncutils.util
+asyncutils.util.dualcontextmanager
 asyncutils.util.semaphore
 asyncutils.util.transient_block
 asyncutils.version

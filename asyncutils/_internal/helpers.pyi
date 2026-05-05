@@ -1,5 +1,5 @@
 '''Miscellaneous helper functions for :mod:`asyncutils` submodules that are not meant to be seen by the user.
-These are undocumented and unstable, and will remain so. This stub file exists for the convenience of development only.'''
+.. warning:: These are undocumented and unstable, and will remain so. This stub file exists for the convenience of development only.'''
 from .types import CanClearAndCopy
 from ..config import Executor
 from _collections_abc import Awaitable, Callable, Generator, Iterable

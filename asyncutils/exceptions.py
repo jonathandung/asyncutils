@@ -165,8 +165,8 @@ def __getattr__(n, /):
                 async def __aenter__(self): return self.__enter__()
                 async def __aexit__(self, /, *_): self.__exit__(*_)
                 P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
-        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical':
-            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical
+        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical'|'ignore_stopiteration'|'ignore_stopaiteration'|'ignore_valerrs':
+            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs
             class IgnoreErrors:
                 __slots__ = 'but', 'exc'
                 def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
@@ -177,7 +177,7 @@ def __getattr__(n, /):
                 async def __aexit__(self, /, *_): return self.__exit__(*_)
                 def excluding(self, *O, _=__import__('itertools').chain): return type(self)(*self.exc, exclude=_(self.but, O))
                 def combined(self, *O, _=check_methods):
-                    f, g, h, j, p = (S := set()).update, (P := set()).update, S.add, (d := []).append, d.pop
+                    f, g, h, j, p = (S := set(self.exc)).update, (P := set(self.but)).update, S.add, (d := []).extend, d.pop
                     for o in O:
                         if isinstance(o, IgnoreErrors): f(o.exc); g(o.but)
                         elif isinstance(o, type): h(o)
@@ -187,7 +187,7 @@ def __getattr__(n, /):
                         else: f(o.exc); g(o.but)
                     return type(self)(*S, exclude=P)
                 P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.xsig), (__aexit__, P.xsig)); del r
-            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
+            ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors(), IgnoreErrors(StopIteration), IgnoreErrors(StopAsyncIteration), IgnoreErrors(ValueError)
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
     return globals()[n]

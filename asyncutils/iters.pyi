@@ -1,5 +1,5 @@
-'''Functional and chainable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`.
-However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.'''
+'''| Functional and chainable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`.
+| However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.'''
 from ._internal.types import AsyncContextManager, Exceptable, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from _collections_abc import AsyncGenerator, Awaitable, Callable, Hashable, Iterable, Reversible
 from asyncio.events import AbstractEventLoop
@@ -19,9 +19,9 @@ def map_on_map[T, R, V](outer: Callable[[R], V], inner: Callable[[T], Awaitable[
 @overload
 def map_on_map[T, R, V](outer: Callable[[R], Awaitable[V]], inner: Callable[[T], Awaitable[SupportsIteration[R]]], it: SupportsIteration[T], *, inner_await: Literal[True], outer_await: Literal[True]) -> AsyncGenerator[tuple[V, ...], None]: '''Apply a transformation on an (async) iterable on top of another.'''
 def tee[T](it: SupportsIteration[T], n: int=..., *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGenerator[T], ...]:
-    '''Create concurrent async iterators over a single (async) iterable.
-    Unlike :func:`itertools.tee`, from which this obviously takes inspiration, the return values are plain async generators (not of a specialized class) and the flattening step is not applied.
-    Generally, if one iterator is expected to complete much sooner than others, it is not advisable to use this function, which uses more space in that case.'''
+    '''| Create concurrent async iterators over a single (async) iterable.
+    | Unlike :func:`itertools.tee`, from which this obviously takes inspiration, the return values are plain async generators (not of a specialized class) and the flattening step is not applied.
+    | Generally, if one iterator is expected to complete much sooner than others, it is not advisable to use this function, which uses more space in that case.'''
 @overload
 async def aunzip[T](ait: SupportsIteration[tuple[T]], put_batch: int=...) -> tuple[AUnzipConsumer[T]]: ...
 @overload
@@ -54,9 +54,9 @@ async def aunzip[T, R](ait: SupportsIteration[tuple[T|R, ...]], put_batch: int, 
 async def aunzip[T, R](ait: SupportsIteration[tuple[T|R, ...]], *, fillvalue: R) -> tuple[AUnzipConsumer[T], ...]: ...
 @overload
 async def aunzip(ait: SupportsIteration[tuple[Any, ...]], put_batch: int=..., fillvalue: Any=...) -> tuple[AUnzipConsumer[Any], ...]:
-    '''Undo the effect of :class:`zip`, :class:`itertools.zip_longest`, :func:`aziplongest` or :func:`azip`.
-    This function operates lazily, consuming items from the async iterable only when needed, in batches of the specified size (default :const:`context.AUNZIP_DEFAULT_PUT_BATCH`),
-    caching other items. This function may thus require significant auxiliary space.'''
+    '''| Undo the effect of :class:`zip`, :class:`itertools.zip_longest`, :func:`aziplongest` or :func:`azip`.
+    | This function operates lazily, consuming items from the async iterable only when needed, in batches of the specified size (default :const:`context.AUNZIP_DEFAULT_PUT_BATCH`)
+    | and caching other items. This function may thus require significant auxiliary space.'''
 def merge[T](*I: SupportsIteration[T], reverse: bool=...) -> AsyncGenerator[T]: '''Merge items from the (async) iterables into a single async generator, in the order as they come (or reverse order if `reverse` is `True`).'''
 def aflatten[T](it: SupportsIteration[SupportsIteration[T]]) -> AsyncGenerator[T]: '''Flatten one level of nesting using :class:`~iterclasses.achain` and return an async iterator over it.'''
 def batch[T](it: SupportsIteration[T], n: int, *, item_timeout: float|None=..., strict: bool=...) -> AsyncGenerator[list[T]]: '''More flexible but slightly slower implementation of :func:`batch2`, supporting timeouts waiting for each item, that raises :exc:`ValueError` instead of :exc:`~exceptions.ItemsExhausted` in the case of the length of the iterable being indivisible by the batch size.'''
@@ -68,12 +68,12 @@ def batch2[T](it: SupportsIteration[T], n: int|None, strict: Literal[False]=...)
 def asideeffect[T](f: Callable[[list[T]], object], it: SupportsIteration[T], /, *, size: int, before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGenerator[T]: ...
 @overload
 def asideeffect[T](f: Callable[[T], object], it: SupportsIteration[T], /, *, size: None=..., before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGenerator[T]:
-    '''Apply a side effect function `f` to each item in an (async) iterable `it` and yield the items unchanged in an async generator.
-    If `size` is specified, the side effect function is applied to batches of that size instead of individual items, but the items are still yielded separately.
-    The `before` and `after` functions are called before and after the iteration, respectively.'''
+    '''| Apply a side effect function `f` to each item in an (async) iterable `it` and yield the items unchanged in an async generator.
+    | If `size` is specified, the side effect function is applied to batches of that size instead of individual items, but the items are still yielded separately.
+    | The `before` and `after` functions are called before and after the iteration, respectively.'''
 def asliced[T: SupportsSlicing[Any]](seq: T, n: int, strict: bool=...) -> AsyncGenerator[T]:
-    '''Slice a slicable object `seq` (so named because these are usually sequences) and yield slices of the size `n`, which should be of the same type as `seq`, from the start to the end.
-    If `strict` is `True`, raise :exc:`ValueError` if the length of any slice is less than `n` (should only happen for the last slice unless the :meth:`__getitem__` method is misimplemented).'''
+    '''| Slice a slicable object `seq` (so named because these are usually sequences) and yield slices of the size `n`, which should be of the same type as `seq`, from the start to the end.
+    | If `strict` is `True`, raise :exc:`ValueError` if the length of any slice is less than `n` (should only happen for the last slice unless the :meth:`__getitem__` method is misimplemented).'''
 def buffer[T](it: SupportsIteration[T], maxsize: int=..., timeout: float|None=..., cooldown: float=..., *, loop: AbstractEventLoop|None=...) -> AsyncGenerator[T]: ...
 def asplitat[T](it: SupportsIteration[T], pred: Callable[[T], bool], maxsplit: int=..., keep_sep: bool=...) -> AsyncGenerator[list[T]]: '''Split an async iterator at each item satisfying `pred`, with `keep_sep` dictating '''
 def batch_process[T, R](items: SupportsIteration[T], size: int, processor: Callable[[list[T]], Awaitable[R]]) -> AsyncGenerator[R]: '''Apply `processor` to each batch of size `size` in `items` and yield the results awaited.'''
@@ -401,11 +401,15 @@ def asubstrindices[S: (str, bytes, bytearray)](seq: S, reverse: bool=...) -> Asy
 def asubstrindices[T](seq: SupportsSlicing[T], reverse: bool=...) -> AsyncGenerator[tuple[Iterable[T], int, int], None]: '''Yield tuples of the form `(substr, start, end)`, where `substr` is a contiguous subsequence of `seq` starting at index `start` and ending at index `end-1` (such that its length is `end-start`).'''
 def iter_future[T](it: SupportsIteration[T], summaryf: Callable[[SupportsIteration[T]], Awaitable[Any]]=...) -> Future[float]: ...
 def agetitems_from_indices[T](it: SupportsIteration[T], indices: SupportsIteration[SupportsIndex], setatend: Future[float]|None=..., finish: bool=...) -> list[Future[T]]:
-    '''Takes an (async) iterable and an (async) iterable of integers interpreted as indices, and immediately returns a list of futures whose eventual results represent
-    the items of that iterable at the index, beginning consumption of the iterable in the background. Exceptions will be set in the futures that are not done if results
-    are encountered during iteration or if the index is out of bounds. Supports negative indices. Do not set the result of any returned future; instead, if the result
-    is no longer relevant, cancel the future. The consumption stops as soon as all the required results are pushed into the respective futures. Pass in a Future for the
-    setatend parameter, which cancels the background consumption of the async iterable once it is done and cancels the undone futures.'''
+    '''| Take an (async) iterable and an (async) iterable of integers interpreted as indices, and immediately returns a list of futures.
+    | Their eventual results represent the items of that iterable at the corresponding index.
+    | Also begin consumption of the iterable in the background.
+    | Exceptions will be set in the futures that are not done if results are encountered during iteration or if the index is out of bounds.
+    | Pass in a :class:`~asyncio.Future` for the `setatend` parameter, which cancels the background consumption of the async iterable once it is done and cancels the undone futures.
+
+    .. attention:: Negative indices would consume the whole iterable at once if not already consumed.
+    .. warning:: Do not set the result of any returned future; instead, if the result is no longer relevant, cancel the future.
+    .. note:: The consumption stops as soon as all the required results are pushed into the respective futures.'''
 def aintersend[T, R](i1: AsyncGenerator[T, R], i2: AsyncGenerator[R, T]) -> AsyncGenerator[tuple[T, R], None]: '''Feed `i1` and `i2` into each other and yield tuples of the form `(yielded_from_i1, yielded_from_i2)`.'''
 def asendstream[T, R](i1: AsyncGenerator[T, R], i2: SupportsIteration[R]) -> AsyncGenerator[T]: '''Feed `i2` into `i1` and yield the results.'''
 @overload
@@ -420,7 +424,7 @@ def areversed[T](it: SupportsIteration[T]|Reversible[T], /) -> AsyncGenerator[T]
 async def to_list[T](it: SupportsIteration[T], /) -> list[T]: '''Collect all items of an async iterable into a list. Faster than :func:`base.collect`.'''
 async def aisprime(n: int) -> bool: '''Probabilistically test for primality of `n`. O(log^3 n), with false-positive rate below 2^(-128) for integers above 10^24.'''
 def adft(xarr: SupportsIteration[complex], /) -> AsyncGenerator[complex]: '''The discrete Fourier transform. O(n^2), since this library does not specialize in these operations.'''
-def aidft(Xarr: SupportsIteration[complex], /) -> AsyncGenerator[complex]: '''The inverse discrete Fourier transform; above remark applies.'''
+def aidft(Xarr: SupportsIteration[complex], /) -> AsyncGenerator[complex]: '''The inverse discrete Fourier transform. O(n^2) just like :func:`adft`.'''
 def apowers[X: (int, float, complex)](base: X, start: X=...) -> AsyncGenerator[X]: '''Yield `start`, `start*base`, `start*base*base`, ...'''
 def arunlengthencode[T](it: SupportsIteration[T], /) -> AsyncGenerator[tuple[T, int], None]: '''Compress a possibly repetitive (async) iterable into an async generator of pairs with run-length encoding.'''
 def arunlengthdecode[T](it: SupportsIteration[tuple[T, int]], /) -> AsyncGenerator[T]: '''Inverse of the above.'''
@@ -434,7 +438,7 @@ async def aargmax[T](it: SupportsIteration[T], key: Callable[[T], SupportsRichCo
 async def aargmax[C: SupportsRichComparison](it: SupportsIteration[C], *, default: int=...) -> int: '''Return the index of the first occurrence of the maximum element in the (async) iterable `it` according to `key`, or `default` if empty.'''
 def arunningmean[X: (int|float, complex)](it: SupportsIteration[X]) -> AsyncGenerator[X]: '''Repeatedly yield the mean of the items in the iterable so far, and advance the iterable.'''
 @overload
-def apowersetofsets[T: Hashable](it: SupportsIteration[T], *, frozen: Literal[True]=...) -> AsyncGenerator[frozenset[T]]: ...
+def apowersetofsets[H: Hashable](it: SupportsIteration[H], *, frozen: Literal[True]=...) -> AsyncGenerator[frozenset[H]]: ...
 @overload
 def apowersetofsets[T: Hashable](it: SupportsIteration[T], *, frozen: Literal[False]) -> AsyncGenerator[set[T]]: '''Yield all the subsets of the items in the (async) iterable after consuming it at once, as :class:`frozenset`'s if `frozen` is `True` (the default) and :class:`set`'s otherwise.'''
 def aserialize[T](it: SupportsIteration[T]) -> AsyncGenerator[T]: ...

@@ -9,7 +9,9 @@ from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'CallbackAccumulator', 'ConnectionPool', 'Pool'
 class Pool[T, R](LoopContextMixin):
-    '''Maps a function over an (async) iterable. Use instances of this class as async context managers only.'''
+    '''Maps a function over an (async) iterable.
+
+    .. caution:: Use instances of this class as async context managers only.'''
     def __init__(self, func: Callable[[T], R], it: SupportsIteration[T], /, workers: int=...): '''Apply `func` to each item in `it` with limited concurrency and yield results as they come.'''
     async def process(self, item: T) -> None: ...
     def __aiter__(self) -> Self: ...
@@ -22,7 +24,8 @@ class Pool[T, R](LoopContextMixin):
     async def aclose(self) -> None: ...
 class AdvancedPool(LoopContextMixin):
     '''A pool implementation used to call sync functions concurrently in an async-first interface, managing event loop and threading resource shenanigans internally.
-    Use instances of this class as async context managers only.'''
+
+    .. caution:: Use instances of this class as async context managers only.'''
     def __init__(self, max_workers: int=..., min_workers: int=..., qsize: int=..., scaling: bool=..., kill_at_exit: bool=...): ...
     def set_adjuster(self, raising: bool=...) -> None: ...
     def raise_for_shutdown(self) -> None: ...
@@ -71,7 +74,8 @@ class AdvancedPool(LoopContextMixin):
     def completed(self) -> int: ...
 class ConnectionPool[T, **P](LoopBoundMixin):
     '''A pool managing resources in a simple and intuitive lock interface, with support for health checking, auto-recycling and dynamic rescaling.
-    Use instances of this class as async context managers only.'''
+
+    .. caution:: Use instances of this class as async context managers only.'''
     def __init__(self, factory: Callable[P, T], maxsize: int=..., minsize: int=..., maxlife: float=..., healthchecker: Callable[[T], bool]|None=..., cleaner: Callable[[T], None]|None=...): ...
     def _is_healthy(self, conn: T, /) -> bool: ...
     @overload
@@ -102,9 +106,12 @@ class ConnectionPool[T, **P](LoopBoundMixin):
     def maxlife(self) -> float: ...
 class CallbackAccumulator[T, **P](deque[T], AsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class to store callbacks and call them at once when the context manager exits.
-    To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
-    The behaviour of this class as a :class:`~collections.deque` is an implementation detail.
-    Note that this class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
+
+    .. tip:: To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
+    .. admonition:: Implementation detail
+
+      This class subclasses :class:`~collections.deque`.
+    .. note:: This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload

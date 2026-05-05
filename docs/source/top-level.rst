@@ -10,7 +10,7 @@ This section documents the symbols defined at the top level of this package.
 
   An instance of :class:`asyncutils.version.VersionInfo` representing the current pip/conda version of this library.
 
-  :note: This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`_.
+  :note: This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`__.
 
 .. data:: __hexversion__
   :no-index:
@@ -53,7 +53,8 @@ This section documents the symbols defined at the top level of this package.
     replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object. For attribute accesses, it acts
     as a proxy to the real submodule, loading it when strictly required.
 
-  :caution: The exact deference mechanism is an implementation detail.
+  :admonition: Implementation detail
+    The exact deference mechanism is an implementation detail.
 
 .. function:: time_since_boot() -> float
   :no-index:

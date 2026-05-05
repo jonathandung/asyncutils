@@ -45,7 +45,7 @@ class AsyncReadWriteCouple(LoopContextMixin):
         except AttributeError as a:
             try: return getattr(self.writer, n)
             except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {n!r}', (a, b)) from None
-class File(LoopContextMixin):
+class File(LoopContextMixin): # noqa: PLR0904
     __slots__ = '_f', '_fn', '_mmap'
     if S.platform != 'win32':
         def madvise(self, option, start=0, length=None, _=H.filter_out): return self.mmap.madvise(option, start, *_(length))

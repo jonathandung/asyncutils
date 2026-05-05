@@ -1,4 +1,4 @@
-'''Exports the :attr:`__all__` attributes of all of :mod:`asyncutils`'s public submodules.'''
+'''The single source of truth that the name exposure system needs, exporting the :attr:`__all__` attributes of all of :mod:`asyncutils`'s public submodules.'''
 from .types import All
 from typing import Final
 altlocks_all: Final[All]

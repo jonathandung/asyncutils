@@ -8,13 +8,17 @@ class achain[T]:
     '''Async version of :class:`itertools.chain` that takes async or sync iterables.'''
     @classmethod
     def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self:
-        '''Construct an :class:`achain` from `its`, an (async) iterable of (async) iterables to chain.
-        The outer iterable is advanced on demand, so it can combine items from different sources.'''
+        '''Construct an :class:`achain` from `it_of_its`, an (async) iterable of (async) iterables to chain.
+
+        .. tip:: Since the outer iterable is advanced on demand, it can combine chunks of items from different sources.'''
     def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an :class:`achain` from the (async) iterables.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
 class apeekable[T](LoopBoundMixin):
     '''Async version of :class:`more_itertools.peekable`.'''
-    def __init__(self, it: SupportsIteration[T]=[]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(self, it: SupportsIteration[T]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
     def __aiter__(self) -> Self: '''Return the :class:`apeekable` instance itself.'''
     def __bool__(self) -> bool: '''Check whether any items are left in the underlying iterable without advancing it.'''
     async def peek(self, default: T=...) -> T: '''Return the next item of the underlying iterable without advancing it, or `default` if the items have run out.'''

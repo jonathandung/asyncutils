@@ -47,7 +47,7 @@ class localcontext:
     def __exit__(self, /, *_):
         setcontext(self.saved_ctx); del self.saved_ctx
         if isinstance(self, nonreusablelocalcontext): del self.new_ctx
-    P.patch_function_signatures((__exit__, P.xsig))
+    P.patch_method_signatures((__exit__, P.xsig))
 class nonreusablelocalcontext(localcontext): __slots__ = ()
 def __getattr__(n, /, _=getcontext): return getattr(_(), n)
 P.patch_function_signatures((getcontext, ''), (setcontext, 'ctx, /'), (__getattr__, 'name, /'))

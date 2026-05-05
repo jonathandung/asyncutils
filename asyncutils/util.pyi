@@ -24,9 +24,9 @@ def done_evt[E: EventProt](*, evtcls: type[E]) -> E: ...
 @overload
 def done_evt() -> Event: '''Return a new async event that is already set, with type `evtcls` if passed and :class:`asyncio.Event` otherwise.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
-    '''Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
-    Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
-    This is as opposed to :meth:`~asyncio.base_events.BaseEventLoop.create_task`, which only takes coroutines.'''
+    '''| Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
+    | Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
+    | This is as opposed to :meth:`~asyncio.base_events.BaseEventLoop.create_task`, which only takes coroutines.'''
 def new_eager_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''A version of :func:`to_sync` that is a decorator factory, returning its partial under `loop=loop`.'''
@@ -52,6 +52,8 @@ def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any,
     Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.
     If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of :func:`transient_block` under the specified `loop`.'''
+@overload
+def dualcontextmanager[T, **P](*, use_existing_executor: bool=..., create_executor: bool=...) -> Callable[[Callable[P, Iterable[T]]], Callable[P, DualContextManager[T]]]: ...
 @overload
 def dualcontextmanager[T, **P](gfunc: Callable[P, Iterable[T]], /, *, use_existing_executor: bool=..., create_executor: bool=...) -> Callable[P, DualContextManager[T]]: ...
 @overload

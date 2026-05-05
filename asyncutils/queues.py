@@ -1,4 +1,4 @@
-from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, getcontext, iter_to_agen, safe_cancel, sync_await
+from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, getcontext, iter_to_agen, safe_cancel, sync_await, ignore_valerrs
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial, Placeholder
@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from itertools import count, starmap
 from sys import _getframe, audit, intern
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
-ignore_qerrs, ignore_valerrs, f = f(*_), E.IgnoreErrors(ValueError), object.__setattr__
+ignore_qerrs, f = f(*_), object.__setattr__
 def _wakeup_next(W):
     P = W.popleft
     while W:
@@ -32,7 +32,7 @@ class Q:
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _
-    P.patch_method_signatures((_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__new__, 'maxsize, empty, qsize, full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, cancel_extend, /'))
+    P.patch_method_signatures((__setattr__, 'name, value, /'), (_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__init_subclass__, '**k'), (__new__, 'maxsize, empty, qsize, full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, cancel_extend, /'))
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=E, _q=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C = getcontext()
     try: F = _getframe(1)
@@ -146,10 +146,10 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     def reset(self): super().__init__(self.maxsize); self._event.clear()
     async def smart_put(self, item, *, timeout=None, raising=True):
         try: self.put_nowait(item); return True
-        except QueueFull:
-            try: await wait_for(self.put(item), timeout); return False
-            except TimeoutError as e:
-                if raising: raise e from None
+        except QueueFull: ...
+        try: await wait_for(self.put(item), timeout); return False
+        except TimeoutError:
+            if raising: raise
     async def smart_get(self, *, timeout=None, default=_NO_DEFAULT):
         f = default is _NO_DEFAULT
         try: return self.get_nowait()
@@ -162,9 +162,9 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
                 if f: raise e from None
                 return default
     async def extend(self, it, timeout=None):
-        info(f'extending {fullname(self)} with iterable {it!r}')
+        info(f'extending {fullname(self)} with iterable {it!r}'); f = self.smart_put
         async with _timeout(timeout):
-            async for i in iter_to_agen(it): await self.smart_put(i)
+            async for i in iter_to_agen(it): await f(i)
     def sync_put(self, item, *, timeout=None): return sync_await(self.smart_put(item, timeout=timeout), loop=self.loop)
     def sync_get(self, *, timeout=None, default=_NO_DEFAULT): return sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
@@ -181,9 +181,9 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
         with ignore_qempty:
             while c < max_items: yield self.get_nowait(); c += 1
     def drain_retlist(self, max_items=None): return list(self.drain_until_empty(max_items))
-    __iter__, __aiter__, __repr__ = drain_persistent, drain_until_empty, object.__repr__
+    __iter__, __aiter__ = drain_persistent, drain_until_empty
     def shutdown(self, immediate=False): self._event.set(); super().shutdown(immediate)
-    def __str__(self): return f'{fullname(self)}({self.maxsize})'
+    def __repr__(self): return f'{fullname(self)}({self.maxsize})'
     @property
     def is_shutdown(self): return self._event.is_set()
     @is_shutdown.setter
@@ -304,7 +304,7 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
         i = 0
         with ignore_qempty:
             while True: yield i, self.get_nowait(); i += 1
-    P.patch_method_signatures((filter_nowait, 'pred=bool'), (transaction, ''), (drain_persistent, 'max=None, timeout=None'))
+    P.patch_method_signatures((filter_nowait, 'pred=bool'), (transaction, ''), (drain_persistent, 'max_items=None, timeout=None'))
 class SmartQueue(PotentQueueBase):
     def _init(self, maxsize): self.__queue = deque(maxlen=maxsize if maxsize > 0 else None)
     def _get(self): return self.__queue.popleft()

@@ -29,9 +29,10 @@ asyncutils = 'asyncutils.cli:run'
 autils = 'asyncutils.cli:run'
 
 [project.optional-dependencies]
-all = ["py-asyncutils[dev,pconf,ptw]==0.9.1"]
+all = ["py-asyncutils[dev,executors,pconf,ptw]==0.9.1"]
 dev = ["pre-commit>=4.6.0", "py-asyncutils[docs,pub,test,tools]==0.9.1"]
 docs = ["furo>=2025.12.19", "sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "myst-parser>=5.0.0"]
+executors = ["deadpool>=2026.4.1", "executorlib>=1.9.2", "ipyparallel>=9.1.0", "loky>=3.5.6", "Pebble>=5.2.0"]
 pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "py-asyncutils[json5]==0.9.1"]
 json5 = ["json5>=0.14.0"]
 pub = ["build>=1.4.4", "twine[keyring]>=6.2.0", "packaging>=26.2"]
@@ -138,8 +139,8 @@ allowed-unused-imports = ["asyncutils._internal.submodules"]
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = ["__replace__", "__setup__", "__cleanup__"]
 max-returns = 10
-max-args = 13
-max-positional-args = 7
-max-public-methods = 46
-max-branches = 18
-max-nested-blocks = 6
+max-args = 12
+max-positional-args = 6
+max-public-methods = 41
+max-branches = 16
+max-nested-blocks = 5

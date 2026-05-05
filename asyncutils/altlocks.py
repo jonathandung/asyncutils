@@ -11,6 +11,7 @@ from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
+from weakref import WeakValueDictionary
 class Releasing:
     __slots__ = '_lock',
     def __init__(self, lock, /): self._lock = lock
@@ -31,11 +32,11 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
     P.patch_method_signatures((__exit__, P.xsig))
 class UniqueResourceGuard(ResourceGuard):
-    _cache, __slots__ = {}, ()
+    _cache, __slots__ = WeakValueDictionary(), ('__weakref__',)
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.altlocks.UniqueResourceGuard')
     @classmethod
     def guard(cls, obj, /, *, action='using'):
-        if (r := (c := cls._cache).get(k := id(obj))) is None: c[k] = r = cls(action, obj)
+        if (r := (c := cls._cache).get(obj)) is None: c[obj] = r = cls(action, obj)
         audit('asyncutils.altlocks.UniqueResourceGuard', fullname(obj)); return r
     @classmethod
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()

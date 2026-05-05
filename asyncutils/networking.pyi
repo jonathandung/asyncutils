@@ -8,10 +8,10 @@ from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, LoopBoundMixin):
-    '''An implementation of :class:`~asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
-    The idea was originally introduced in :pep:`3153`, but did not see eventual adaptation in the standard library.
-    This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
-    Instantiating this class will give an :class:`LFProtocol` or :class:`CRLFProtocol` depending on :data:`os.linesep`.'''
+    '''| An implementation of :class:`~asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
+    | The idea was originally introduced in :pep:`3153`, but did not see eventual adaptation in the standard library.
+    | This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
+    | Instantiating this class will give an :class:`LFProtocol` or :class:`CRLFProtocol` depending on :data:`os.linesep`.'''
     NEWLINE: ClassVar[bytes]
     '''The newline sequence used by this protocol as bytes.'''
     CARRIAGE_RETURN: ClassVar[bytes]
