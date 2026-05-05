@@ -30,7 +30,7 @@ Next, install py-asyncutils:
 .. code-block:: bash
 
   # recommended: pip
-  pip install py-asyncutils==0.9.1
+  pip install py-asyncutils==0.9.2
   # alternatively, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
@@ -58,21 +58,21 @@ other installation pathways:
 .. code-block:: bash
 
   # pipx:
-  pipx install py-asyncutils==0.9.1
+  pipx install py-asyncutils==0.9.2
   # conda:
-  conda install -c conda-forge py-asyncutils=0.9.1
+  conda install -c conda-forge py-asyncutils=0.9.2
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.1
+  conda install py-asyncutils==0.9.2
   # uv:
-  uv pip install 'py-asyncutils==0.9.1'
+  uv pip install 'py-asyncutils==0.9.2'
   # poetry:
-  poetry add py-asyncutils@0.9.1
+  poetry add py-asyncutils@0.9.2
   # pdm:
-  pdm add py-asyncutils==0.9.1
+  pdm add py-asyncutils==0.9.2
   # pipenv:
-  pipenv install py-asyncutils==0.9.1
+  pipenv install py-asyncutils==0.9.2
 
 .. version-added:: 0.9.0
   Created a Makefile to simplify development chores. We will never add setup.py, since only pyproject.toml is the modern way to go.
