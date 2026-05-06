@@ -22,7 +22,7 @@ Takes pride in:
 
 ## Setup
 
-I am not sure how this package would work on alternate python implementations. However, it is set to be extensively tested on CPython.
+I am not sure how this package would work on alternate python implementations. However, it is tested on CPython and set to be extensively so.
 
 Since the name 'asyncutils' was somehow unavailable on PyPI, 'py-asyncutils' was chosen instead.
 

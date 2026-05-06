@@ -17,7 +17,7 @@ class Module:
     def __reduce__(self): return type(self), (self._n,)
     def __getattr__(self, n, /, _=F.all_contextual_consts):
         if n == '_fs': self._fs = s = _.union(self.__dir__()) if n == 'context' else frozenset(self.__dir__()); return s
-        if n == '__dict__' or n in self._fs: return getattr(self.load(), n)
+        if (n[:2] == '__' and n[-2:] == '__') or n in self._fs: return getattr(self.load(), n)
         raise AttributeError(f"module 'asyncutils.{self._n}' has no attribute {n!r}") from None
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')

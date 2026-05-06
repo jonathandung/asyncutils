@@ -32,10 +32,10 @@ class Pool(LoopContextMixin):
         if t := self._task: await safe_cancel(t)
     __cleanup__ = aclose
 class AdvancedPool(LoopContextMixin):
-    __slots__ = '__cnt', '_adjustment', '_current', '_kill_at_exit', '_lock', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
+    __slots__ = '__cnt', '_current', '_kill_at_exit', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
-    def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._lock, self._adjustment, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, Lock(), None, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
+    def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
     def __repr__(self): return f'{fullname(self)}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
     async def _threadsafe_get(self):
         with self._tlock: return await self._queue.get()
@@ -54,12 +54,11 @@ class AdvancedPool(LoopContextMixin):
                     with self._tlock: self.completed += 1; self._pending -= 1
         except CRITICAL as e: g(_.set_exception, Critical(e))
         else: g(_.set_result, x)
-    async def _adjust_workers(self):
+    def _adjust_workers(self):
         if not self._scaling: return
         C = getcontext()
-        async with self._lock:
-            if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
-            elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
+        if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
+        elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             a, b, f, g = self._workers.add, self._futures.add, self._worker_loop, self.make_fut
@@ -70,7 +69,7 @@ class AdvancedPool(LoopContextMixin):
         self._current = new
     def _put_nowait_priority(self, priority, item): self._queue.put_nowait((priority, self._tiebreak, item))
     def set_adjuster(self, raising=False):
-        if self._scaling: self._adjustment = self.make(self._adjust_workers())
+        if self._scaling: self._adjust_workers()
         elif raising: raise PoolError(f'{fullname(self)} is non-scaling')
     def raise_for_shutdown(self):
         if self._shutdown: raise PoolShutDown(f'{fullname(self)} is shutting down')
@@ -95,7 +94,6 @@ class AdvancedPool(LoopContextMixin):
         self._shutdown = True
         try:
             async with timeout(total_timeout):
-                if a := self._adjustment: await safe_cancel(a)
                 if cancel_pending: await self._kill_helper()
                 else:
                     try: await self.wait_for_slot(idle_timeout)
@@ -109,8 +107,7 @@ class AdvancedPool(LoopContextMixin):
     async def starmap(self, f, it, /, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))
     async def starmap_withkwds(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(*a, **k) for a, k in it))
-    async def resize(self, min_workers, max_workers):
-        async with self._lock: M = max(max_workers, m := max(1, min_workers)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
+    async def resize(self, min_workers, max_workers): M = max(max_workers, m := max(1, min_workers)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
     def drain(self): return self._queue.join()
     async def wait_for_slot(self, timeout=None):
         self.raise_for_shutdown()
@@ -143,20 +140,18 @@ class ConnectionPool(LoopBoundMixin):
                 self._cleaner(c)
             if self.currsize < self.maxsize: self._in_use.add(c := await self.create_connection(*a, **k)); return c
         await self._available.wait(); return await self.acquire(*a, **k)
-    async def release(self, c, /, *a, **k):
-        async with self._lock:
-            self._in_use.discard(c)
-            if self._is_healthy(c) and len(self._pool) < self.maxsize: self._pool.append(c); self._available.set(); self._available.clear()
-            else:
-                self._cleaner(c)
-                if self.currsize < self.minsize: self.make(self.create_connection(*a, **k))
+    def release(self, c, /, *a, **k):
+        self._in_use.discard(c)
+        if self._is_healthy(c) and len(self._pool) < self.maxsize: self._pool.append(c); self._available.set(); self._available.clear()
+        else:
+            self._cleaner(c)
+            if self.currsize < self.minsize: self.make(self.create_connection(*a, **k))
     async def _maintain(self):
         f = sleep.__get__(getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:
             await f(); n, g = [], self.create_connection
-            async with self._lock:
-                for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
-                n.extend(await gather(*(g() for _ in range(self.minsize-self.currsize)))); self._pool = n
+            for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
+            async with self._lock: n.extend(await gather(*(g() for _ in range(self.minsize-self.currsize)))); self._pool = n
     async def start(self, akgen=None, executor=None):
         f = self.create_connection
         if akgen is None:
@@ -166,10 +161,9 @@ class ConnectionPool(LoopBoundMixin):
         self._maintainer = self.make(self._maintain())
     async def stop(self):
         if (m := self._maintainer): await safe_cancel(m)
-        async with self._lock:
-            while self._pool: self._cleaner(self._pool.pop())
-            for _ in self._in_use: self._cleaner(_)
-            self._in_use.clear()
+        while self._pool: self._cleaner(self._pool.pop())
+        for _ in self._in_use: self._cleaner(_)
+        self._in_use.clear()
     async def __aenter__(self): await self.start(); return self
     async def __aexit__(self, /, *_): await self.stop()
     @property

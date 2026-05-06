@@ -13,13 +13,13 @@ See the possible keys in format.json5, which can be accessed using tools.get_cfg
 Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, or tornado.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE, interpreted as a file descriptor if an integer, is passed, the logging output goes to a file with that name.
-Most of the logging output is created in debug mode only, to prevent cluttering of the stream.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
 If FILE is 'MEMORY', logs are stored in memory and returned and voided whenever get_past_logs is called.
 If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log' in the
 current working directory for logging, for number from 1 to 4096. If you have more than 4096 log files, you should probably clean them up.
-If FILE is 'STDOUT', logs to stdout.
-If FILE is 'STDERR', logs to stderr. This is also the default behaviour and fallback if the above steps fail.''')
+Log file rotation is not currently supported.
+If FILE is 'STDOUT', log to stdout.
+If FILE is 'STDERR', log to stderr. This is also the default behaviour and fallback if the above steps fail.''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
 Thus, this option cannot avoid the cost of importing logging early on.''')

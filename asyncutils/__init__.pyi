@@ -38,6 +38,7 @@ def __dir__() -> tuple[str, ...]: '''All the public names exported by this libra
 def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
 __version__: Final[VersionInfo]
 '''The current :mod:`asyncutils` version as a string with magical properties for working with versions.
+
 .. tip::
   :collapsible:
 

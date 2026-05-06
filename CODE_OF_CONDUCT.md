@@ -18,7 +18,8 @@ Examples of behavior that contributes to creating a positive environment include
 
 Examples of unacceptable behavior by participants include:
 
-* The use of sexualized language or imagery; unwelcome sexual attention or advances
+* The use of sexualized language or imagery
+* Unwelcome sexual attention or advances
 * Trolling, insulting/derogatory comments, personal or political attacks
 * Public or private harassment
 * Publishing others' private information, such as a physical or electronic address, without explicit permission
@@ -55,4 +56,4 @@ other members of the project's leadership.
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://contributor-covenant.org), version 3.0, available on
-[the official page](https://www.contributor-covenant.org/version/3/0).
+[their official page](https://www.contributor-covenant.org/version/3/0).

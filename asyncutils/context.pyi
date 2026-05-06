@@ -129,7 +129,7 @@ def setcontext(ctx: Context, /) -> None: '''Set the current context to for the a
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
-.. attention::
+.. note::
   These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (78 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]

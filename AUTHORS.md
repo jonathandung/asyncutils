@@ -1,6 +1,6 @@
-# Project Authors
+# Authors
 
-## Project technical leads
+## Technical leads
 
 * Jonathan Dung - owner - Hong Kong
 

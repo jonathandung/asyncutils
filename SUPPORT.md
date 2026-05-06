@@ -9,8 +9,8 @@ Before jumping to seek support, do skim through **[README.md](https://github.com
 If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
-2. If not, create a new issue
-3. Refer and adhere to the issue template chosen; otherwise, issue risks being closed without going through actual review
+2. Create a new issue if not
+3. Refer and adhere to the issue template chosen, or risk your issue being closed without going through actual review
 
 ## Feature Requests
 
@@ -56,14 +56,14 @@ pip check
 
 # I personally also use:
 pip install -U pipdeptree
-pipdeptree # Prettily print the dependency graph
+pipdeptree # Pretty print the pip packages dependency tree
 pipdeptree --packages py-asyncutils # Show only the dependents and dependencies of this package
 
 # Clean install
 pip uninstall py-asyncutils
 pip install py-asyncutils
 
-# If using pipx
+# If using pipx, likely installed with pip
 
 pip install -U pipx
 pipx ensurepath
@@ -71,7 +71,7 @@ pipx ensurepath
 # If using conda
 conda update py-asyncutils
 
-# If using uv
+# If using uv; this is much faster from my experience
 uv pip install -U py-asyncutils
 ```
 
@@ -93,12 +93,6 @@ python -c "print(*__import__('sys').path, sep='\n')"
 python -c "print(*__import__('asyncutils').__all__, sep='\n')"
 # If not loading site, repeat the above steps w/ python -Sc
 ```
-
-## Version Compatibility
-
-- Python 3.12+ required
-- No dependencies outside development, which we're proud of
-- This project is under active development (patch version is frequently bumped) that can have breaking changes
 
 ## Response Times
 

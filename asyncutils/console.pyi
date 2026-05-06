@@ -1,4 +1,4 @@
-'''Implementation of an interactive console base class, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
+'''Implementation of an `interactive async console base class <https://asyncutils.readthedocs.io/en/stable/api/asyncutils/console/index.html#asyncutils.console.AsyncUtilsConsole>`_, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.types import ExcType
 from _collections_abc import Callable, Coroutine, Iterable
 from _contextvars import Context

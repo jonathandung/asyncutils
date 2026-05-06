@@ -1,4 +1,4 @@
-'''Some asyncio protocols and a transport. See [the documentation page](https://docs.python.org/3/library/asyncio-protocol.html).'''
+'''Some asyncio protocols and a transport. See `the asyncio documentation page <https://docs.python.org/3/library/asyncio-protocol.html>`__.'''
 from .mixins import LoopBoundMixin
 from asyncio.events import AbstractEventLoop
 from asyncio.protocols import Protocol

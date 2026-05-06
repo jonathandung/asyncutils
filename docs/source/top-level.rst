@@ -54,7 +54,7 @@ This section documents the symbols defined at the top level of this package.
     as a proxy to the real submodule, loading it when strictly required.
 
   :admonition: Implementation detail
-    The exact deference mechanism is an implementation detail.
+    The exact deferment mechanism is not part of the public API.
 
 .. function:: time_since_boot() -> float
   :no-index:

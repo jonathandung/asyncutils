@@ -10,11 +10,12 @@ from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from io import _WrappedBuffer, TextIOWrapper
 from types import CodeType, FrameType, FunctionType, TracebackType
-from typing import IO, Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 __all__ = ()
 '''| This is a fake module, and none of its symbols exist at runtime.
 | Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
-| It is, however, difficult to cause linters to emit diagnostics with other usage patterns of this module, so bear this in mind.'''
+
+.. tip:: For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks, and use `from __future__ import annotations` on Python 3.13 or below.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -127,7 +128,9 @@ class FuncProxy[W](Protocol):
     '''Same as above.'''
     @property
     def __func__(self) -> W: ...
-type Wrapper = FunctionType|FuncProxy[FunctionType|Wrapper]|FuncWrapper[FunctionType|Wrapper]
+type Proxy[W] = FuncProxy[W]|FuncWrapper[W]
+'''A supposed callable whose :attr:`__wrapped__` or :attr:`__func__` attribute points to the callable it wraps.'''
+type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
 '''A function or wrapper of any depth thereof.'''
 type SigPatcherArg = tuple[Wrapper, str]
 '''The type of a positional argument passed to a signature-patching function in :mod:`asyncutils._internal.patch`.'''
@@ -183,11 +186,11 @@ class RWLockRV[T, **P](Protocol):
 @type_check_only
 class EveryMethodRVRV[T, R](Protocol):
     '''Return type of :class:`EveryMethodRV`.'''
-    async def __call__(self, _: T, /, *a: Any, **k: Any) -> R|None: ...
+    async def __call__(self, self_: T, /, *a: Any, **k: Any) -> R|None: ...
 @type_check_only
 class EveryMethodFT[T, R](Protocol):
     '''The type of functions taken by :class:`EveryMethodRV`.'''
-    def __call__(self, _: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
+    def __call__(self, self_: T, /, *a: Any, **k: Any) -> Awaitable[R]: ...
 @type_check_only
 class DecoratorFactoryRV(Protocol):
     '''The return type of various decorator factories in :mod:`func`, including :func:`~func.debounce`, :func:`~func.throttle` and :func:`~func.debounce`.'''
@@ -198,7 +201,7 @@ class EveryRV[T](Protocol):
     def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
 @type_check_only
 class SubscriptionRV(Protocol):
-    '''Return type of :func:`channels.Observable.subscribe`, :func:`channels.Observable.subscribe_nowait` and :func:`channels.Observable.ntimes`.'''
+    '''Return type of the :meth:`~channels.Observable.subscribe`, :meth:`~channels.Observable.subscribe_nowait` and :meth:`~channels.Observable.ntimes` methods of :class:`channels.Observable`.'''
     def __call__(self, strict: bool=...) -> None: ...
 @type_check_only
 class StateSnapshot(NamedTuple):
@@ -208,9 +211,9 @@ class StateSnapshot(NamedTuple):
     num_putters: int
     '''Current number of values waiting for slots.'''
     num_ops: int
-    '''`num_getters+num_putters`'''
+    '''`ss.num_ops == ss.num_getters+ss.num_putters`'''
     idle: bool
-    '''`num_getters == num_putters == 0`'''
+    '''`ss.idle == (ss.num_getters == ss.num_putters == 0)`'''
 @type_check_only
 class BenchmarkResult(NamedTuple):
     '''The return type of :func:`func.benchmark`.'''
@@ -221,7 +224,7 @@ class BenchmarkResult(NamedTuple):
     total: float
     '''The total execution time.'''
     avg: float
-    '''`total/iterations`.'''
+    '''`ss.avg == ss.total/ss.iterations`.'''
     iterations: int
     '''The `times` constructor parameter.'''
 @type_check_only
@@ -238,7 +241,6 @@ class MemoryMappedFile(LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     async def seek(self, pos: int, whence: Seek=...) -> None: '''Move the file pointer to `pos` according to `whence`.'''
-    def __new__(cls, file: IO[bytes], /) -> Self: ...
     def __iter__(self) -> Iterator[bytes]: '''Return an iterator over the lines of the file.'''
     def __aiter__(self) -> AsyncGenerator[bytes]: '''Return an asynchronous iterator over the lines of the file.'''
     @property
@@ -350,7 +352,7 @@ type Exceptable = ExcType|tuple[ExcType, ...]
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to the built-in :func:`open` function.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
-'''A slice with start, stop and step being integers or None, representing a slice that typical sequences supporting slicing should accept.'''
+'''A slice with start, stop and step being integers or `None`, representing a slice that typical sequences supporting slicing should accept.'''
 type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''
 type All = tuple[str, ...]

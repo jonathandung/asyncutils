@@ -5,11 +5,12 @@
 | Version | Supported          |
 | ------- | ------------------ |
 | 0.9.x   | :white_check_mark: |
+| 0.8.x   | :red_cross_mark:   |
 
 ## Reporting a Vulnerability
 
-I think it highly unlikely there will be any security vulnerabilities in the near future (this project is nowhere near that advanced), but this is
-still included for compliance. Please report as described below.
+I think it highly unlikely there will be any security vulnerabilities in the near future since this project is should not see much applications in
+related fields, but this is still included for compliance. Please report as described below.
 
 - **Method native to GitHub**
 
@@ -21,7 +22,7 @@ still included for compliance. Please report as described below.
 
   If possible, encrypt your message with PGP; the fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`, and the public key is shown below.
 
-  You should always check it against the fingerprint first in case either was compromised.
+  *You should always check the key against the fingerprint first in case either was compromised.*
 
 ```text
 -----BEGIN PGP PUBLIC KEY BLOCK-----

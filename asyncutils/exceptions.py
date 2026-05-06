@@ -35,7 +35,7 @@ def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppres
     e.__suppress_context__ = suppress; return e.with_traceback(traceback)
 def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
     if isinstance(e, type): e = e(*a, **k)
-    elif a or k: _s_.write('raise_exc: no additional arguments were expected\n')
+    elif a or k: _s_.write('exceptions.raise_exc: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
@@ -61,6 +61,7 @@ class Critical(BaseException):
     def __new__(cls, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception):
         if isinstance(e, cls): return e
         BaseException.__init__(E := BaseException.__new__(cls), _m); E.__context__ = _e() if e is None else e; return E
+    __init__ = object.__init__ # type: ignore[assignment]
     @property
     def __suppress_context__(self): return False # noqa: PLW3201
     @property
