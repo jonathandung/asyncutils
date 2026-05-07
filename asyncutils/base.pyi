@@ -20,7 +20,7 @@ class event_loop: # noqa: N801
     @overload
     def __exit__(self, t: ExcType, v: BaseException, b: TracebackType, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
-    def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration to the defaults.'''
+    def clear_flags(self, mask_to_keep: int|None=...) -> None: '''Reset the configuration to the defaults.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''

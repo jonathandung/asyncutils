@@ -40,7 +40,7 @@ Some keys can have various types, as detailed by the comments attached. */
   This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.
   If null, the environment variable is unset entirely after reading this config.
   Cycles can be created to switch between flags periodically.
-  Ensure %AUTILSCFGPATH% is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
+  Ensure AUTILSCFGPATH is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
   in a previous config. By that logic, you should also remember to update this correctly when the config file is moved. */
   context: {
     // configures individual submodules (contextual constants)
@@ -55,7 +55,7 @@ Some keys can have various types, as detailed by the comments attached. */
         default_lbound: 0.25,
         default_lfactor: 0.75,
         default_max_rate: 100.0,
-        default_min_rate: 1e2,
+        default_min_rate: 1e-2,
         default_ubound: 0.75,
         default_ufactor: 1.25,
         default_window: 100,

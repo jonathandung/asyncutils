@@ -66,6 +66,7 @@ class VersionInfo(str): # noqa: FURB189
         * 2, patch: `'0'`
         * s, short: `'123.4'`
         * l, long: `'asyncutils version 123.4.0'`
+        * a, ascii: `'{\x04\x00'`
         * c, chars: `'{\x04\x00'`
         * t, tuple: `'(123, 4, 0)'`
         * h, hash: `'116380397'`

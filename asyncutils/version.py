@@ -10,7 +10,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
 def r(c, /, _='cannot subclass asyncutils.version.%s'):
-    def f(_=TypeError(_%c.__name__)): raise _
+    def f(_=TypeError(_%c.__name__)): raise _ # pragma: no cover
     return f
 def a(c, /, t=tuple(property(lambda o, _=i: o[_]) for i in range(3)), _=r, f=('major', 'minor', 'patch')): c._fields, c._asdict = f, lambda self, _=f: dict(zip(_, self)); c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c._replace = c.__replace__ = lambda self, **k: c(**self._asdict(), **k); c.__init_subclass__ = _(c); return c
 N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xFF
@@ -65,12 +65,12 @@ class VersionInfo(str): # noqa: FURB189
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # type: ignore
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'v'+'.'.join(map(str, self if self[2] else self[:2 if self[1] else 1]))
             case 'l': return f'asyncutils version {self}'
-            case 'c': return bytes(self).decode('latin-1')
+            case 'a'|'c': return bytes(self).decode('ascii' if s == 'a' else 'latin-1')
             case 't': return str(self.parts)
             case 'd': return repr(int(self))
             case 'h': return repr(hash(self))
@@ -110,8 +110,8 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
     elif not c(o): return
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
 def normalize(o, /, _=E.VersionNormalizerMissing):
-    if (r := normalize_allow_unimplemented(o)) is None: raise _(o)
-    return r
+    if (r := normalize_allow_unimplemented(o)): return r
+    raise _(o)
 def register_normalizer(o, n, /, _=t, f=N.setdefault): return f(_(o), n) is n
 def unregister_normalizer(o, /, _=t, f=N.pop): return f(_(o), None)
 def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))

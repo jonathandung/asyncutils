@@ -1,8 +1,10 @@
 from collections import deque
+from asyncio.locks import Lock
 from asyncio.tasks import sleep, gather
+from asyncio.timeouts import timeout
 import pytest
 from asyncutils.altlocks import *
-from asyncutils.exceptions import CircuitOpen
+from asyncutils import CircuitOpen, timer
 @pytest.fixture
 def obj(): return object()
 def test_rguard(obj):
@@ -36,3 +38,21 @@ async def test_sbarrier():
     (u, x), (v, y), (w, z) = await gather(*map(b.wait, range(1, 6, 2)))
     assert (u, v, w) == (0, 1, 2)
     assert x == y == z == deque((1, 3, 5))
+async def test_releasing():
+    rel = Releasing(lock := Lock())
+    with pytest.raises(RuntimeError, match='asyncutils.altlocks.Releasing: lock is not acquired'):
+        async with rel: ...
+    async with timeout(0.01): await lock.acquire()
+    async with rel: assert not lock.locked()
+    assert lock.locked()
+    lock.release()
+@timer
+async def dts(t):
+    async with t, t, t, t: ...
+@timer
+async def dtf(t):
+    async with t, t, t, t: 1/0
+async def test_dthrottle():
+    t = DynamicThrottle(3, window=6)
+    assert (await dts(t))[1] == pytest.approx(1, rel=0.15)
+    await dtf(t)

@@ -11,9 +11,9 @@ class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
-        pool = self.__reusable
+        p = (pool := self.__reusable).pop
         while pool:
-            if (L := pool.pop()).is_closed() or L.is_running(): continue
+            if (L := p()).is_closed() or L.is_running(): continue
             with _: L._ready.clear()
             with _: L._scheduled.clear()
             return L
@@ -31,7 +31,7 @@ class event_loop: # noqa: N801
             elif x: F |= s
             else: F &= ~s
             s <<= 1
-        if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}')
+        if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}') # pragma: no cover
         return cls.from_flags(F)
     def __enter__(self, _='event_loop context already entered'):
         if (f := self._flags)&self._ENTERED:
@@ -95,7 +95,7 @@ def f(n):
         if callable(p := getattr(it, n, None)):
             while it: yield p()
             if callable(p := getattr(it, 'clear', None)) and iscoroutine(p := p()): await p
-        else:
+        else: # pragma: no cover
             async for i in iter_to_agen(it): yield i
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))

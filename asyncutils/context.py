@@ -5,9 +5,10 @@ _, k, all_contextual_consts = __import__('_contextvars').ContextVar('asyncutils_
 class Context:
     __slots__ = tuple(C); exec(f'def __new__(cls,/,*,{",".join(f"{k}={v!r}" for k, v in C.items())}):\n\t(_:=object.__new__(cls)).{"\n\t_.".join(f"{k}={k}" for k in __slots__)}\n\treturn _') # noqa: S102
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.context.Context')
-    def __getattribute__(self, n, /):
-        if n[0] == '_': return object.__getattribute__(self, n)
-        if isinstance(r := object.__getattribute__(self, n := n.upper()), list):
+    def __getattribute__(self, n, /, _=frozenset(('replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint')), u='__', f=object.__getattribute__):
+        if n.startswith(u) and n.endswith(u): return object.__getattribute__(self, n)
+        if n in _: return f(self, n)
+        if isinstance(r := f(self, n := n.upper()), list):
             if isinstance(r[0], list): r = map(tuple, r)
             r = tuple(r)
         return r
@@ -28,7 +29,7 @@ class Context:
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
     def copy(self): return type(self)(**self.asdict())
     def replace(self, /, **k): return self.replace_from_dct(k)
-    def pprint(self, file=__import__('sys').stdout, *, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True)): print(f'Context(\n {pp.pformat(self.asdict())[1:-1]}\n)', file=file) # noqa: B008
+    def pprint(self, file=__import__('sys').stdout, *, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True)): print(f'Context(\n {pp.pformat(self.asdict())[1:-1]}\n)', file=file) # pragma: no cover # noqa: B008
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
     __copy__, __replace__ = copy, replace; P.patch_method_signatures((pprint, 'file={0}, *, pp={0}'), (replace_from_dct, 'd, /'))
 def getcontext(_=_, d=Context()):

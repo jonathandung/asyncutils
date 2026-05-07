@@ -30,7 +30,7 @@ class AsyncProperty:
         if self._strict: raise AttributeError(msg, name=self._name)
         return self
     def _helper(self, f, *a, c='get'):
-        try: return sync_await(f(*a), loop=self._loop).result()
+        try: return sync_await(f(*a), loop=self._loop)
         except BaseException as e: raise AttributeError(f'failed to {c} attribute {self._name}') from e
     def _set_helper(self, msg, val):
         if self._strict: raise AttributeError(msg, name=self._name)

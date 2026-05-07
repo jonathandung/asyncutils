@@ -33,7 +33,7 @@ all = ["py-asyncutils[dev,executors,pconf,ptw]==0.9.2"]
 dev = ["pre-commit>=4.6.0", "mypy>=2.0.0", "py-asyncutils[docs,pub,test,tools]==0.9.2"]
 docs = ["furo>=2025.12.19", "sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "myst-parser>=5.0.0"]
 executors = ["deadpool>=2026.4.1", "executorlib>=1.9.2", "ipyparallel>=9.1.0", "loky>=3.5.6", "Pebble>=5.2.0"]
-pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "py-asyncutils[json5]==0.9.2"]
+pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "xmltodict>=1.0.4", "py-asyncutils[json5]==0.9.2"]
 json5 = ["json5>=0.14.0"]
 pub = ["build>=1.4.4", "twine[keyring]>=6.2.0", "packaging>=26.2"]
 ptw = ["pytest-watch>=4.2.0"]
@@ -84,7 +84,7 @@ target-version = "py312"
 exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env", "*.egg-info", ".eggs", ".mypy_cache", ".pytest_cache", "docs/source/conf.py"]
 
 [tool.ruff.lint]
-ignore = ["ANN401", "ASYNC109", "B904", "B905", "B912", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "N803", "N806", "N812", "N818", "PLC0415", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
+ignore = ["ANN401", "ASYNC109", "B904", "B905", "B912", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "N803", "N806", "N812", "N818", "PLC0415", "PLC1901", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
 select = ["A", "ARG", "ANN", "ASYNC", "B", "BLE001", "COM819", "C4", "C901", "E", "EM103", "ERA001", "EXE", "F", "FIX002", "FLY002", "FURB", "G", "ISC", "INP001", "LOG", "N", "PERF", "PIE", "PGH004", "PL", "PYI", "Q", "RET", "RSE102", "RUF", "S", "SIM", "SLOT", "T100", "T201", "TID252", "TRY", "UP", "W", "YTT"]
 logger-objects = ["asyncutils._internal.log"]
 preview = true

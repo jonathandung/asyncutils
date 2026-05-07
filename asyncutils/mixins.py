@@ -1,5 +1,5 @@
 __lazy_modules__ = frozenset(('asyncio',))
-from asyncutils import safe_cancel_batch
+from asyncutils.base import safe_cancel_batch
 from asyncutils._internal import helpers as H
 from asyncutils._internal.submodules import mixins_all as __all__
 import functools as F

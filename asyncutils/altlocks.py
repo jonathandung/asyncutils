@@ -16,8 +16,8 @@ class Releasing:
     __slots__ = '_lock',
     def __init__(self, lock, /): self._lock = lock
     async def __aenter__(self):
-        if iscoroutine(r := self._lock.release()): r = await r
-        return r
+        if not (l := self._lock).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
+        if iscoroutine(r := l.release()): await r
     async def __aexit__(self, *_): await self._lock.acquire()
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     _inc_cnt = staticmethod(count(1).__next__); __slots__ = 'guarded',
@@ -39,7 +39,7 @@ class UniqueResourceGuard(ResourceGuard):
         if (r := (c := cls._cache).get(obj)) is None: c[obj] = r = super().guard(obj, **_)
         audit('asyncutils.altlocks.UniqueResourceGuard', fullname(obj)); return r
     @classmethod
-    def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
+    def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear() # pragma: no cover
     P.patch_method_signatures((guard, "obj, /, *, action='using'"))
 class CircuitBreaker:
     __slots__ = '_exc', '_half_open_calls', '_lock', '_max_fails', '_max_half_open_calls', '_opened', '_reset', '_unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
@@ -107,8 +107,8 @@ class DynamicThrottle:
         C = getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
-        if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates')
-        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand; self.rate = init_rate; self.reset()
+        if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates applying bounds')
+        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf, self._rate = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate; self.reset()
     @property
     def rate(self): return self._rate
     @rate.setter

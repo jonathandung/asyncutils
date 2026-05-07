@@ -19,9 +19,10 @@ Basic Customization
 An extensible, two-part configuration system is in place. The first part is static/frozen, detailed below.
 
 It includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation
-using the ``AUTILSCFGPATH`` environment variable (all uppercase for Windows support), which should point to an absolute path to a configuration .json
-or .jsonl file. ``AUTILSCFGPATH`` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will
-be thrown as appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types.
+using the ``AUTILSCFGPATH`` environment variable (all uppercase for Windows support), which should point to an absolute path to a configuration file.
+``AUTILSCFGPATH`` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown as
+appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types, but you may see
+raw :exc:`ModuleNotFoundError`'s if the library cannot be located or executed.
 
 Automatic discovery of config files, as in other libraries or command-line tools, is not supported, because there is no standard location for it and
 determining a precedence for the different allowed file extensions would be arbitrary, non-trivial and difficult to maintain.
@@ -38,30 +39,40 @@ New options will likely be added in the future, but every current option is cons
 The above keys have a near one-to-one correspondence with the command line arguments, as the comments below each key explain. Use ``asyncutils -?``
 to see detailed CLI usage.
 
-JSON and TOML are the native formats of the configuration file, the parsers for which come with the standard library.
-YAML, JSON5, JSONC and Hjson formats are also supported for the configuration file, though the corresponding pip libraries must be installed.
+The config file can be written in the below formats, listed with the third-party libraries they require if any:
 
-.. attention::
-
-  To write the config in each format, adhere to the analog of the nested dictionary structure shown in format.json5 in the chosen language.
+====== ============== ================== ===========
+Format File extension PyPI package name  Module name
+JSON   .json                             json
+TOML   .toml                             tomllib
+YAML   .yaml, .yml    PyYAML             yaml
+JSON5  .json5         json5              json5
+JSONC  .jsonc         json-with-comments jsonc
+Hjson  .hjson         hjson              hjson
+XML    .xml           xmltodict          xmltodict
 
 .. danger::
 
   Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
+  Be especially careful with XML; see `the CVE database <https://www.cve.org/CVERecord>`__ for details.
   Thus, write your configs yourself to avoid malicious inputs exhausting computing resources.
 
 .. important::
 
-  INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
+  To write the config in each format, adhere to the analog of the nested dictionary structure shown in format.json5 in the chosen language.
 
 .. warning::
 
   Though the exact parsing method used by this module may allow object nesting deviating from that shown, you should still strictly adhere to it.
 
+.. note::
+
+  INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
+
 .. tip::
   :collapsible:
 
-  To ensure all formats can be parsed, install the ``pconf`` extra.
+  To ensure all formats can be parsed, install the ``pconf`` :term:`extra`.
 
 Contextual "Constants"
 ----------------------
@@ -98,4 +109,5 @@ For more detailed documentation on context usage, see the :mod:`context` page.
 .. tip::
   :collapsible:
 
-  You can think of the :class:`~asyncutils.context.Context` class as similar to :class:`decimal.Context`, but with different methods and attributes.
+  You can think of the :class:`~asyncutils.context.Context` class as similar to :class:`decimal.Context`, but with different methods and attributes
+  and customizing an entire module insteasd of quirks of the operations of a single class.

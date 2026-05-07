@@ -26,13 +26,12 @@ def transient_block_from_loop(loop, *, threadsafe=False): return partial(transie
 def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     audit('asyncutils.util.sync_await', fullname(aw)); f = loop is None
     if (c := getc()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call util.sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
-    if loop is (loop := _get_running_loop()):
-        if f: loop = new_event_loop(); set_event_loop(loop)
-        if not loop.is_running():
-            try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
-            finally:
-                if f: loop.stop(); loop.close(); set_event_loop(None)
-    return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)
+    if f and (loop := _get_running_loop()) is None: loop = new_event_loop(); set_event_loop(loop)
+    if loop.is_running():
+        return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)
+    try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
+    finally:
+        if f: loop.stop(); loop.close(); set_event_loop(None)
 def semaphore(bounded=False, workers=None): return (BoundedSemaphore if bounded else Semaphore)(getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
 def lockf(f, /, lf=Lock, _lc={}): # noqa: B006
     if (l := _lc.get(i := id(f))) is None: _lc[i] = l = lf()

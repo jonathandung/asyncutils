@@ -40,7 +40,7 @@ class UniqueResourceGuard(ResourceGuard):
 class Releasing:
     '''An async context manager that releases the given lock on entry and re-acquires it on exit.'''
     def __init__(self, lock: AsyncLockLike[Any], /) -> None: ...
-    async def __aenter__(self) -> Any: '''Return the return value of the release method of the lock, awaited if it is a coroutine.'''
+    async def __aenter__(self) -> None: '''Call the release method of the lock, awaiting if it returns a coroutine.'''
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
