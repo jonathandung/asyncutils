@@ -37,7 +37,7 @@ class AsyncLRUCache(LoopContextMixin):
     '''An async-compatible LRU cache with optional TTL. Use as a context manager and decorator.'''
     def __init__(self, maxsize: int|None=..., ttl: float|None=..., *, typed: bool=..., timer: Timer=...):
         '''| `maxsize` (optional): Maximum number of entries to cache; default :const:`context.ASYNC_LRU_CACHE_DEFAULT_MAX_SIZE`.
-        | `ttl` (optional): Time-to-live in seconds. If None, TTL is disabled.
+        | `ttl` (optional): Time-to-live of each entry in seconds. If `None`, TTL is disabled.
         | `typed` (optional): Whether to cache different argument types separately.'''
     @overload
     def __call__[T: Coroutine[Any, Any, Any], **P](self, f: Callable[P, T], /) -> Callable[P, T]: ...

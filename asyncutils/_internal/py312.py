@@ -1,6 +1,6 @@
 from asyncutils._internal.helpers import fullname, subscriptable, verify_compat
 verify_compat('3.12')
-from asyncutils import LoopBoundMixin
+from asyncutils.mixins import LoopBoundMixin
 import _heapq as H
 from _collections import deque # type: ignore[import-not-found]
 from asyncio.locks import Event

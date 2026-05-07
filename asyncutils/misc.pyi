@@ -14,4 +14,6 @@ class StateMachine:
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
-async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]: '''`n`, which defaults to :const:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently running awaitables, whereas `ret_exc` is passed to :func:`asyncio.gather` as `return_exceptions`.'''
+async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
+    '''| `n`, which defaults to :const:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently running awaitables.
+    | `ret_exc` is passed to :func:`asyncio.gather` as the `return_exceptions` argument.'''

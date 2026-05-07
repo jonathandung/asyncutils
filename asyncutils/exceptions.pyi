@@ -70,6 +70,7 @@ class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     def __new__(cls, exc: E) -> Self: ...
     @overload
     def __new__(cls, exc: None=...) -> Self: '''Construct the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
+    def __init__(self) -> None: ...
     @property
     def exc(self) -> E: '''The exception that occurred, determined by the raising scope by default.'''
     @property

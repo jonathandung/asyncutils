@@ -2,7 +2,7 @@
 from ._internal.types import CanWriteAndFlush, DumpType, Openable
 from _collections_abc import Callable, Sequence
 from typing import Any
-__all__ = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'print_cfg_json_format', 'print_cmd_help'
+__all__ = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'
 def loadf(path: Openable, ext: str=..., /) -> dict[str, Any]: '''Load the file at `path`, with the specified file extension if indeducible from the file name, into a dictionary using the correct library.'''
 def json_to_argv(path: Openable, /) -> list[str]:
     '''| Return a list of strings representing the command-line arguments for this module from `path` to the corresponding json file, with as little items as possible.

@@ -1,19 +1,17 @@
 __lazy_modules__ = frozenset(('asyncutils',))
-from asyncutils import CRITICAL, Critical, event_loop, aiter_to_gen, new_eager_tasks, safe_cancel_batch, wrap_in_coro
+from asyncutils import CRITICAL, Critical, aiter_to_gen, new_eager_tasks, safe_cancel_batch, wrap_in_coro
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import compete_all as __all__
 import asyncio as A
 from asyncio.staggered import staggered_race
-from sys import audit, exc_info
-async def first_completed(*C, ret_exc=False, timeout=None, loop=None, _=A):
-    audit('asyncutils.compete.first_completed/start', L := len(C)); c = None
-    if loop is None: loop = (c := event_loop.from_flags(0)).__enter__()
+from sys import audit
+async def first_completed(*C, ret_exc=False, timeout=None, loop=None, _=A, f=H.get_loop_and_set):
+    audit('asyncutils.compete.first_completed/start', L := len(C))
+    if loop is None: loop = f()
     try:
         async with _.timeout(timeout):
-            for F in (await _.wait(t := tuple(map(loop.create_task, C)), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := F.exception()) else F.result()
-    finally:
-        if c: c.__exit__(*exc_info())
-        audit('asyncutils.compete.first_completed/end', L); await safe_cancel_batch(t)
+            for F in (await _.wait(t := tuple(new_eager_tasks(*C)), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := F.exception()) else F.result()
+    finally: audit('asyncutils.compete.first_completed/end', L); await safe_cancel_batch(t)
 async def race_with_callback(*C, winner=None, loser=None, timeout=None, _=A):
     if not C: raise TypeError('pass in at least one coroutine to race_with_callback')
     audit('asyncutils.compete.race_with_callback/start', L := len(C)); d, p = await _.wait(new_eager_tasks(*C), return_when='FIRST_COMPLETED', timeout=timeout)

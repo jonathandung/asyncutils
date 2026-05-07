@@ -103,7 +103,9 @@ The extras are listed below for reference:
 * json5: The JSON5 parser, specifically used to read format.json5 in tests.
 * pub: Dependencies for building and publishing packages to PyPI
 * test: Test dependencies, including pytest and related plugins
-* tools: Development tools dependencies, including mypy and uv
+
+.. version-removed:: 0.9.2
+  The tools extra. Install uv yourself if you wish.
 
 .. version-added:: 0.9.2
   The executors extra.

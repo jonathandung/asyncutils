@@ -92,6 +92,8 @@ async def sleep_forever() -> NoReturn: '''A coroutine that only completes when a
 dummy_task: GeneratorCoroutine[None, Any, Any]
 '''An awaitable object that completes immediately and is also an exhausted generator.
 
-.. note:: This is achieved by setting the :const:`inspect.CO_ITERABLE_COROUTINE` flag on the code of a generator function.'''
+.. admonition:: Implementation detail
+
+  This is achieved by setting the :const:`inspect.CO_ITERABLE_COROUTINE` flag on the code of a generator function.'''
 yield_to_event_loop: Awaitable[None]
 '''An awaitable object that yields control to the event loop for one iteration when awaited.'''

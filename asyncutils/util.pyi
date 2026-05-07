@@ -27,7 +27,7 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
     '''| Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     | Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
     | This is as opposed to :meth:`~asyncio.base_events.BaseEventLoop.create_task`, which only takes coroutines.'''
-def new_eager_tasks[T](*coro: Coroutine[Any, Any, T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
+def new_eager_tasks[T](*aws: Awaitable[T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under a new event loop in order.'''
 def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop `loop` when required or creating when necessary.'''
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''A version of :func:`to_sync` that is a decorator factory, returning its partial under `loop=loop`.'''
 def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object `aw` under the given event loop `loop` with timeout `timeout`. It is preferred to use :func:`asyncio.runners.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
