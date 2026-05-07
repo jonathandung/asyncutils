@@ -20,10 +20,16 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
+### [0.9.3] - 2026-05-09
+
+Added some tests.
+
+## Above versions are unreleased
+
 ### [0.9.2] - 2026-05-05; newest
 
 Created symbolic links in docs directory linking to root .md files; fixed some bugs; respected some more environment variables and documented this
-behaviour; completed benchmarks; added myst_parser as an optional dependency.
+behaviour; completed benchmarks; added myst_parser as an optional dependency; bumped some dependencies; added some examples.
 
 ### [0.9.1] - 2026-05-01
 
