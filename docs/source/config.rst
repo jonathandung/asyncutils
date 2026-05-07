@@ -43,6 +43,7 @@ The config file can be written in the below formats, listed with the third-party
 
 ====== ============== ================== ===========
 Format File extension PyPI package name  Module name
+====== ============== ================== ===========
 JSON   .json                             json
 TOML   .toml                             tomllib
 YAML   .yaml, .yml    PyYAML             yaml
@@ -50,6 +51,7 @@ JSON5  .json5         json5              json5
 JSONC  .jsonc         json-with-comments jsonc
 Hjson  .hjson         hjson              hjson
 XML    .xml           xmltodict          xmltodict
+====== ============== ================== ===========
 
 .. danger::
 
