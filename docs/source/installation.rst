@@ -75,7 +75,9 @@ other installation pathways:
   pipenv install py-asyncutils==0.9.2
 
 .. version-added:: 0.9.0
-  Created a Makefile to simplify development chores. We will never add setup.py, since only pyproject.toml is the modern way to go.
+  Created a Makefile to simplify development chores.
+
+.. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m``.
@@ -104,13 +106,13 @@ The extras are listed below for reference:
 * tools: Development tools dependencies, including mypy and uv
 
 .. version-added:: 0.9.2
-  The executors group.
+  The executors extra.
 
 .. version-added:: 0.9.1
-  The ptw group.
+  The ptw extra.
 
 .. version-removed:: 0.9.1
-  The dlint group, since doc8 no longer appears to be maintained.
+  The dlint extra, since doc8 no longer appears to be maintained.
 
 .. version-changed:: 0.9.0
-  Completely reorganized optional dependencies, moving them around among groups. Still no strictly required dependencies!
+  Completely reorganized optional dependencies, moving them around among groups.

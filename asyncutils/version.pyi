@@ -56,7 +56,7 @@ class VersionInfo(str): # noqa: FURB189
     def __sub__(self, other: Self, /) -> VersionDelta: '''Return this version decremented by `n` patches or the delta `delta`, or the delta between `self` and `other`.'''
     def __setattr__(self, name: str, value: Any, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: str, /) -> str:
-        r"""Format specification and corresponding return value: (using version 123.4.0 as example)
+        r"""Format specification and corresponding return value: (using version 123.4.0 as example):
         * x, hex: `'0x7b0400'`
         * o, oct: `'0o36602000'`
         * b, bin: `'0b11110110000010000000000'`

@@ -38,9 +38,5 @@ The format of each log message as printed is "<asctime> - asyncutils - <levelnam
 
 .. note::
 
-  This allows deterministic parsing of a log file, but is definitely not meant.
-
-.. tip::
-  :collapsible:
-
-  Instead, custom handlers should be attached to the logger using the :mod:`logging` API.
+  Though the format is stable and allows deterministic parsing of a log file, it is recommended to attach custom handlers to the logger using the
+  :mod:`logging` API to achieve the same effect.
