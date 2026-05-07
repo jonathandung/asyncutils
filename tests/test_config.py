@@ -8,3 +8,6 @@ def test_mod():
     assert debug.orig_name == 'WARNING'
     assert logging_to == 'STDERR'
     assert not get_past_logs()
+    set_logger_level(20)
+    assert debug.level == 20
+    set_logger_level(30)

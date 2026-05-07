@@ -18,11 +18,21 @@ class event_loop: # noqa: N801
             with _: L._scheduled.clear()
             return L
         return factory()
-    def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep|self._INTERNAL_MASK
+    def clear_flags(self, mask_to_keep=None): self._flags &= (getcontext().EVENT_LOOP_BASE_FLAGS if mask_to_keep is None else mask_to_keep)|self._INTERNAL_MASK
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
-    def from_flags(cls, flags, /, _=c): r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
-    def __new__(cls, /, *, dont_release_loop_on_finalization=False, silent_on_finalize=False, check_running=False, close_existing_on_exit=False, dont_always_stop_on_exit=False, dont_close_created_on_exit=False, cancel_all_tasks=False, keep_loop=False, suppress_runtime_errors=False, fail_silent=False, dont_allow_reuse=False, dont_reuse=False, dont_attempt_enter=False, attempt_aenter=False, suppress_inner_exit_on_runtime_error=False, suppress_inner_aexit_on_runtime_error=False): return cls.from_flags(dont_release_loop_on_finalization|silent_on_finalize<<1|check_running<<2|close_existing_on_exit<<3|dont_always_stop_on_exit<<4|dont_close_created_on_exit<<5|cancel_all_tasks<<6|keep_loop<<7|suppress_runtime_errors<<8|fail_silent<<9|dont_allow_reuse<<10|dont_reuse<<11|dont_attempt_enter<<16|attempt_aenter<<17|suppress_inner_exit_on_runtime_error<<18|suppress_inner_aexit_on_runtime_error<<19) # noqa: PLR0913
+    def from_flags(cls, flags, /, _=c, m=-0xf1000):
+        if flags&m: raise OverflowError(f'{cls.__qualname__}: flags value {flags:#x} has forbidden bits set')
+        r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
+    def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'check_running', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
+        F, p, s = getcontext().EVENT_LOOP_BASE_FLAGS, k.pop, 1
+        for f in _:
+            if (x := p(f, None)) is None: ...
+            elif x: F |= s
+            else: F &= ~s
+            s <<= 1
+        if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}')
+        return cls.from_flags(F)
     def __enter__(self, _='event_loop context already entered'):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop

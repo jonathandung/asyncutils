@@ -12,8 +12,8 @@ build:
       - cp SUPPORT.md docs/source/support.md
       - cp EXAMPLES.md docs/source/examples.md
       - cp ROADMAP.md docs/source/roadmap.md
-      - cp README.md docs/source/readme.md
 formats:
+  - htmlzip
   - pdf
 python:
   install:

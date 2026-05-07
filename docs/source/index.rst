@@ -32,7 +32,6 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   contributing
   support
   changelog
-  readme
   roadmap
 
 .. toctree::
@@ -45,6 +44,14 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   PDF Documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
 
 .. note:: This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
+
+.. version-changed:: 0.9.2
+
+  Started releasing documentation in pdf and htmlzip formats.
+
+.. version-changed:: 0.8.18
+
+  Completed the backport of the project to Python 3.12 and Python 3.14.
 
 .. hint::
   :collapsible:

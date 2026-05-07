@@ -12,7 +12,7 @@ _s = object()
 _f = '',
 class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
-    if C.basic_repl: CAN_USE_PYREPL = False
+    if C.basic_repl: CAN_USE_PYREPL = False # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}): # noqa: B006
         if (t := type(self)) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
@@ -26,11 +26,11 @@ class ConsoleBase(B):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
         loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', local_exit=self.default_local_exit); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __spec__=__spec__, __annotations__={})
-        if (H := S.hexversion) > 0x30e00a0: d['__annotate__'] = g('__annotate__')
+        if (H := S.hexversion) > 0x30e00a0: d['__annotate__'] = g('__annotate__') # cover: off
         if H < 0x30f00a1:
             for k in _: d[k] = g(k)
         elif H < 0x30f00f0:
-            for k, v in _.items(): d[k] = getattr(__spec__, v)
+            for k, v in _.items(): d[k] = getattr(__spec__, v) # cover: on
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
         elif h is not None: raise TypeError(f'asyncutils.console.ConsoleBase: locals handler for module {modname!r} should be callable, not {fullname(h)!r}')
     def refresh(self):
@@ -57,7 +57,7 @@ class ConsoleBase(B):
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # noqa: B008
         x = False; self.write_special(self.BANNER if banner is None else banner)
         try:
-            if p and not S.flags.ignore_environment:
+            if p and not S.flags.ignore_environment: # pragma: no cover
                 with __import__('tokenize').open(p) as f:
                     if _q: S.stdout, _o = _o, S.stdout
                     S.audit('cpython.run_startup', p); exec(compile(f.read(), p, 'exec'), self.locals) # noqa: S102
@@ -72,7 +72,7 @@ class ConsoleBase(B):
     def write_special(self, msg): self.write(msg)
     def interrupt(self, _=_f, m='\nKeyboardInterrupt\n'):
         if not self.CAN_USE_PYREPL: self.write(m)
-        elif (x := __import__('_pyrepl.simple_interact', fromlist=_)._get_reader().threading_hook): x.add('')
+        elif callable(f := getattr(__import__('_pyrepl.readline', fromlist=_)._get_reader().threading_hook, 'add', None)): f('')
         self.refresh()
     def memoryerror(self):
         if (m := self.memory_errors) == self._max_memerrs: return self.set_return_code(f'ERROR: Exceeded MemoryError threshold: {m}\n')
@@ -93,11 +93,11 @@ class ConsoleBase(B):
         self.prehook(max_memerrs); S.audit(f'{fullname(self)}.run', id(self)); l = self._loop
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = S.stderr.write
-            if callable(h := getattr(S, i := '__interactivehook__', None)):
+            if callable(h := getattr(S, i := '__interactivehook__', None)): # pragma: no cover
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
                 except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
-                if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == 'register_readline'):
+                if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == h.__qualname__ == 'register_readline'):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete)
                     except ImportError: w('Failed to install readline completer\n')
             elif h is not None: w('Removing sys.__interactivehook__ since it is not callable\n'); delattr(S, i)

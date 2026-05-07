@@ -62,14 +62,15 @@ Some keys can have various types, as detailed by the comments attached. */
       }
     },
     base: {
+      event_loop_base_flags: 0,
+      aiter_to_gen: {
+        default_allow_futures: true,
+        default_strict: false
+      },
       iter_to_agen: {
         default_may_create_executor: false,
         default_strict: false,
         default_use_existing_executor: false
-      },
-      aiter_to_gen: {
-        default_allow_futures: true,
-        default_strict: false
       }
     },
     buckets: {
@@ -183,6 +184,7 @@ Some keys can have various types, as detailed by the comments attached. */
     util: {
       dual_context_manager: {
         default_may_create_executor: false,
+        default_strict: false,
         default_use_existing_executor: true
       },
       semaphore_default_value: 1

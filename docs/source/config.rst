@@ -42,7 +42,6 @@ JSON and TOML are the native formats of the configuration file, the parsers for 
 YAML, JSON5, JSONC and Hjson formats are also supported for the configuration file, though the corresponding pip libraries must be installed.
 
 .. attention::
-  :collapsible:
 
   To write the config in each format, adhere to the analog of the nested dictionary structure shown in format.json5 in the chosen language.
 

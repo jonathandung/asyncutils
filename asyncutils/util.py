@@ -32,8 +32,7 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
             try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
             finally:
                 if f: loop.stop(); loop.close(); set_event_loop(None)
-    async def wrapper(): return await aw
-    return run_coroutine_threadsafe(wrapper(), loop).result(timeout)
+    return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)
 def semaphore(bounded=False, workers=None): return (BoundedSemaphore if bounded else Semaphore)(getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
 def lockf(f, /, lf=Lock, _lc={}): # noqa: B006
     if (l := _lc.get(i := id(f))) is None: _lc[i] = l = lf()
@@ -80,12 +79,12 @@ async def safe_cancel(t, /):
     try: await F
     finally: t.remove_done_callback(f)
 class DualContextManager:
-    __slots__ = '_aentered', '_ce', '_entered', '_gen', '_ue'
-    def __init__(self, g, u, c, /): self._gen, self._ce, self._ue = g, c, u; self._entered = self._aentered = False
+    __slots__ = '_aentered', '_ce', '_entered', '_gen', '_st', '_ue'
+    def __init__(self, /, *_): self._gen, self._ce, self._ue, self._st = _; self._entered = self._aentered = False
     def __enter__(self):
         if self._aentered: raise RuntimeError('context manager already entered asynchronously')
         if self._entered: raise RuntimeError('context manager already entered')
-        try: self._gen = g = aiter_to_gen(self._gen, strict=False, use_futures=True); self._entered = True; return next(g)
+        try: self._gen = g = aiter_to_gen(self._gen, strict=self._st, use_futures=True); self._entered = True; return next(g)
         except StopIteration: raise RuntimeError("generator didn't yield") from None
     def __exit__(self, t, v, b, /):
         if self._aentered: raise RuntimeError('cannot exit async context manager synchronously')
@@ -108,7 +107,7 @@ class DualContextManager:
     def __aenter__(self):
         if self._aentered: raise RuntimeError('async context manager already entered')
         if self._entered: raise RuntimeError('async context manager already entered synchronously')
-        try: self._gen = g = iter_to_agen(self._gen, strict=False, use_existing_executor=self._ue, create_executor=self._ce); self._aentered = True; return anext(g)
+        try: self._gen = g = iter_to_agen(self._gen, strict=self._st, use_existing_executor=self._ue, create_executor=self._ce); self._aentered = True; return anext(g)
         except StopAsyncIteration: raise RuntimeError("async generator didn't yield") from None
     async def __aexit__(self, t, v, b, /):
         if self._entered: raise RuntimeError('cannot exit sync context manager asynchronously')
@@ -128,8 +127,8 @@ class DualContextManager:
             raise
         try: raise RuntimeError("async generator didn't stop after athrow")
         finally: await g.aclose()
-def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor=None, create_executor=None):
-    if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor)
-    return wraps(f)(lambda *a, **k: _(f(*a, **k), getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR if create_executor is None else create_executor))
+def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor=None, create_executor=None, strict=None):
+    if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor, strict=strict)
+    return wraps(f)(lambda *a, **k: _(f(*a, **k), getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR if create_executor is None else create_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_STRICT if strict is None else strict))
 patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None'))
 del DualContextManager

@@ -5,7 +5,7 @@ from asyncutils._internal.unparsed import N, c
 from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
 if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; p.parse_args(namespace=N); del p
-def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # pragma: no cover # noqa: B008,PLR0912
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008,PLR0912 # pragma: no cover
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -80,7 +80,7 @@ match logging_to := g('log_to'):
 if M: s.write('ERROR: Failed to create log file; falling back to stderr\n')
 l.addHandler(_ := L.StreamHandler(s))
 _.setFormatter(L.Formatter('%(asctime)s - asyncutils - %(levelname)s - %(message)s'))
-(set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))((D := 10)*min(max(3-N.V+N.Q, 1), 5))
+(set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 class debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
@@ -88,13 +88,13 @@ class debugging:
     @property
     def entered(self): return self.orig_level is not None
     def __init__(self): self.orig_level = self.orig_name = None
-    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l, _d=D):
+    def __enter__(self, _s=set_logger_level, _m=L._levelToName.__getitem__, _l=l, _d=10):
         if self.entered: _l.warning('config.debugging: context manager already entered')
         else:
             self.orig_name, self.orig_level = _m(l := _l.level), l; _s(_d)
             if l != _d: _l.debug('config.debugging: debug mode entered')
         return self
-    def __exit__(self, /, *_, _s=set_logger_level, _l=l, _L=D):
+    def __exit__(self, /, *_, _s=set_logger_level, _l=l, _L=10):
         if not self.entered: return _l.warning('config.debugging: context manager not entered')
         if (l := self.orig_level) != _l.level == _L: _l.debug('config.debugging: exiting debug mode'); _s(l)
         else: _l.warning('config.debugging: user already exited debug mode; original level was %s', self.orig_name)
@@ -112,4 +112,4 @@ def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, D, M, N, S, f, m, r, s, b, P, g, k, l, E, c, d # noqa: F821
+del _, e, L, M, N, S, f, m, r, s, b, P, g, k, l, E, c, d # noqa: F821

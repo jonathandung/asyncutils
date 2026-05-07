@@ -25,7 +25,7 @@ class AsyncProperty:
     def __set_name__(self, typ, name, /): self._name, self._cls = name, typ
     def __repr__(self): return f'{fullname(self)}({self.fget!r}, {self.fset!r}, {self.fdel!r}, doc={self.__doc__!r}, strict={self._strict})'
     def _raise_for_unbound(self):
-        if not all(hasattr(self, _) for _ in ('__name__', '_cls')): raise TypeError(f'instance of {type(self)._name} is not bound to a class')
+        if not all(hasattr(self, _) for _ in ('_name', '_cls')): raise TypeError(f'instance of {type(self)._name} is not bound to a class')
     def _get_helper(self, msg):
         if self._strict: raise AttributeError(msg, name=self._name)
         return self
