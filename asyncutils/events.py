@@ -36,7 +36,7 @@ class EventWithValue(EventMixin):
             f, w = (t := []).append, self._waiters
             for _ in w: f(_) if _.done() else _.set_result(value)
             w.difference_update(t)
-    def remove_done_waiters(self): (W := self._waiters).difference_update(filter(lambda w: w.done(), W))
+    def remove_done_waiters(self, _=__import__('_operator').methodcaller('done')): (W := self._waiters).difference_update(filter(_, W))
     def set_once(self, value): v = self._value; self.set(value); self.set(v)
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):

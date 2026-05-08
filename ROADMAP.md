@@ -2,7 +2,7 @@
 
 This file provides an overview of the direction towards which this project is heading.
 
-Current version: 0.9.2
+Current version: 0.9.3
 
 ## [1.0] - 2026-06
 
@@ -18,14 +18,14 @@ Current version: 0.9.2
 
 - Ramp up coverage to 75%
 
-## [3.0] - 2027-02 or before
+## [3.0] - 2027-04 or before
 
 - Comprehensive bugfixes
 
 ## [3.x]
 
 - Major feature additions, with more focus on low-level stuff
-- Publish docker images
+- Possibly publish docker images if there is demand
 - Deprecate <=3.12 compatibility module
 
 ## [4.0] - 2027-10

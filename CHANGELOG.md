@@ -20,11 +20,9 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.3] - 2026-05-10
+### [0.9.3] - 2026-05-10; unreleased
 
-Added some tests.
-
-## Above versions are unreleased
+Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable.
 
 ### [0.9.2] - 2026-05-07; newest
 
@@ -39,6 +37,7 @@ option; started using furo theme.
 ### [0.9.0] - 2026-04-27
 
 Added `__lazy_modules__` attribute to submodules where appropriate; added some iteration, functional programming and context management utilities.
+Declared end of life for all alpha versions.
 
 #### BREAKING
 
@@ -271,6 +270,7 @@ Submodules:
   - throttle
   - debounce
   - measure
+  - measure2
   - benchmark
   - star
   - unstar
@@ -411,11 +411,9 @@ Submodules:
 
 - tools
 
-  Constants:
-  - ext2modname
-
   Functions:
 
+  - loadf
   - json_to_argv
   - json_to_argstr
   - argv_to_json
@@ -546,7 +544,7 @@ Created .dockerignore, .github/workflows/python-package.yaml, CODE_OF_CONDUCT.md
 
 ### [0.8.1] - 2026-03-06
 
-Created pyproject.toml, .pypirc, and SECURITY.md.
+Created pyproject.toml and SECURITY.md.
 
 ### [0.8.0] - 2026-03-06
 

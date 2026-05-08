@@ -5,10 +5,10 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log, patch as P
 from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import func_all as __all__
-from asyncio import CancelledError, Lock, eager_task_factory, iscoroutine, sleep, wait_for
+from asyncio import CancelledError, Lock, eager_task_factory, gather, iscoroutine, sleep, wait_for
 from collections import deque, namedtuple
 from functools import partial, wraps
-from itertools import count
+from itertools import count, repeat
 from sys import audit
 from time import perf_counter
 def acompose(*F, wrap_last=True):
@@ -40,17 +40,14 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                 t = timer()
                 try: await f(*supplied_args, *a, **(supplied_kwargs or {}), **k)
                 except CRITICAL: raise Critical
-                except BaseException:
+                except:
                     if stop_on_exc:
                         if stop_when.done(): return stop_when.result()
-                        if verbose: raise
                         break
                     (log.error if verbose else log.warning)('func.every: error in periodic coroutine %s on iteration %d', n, i, exc_info=True)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
-                    if stop_on_exc:
-                        if verbose: raise
-                        break
+                    if stop_on_exc: break
                     (log.info if verbose else log.debug)('func.every: future to stop periodic coroutine %s was cancelled on iteration %d', n, i, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
@@ -72,17 +69,14 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
                 t = timer()
                 try: await f(self, *supplied_args, *a, **(supplied_kwargs or {}), **k)
                 except CRITICAL: raise Critical
-                except: # noqa: E722
+                except:
                     if stop_on_exc:
                         if stop_when.done(): return stop_when.result()
-                        if verbose: raise
                         break
                     (log.error if verbose else log.warning)('func.everymethod: error in periodic coroutine %s on iteration %d', n, i, exc_info=True)
                 try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
                 except CancelledError:
-                    if stop_on_exc:
-                        if verbose: raise
-                        break
+                    if stop_on_exc: break
                     (log.info if verbose else log.debug)('func.everymethod: future to stop periodic coroutine %s was cancelled on iteration %d', n, i, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
             else:
@@ -92,19 +86,19 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
             if not q: return default
         return wraps(f)(wrapper)
     return dec
-def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=perf_counter, ns=False):
+def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=perf_counter, ns=False, _='nano', c='func.timer: function %s finished in %.*f %sseconds.', d='func.timer: received expected error from function %s after %.*f %sseconds: %s'):
     if precision is None: precision = getcontext().TIMER_DEFAULT_PRECISION-ns*9
     async def wrapper(*a, **k):
         s = timer()
         try:
             r = await f(*a, **k); e = timer()-s
-            if should_log: log.info('func.timer: function %s executed in %.*f %sseconds.', fullname(f), precision, e, 'nano' if ns else '')
+            if should_log: log.info(c, fullname(f), precision, e, _ if ns else '')
             return r, e
         except CRITICAL: raise Critical
-        except expected as _:
+        except expected as b:
             e = timer()-s
-            if should_log: log.warning('func.timer: function %s encountered expected error after %.*f %sseconds: %s', fullname(f), precision, e, 'nano' if ns else '', _, exc_info=True)
-            return wrap_exc(_), e
+            if should_log: log.warning(d, fullname(f), precision, e, _ if ns else '', b, exc_info=True)
+            return wrap_exc(b), e
     return wraps(f)(wrapper)
 def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=(_ := lambda *_: None), on_success=_, random=_randinst.random):
     c = getcontext()
@@ -154,13 +148,17 @@ def iterf(n, /):
             return x
         return wraps(f)(wrapper)
     return dec
-async def measure(f, /, timer=perf_counter): s = timer(); return await f(), timer()-s
-async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func')):
-    c = getcontext()
+async def measure(f, /, *, timer=perf_counter): s = timer(); return await f(), timer()-s
+async def measure2(f, /, **k): return (await measure(f, **k))[1]
+async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func'), *, sequential=None):
+    c, g = getcontext(), measure2.__get__(f)
+    if sequential is None: sequential = c.BENCHMARK_DEFAULT_SEQUENTIAL
     if times is None: times = c.BENCHMARK_DEFAULT_TIMES
     if warmup is None: warmup = c.BENCHMARK_DEFAULT_WARMUP
-    for _ in range(warmup): await f()
-    g = measure.__get__(f); audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [(await g())[1] for _ in range(times)]), max(t), S := sum(t), S/times, T)
+    if sequential:
+        for _ in repeat(None, warmup): await f()
+    else: await gather(*(f() for _ in repeat(None, warmup)))
+    audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in range(times)] if sequential else await gather(*(g() for _ in range(times)))), max(t), S := sum(t), S/times, T)
 P.patch_function_signatures((measure, 'f, /, timer={}'), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
@@ -180,4 +178,4 @@ class RateLimited:
         return await f(*a, **k)
     def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r}, lock_impl={fullname(self._lock)})'
     P.patch_classmethod_signatures((__new__, 'f, /, calls, period=None, *, raise_=False, timer={}, lock_impl=None'))
-del _, perf_counter
+del _, perf_counter, P

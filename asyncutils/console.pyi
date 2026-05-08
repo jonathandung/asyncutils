@@ -49,7 +49,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     @property
     def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in :attr:`is_running` for state consistency checks.'''
     @property
-    def is_running(self) -> bool: '''Whether the console is running. The default implementation uses :attr:`_internal_is_running` only.'''
+    def is_running(self) -> bool: '''Whether the console is running. The default implementation simply returns :attr:`_internal_is_running`.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
         '''| `loop` (required): Event loop used by console interaction.
         | `mod`: The module to import within the console, determined by the subclass name by default.
@@ -107,5 +107,5 @@ class AsyncUtilsConsole(ConsoleBase):
     def prehook(self, max_memerrs: int) -> None: '''Ensures the console will be the only one running.'''
     def posthook(self) -> None: '''Ensures that the console is not left running after unset.'''
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: ...
-    def write_special(self, msg: str) -> None: '''Writes msg to stderr only if the quiet flag is not set.'''
+    def write_special(self, msg: str) -> None: '''Writes `msg` to stderr if and only if the quiet flag is not set.'''
     def showtraceback(self) -> None: ...

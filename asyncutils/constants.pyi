@@ -11,7 +11,7 @@ POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]
 '''Equivalent to `frozenset(POSSIBLE_EXECUTORS)`. Allows for faster membership testing.'''
 class sentinel_base:
-    '''Base class for sentinel values.'''
+    '''Base class for sentinel values. To support versions below Python 3.15, we cannot make use of the built-in :class:`sentinel` type, and this class offers extra methods anyway.'''
     def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change :class:`~typing.NoReturn` to :class:`~typing.Self`) if and only if your subclass can be instantiated by the user.'''
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
@@ -30,9 +30,9 @@ class sentinel_base:
 RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
 SYNC_AWAIT: Final[SyncAwaitType]
-'''A possible value to :attr:`exceptions.Deadlock.noticer`, indicating the deadlock situation was found by :func:`util.sync_await`.'''
+'''A possible value of :attr:`exceptions.Deadlock.noticer`, indicating the deadlock situation was found by :func:`util.sync_await`.'''
 _NO_DEFAULT: Final[NoDefaultType]
-'''Users are not meant to interact with this directly; only here for completeness.'''
+'''.. warning:: This constant is unstable. Users are not meant to interact with this directly.'''
 CLOSED: Final[int]
 '''The closed state of a circuit breaker.'''
 HALF_OPEN: Final[int]

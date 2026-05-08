@@ -4,7 +4,7 @@ from _collections_abc import Awaitable, Callable, Coroutine, Iterable, Mapping
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from typing import Any, Literal, Self, overload
-__all__ = 'RateLimited', 'acompose', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'iterf', 'measure', 'retry', 'star', 'throttle', 'timer', 'unstar'
+__all__ = 'RateLimited', 'acompose', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'unstar'
 def acompose(*funcs: Callable[..., Any], wrap_last: bool=...) -> Callable[..., Any]: '''Compose multiple functions. If the result of a function is a coroutine, await it before passing it to the next. Begin from the rightmost function, which can take variadic parameters, and then pipe its return value through as a single argument.'''
 @overload
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: ...
@@ -53,8 +53,9 @@ def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: fl
 def throttle(lim: float, timer: Timer=...) -> DecoratorFactoryRV: '''A decorator factory that throttles the wrapped function, such that it can only be called once every `lim` seconds, as determined by `timer`.'''
 def debounce(wait: float) -> DecoratorFactoryRV: '''A decorator factory that debounces the wrapped function, such that it is only called after it has not been called for `wait` seconds.'''
 def iterf[T](n: int, /) -> Callable[[Callable[[T], Awaitable[T]]], Callable[[T], Coroutine[Any, Any, T]]]: '''A decorator factory that applies the decorated function `n` times to its argument.'''
-async def measure[T](f: Callable[[], Awaitable[T]], /, timer: Timer=...) -> tuple[T, float]: '''A simple version of :func:`timer` for functions taking no arguments and returning awaitables.'''
-async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=...) -> BenchmarkResult:
+async def measure[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> tuple[T, float]: '''A simple version of :func:`timer` for functions taking no arguments and returning awaitables.'''
+async def measure2[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> float: '''Only return the time and discard the return value of the function.'''
+async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=..., *, sequential: bool=...) -> BenchmarkResult:
     '''| `f` is the function to benchmark, which should take no arguments and return an awaitable.
     | `times` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
     | `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.'''

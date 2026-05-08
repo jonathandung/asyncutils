@@ -25,18 +25,19 @@ As to how the loquacity and output whereabouts of the logger can be altered, ref
 .. literalinclude:: ../../asyncutils/config.pyi
   :language: python
   :caption: relevant portion of the stub of the :mod:`config` submodule
-  :lines: 9-28,39-
+  :lines: 15-35,46-
   :force:
 
 .. literalinclude:: ../../asyncutils/format.json5
   :language: json5
   :caption: json-based or command-line configuration
-  :lines: 4-13,18-20,27-30,183
+  :lines: 4-13,18-20,27-30,193
   :force:
 
-The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>".
+.. note:: The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>".
 
 .. note::
+  :collapsible: closed
 
-  Though the format is stable and allows deterministic parsing of a log file, it is recommended to attach custom handlers to the logger using the
-  :mod:`logging` API to achieve the same effect.
+  Though the above is stable and allows deterministic parsing of a log file, it is recommended to attach custom handlers to the logger using the
+  :mod:`logging` API instead to achieve the same effect more efficiently and less hackily.

@@ -1,8 +1,8 @@
 def __dir__(_=(__all__ := ('run',))): return _
-def run():
-    import sys as S; S._xoptions['asyncutils_run_as_main'] = True; S.audit('asyncutils.cli.run'); import asyncutils._internal.initialize
+def run(argv=None):
+    import asyncutils as A, asyncutils._internal as I, sys as S; I.parsed.p.parse_args(argv, I.unparsed.N); I.initialize; S.audit('asyncutils.cli.run') # noqa: B018
     try:
-        with asyncutils.event_loop.from_flags(0) as g: return asyncutils.AsyncUtilsConsole(g).run(suppress_asyncio_warnings=True, suppress_unawaited_coroutine_warnings=True, always_run_interactive=len(A := S.orig_argv) == 2 and A[0] == S.executable and A[1].endswith(('/bin/autils.exe', '/bin/asyncutils.exe', r'\Scripts\asyncutils.exe', r'\Scripts\autils.exe'))) # noqa: PLR2004
+        with A.event_loop.from_flags(0) as g: return A.AsyncUtilsConsole(g).run(suppress_asyncio_warnings=True, suppress_unawaited_coroutine_warnings=True, always_run_interactive=len(a := S.orig_argv) == 2 and a[0] == S.executable and a[1].endswith(('/bin/autils.exe', '/bin/asyncutils.exe', r'\Scripts\asyncutils.exe', r'\Scripts\autils.exe'))) # noqa: PLR2004
     except:
-        if asyncutils.pdb: __import__('pdb').post_mortem(); return 1
+        if A.pdb: __import__('pdb').post_mortem(); return 1
         raise

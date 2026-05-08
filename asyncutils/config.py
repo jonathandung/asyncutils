@@ -4,7 +4,6 @@ from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
 from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
-if S._xoptions.get('asyncutils_run_as_main'): from asyncutils._internal.parsed import p; p.parse_args(namespace=N); del p
 def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008,PLR0912 # pragma: no cover
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)

@@ -1,4 +1,5 @@
 '''Miscellaneous helper functions for :mod:`asyncutils` submodules that are not meant to be seen by the user.
+
 .. warning:: These are undocumented and unstable, and will remain so. This stub file exists for the convenience of development only.'''
 from .types import CanClearAndCopy
 from ..config import Executor
@@ -27,6 +28,6 @@ async def simple_wrap[T](aw: Awaitable[T], /) -> T: ...
 class LoopMixinBase:
     @property
     def loop(self) -> AbstractEventLoop: '''The underlying event loop.'''
-    def make[T](self, aw: Awaitable[T]) -> Task[T]: '''Create a :class:`~asyncio.tasks.Task` for the given awaitable that runs in the underlying loop.'''
+    def make[T](self, aw: Awaitable[T], /) -> Task[T]: '''Create a :class:`~asyncio.tasks.Task` for the given awaitable that runs in the underlying loop.'''
     def make_fut(self) -> Future[Any]: '''Create a :class:`~asyncio.futures.Future` attached to the underlying loop.'''
-    def make_multiple[T](self, aws: Iterable[Awaitable[T]]) -> Generator[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.tasks.Task` created for each coroutine in C, in that order.'''
+    def make_multiple[T](self, aws: Iterable[Awaitable[T]], /) -> Generator[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.tasks.Task` created for each coroutine in C, in that order.'''

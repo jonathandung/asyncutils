@@ -11,7 +11,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
     if loop is None: loop = get_loop_and_set()
     a, h = (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(C(s))
     if M.platform == 'win32':
-        if getc() is None: __import__('warnings').warn('signals.wait_for_signal has limited functionality on windows', RuntimeWarning, 2)
+        if getc() is None: __import__('_warnings').warn('signals.wait_for_signal has limited functionality on windows', RuntimeWarning, 2)
         for s in S:
             try: o = _s(s := C(s), h)
             except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s)

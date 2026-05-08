@@ -31,7 +31,7 @@ class Context:
     def replace(self, /, **k): return self.replace_from_dct(k)
     def pprint(self, file=__import__('sys').stdout, *, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True)): print(f'Context(\n {pp.pformat(self.asdict())[1:-1]}\n)', file=file) # pragma: no cover # noqa: B008
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
-    __copy__, __replace__ = copy, replace; P.patch_method_signatures((pprint, 'file={0}, *, pp={0}'), (replace_from_dct, 'd, /'))
+    __copy__, __replace__ = copy, replace; P.patch_method_signatures((pprint, 'file={0}, *, pp={0}'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
 def getcontext(_=_, d=Context()):
     try: return _.get()
     except LookupError: _.set(d); return d
@@ -43,7 +43,7 @@ class localcontext:
     def __init__(self, ctx=None, **k):
         if ctx is None: ctx = getcontext()
         if type(ctx) is not Context: raise TypeError('localcontext: ctx must be an instance of asyncutils.context.Context')
-        self.new_ctx = ctx.replace(**{n.upper(): v for n, v in k.items()})
+        self.new_ctx = ctx.replace_from_dct(k)
     def __enter__(self): self.saved_ctx = getcontext(); setcontext(c := self.new_ctx); return c
     def __exit__(self, /, *_):
         setcontext(self.saved_ctx); del self.saved_ctx

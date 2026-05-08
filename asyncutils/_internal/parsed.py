@@ -40,10 +40,11 @@ elib_single_node: Use executorlib.executor.single.SingleNodeExecutor.
 pebble_thread: Use pebble.pool.thread.ThreadPool.
 pebble_process: Use pebble.pool.process.ProcessPool.
 deadpool: Use deadpool.Deadpool.
-There are some implementations from niche libraries (found on a PyPI-wide search using the keyword "executor") that are intentionally excluded, because they
-either require prior configuration to be useful (as is the case with adaptive-executor), are too small (contextvars-executor), unmaintained (celery-executor),
-too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific backends seldom used for this
-purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified name to -c and bear the consequences.''')
+There are some implementations from niche libraries (found on a PyPI-wide search using the keyword "executor") that are intentionally excluded, since
+they either require prior configuration to be useful (as is the case with adaptive-executor), are too small (contextvars-executor), unmaintained
+(celery-executor), too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific
+backends seldom used for this purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified
+name to -c and bear the potential consequences.''')
 a('-c', '--custom-executor', dest='executor', metavar=j, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
 for _ in C: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')

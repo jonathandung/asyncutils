@@ -12,11 +12,11 @@
 I think it highly unlikely there will be any security vulnerabilities in the near future since this project is should not see much applications in
 related fields, but this is still included for compliance. Please report as described below.
 
-- **Method native to GitHub**
+- GitHub-native method
 
   Go to the [Security tab](https://github.com/jonathandung/asyncutils/security) and click on "Report a vulnerability" in the upper right corner.
 
-- **Via email**
+- Via email
 
   [Send me an email](mailto:jonathandung@yahoo.com).
 

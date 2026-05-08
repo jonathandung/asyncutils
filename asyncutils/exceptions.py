@@ -32,7 +32,7 @@ def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppres
     else: n.extend(notes)
     if cause is None is e.__context__: e.__context__ = context or _()
     else: e.__cause__ = cause
-    e.__suppress_context__ = suppress; return e.with_traceback(traceback)
+    e.__suppress_context__, e.__traceback__ = suppress, traceback; return e
 def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
     if isinstance(e, type): e = e(*a, **k)
     elif a or k: _s_.write('exceptions.raise_exc: no additional arguments were expected\n')

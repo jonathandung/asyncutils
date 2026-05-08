@@ -30,7 +30,7 @@ Next, install py-asyncutils:
 .. code-block:: bash
 
   # recommended: pip
-  pip install py-asyncutils==0.9.2
+  pip install py-asyncutils==0.9.3
   # alternatively, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
@@ -58,21 +58,21 @@ other installation pathways:
 .. code-block:: bash
 
   # pipx:
-  pipx install py-asyncutils==0.9.2
+  pipx install py-asyncutils==0.9.3
   # conda:
-  conda install -c conda-forge py-asyncutils=0.9.2
+  conda install -c conda-forge py-asyncutils=0.9.3
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.2
+  conda install py-asyncutils==0.9.3
   # uv:
-  uv pip install 'py-asyncutils==0.9.2'
+  uv pip install 'py-asyncutils==0.9.3'
   # poetry:
-  poetry add py-asyncutils@0.9.2
+  poetry add py-asyncutils@0.9.3
   # pdm:
-  pdm add py-asyncutils==0.9.2
+  pdm add py-asyncutils==0.9.3
   # pipenv:
-  pipenv install py-asyncutils==0.9.2
+  pipenv install py-asyncutils==0.9.3
 
 .. version-added:: 0.9.0
   Created a Makefile to simplify development chores.

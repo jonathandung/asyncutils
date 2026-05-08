@@ -74,7 +74,14 @@ XML    .xml           xmltodict          xmltodict
 .. tip::
   :collapsible:
 
-  To ensure all formats can be parsed, install the ``pconf`` :term:`extra`.
+  To ensure all supported formats can be parsed, install the ``pconf`` :term:`extra`.
+
+.. note::
+
+  It is currently possible to associate file extensions not shown above with other libraries providing a :func:`load` function taking a file object
+  and returning a dictionary, by modifying the :data:`asyncutils._internal.unparsed.D` map from file extensions to names of corresponding modules.
+  However, it is believed that the offered options are versatile enough to fit every individual need, so this functionality is just a quirk of the
+  implementation that just so happens to have been declared stable.
 
 Contextual "Constants"
 ----------------------

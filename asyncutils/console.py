@@ -110,7 +110,7 @@ class ConsoleBase(B):
         except SystemExit: raise
         except BaseException as e: w(f'{fullname(e)} occurred in posthook of {self!r}: {e}\n')
         finally:
-            if suppress_asyncio_warnings: P.patch_asyncio_warnings()
+            if suppress_asyncio_warnings: P.patch_aio_logs()
             if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
             self.write_special(exitmsg%n)
         return self.retcode

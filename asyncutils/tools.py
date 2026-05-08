@@ -24,7 +24,7 @@ def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):
     with open(p, 'w') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
-def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot')), M=A.submodules_map):
+def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
     if o in _: return 'https://asyncutils.readthedocs.io/en/stable/index.html'
     if isinstance(o, str):
         if (o := o.removeprefix('asyncutils.')) == '__init__': return 'https://asyncutils.readthedocs.io/en/stable/top-level.html'

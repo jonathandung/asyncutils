@@ -5,7 +5,7 @@ from asyncio.locks import Lock
 from typing import Any, Concatenate, Self, final, overload
 __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 class AsyncProperty[T, R]:
-    '''A property with asynchronous getters, setters and deleters.'''
+    '''A property with asynchronous getters, setters and deleters running synchronously via event loop scheduling.'''
     @overload
     def __new__(cls, *, doc: str|None=..., strict: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
     @overload

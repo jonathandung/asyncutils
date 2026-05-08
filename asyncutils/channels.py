@@ -103,7 +103,7 @@ class Observable(LoopContextMixin):
             b.append((a, k))
             if len(b) >= c: await gather(*(f(*A, **K) for A, K in copy_and_clear(b)), return_exceptions=ret_exc)
         self.subscribe_nowait(buffered); return _
-    def at_change(self, key=lambda *a, **k: (a, k), ret_exc=True):
+    def at_change(self, key=lambda *a, **k: (a, *k, *k.values()), ret_exc=True):
         f, l = partial((_ := type(self)()).notify, _ret_exc_=ret_exc), object()
         async def distinct(*a, **k):
             nonlocal l

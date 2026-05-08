@@ -2,7 +2,7 @@
 
 Thank you for using asyncutils! This document outlines how to get help with this project.
 
-Before jumping to seek support, do skim through **[README.md](https://github.com/jonathandung/asyncutils/blob/main/README.md)**.
+Before jumping to seek support, do skim through [the readme](https://github.com/jonathandung/asyncutils#asyncutils).
 
 ## Bug Reports
 
@@ -24,8 +24,8 @@ Have an idea? We'd love to hear it!
 
 ### Community Support
 
-- [**GitHub Discussions**](https://github.com/jonathandung/asyncutils/discussions)
-- **Stack Overflow**: Tag questions with `[python]` and `[asyncutils]`
+- [GitHub Discussions](https://github.com/jonathandung/asyncutils/discussions)
+- Stack Overflow: Tag questions with `[python]` and `[asyncutils]`
 
 ### Quick Questions
 
@@ -39,7 +39,7 @@ For quick questions, consider:
 
 **Never report security vulnerabilities publicly.**
 
-See [SECURITY.md](SECURITY.md) for details.
+See [SECURITY.md](https://asyncutils.readthedocs.io/en/stable/security.html) for details.
 
 ## 🔧 Common Issues & Solutions
 

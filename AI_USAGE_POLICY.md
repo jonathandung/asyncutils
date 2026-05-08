@@ -31,7 +31,7 @@ If you do end up using AI tools, we ask that you only do so **assistively** (lik
 2. **Test thoroughly:** Review and test all code before submission
 3. **Take responsibility:** You are responsible for bugs, issues, or problems with your contribution
 4. **Disclose usage:** Note which AI tools you used in your PR description
-5. **Follow guidelines:** Comply with all rules in [CONTRIBUTING.md](https://github.com/jonathandung/asyncutils/CONTRIBUTING.md)
+5. **Follow guidelines:** Comply with all rules in [the contributing guide](https://asyncutils.readthedocs.io/en/stable/contributing.html)
 
 ### Example disclosure
 

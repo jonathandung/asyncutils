@@ -1,4 +1,4 @@
-def patch_asyncio_warnings(): __import__('logging').getLogger('asyncio').disabled = True
+def patch_aio_logs(): __import__('logging').getLogger('asyncio').disabled = True
 def patch_unawaited_coroutine_warnings(): __import__('warnings').filterwarnings('ignore', "coroutine '.*' was never awaited", RuntimeWarning)
 def _(t, d, a='__text_signature__', u='<unrepresentable>', c=('__wrapped__', '__func__')):
     def patch(*I):

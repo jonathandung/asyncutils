@@ -1,6 +1,5 @@
-from asyncutils._internal.helpers import fullname, subscriptable, verify_compat
+from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable, verify_compat
 verify_compat('3.12')
-from asyncutils.mixins import LoopBoundMixin
 import _heapq as H
 from _collections import deque # type: ignore[import-not-found]
 from asyncio.locks import Event
@@ -12,7 +11,8 @@ def _wakeup_next(W, /, w=None):
     while W and (w := W.popleft()).done(): ...
     if w: w.set_result(None)
 @subscriptable
-class Queue(LoopBoundMixin):
+class Queue(LoopMixinBase):
+    __slots__ = '_finished', '_getters', '_is_shutdown', '_putters', '_queue', '_unfinished_tasks', 'maxsize'
     def __init__(self, maxsize=0):
         self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown = maxsize, deque(), deque(), 0, False
         self._finished = e = Event(); e.set(); self._init(maxsize)
@@ -83,10 +83,12 @@ class Queue(LoopBoundMixin):
             while D:
                 if not (F := f()).done(): F.set_result(None)
 class LifoQueue(Queue):
+    __slots__ = ()
     def _init(self, maxsize): self._queue = []
     def _get(self): return self._queue.pop()
     def _put(self, i, /): self._queue.append(i)
 class PriorityQueue(Queue):
+    __slots__ = ()
     def _init(self, maxsize): self._queue = []
     def _get(self, _=H.heappop): return _(self._queue)
     def _put(self, i, /, _=H.heappush): _(self._queue, i)

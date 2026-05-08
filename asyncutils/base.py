@@ -1,14 +1,14 @@
 # type: ignore
-from asyncutils import CRITICAL, RAISE, Critical, IgnoreErrors, ItemsExhausted, getcontext, unnest_reverse, ignore_stopaiteration
-from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, log as L, patch as P
 from asyncutils._internal.submodules import base_all as __all__
+from asyncutils.constants import _NO_DEFAULT, RAISE
+from asyncutils import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, getcontext, unnest_reverse, ignore_stopaiteration
 from _functools import partial
 from asyncio import Future, _get_running_loop, all_tasks, gather, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, sleep
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
-    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x1000, 0x2000, 0x4000, 0x8000, 0xF000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
+    _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x10000, 0x20000, 0x40000, 0x80000, 0xF0000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
         p = (pool := self.__reusable).pop
@@ -21,7 +21,7 @@ class event_loop: # noqa: N801
     def clear_flags(self, mask_to_keep=None): self._flags &= (getcontext().EVENT_LOOP_BASE_FLAGS if mask_to_keep is None else mask_to_keep)|self._INTERNAL_MASK
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
-    def from_flags(cls, flags, /, _=c, m=-0xf1000):
+    def from_flags(cls, flags, /, _=c, m=-0x10000):
         if flags&m: raise OverflowError(f'{cls.__qualname__}: flags value {flags:#x} has forbidden bits set')
         r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'check_running', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
@@ -33,34 +33,34 @@ class event_loop: # noqa: N801
             s <<= 1
         if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}') # pragma: no cover
         return cls.from_flags(F)
-    def __enter__(self, _='event_loop context already entered'):
+    def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
         if (f := self._flags)&self._ENTERED:
             if f&0x200: return self._loop
             raise RuntimeError(_)
         if (l := _get_running_loop()) is None: set_event_loop(l := self._get_unclosed_loop())
         elif f&4 and l.is_running(): l = self._get_unclosed_loop()
         else: f |= self._SHOULD_CLOSE
-        if not f&0x10000 and callable(g := getattr(l, '__enter__', None)):
+        if not f&0x1000 and callable(g := getattr(l, '__enter__', None)):
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
                 if not f&0x200: raise RuntimeError(f'{self._istr}: exception occurred while calling __enter__ of associated event loop: {e}') from e
-        if f&0x20000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
+        if f&0x2000 and callable(g := getattr(l, '__aenter__', None)): l.call_soon(g); f |= self._INNER_AEXIT
         self._loop, self._flags = l, f|self._ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
         N = self._istr
         if not (f := self._flags)&(e := self._ENTERED):
             if f&0x200: return False
             raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
-        f &= ~e; l = self._loop
+        f, l = ~e, self._loop
         if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
         if not f&0x400: self.__reusable.append(l)
         if not ((c := f&self._SHOULD_CLOSE) and f&0x10):
             with _i: l.stop()
-        q, r, self._flags = t is not None and issubclass(t, RuntimeError), False, f&~0xC0000
+        q, r, self._flags = t is not None and issubclass(t, RuntimeError), False, f&~0xC000
         if f&self._INNER_EXIT:
             if callable(g := getattr(l, '__exit__', None)):
-                try: r = g(None, None, None) if f&0x40000 and q else g(t, v, b)
+                try: r = g(None, None, None) if f&0x4000 and q else g(t, v, b)
                 except CRITICAL: _l.critical('%s: critical error while calling __exit__ of associated event loop', N, exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('event loop management shenanigans while exiting associated event loop')
@@ -69,7 +69,7 @@ class event_loop: # noqa: N801
             elif not f&0x200: _l.error('%s: __enter__ already called but __exit__ is not present', N)
         if f&self._INNER_AEXIT:
             if callable(g := getattr(l, '__aexit__', None)) and not r:
-                try: r = run_coroutine_threadsafe(g(None, None, None) if f&0x80000 else g(t, v, b), l).result()
+                try: r = run_coroutine_threadsafe(g(None, None, None) if f&0x8000 else g(t, v, b), l).result()
                 except CRITICAL: _l.critical('%s: critical error while calling __aexit__ of associated event loop', N, exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')

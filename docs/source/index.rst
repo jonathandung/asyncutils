@@ -1,4 +1,4 @@
-asyncutils 0.9.2: makes async straightforward and enjoyable
+asyncutils 0.9.3: makes async straightforward and enjoyable
 ===========================================================
 
 **PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`__
@@ -30,7 +30,10 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   examples
   compat
   contributing
+  conduct
+  ai-use
   support
+  security
   changelog
   roadmap
 
@@ -42,12 +45,21 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   asyncutils @ GitHub <https://github.com/jonathandung/asyncutils/>
   Issue Tracker <https://github.com/jonathandung/asyncutils/issues>
   PDF Documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
+  Documentation Archive <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip>
 
 .. note:: This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
+
+.. version-changed:: 0.9.3
+
+  Added the documentation downloads to the links section in the sidebar.
 
 .. version-changed:: 0.9.2
 
   Started releasing documentation in pdf and htmlzip formats.
+
+.. version-removed:: 0.9.0
+
+  0.8.x versions reached end-of-life.
 
 .. version-changed:: 0.8.18
 

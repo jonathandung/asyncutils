@@ -1,9 +1,8 @@
-from atexit import register
-import sys as S
+__lazy_modules__ = frozenset(('asyncio.events',))
+import asyncio.events as E, sys as S
 def filter_out(*a, s=None): yield from filter(lambda x, s=s: s is not x, a)
-def get_loop_and_set(_=(lambda l: l.stop() or l.close()).__get__):
-    import asyncio.events as E
-    if (l := E._get_running_loop()) is None: register(_(l := E.new_event_loop())); E.set_event_loop(l)
+def get_loop_and_set(_=(lambda l: l.stop() or l.close()).__get__, f=__import__('atexit').register):
+    if (l := E._get_running_loop()) is None: f(_(l := E.new_event_loop())); E.set_event_loop(l)
     S.audit('asyncutils/get_loop_and_set', l); return l
 def check_methods(obj, /, *meth):
     M = obj.__class__.__mro__
@@ -37,7 +36,11 @@ async def simple_wrap(aw, /): return await aw
 class LoopMixinBase:
     __slots__ = '_loop',
     @property
-    def loop(self): return self._loop
-    def make(self, aw): return self.loop.create_task(simple_wrap(aw))
+    def loop(self):
+        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
+        elif l is not E._get_running_loop(): raise RuntimeError('could not bind loop')
+        return l
+    def make(self, aw, /): return self.loop.create_task(simple_wrap(aw))
     def make_fut(self): return self.loop.create_future()
-    def make_multiple(self, aws): yield from map(self.make, aws)
+    def make_multiple(self, aws, /): yield from map(self.make, aws)
+ismodule.__text_signature__, subscriptable.__text_signature__, fullname.__text_signature__, verify_compat.__text_signature__, get_loop_and_set.__text_signature__ = '(o, /)', '(cls, /)', '(f, /, rmpref=False)', '(v, /)', '()'
