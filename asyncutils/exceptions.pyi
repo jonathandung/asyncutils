@@ -7,7 +7,7 @@ from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'FaultyConfig', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
@@ -55,15 +55,6 @@ class StateCorrupted(BaseException):
     def adjective(self) -> str: ...
     @property
     def details(self) -> str: ...
-class FaultyConfig(BaseException):
-    '''Raised when the configuration json has values of incorrect types; should not be caught.'''
-    def __init__(self, key: str, wrong: type, correct: type|tuple[type, ...], /): ...
-    @property
-    def key(self) -> str: ...
-    @property
-    def wrong(self) -> type: ...
-    @property
-    def correct(self) -> type|tuple[type, ...]: ...
 class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     '''Raised when a critical error is encountered by exception-handling middleware.'''
     @overload

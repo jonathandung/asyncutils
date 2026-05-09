@@ -22,13 +22,7 @@ Cumulative import time of asyncio: 115.1 ± 12.4 ms; max 139.4 ms, min 103.3 ms;
 
   python -SEqX importtime -c "import asyncutils"
 
-Cumulative import time of asyncutils: 7774 ± 653 μs; max 8786 μs, min 6708 μs, n = 10
-
-.. code-block:: bash
-
-  python -SEqX importtime -c "import asyncutils._internal.initialize"
-
-Actually initializing the submodules and importing asyncio:
+Cumulative import time of asyncutils: 7774 ± 653 μs; max 8786 μs, min 6708 μs; n = 10
 
 .. code-block:: bash
 
@@ -45,6 +39,4 @@ Time taken to actually import all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms,
 .. note::
   :collapsible:
 
-  asyncio is still loaded early such that attribute accesses later on would not randomly take more than 150 ms. However, this is not guaranteed when
-  the library is imported, because a different initialization and bootstrapping path is taken. As the above results show, asyncio must not have been
-  loaded in such a short interval.
+  :mod:`asyncio` is still loaded early such that attribute accesses later on would not randomly take more than 150 ms.

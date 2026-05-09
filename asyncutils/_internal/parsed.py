@@ -40,6 +40,8 @@ elib_single_node: Use executorlib.executor.single.SingleNodeExecutor.
 pebble_thread: Use pebble.pool.thread.ThreadPool.
 pebble_process: Use pebble.pool.process.ProcessPool.
 deadpool: Use deadpool.Deadpool.
+Note: The executorlib project is Python <3.14 only, and the executors extra may not work on higher python versions, causing installation of the all
+extra to also fail.
 There are some implementations from niche libraries (found on a PyPI-wide search using the keyword "executor") that are intentionally excluded, since
 they either require prior configuration to be useful (as is the case with adaptive-executor), are too small (contextvars-executor), unmaintained
 (celery-executor), too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific

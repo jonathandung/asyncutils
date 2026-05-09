@@ -1,9 +1,8 @@
-from asyncutils import cli as L, config as C, constants as D, context as F, exceptions as E, time_since_boot as T, version as V
+from asyncutils import cli as L, constants as D, context as F, exceptions as E, time_since_boot as T, version as V
 from asyncutils._internal import patch as P, running_console as R
-from asyncutils._internal.log import debug as l
 from asyncutils._internal.submodules import __dict__ as d
 if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (BaseException,), {})('asyncutils: cannot reload internal initialization module')
-_a, _u, _f, _s, _i, s, t, U = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all', (S := list(a)).extend
+_a, _u, _f, _s, _i, s, t, U, A = frozenset(a), (_d := {}).update, ('',), 'asyncutils.', iter(d.items()), {}, '_all', (S := list(a)).extend, []
 for _k, _v in _i:
     if _k[0] != '_': break
 with E.ignore_stopiteration:
@@ -21,21 +20,17 @@ class Module:
         raise AttributeError(f"module 'asyncutils.{self._n}' has no attribute {n!r}") from None
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
-    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _l=l, _n=_s):
+    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s):
         if (t := type(self)) is not __class__: return self
         if type(m := _s.get(n := self._n)) is not t: return m
-        if (m := _m.get(_n := _n+n)) is None: _l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__
-        if l := getattr(_g(), 'locals', None): l[n] = m
+        if (m := _m.get(_n := _n+n)) is None: l(f'now loading: {n}'); (m := __import__(_n, fromlist=_f)).__dir__ = self.__dir__
+        if d := getattr(_g(), 'locals', None): d[n] = m
         _s[n] = m; return m
     __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._n+t]); P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''), (__repr__, ''), (__getattr__, _))
 f = object.__new__
 for _ in a: r._n, s[_] = _, (r := f(Module))
-for _ in (f := ('cli', 'config', 'constants', 'context', 'exceptions', 'version')): l('preloading: %s', _)
-for _k, _v in zip(f, (L, C, D, F, E, V)): s[_k], _v.__dir__ = _v, s[_k].__dir__ # type: ignore[attr-defined]
+def l(*a, _=A.append): _(a)
+for _k, _v in (('cli', L), ('constants', D), ('context', F), ('exceptions', E), ('version', V)): l('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__ # type: ignore[attr-defined]
 l('all submodules initialized in %.2f milliseconds', T())
-if C.loaded_all:
-    f = Module.load
-    for _ in s.values(): f(_)
-    l('all submodules loaded in %.2f milliseconds', T())
 U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del C, P, R, E, V, F, L, T, U, l, d, f, r, t, _d, _k, _v, _a, _f, _s, _u, _i, _
+del P, R, E, V, F, L, T, U, d, f, r, t, _d, _k, _v, _a, _f, _s, _u, _i, _

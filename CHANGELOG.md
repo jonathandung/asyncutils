@@ -128,6 +128,7 @@ Submodules:
   Classes:
   - debugging
   - Executor
+  - FaultyConfig
 
   Functions:
   - set_logger_level
@@ -203,7 +204,6 @@ Submodules:
   Exception types:
   - Critical
   - StateCorrupted
-  - FaultyConfig
   - VersionError
   - VersionConversionError
   - VersionNormalizerMissing

@@ -43,15 +43,19 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 
   asyncutils @ PyPI <https://pypi.org/p/py-asyncutils/>
   asyncutils @ GitHub <https://github.com/jonathandung/asyncutils/>
-  Issue Tracker <https://github.com/jonathandung/asyncutils/issues>
-  PDF Documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
-  Documentation Archive <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip>
+  Issue tracker <https://github.com/jonathandung/asyncutils/issues>
+  PDF documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
+  .zip archive of pages <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip>
 
 .. note:: This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
 
 .. version-changed:: 0.9.3
 
   Added the documentation downloads to the links section in the sidebar.
+
+.. version-changed:: 0.9.3
+
+  Copied more pages from the root to the sidebar for easier navigation.
 
 .. version-changed:: 0.9.2
 

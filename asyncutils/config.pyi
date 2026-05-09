@@ -4,14 +4,26 @@ from concurrent.futures._base import Executor as _
 from random import Random
 from types import TracebackType
 from typing import Final, Self, overload
-__all__ = 'Executor', 'basic_repl', 'debug', 'debugging', 'get_past_logs', 'loaded_all', 'logging_to', 'pdb', 'set_logger_level', 'silent'
+__all__ = 'Executor', 'FaultyConfig', 'basic_repl', 'debug', 'debugging', 'get_past_logs', 'loaded_all', 'logging_to', 'max_memerrs', 'pdb', 'set_logger_level', 'silent'
 class Executor(_, PartialInterface):
     '''A class that implements the :pep:`3148` executor interface.
 
     .. note:: The exact class is determined at runtime by command-line arguments.
     .. tip::
       Since instances of this class are only ever passed into `loop.run_in_executor`, nothing stops you from monkey-patching the event loop itself
-      or policy thereof, and using a custom class that does not follow the interface. Only do so if you know what you're doing.'''
+      or policy thereof, and using a custom class that does not follow the interface, but that may be too hacky and fragile.
+    .. tip::
+      If you know your application only uses a specific executor, import this symbol at runtime and import the actual class in the stub or in an
+      if TYPE_CHECKING: block where applicable to help type checkers.'''
+class FaultyConfig(BaseException):
+    '''Raised when the configuration file has values of incorrect types; should not be caught.'''
+    def __init__(self, key: str, wrong: type, correct: type|tuple[type, ...], /): ...
+    @property
+    def key(self) -> str: ...
+    @property
+    def wrong(self) -> type: ...
+    @property
+    def correct(self) -> type|tuple[type, ...]: ...
 class debugging:
     '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally within the context using :func:`set_logger_level`.'''
     @property

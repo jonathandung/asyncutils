@@ -19,3 +19,5 @@ class Module:
 a: Final[tuple[Submodule, ...]]
 s: Final[dict[Submodule, Module|ModuleType]]
 S: Final[list[str]]
+A: Final[list[str]]
+def l(*a: Any) -> None: ...

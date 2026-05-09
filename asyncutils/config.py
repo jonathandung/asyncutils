@@ -1,10 +1,11 @@
-__lazy_modules__ = frozenset(('asyncutils.exceptions',))
-from asyncutils._internal import log as l, patch as P
+from asyncutils._internal import log as l, patch as P, initialize as I
 from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
-from asyncutils.exceptions import FaultyConfig as E
 import logging as L, sys as S
-def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', s=(s := S.stderr)): # noqa: B008,PLR0912 # pragma: no cover
+def __dir__(_=__all__): return _
+class FaultyConfig(BaseException):
+    def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {", ".join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # noqa: B008,PLR0912 # pragma: no cover
     if not isinstance(e, str): raise TypeError('executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -29,26 +30,27 @@ def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=froze
         else:
             d, *a = e.split('_')
             if d == 'elib':
+                if S.version_info >= (3, 14): __import__('_warnings').warn('executorlib is not compatible with Python 3.14 and above', ImportWarning, 2)
                 try: a, e = a; return getattr(_('executorlib.executor.'+a), f'{a.title()}{e.title()}Executor')
                 except ImportError: d = 'executorlib'
             elif d == 'pebble':
                 try: a = a[0]; return getattr(_('pebble.pool.'+a), a.title()+'Pool')
                 except ImportError: ...
-            else: raise ValueError('invalid custom executor: '+e)
-    s.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return _('concurrent.futures.thread').ThreadPoolExecutor
-def k(e, a=False, N=N, _=E):
+            else: raise FaultyConfig('executor', e, _('asyncutils.constants').POSSIBLE_EXECUTORS)
+    S.stderr.write(f'Error importing {d} (maybe not installed); falling back to ThreadPoolExecutor\n'); return _('concurrent.futures.thread').ThreadPoolExecutor
+def k(e, a=False, N=N):
     if isinstance(x := N[e], str):
         try: return int(x, 0)
         except ValueError:
-            if a: raise _(e, str, int)
+            if a: raise FaultyConfig(e, str, int)
     return x
-def g(e, a=False, t=(str, int, bytes), k=k, _=E):
-    if isinstance(x := k(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
+def g(e, a=False, t=(str, int, bytes), _=k):
+    if isinstance(x := _(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
         try: x = x.encode()[2:-1] # noqa: SIM105
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
-    raise _(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, b = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'a', False, __import__('os').name == 'posix' # type: ignore[no-redef]
+    raise FaultyConfig(e, type(x), t)
+max_memerrs, e, Executor, get_past_logs, m, M, b, s = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'a', False, __import__('os').name == 'posix', S.stderr # type: ignore[no-redef]
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
@@ -100,15 +102,21 @@ class debugging:
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig))
-get_past_logs.handler, d, debug = _, l.debug, debugging()
+get_past_logs.handler, debug = _, debugging()
+I.l = d = l.debug
 if N.debug:
     debug.__enter__(); d('python %s', S.version)
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
     if c: d('config file path: %s', c)
 __import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
+for _ in I.A: d(*_)
 def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
-P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'))
-del _, e, L, M, N, S, f, m, r, s, b, P, g, k, l, E, c, d # noqa: F821
+P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'), (__dir__, ''))
+if loaded_all:
+    i = I.Module.load
+    for _ in I.s.values(): i(_)
+    l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
+del _, e, L, M, N, S, f, m, r, s, b, P, g, k, l, c, d # noqa: F821

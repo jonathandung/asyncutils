@@ -33,6 +33,9 @@ asyncutils.compete.multi_winner_race_with_callback
 asyncutils.compete.race_with_callback
 (asyncutils\.config)?
 (asyncutils\.config\.Executor.*)?
+asyncutils.config.FaultyConfig.correct
+asyncutils.config.FaultyConfig.key
+asyncutils.config.FaultyConfig.wrong
 (asyncutils\.console)?
 (asyncutils\.console\.ConsoleBase\.__init__)?
 (asyncutils\.console\.ConsoleBase\.__init_subclass__)?
@@ -54,9 +57,6 @@ asyncutils.context.localcontext.__init__
 (asyncutils\.exceptions)?
 asyncutils.exceptions.Critical.__new__
 asyncutils.exceptions.Deadlock.noticer
-asyncutils.exceptions.FaultyConfig.correct
-asyncutils.exceptions.FaultyConfig.key
-asyncutils.exceptions.FaultyConfig.wrong
 asyncutils.exceptions.ForbiddenOperation.op
 asyncutils.exceptions.GetPasswordMissing
 asyncutils.exceptions.LockForceRequest.fulfill

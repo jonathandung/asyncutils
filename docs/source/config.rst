@@ -10,7 +10,7 @@ The below environment variables directly affect what this library does, mostly i
 * ``PYTHON_BASIC_REPL`` - Not read under ``python -E``
 * ``PYTHONSTARTUP`` - Not executed with ``python -E``
 * ``NO_COLOR`` - Overrides ``FORCE_COLOR`` (python convention)
-* ``FORCE_COLOR`` - Overrides ``TERM``
+* ``FORCE_COLOR`` - Overrides ``TERM=dumb`` with a warning (since this is probably not meant)
 * ``TERM`` - Turn off smart terminal features, including ANSI colour sequences when set to "dumb"
 
 Basic Customization
@@ -56,8 +56,20 @@ XML    .xml           xmltodict          xmltodict
 .. danger::
 
   Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
-  Be especially careful with XML; see `the CVE database <https://www.cve.org/CVERecord>`__ for details.
+  Be especially careful with XML.
   Thus, write your configs yourself to avoid malicious inputs exhausting computing resources.
+
+.. seealso::
+
+  `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
+    a vulnerability of the :class:`xml.sax.saxutils.XMLGenerator` class of the standard library used by :mod:`xmltodict` without input sanitization
+
+  `GitHub issue <https://github.com/python/cpython/issues/149231>`__
+    a quadratic complexity case in the parsing of a TOML by :mod:`tomllib` where a key has many dot-separated parts
+
+  `the CVE database <https://www.cve.org/CVERecord>`__
+    for any new vulnerabilities
+
 
 .. important::
 
@@ -112,6 +124,8 @@ methods that leave the original context alone by deriving a new one from it:
 
 :meth:`~asyncutils.context.Context.__copy__` and :meth:`~asyncutils.context.Context.__replace__` are also implemented to help :func:`copy.copy` and
 :func:`copy.replace` (python 3.13+) respectively.
+
+Even better is to use the :class:`asyncutils.context.nonreusablelocalcontext` context manager.
 
 For more detailed documentation on context usage, see the :mod:`context` page.
 

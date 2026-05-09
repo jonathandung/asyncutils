@@ -8,5 +8,5 @@ def __getattr__(n, /, _=globals()):
     try: return _[n]
     except KeyError: return __getattr__(n)
 from asyncutils.version import VersionInfo as V
-time_since_boot.__text_signature__, __hexversion__, console_preloaded_submodules = '()', int(__version__ := V('0.9.3')), (preloaded_submodules := frozenset(('config', 'constants', 'context', 'cli', 'exceptions', 'version'))).union(('base', 'console'))
+time_since_boot.__text_signature__, __hexversion__, console_preloaded_submodules = '()', int(__version__ := V('0.9.3')), (preloaded_submodules := frozenset(('constants', 'context', 'cli', 'exceptions', 'version'))).union(('base', 'console'))
 del V, I, T, M

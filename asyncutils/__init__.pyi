@@ -44,10 +44,11 @@ __version__: Final[VersionInfo]
 
   Refer to the IDE autocomplete for its methods.'''
 __hexversion__: Final[int]
-'''For example, `0x12070e` corresponds to version 18.7.14.'''
-console_preloaded_submodules: Final[frozenset[str]]
-'''Below, but including `'base'`, `'cli'` and `'console'`.'''
-preloaded_submodules: Final[frozenset[str]]
+'''| An integer encoding the current version suitable for numerical comparisons; inspired by :const:`sys.hexversion`.
+| For example, `0x12070e` corresponds to version 18.7.14.'''
+console_preloaded_submodules: Final[frozenset[Submodule]]
+'''Below, but including `'base'` and `'console'` as well.'''
+preloaded_submodules: Final[frozenset[Submodule]]
 '''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
-'''A dictionary mapping submodule names to the corresponding submodule objects, which may not actually be instances of :class:`types.ModuleType` at runtime (implementation-defined).'''
+'''A dictionary mapping submodule names to the corresponding submodule objects, which may not be instances of :class:`types.ModuleType` at runtime.'''

@@ -5,8 +5,7 @@ Glossary
 
   extra
     A name corresponding to a set of optional dependencies, supported by most package managers (pip, pipx, conda and uv). This module has no
-    runtime dependencies outside of the standard library (unless you count json-with-comments, json5 and hjson used in special cases by
-    :func:`tools.json_to_argv` and :func:`tools.json_to_argstr`, which come with the ``json`` extra), and the other extras are for development only.
+    runtime dependencies outside of the standard library save for the config file parsers, and all the extras are for development only.
 
   submodule
     A module that is part of a library or package that is not the main module/entry point. For this project, :mod:`asyncutils` is the main module and
