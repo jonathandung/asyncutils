@@ -1,3 +1,5 @@
+on:
+  push
 coverage:
   status:
     project:
