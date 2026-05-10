@@ -39,4 +39,5 @@ Time taken to actually import asyncio and all 32 submodules: 266.2 ± 13.2 ms; m
 .. note::
   :collapsible:
 
-  :mod:`asyncio` is still loaded early such that attribute accesses later on would not randomly take more than 150 ms.
+  :mod:`asyncio` is still loaded early such that attribute accesses later on would not randomly take more than 150 ms. This is, however, subject to
+  change. On Python 3.15+, lazy imports are used by this library wherever possible. Changes may be made to exclude :mod:`asyncio` from this.

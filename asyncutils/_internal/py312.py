@@ -1,5 +1,6 @@
 from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable, verify_compat
 verify_compat('3.12')
+__lazy_modules__ = frozenset(('asyncio.locks',))
 import _heapq as H
 from _collections import deque # type: ignore[import-not-found]
 from asyncio.locks import Event

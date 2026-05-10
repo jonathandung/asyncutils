@@ -12,7 +12,7 @@ function being called.
 See the official documentation for :func:`sys.audit` and :func:`sys.addaudithook` on how to listen to these events, as well as
 :class:`asyncutils.channels.EventBus`, which is capable of triggering mass publications to async subscribers for audit events efficiently.
 
-Also see `the standard library audit event table <https://docs.python.org/3/library/audit_events.html>`__, from which the inclustion and format of
+Also see :doc:`the standard library audit event table <python:library/audit_events>`, from which the inclustion and format of
 this table take inspiration.
 
 .. list-table:: Audit events

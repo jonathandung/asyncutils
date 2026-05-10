@@ -32,8 +32,9 @@ Current version: 0.9.3
 
 - Deprecate <=3.13 compatibility module
 - Ramp up coverage to 90%
-- Remove/supersede overly inefficient or faulty patterns
-- Make release schedule regular (e.g. increment major version yearly and minor monthly)
+- Remove or supersede faulty patterns
+- Make release schedule regular
+- Synchronize release schedule with Python's (major release every Python minor version)
 
 ## [4.11.?] - 2028-09
 

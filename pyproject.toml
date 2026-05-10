@@ -17,7 +17,7 @@ classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", 
 
 [project.urls]
 Homepage = "https://github.com/jonathandung/asyncutils"
-Documentation = "https://asyncutils.readthedocs.io/en/stable/api/index.html"
+Documentation = "https://asyncutils.readthedocs.io/en/stable/index.html"
 Repository = "https://github.com/jonathandung/asyncutils.git"
 Issues = "https://github.com/jonathandung/asyncutils/issues"
 Changelog = "https://asyncutils.readthedocs.io/en/stable/changelog.html"
@@ -31,7 +31,7 @@ autils = "asyncutils.cli:run"
 [project.optional-dependencies]
 all = ["py-asyncutils[dev,executors,pconf,ptw]==0.9.3"]
 dev = ["pre-commit>=4.6.0", "mypy>=2.0.0", "py-asyncutils[docs,pub,test,tools]==0.9.3"]
-docs = ["furo>=2025.12.19", "Sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "myst-parser>=5.0.0"]
+docs = ["furo>=2025.12.19", "Sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-copybutton>=0.5.2", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "myst-parser>=5.0.0"]
 executors = ["deadpool-executor>=2026.4.1", "executorlib>=1.9.3", "ipyparallel>=9.1.0", "loky>=3.5.6", "Pebble>=5.2.0"]
 pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "xmltodict>=1.0.4", "py-asyncutils[json5]==0.9.3"]
 json5 = ["json5>=0.14.0"]

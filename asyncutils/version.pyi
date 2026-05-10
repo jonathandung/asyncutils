@@ -24,7 +24,8 @@ class VersionInfo(str): # noqa: FURB189
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]:
-        '''Depending on the value of `idx`, corresponds to the following attributes:
+        '''Depending on the value of `idx`, corresponds to the following properties:
+
         * 0 -> :attr:`major`
         * 1 -> :attr:`minor`
         * 2 -> :attr:`patch`
@@ -58,6 +59,7 @@ class VersionInfo(str): # noqa: FURB189
     def __setattr__(self, name: str, value: Any, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: str, /) -> str:
         r"""Format specification and corresponding return value: (using version 123.4.0 as example):
+
         * x, hex: `'0x7b0400'`
         * o, oct: `'0o36602000'`
         * b, bin: `'0b11110110000010000000000'`

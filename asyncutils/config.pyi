@@ -57,6 +57,7 @@ _randinst: Final[Random]
 '''The random number generator (instance of :class:`random.Random`) used internally by this module.'''
 logging_to: Final[str]
 '''The name (path; possibly relative) of the log file currently used by this library as a string, with four exceptions:
+
 * `'NULL'`: no logging is taking place
 * `'MEMORY'`: the logs are not going to a physical file but can be retrieved by :func:`get_past_logs`
 * `'STDOUT'`: logging is going to :data:`sys.stdout`
