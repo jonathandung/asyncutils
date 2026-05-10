@@ -31,6 +31,8 @@ Next, install py-asyncutils:
 
   # recommended: pip
   pip install py-asyncutils==0.9.3
+  # directly from source
+  pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils
   # alternatively, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
@@ -57,21 +59,20 @@ other installation pathways:
 
 .. code-block:: bash
 
-  # pipx:
+  # pipx
   pipx install py-asyncutils==0.9.3
-  # conda:
+  # conda
   conda install -c conda-forge py-asyncutils=0.9.3
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
   conda install py-asyncutils==0.9.3
-  # uv:
-  uv pip install 'py-asyncutils==0.9.3'
-  # poetry:
+  # uv essentially supports the same interface as pip with uv pip
+  # poetry
   poetry add py-asyncutils@0.9.3
-  # pdm:
+  # pdm
   pdm add py-asyncutils==0.9.3
-  # pipenv:
+  # pipenv
   pipenv install py-asyncutils==0.9.3
 
 .. version-added:: 0.9.0
@@ -82,7 +83,7 @@ other installation pathways:
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m``.
 
-Refer to `the support page <https://asyncutils.readthedocs.io/en/latest/support.html>`__ for steps to check the installation.
+Refer to :doc:`support` for steps to check the installation.
 
 .. _extras:
 

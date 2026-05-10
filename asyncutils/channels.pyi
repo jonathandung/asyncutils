@@ -13,10 +13,13 @@ from contextlib import AbstractContextManager
 from typing import Any, Literal, Self, TypeGuard, overload
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
+    '''A class representing an observable stream of data, that observers can subscribe to and receive notifications from. Observers must be hashable!
+
+    .. caution:: Use instances of this class as context managers only.'''
     @property
-    def idle(self) -> bool: ...
+    def idle(self) -> bool: '''Whether the observable is idle, that is, not currently notifying observers.'''
     @property
-    def notifying(self) -> bool: ...
+    def notifying(self) -> bool: '''The opposite of :attr:`idle`.'''
     @overload
     async def notify(self, *a: P.args, **k: P.kwargs) -> None: ...
     @overload

@@ -16,10 +16,19 @@ def argv_to_json(argv: Sequence[str], path: Openable, /, *, dump: DumpType=...) 
 def argstr_to_json(argstr: str, path: Openable, /, *, dump: DumpType=..., split: Callable[[str], Sequence[str]]=...) -> None: '''Parses the shell-escaped string representing the command-line arguments for this module and writes it into a .json path.'''
 def get_cfg_json_format() -> str: '''Get the format of .json configs this module takes as a string. :func:`print_cfg_json_format` is perhaps more useful.'''
 def print_cfg_json_format(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the above format into the specified file and flush it (default :data:`~sys.stdout`).'''
-def get_cmd_help() -> str: '''Get the command line help as a string containing ANSI color escape sequences. It would therefore be more useful to call :func:`print_cmd_help` instead. Actually a bound method of the library's argument parser at runtime.'''
+def get_cmd_help() -> str:
+    '''Return the command line help as a string containing ANSI color escape sequences.
+    .. seealso
+
+      :func:`print_cmd_help`
+        A more useful function that prints the help to a file or the console
+
+    .. admonition:: Implementation detail
+
+      Actually a bound method of the library's argument parser at runtime.'''
 def print_cmd_help(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the above help into the specified file (default :data:`~sys.stdout`) and flush it.'''
 def find_help_url(obj: Any=..., /) -> str:
     '''Get the URL of the :mod:`asyncutils` documentation page for `obj`. See the supported calling patterns `here <https://asyncutils.readthedocs.io/en/stable/examples.html>`__.
 
-    .. warning:: The URL returned is not guaranteed to work with strings representing nonexistent, undocumented or internal symbols.'''
+    .. warning:: The URL returned is not guaranteed to work with strings representing non-existent, undocumented or internal symbols.'''
 def open_help(obj: Any=..., /) -> bool: '''Open the URL to the documentation of the specified symbol defined in :mod:`asyncutils` via the default browser, returning success.'''

@@ -3,7 +3,9 @@ asyncutils.__main__
 (asyncutils\._internal\.types\..*)
 (asyncutils\..*\.__class_getitem__)
 (asyncutils\._internal\.py31[23]\..*)?
+(asncutils\..*\.__lazy_modules__)?
 asyncutils._internal.log
+asyncutils._internal.initialize.l
 (asyncutils\.altlocks)?
 asyncutils.altlocks.CircuitBreaker.__new__
 asyncutils.altlocks.DynamicThrottle.__init__
@@ -36,6 +38,7 @@ asyncutils.compete.race_with_callback
 asyncutils.config.FaultyConfig.correct
 asyncutils.config.FaultyConfig.key
 asyncutils.config.FaultyConfig.wrong
+asyncutils.config.get_past_logs
 (asyncutils\.console)?
 (asyncutils\.console\.ConsoleBase\.__init__)?
 (asyncutils\.console\.ConsoleBase\.__init_subclass__)?

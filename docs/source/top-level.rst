@@ -31,6 +31,15 @@ This section documents the symbols defined at the top level of this package.
 
   :note: It is a strict superset of :data:`preloaded_submodules`.
 
+  .. version-changed:: 0.9.3
+    Removed :mod:`config` from this set.
+
+  .. version-changed:: 0.9.0
+    Added :mod:`cli` to this set.
+
+  .. version-changed:: 0.8.28
+    Added :mod:`context` to this set.
+
 .. data:: preloaded_submodules
   :no-index:
   :module: asyncutils

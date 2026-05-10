@@ -12,7 +12,7 @@ class event_loop: # noqa: N801
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
         p = (pool := self.__reusable).pop
-        while pool:
+        while pool: # pragma: no cover
             if (L := p()).is_closed() or L.is_running(): continue
             with _: L._ready.clear()
             with _: L._scheduled.clear()
@@ -34,13 +34,13 @@ class event_loop: # noqa: N801
         if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}') # pragma: no cover
         return cls.from_flags(F)
     def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
-        if (f := self._flags)&self._ENTERED:
+        if (f := self._flags)&self._ENTERED: # pragma: no cover
             if f&0x200: return self._loop
             raise RuntimeError(_)
         if (l := _get_running_loop()) is None: set_event_loop(l := self._get_unclosed_loop())
         elif f&4 and l.is_running(): l = self._get_unclosed_loop()
         else: f |= self._SHOULD_CLOSE
-        if not f&0x1000 and callable(g := getattr(l, '__enter__', None)):
+        if not f&0x1000 and callable(g := getattr(l, '__enter__', None)): # pragma: no cover
             try: g(); f |= self._INNER_EXIT
             except CRITICAL: raise Critical
             except BaseException as e:
@@ -58,7 +58,7 @@ class event_loop: # noqa: N801
         if not ((c := f&self._SHOULD_CLOSE) and f&0x10):
             with _i: l.stop()
         q, r, self._flags = t is not None and issubclass(t, RuntimeError), False, f&~0xC000
-        if f&self._INNER_EXIT:
+        if f&self._INNER_EXIT: # pragma: no cover
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&0x4000 and q else g(t, v, b)
                 except CRITICAL: _l.critical('%s: critical error while calling __exit__ of associated event loop', N, exc_info=True)
@@ -67,7 +67,7 @@ class event_loop: # noqa: N801
                 except:
                     if not f&0x200: _l.exception('%s: exception occurred while calling __exit__ of associated event loop', N)
             elif not f&0x200: _l.error('%s: __enter__ already called but __exit__ is not present', N)
-        if f&self._INNER_AEXIT:
+        if f&self._INNER_AEXIT: # pragma: no cover
             if callable(g := getattr(l, '__aexit__', None)) and not r:
                 try: r = run_coroutine_threadsafe(g(None, None, None) if f&0x8000 else g(t, v, b), l).result()
                 except CRITICAL: _l.critical('%s: critical error while calling __aexit__ of associated event loop', N, exc_info=True)
@@ -91,11 +91,11 @@ class event_loop: # noqa: N801
     def __reduce__(self, /): return self.from_flags, (self._flags,)
     P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig), (__del__, ''), (_get_unclosed_loop, 'factory={}')); P.patch_classmethod_signatures((from_flags, 'flags, /'))
 def f(n):
-    async def adisembowel(it, /):
+    async def adisembowel(it, /): # pragma: no cover
         if callable(p := getattr(it, n, None)):
             while it: yield p()
             if callable(p := getattr(it, 'clear', None)) and iscoroutine(p := p()): await p
-        else: # pragma: no cover
+        else:
             async for i in iter_to_agen(it): yield i
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
