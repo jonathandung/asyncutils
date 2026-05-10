@@ -11,7 +11,7 @@ The logger is named 'asyncutils' and retrievable by a :func:`logging.getLogger` 
 output would be spread too thin. To keep things simple, the logging level defaults to warning, and only the standard levels are used; that is, there
 is no level such as 'trace' or 'subwarning'.
 
-While we also use auditing for applications where it is deemed useful to have custom behaviour programatically triggered, we adhere to the DRY (don't
+While we also use auditing for applications where it is deemed useful to have custom behaviour programatically triggered, we follow the DRY (don't
 repeat yourself) philosophy, such that most audit events and logs are mutually exclusive, and anything displayed in the console banner is not logged.
 
 .. hint::

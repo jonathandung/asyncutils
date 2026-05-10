@@ -10,7 +10,7 @@ Use the AUTILSCFGPATH environment variable to specify a path to a .json or .json
 A --config option is not offered due to the complexity of implementation and ease to revert to a default config within a one-off config.
 See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
-Note that the API of this module is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, or tornado.''', **j)
+Note that the inner workings of this library is tightly coupled with the ever-evolving asyncio framework. As such, it is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, and tornado.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE, interpreted as a file descriptor if an integer, is passed, the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.

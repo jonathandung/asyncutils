@@ -9,6 +9,7 @@ from _weakrefset import WeakSet
 from asyncio import iscoroutine, CancelledError, Event, Lock, Semaphore, gather, shield, sleep, wait_for, timeout as _timeout
 from collections import defaultdict, deque, namedtuple
 from contextlib import contextmanager
+from itertools import starmap
 from sys import addaudithook, audit
 @subscriptable
 class Observable(LoopContextMixin):
@@ -17,7 +18,7 @@ class Observable(LoopContextMixin):
     def idle(self): return self._event.is_set()
     @property
     def notifying(self): return not self.idle
-    async def notify(self, *a, _ret_exc_=True, **k):
+    async def notify(self, *a, _ret_exc_=False, **k):
         if not self: return
         async with self._lock:
             if self.notifying: return None if (q := self._queue) is None else await q.put((_ret_exc_, a, k))
@@ -72,45 +73,45 @@ class Observable(LoopContextMixin):
             nonlocal n; await observer(*a, **k); n -= 1 # type: ignore
             if n == 0: await self.unsubscribe(wrapper)
         self.subscribe_nowait(wrapper); return partial(self.unsubscribe_nowait, wrapper)
-    def filter(self, pred, ret_exc=True):
-        f = partial((_ := type(self)()).notify, _ret_exc_=ret_exc)
+    def filter(self, pred, ret_exc=False):
+        f = partial((_ := type(self)())._notify_helper, ret_exc)
         async def filtered(*a, **k):
-            if pred(*a, **k): await f(*a, **k)
+            if pred(*a, **k): await f(a, k)
         self.subscribe_nowait(filtered); return _
-    def map(self, transform, ret_exc=True):
-        f = partial((_ := Observable()).notify, _ret_exc_=ret_exc)
-        async def mapped(*a, **k): A, K = transform(*a, **k); await f(*A, **K)
+    def map(self, transform, ret_exc=False):
+        f = partial((_ := Observable())._notify_helper, ret_exc)
+        async def mapped(*a, **k): A, K = transform(*a, **k); await f(A, K)
         self.subscribe_nowait(mapped); return _
-    def debounce(self, delay, ret_exc=True):
-        f = partial((_ := type(self)()).notify, _ret_exc_=ret_exc); t = None
+    def debounce(self, delay, ret_exc=False):
+        f = partial((_ := type(self)())._notify_helper, ret_exc); t = None
         async def debounced(*a, **k):
             nonlocal t
             if t is not None: await safe_cancel(t)
             async def notifier():
-                with ignore_cancellation: await sleep(delay); await f(*a, **k)
+                with ignore_cancellation: await sleep(delay); await f(a, k)
             t = self.make(notifier())
         self.subscribe_nowait(debounced); return _
-    def throttle(self, interval, ret_exc=True):
-        f, t = partial((_ := type(self)()).notify, _ret_exc_=ret_exc), 0
+    def throttle(self, interval, ret_exc=False):
+        f, t = partial((_ := type(self)())._notify_helper, ret_exc), 0
         async def throttled(*a, **k):
             nonlocal t
             with event_loop.from_flags(0) as l:
-                if (c := l.time())-t >= interval: t = c; await f(*a, **k)
+                if (c := l.time())-t >= interval: t = c; await f(a, k)
         self.subscribe_nowait(throttled); return _
-    def buffer(self, count, ret_exc=True):
-        f, b, c = (_ := type(self)()).notify, [], max(1, count)
+    def buffer(self, count, ret_exc=False):
+        f, b, c = (_ := type(self)())._notify_helper, [], max(1, count)
         async def buffered(*a, **k):
             b.append((a, k))
-            if len(b) >= c: await gather(*(f(*A, **K) for A, K in copy_and_clear(b)), return_exceptions=ret_exc)
+            if len(b) >= c: await gather(*starmap(f, copy_and_clear(b)), return_exceptions=ret_exc)
         self.subscribe_nowait(buffered); return _
-    def at_change(self, key=lambda *a, **k: (a, *k, *k.values()), ret_exc=True):
-        f, l = partial((_ := type(self)()).notify, _ret_exc_=ret_exc), object()
+    def at_change(self, key=lambda *a, **k: (a, frozenset(k.items())), ret_exc=False):
+        f, l = partial((_ := type(self)())._notify_helper, ret_exc), object()
         async def distinct(*a, **k):
             nonlocal l
-            if (c := key(*a, **k)) != l: l = c; await f(*a, **k)
+            if (c := key(*a, **k)) != l: l = c; await f(a, k)
         self.subscribe_nowait(distinct); return _
-    def fork(self, ret_exc=True): self.subscribe_nowait(partial((_ := type(self)()).notify, _ret_exc_=ret_exc)); return _
-    def merge(*obs, ret_exc=True):
+    def fork(self, ret_exc=False): self.subscribe_nowait(partial((_ := type(self)()).notify, _ret_exc_=ret_exc)); return _
+    def merge(*obs, ret_exc=False):
         p = partial((_ := type(obs[0])()).notify, _ret_exc_=ret_exc)
         for o in obs: o._data.add(p)
         return _

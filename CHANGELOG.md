@@ -10,29 +10,30 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-53% coverage, 51 tests
+53% coverage (41% branch), 51 tests
 
 ### Docs
 
-50% complete
+51% complete
 
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.3] - 2026-05-10; unreleased
+### [0.9.3] - 2026-05-10; newest
 
-Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable.
+Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
+sphinx-copybutton as an optional dependency.
 
-### [0.9.2] - 2026-05-07; newest
+### [0.9.2] - 2026-05-07
 
 Created symbolic links in docs directory linking to root .md files; fixed some bugs; respected some more environment variables and documented this
 behaviour; completed benchmarks; added myst_parser as an optional dependency; bumped some dependencies; added some examples.
 
 ### [0.9.1] - 2026-05-01
 
-Declared full support for python[ -m] as an entry point; patched function, method and class method signatures where appropriate; added -P/--pdb
-option; started using furo theme.
+Declared full support for python[ -m] asyncutils an entry point; patched function, method and class method signatures where appropriate; added
+-P/--pdb option; switched to furo theme.
 
 ### [0.9.0] - 2026-04-27
 

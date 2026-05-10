@@ -5,8 +5,8 @@ When used as a REPL (Read-Eval-Print Loop), this module starts slow since it bui
 submodules on import, and the event loop is quite difficult to implement. This is understandable but suboptimal. On the contrary, we focus on
 simplifying boilerplate-heavy code and integrating and combining existing patterns seamlessly with a set of core utilities, so :mod:`asyncutils` is
 not at all heavy in terms of import time. In addition, you only pay for what you use; the parts of the code you don't call are not executed until
-you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast, light and
-tightly coupled to the ever-evolving asyncio ecosystem, because of its design goals and philosophy.
+you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast and light
+because of its design goals and philosophy.
 
 The figures below are obtained by running each of the following sequentially with no warmup tenfold in a fresh console session:
 
@@ -39,5 +39,5 @@ Time taken to actually import asyncio and all 32 submodules: 266.2 ± 13.2 ms; m
 .. note::
   :collapsible:
 
-  :mod:`asyncio` is still loaded early such that attribute accesses later on would not randomly take more than 150 ms. This is, however, subject to
-  change. On Python 3.15+, lazy imports are used by this library wherever possible. Changes may be made to exclude :mod:`asyncio` from this.
+  :mod:`asyncio` is still loaded early such that attribute accesses later on would not randomly take more than 150 ms, and you logically wouldn't use
+  this module without an async entry point, which unavoidably requires asyncio and its event loop.

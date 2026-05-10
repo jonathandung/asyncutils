@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: pip install -U pip && pip install -e .[test] && pip check
     - name: Run tests
-      run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 53 -n auto
+      run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 41 -n auto
     - name: Upload results
       if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15.0-beta-1'}}
       uses: codecov/codecov-action@v6.0.0

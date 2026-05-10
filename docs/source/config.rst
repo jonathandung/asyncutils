@@ -56,7 +56,7 @@ XML    .xml           xmltodict          xmltodict
 .. danger::
 
   Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
-  Be especially careful with XML.
+  Be especially careful with XML. It is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
   Thus, write your configs yourself to avoid malicious inputs exhausting computing resources.
 
 .. seealso::
@@ -112,7 +112,8 @@ One may find it useful to alter the context dynamically without creating a new c
     {'SOCKET_TRANSPORT_LIMITS': (1024, 16384)}, # can optionally pass in a dictionary as the first and only positional argument
     ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR=True, # fields go here; keyword arguments are accepted
     observable_default_ntimes_n=3, # lowercase or mixed-case is allowed but not recommended
-    lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1 # fields do not have to be in order
+    lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1, # fields do not have to be in order
+    WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2] # list will be automatically converted into tuple
   ) # check if a string is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
 
 However, due care must be exercised to avoid messing up other parts of your program relying on this context. It is advisable to call the following

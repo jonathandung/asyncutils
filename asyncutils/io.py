@@ -169,7 +169,8 @@ class MemoryMappedIOManager(LoopContextMixin):
     def _memusage_helper(self): return sum(m.size() for m in self.open_mmaps)
     @asynccontextmanager
     async def prefetch_files(self, *P, init_size=0, _=S.exc_info):
-        try: l = tuple(map(partial(self.open, init_size=init_size), P)); yield await gather(*(c.__aenter__() for c in l))
+        l = tuple(map(partial(self.open, init_size=init_size), P))
+        try: yield await gather(*(c.__aenter__() for c in l))
         finally: t = _(); await gather(*(c.__aexit__(*t) for c in l))
     @asynccontextmanager
     async def create_sparsef(self, path, total_size, chunks):

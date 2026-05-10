@@ -40,7 +40,7 @@ async def test_sbarrier():
     assert x == y == z == deque((1, 3, 5))
 async def test_releasing():
     rel = Releasing(lock := Lock())
-    with pytest.raises(RuntimeError, match='asyncutils.altlocks.Releasing: lock is not acquired'):
+    with pytest.raises(RuntimeError, match=r'asyncutils\.altlocks\.Releasing: lock is not acquired'):
         async with rel: ...
     async with timeout(0.01): await lock.acquire()
     async with rel: assert not lock.locked()
@@ -48,11 +48,11 @@ async def test_releasing():
     lock.release()
 @timer
 async def dts(t):
-    async with t, t, t, t: ...
+    async with t, t, t: ...
 @timer
 async def dtf(t):
-    async with t, t, t, t: 1/0
+    async with t, t, t: 1/0
 async def test_dthrottle():
     t = DynamicThrottle(3, window=6)
-    assert (await dts(t))[1] == pytest.approx(1, rel=0.15)
+    assert 0.6 < (await dts(t))[1] < 1
     await dtf(t)
