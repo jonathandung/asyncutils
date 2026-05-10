@@ -82,7 +82,7 @@ other installation pathways:
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
 to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m``.
 
-Refer to `SUPPORT.md <https://github.com/jonathandung/asyncutils/blob/main/SUPPORT.md>`__ for steps to check the installation.
+Refer to `the support page <https://asyncutils.readthedocs.io/en/latest/support.html>`__ for steps to check the installation.
 
 .. _extras:
 

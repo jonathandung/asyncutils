@@ -16,7 +16,7 @@ class Log(BaseException): ...
 def raise_(msg, *a, exc_info=False): raise Log(msg%a)
 def ignore(*_): ...
 @fixture(scope='module')
-def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore)) # type: ignore
+def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore))
 @dec
 async def test_signal_log(wait_partial):
     with raises(Log, match='invalid signal None: .*'): await wait_partial(None)

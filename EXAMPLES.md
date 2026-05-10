@@ -72,6 +72,8 @@ name 'DynamicBoundedSemaphore' is not defined
 'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/context/index.html#asyncutils.context.Context'
 >>> find_help_url(asyncutils.channels.EventBus.audit_context)
 'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/channels/index.html#asyncutils.channels.EventBus.audit_context'
+>>> find_help_url('CRLFProtocol.connection_lost')
+'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/networking/index.html#asyncutils.networking.LineProtocol.connection_lost'
 >>> open_help(open_help) # Opens the https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#asyncutils.tools.open_help page\
 ... # in the system default browser using the standard webbrowser library and returns success
 True

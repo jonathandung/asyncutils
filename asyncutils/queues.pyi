@@ -1,3 +1,4 @@
+# mypy: disable-error-code="override"
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
@@ -77,10 +78,15 @@ def password_queue[R](*, maxsize: int=..., protect_get: Literal[True], protect_p
 def password_queue[V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., puttyp: type[V], strict: bool=...) -> B[Any, V, Any]: ...
 @overload
 def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., strict: bool=...) -> B[Any, Any, Any]:
-    '''| Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    | If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
-    | If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
-    | If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.'''
+    '''| Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with
+    | maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
+    | If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the caller's
+    | scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
+    | If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the caller's
+    | scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
+    | If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.
+    | The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use default
+    | values in the type parameters here to cut this number in half.'''
 class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
@@ -190,7 +196,7 @@ class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
     def __init__(self, maxsize: int=..., *, init_priority: int=..., init_items: SupportsIteration[T]): ...
     @overload
     def __init__(self, maxsize: int=..., *, init_priority: int=...): ...
-    def put_nowait(self, item: T, priority: int=...) -> None: ... # type: ignore[override]
-    def get_nowait(self) -> T: ... # type: ignore[override]
-    async def put(self, item: T, priority: int=...) -> None: ... # type: ignore[override]
-    async def get(self) -> T: ... # type: ignore[override]
+    def put_nowait(self, item: T, priority: int=...) -> None: ...
+    def get_nowait(self) -> T: ...
+    async def put(self, item: T, priority: int=...) -> None: ...
+    async def get(self) -> T: ...

@@ -50,7 +50,7 @@ def g(e, a=False, t=(str, int, bytes), _=k):
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise FaultyConfig(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, b, s = k('max_memerrs'), g('seed', True), f(N.executor), lambda: '', 'a', False, __import__('os').name == 'posix', S.stderr # type: ignore[no-redef]
+max_memerrs, e, Executor, get_past_logs, m, M, b, s = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr # type: ignore[no-redef]
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
@@ -68,7 +68,7 @@ match logging_to := g('log_to'):
         def get_past_logs(_=j):
             if r := (H := get_past_logs.handler).stream.getvalue(): H.setStream(_())
             return r
-        del j
+        get_past_logs.__text_signature__ = '()'; del j
     case 'STDOUT': s = S.stdout
     case 'STDERR': ...
     case 1 if b: s, logging_to = S.stdout, 'STDOUT'
@@ -102,14 +102,16 @@ class debugging:
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig))
-get_past_logs.handler, debug = _, debugging()
+debug = debugging()
 I.l = d = l.debug
+if get_past_logs is not str: get_past_logs.handler = _
 if N.debug:
     debug.__enter__(); d('python %s', S.version)
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
     if c: d('config file path: %s', c)
 __import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
-for _ in I.A: d(*_)
+p = (A := I.A).pop
+while A: d(*p())
 def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)

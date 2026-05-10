@@ -20,6 +20,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   logging
   top-level
   api/index
+  examples
   benchmark
   glossary
 
@@ -27,7 +28,6 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   :caption: About the project
   :hidden:
 
-  examples
   compat
   contributing
   conduct

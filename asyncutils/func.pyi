@@ -58,7 +58,11 @@ async def measure2[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> 
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=..., *, sequential: bool=...) -> BenchmarkResult:
     '''| `f` is the function to benchmark, which should take no arguments and return an awaitable.
     | `times` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
-    | `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.'''
+    | `warmup` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.
+    | `sequential` (default :const:`context.BENCHMARK_DEFAULT_SEQUENTIAL`) determines whether the function calls are made sequentially or gathered at once. For
+    | example, for functions requiring a mutex to be acquired or with other rate-limiting policies in place, you should explicitly pass `sequential=True`.
+    | This function should only be used in very simple cases, because we recognize the inherent difficulty and abundancy of noise in testing IO-bound code, and
+    | this library alone is by no means designed to solve that issue.'''
 class RateLimited[T, **P]:
     '''The rate limiter pattern as a decorator (factory). See :class:`~locks.AdvancedRateLimit` for the async context manager version.'''
     @overload

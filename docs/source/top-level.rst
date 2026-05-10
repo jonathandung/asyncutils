@@ -38,6 +38,15 @@ This section documents the symbols defined at the top level of this package.
 
   A :class:`frozenset` of names of submodules which are preloaded when importing the library for essential initialization.
 
+  .. version-changed:: 0.9.3
+    Removed :mod:`config` from this set.
+
+  .. version-changed:: 0.9.0
+    Added :mod:`cli` to this set.
+
+  .. version-changed:: 0.8.28
+    Added :mod:`context` to this set.
+
 .. data:: submodules_map
   :no-index:
   :module: asyncutils
@@ -54,6 +63,7 @@ This section documents the symbols defined at the top level of this package.
     as a proxy to the real submodule, loading it when strictly required.
 
   :admonition: Implementation detail
+
     The exact deferment mechanism is not part of the public API.
 
 .. function:: time_since_boot() -> float

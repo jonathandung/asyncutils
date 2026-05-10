@@ -70,7 +70,7 @@ Other resources if you're new to the world of async:
 
 If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
 
-For more, check out the [contributing guide](https://asyncutils.readthedocs.io/en/stable/contributing.md).
+For more, check out the [contributing guide](https://asyncutils.readthedocs.io/en/stable/contributing.html).
 
 ## License
 

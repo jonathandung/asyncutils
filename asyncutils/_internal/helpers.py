@@ -43,4 +43,11 @@ class LoopMixinBase:
     def make(self, aw, /): return self.loop.create_task(simple_wrap(aw))
     def make_fut(self): return self.loop.create_future()
     def make_multiple(self, aws, /): yield from map(self.make, aws)
+@subscriptable
+class Bag(dict): # noqa: FURB189
+    __slots__ = ()
+    def __getattr__(self, k, /):
+        try: return self[k]
+        except KeyError: raise AttributeError(name=k, obj=self) from None
+    __setattr__, __delattr__ = dict.__setitem__, dict.__delitem__
 ismodule.__text_signature__, subscriptable.__text_signature__, fullname.__text_signature__, verify_compat.__text_signature__, get_loop_and_set.__text_signature__ = '(o, /)', '(cls, /)', '(f, /, rmpref=False)', '(v, /)', '()'

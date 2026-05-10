@@ -36,7 +36,7 @@ class EventWithValue(EventMixin):
             f, w = (t := []).append, self._waiters
             for _ in w: f(_) if _.done() else _.set_result(value)
             w.difference_update(t)
-    def remove_done_waiters(self, _=__import__('_operator').methodcaller('done')): (W := self._waiters).difference_update(filter(_, W))
+    def remove_done_waiters(self, _=__import__('_operator').methodcaller('done')): (W := self._waiters).difference_update(filter(_, W)) # noqa: B008
     def set_once(self, value): v = self._value; self.set(value); self.set(v)
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):
@@ -59,12 +59,13 @@ class EventWithValue(EventMixin):
         for t, _ in I:
             if t >= x: yield t, _; yield from I
     async def wait_for_transition(self, old, new, timeout=None, *, force_transition=False):
+        x = new
         try:
             async with _timeout(timeout):
                 while True:
-                    await self.wait_for_value(old)
-                    if new is await self.wait_for_next(): return True
+                    if x is not old: await self.wait_for_value(old)
+                    if new is (x := await self.wait_for_next()): return True
         except TimeoutError:
-            if force_transition: o = self.get(None); self.set(old); self.set(new); self.set(o, strict=False) # type: ignore[arg-type]
+            if force_transition: o = self.get(None); (s := self.set)(old); s(new); s(o, strict=False) # type: ignore[arg-type]
             return False
     async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))

@@ -39,7 +39,7 @@ For quick questions, consider:
 
 **Never report security vulnerabilities publicly.**
 
-See [SECURITY.md](https://asyncutils.readthedocs.io/en/stable/security.html) for details.
+See [the security policy](https://asyncutils.readthedocs.io/en/stable/security.html) for details.
 
 ## 🔧 Common Issues & Solutions
 

@@ -47,7 +47,7 @@ __hexversion__: Final[int]
 '''| An integer encoding the current version suitable for numerical comparisons; inspired by :const:`sys.hexversion`.
 | For example, `0x12070e` corresponds to version 18.7.14.'''
 console_preloaded_submodules: Final[frozenset[Submodule]]
-'''Below, but including `'base'` and `'console'` as well.'''
+'''Below, but including `'base'`, `'config'`, and `'console'` as well.'''
 preloaded_submodules: Final[frozenset[Submodule]]
 '''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup.'''
 submodules_map: Final[dict[Submodule, ModuleType]]

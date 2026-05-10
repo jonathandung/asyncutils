@@ -76,7 +76,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         | Pass a negative value for `max_memerrs` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
         | If `always_install_completer` is True, set the completer on readline as long as readline is available.
         | Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
-        | If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start python with the -i flag.'''
+        | If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start Python with the `-i` flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing (this differs from the superclass behaviour).'''
     @final
     def interrupt(self) -> None: '''Pass `additional_interrupt_hooks` to the subclass constructor to change the behaviour when encountering a :exc:`KeyboardInterrupt`, instead of touching this method.'''

@@ -26,7 +26,7 @@ async def test_cbreaker():
     async def f(): return 1
     assert await f() == 1
     async def g(): return 1/0
-    g = cb(g, default=0) # type: ignore
+    g = cb(g, default=0)
     for _ in range(3): assert await g() == 0
     with pytest.raises(CircuitOpen): await g()
     await sleep(0.25)

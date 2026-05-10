@@ -6,9 +6,9 @@ submodules on import, and the event loop is quite difficult to implement. This i
 simplifying boilerplate-heavy code and integrating and combining existing patterns seamlessly with a set of core utilities, so :mod:`asyncutils` is
 not at all heavy in terms of import time. In addition, you only pay for what you use; the parts of the code you don't call are not executed until
 you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast, light and
-tightly coupled to the ever-evolving asyncio ecosystem, because of its design goals and philosophy. Here are some concrete figures:
+tightly coupled to the ever-evolving asyncio ecosystem, because of its design goals and philosophy.
 
-Below are obtained by running each of the following commands sequentially with no warmup:
+The figures below are obtained by running each of the following sequentially with no warmup tenfold in a fresh console session:
 
 Baseline:
 
@@ -16,25 +16,25 @@ Baseline:
 
   python -SEqX importtime -c "import asyncio"
 
-Cumulative import time of asyncio: 115.1 ± 12.4 ms; max 139.4 ms, min 103.3 ms; n = 10
+Cumulative import time of asyncio: 115.1 ± 12.4 ms; max 134.4 ms, min 103.3 ms; n = 10
 
 .. code-block:: bash
 
   python -SEqX importtime -c "import asyncutils"
 
-Cumulative import time of asyncutils: 7774 ± 653 μs; max 8786 μs, min 6708 μs; n = 10
+Cumulative import time of asyncutils: 123.8 ± 12.6 ms; max 138.3 ms, min 107.9 ms; n = 10
 
 .. code-block:: bash
 
   python -SEqm asyncutils -d
 
-Time taken to initialize all submodules (and import asyncio): 122.1 ± 9.5 ms; max 136.5 ms, min 109.2 ms, n = 10
+Time taken to start the console with asyncio imported: 122.1 ± 9.5 ms; max 136.5 ms, min 109.2 ms, n = 10
 
 .. code-block:: bash
 
   python -SEqm asyncutils -dp
 
-Time taken to actually import all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms, min 237.0 ms, n = 10
+Time taken to actually import asyncio and all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms, min 237.0 ms, n = 10
 
 .. note::
   :collapsible:

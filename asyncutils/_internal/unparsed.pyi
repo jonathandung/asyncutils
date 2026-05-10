@@ -1,7 +1,7 @@
 '''This submodule automatically reads the config from the file whose path is specified by `AUTILSCFGPATH`.
 
 .. important:: Values will be overwritten by command-line arguments when this module runs as a script.'''
-from .types import Bag
+from .helpers import Bag
 from typing import Any, Final, overload
 N: Final[Bag]
 '''The frozen part of the configuration as a light namespace-like object.'''

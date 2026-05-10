@@ -1,3 +1,4 @@
+# mypy: disable-error-code="override"
 '''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
@@ -15,7 +16,10 @@ __all__ = ()
 '''| This is a fake module, and none of its symbols exist at runtime.
 | Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
 
-.. tip:: For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks, and use `from __future__ import annotations` on Python 3.13 or below.'''
+.. tip::
+
+  For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks, and use `from __future__ import annotations` on the top of the file
+  for Python 3.13 or below, so that the annotations need not be quoted even prior to :pep:`563`, which introduced deferred annotation evaluation.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -78,11 +82,11 @@ class SupportsPopLeft[T](Protocol):
 class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
     '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
     def send(self, val: S, /) -> Y: ...
-    @overload # type: ignore[override]
+    @overload
     def throw(self, typ: ExcType, val: BaseException|None=..., tb: TracebackType|None=..., /) -> Y: ...
     @overload
     def throw(self, exc: BaseException, /) -> Y: ...
-    def close(self) -> R|None: ... # type: ignore[override]
+    def close(self) -> R|None: ...
     @property
     def gi_code(self) -> CodeType: ...
     @property
@@ -94,9 +98,9 @@ class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
     @property
     def gi_suspended(self) -> bool: ...
     @property
-    def __name__(self) -> str: ... # type: ignore[override]
+    def __name__(self) -> str: ...
     @property
-    def __qualname__(self) -> str: ... # type: ignore[override]
+    def __qualname__(self) -> str: ...
     def __await__(self) -> Generator[Any, None, R]: ...
 @type_check_only
 class PartialInterfaceMeta(type):
@@ -111,7 +115,7 @@ class PartialInterface(metaclass=PartialInterfaceMeta):
     def __getattr__(self, name: str, /) -> Any: ...
 @type_check_only
 class DumpType(Protocol):
-    '''Represents the type of simple json-dumping functions accepted by :func:`~tools.argv_to_json` and :func:`~tools.argstr_to_json`.'''
+    '''Encapsulates the signature of simple json-dumping functions accepted by :func:`~tools.argv_to_json` and :func:`~tools.argstr_to_json`.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
@@ -143,7 +147,7 @@ class Middleware(Protocol):
     def __hash__(self) -> int: ...
 @type_check_only
 class SupportsMatMul(Protocol):
-    '''Objects that supports matrix multiplication, returning an instance of its own type.'''
+    '''Objects that implement matrix multiplication to return an instance of its own type.'''
     def __matmul__(self, other: Self, /) -> Self: ...
 @type_check_only
 class Q[R, T](Protocol):
@@ -168,13 +172,13 @@ class Q[R, T](Protocol):
 @type_check_only
 class G[R, T](Q[R, T], Protocol):
     '''Queues for which :meth:`get` is protected by a password.'''
-    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, wait until an item is available.''' # type: ignore[override]
-    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.''' # type: ignore[override]
+    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
+    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
 @type_check_only
 class P[R, T](Q[R, T], Protocol):
     '''Queues for which :meth:`put` is protected by a password.'''
-    async def put(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, wait until a free slot is available.''' # type: ignore[override]
-    def put_nowait(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.''' # type: ignore[override]
+    async def put(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
+    def put_nowait(self, item: T, pwd: R) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
 class B[R, V, T](G[R, T], P[V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords, which may or may not be the same.'''
 @type_check_only
@@ -283,12 +287,6 @@ class MemoryMappedFile(LoopContextMixin):
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
     async def compact(self) -> None: '''Reduce the size of the file by stripping all contiguous null bytes at the end.'''
 @type_check_only
-class Bag(dict[str, Any]): # noqa: FURB189
-    '''A thin dictionary subclass that supports attribute access.'''
-    def __getattr__(self, key: str, /) -> Any: ...
-    def __setattr__(self, key: str, value: Any, /) -> None: ...
-    def __delattr__(self, key: str, /) -> None: ...
-@type_check_only
 class AUnzipConsumer[T]:
     '''The type of each consumer in the tuple return value of :func:`iters.aunzip`.'''
     def __aiter__(self) -> Self: ...
@@ -318,7 +316,7 @@ class DualContextManager[T]:
 @type_check_only
 class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the :mod:`asyncutils.constants` namespace.''' # type: ignore[override]
+    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the :mod:`asyncutils.constants` namespace.'''
 @final
 @type_check_only
 class NoDefaultType(Sentinel): ...
