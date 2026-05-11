@@ -20,7 +20,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.3] - 2026-05-10; newest
+### [0.9.3] - 2026-05-11; newest
 
 Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
 sphinx-copybutton as an optional dependency.

@@ -667,7 +667,7 @@ async def _factor_pollard(n):
     raise ValueError(f'afactor: internal error: {n} is prime')
 @lru_cache
 def _shift_to_odd(n):
-    if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError('invalid n')
+    if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError(f'aisprime: internal error: {n} is invalid')
     return s, d
 def _probable_prime(n, base, _=_shift_to_odd): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or any((x := x*x%n) == n-1 for _ in range(s-1))
 async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable_prime):

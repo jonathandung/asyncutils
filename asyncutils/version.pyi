@@ -74,28 +74,28 @@ class VersionInfo(str): # noqa: FURB189
         * t, tuple: `'(123, 4, 0)'`
         * h, hash: `'116380397'`
         * n, majmin: `'123.4'`"""
-    def __int__(self) -> int: '''Assumes :attr:`minor` and :attr:`patch` are less than 256.'''
+    def __int__(self) -> int: '''Assuming :attr:`minor` and :attr:`patch` are less than 256, pack the parts into an integer, which can be larger than 24 bits to fit the major version. :exc:`OverflowError` is raised if not possible.'''
     def __index__(self) -> int: '''The same as :meth:`__int__`.'''
     def __floor__(self) -> int: '''Return the major version.'''
     def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
     def __ceil__(self) -> int: '''Return the major version, adding one if there is a minor or patch version.'''
     def __float__(self) -> float: '''Assumes :attr:`minor` and :attr:`patch` are less than 100.'''
     def __replace__(self, **k: int) -> Self: ...
-    def _replace(self, **k: int) -> Self: ...
+    def _replace(self, **k: int) -> Self: '''Satisfy the named tuple interface.'''
     def to_complex(self) -> complex: '''Loses the patch version. Since this class is a :class:`str` subclass, an implementation of :meth:`__complex__` will not be recognized.'''
     def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''
     def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
     def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: '''Whether this version is compatible with the other, given the major and minor tolerances.'''
     def next_patch(self) -> Self: '''The patch version following this version.'''
-    def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
-    def next_major(self) -> Self: '''The major version following this version, with a minor and patch of 0.'''
+    def next_minor(self) -> Self: '''The minor version following this version, with a patch of `0`.'''
+    def next_major(self) -> Self: '''The major version following this version, with a minor and patch of `0`.'''
     def shelve(self, path: Openable, /, key: int=...) -> None: '''Store this version into the specified `path`, non-cryptographically transforming the bytes with `key`, which can be any integer.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''
     @classmethod
     def from_hash(cls, hashed: int) -> Self: '''Reconstruct the version from its hash.'''
     @classmethod
-    def from_rep(cls, rep: str) -> Self: '''Parse a version from the string representation.'''
+    def from_rep(cls, rep: str) -> Self: '''Parse the string representation of a version to get the version back.'''
     @classmethod
     def unshelve(cls, path: Openable, /, key: int=...) -> Self: '''Recover a stored version from `path`. A wrong key would usually raise an error, and even if it doesn't, the version would be wrong.'''
     @classmethod
@@ -114,7 +114,7 @@ class VersionInfo(str): # noqa: FURB189
     def patch(self) -> int: '''The patch part of the version.'''
 @final
 class VersionDelta(NamedTuple):
-    '''A named tuple-like class representing the difference between versions. Not actually created by :func:`collections.namedtuple`. Can be taken by the + or - operators.'''
+    '''A named tuple-like class representing the difference between versions. Not actually created by :func:`collections.namedtuple`, but has its methods. Can be taken by the + or - operators.'''
     major: int = ...
     '''The major part of the version.'''
     minor: int = ...

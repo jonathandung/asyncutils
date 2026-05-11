@@ -36,7 +36,7 @@ def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initializ
     elif isinstance(o, property): o = o.fget
     if h.ismodule(o): s, o = o.__name__, None
     elif callable(o): s, o = o.__module__, o.__qualname__
-    elif not isinstance(o, str): raise TypeError(f'tools.find_help_url: expected a string, module or callable; got {h.fullname(o)}')
+    elif not isinstance(o, str): raise TypeError(f'tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
     s = s.removeprefix('asyncutils.'); return (f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{o}/index.html' if o in M else 'https://asyncutils.readthedocs.io/en/stable/top-level.html') if s == 'asyncutils' else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{s}/index.html#{f"module-asyncutils.{s}" if o is None else f"asyncutils.{s}.{o}"}'
 def open_help(o=None, /): return __import__('webbrowser').open(find_help_url(o))
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()

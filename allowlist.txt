@@ -3,7 +3,7 @@ asyncutils.__main__
 (asyncutils\._internal\.types\..*)
 (asyncutils\..*\.__class_getitem__)
 (asyncutils\._internal\.py31[23]\..*)?
-(asncutils\..*\.__lazy_modules__)?
+(asyncutils\..*\.__lazy_modules__)?
 asyncutils._internal.log
 asyncutils._internal.initialize.l
 (asyncutils\.altlocks)?

@@ -50,7 +50,7 @@ def g(e, a=False, t=(str, int, bytes), _=k):
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise FaultyConfig(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, b, s = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr # type: ignore[no-redef]
+max_memerrs, e, Executor, get_past_logs, m, M, b, s, _ = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler() # type: ignore[no-redef]
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
@@ -64,11 +64,11 @@ match logging_to := g('log_to'):
         else: M = True
         del T, h
     case 'MEMORY':
-        s = (j := __import__('_io').StringIO)()
-        def get_past_logs(_=j):
-            if r := (H := get_past_logs.handler).stream.getvalue(): H.setStream(_())
+        from _io import StringIO as J
+        def get_past_logs(j=J, _=_):
+            if r := _.stream.getvalue(): _.setStream(j())
             return r
-        get_past_logs.__text_signature__ = '()'; del j
+        get_past_logs.__text_signature__, s = '()', J(); del J
     case 'STDOUT': s = S.stdout
     case 'STDERR': ...
     case 1 if b: s, logging_to = S.stdout, 'STDOUT'
@@ -79,7 +79,8 @@ match logging_to := g('log_to'):
         except OSError as b: s.write(f'ERROR: {b}\n')
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
 if M: s.write('ERROR: Failed to create log file; falling back to stderr\n')
-l.addHandler(_ := L.StreamHandler(s))
+l.addHandler(_)
+_.setStream(s)
 _.setFormatter(L.Formatter('%(asctime)s - asyncutils - %(levelname)s - %(message)s'))
 (set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 class debugging:
@@ -104,7 +105,6 @@ class debugging:
     P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig))
 debug = debugging()
 I.l = d = l.debug
-if get_past_logs is not str: get_past_logs.handler = _
 if N.debug:
     debug.__enter__(); d('python %s', S.version)
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)

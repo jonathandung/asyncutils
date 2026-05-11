@@ -159,7 +159,7 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
         for _ in repeat(None, warmup): await f()
     else: await gather(*(f() for _ in repeat(None, warmup)))
     audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in range(times)] if sequential else await gather(*(g() for _ in range(times)))), max(t), S := sum(t), S/times, T)
-P.patch_function_signatures((measure, _ := 'f, /, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
+P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
     def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):

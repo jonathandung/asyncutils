@@ -90,9 +90,9 @@ class ConsoleBase(B):
     @property
     def is_running(self): return self._internal_is_running
     def run(self, *, exitmsg='Thank you for using %s!\nExiting REPL...\n', threadname='<%s REPL thread>', max_memerrs=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))):
-        self.prehook(max_memerrs); S.audit(f'{fullname(self)}.run', id(self)); l = self._loop
+        self.prehook(max_memerrs); S.audit(f'{fullname(self)}.run', id(self)); l, w, n = self._loop, S.stderr.write, self.NAME
         if always_run_interactive or S.stdin.isatty():
-            S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%(n := self.NAME), target=self.interact, daemon=True).start(); w = S.stderr.write
+            S.audit('cpython.run_stdin'); __import__('threading').Thread(name=threadname%n, target=self.interact, daemon=True).start()
             if callable(h := getattr(S, i := '__interactivehook__', None)): # pragma: no cover
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
