@@ -25,7 +25,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     def __enter__(self):
         if self.guarded: raise self
         self.guarded = True
-    def __exit__(self, /, *_, e=RuntimeError('__aexit__ called without prior __aenter__ call')): # noqa: B008
+    def __exit__(self, /, *_, e=RuntimeError('asyncutils.altlocks.ResourceGuard: __aexit__ called without prior __aenter__ call')): # noqa: B008
         if not self.guarded: raise e
         self.guarded = False
     @classmethod
@@ -53,9 +53,9 @@ class CircuitBreaker:
             async with self._lock: # type: ignore
                 if (s := self.state) == 2: # noqa: PLR2004
                     if timer()-self._opened > self._reset: self.state, self._half_open_calls = 1, 0
-                    else: raise CircuitOpen(f'circuit {self.name} is open')
+                    else: raise CircuitOpen(f'asyncutils.altlocks.CircuitBreaker: circuit {self.name} is open')
                 elif s == 1:
-                    if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise CircuitHalfOpen(f'circuit {self.name} exceeded the maximum of {m} calls in the half-open state')
+                    if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise CircuitHalfOpen(f'asyncutils.altlocks.CircuitBreaker: breaker {self.name} exceeded the maximum of {m} calls in the half-open state')
                     self._half_open_calls = c+1
                 try:
                     async with self._unlock: r = await f(*a, **k) # type: ignore
@@ -67,7 +67,7 @@ class CircuitBreaker:
                     if default is _NO_DEFAULT: raise
                     return default
                 except CRITICAL: raise Critical
-                except BaseException as e: raise CircuitBreakerError(f'unexpected {fullname(e)} in {fullname(f)} under {fullname(self)} {self.name!r}') from e
+                except BaseException as e: raise CircuitBreakerError(f'asyncutils.altlocks.CircuitBreaker: unexpected {fullname(e)} in {fullname(f)} under breaker {self.name!r}') from e
         return wraps(f)(wrapper)
     P.patch_classmethod_signatures((__new__, 'name, /, max_fails=None, reset=None, *, exc={}, max_half_open_calls=None'))
 class StatefulBarrier(AwaitableMixin):
@@ -107,8 +107,8 @@ class DynamicThrottle:
         C = getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
-        if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('inconsistent rates applying bounds')
-        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf, self._rate = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate; self.reset()
+        if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('asyncutils.altlocks.DynamicThrottle: inconsistent rates after applying bounds')
+        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf, self._rate, self._lc = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate, timer()-1.0/init_rate; self.reset()
     @property
     def rate(self): return self._rate
     @rate.setter
@@ -127,9 +127,9 @@ class DynamicThrottle:
     async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._lc)*(1.0+self._randf(self._jitter))); self._lc = self.ctime
     async def __aexit__(self, e, /, *_):
         async with self._lock:
-            if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._uf if (r := s/t) > self._ub else self._lf if r < self._lb else 1.0; self._successes = self._fails = 0
+            if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._uf if (r := s/t) > self._ub else self._lf if r < self._lb else 1.0; self.reset()
             if e is None: self._successes += 1
             else: self._fails += 1
-    def reset(self): self._successes = self._fails = 0; self._lc = self.ctime-1.0/self._rate
+    def reset(self): self._successes = self._fails = 0
     P.patch_method_signatures((__aexit__, P.xsig))
 del _randinst, count, P

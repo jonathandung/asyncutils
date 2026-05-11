@@ -84,7 +84,9 @@ exclude_also = ["if __name__ == '__main__':", "raise NotImplementedError", "^\\s
 [tool.ruff]
 namespace-packages = ["tests"]
 target-version = "py312"
-exclude = [".git", "__pycache__", "build", "dist", "venv", "env", ".venv", ".env", "*.egg-info", ".eggs", ".mypy_cache", ".pytest_cache", "docs/source/conf.py"]
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+extend-exclude = ["docs/source/conf.py"]
+required-version = ">=0.15.12"
 
 [tool.ruff.lint]
 ignore = ["ANN401", "ASYNC109", "B904", "B905", "B912", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "N803", "N806", "N812", "N818", "PLC0415", "PLC1901", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
@@ -149,3 +151,9 @@ max-positional-args = 6
 max-public-methods = 41
 max-branches = 16
 max-nested-blocks = 5
+
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.src]
+include = ["asyncutils"]

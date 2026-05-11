@@ -30,10 +30,10 @@ class Context:
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
     def copy(self): return type(self)(**self.asdict())
     def replace(self, /, **k): return self.replace_from_dct(k)
-    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True)): file.write('Context.from_dct(\n'); pp._format(self.asdict(), file, 0, 0, {}, 0); print(end='\n)\n', file=file, flush=flush) # pragma: no cover # noqa: B008
-    def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _()); return s.getvalue()
+    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True), incl_newline=True): file.write('Context.from_dct(\n'); pp._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*incl_newline, file=file, flush=flush) # pragma: no cover # noqa: B008
+    def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _(), incl_newline=False); return s.getvalue()
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
-    __copy__, __replace__ = copy, replace; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
+    __copy__, __replace__ = copy, replace; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
 def getcontext(_=_, d=Context()):
     try: return _.get()
     except LookupError: _.set(d); return d

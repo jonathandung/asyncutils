@@ -31,6 +31,7 @@ htmlcov/
 coverage.xml
 *.cover
 *.py.cover
+*.out
 .pytest_cache/
 cover/
 *.mo
@@ -58,5 +59,4 @@ dmypy.json
 cython_debug/
 .vscode/
 .ruff_cache/
-.out/
 .pypirc

@@ -88,9 +88,9 @@ python -m asyncutils
 python asyncutils
 python -m asyncutils.__main__
 python asyncutils/__main__.py
-python -m asyncutils/__main__.py # this is documented to be unsupported, but somehow works
-# python asyncutils.__main__ straight up doesn't work
+python -m asyncutils/__main__.py # this is documented to be unsupported, but works on some versions
+# python asyncutils.__main__ doesn't work because python attempts to find a file called asyncutils.__main__ in the cwd
 ```
 
 If you're in the integrated shell of VS Code, it is recommended that you unset the `PYTHON_BASIC_REPL` environment variable or turn off shell
-integration for a better experience in my opinion, since this console does not work well building on the pre-3.12 REPL at all.
+integration for a better experience in my opinion, since this console does not work well building on the pre-3.13 REPL at all.

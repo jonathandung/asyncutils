@@ -23,7 +23,7 @@ class event_loop: # noqa: N801
     def clear_flags(self, mask_to_keep: int|None=...) -> None: '''Reset the configuration to the defaults.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
     @classmethod
-    def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options.'''
+    def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options (default :const:`context.EVENT_LOOP_BASE_FLAGS`).'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]=...) -> AbstractEventLoop: '''Return a usable asyncio event loop from the internal pool, or a new event loop if there are none.'''
 @overload
 def iter_to_agen[T, R](it: AsyncGenerator[T, R], sentinel: T=..., *, use_existing_executor: bool=..., create_executor: bool=..., strict: Literal[False]=...) -> AsyncGenerator[T, R]: ...
@@ -35,11 +35,11 @@ def iter_to_agen[T](it: Iterable[T], *, use_existing_executor: bool=..., create_
 def iter_to_agen[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGenerator[T]:
     '''| Convert the (async) iterable `it` to an async generator as non-blockingly as possible.
     | If `it` is an async generator and `sentinel` is not passed, it is returned as is.
-    | Values sent to the return async generator will be passed to the original.
+    | Values sent to the return async generator will be passed through to the original.
     | The async generator will stop when it encounters an item identical to `sentinel`.
     | When `use_existing_executor=True` is passed (default :const:`context.ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR`), the function will attempt to use
-    | an existing executor as created by previous calls specifying `create_executor=True` (default :const:`context.ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR`) to
-    | advance the iterable, and fall back to blocking the event loop every step without an executor.
+    | an existing executor as created by previous calls specifying `create_executor=True` (default :const:`context.ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR`)
+    | to advance the iterable, and fall back to blocking the event loop every step without an executor.
     | If `strict` is `True` (default :const:`context.ITER_TO_AGEN_DEFAULT_STRICT`), only sync iterables are accepted.'''
 @overload
 def aiter_to_gen[T, R](ait: AsyncGenerator[T, R], *, use_futures: bool=..., loop: AbstractEventLoop|None=..., strict: bool=...) -> Generator[T, R]: ...
@@ -63,7 +63,7 @@ async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Ca
     | The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
     | If `raising` is `True`, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> list[T]:
-    '''| Collect `n` items from the (async) iterable into a list and return that list.
+    '''| Return a list of the first `n` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than `n` items to collect, throw :exc:`exceptions.ItemsExhausted` if default is :const:`constants.RAISE` and emit a warning
     | through the logger before padding the behind of the list with copies of the default if passed otherwise.
 
@@ -90,7 +90,7 @@ def drop[T](it: SupportsIteration[T], n: int, *, raising: bool=...) -> AsyncGene
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T], None]: '''The async version of enumerate, except it is not a class and additionally supports the `step` parameter.'''
 async def sleep_forever() -> NoReturn: '''A coroutine that only completes when an exception is thrown in. The exception is propagated.'''
 dummy_task: GeneratorCoroutine[None, Any, Any]
-'''An awaitable object that completes immediately and is also an exhausted generator.
+'''An awaitable object that completes immediately. Also an exhausted generator.
 
 .. admonition:: Implementation detail
 

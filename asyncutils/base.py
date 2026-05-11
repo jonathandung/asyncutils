@@ -107,7 +107,7 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
         L = len(r := await gather(*map(f, r), return_exceptions=True))
-        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
+        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'base.safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,PLR0912
     audit('asyncutils.base.iter_to_agen', a(it)); C = getcontext()
     if b(it, '__aiter__') and not (C.ITER_TO_AGEN_DEFAULT_STRICT if strict is None else strict):
@@ -121,13 +121,13 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
                 if _(l, sentinel): break
                 yield l
         return
-    elif not b(it, '__iter__'): raise TypeError(f'iter_to_agen: cannot iterate over {it!r} synchronously or asynchronously')
+    elif not b(it, '__iter__'): raise TypeError(f'asyncutils.base.iter_to_agen: cannot iterate over {it!r} synchronously or asynchronously')
     e, g = None, _(it := iter(it))
     if create_executor is None: create_executor = C.ITER_TO_AGEN_DEFAULT_MAY_CREATE_EXECUTOR
     if C.ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor:
         if (e := getattr(iter_to_agen, 'executor', None)) is None:
             if create_executor: e = s(iter_to_agen)
-            else: w('iter_to_agen: no existing executor')
+            else: w('asyncutils.base.iter_to_agen: no existing executor')
     elif create_executor: e = s(iter_to_agen, False)
     with g:
         if e is None:
@@ -151,12 +151,12 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
 def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set):
     audit('asyncutils.base.aiter_to_gen', a(ait)); from asyncio.futures import _chain_future as e; C = getcontext()
     if b(ait, '__iter__') and not (C.AITER_TO_GEN_DEFAULT_STRICT if strict is None else strict): yield from ait; return
-    if not b(ait, '__aiter__'): raise TypeError(f'aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')
+    if not b(ait, '__aiter__'): raise TypeError(f'asyncutils.base.aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')
     d = b(ait := aiter(ait), 'asend', 'athrow', 'aclose')
     with ignore_stopaiteration:
         if loop is None: loop = g()
         if loop.is_running():
-            if not (C.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES if use_futures is None else use_futures): raise RuntimeError(f'aiter_to_gen: cannot convert async iterator {ait!r} to sync in running event loop without using futures')
+            if not (C.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES if use_futures is None else use_futures): raise RuntimeError(f'asyncutils.base.aiter_to_gen: cannot convert async iterator {ait!r} to sync in running event loop without using futures')
             def f(*a, f, c=loop.create_task, g=e, t=Future): return g(c(f(*a)), F := t()) or F.result()
             if d:
                 f, x = partial(f, f=ait.asend), None
@@ -172,7 +172,7 @@ def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H
             else:
                 f = ait.__anext__
                 while True: yield a(f())
-async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='base.take ran out of items'):
+async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base.take: ran out of items'):
     if n is None:
         async for i in iter_to_agen(it): yield i
         return
@@ -183,8 +183,8 @@ async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='base.take ran o
     if default is _NO_DEFAULT: _(m)
     else:
         for _ in range(n): yield default
-async def collect(it, n=None, *, default=_NO_DEFAULT, _='base.collect ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
-async def drop(it, n, *, raising=False, _=L.debug, m='base.drop ran out of items'):
+async def collect(it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
+async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items'):
     i, it = 0, iter_to_agen(it)
     async for i, _ in aenumerate(it):
         if i >= n: yield _

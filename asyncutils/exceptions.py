@@ -18,13 +18,13 @@ def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest_helper, **k):
 def unnest_reverse(g, /, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
 def potent_derive(*groups, ordered=True, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
-    if not isinstance(g := groups[0], BaseExceptionGroup): *_, t = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__ = _
+    if not isinstance(g := groups[0], BaseExceptionGroup): _ = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__, g.__traceback__ = _
     if n:
         if isinstance(n, str): g.add_note(n)
         else:
             try: g.__notes__.extend(n)
             except AttributeError: g.__notes__ = list(n)
-    return g.with_traceback(t)
+    return g
 def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppress=False, notes=(), _=exception):
     if not isinstance(e, BaseException): raise TypeError(f'cannot prepare non-exception: {e!r}')
     if isinstance(notes, str): e.add_note(notes)

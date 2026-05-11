@@ -17,7 +17,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
     @classmethod
-    def guard(cls, obj: object, /, *, action: str=...) -> Self: '''Alternate constructor; determines the name of the resource from the representation of the object.'''
+    def guard(cls, obj: object, /, *, action: str=...) -> Self: '''Alternate constructor which determines the name of the resource from the representation of the object.'''
 @final
 class UniqueResourceGuard(ResourceGuard):
     '''A subclass of :class:`ResourceGuard` that only allows one guard per object. Cannot be further subclassed.
@@ -116,7 +116,7 @@ class DynamicThrottle:
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''If an error caused the context manager, increment `fails` and reraise; otherwise, increment `successes`. Also adjust the rate if necessary.'''
-    def reset(self) -> None: '''Reset the successes and fails.'''
+    def reset(self) -> None: '''Reset the counts of successes and fails.'''
     @property
     def ctime(self) -> float: '''The current time as returned by `timer`.'''
     @property

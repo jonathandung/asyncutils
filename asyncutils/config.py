@@ -30,7 +30,7 @@ def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=froze
         else:
             d, *a = e.split('_')
             if d == 'elib':
-                if S.version_info >= (3, 14): __import__('_warnings').warn('executorlib is not compatible with Python 3.14 and above', ImportWarning, 2)
+                if S.version_info >= (3, 14): __import__('_warnings').warn('executorlib is not yet compatible with Python 3.14 and above', ImportWarning, 2)
                 try: a, e = a; return getattr(_('executorlib.executor.'+a), f'{a.title()}{e.title()}Executor')
                 except ImportError: d = 'executorlib'
             elif d == 'pebble':
@@ -50,7 +50,7 @@ def g(e, a=False, t=(str, int, bytes), _=k):
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise FaultyConfig(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, b, s, _ = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler() # type: ignore[no-redef]
+max_memerrs, e, Executor, get_past_logs, m, M, o, s, _ = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler() # type: ignore[no-redef]
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
@@ -71,8 +71,8 @@ match logging_to := g('log_to'):
         get_past_logs.__text_signature__, s = '()', J(); del J
     case 'STDOUT': s = S.stdout
     case 'STDERR': ...
-    case 1 if b: s, logging_to = S.stdout, 'STDOUT'
-    case 2 if b: logging_to = 'STDERR'
+    case 1 if o: s, logging_to = S.stdout, 'STDOUT'
+    case 2 if o: logging_to = 'STDERR'
     case str()|int()|bytes():
         try: M = True; logging_to = getattr(s := open(logging_to, m), 'name', logging_to); M = False
         except PermissionError as b: s.write(f'ERROR: insufficient permissions: {b}\n')
@@ -121,4 +121,4 @@ if loaded_all:
     i = I.Module.load
     for _ in I.s.values(): i(_)
     l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
-del _, e, L, M, N, S, f, m, r, s, b, P, g, k, l, c, d # noqa: F821
+del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d

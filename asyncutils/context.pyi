@@ -12,13 +12,13 @@ class Context:
     '''| An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for
     | :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
     | :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like a sequence.
-    | Type annotated as a dataclass for convenience.
     | The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
     | For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what it configures.
 
     .. tip:: If you need to use any of the settings, you can find the documentation under the API reference for the utilities that use that setting.
     .. note:: Refer to format.json5 for the factory default values of each setting.
-    .. note:: It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.'''
+    .. note:: It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.
+    .. note:: This is only type annotated as a dataclass for convenience and to avoid even more code duplication than there is now.'''
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...
     CIRCUIT_BREAKER_DEFAULT_RESET: float = ...
@@ -104,7 +104,7 @@ class Context:
     def copy(self) -> Self: '''Return a copy of the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
-    def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter=...) -> None: '''Pretty print the context to the provided file-like object with the provided :class:`pprint.PrettyPrinter` instance.'''
+    def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter=..., incl_newline: bool=...) -> None: '''Pretty print the context to the provided file-like object `file` with the :class:`pprint.PrettyPrinter` instance `pp`, without a trailing newline if `incl_newline=False` is specified.'''
     def replace(self, /, **k: Any) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''

@@ -45,6 +45,7 @@ var/
 docker-compose*.yml
 docker-compose*.yaml
 *.log
+*.out
 *.db
 *.sqlite
 *.sqlite3
@@ -53,4 +54,3 @@ allowlist.txt
 .dockerignore
 .pre-commit-config.yaml
 .editorconfig
-.out/
