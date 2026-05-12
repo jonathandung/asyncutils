@@ -19,8 +19,8 @@ def ignore(*_): ...
 def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore))
 @dec
 async def test_signal_log(wait_partial):
-    with raises(Log, match='invalid signal None: .*'): await wait_partial(None)
-    with raises(Log, match='wait_for_signal timed out'): await wait_partial(4, timeout=0.05)
-    with raises(Log, match=r'(insufficient permissions for signal .*: .*)|(error registering signal handler: sig \d+ cannot be caught)'): await wait_partial(19, timeout=0.1)
+    with raises(Log, match=r'signals\.wait_for_signal: invalid signal None'): await wait_partial(None)
+    with raises(Log, match=r'signals\.wait_for_signal: timed out'): await wait_partial(4, timeout=0.05)
+    with raises(Log, match=r'signals\.wait_for_signal: (insufficient permissions|error registering signal handler) for signal SIGSTOP'): await wait_partial(19, timeout=0.1)
 async def test_signal_raise(wait_partial):
     with raises(TimeoutError): await wait_partial(Signals.SIGFPE, timeout=0.05, raise_on_timeout=True)

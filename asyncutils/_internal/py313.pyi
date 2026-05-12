@@ -4,8 +4,8 @@ assert sys.version_info < (3, 14)
 from functools import partial
 from typing import Any, Final
 from .types import SupportsRichComparison
-__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'pargs', 'partial'
-pargs: dict[str, Any]
+__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial'
+j: dict[str, Any]
 Placeholder: Final[object]
 def heapify[C: SupportsRichComparison](heap: list[C], /) -> None: ...
 def heappop[C: SupportsRichComparison](heap: list[C], /) -> C: ...

@@ -105,6 +105,9 @@ The extras are listed below for reference:
 * pub: Dependencies for building and publishing packages to PyPI
 * test: Test dependencies, including pytest and related plugins
 
+.. version-changed:: 0.9.3
+  Removed the pytest-local-badge dependency from the test extra.
+
 .. version-removed:: 0.9.2
   The tools extra. Install uv yourself if you wish.
 

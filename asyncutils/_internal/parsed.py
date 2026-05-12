@@ -1,5 +1,5 @@
 from asyncutils.constants import POSSIBLE_EXECUTORS as C
-from asyncutils._internal.compat import pargs as j
+from asyncutils._internal.compat import j
 import argparse as A
 i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
@@ -21,8 +21,8 @@ Log file rotation is not currently supported.
 If FILE is 'STDOUT', log to stdout.
 If FILE is 'STDERR', log to stderr. This is also the default behaviour and fallback if the above steps fail.''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
-A disabled logger is still created to make subsequent logging.getLogger calls by other parties return it.
-Thus, this option cannot avoid the cost of importing logging early on.''')
+A disabled logger is still created to make subsequent logging.getLogger calls return it.
+Thus, this option cannot avoid the cost of importing logging and instantiating the logger early on.''')
 (a := h())('-e', '--executor', choices=C, metavar=j, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
