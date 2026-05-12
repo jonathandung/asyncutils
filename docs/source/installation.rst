@@ -77,6 +77,9 @@ other installation pathways:
 .. version-added:: 0.9.0
   Created a Makefile to simplify development chores.
 
+.. version-changed:: 0.9.4
+  Used more of uv in the Makefile.
+
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 
 After this, as long as you have the python scripts directory on PATH, ``asyncutils`` and ``autils`` will be made available as entry points
@@ -95,14 +98,20 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, json5, pub, test, tools
+* dev: Packages one would want installed for development; superset of docs, json5, test, tools
 * docs: Documentation dependencies, including sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
+* json5: The JSON5 parser, specifically used to read format.json5 in tests.
+* lint: pre-commit and mypy. ruff is absent because it is recommended to install it with uv, and that cannot be specified as a dependency directly.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
-* json5: The JSON5 parser, specifically used to read format.json5 in tests.
-* pub: Dependencies for building and publishing packages to PyPI
 * test: Test dependencies, including pytest and related plugins
+
+.. version-removed:: 0.9.4
+  The pub extra, because uv already provides that functionality.
+
+.. version-added:: 0.9.4
+  The lint extra.
 
 .. version-changed:: 0.9.3
   Removed the pytest-local-badge dependency from the test extra.

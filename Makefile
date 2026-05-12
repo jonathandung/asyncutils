@@ -1,6 +1,6 @@
-.PHONY: test clean ruff install install-silent install-ruff install-dev install-all watch type-check stubtest rmclog clog build publish pre-commit help
+.PHONY: test clean ruff install install-silent install-dev install-all watch type-check stubtest rmclog clog build publish pre-commit help
 test:
-	pytest tests/ -v -n auto --maxfail 5 --cov asyncutils --cov-report xml --cov-fail-under 52
+	pytest
 clean:
 	rm -rf build dist asyncutils.egg-info .ruff_cache .pytest_cache .mypy_cache .coverage
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
@@ -8,21 +8,18 @@ clean:
 	find . -type f -name '*.so' -delete
 .uv-stamp:
 	curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv tool install ruff
 	touch .uv-stamp
 install: .uv-stamp
 	uv pip install -e .
 install-silent:
 	$(MAKE) install > /dev/null
-install-ruff: .uv-stamp
-	uv tool install ruff
 install-dev: .uv-stamp
 	uv pip install -e .[dev]
-	$(MAKE) install-ruff
 install-all: .uv-stamp
 	uv pip install -e .[all]
-	$(MAKE) install-ruff
-ruff:
-	uvx ruff check .
+ruff: .uv-stamp
+	ruff check .
 watch:
 	ptw --runner "make test" --onfail "echo 'Tests failed!'"
 type-check:
@@ -46,7 +43,6 @@ help:
 	@echo "  clean          - Clean build artifacts and caches"
 	@echo "  install        - Install the package in editable mode"
 	@echo "  install-silent - The above without output"
-	@echo "  install-ruff   - Install the ruff linter as a tool with uv without adding a ruff executable"
 	@echo "  install-dev    - Install the package with development dependencies"
 	@echo "  install-all    - Install the package with all dependencies"
 	@echo "  ruff           - Run ruff linter"

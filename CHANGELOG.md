@@ -20,6 +20,12 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
+### [0.9.4] - 2026-05-15
+
+Fixed workflows once more and integrated uv more fully.
+
+## Above versions are unreleased
+
 ### [0.9.3] - 2026-05-11; newest
 
 Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
@@ -38,11 +44,11 @@ Declared full support for python[ -m] asyncutils an entry point; patched functio
 ### [0.9.0] - 2026-04-27
 
 Added `__lazy_modules__` attribute to submodules where appropriate; added some iteration, functional programming and context management utilities.
-Declared end of life for all alpha versions.
 
 #### BREAKING
 
-Changed version shelving and unshelving schema; added `'cli'` to `preloaded_submodules`.
+Declared end of life for all alpha versions.
+Changed version shelving and unshelving schema.
 
 Added the following to the public API:
 
@@ -53,6 +59,7 @@ Added the following to the public API:
   - \_\_hexversion__
   - submodules_map
   - preloaded_submodules
+  - console_preloaded_submodules
 
   Functions:
   - time_since_boot

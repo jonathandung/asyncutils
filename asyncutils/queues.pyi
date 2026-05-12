@@ -148,13 +148,13 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     @overload
     def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process (transformation analogous to `itertools.starmap`).'''
     @overload
-    def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[False]=...) -> SmartQueue[T]: '''Return a new queue from which getters can get the items in this queue that satisfy the predicate; items remaining in the original queue did not satisfy the predicate.'''
+    def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[False]=...) -> SmartQueue[T]: ...
     @overload
-    def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[True]) -> SmartLifoQueue[T]: ...
+    def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[True]) -> SmartLifoQueue[T]: '''Return a new queue from which getters can get the items in this queue that satisfy the predicate; items remaining in the original queue did not satisfy the predicate.'''
     @overload
-    def enumerate(self, *, lifo: Literal[False]=...) -> SmartQueue[tuple[int, T]]: '''Return a queue containing the items from enumerate applied on this queue and empty it in the process.'''
+    def enumerate(self, *, lifo: Literal[False]=...) -> SmartQueue[tuple[int, T]]: ...
     @overload
-    def enumerate(self, *, lifo: Literal[True]) -> SmartLifoQueue[tuple[int, T]]: ...
+    def enumerate(self, *, lifo: Literal[True]) -> SmartLifoQueue[tuple[int, T]]: '''Return a queue containing the items from enumerate applied on this queue and empty it in the process.'''
     def map_nowait[R](self, f: Callable[[T], Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
     def starmap_nowait[R](self, f: Callable[..., Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
     def filter_nowait(self, pred: Callable[[T], bool]=..., /) -> tuple[list[T], int]: '''Filter items in the queue by a predicate and return a list of removed items and an integer; the items in the returned list after the index corresponding to that integer were items rejected from the queue due to the queue being full.'''

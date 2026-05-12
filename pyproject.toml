@@ -30,12 +30,12 @@ autils = "asyncutils.cli:run"
 
 [project.optional-dependencies]
 all = ["py-asyncutils[dev,executors,pconf,ptw]==0.9.3"]
-dev = ["pre-commit>=4.6.0", "mypy>=2.1.0", "py-asyncutils[docs,pub,test]==0.9.3"]
+dev = ["py-asyncutils[docs,lint,test]==0.9.3"]
 docs = ["furo>=2025.12.19", "Sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-copybutton>=0.5.2", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "myst-parser>=5.0.0"]
 executors = ["deadpool-executor>=2026.4.1", "executorlib>=1.9.3", "ipyparallel>=9.1.0", "loky>=3.5.6", "Pebble>=5.2.0"]
-pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "xmltodict>=1.0.4", "py-asyncutils[json5]==0.9.3"]
 json5 = ["json5>=0.14.0"]
-pub = ["build>=1.4.4", "twine[keyring]>=6.2.0", "packaging>=26.2"]
+lint = ["pre-commit>=4.6.0", "mypy>=2.1.0"]
+pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "xmltodict>=1.0.4", "py-asyncutils[json5]==0.9.3"]
 ptw = ["pytest-watch>=4.2.0"]
 test = ["pytest>=9.0.3", "pytest-asyncio>=1.3.0", "pytest-cov>=7.1.0", "pytest-local-badge>=1.0.3", "pytest-sugar>=1.1.1", "pytest-xdist>=3.8.0", "py-asyncutils[json5]==0.9.3"]
 
@@ -156,7 +156,7 @@ max-nested-blocks = 5
 replace-imports-with-any = ["_functools.**", "_heapq.**"]
 
 [tool.ty.environment]
-python-version = "3.12"
+python-version = "3.12.13"
 
 [tool.ty.src]
 include = ["asyncutils"]

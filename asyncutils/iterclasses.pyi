@@ -27,7 +27,7 @@ class apeekable[T](LoopBoundMixin):
     @overload
     async def __getitem__(self, idx: ValidSlice, /) -> tuple[T, ...]: ...
     @overload
-    async def __getitem__(self, idx: SupportsIndex, /) -> T: '''Index access. Must be awaited.'''
+    async def __getitem__(self, idx: SupportsIndex, /) -> T: '''Slice or index access. Must be awaited.'''
 class abucket[T, R](LoopContextMixin):
     '''Async version of :class:`more_itertools.bucket`.'''
     def __init__(self, it: SupportsIteration[T], key: Callable[[T], R], validator: Callable[[R], bool]): ...

@@ -79,7 +79,7 @@ class ConsoleBase(B):
         self.memory_errors = m+1
         for _ in self.memerr_hooks: _(self)
         self.refresh()
-    def set_return_code(self, e, /, _s=_s): self.exc = e if isinstance(e, SystemExit) else SystemExit(*(e.args if isinstance(e, BaseException) else (e,))); self._loop.stop(_s)
+    def set_return_code(self, e, /, _=_s): self.exc = e if isinstance(e, SystemExit) else SystemExit(*(e.args if isinstance(e, BaseException) else (e,))); self._loop.stop(_)
     def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memerr_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%fullname(cls))
         if name is None: name = cls.__qualname__.casefold().removesuffix('console')

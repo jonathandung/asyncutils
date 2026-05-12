@@ -109,10 +109,10 @@ class CallbackAccumulator[T, **P](deque[T], AsyncContextMixin[CallbackAccumulato
     '''A utility class to store callbacks and call them at once when the context manager exits.
 
     .. tip:: To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
+    .. note:: This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.
     .. admonition:: Implementation detail
 
-      This class subclasses :class:`~collections.deque`.
-    .. note:: This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.'''
+      This class subclasses :class:`~collections.deque`.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload

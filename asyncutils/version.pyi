@@ -147,4 +147,4 @@ def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''U
 def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
 @overload
 def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
-def autogenerate_normalizers() -> bool: '''Registers normalizers for :class:`~decimal.Decimal` and :class:`~fractions.Fraction`. Return whether both normalizers were successfully registered (including re-registration of the same normalizer).'''
+def autogenerate_normalizers() -> bool: '''Registers normalizers for :class:`decimal.Decimal` and :class:`fractions.Fraction`. Return whether both normalizers were successfully registered (including re-registration of the same normalizer).'''

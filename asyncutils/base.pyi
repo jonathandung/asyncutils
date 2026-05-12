@@ -70,7 +70,7 @@ async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|Ra
     .. seealso::
 
       :func:`iters.basic_collect`
-        a slightly faster variant that doesn't accept a default.
+        a possibly slightly faster variant that doesn't accept a default.
 
       :func:`iters.to_list`
         the most barebones variant equivalent to the case when `n` is not passed.'''
