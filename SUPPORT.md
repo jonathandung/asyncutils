@@ -87,11 +87,11 @@ If the package is not working with python, perform the steps below:
 
 ```bash
 # Check sys.path
-python -c "print(*__import__('sys').path, sep='\n')"
+python3 -c "print(*__import__('sys').path, sep='\n')"
 # Check for package naming conflicts; following snippet should print altlocks, base, buckets, caches, channels, cli, compete, config, console
 # constants, context, events, exceptions, ... separated by newlines
-python -c "print(*__import__('asyncutils').__all__, sep='\n')"
-# If not loading site, repeat the above steps w/ python -Sc
+python3 -c "print(*__import__('asyncutils').__all__, sep='\n')"
+# If not loading site, repeat the above steps w/ python3 -Sc
 ```
 
 ## Response Times

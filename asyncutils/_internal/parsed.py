@@ -1,7 +1,7 @@
 from asyncutils.constants import POSSIBLE_EXECUTORS as C
 from asyncutils._internal.compat import j
 import argparse as A
-i, b, d, e, f, g, j, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
+i, b, d, e, f, g, J, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and colored REPL support for quick development.
 On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line; this format differs from that described below.
@@ -23,7 +23,7 @@ If FILE is 'STDERR', log to stderr. This is also the default behaviour and fallb
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls return it.
 Thus, this option cannot avoid the cost of importing logging and instantiating the logger early on.''')
-(a := h())('-e', '--executor', choices=C, metavar=j, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
+(a := h())('-e', '--executor', choices=C, metavar=J, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
@@ -47,7 +47,7 @@ they either require prior configuration to be useful (as is the case with adapti
 (celery-executor), too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific
 backends seldom used for this purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified
 name to -c and bear the potential consequences.''')
-a('-c', '--custom-executor', dest='executor', metavar=j, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
+a('-c', '--custom-executor', dest='executor', metavar=J, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
 for _ in C: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')
 a('-V', action=g, default=0, help='Produce more logging output. Additive.')
@@ -60,6 +60,6 @@ Set to a negative value to disable the threshold completely.''')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
 a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero, or an uncaught error occurs in the console execution logic itself.')
-(a := h('metadata', 'Get information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils and exit. Useful for checking if the installation succeeded.')
+(a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit. Useful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
-del a, b, C, d, e, f, g, h, i, j, A
+del a, b, C, d, e, f, g, h, i, j, J, A

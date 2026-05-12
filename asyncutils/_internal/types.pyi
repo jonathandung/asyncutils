@@ -18,8 +18,9 @@ __all__ = ()
 
 .. tip::
 
-  For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks, and use `from __future__ import annotations` on the top of the file
-  for Python 3.13 or below, so that the annotations need not be quoted even prior to :pep:`563`, which introduced deferred annotation evaluation.'''
+  For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks.
+  Besides, use `from __future__ import annotations` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted even prior
+  to the implementation of :pep:`563`, which introduced deferred annotation evaluation.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
@@ -48,7 +49,7 @@ class FutWrapType(Protocol):
     def __call__(self, future: Future[Any]|SyncFuture[Any], *, loop: AbstractEventLoop|None) -> Future[Any]: ...
 @type_check_only
 class GenericSized[T](Protocol):
-    ''':class:`typing.Sized` is not generic, so here is a generic version of it.'''
+    '''A generic version of :class:`typing.Sized`.'''
     def __len__(self) -> int: ...
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
@@ -109,7 +110,8 @@ class PartialInterfaceMeta(type):
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
     '''| Base class for partial interfaces.
-    | If it is only known that a class implements an interface, type checkers might throw errors on unrecognized attributes that may actually exist on the object or class.
+    | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may
+    | actually exist on the object or class.
     | This is a simplistic fix that asks type checkers to assume those attributes always exist and make no attempt to infer their types.'''
     def __init__(self, *a: Any, **k: Any): ...
     def __getattr__(self, name: str, /) -> Any: ...
@@ -156,13 +158,13 @@ class Q[R, T](Protocol):
     '''Convenience alias for :exc:`~exceptions.ForbiddenOperation`.'''
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Asynchronously put an item into the queue; if the queue is full, wait until a free slot is available.'''
-    def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`asyncio.QueueEmpty` if impossible.'''
-    def put_nowait(self, item: T) -> None: '''Put an item into the queue immediately; raise :exc:`asyncio.QueueFull` if impossible.'''
+    def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`~asyncio.QueueEmpty` if impossible.'''
+    def put_nowait(self, item: T) -> None: '''Put an item into the queue immediately; raise :exc:`~asyncio.QueueFull` if impossible.'''
     def qsize(self) -> int: '''Number of items in the queue.'''
     def task_done(self) -> None: '''Mark the completion of a task gotten from the queue to :meth:`join`.'''
     @property
     def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
-    def cancel_extend(self, msg: Any=...) -> bool: '''Cancel the current extend operation with a message which will be the argument for the CancelledError seen by the extender if any, returning success, and return False otherwise.'''
+    def cancel_extend(self, msg: Any=...) -> bool: '''Cancel the current extend operation with a message which will be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any, returning success, and return False otherwise.'''
     def empty(self) -> bool: '''Check if the queue is empty.'''
     def full(self) -> bool: '''Check if the queue is full.'''
     async def join(self) -> None: '''Wait until :meth:`task_done` has been called for each item put into the queue.'''
@@ -228,7 +230,7 @@ class BenchmarkResult(NamedTuple):
     total: float
     '''The total execution time.'''
     avg: float
-    '''`ss.avg == ss.total/ss.iterations`.'''
+    '''`br.avg == br.total/br.iterations`.'''
     iterations: int
     '''The `times` constructor parameter.'''
 @type_check_only
@@ -282,7 +284,7 @@ class MemoryMappedFile(LoopContextMixin):
     async def delete(self, offset: int, size: int) -> None: '''Delete a range of bytes from the file.'''
     async def replace(self, old: bytes, new: bytes, offset: int=..., count: int=...) -> int: '''Replace occurrences of a pattern in the file with a new pattern.'''
     def search_lazy(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''Search for a pattern in the file starting from the specified offset, yielding the offsets of each occurrence found as they are found.'''
-    def search_lazy_nonoverlapping(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
+    def search_lazy_nonoverlapping(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''The above, but ensure the offsets returned do not overlap using a greedy approach.'''
     async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Return a list of the offsets of the first `max_results` occurrences of `pattern` in the file starting from `offset`.'''
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
     async def compact(self) -> None: '''Reduce the size of the file by stripping all contiguous null bytes at the end.'''
@@ -320,12 +322,14 @@ class SyncAwaitType(Sentinel): ...
 class WildcardType:
     '''Type of :const:`channels.EventBus.WILDCARD`.'''
     def __bool__(self) -> Literal[False]: ...
+@type_check_only
 class EventProt(Protocol):
     '''Protocol for event objects.'''
     def is_set(self) -> bool: ...
     def set(self) -> None: ...
     def clear(self) -> None: ...
     async def wait(self) -> Any: ...
+@type_check_only
 class DCRV(Protocol):
     '''Protocol for the strict decorator factory overload of :func:`util.dualcontextmanager`.'''
     @overload
@@ -357,7 +361,7 @@ type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreus
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. blake2s, which is fast and somewhat secure with a low probability of collision, is recommended.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
-'''The type of the return values of the :meth:`open`, :meth:`create` and :meth:`create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
+'''The type of the return values of the :meth:`~asyncutils.io.MemoryMappedIOManager.open`, :meth:`~asyncutils.io.MemoryMappedIOManager.create` and :meth:`~asyncutils.io.MemoryMappedIOManager.create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`~asyncutils.io.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]
@@ -366,18 +370,20 @@ type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]
 '''The type of wildcard subscribers for :class:`channels.EventBus`.'''
 if sys.platform == 'win32':
     type Seek = Literal[0, 1, 2]
-    '''Possible values of the `whence` parameter for :meth:`io.MemoryMappedIOManager.seek`, as follows:
-    * 0: SEEK_SET
-    * 1: SEEK_CUR
-    * 2: SEEK_END'''
+    '''Possible values of the `whence` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
+
+    * 0: :const:`SEEK_SET`
+    * 1: :const:`SEEK_CUR`
+    * 2: :const:`SEEK_END`'''
 else:
     type Seek = Literal[0, 1, 2, 3, 4]
-    '''Possible values of the `whence` parameter for :meth:`io.MemoryMappedIOManager.seek`, as follows:
-    * 0: SEEK_SET
-    * 1: SEEK_CUR
-    * 2: SEEK_END
-    * 3: SEEK_DATA
-    * 4: SEEK_HOLE'''
+    '''Possible values of the `whence` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
+
+    * 0: :const:`SEEK_SET`
+    * 1: :const:`SEEK_CUR`
+    * 2: :const:`SEEK_END`
+    * 3: :const:`SEEK_DATA`
+    * 4: :const:`SEEK_HOLE`'''
 type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], EveryMethodRVRV[T, R]]
 '''Return type of :func:`func.everymethod`.'''
 type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]

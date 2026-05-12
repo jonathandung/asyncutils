@@ -14,11 +14,12 @@ jobs:
       url: https://pypi.org/p/py-asyncutils/${{github.event.release.name}}
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: actions/setup-python@v6.2.0
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
         with:
           python-version: 3.14
+          cache-python: true
       - name: Upload to PyPI
-        run: pip install -U pip .[pub] && python -m build && twine upload dist/* --verbose --skip-existing
+        run: uv pip install --system .[pub] && python3 -m build && twine upload dist/* --verbose --skip-existing
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{secrets.PYPI_TOKEN}}

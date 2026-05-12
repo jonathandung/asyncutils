@@ -6,17 +6,20 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[co]' -delete
 	find . -type f -name '*.so' -delete
-install:
-	pip install -e .
+.uv-stamp:
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+	touch .uv-stamp
+install: .uv-stamp
+	uv pip install -e .
 install-silent:
 	$(MAKE) install > /dev/null
-install-ruff:
+install-ruff: .uv-stamp
 	uv tool install ruff
-install-dev:
-	pip install -e .[dev]
+install-dev: .uv-stamp
+	uv pip install -e .[dev]
 	$(MAKE) install-ruff
-install-all:
-	pip install -e .[all]
+install-all: .uv-stamp
+	uv pip install -e .[all]
 	$(MAKE) install-ruff
 ruff:
 	uvx ruff check .

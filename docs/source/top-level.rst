@@ -1,3 +1,5 @@
+.. currentmodule:: asyncutils
+
 Top level
 =========
 
@@ -87,4 +89,4 @@ The remarks below are inapplicable to the contextually configured constants in :
 * One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
 * The submodule objects are also accessible as attributes of :mod:`asyncutils` without triggering the loading immediately if not loaded.
 * Each module has an :data:`__all__` attribute, a tuple of strings representing its public API. Anything not included in it is considered unstable or
-  private, except :data:`asyncutils.__version__` and :data:`asyncutils.__hexversion__`.
+  private, except :data:`__version__` and :data:`__hexversion__`.

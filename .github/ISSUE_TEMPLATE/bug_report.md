@@ -14,7 +14,7 @@ source if possible. Also link to the source file here; a permalink (not /blob/ma
 ## To Reproduce
 
 ```python
-# minimal reproducible example as python snippet here
+# minimal reproducible example as Python snippet here
 # include all used references in imports, such that this code is self-contained
 ```
 
@@ -28,7 +28,7 @@ If applicable, add screenshots to help explain your problem.
 
 ## Complete the following
 
-- Python version tag (`python -VV`)
+- Python version tag (`python3 -VV`)
 - asyncutils version (`asyncutils -v`)
 - Operating system
 - Package version (`pip show py-asyncutils | grep Version:` or `conda list py-asyncutils --fields version`)

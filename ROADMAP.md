@@ -42,8 +42,8 @@ Current version: 0.9.3
 
 ## [5.0] - 2028-10
 
-- Drop support for python 3.12 (adapt type parameters with defaults)
+- Drop support for Python 3.12 (adapt type parameters with defaults)
 
 ## [6.0] - 2029-10
 
-- Drop support for python 3.13 entirely as it reaches EOL (remove functools.partial compatibility layer)
+- Drop support for Python 3.13 entirely as it reaches EOL (remove functools.partial compatibility layer)

@@ -9,7 +9,7 @@
 [![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
 [![Docs](https://app.readthedocs.org/projects/asyncutils/badge)](https://asyncutils.readthedocs.io/en/stable)
 
-A python library abstracting all the common patterns I can think of that somehow always pop up in async code.
+A Python library abstracting all the common patterns I can think of that somehow always pop up in async code.
 
 Includes a wide range of submodules tailored for specific usages, though concrete low-level implementations are lacking.
 
@@ -21,7 +21,7 @@ Takes pride in:
 
 ## Setup
 
-I am not sure how this package would work on alternate python implementations. However, it is tested on CPython and set to be extensively so.
+I am not sure how this package would work on alternate Python implementations. However, it is tested on CPython and set to be extensively so.
 
 Since the name 'asyncutils' was somehow unavailable on PyPI, 'py-asyncutils' was chosen instead.
 

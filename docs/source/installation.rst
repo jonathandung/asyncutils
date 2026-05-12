@@ -53,7 +53,6 @@ or if you wish to obtain the :ref:`extras`:
 
   # tools likely enough for developers
   pip install py-asyncutils[dev]
-  uv tool install ruff # make ruff available with the uvx interface
 
 other installation pathways:
 

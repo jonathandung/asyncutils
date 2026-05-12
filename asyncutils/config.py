@@ -59,7 +59,7 @@ match logging_to := g('log_to'):
         for h in range(1, 0x1001):
             try: logging_to = (s := open(T%h, m)).name; break
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
-            except AttributeError: raise SystemError("python opened a file with no 'name' attribute") from None
+            except AttributeError: raise SystemError("Python opened a file with no 'name' attribute") from None
             except Exception: ...
         else: M = True
         del T, h

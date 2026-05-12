@@ -84,12 +84,12 @@ behavioural differences, and the same arguments that the `asyncutils` shell acce
 
 ```bash
 asyncutils
-python -m asyncutils
-python asyncutils
-python -m asyncutils.__main__
-python asyncutils/__main__.py
-python -m asyncutils/__main__.py # this is documented to be unsupported, but works on some versions
-# python asyncutils.__main__ doesn't work because python attempts to find a file called asyncutils.__main__ in the cwd
+python3 -m asyncutils
+python3 asyncutils
+python3 -m asyncutils.__main__
+python3 asyncutils/__main__.py
+# python3 -m asyncutils/__main__.py: documented to be unsupported, but works on some versions
+# note: python3 asyncutils.__main__ doesn't work because python attempts to find a file called asyncutils.__main__ in the cwd
 ```
 
 If you're in the integrated shell of VS Code, it is recommended that you unset the `PYTHON_BASIC_REPL` environment variable or turn off shell

@@ -9,13 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6.0.2
-    - uses: actions/setup-python@v6.2.0
+    - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       with:
         python-version: 3.12
+        cache-python: true
     - name: Install dependencies
-      run: pip install -U pip mypy && pip install -e . && curl -LsSf https://astral.sh/uv/install.sh | sh && pip check
+      run: uv pip install --system -U mypy -e . && uv pip check
     - name: Lint with ruff
-      run: uv tool install ruff && uvx ruff check . --output-format=github
+      run: uvx ruff check --output-format=github
     - name: Run mypy
       run: mypy asyncutils
     - name: Run stubtest
@@ -30,13 +31,11 @@ jobs:
         python-version: ["3.12", "3.15.0-beta.1"]
     steps:
     - uses: actions/checkout@v6.0.2
-    - uses: actions/setup-python@v6.2.0
+    - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       with:
         python-version: ${{matrix.python-version}}
-    - name: Install dependencies
-      run: pip install -U pip && pip install -e .[test] && pip check
     - name: Run tests
-      run: pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 41 -n auto
+      run: uv run --with ".[test]" pytest tests/ -vv --cov asyncutils --cov-report xml --cov-fail-under 41 -n auto
     - name: Upload results
       if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15.0-beta.1'}}
       uses: codecov/codecov-action@v6.0.0

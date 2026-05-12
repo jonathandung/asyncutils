@@ -15,6 +15,9 @@ def l(p, e=None, /):
             case _:
                 try: f = __import__(L, fromlist=('',) if '.' in L else ()).load(F)
                 except ImportError as a: raise RuntimeError(f'{L} library must be installed for asyncutils to accept configuration from {p!r}') from a
+    if F.name.endswith(('/pyproject.toml', '\\pyproject.toml')):
+        try: f = f['tool']['asyncutils']
+        except KeyError: return {}
     if type(f) is dict: return f
     raise TypeError(f'incorrent json format for asyncutils configuration at {p}; top-level structure should be an object')
 def m(m, a, /, _='see format.json5'): (e := TypeError(m%(c, a))).add_note(_); raise e

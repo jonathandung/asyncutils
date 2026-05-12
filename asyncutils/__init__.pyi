@@ -34,21 +34,10 @@ from .util import *
 from .version import *
 from types import ModuleType
 from typing import Final
-def __dir__() -> tuple[str, ...]: '''All the public names exported by this library, including the names of the submodules.'''
-def time_since_boot() -> float: '''The time in milliseconds since the module began initializing.'''
+def __dir__() -> tuple[str, ...]: ...
+def time_since_boot() -> float: ...
 __version__: Final[VersionInfo]
-'''The current :mod:`asyncutils` version as a string with magical properties for working with versions.
-
-.. tip::
-  :collapsible:
-
-  Refer to the IDE autocomplete for its methods.'''
 __hexversion__: Final[int]
-'''| An integer encoding the current version suitable for numerical comparisons; inspired by :const:`sys.hexversion`.
-| For example, `0x12070e` corresponds to version 18.7.14.'''
 console_preloaded_submodules: Final[frozenset[Submodule]]
-'''Below, but including `'base'`, `'config'`, and `'console'` as well.'''
 preloaded_submodules: Final[frozenset[Submodule]]
-'''A :class:`frozenset` containing all submodules that are inevitably preloaded on module startup.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
-'''A dictionary mapping submodule names to the corresponding submodule objects, which may not be instances of :class:`types.ModuleType` at runtime.'''

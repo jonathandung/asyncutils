@@ -491,10 +491,6 @@ Created AI_USAGE_POLICY.md.
 
 Integrated pre-commit CI.
 
-### [0.8.22] - 2026-04-06
-
-Deleted dev branch.
-
 ### [0.8.21] - 2026-04-01
 
 Organized badges into table; started using mypy.
@@ -506,10 +502,6 @@ Started hosting documentation on Read the Docs.
 ### [0.8.19] - 2026-03-27
 
 Set up docs directory.
-
-### [0.8.18] - 2026-03-26
-
-Created dev branch for python 3.15 features.
 
 ### [0.8.17] - 2026-03-24
 

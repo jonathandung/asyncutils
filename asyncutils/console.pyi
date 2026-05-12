@@ -16,7 +16,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     STATEMENT_FAILED: ClassVar[object]
-    '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the base class.'''
+    '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument `name` is not provided to the subclass constructor.'''
     CAN_USE_PYREPL: ClassVar[bool]
@@ -33,7 +33,7 @@ class ConsoleBase(InteractiveConsole, ABC):
 
     .. note:: Add hooks using the `additional_memerr_hooks` class construction parameter.'''
     default_local_exit: ClassVar[bool]
-    '''Whether python should continue running after the console exits by default, as opposed to the console raising :exc:`SystemExit` directly.'''
+    '''Whether Python should continue running after the console exits by default, as opposed to the console raising :exc:`SystemExit` directly.'''
     disallow_subclass_msg: ClassVar[str]
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the `disallow_subclass_msg` argument, which any unsubclassable console should pass.'''
     @property
