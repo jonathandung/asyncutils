@@ -42,8 +42,10 @@ Some keys can have various types, as detailed by the comments attached. */
   Cycles can be created to switch between flags periodically.
   Ensure AUTILSCFGPATH is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
   in a previous config. By that logic, you should also remember to update this correctly when the config file is moved. */
-  context: {
-    // configures individual submodules (contextual constants)
+  context: { // configures individual submodules (contextual constants)
+    /* Essentially maps submodule names to objects like {utility1: {key1: value1, key2: value2, ...}}, utility2: {...}};
+    or if the utility has only one configurable parameter, there will be a key at the top level of a mapping above,
+    with the keys being sorted alphabetically. */
     altlocks: {
       circuit_breaker: {
         default_max_fails: 3,
@@ -131,7 +133,11 @@ Some keys can have various types, as detailed by the comments attached. */
     iters: {
       afrievalds_default_k: 2,
       aunzip_default_put_batch: 16,
-      tee_default_put_exc: true
+      merge_default_max_qsize: 0,
+      tee: {
+        default_put_exc: true,
+        default_max_qsize: 32
+      }
     },
     locks: {
       advanced_rate_limit_default_tokens: 1.0,

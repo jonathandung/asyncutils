@@ -144,7 +144,7 @@ def debounce(wait):
 def iterf(n, /):
     def dec(f, /):
         async def wrapper(x, /):
-            for _ in range(n): x = await f(x)
+            for _ in repeat(None, n): x = await f(x)
             return x
         return wraps(f)(wrapper)
     return dec
@@ -158,7 +158,7 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
     if sequential:
         for _ in repeat(None, warmup): await f()
     else: await gather(*(f() for _ in repeat(None, warmup)))
-    audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in range(times)] if sequential else await gather(*(g() for _ in range(times)))), max(t), S := sum(t), S/times, T)
+    audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in repeat(None, times)] if sequential else await gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
 P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'

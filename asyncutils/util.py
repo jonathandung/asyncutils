@@ -1,13 +1,12 @@
 __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools'))
-from asyncutils import CRITICAL, SYNC_AWAIT, Critical, Deadlock, IgnoreErrors, aiter_to_gen, getcontext, iter_to_agen
+from asyncutils import CRITICAL, Critical, IgnoreErrors, ignore_typeerrs, aiter_to_gen, getcontext, iter_to_agen
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, fullname
 from asyncutils._internal.patch import patch_function_signatures
-from asyncutils._internal.running_console import getc
 from asyncutils._internal.submodules import util_all as __all__
-from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, _get_running_loop, eager_task_factory, ensure_future, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, timeout as _timeout, wait_for
+from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, eager_task_factory, ensure_future, iscoroutine, run_coroutine_threadsafe, timeout as _timeout, wait_for
 from functools import partial, wraps
-from sys import audit
+from sys import audit, exc_info
 ignore_cancellation = IgnoreErrors(CancelledError)
 class anullcontext: # noqa: N801
     async def __aenter__(self): ...
@@ -24,14 +23,9 @@ def _set_call(F, f, /): F.set_result(f())
 def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_set_call, F := l.create_future(), partial(f, *a, **k)); return F
 def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
-    audit('asyncutils.util.sync_await', fullname(aw)); f = loop is None
-    if (c := getc()) and (f or loop is (l := c._loop) or getattr(loop, _, None) == getattr(l, _, NotImplemented)): raise Deadlock('cannot call util.sync_await within console; use the await statement directly instead', noticer=SYNC_AWAIT) # type: ignore
-    if f and (loop := _get_running_loop()) is None: loop = new_event_loop(); set_event_loop(loop)
-    if loop.is_running():
-        return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)
-    try: return loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
-    finally:
-        if f: loop.stop(); loop.close(); set_event_loop(None)
+    audit('asyncutils.util.sync_await', fullname(aw))
+    if loop is None: loop = get_loop_and_set()
+    return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout) if loop.is_running() else loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None): return (BoundedSemaphore if bounded else Semaphore)(getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
 def lockf(f, /, lf=Lock, _lc={}): # noqa: B006
     if (l := _lc.get(i := id(f))) is None: _lc[i] = l = lf()
@@ -129,5 +123,19 @@ class DualContextManager:
 def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor=None, create_executor=None, strict=None):
     if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor, strict=strict)
     return wraps(f)(lambda *a, **k: _(f(*a, **k), getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR if create_executor is None else create_executor, getcontext().DUAL_CONTEXT_MANAGER_DEFAULT_STRICT if strict is None else strict))
+def aawcmf2dcmff(**d):
+    def f(f, /, _=dualcontextmanager(**d)): # noqa: B008
+        async def g(*a, **k):
+            c = f(*a, **k)
+            with ignore_typeerrs: c = await c
+            if check_methods(c, '__aenter__', '__aexit__'):
+                async with c as r: yield r; return
+            if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = create_executor(aawcmf2dcmff)
+            r = await (h := partial(get_loop_and_set().run_in_executor, e))(c.__enter__())
+            try: yield r
+            finally: await h(c.__exit__, *exc_info())
+        return _(g)
+    return f
+aawcmf2dcmf = aawcmf2dcmff()
 patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

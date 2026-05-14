@@ -153,13 +153,14 @@ max-branches = 16
 max-nested-blocks = 5
 
 [tool.ty.analysis]
-replace-imports-with-any = ["_functools.**", "_heapq.**"]
+allowed-unresolved-imports = ["_collections.**", "_functools.**", "_heapq.**"]
 
 [tool.ty.environment]
 python-version = "3.12.13"
+python-platform = "all"
 
 [tool.ty.src]
 include = ["asyncutils"]
 
 [tool.uv]
-required-version = ">=0.11.13"
+required-version = ">=0.11.14"

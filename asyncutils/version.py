@@ -6,7 +6,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     for i, j in enumerate(I):
         a(int(j, 0) if isinstance(j, str) else int(j))
         if i == 2: break
-    else: r.extend(0 for _ in range(2-i))
+    else: r += (0 for _ in range(2-i))
     if any(map(f, r)): raise e('major, minor and patch should all be positive')
     return tuple(r)
 def r(c, /, _='cannot subclass asyncutils.version.%s'):

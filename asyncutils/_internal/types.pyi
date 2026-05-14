@@ -303,7 +303,7 @@ class TransientBlockFromLoopRV(Protocol):
     '''The signature of the return value of :func:`util.transient_block_from_loop`.'''
     def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
-class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :deco:`util.dualcontextmanager`. The initialization signature is not documented intentionally.'''
+class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :deco:`util.dualcontextmanager`. The initialization signature of this class is not documented intentionally.'''
 @type_check_only
 class Sentinel(sentinel_base):
     '''Common type of sentinels for this module, internal or public.'''

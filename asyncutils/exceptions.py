@@ -164,8 +164,8 @@ def __getattr__(n, /):
                 async def __aenter__(self): return self.__enter__()
                 async def __aexit__(self, /, *_): self.__exit__(*_)
                 P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
-        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical'|'ignore_stopiteration'|'ignore_stopaiteration'|'ignore_valerrs':
-            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs
+        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical'|'ignore_stopiteration'|'ignore_stopaiteration'|'ignore_valerrs'|'ignore_typeerrs':
+            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs
             class IgnoreErrors:
                 __slots__ = 'but', 'exc'
                 def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
@@ -186,7 +186,7 @@ def __getattr__(n, /):
                         else: f(o.exc); g(o.but)
                     return type(self)(*S, exclude=P)
                 P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.xsig), (__aexit__, P.xsig)); del r
-            ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors(), IgnoreErrors(StopIteration), IgnoreErrors(StopAsyncIteration), IgnoreErrors(ValueError)
+            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors(); ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError))
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
     return globals()[n]

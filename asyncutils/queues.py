@@ -1,4 +1,4 @@
-from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, getcontext, iter_to_agen, safe_cancel, sync_await, ignore_valerrs
+from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, dualcontextmanager, getcontext, iter_to_agen, safe_cancel, sync_await, ignore_valerrs
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial, Placeholder
@@ -8,7 +8,6 @@ from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque # type: ignore[import-not-found]
 from abc import ABCMeta, abstractmethod
 from asyncio import Event, gather, timeout as _timeout, wait_for
-from contextlib import asynccontextmanager
 from itertools import count, starmap
 from sys import _getframe, audit, intern
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := E.IgnoreErrors(QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
@@ -224,13 +223,13 @@ class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     def clear(self):
         with ignore_qempty:
             while True: self.get_nowait()
-    @asynccontextmanager
-    async def transaction(self, _=E.IgnoreErrors(TimeoutError)):
+    @dualcontextmanager
+    def transaction(self, _=E.IgnoreErrors(TimeoutError)):
         audit((s := f'{fullname(self)}.transaction/%s')%'start', i := id(self)); q = self.peek_all()
         try: yield self
         except:
-            self.clear()
-            with _: await self.extend(q, 0.1)
+            self.clear(); f = self.put_nowait
+            for _ in q: f(_)
             raise
         finally: audit(s%'end', i)
     def empty(self): return self.qsize() == 0

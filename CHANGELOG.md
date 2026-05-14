@@ -208,6 +208,7 @@ Submodules:
   - ignore_stopiteration
   - ignore_stopaiteration
   - ignore_valerrs
+  - ignore_typeerrs
 
   Exception types:
   - Critical
@@ -440,6 +441,8 @@ Submodules:
   - anullcontext
 
   Functions:
+  - aawcmf2dcmf
+  - aawcmf2dcmff
   - get_future
   - new_eager_tasks
   - to_sync

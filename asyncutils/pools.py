@@ -5,7 +5,7 @@ from asyncutils._internal.helpers import filter_out, fullname, subscriptable
 from asyncutils._internal.submodules import pools_all as __all__
 from _functools import partial # type: ignore[import-not-found]
 from asyncio import Event, Lock, Semaphore, gather, sleep, timeout, wait_for
-from itertools import count, starmap
+from itertools import count, repeat, starmap
 from sys import exc_info
 from threading import Thread, Lock as TLock
 from time import monotonic
@@ -62,10 +62,10 @@ class AdvancedPool(LoopContextMixin):
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             a, b, f, g = self._workers.add, self._futures.add, self._worker_loop, self.make_fut
-            for _ in range(d): (T := Thread(target=f, args=(F := g(),))).start(); a(T); b(F)
+            for _ in repeat(None, d): (T := Thread(target=f, args=(F := g(),))).start(); a(T); b(F)
         elif d < 0:
             f = self._put_nowait_priority
-            for _ in range(-d): f(0, None)
+            for _ in repeat(None, -d): f(0, None)
         self._current = new
     def _put_nowait_priority(self, priority, item): self._queue.put_nowait((priority, self._tiebreak, item))
     def set_adjuster(self, raising=False):
@@ -98,7 +98,7 @@ class AdvancedPool(LoopContextMixin):
                 else:
                     try: await self.wait_for_slot(idle_timeout)
                     except PoolFull: await self._kill_helper()
-                for _ in range(self._current): await self._queue.put((0, self._tiebreak, None))
+                for _ in repeat(None, self._current): await self._queue.put((0, self._tiebreak, None))
                 with self._tlock: self._queue.shutdown(True)
                 await self.join(); await self.drain(); return self.uptime
         except TimeoutError: raise TimeoutError('shutdown exceeded timeout') from None
@@ -151,11 +151,11 @@ class ConnectionPool(LoopBoundMixin):
         while True:
             await f(); n, g = [], self.create_connection
             for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
-            async with self._lock: n.extend(await gather(*(g() for _ in range(self.minsize-self.currsize)))); self._pool = n
+            async with self._lock: n.extend(await gather(*(g() for _ in repeat(None, self.minsize-self.currsize)))); self._pool = n
     async def start(self, akgen=None, executor=None):
         f = self.create_connection
         if akgen is None:
-            for _ in range(self.minsize): await f(_executor_=executor)
+            for _ in repeat(None, self.minsize): await f(_executor_=executor)
         else:
             async for a, k in take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
         self._maintainer = self.make(self._maintain())

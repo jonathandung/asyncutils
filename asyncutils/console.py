@@ -5,6 +5,7 @@ from asyncutils._internal.submodules import console_all as __all__
 import sys as S
 from asyncio import iscoroutine
 from asyncio.futures import _chain_future # type: ignore[import-not-found]
+from itertools import repeat
 from os import getenv as g
 try: from _pyrepl.console import InteractiveColoredConsole as B
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
@@ -146,14 +147,14 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if (t := e.__traceback__) is None: raise e
             __import__('pdb').post_mortem(t)
         super().posthook()
-    def showtraceback(self, _sf=3, _suf=('asyncutils\\console.py', 'asyncutils/console.py'), _fln=38, _mn=S.intern('__callback')):
+    def showtraceback(self, s=3, a=('asyncutils\\console.py', 'asyncutils/console.py'), f=39, m=S.intern('__callback')):
         t, v, b = S.exc_info()
         if b is None: return
         try:
-            for _ in range(_sf):
+            for _ in repeat(None, s):
                 if (b := b.tb_next) is None: break
             else:
-                if (c := b.tb_frame.f_code).co_filename.endswith(_suf) and c.co_firstlineno == _fln and c.co_name == _mn: b = b.tb_next
+                if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_firstlineno == f and c.co_name == m: b = b.tb_next
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))

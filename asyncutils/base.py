@@ -5,6 +5,7 @@ from asyncutils.constants import _NO_DEFAULT, RAISE
 from asyncutils import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, getcontext, unnest_reverse, ignore_stopaiteration
 from _functools import partial
 from asyncio import Future, _get_running_loop, all_tasks, gather, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, sleep
+from itertools import repeat
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
@@ -38,7 +39,6 @@ class event_loop: # noqa: N801
             if f&0x200: return self._loop
             raise RuntimeError(_)
         if (l := _get_running_loop()) is None: set_event_loop(l := self._get_unclosed_loop())
-        elif f&4 and l.is_running(): l = self._get_unclosed_loop()
         else: f |= self._SHOULD_CLOSE
         if not f&0x1000 and callable(g := getattr(l, '__enter__', None)): # pragma: no cover
             try: g(); f |= self._INNER_EXIT
@@ -182,7 +182,7 @@ async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base
     if default is RAISE: raise ItemsExhausted(m)
     if default is _NO_DEFAULT: _(m)
     else:
-        for _ in range(n): yield default
+        for _ in repeat(default, n): yield _
 async def collect(it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
 async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items'):
     i, it = 0, iter_to_agen(it)

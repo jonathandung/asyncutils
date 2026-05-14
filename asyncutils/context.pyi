@@ -68,7 +68,9 @@ class Context:
     MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: HashAlgorithm = ...
     AFRIEVALDS_DEFAULT_K: int = ...
     AUNZIP_DEFAULT_PUT_BATCH: int = ...
+    MERGE_DEFAULT_MAX_QSIZE: int = ...
     TEE_DEFAULT_PUT_EXC: bool = ...
+    TEE_DEFAULT_MAX_QSIZE: int = ...
     ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: float = ...
     DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE: int = ...
     LOCKSMITH_DEFAULT_TIMEOUTS: tuple[float|None, float|None, float|None] = ...
@@ -100,6 +102,7 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_STRICT: bool = ...
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
+    def ascurctx(self) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry.'''
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
     def copy(self) -> Self: '''Return a copy of the context.'''
     @classmethod
@@ -109,6 +112,7 @@ class Context:
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
+    def __setitem__(self, name: str, value: Any, /) -> None: '''Alias for :meth:`__setattr__`.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: Any): '''Note that the context of the current thread is to be set to `ctx`.'''
@@ -133,7 +137,7 @@ all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
-  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (81 as of now!) and more may be added in the future,
+  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (83 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
@@ -184,7 +188,9 @@ TIMER_DEFAULT_PRECISION: Final[int]
 MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: Final[HashAlgorithm]
 AFRIEVALDS_DEFAULT_K: Final[int]
 AUNZIP_DEFAULT_PUT_BATCH: Final[int]
+MERGE_DEFAULT_MAX_QSIZE: Final[int]
 TEE_DEFAULT_PUT_EXC: Final[bool]
+TEE_DEFAULT_MAX_QSIZE: Final[int]
 ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: Final[float]
 DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE: Final[int]
 LOCKSMITH_DEFAULT_TIMEOUTS: Final[tuple[float|None, float|None, float|None]]

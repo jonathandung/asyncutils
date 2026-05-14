@@ -8,7 +8,7 @@ from typing import Any, Final, Self, final, overload
 class Module:
     '''Only user-facing methods have docstrings here.'''
     @overload
-    def __new__(cls, name: Submodule, /) -> Self|ModuleType: ...
+    def __new__(cls, name: Submodule, /) -> Self|ModuleType: ... # type: ignore[misc]
     @overload
     def __new__(cls, name: str, /) -> Any: ...
     def __getattr__(self, name: str, /) -> Any: '''Check if the name is public and exit early without importing the module if not, unless the name is a double-underscored attribute, in which case the module will be loaded even if it doesn't exist.'''

@@ -10,7 +10,7 @@ from asyncio.tasks import Task
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from types import TracebackType
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aiter_from_f', 'anullcontext', 'done_evt', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'aiter_from_f', 'anullcontext', 'done_evt', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable `aw`, such that it can be passed to :func:`asyncio.create_task`.'''
@@ -84,3 +84,5 @@ def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, stri
 def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, strict: Literal[False]) -> Callable[P, DualContextManager[T]]: ...
 @overload
 def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, strict: bool=...) -> Callable[P, DualContextManager[T]]: '''Convert a callable that returns an (async) iterable, usually an (async) generator function, over exactly one item, into a function returning a non-reusable sync- and async-compatible context manager. Essentially combines :func:`contextlib.contextmanager` and :func:`contextlib.asynccontextmanager` into one decorator.'''
+def aawcmf2dcmff[T, **P](*, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> Callable[[Callable[P, Awaitable[AbstractContextManager[T]|AbstractAsyncContextManager[T]]]], Callable[P, DualContextManager[T]]]: '''A decorator factory converting a function giving an awaitable resolving to an async context manager into a function returning a non-reusable dual context manager using :func:`dualcontextmanager`.'''
+def aawcmf2dcmf[T, **P](f: Callable[P, Awaitable[AbstractContextManager[T]|AbstractAsyncContextManager[T]]], /) -> Callable[P, DualContextManager[T]]: '''Equivalent to `aawcmf2dcmff()(f)`.'''

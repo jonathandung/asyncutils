@@ -263,8 +263,8 @@ this table take inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~asyncutils.queues.UserPriorityQueue.enumerate` method of an exact instance of :class:`~asyncutils.queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.signals.wait_for_signal
-    - ``sigs``: :type:`tuple[int, ...]`
-    - Raised when :func:`~asyncutils.signals.wait_for_signal` is called on signal numbers ``sigs``.
+    - ``sigs``: :type:`set[int]`
+    - Raised when :func:`~asyncutils.signals.wait_for_signal` is called on signal numbers ``sigs``. Audit hooks can modify the set, and the changes will be reflected.
   * - asyncutils.util.sync_await
     - ``atname``: :class:`str`
     - Raised when :func:`~asyncutils.util.sync_await` is called on an awaitable whose type is of name ``atname``.

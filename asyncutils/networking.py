@@ -1,5 +1,5 @@
 __lazy_modules__ = frozenset(('asyncutils._internal.compat', 'asyncutils._internal.helpers'))
-from asyncutils import IgnoreErrors, LoopBoundMixin, getcontext, ignore_cancellation
+from asyncutils import IgnoreErrors, LoopBoundMixin, dualcontextmanager, getcontext, ignore_cancellation
 from asyncutils._internal.compat import Queue
 from asyncutils._internal.helpers import audit_fullname, fullname
 from asyncutils._internal.log import warning
@@ -79,7 +79,7 @@ class SocketTransport(Transport):
         if (s := self._socket) is None: return
         with self._h: s.close()
         self.loop.remove_reader(s.fileno()); self._socket = None; self._reset_extra(); return s
-    @__import__('contextlib').contextmanager
+    @dualcontextmanager
     def sock_context(self, sock):
         try: yield self.connect_sock(sock)
         finally: self.disconnect_sock()

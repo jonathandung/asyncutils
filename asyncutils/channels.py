@@ -1,4 +1,4 @@
-from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, getcontext, iter_to_agen, potent_derive, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation
+from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, dualcontextmanager, getcontext, iter_to_agen, potent_derive, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log as L, patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueShutDown
@@ -8,8 +8,7 @@ from _functools import partial # type: ignore[import-not-found]
 from _weakrefset import WeakSet
 from asyncio import iscoroutine, CancelledError, Event, Lock, Semaphore, gather, shield, sleep, wait_for, timeout as _timeout
 from collections import defaultdict, deque, namedtuple
-from contextlib import contextmanager
-from itertools import starmap
+from itertools import repeat, starmap
 from sys import addaudithook, audit
 @subscriptable
 class Observable(LoopContextMixin):
@@ -159,17 +158,19 @@ class EventBus(LoopContextMixin):
             F.set_result(result)
         return result
     def add_middleware_once(self, middleware, until): return self._middlewares.setdefault(middleware, until) is until
-    @contextmanager
+    @(c := dualcontextmanager(use_existing_executor=False, create_executor=False, strict=False))
     def audit_context(self):
+        o = not self._auditing
         try:
-            if o := not self._auditing: self.start_audit()
+            if o: self.start_audit()
             yield
         finally:
             if o: self.stop_audit()
-    @contextmanager
+    @c
     def tracking_context(self, stats_receiver=None):
+        o = not self._tracking
         try:
-            if o := not self._tracking: self.start_tracking()
+            if o: self.start_tracking()
             yield
         finally:
             if o: self.stop_tracking() if stats_receiver is None else stats_receiver.set_result(self.stop_tracking(True))
@@ -188,7 +189,6 @@ class EventBus(LoopContextMixin):
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
-        if self._auditing: audit(event_type, data)
         p, f = self.sync_start_publish(event_type, data, safe=safe, timeout=timeout, chaperone=chaperone)
         if not wait: return
         try:
@@ -249,7 +249,7 @@ class EventBus(LoopContextMixin):
         try:
             async with _timeout(timeout):
                 self.stream_queue.shutdown(immediate)
-                for _ in range(self.active_tasks): await f()
+                for _ in repeat(None, self.active_tasks): await f()
         except TimeoutError: L.exception('%s shutdown timed out, some tasks may be incomplete', self.name)
         finally:
             if p := self._publishers: await safe_cancel_batch(p)
@@ -269,7 +269,7 @@ class EventBus(LoopContextMixin):
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
     async def __setup__(self): super().__init__()
     def __cleanup__(self): return self.shutdown(immediate=True)
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False'), (subscribe_until, 'fut, subscriber, event_type=None, *, till_permanent=None')); WILDCARD, _inc_cnt = None, classmethod(_); del _ # noqa: B008
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=__import__('itertools').count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False'), (subscribe_until, 'fut, subscriber, event_type=None, *, till_permanent=None')); WILDCARD, _inc_cnt = None, classmethod(_); del _, c # noqa: B008
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'

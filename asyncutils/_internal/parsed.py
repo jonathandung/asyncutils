@@ -10,7 +10,8 @@ Use the AUTILSCFGPATH environment variable to specify a path to a .json or .json
 A --config option is not offered due to the complexity of implementation and ease to revert to a default config within a one-off config.
 See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
-Note that the inner workings of this library is tightly coupled with the ever-evolving asyncio framework. As such, it is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, and tornado.''', **j)
+Note that the inner workings of this library is tightly coupled with the ever-evolving asyncio framework.
+As such, it is probably incompatible with full-fledged third-party async frameworks such as curio, anyio, trio, and tornado.''', **j)
 (a := (h := lambda f=p.add_mutually_exclusive_group: f().add_argument)())('-l', '--log-to', nargs='?', const='MAKE', metavar='FILE', help='''This module uses a logger, so that post-mortem debugging can be done by inspecting the log file created.
 When FILE, interpreted as a file descriptor if an integer, is passed, the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
@@ -58,8 +59,8 @@ M defaults to 3.
 Set to a negative value to disable the threshold completely.''')
 (a := h('testing', 'Options to more conveniently test this module.'))('-p', '--load-all', action=f, help='Preload all submodules of this module. Useful for testing, but incurs noticeable performance penalty.')
 a('-s', '--seed', help='Seed the random instance used internally by this module with SEED, which will be interpreted as an integer if possible.')
-a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since the verbosity flags take effect when the context manager is manually exited.')
-a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero, or an uncaught error occurs in the console execution logic itself.')
-(a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit. Useful for checking if the installation succeeded.')
+a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since\nthe verbosity flags take effect again when the context manager is manually exited.')
+a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero,\nor an uncaught error occurs in the console execution logic itself.')
+(a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit.\nUseful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
 del a, b, C, d, e, f, g, h, i, j, J, A

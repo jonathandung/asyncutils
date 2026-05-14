@@ -1,4 +1,5 @@
 from asyncutils._internal.helpers import verify_compat
+from itertools import repeat
 if verify_compat('3.13'): from _heapq import heapify_max as heapify, heappop_max as heappop, heapreplace_max as heapreplace, heappush_max as heappush, heappushpop_max as heappushpop # type: ignore[import-not-found]
 else:
     from _heapq import _heapify_max as heapify, _heappop_max as heappop, _heapreplace_max as heapreplace; from heapq import _siftdown_max, _siftup_max # type: ignore[import-not-found]
@@ -26,12 +27,12 @@ class partial: # noqa: N801
         if a and a[-1] is Placeholder: raise TypeError('trailing Placeholders are not allowed')
         if k is None: k = {}
         if any(v is Placeholder for v in k.values()): raise TypeError('Placeholder cannot be passed as a keyword argument')
-        if isinstance(f, partial):
+        if isinstance(f, cls):
             P, e = f._phs, (A := list(f.args)).extend
             if a:
                 e(a)
                 if P:
-                    if (N := len(a)) < P: e(Placeholder for _ in range(P-N))
+                    if (N := len(a)) < P: e(Placeholder for _ in repeat(None, P-N))
                     A = list(f._mg(A))
                     if N > P: A.extend(a[P:])
                 C, M = _(A)

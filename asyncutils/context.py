@@ -5,16 +5,14 @@ _, k, all_contextual_consts = __import__('_contextvars').ContextVar('asyncutils_
 class Context:
     __slots__ = tuple(C); exec(f'def __new__(cls,/,*,{",".join(f"{k}={v!r}" for k, v in C.items())}):\n\t(_:=object.__new__(cls)).{"\n\t_.".join(f"{k}={k}" for k in __slots__)}\n\treturn _') # noqa: S102
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.context.Context')
-    def __getattribute__(self, n, /, _=frozenset(('replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint')), u='__', f=object.__getattribute__):
-        if n.startswith(u) and n.endswith(u): return object.__getattribute__(self, n)
-        if n in _: return f(self, n)
-        if isinstance(r := f(self, n := n.upper()), list):
-            if isinstance(r[0], list): r = map(tuple, r)
-            r = tuple(r)
-        return r
+    def __getattribute__(self, n, /, _=frozenset(('ascurctx', 'replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint', 'from_dct')), u='__'): return super().__getattribute__(n if n in _ or (n.startswith(u) and n.endswith(u)) else n.upper())
+    def __getitem__(self, n, /): return super().__getattribute__(n.upper())
     def __setattr__(self, n, v, /):
-        if (n := n.upper()) in all_contextual_consts: object.__setattr__(self, n, v)
-        else: raise AttributeError(f'{type(self).__name__!r} object has no attribute {n!r}')
+        if (n := n.upper()) not in all_contextual_consts: raise AttributeError(f'{type(self).__name__!r} object has no attribute {n!r}')
+        if isinstance(v, list):
+            if v and isinstance(v[0], list): v = map(tuple, v)
+            v = tuple(v)
+        super().__setattr__(n, v)
     def replace_from_dct(self, d, /, _=all_contextual_consts):
         D = self.asdict()
         for n, v in d.items():
@@ -25,6 +23,7 @@ class Context:
             if not m: continue
             for n, v in m.items():
                 if (n := n.upper()) in _: setattr(self, n, v)
+    def ascurctx(self): return nonreusablelocalcontext(self)
     @classmethod
     def from_dct(cls, d, /): return cls(**{k.upper(): v for k, v in d.items()})
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
@@ -33,7 +32,7 @@ class Context:
     def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=__import__('pprint').PrettyPrinter(sort_dicts=False, underscore_numbers=True), incl_newline=True): file.write('Context.from_dct(\n'); pp._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*incl_newline, file=file, flush=flush) # pragma: no cover # noqa: B008
     def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _(), incl_newline=False); return s.getvalue()
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
-    __copy__, __replace__ = copy, replace; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
+    __copy__, __replace__, __setitem__ = copy, replace, __setattr__; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
 def getcontext(_=_, d=Context()):
     try: return _.get()
     except LookupError: _.set(d); return d
@@ -50,7 +49,9 @@ class localcontext:
     def __exit__(self, /, *_):
         setcontext(self.saved_ctx); del self.saved_ctx
         if isinstance(self, nonreusablelocalcontext): del self.new_ctx
-    P.patch_method_signatures((__exit__, P.xsig))
+    async def __aenter__(self): return self.__enter__()
+    async def __aexit__(self, /, *_): return self.__exit__(*_)
+    P.patch_method_signatures((__exit__, s := P.xsig), (__aexit__, s)); del s
 class nonreusablelocalcontext(localcontext): __slots__ = ()
 def __getattr__(n, /, _=getcontext): return getattr(_(), n)
 P.patch_function_signatures((getcontext, ''), (setcontext, 'ctx, /'), (__getattr__, 'name, /'))
