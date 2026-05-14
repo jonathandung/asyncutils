@@ -11,16 +11,15 @@ jobs:
     - uses: actions/checkout@v6.0.2
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       with:
-        python-version: 3.12.13
+        python-version: 3.12
         cache-python: true
+        activate-environment: true
     - name: Install dependencies
       run: uv pip install -U mypy -e . && uv pip check
     - name: Lint with ruff
       run: uvx ruff check --output-format=github
-    - name: Run mypy
-      run: uvx mypy asyncutils
-    - name: Run stubtest
-      run: uvx stubtest asyncutils --strict-type-check-only --allowlist=allowlist.txt
+    - name: Run mypy and stubtest
+      run: mypy asyncutils && stubtest asyncutils --strict-type-check-only --allowlist=allowlist.txt
   test:
     needs: lint
     runs-on: ${{matrix.os}}
@@ -28,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.12.13", "3.15.0-beta.1"]
+        python-version: ["3.12", "3.15.0-beta.1"]
     steps:
     - uses: actions/checkout@v6.0.2
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
