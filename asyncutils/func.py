@@ -6,7 +6,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log, patch as P
 from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import func_all as __all__
-from asyncio import CancelledError, Lock, eager_task_factory, gather, iscoroutine, sleep, wait_for
+import asyncio as A
 from collections import deque, namedtuple
 from functools import partial, wraps
 from itertools import count, repeat
@@ -14,9 +14,9 @@ from sys import audit
 from time import perf_counter
 def acompose(*F, wrap_last=True):
     async def composed(*a, **k):
-        if iscoroutine(r := next(I := reversed(F))(*a, **k)): r = await r
+        if A.iscoroutine(r := next(I := reversed(F))(*a, **k)): r = await r
         for f in I:
-            if iscoroutine(r := f(r)): r = await r
+            if A.iscoroutine(r := f(r)): r = await r
         return r
     return wraps(F[-1])(composed) if wrap_last else composed
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
@@ -36,7 +36,7 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
         async def wrapper(*a, **k):
             log.debug('func.every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
-            if wait_first: await sleep(intvl)
+            if wait_first: await A.sleep(intvl)
             for i in count() if max_iterations is None else range(max_iterations):
                 t = timer()
                 try: await f(*supplied_args, *a, **(supplied_kwargs or {}), **k)
@@ -46,8 +46,8 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                         if stop_when.done(): return stop_when.result()
                         break
                     (log.error if verbose else log.warning)('func.every: error in periodic coroutine %s on iteration %d', n, i, exc_info=True)
-                try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
-                except CancelledError:
+                try: return await A.wait_for(stop_when, intvl+t-timer() if count_f else intvl)
+                except A.CancelledError:
                     if stop_on_exc: break
                     (log.info if verbose else log.debug)('func.every: future to stop periodic coroutine %s was cancelled on iteration %d', n, i, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
@@ -65,7 +65,7 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
         async def wrapper(self, /, *a, **k):
             log.debug('func.everymethod: periodic task started'); q = default is _NO_DEFAULT
             if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('func.everymethod: future to stop periodic coroutine %s is already done', n)
-            if wait_first: await sleep(intvl)
+            if wait_first: await A.sleep(intvl)
             for i in count() if max_iterations is None else range(max_iterations):
                 t = timer()
                 try: await f(self, *supplied_args, *a, **(supplied_kwargs or {}), **k)
@@ -75,8 +75,8 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
                         if stop_when.done(): return stop_when.result()
                         break
                     (log.error if verbose else log.warning)('func.everymethod: error in periodic coroutine %s on iteration %d', n, i, exc_info=True)
-                try: return await wait_for(stop_when, intvl+t-timer() if count_f else intvl)
-                except CancelledError:
+                try: return await A.wait_for(stop_when, intvl+t-timer() if count_f else intvl)
+                except A.CancelledError:
                     if stop_on_exc: break
                     (log.info if verbose else log.debug)('func.everymethod: future to stop periodic coroutine %s was cancelled on iteration %d', n, i, exc_info=True); stop_when = loop.create_future()
                 except TimeoutError: continue
@@ -115,10 +115,10 @@ def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, 
                 try: r = await f(*a, **k)
                 except exc as e:
                     c += 1
-                    if iscoroutine(t := on_retry(i, e)): await t
-                    await sleep(l := min(max(delay*b+(c*delay)*(1+(random()*2-1)*jitter), delay), max_delay)); b *= backoff
+                    if A.iscoroutine(t := on_retry(i, e)): await t
+                    await A.sleep(l := min(max(delay*b+(c*delay)*(1+(random()*2-1)*jitter), delay), max_delay)); b *= backoff
                 else:
-                    if iscoroutine(t := on_success(i, l)): await t
+                    if A.iscoroutine(t := on_success(i, l)): await t
                     return r
             return await f(*a, **k)
         return wraps(f)(wrapper)
@@ -128,13 +128,13 @@ def throttle(lim, timer=perf_counter):
     def dec(f, /):
         async def wrapper(*a, **k):
             nonlocal l
-            if w := max(0, 1/lim-timer()+l): await sleep(w)
+            if w := max(0, 1/lim-timer()+l): await A.sleep(w)
             l = timer(); return await f(*a, **k)
         return wraps(f)(wrapper)
     return dec
 def debounce(wait):
     def dec(f, /, l=None):
-        (L := get_loop_and_set()).set_task_factory(eager_task_factory); g, h = L.create_task, sleep.__get__(wait)
+        (L := get_loop_and_set()).set_task_factory(A.eager_task_factory); g, h = L.create_task, A.sleep.__get__(wait)
         async def wrapper(*a, **k):
             nonlocal l
             if l: await safe_cancel(l)
@@ -158,23 +158,23 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
     if warmup is None: warmup = c.BENCHMARK_DEFAULT_WARMUP
     if sequential:
         for _ in repeat(None, warmup): await f()
-    else: await gather(*(f() for _ in repeat(None, warmup)))
-    audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in repeat(None, times)] if sequential else await gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
+    else: await A.gather(*(f() for _ in repeat(None, warmup)))
+    audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in repeat(None, times)] if sequential else await A.gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
 P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
     def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):
         if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
-        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
+        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (A.Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
-        p, A, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
+        p, m, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
         async with self._lock:
             d = (n := self._timer())-P
             while T:
-                if (x := p()) > d: A(x); break
+                if (x := p()) > d: m(x); break
             if (l := len(T)-self._calls+1) > 0:
                 if self._raise: raise RateLimitExceeded(f, a, k, C, P, l)
-                await sleep(p()-d)
+                await A.sleep(p()-d)
             T.append(n)
         return await f(*a, **k)
     def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r}, lock_impl={fullname(self._lock)})'

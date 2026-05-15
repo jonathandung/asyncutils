@@ -1,4 +1,4 @@
-from asyncutils import LoopBoundMixin, LoopContextMixin, dummy_task, take, iter_to_agen, sync_await
+import asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import iterclasses_all as __all__
@@ -11,15 +11,15 @@ class achain:
     def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in iter_to_agen(self._its): # ty: ignore[unresolved-attribute]
-            async for _ in iter_to_agen(i): yield _
+        async for i in A.iter_to_agen(self._its): # ty: ignore[unresolved-attribute]
+            async for _ in A.iter_to_agen(i): yield _
 @H.subscriptable
-class apeekable(LoopBoundMixin):
+class apeekable(A.LoopBoundMixin):
     __slots__ = '_cache', '_it'
-    def __init__(self, it=()): self._it, self._cache = iter_to_agen(it), deque(); super().__init__()
+    def __init__(self, it=()): self._it, self._cache = A.iter_to_agen(it), deque(); super().__init__()
     def __aiter__(self): return self
     def __bool__(self):
-        try: sync_await(self.peek(), loop=self.loop); return True
+        try: A.sync_await(self.peek(), loop=self.loop); return True
         except StopAsyncIteration: return False
     async def peek(self, default=_NO_DEFAULT):
         if not (c := self._cache):
@@ -39,20 +39,20 @@ class apeekable(LoopBoundMixin):
             elif c < 0: a, b = -1 if (s := i.start) is None else int(s), _ if (s := i.stop) is None else int(s)
             else: raise ValueError('slice step cannot be zero')
             if a < 0 or b < 0:
-                async for s in iter_to_agen(self._it): f(s)
+                async for s in A.iter_to_agen(self._it): f(s)
             elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
-                async for s in take(self._it, d): f(s)
+                async for s in A.take(self._it, d): f(s)
             return tuple(C)[a:b:c]
         l, i = len(C), int(i)
         if i < 0:
-            async for s in iter_to_agen(self._it): f(s)
+            async for s in A.iter_to_agen(self._it): f(s)
         elif i >= l:
-            async for s in take(self._it, i-l+1): f(s)
+            async for s in A.take(self._it, i-l+1): f(s)
         return C[i]
     P.patch_method_signatures((__getitem__, 'idx, /'))
 class await_later:
     __slots__ = 'aw',
-    def __new__(cls, a, /, _=type(dummy_task)):
+    def __new__(cls, a, /, _=type(A.dummy_task)):
         if H.check_methods(a, '__await__') or isinstance(a, _) and a.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', a); return _ # noqa: RUF021
         raise TypeError(f'{H.fullname(a)} object at {id(a):#x} is not awaitable')
     def __getattr__(self, n, /): return getattr(self.aw, n)
@@ -61,8 +61,8 @@ class await_later:
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass the type of proxies to awaitables')
     P.patch_classmethod_signatures((__new__, 'aw, /'))
 @H.subscriptable
-class abucket(LoopContextMixin):
-    def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
+class abucket(A.LoopContextMixin):
+    def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
     def __contains__(self, k, /, _=await_later):
         if not self._validator(k): return False
         try: self._cache[k].appendleft(_(anext(self[k]))); return True
@@ -84,4 +84,4 @@ class abucket(LoopContextMixin):
                     if (k := K(i)) == v: yield i; break
                     elif V(k): C[k].append(i)
     P.patch_method_signatures((__contains__, _ := 'key, /'), (__getitem__, _)); del _
-del P, await_later, dummy_task
+del P, await_later
