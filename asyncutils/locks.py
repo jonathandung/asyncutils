@@ -1,6 +1,5 @@
-# type: ignore
 __lazy_modules__ = frozenset(('_heapq', 'asyncio'))
-from asyncutils import Critical, LoopBoundMixin, LockForceRequest, LockMixin, LockWithOwnerMixin, getcontext, safe_cancel_batch, wrap_in_coro, CRITICAL
+import asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set, subscriptable
@@ -10,7 +9,7 @@ from _heapq import heappop, heappush
 from asyncio import BoundedSemaphore, Lock, current_task, gather, iscoroutine, wait, wait_for
 from time import monotonic
 class DynamicBoundedSemaphore(BoundedSemaphore):
-    def __init__(self, value=None): super().__init__(getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque() # type: deque
+    def __init__(self, value=None): super().__init__(A.getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque() # type: deque
     @property
     def bound(self): return self._bound_value
     @bound.setter
@@ -19,30 +18,32 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
         d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft # ty: ignore[unresolved-attribute]
         while d and W:
             if not (w := f()).done(): w.set_result(None); d -= 1
-class AdvancedRateLimit(LoopBoundMixin, LockMixin):
+class AdvancedRateLimit(A.LoopBoundMixin, A.LockMixin):
     __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._lu = rate, Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
     async def acquire(self, tokens=None, timeout=None):
         async with self._lock:
             self.update_tokens_lock_held()
-            if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens, F := self.loop.create_future()))
+            if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((A.getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens, F := self.loop.create_future()))
             else: self.tokens -= tokens; return True
         try: await wait_for(F, timeout); return True
         except TimeoutError: return False
     async def release(self, tokens=None):
-        async with self._lock: self.update_tokens_lock_held(); self.tokens = min(self.tokens+(getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens), self.capacity)
+        async with self._lock: self.update_tokens_lock_held(); self.tokens = min(self.tokens+(A.getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens), self.capacity)
     async def set_rate(self, new):
         async with self._lock: self.update_tokens_lock_held(); self.rate, self.capacity = new, max(self.capacity, new)
     def locked(self): return bool(self._waiters)
     def update_tokens_lock_held(self):
+        if not (w := self._waiters): return
         e, p, self._lu = (n := monotonic())-self._lu, (w := self._waiters).popleft, n; T = min(self.capacity, self.tokens+e*self.rate)
-        while w and (t := p())[0] <= T:
+        while (t := p())[0] <= T:
             t, f = t; T -= t
             if not f.done(): f.set_result(None)
+            if not w: break
         self.tokens = T; w.appendleft(t)
-class PrioritySemaphore(LoopBoundMixin, LockMixin):
+class PrioritySemaphore(A.LoopBoundMixin, A.LockMixin):
     __slots__ = '_tiebreak', '_value', '_waiters'
-    def __init__(self, value=None): self._value, self._tiebreak, self._waiters = getcontext().PRIORITY_SEMAPHORE_DEFAULT_VALUE if value is None else value, 0, []
+    def __init__(self, value=None): self._value, self._tiebreak, self._waiters = A.getcontext().PRIORITY_SEMAPHORE_DEFAULT_VALUE if value is None else value, 0, []
     async def acquire(self, priority=0):
         self._value -= 1; self._tiebreak += 1; w = self._waiters
         while self._value < 0: heappush(w, (priority, self._tiebreak, F := self.make_fut())); await F
@@ -56,7 +57,7 @@ class PrioritySemaphore(LoopBoundMixin, LockMixin):
         for *_, e in self._waiters: e.set_result(None)
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
 @subscriptable
-class KeyedCondition(LoopBoundMixin, LockMixin):
+class KeyedCondition(A.LoopBoundMixin, A.LockMixin):
     __slots__ = '__lock', '_specific_waiters'
     def __init__(self, lock=None): super().__init__(); self.__lock, self._specific_waiters = lock or Lock(), defaultdict(set)
     async def acquire(self): await self.__lock.acquire(); return True
@@ -124,7 +125,7 @@ class MultiCountDownLatch:
         async with (C := self._cond): await C.wait_all(timeout)
     @property
     def broken(self): return not self._counts
-class RLock(LockWithOwnerMixin):
+class RLock(A.LockWithOwnerMixin):
     __slots__ = '__lock', '_count', '_owner'
     def __init__(self, lock=None): self._count, self._owner, self.__lock = 0, None, lock or Lock()
     async def acquire(self):
@@ -140,7 +141,7 @@ class RLock(LockWithOwnerMixin):
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is current_task()
-class PriorityLock(LoopBoundMixin, LockWithOwnerMixin):
+class PriorityLock(A.LoopBoundMixin, A.LockWithOwnerMixin):
     __slots__ = '_owner', '_tiebreak', '_waiters'
     def __init__(self): super().__init__(); self._waiters, self._tiebreak, self._owner = [], 0, None
     async def acquire(self, priority=0, timeout=None):
@@ -197,15 +198,15 @@ class LocksmithBase:
         if info is None: info = await self.get_info(lock)
         try:
             if iscoroutine(r := lock.release()): r = await r
-        except CRITICAL: raise Critical
+        except A.CRITICAL: raise A.Critical
         except:
             if self.find_owner(lock) is (o := current_task()):
                 if o is None: return self.throw_fallback(lock)
                 if (c := o.get_coro()) is None: return self.eager_fallback(lock)
                 F = self._loop.create_future()
-                try: c.throw(LockForceRequest(self, F.set_result, lock, info)) # ty: ignore[invalid-argument-type]
-                except CRITICAL as e: self.task_raised_critical(lock, e)
-                except LockForceRequest as e:
+                try: c.throw(A.LockForceRequest(self, F.set_result, lock, info)) # ty: ignore[invalid-argument-type]
+                except A.CRITICAL as e: self.task_raised_critical(lock, e)
+                except A.LockForceRequest as e:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
                     else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self)) # ty: ignore[invalid-argument-type]
                 except BaseException as e: self.raised_other(lock, e)
@@ -216,21 +217,21 @@ class LocksmithBase:
         finally:
             if purge_waiters: await self.purge_waiters(lock)
     async def purge_waiters(self, lock, /):
-        if w := getattr(lock, '_waiters', None): await safe_cancel_batch(w, disembowel=True)
+        if w := getattr(lock, '_waiters', None): await A.safe_cancel_batch(w, disembowel=True)
     async def host(self, task, lock, /, *, timeout1=_NO_DEFAULT, timeout2=_NO_DEFAULT, timeout3=_NO_DEFAULT):
         await wait(f := tuple(map(self.wrap_task, (self.force(lock, purge_waiters=False), lock.acquire()))), return_when='FIRST_COMPLETED'); f, a = f
-        if await wait_for(f, getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[0] if timeout1 is _NO_DEFAULT else timeout1): await a
+        if await wait_for(f, A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[0] if timeout1 is _NO_DEFAULT else timeout1): await a
         else:
-            try: await wait_for(a, getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[1] if timeout2 is _NO_DEFAULT else timeout2)
+            try: await wait_for(a, A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[1] if timeout2 is _NO_DEFAULT else timeout2)
             except TimeoutError: raise TimeoutError(f'failed to acquire lock {lock!r} within {timeout2} seconds') from None
-        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[2] if timeout3 is _NO_DEFAULT else timeout3)
+        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[2] if timeout3 is _NO_DEFAULT else timeout3)
     async def _wait_on(self, task, lock, /):
         try: return await task
         finally:
             if lock.locked() and iscoroutine(a := lock.release()): await a
     async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
     async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(lock), id(lock))
-    def wrap_task(self, a, /): return self._loop.create_task(wrap_in_coro(a))
+    def wrap_task(self, a, /): return self._loop.create_task(A.wrap_in_coro(a))
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
     def find_owner(self, lock, /): return getattr(lock, '_owner', None)

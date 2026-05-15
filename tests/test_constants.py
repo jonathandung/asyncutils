@@ -27,5 +27,3 @@ def test_custom_sentinel():
     assert a.is_(a) and a.bound_to is None
     class qux: __slots__, grault = (), TestSentinel()
     assert f'{qux.grault.bound_to}.{qux.grault.back}'.endswith('qux.grault')
-    class garply: __slots__, waldo = (), TestSentinel('garply.waldo')
-    assert garply.waldo.is_(TestSentinel('garply.waldo'))

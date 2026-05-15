@@ -1,6 +1,6 @@
 import sys as S
 __all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial'
-c, V, b = (g := (E := __import__('os').environ).get)('NO_COLOR') != '1', (S.hexversion-0xf0)>>16, None if (r := (F := S.flags).ignore_environment) else g('PYTHON_BASIC_REPL') == '1'
+c, V, b = (g := (E := __import__('os').environ).get)('NO_COLOR') != '1', (S.hexversion-0xf0)>>16, g('PYTHON_BASIC_REPL') == '1' if (r := not (F := S.flags).ignore_environment) else None
 if d := g('TERM') == 'dumb':
     if g('FORCE_COLOR') == '1': __import__('_warnings').warn('possibly undesired conflict in environment variables: FORCE_COLOR=1 overrides TERM=dumb', RuntimeWarning)
     else: c = False

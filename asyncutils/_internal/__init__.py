@@ -1,3 +1,3 @@
-def __getattr__(n, /, g=globals(), s=frozenset(__all__ := ('compat', 'helpers', 'log', 'patch', 'running_console', 'submodules')).union(('parsed', 'initialize', 'py312', 'py313', 'types', 'unparsed')), t='from asyncutils._internal.%s import __class__', m=__import__('sys').modules, p='asyncutils._internal.'): # noqa: B008
+def __getattr__(n, /, g=globals(), s=frozenset(__all__ := ('compat', 'helpers', 'log', 'patch', 'running_console', 'submodules')).union(('parsed', 'initialize', 'py312', 'py313', 'unparsed')), t='from asyncutils._internal.%s import __class__', m=__import__('sys').modules, p='asyncutils._internal.'): # noqa: B008
     if n not in s: raise AttributeError(f"module 'asyncutils._internal' has no attribute {n!r}")
     exec(t%n, g); return m[p+n] # noqa: S102

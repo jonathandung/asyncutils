@@ -1,4 +1,4 @@
-from asyncutils import AsyncContextMixin, Critical, PoolError, LoopBoundMixin, LoopContextMixin, PoolFull, PoolShutDown, aiter_to_gen, exception_occurred, getcontext, iter_to_agen, safe_cancel, sync_await, take, unwrap_exc, wrap_exc, CRITICAL
+import asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.compat import PriorityQueue, Queue
 from asyncutils._internal.helpers import filter_out, fullname, subscriptable
@@ -10,32 +10,32 @@ from sys import exc_info
 from threading import Thread, Lock as TLock
 from time import monotonic
 @subscriptable
-class Pool(LoopContextMixin):
+class Pool(A.LoopContextMixin):
     __slots__ = '_event', '_func', '_it', '_queue', '_sem', '_task'
-    def __init__(self, f, it, /, workers=None): self._func, self._it, self._sem, self._queue, self._task, self._event = f, it, Semaphore(getcontext().POOL_DEFAULT_WORKERS if workers is None else workers), Queue(1), None, Event()
+    def __init__(self, f, it, /, workers=None): self._func, self._it, self._sem, self._queue, self._task, self._event = f, it, Semaphore(A.getcontext().POOL_DEFAULT_WORKERS if workers is None else workers), Queue(1), None, Event()
     async def process(self, item):
         async with self._sem: await self._queue.put(await self._func(item))
     async def _consumer(self):
         try:
-            async for _ in iter_to_agen(self._it): await self.process(_)
-        finally: await self._queue.put(wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
+            async for _ in A.iter_to_agen(self._it): await self.process(_)
+        finally: await self._queue.put(A.wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
     def __aiter__(self): self._task = self.make(self._consumer()); return self
     async def __anext__(self):
         if self._event.is_set() and self._queue.empty(): raise StopAsyncIteration('pool ran out of items')
         try:
-            if exception_occurred(i := await self._queue.get()) and isinstance(e := unwrap_exc(i), StopAsyncIteration): raise e
+            if A.exception_occurred(i := await self._queue.get()) and isinstance(e := A.unwrap_exc(i), StopAsyncIteration): raise e
             return i
         finally:
             if t := self._task: t.cancel()
     async def __setup__(self): super().__init__()
     async def aclose(self):
-        if t := self._task: await safe_cancel(t)
+        if t := self._task: await A.safe_cancel(t)
     __cleanup__ = aclose
-class AdvancedPool(LoopContextMixin):
+class AdvancedPool(A.LoopContextMixin):
     __slots__ = '__cnt', '_current', '_kill_at_exit', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
-    def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
+    def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = A.getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
     def __repr__(self): return f'{fullname(self)}({self._max}, {self._min}, {self._queue.maxsize}, {self._scaling}, {self._kill_at_exit})'
     async def _threadsafe_get(self):
         with self._tlock: return await self._queue.get()
@@ -45,18 +45,18 @@ class AdvancedPool(LoopContextMixin):
         x, g, G = 0, (L := self.loop).call_soon_threadsafe, self._threadsafe_get
         try:
             while not self._shutdown:
-                if (F := sync_await(G(), loop=L)[2]) is None: self._threadsafe_task_done(); break
+                if (F := A.sync_await(G(), loop=L)[2]) is None: self._threadsafe_task_done(); break
                 f, a, k, F = F
                 try: F.set_result(f(*a, **k))
                 except BaseException as e: F.set_exception(e) # noqa: BLE001
                 finally:
                     self._threadsafe_task_done(); x += 1
                     with self._tlock: self.completed += 1; self._pending -= 1
-        except CRITICAL as e: g(_.set_exception, Critical(e))
+        except A.CRITICAL as e: g(_.set_exception, A.Critical(e))
         else: g(_.set_result, x)
     def _adjust_workers(self):
         if not self._scaling: return
-        C = getcontext()
+        C = A.getcontext()
         if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
         elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     def _scale_to(self, new):
@@ -70,12 +70,12 @@ class AdvancedPool(LoopContextMixin):
     def _put_nowait_priority(self, priority, item): self._queue.put_nowait((priority, self._tiebreak, item))
     def set_adjuster(self, raising=False):
         if self._scaling: self._adjust_workers()
-        elif raising: raise PoolError(f'{fullname(self)} is non-scaling')
+        elif raising: raise A.PoolError(f'{fullname(self)} is non-scaling')
     def raise_for_shutdown(self):
-        if self._shutdown: raise PoolShutDown(f'{fullname(self)} is shutting down')
+        if self._shutdown: raise A.PoolShutDown(f'{fullname(self)} is shutting down')
     def submit_nowait(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
-        if self.full: raise PoolFull('task queue full')
+        if self.full: raise A.PoolFull('task queue full')
         with self._tlock: self._pending += 1
         self._put_nowait_priority(_priority_, (f, a, k, F := self.make_fut())); self.set_adjuster(); return F
     def revive(self): self.__init__(self._max, self._min, self._queue.maxsize, self._scaling, self._kill_at_exit)
@@ -83,7 +83,7 @@ class AdvancedPool(LoopContextMixin):
         from asyncutils import ignore_qempty as C; f, g = (q := self._queue).get_nowait, q.task_done
         with self._tlock, C:
             while True:
-                if (F := f()[2]) is not None: await safe_cancel(F[-1])
+                if (F := f()[2]) is not None: await A.safe_cancel(F[-1])
                 g()
     async def complete(self, *a, **k): return await (await self.submit(*a, **k))
     async def submit(self, f, *a, _priority_=0, **k):
@@ -97,7 +97,7 @@ class AdvancedPool(LoopContextMixin):
                 if cancel_pending: await self._kill_helper()
                 else:
                     try: await self.wait_for_slot(idle_timeout)
-                    except PoolFull: await self._kill_helper()
+                    except A.PoolFull: await self._kill_helper()
                 for _ in repeat(None, self._current): await self._queue.put((0, self._tiebreak, None))
                 with self._tlock: self._queue.shutdown(True)
                 await self.join(); await self.drain(); return self.uptime
@@ -113,7 +113,7 @@ class AdvancedPool(LoopContextMixin):
         self.raise_for_shutdown()
         if not self.full: return 0.0
         try: t = monotonic(); await wait_for(self.drain(), timeout); return monotonic()-t
-        except TimeoutError: raise PoolFull('timeout waiting for queue space') from None
+        except TimeoutError: raise A.PoolFull('timeout waiting for queue space') from None
     async def __cleanup__(self): await self.shutdown(self._kill_at_exit)
     def __del__(self): self.loop.call_soon_threadsafe(self.shutdown, True, 0.2, 0.2)
     @property
@@ -127,9 +127,9 @@ class AdvancedPool(LoopContextMixin):
     @property
     def uptime(self): return monotonic()-self._start
 @subscriptable
-class ConnectionPool(LoopBoundMixin):
+class ConnectionPool(A.LoopBoundMixin):
     __slots__ = '_available', '_cleaner', '_creation_times', '_factory', '_healthchecker', '_in_use', '_lock', '_maintainer', '_pool', 'maxlife', 'maxsize', 'minsize'
-    def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = getcontext(); self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._maintainer = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, Lock(), Event(), None
+    def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = A.getcontext(); self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._maintainer = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, Lock(), Event(), None
     def _is_healthy(self, conn, /): return self._healthchecker(conn) and not ((t := self._creation_times.get(id(conn))) and monotonic()-t > self.maxlife)
     async def create_connection(self, *a, _executor_=None, **k): self._creation_times[id(c := self.loop.run_in_executor(_executor_, partial(self._factory, *a, **k)))] = monotonic(); return await c
     async def acquire(self, *a, **k):
@@ -147,7 +147,7 @@ class ConnectionPool(LoopBoundMixin):
             self._cleaner(c)
             if self.currsize < self.minsize: self.make(self.create_connection(*a, **k))
     async def _maintain(self):
-        f = sleep.__get__(getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
+        f = sleep.__get__(A.getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:
             await f(); n, g = [], self.create_connection
             for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
@@ -157,10 +157,10 @@ class ConnectionPool(LoopBoundMixin):
         if akgen is None:
             for _ in repeat(None, self.minsize): await f(_executor_=executor)
         else:
-            async for a, k in take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
+            async for a, k in A.take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
         self._maintainer = self.make(self._maintain())
     async def stop(self):
-        if (m := self._maintainer): await safe_cancel(m)
+        if (m := self._maintainer): await A.safe_cancel(m)
         while self._pool: self._cleaner(self._pool.pop())
         for _ in self._in_use: self._cleaner(_)
         self._in_use.clear()
@@ -172,8 +172,8 @@ class ConnectionPool(LoopBoundMixin):
     def available(self): return len(self._pool)
     @property
     def in_use(self): return len(self._in_use)
-class CallbackAccumulator(__import__('_collections').deque, AsyncContextMixin):
-    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(aiter_to_gen(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
+class CallbackAccumulator(__import__('_collections').deque, A.AsyncContextMixin):
+    def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(A.aiter_to_gen(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
     def __enter__(self): return self

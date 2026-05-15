@@ -22,7 +22,7 @@ class sentinel_base:
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')
     def __repr__(self): return f'<{fullname(self)} {self.__name!r} at {id(self):#x}>'
     def __str__(self): return getattr(self, '_sentinel_base__name', '<unbound>')+(' <private>'*self.is_private)
-    def __set_name__(self, owner, name, /, _='NOTE: The following is considered bad practice:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, consider:\nclass {0}:\n{1} = {2}()\n'.format):
+    def __set_name__(self, owner, name, /, _='NOTE: The following is not allowed:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, use:\nclass {0}:\n{1} = {2}()\n'.format):
         N = f'{fullname(owner)}.{name}'.replace('<locals>.', '').replace('<lambda>.', '')
         with self._lock:
             if (n := getattr(self, '_sentinel_base__name', None)) is None:

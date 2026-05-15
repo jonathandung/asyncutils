@@ -1,6 +1,6 @@
 '''Submodule managing the current running :mod:`asyncutils` console. No more thread safe than is necessary.
 
-.. caution:: These functions are internal and unstable. Do not call any of them.'''
+.. caution:: These functions are internal and unstable. Do not call any of them or risk corrupting state.'''
 from ..console import AsyncUtilsConsole as Console
 from typing import Any
 def getc() -> Console|None: ...

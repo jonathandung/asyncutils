@@ -32,7 +32,7 @@ Next, install py-asyncutils:
   # recommended: pip
   pip install py-asyncutils==0.9.4
   # directly from source
-  pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils
+  pip install git+https://github.com/jonathandung/asyncutils.git
   # alternatively, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
@@ -53,6 +53,7 @@ or if you wish to obtain the :ref:`extras`:
 
   # tools likely enough for developers
   pip install py-asyncutils[dev]
+  # or the equivalent syntax for extras installation in other package managers
 
 other installation pathways:
 
@@ -98,11 +99,11 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, json5, test, tools
+* dev: Packages one would want installed for development; superset of docs, json5, test, tools, and includes pre-commit as well.
+  Notably, ruff and ty are absent because it is recommended to install them with uv, which renders them unspecifiable as dependencies.
 * docs: Documentation dependencies, including sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The JSON5 parser, specifically used to read format.json5 in tests.
-* lint: pre-commit. ruff and ty are absent because it is recommended to install them with uv, which renders them unspecifiable as dependencies.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
 * test: Test dependencies, including pytest and related plugins
@@ -110,8 +111,8 @@ The extras are listed below for reference:
 .. version-removed:: 0.9.4
   The pub extra, because uv already provides that functionality.
 
-.. version-added:: 0.9.4
-  The lint extra.
+.. version-removed:: 0.9.4
+  mypy is no longer in any extra.
 
 .. version-changed:: 0.9.3
   Removed the pytest-local-badge dependency from the test extra.

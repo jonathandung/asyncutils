@@ -33,7 +33,7 @@ class Module:
 f, b, n = object.__new__, object.__setattr__, '_n'
 for _ in a: s[_] = r = f(Module); b(r, n, _)
 def l(*a, _=A.append): _(a)
-for _k, _v in (('cli', L), ('constants', D), ('context', F), ('exceptions', E), ('version', V)): l('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__
+for _k, _v in (('version', V), ('exceptions', E), ('context', F), ('constants', D), ('cli', L)): l('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__
 l('all submodules initialized in %.2f milliseconds', T())
 U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
 del P, R, E, V, F, L, T, U, d, f, r, t, n, _d, _k, _v, _a, _f, _s, _u, _i, _

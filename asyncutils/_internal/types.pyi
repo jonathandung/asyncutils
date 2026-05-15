@@ -1,5 +1,13 @@
 # ty: ignore[invalid-method-override]
-'''Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.'''
+'''| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
+| This is a fake module, and neither it nor any of its symbols exist at runtime.
+| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
+
+.. tip:: For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks.
+.. tip::
+
+  Besides, run `from __future__ import annotations` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted even prior
+  to the implementation of :pep:`563`, which introduced deferred annotation evaluation.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
@@ -12,15 +20,6 @@ from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from io import _WrappedBuffer, TextIOWrapper
 from types import CodeType, FrameType, FunctionType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
-__all__ = ()
-'''| This is a fake module, and none of its symbols exist at runtime.
-| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
-
-.. tip::
-
-  For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks.
-  Besides, use `from __future__ import annotations` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted even prior
-  to the implementation of :pep:`563`, which introduced deferred annotation evaluation.'''
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
