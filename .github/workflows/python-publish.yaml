@@ -20,7 +20,7 @@ jobs:
           cache-python: true
           activate-environment: true
       - name: Upload to PyPI
-        run: uv pip install -e . && uv build && uv publish --token ${{secrets.PYPI_TOKEN}}
+        run: uv pip install -e ".[docs]" && uv build && uv publish --token ${{secrets.PYPI_TOKEN}}
       - name: Build documentation
         run: cd docs && make html
       - name: Deploy to Pages
