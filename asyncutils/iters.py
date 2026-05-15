@@ -2,14 +2,14 @@ __lazy_modules__ = frozenset(('asyncio', 'asyncutils._internal.compat'))
 from asyncutils import exceptions as E, achain, adisembowel, aenumerate, aiter_from_f, areduce, collect, getcontext, iter_to_agen, iterf, safe_cancel, safe_cancel_batch, take, RAISE, RECIP_E, ignore_qshutdown
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown, partial, Placeholder
+from asyncutils._internal.compat import LifoQueue, Queue, QueueEmpty, QueueShutDown, partial as ppartial, Placeholder
 from asyncutils._internal.helpers import check, check_methods, copy_and_clear, create_executor, filter_out, fullname, get_loop_and_set
 from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.submodules import iters_all as __all__
 import _operator as O, math as M
 from asyncio import CancelledError, Lock, gather, iscoroutine, sleep, wait_for
 from collections import Counter, defaultdict, deque
-from functools import lru_cache, wraps
+from functools import partial, lru_cache, wraps
 from itertools import repeat
 from sys import audit
 _rand, _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.random, _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _littleprimes[:5]), (0x32907381cdf, _littleprimes[:6]), (1<<64, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _littleprimes[:13]), (0x4c16c7697197146a6b8eb49518c5, _littleprimes[:18])), lambda _, /: _
@@ -62,11 +62,16 @@ async def aloops(n):
 async def _aunzip_put(Q, t):
     for q, i in zip(Q, t):
         with ignore_qshutdown: await q.put(i)
-async def aunzip(ait, put_batch=None, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=_identity):
-    audit('asyncutils.iters.aunzip', fullname(ait)); l = len(t := await anext(ait := iter_to_agen(ait), ()))
+async def aunzip(ait, *, fillvalue=_NO_DEFAULT, put_batch=None, maxqsize=None, _a=_aunzip_put, _b=_identity):
+    audit('asyncutils.iters.aunzip', fullname(ait)); l = len(t := await anext(ait := iter_to_agen(ait), ())); C = getcontext()
+    if maxqsize is None: maxqsize = C.AUNZIP_DEFAULT_MAX_QSIZE
+    if put_batch is None: put_batch = C.AUNZIP_DEFAULT_PUT_BATCH
+    if maxqsize < put_batch: raise ValueError('maxqsize cannot be less than put_batch')
+    f = partial(Queue, maxqsize)
     class aunzip_consumer:
         __slots__ = '__q',
-        async def __anext__(self, l=Lock(), f=partial(take, ait, getcontext().AUNZIP_DEFAULT_PUT_BATCH if put_batch is None else put_batch, default=RAISE)): # noqa: B008
+        def __init__(self): self.__q = f()
+        async def __anext__(self, l=Lock(), f=partial(take, ait, put_batch, default=RAISE)): # noqa: B008
             if self.__q.empty():
                 async with l:
                     try:
@@ -78,7 +83,7 @@ async def aunzip(ait, put_batch=None, fillvalue=_NO_DEFAULT, _a=_aunzip_put, _b=
             if r is fillvalue: raise StopAsyncIteration
             return r
         def close(self): self.__q.shutdown()
-        __aiter__, __anext__.__text_signature__ = _b, '($self)'
+        __aiter__, __anext__.__text_signature__ = _b, '($self)' # ty: ignore[unresolved-attribute]
     await _a(Q := await to_tuple(aunzip_consumer() async for _ in aloops(l)), t); return Q
 async def merge(*I, reverse=False, maxqsize=None, _=lambda p: lambda i: aconsume(amap(p, i, await_=True))):
     audit('asyncutils.iters.merge', I); p, g, l, a = (q := (LifoQueue if reverse else Queue)(getcontext().MERGE_DEFAULT_MAX_QSIZE if maxqsize is None else maxqsize)).put, q.get, get_loop_and_set(), object()
@@ -276,7 +281,11 @@ async def azip(*I, strict=False, _=E.ignore_stopaiteration.combined(RuntimeError
         for x, y in enumerate(I):
             with _: await anext(y); raise ValueError(f'asyncutils.iters.azip: iterable {x} longer than shortest iterable')
 async def amap(f, /, *its, await_=False, strict=False):
-    async for _ in azip(*its, strict=strict): r = f(*_); yield (await r) if await_ else r
+    it = azip(*its, strict=strict)
+    if await_:
+        async for _ in it: yield await f(*_)
+    else:
+        async for _ in it: yield f(*_)
 async def afilter(f, it):
     if f is None: f = bool
     async for _ in iter_to_agen(it):
@@ -630,11 +639,11 @@ async def anthcombination(it, r, idx):
         yield p[~n]
 @aawgenf2agenf
 async def asubslices(it): return astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2))))
-def arepeatfunc(f, times=None, *a):
-    async def g(a, _=f):
-        r = _(*a)
-        with E.ignore_typeerrs: r = await r
-    return astarmap(g, arepeat(a, times), True)
+async def arepeatfunc(f, times=None, *a):
+    async def g(i=E.ignore_typeerrs, _=partial(f, *a)):
+        r = _()
+        with i: r = await r
+    async for _ in aloops(times): await g()
 async def apolynomialfromroots(roots, _=(1,)):
     async for r in iter_to_agen(roots): _ = aconvolve(_, (1, -r))
     async for i in iter_to_agen(_): yield i
@@ -669,8 +678,13 @@ async def _factor_pollard(n):
 @lru_cache
 def _shift_to_odd(n):
     if not ((1<<(s := ((n-1)^n).bit_length()-1))*(d := n>>s) == n and d&1 and s > -1): raise ValueError(f'asyncutils.iters.aisprime: internal error: {n} is invalid')
-    return s, d
-async def _probable_prime(n, base, _=_shift_to_odd): s, d = _(n-1); return (x := pow(base, d, n)) in {1, n-1} or await aany((x := x*x%n) == n-1 async for _ in aloops(s-1))
+    return s-1, d
+async def _probable_prime(n, base, _=_shift_to_odd):
+    s, d = _(m := n-1)
+    if (x := pow(base, d, n)) in {1, m}: return True
+    async for _ in aloops(s):
+        if (x := x*x%n) == m: return True
+    return False
 async def aisprime(n, s=_smallprimes, p=_perfect_test, r=_randrange, f=_probable_prime):
     if n < 210: return n in s
     if not (n&1 and n%3 and n%5 and n%7 and n%11 and n%13 and n%17): return False
@@ -823,8 +837,8 @@ async def aserialize(it):
 async def aonlinesorter(it=None):
     audit('asyncutils.iters.aonlinesorter'); from _heapq import heapify, heappop, heappush
     if (e := getattr(aonlinesorter, 'executor', None)) is None: e = create_executor(aonlinesorter)
-    await (f := partial(get_loop_and_set().run_in_executor, e, Placeholder, h := [] if it is None else await to_list(it)))(heapify)
+    a, b = map(partial(ppartial, f := ppartial(get_loop_and_set().run_in_executor, e, Placeholder, h := [] if it is None else await to_list(it))), (heappop, heappush)); await f(heapify) # ty: ignore[invalid-argument-type]
     while h:
-        if (i := (yield await f(heappop))) is not None: await f(heappush, i)
-patch_function_signatures((adistinctpermutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleaverandomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiterindex, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asampleweighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'))
+        if (i := (yield await a())) is not None: await b(i)
+patch_function_signatures((adistinctpermutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleaverandomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiterindex, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asampleweighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'), follow_wrapped=False)
 del achain, patch_function_signatures, _adpermpartial, _adpermfull, _atraverse, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _rand, _randinst, _identity, _

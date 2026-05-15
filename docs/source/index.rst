@@ -1,4 +1,4 @@
-asyncutils 0.9.3: makes async straightforward and enjoyable
+asyncutils 0.9.4: makes async straightforward and enjoyable
 ===========================================================
 
 **PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`__

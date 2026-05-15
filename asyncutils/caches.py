@@ -1,7 +1,7 @@
 __lazy_modules__ = frozenset(('asyncio', 'functools'))
 from asyncutils import CRITICAL, Critical, LoopContextMixin, event_loop, getcontext, safe_cancel, to_async
 from asyncutils._internal import patch as P
-from asyncutils._internal.helpers import fullname
+from asyncutils._internal.helpers import create_executor, fullname
 from asyncutils._internal.submodules import caches_all as __all__
 from asyncio import CancelledError, Event, Lock, gather, iscoroutine, sleep
 from collections import defaultdict, namedtuple
@@ -9,7 +9,7 @@ from functools import lru_cache, wraps
 from sys import audit
 from time import monotonic
 class CacheWithBackgroundRefresh(LoopContextMixin):
-    __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_timer', '_ttl'
+    _executor = None; __slots__ = '_cache', '_event', '_loaders', '_lock', '_processor', '_refresh', '_task', '_timer', '_ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic, _=defaultdict):
         C = getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
@@ -25,7 +25,8 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         if (k := self._loaders[key]) is None: raise LookupError(f'no loader registered for key {key!r}')
         return k
     async def _process_error(self, e, b, /):
-        if iscoroutine(r := await self.loop.run_in_executor(self._processor, e, b)): await r
+        if (x := (c := type(self))._executor) is None: x = create_executor(c)
+        if iscoroutine(r := await self.loop.run_in_executor(x, self._processor, e, b)): await r
     async def get(self, key, loader=None):
         async with self._lock:
             if loader: self.register_loader(key, loader)

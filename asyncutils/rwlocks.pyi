@@ -11,7 +11,7 @@ class RWLock(ABC):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> ReadPreferredRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Whether instantiating this class gives a writer-preferring :class:`RWLock` by default depends on :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.''' # type: ignore[misc]
+    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Whether instantiating this class gives a writer-preferring :class:`RWLock` by default depends on :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
     def reader[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async reading context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     def writer[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async writing context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     @abstractmethod
@@ -47,7 +47,7 @@ class PriorityRWLock(RWLock):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> FairPriorityRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.''' # type: ignore[misc]
+    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...

@@ -80,7 +80,7 @@ class PriorityRLock(RLock):
     def __init__(self) -> None: ...
     @property
     def owner(self) -> Task[Any]|None: ...
-    async def acquire(self, priority: int=..., timeout: float|None=...) -> bool: ... # type: ignore[override]
+    async def acquire(self, priority: int=..., timeout: float|None=...) -> bool: ... # ty: ignore[invalid-method-override]
 class LocksmithBase:
     '''Implements a locksmith that will attempt to force specific locks; especially useful in deadlock scenarios.'''
     handlers: ClassVar[dict[type[AsyncLockLike[Any]], Callable[[AsyncLockLike[Any]], Any]]]

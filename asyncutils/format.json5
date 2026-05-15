@@ -132,7 +132,10 @@ Some keys can have various types, as detailed by the comments attached. */
     io: {memory_mapped_io_manager_default_checksum_alg: "blake2s"},
     iters: {
       afrievalds_default_k: 2,
-      aunzip_default_put_batch: 16,
+      aunzip: {
+        default_max_qsize: 64,
+        default_put_batch: 16
+      },
       merge_default_max_qsize: 0,
       tee: {
         default_put_exc: true,

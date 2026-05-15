@@ -1,1 +1,0 @@
-__import__('sys').modules[__name__] = __import__('logging').getLogger('asyncutils')

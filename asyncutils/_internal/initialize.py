@@ -8,16 +8,19 @@ for _k, _v in _i:
 with E.ignore_stopiteration:
     while True: U(_v); _u(dict.fromkeys(_v, _k.removesuffix(t))); _k, _v = next(_i)
 class Module:
-    __slots__ = '_fs', '_n'
+    __slots__ = frozenset(('_fs', '_n'))
     def __new__(cls, name, /, _d=_d, _a=_a, _=s):
         if name in _a: return _[name]
         try: return getattr(_[_d[name]], name)
         except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._n,)
     def __getattr__(self, n, /, u='__', _=F.all_contextual_consts):
-        if n == '_fs': self._fs = s = _.union(self.__dir__()) if n == 'context' else frozenset(self.__dir__()); return s
+        if n == '_fs': super().__setattr__(n, s := _.union(self.__dir__()) if self._n == 'context' else frozenset(self.__dir__())); return s
         if n[:2] == u == n[-2:] or n in self._fs: return getattr(self.load(), n)
         raise AttributeError(f"module 'asyncutils.{self._n}' has no attribute {n!r}") from None
+    def __setattr__(self, n, v, /):
+        if n in self.__slots__: raise AttributeError('immutable attribute', name=n, obj=self)
+        setattr(self.load(), n, v)
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s):
@@ -27,10 +30,10 @@ class Module:
         if d := getattr(_g(), 'locals', None): d[n] = m
         _s[n] = m; return m
     __all__ = property(__dir__ := lambda self, d=d, t=t: d[self._n+t]); P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__dir__, ''), (__repr__, ''), (__getattr__, _)); del _
-f = object.__new__
-for _ in a: r._n, s[_] = _, (r := f(Module))
+f, b, n = object.__new__, object.__setattr__, '_n'
+for _ in a: s[_] = r = f(Module); b(r, n, _)
 def l(*a, _=A.append): _(a)
-for _k, _v in (('cli', L), ('constants', D), ('context', F), ('exceptions', E), ('version', V)): l('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__ # type: ignore[attr-defined]
+for _k, _v in (('cli', L), ('constants', D), ('context', F), ('exceptions', E), ('version', V)): l('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__
 l('all submodules initialized in %.2f milliseconds', T())
 U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del P, R, E, V, F, L, T, U, d, f, r, t, _d, _k, _v, _a, _f, _s, _u, _i, _
+del P, R, E, V, F, L, T, U, d, f, r, t, n, _d, _k, _v, _a, _f, _s, _u, _i, _

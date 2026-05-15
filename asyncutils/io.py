@@ -1,8 +1,9 @@
+# ty: ignore[unresolved-attribute]
 from asyncutils import LoopContextMixin, collect, getcontext, iter_to_agen, sync_await
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import io_all as __all__
 import os as O, sys as S
-from _functools import partial # type: ignore[import-not-found]
+from _functools import partial
 from asyncio import Lock, gather
 from contextlib import asynccontextmanager
 from itertools import count, starmap
@@ -99,7 +100,7 @@ class File(LoopContextMixin): # noqa: PLR0904
         except: return False # noqa: E722
     def fill(self, pattern, offset=0, count=1): return self.write(pattern*count, offset)
     async def compare(self, other, /, size=-1, offset_self=0, offset_other=0): return (await self.read(offset_self, size)) == (await other.read(offset_other, size))
-    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum(x.bit_count() for x in map(int.__xor__, await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0))
+    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum((i^j).bit_count() for i, j in zip(await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0))
     async def read_until(self, delim, offset=0, maxsize=-1): return (d, offset+len(d)) if (p := (d := await self.read(offset, maxsize)).find(delim)) == -1 else (d[:p+(l := len(delim))], offset+p+l)
     async def insert(self, data, offset): await self.write(data if offset > await self.run(self.size) else data+await self.read(offset), offset)
     async def delete(self, offset, size):
@@ -107,8 +108,9 @@ class File(LoopContextMixin): # noqa: PLR0904
         if (t := offset+size) < s: await self.write(await self.read(t), offset)
         await self.run(self.resize, max(0, s-size))
     async def replace(self, old, new, offset=0, count=None):
-        r, c, o, n, f, g, h, b = 0, offset, len(old), len(new), partial(self.run, self.find, old), self.delete, self.insert, count is None
-        while b or r < count:
+        r, c, o, n, f, g, h = 0, offset, len(old), len(new), partial(self.run, self.find, old), self.delete, self.insert
+        if count is None: count = float('inf')
+        while r < count:
             if (p := await f(c)) == -1: break
             await g(p, o); await h(new, p); r += 1; c = p+n
         return r

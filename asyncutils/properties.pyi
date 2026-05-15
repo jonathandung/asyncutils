@@ -7,7 +7,7 @@ __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 class AsyncProperty[T, R]:
     '''A property with asynchronous getters, setters and deleters running synchronously via event loop scheduling.'''
     @overload
-    def __new__(cls, *, doc: str|None=..., strict: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, *, doc: str|None=..., strict: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=...) -> Self: ...
     @overload
@@ -34,7 +34,7 @@ class AsyncLockProperty[T, R: Hashable](AsyncProperty[T, R]):
     @staticmethod
     def _new_lock(_: R) -> Lock: '''Default way to create a new lock for the given object. The implementation should not cache the locks for each instance, since that is done by this class already.'''
     @overload
-    def __new__(cls, *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
     def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a cache that unfortunately requires the object to be hashable and weakly referencable.'''

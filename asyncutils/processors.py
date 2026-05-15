@@ -2,7 +2,7 @@ from asyncutils import BulkheadFull, BulkheadShutDown, LoopContextMixin, collect
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown
 from asyncutils._internal.helpers import copy_and_clear, fullname, subscriptable
 from asyncutils._internal.submodules import processors_all as __all__
-from _functools import partial # type: ignore[import-not-found]
+from _functools import partial
 from asyncio import CancelledError, Event, Lock, Semaphore, sleep, timeout as _timeout, wait_for
 from time import monotonic
 @subscriptable

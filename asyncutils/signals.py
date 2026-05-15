@@ -16,7 +16,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             s = P()
             try: o = _s(s := C(s), h)
             except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s)
-            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name)
+            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name) # ty: ignore[unresolved-attribute]
             else: a(lambda _, s=s, o=o: _s(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
     else:
         while S:
@@ -45,4 +45,4 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         except BaseException as e: raise RuntimeError(f'signals.wait_for_signal: unexpected {fullname(e)} in processor {p!r} for signal {s.name}') from e
         return r
     finally: await safe_cancel(F)
-wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0})'
+wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0})' # ty: ignore[unresolved-attribute]

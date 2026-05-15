@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-global]
 from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import check_methods, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
@@ -16,7 +17,7 @@ def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter
         else: ack3(group)
 def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest_helper, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
 def unnest_reverse(g, /, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
-def potent_derive(*groups, ordered=True, **k):
+def potent_derive(*groups, ordered=False, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
     if not isinstance(g := groups[0], BaseExceptionGroup): _ = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__, g.__traceback__ = _
     if n:
@@ -37,7 +38,7 @@ def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False
     if isinstance(e, type): e = e(*a, **k)
     elif a or k: _s_.write('exceptions.raise_exc: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
-P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=True, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
+P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=False, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
@@ -46,7 +47,7 @@ class ExceptionWrapper:
     def __getattr__(self, n, /): return getattr(self.__exc, n)
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
-exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # type: ignore[attr-defined]
+exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # ty: ignore[unresolved-attribute]
 @subscriptable
 class ref: # noqa: N801
     __slots__ = '__obj',
@@ -54,22 +55,17 @@ class ref: # noqa: N801
         if isinstance(obj, (cls, r)): return obj
         try: return r(obj)
         except TypeError: (_ := object.__new__(cls)).__obj = obj; return _
-    def __call__(self): return self.__obj
+    def __call__(self): return self.__obj # ty: ignore[unresolved-attribute]
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @subscriptable
 class Critical(BaseException):
-    def __new__(cls, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception):
-        if isinstance(e, cls): return e
-        BaseException.__init__(E := BaseException.__new__(cls), _m); E.__context__ = _e() if e is None else e; return E
-    __init__ = object.__init__ # type: ignore[assignment]
+    def __init__(self, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception): super().__init__(_m); self.__context__ = e.__context__ if isinstance(e, __class__) else _e() if e is None else e # ty: ignore[unresolved-reference]
     @property
     def __suppress_context__(self): return False # noqa: PLW3201
     @property
     def exc(self): return self.__cause__ or self.__context__
 class StateCorrupted(BaseException):
     def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
-class Deadlock(BaseException):
-    def __init__(self, /, *_, noticer=None): super().__init__(*_); self.noticer = noticer
 class VersionError(Exception): ...
 for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
     def _(self, a=A, b=B):
@@ -120,10 +116,10 @@ class FutureCorrupted(RuntimeError): ...
 class MaxIterationsError(RuntimeError): ...
 class ItemsExhausted(ValueError): ...
 class RateLimitExceeded(RuntimeError):
-    def __init__(self, f, a, k, c, p, l, /): self._f, self._a, self._k = f, a, k; super().__init__(f'rate limit of {c} calls in {p} periods exceeded by {l} calls when calling {f!r}')
-    async def repeat_call(self): return await self._f(*self._a, **self._k)
+    def __init__(self, f, a, k, c, p, l, /): self.__f, self.__a, self.__k = f, a, k; super().__init__(f'rate limit of {c} calls in {p} periods exceeded by {l} calls when calling {f!r}')
+    async def repeat_call(self): return await self.__f(*self.__a, **self.__k)
 class LockForceRequest(BaseException):
-    def __init__(self, s, a, l, i, /): self.requester, self.fulfill, self.lock = s, a, l; super().__init__(f'request from {type(s).__qualname__} to release {type(l).__qualname__}', i)
+    def __init__(self, s, a, l, i, /): self.requester, self.fulfill, self.lock = s, a, l; super().__init__(f'request from {type(s).__qualname__} to release {type(l).__qualname__}'); self.add_note(i)
 class PasswordQueueError(Exception): ...
 class PasswordRetrievalError(PasswordQueueError):
     def __init__(self, from_): self.from_ = from_; super().__init__(f'failed to retrieve correct password of password-protected queue from closure variable of name {from_!r}')
@@ -131,23 +127,22 @@ class GetPasswordRetrievalError(PasswordRetrievalError): ...
 class PutPasswordRetrievalError(PasswordRetrievalError): ...
 class ForbiddenOperation(PasswordQueueError, TypeError):
     def __init__(self, op, *a): self.op = op = op%a; super().__init__(f'cannot {op} PasswordQueue')
+@subscriptable
 class PasswordError(PasswordQueueError):
     @property
-    def wrongpass(self): return self._refp() # type: ignore[attr-defined]
-    @property
-    def queue(self): return self._refq() # type: ignore[attr-defined]
+    def wrongpass(self): return self._refp() # ty: ignore[unresolved-attribute]
 class WrongPassword(PasswordError, ValueError):
-    def __init__(self, *a, _='failure to modify queue because %r received incorrect password: %r'): self._refq, self._refp = map(ref, a); super().__init__(_%a)
+    def __init__(self, q, p, /, _='failure to modify queue because %r received incorrect password: %r'): self.qid, self._refp = id(q), ref(p); super().__init__(_%(q, p))
 @subscriptable
 class WrongPasswordType(PasswordError, TypeError):
-    def __init__(self, *a, _='password {!r} of wrong type {.__qualname__!r} passed to {!r}; should be {!r}'.format): self._refp, self._reft, self._refq, self._refc = map(ref, a); super().__init__(_(*a))
+    def __init__(self, q, *a, _='{!r} received password {!r} of wrong type {.__qualname__!r}; should be {!r}'.format): self.qid, self._refp, self._reft, self._refc = id(q), *map(ref, a); super().__init__(_(q, *a))
     @property
     def wrongtype(self): return self._reft()
     @property
     def correcttype(self): return self._refc()
 class PasswordMissing(PasswordQueueError, TypeError):
     def __init__(self): raise TypeError('use GetPasswordMissing or PutPasswordMissing instead')
-    def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # type: ignore[assignment]
+    def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # ty: ignore[invalid-assignment]
 class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
 def __getattr__(n, /):
@@ -157,7 +152,7 @@ def __getattr__(n, /):
             class WarningToError:
                 __slots__ = '_cm', '_w'
                 def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
-                def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # type: ignore[arg-type]
+                def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # ty: ignore[invalid-argument-type]
                 def __exit__(self, t, /, *_):
                     if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
                     c.__exit__(t, *_)
@@ -178,7 +173,7 @@ def __getattr__(n, /):
                 def combined(self, *O, _=check_methods):
                     f, g, h, j, p = (S := set(self.exc)).update, (P := set(self.but)).update, S.add, (d := []).extend, d.pop
                     for o in O:
-                        if isinstance(o, IgnoreErrors): f(o.exc); g(o.but)
+                        if isinstance(o, IgnoreErrors): f(o.exc); g(o.but) # ty: ignore[unresolved-reference]
                         elif isinstance(o, type): h(o)
                         elif _(o, '__iter__'): j(o)
                     while d:

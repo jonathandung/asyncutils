@@ -16,7 +16,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     @bound.setter
     def bound(self, value, /):
         if value < 0: raise ValueError('bound must be non-negative')
-        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft
+        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft # ty: ignore[unresolved-attribute]
         while d and W:
             if not (w := f()).done(): w.set_result(None); d -= 1
 class AdvancedRateLimit(LoopBoundMixin, LockMixin):
@@ -163,12 +163,12 @@ class PriorityRLock(RLock):
     __slots__ = ()
     def __init__(self): super().__init__(PriorityLock())
     @property
-    def owner(self): o = self.__lock._owner = self._owner; return o
+    def owner(self): o = self.__lock._owner = self._owner; return o # ty: ignore[invalid-assignment]
     @owner.setter
-    def owner(self, val, /): self._owner = self.__lock._owner = val
+    def owner(self, val, /): self._owner = self.__lock._owner = val # ty: ignore[invalid-assignment]
     async def acquire(self, priority=0, timeout=None):
         if self.is_owner: self._count += 1; return True
-        if await self.__lock.acquire(priority, timeout): self._count = 1; return True
+        if await self.__lock.acquire(priority, timeout): self._count = 1; return True # ty: ignore[too-many-positional-arguments]
         return False
 class LocksmithBase:
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
@@ -203,11 +203,11 @@ class LocksmithBase:
                 if o is None: return self.throw_fallback(lock)
                 if (c := o.get_coro()) is None: return self.eager_fallback(lock)
                 F = self._loop.create_future()
-                try: c.throw(LockForceRequest(self, F.set_result, lock, info))
+                try: c.throw(LockForceRequest(self, F.set_result, lock, info)) # ty: ignore[invalid-argument-type]
                 except CRITICAL as e: self.task_raised_critical(lock, e)
                 except LockForceRequest as e:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
-                    else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self))
+                    else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self)) # ty: ignore[invalid-argument-type]
                 except BaseException as e: self.raised_other(lock, e)
                 else: self.answer_received(lock, await F)
             if callable(f := self.handlers.get(type(lock))) and iscoroutine(r := f(lock)): await r

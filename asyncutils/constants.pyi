@@ -1,9 +1,9 @@
 '''Exports sentinels and public constants.'''
-from ._internal.types import Executor, RaiseType, SyncAwaitType, NoDefaultType
+from ._internal.types import Executor, RaiseType
 from _collections_abc import Callable
 from threading import Lock
 from typing import Final, NoReturn, Self
-__all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'SYNC_AWAIT', 'sentinel_base'
+__all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`iters.aguessmin` and :func:`iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
@@ -29,10 +29,6 @@ class sentinel_base:
     def is_(self, other: object, /) -> bool: ''':func:`operator.is_` for sentinels.'''
 RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
-SYNC_AWAIT: Final[SyncAwaitType]
-'''A possible value of :attr:`exceptions.Deadlock.noticer`, indicating the deadlock situation was found by :func:`util.sync_await`.'''
-_NO_DEFAULT: Final[NoDefaultType]
-'''.. warning:: This constant is unstable. Users are not meant to interact with this directly.'''
 CLOSED: Final[int]
 '''The closed state of a circuit breaker.'''
 HALF_OPEN: Final[int]

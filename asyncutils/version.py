@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute,unresolved-reference]
 from asyncutils import exceptions as E
 from asyncutils._internal import patch as P
 from asyncutils._internal.submodules import version_all as __all__
@@ -61,9 +62,9 @@ class VersionInfo(str): # noqa: FURB189
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
     def assert_valid(self, _=E.VersionCorrupted):
         try:
-            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
+            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unsupported-operator]
         except (ValueError, TypeError, AttributeError): ...
-        raise _(self) # type: ignore
+        raise _(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
         match s := a(s := s.lower(), s):
@@ -77,8 +78,8 @@ class VersionInfo(str): # noqa: FURB189
             case 'n': return self.rpartition('.')[0]
             case 'bin'|'hex'|'oct': return __builtins__[s](int(self))
         return str(self)
-    def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented # type: ignore
-    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o, strict=True)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
+    def __add__(self, o, /): return __class__(*self[:2], self[2]+o) if isinstance(o, int) else __class__(*map(int.__add__, self, o)) if isinstance(o, VersionDelta) else NotImplemented
+    def __sub__(self, o, /, f=lambda x, y: max(0, x-y)): return __class__(*self[:2], f(self[2], o)) if isinstance(o, int) else T[1-T.index(t)](*map(f, self, o)) if (t := type(o)) in (T := (VersionDelta, __class__)) else NotImplemented
     def next_patch(self): return self.replace_parts(patch=self[2]+1)
     def next_minor(self): return __class__(self[0], self[1]+1)
     def next_major(self): return __class__(self[0]+1, 0)
@@ -96,7 +97,7 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
     elif T is complex: o = o.real, o.imag, 0
-    if T is int: o = o>>16, (o>>8)&m, o&m
+    if T is int: o = o>>16, (o>>8)&m, o&m # ty: ignore[unsupported-operator]
     elif T is float:
         if (o := format(o, '.4f')) in s: return
         o, _ = o.split('.', 1); o = map(int, (o, _[:2], _[2:]))

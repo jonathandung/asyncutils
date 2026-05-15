@@ -1,8 +1,8 @@
-from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable, verify_compat
-verify_compat('3.12')
+import asyncutils._internal.helpers as h
+h.verify_compat('3.12')
 __lazy_modules__ = frozenset(('asyncio.locks',))
 import _heapq as H
-from _collections import deque # type: ignore[import-not-found]
+from _collections import deque
 from asyncio.locks import Event
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
 class QueueEmpty(Exception): ...
@@ -11,14 +11,14 @@ class QueueShutDown(Exception): ...
 def _wakeup_next(W, /, w=None):
     while W and (w := W.popleft()).done(): ...
     if w: w.set_result(None)
-@subscriptable
-class Queue(LoopMixinBase):
+@h.subscriptable
+class Queue(h.LoopMixinBase):
     __slots__ = '_finished', '_getters', '_is_shutdown', '_putters', '_queue', '_unfinished_tasks', 'maxsize'
     def __init__(self, maxsize=0):
         self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown = maxsize, deque(), deque(), 0, False
         self._finished = e = Event(); e.set(); self._init(maxsize)
-    def __repr__(self): return f'<{fullname(self)} at {id(self):#x} {self._format()}>'
-    def __str__(self): return f'<{fullname(self)} {self._format()}>'
+    def __repr__(self): return f'<{h.fullname(self)} at {id(self):#x} {self._format()}>'
+    def __str__(self): return f'<{h.fullname(self)} {self._format()}>'
     def _format(self):
         f = (p := [f'maxsize={self.maxsize!r}']).append
         if l := self._getters: f(f'_getters[{len(l)}]')
@@ -78,7 +78,7 @@ class Queue(LoopMixinBase):
             while not self.empty():
                 g()
                 if (U := self._unfinished_tasks) > 0: self._unfinished_tasks = U-1
-            if U == 1: self._finished.set()
+            if self._unfinished_tasks == 0: self._finished.set()
         for D in (self._getters, self._putters):
             f = D.popleft
             while D:

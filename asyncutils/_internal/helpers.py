@@ -25,13 +25,7 @@ def fullname(f, /, rmpref=False, _=('__module__', '__qualname__')): f = coerce_c
 def audit_fullname(f, /, rmpref=False): S.audit(fullname(f, rmpref))
 def verify_compat(v, /, _='This module is only for python %s or under'):
     a, b = v.split('.', 1)
-    if (int(a), int(b)+1) > S.version_info: return False
-    frame = S._getframe(1)
-    while frame := frame.f_back:
-        if frame.f_code.co_qualname == 'import_module':
-            if (c := frame.f_back.f_code).co_filename.endswith(('mypy/stubtest.py', 'mypy\\stubtest.py')) and c.co_qualname == 'silent_import_module': return True
-            break
-    raise ImportError(_%v)
+    if (int(a), int(b)+1) <= S.version_info: raise ImportError(_%v)
 async def simple_wrap(aw, /): return await aw
 class LoopMixinBase:
     __slots__ = '_loop',
@@ -50,4 +44,4 @@ class Bag(dict): # noqa: FURB189
         try: return self[k]
         except KeyError: raise AttributeError(name=k, obj=self) from None
     __setattr__, __delattr__ = dict.__setitem__, dict.__delitem__
-ismodule.__text_signature__, subscriptable.__text_signature__, fullname.__text_signature__, verify_compat.__text_signature__, get_loop_and_set.__text_signature__ = '(o, /)', '(cls, /)', '(f, /, rmpref=False)', '(v, /)', '()'
+ismodule.__text_signature__, subscriptable.__text_signature__, fullname.__text_signature__, verify_compat.__text_signature__, get_loop_and_set.__text_signature__ = '(o, /)', '(cls, /)', '(f, /, rmpref=False)', '(v, /)', '()' # ty: ignore[unresolved-attribute]

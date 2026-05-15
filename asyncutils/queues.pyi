@@ -1,4 +1,4 @@
-# mypy: disable-error-code="override"
+# ty: ignore[invalid-method-override]
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
 from ._internal.types import SupportsIteration, B, G, P
 from .exceptions import IgnoreErrors
@@ -86,7 +86,13 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
     | scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
     | If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue.
     | The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use default
-    | values in the type parameters here to cut this number in half.'''
+    | values in the type parameters here to cut this number in half.
+
+    .. danger::
+
+      This function is not for cryptographic purposes, because no hashing of the password is performed! Attackers may obtain sensitive information,
+      namely the passwords used by the queue, from the memory address of the returned object alone, or worse still, access and modify the internal
+      stack/queue storing the items directly.'''
 class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod

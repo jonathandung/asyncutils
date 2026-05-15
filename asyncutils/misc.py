@@ -1,7 +1,7 @@
 __lazy_modules__ = frozenset(('asyncio',))
 from asyncutils import IgnoreErrors, getcontext
 from asyncutils._internal.submodules import misc_all as __all__
-from _collections import defaultdict # type: ignore[import-not-found]
+from _collections import defaultdict
 from asyncio import Lock, Semaphore, gather
 from sys import intern
 class StateMachine:
@@ -19,7 +19,7 @@ class StateMachine:
             await self._helper(1); self._state = state; await self._helper(0); return True
     async def _helper(self, i, /, _=IgnoreErrors(KeyError), s=__slots__):
         async with _: await getattr(self, s[i])[self._state]()
-    _helper.__text_signature__ = '($self, attr)'
+    _helper.__text_signature__ = '($self, attr)' # ty: ignore[unresolved-attribute]
 async def gather_with_limited_concurrency(n=None, /, *coros, ret_exc=False):
     async def wrapped(c, s=Semaphore(getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # noqa: B008
         async with s: return await c

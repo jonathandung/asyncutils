@@ -3,7 +3,7 @@ from asyncutils import LoopBoundMixin, LoopContextMixin, dummy_task, take, iter_
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import iterclasses_all as __all__
-from _collections import defaultdict, deque # type: ignore[import-not-found]
+from _collections import defaultdict, deque
 from sys import maxsize as INF
 @H.subscriptable
 class achain:
@@ -12,7 +12,7 @@ class achain:
     def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = it_of_its; return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in iter_to_agen(self._its):
+        async for i in iter_to_agen(self._its): # ty: ignore[unresolved-attribute]
             async for _ in iter_to_agen(i): yield _
 @H.subscriptable
 class apeekable(LoopBoundMixin):
@@ -58,7 +58,7 @@ class await_later:
         raise TypeError(f'{H.fullname(a)} object at {id(a):#x} is not awaitable')
     def __getattr__(self, n, /): return getattr(self.aw, n)
     def __repr__(self): return f'<proxy at {id(self):#x} to awaitable at {id(self.aw):#x}>'
-    def __setattr__(self, n, /): raise AttributeError('attribute aw is read-only' if n == 'aw' else f'cannot set attribute {n!r} through proxy')
+    def __setattr__(self, n, _, /): raise AttributeError('attribute aw is read-only' if n == 'aw' else f'cannot set attribute {n!r} through proxy')
     def __init_subclass__(cls, /, **_): raise AttributeError('cannot subclass the type of proxies to awaitables')
     P.patch_classmethod_signatures((__new__, 'aw, /'))
 @H.subscriptable

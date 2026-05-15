@@ -1,14 +1,15 @@
-.PHONY: test clean ruff install install-silent install-dev install-all watch type-check stubtest rmclog clog build publish pre-commit help
+.PHONY: test clean ruff install install-silent install-dev install-all watch type-check rmclog clog build publish pre-commit help
 test:
 	pytest
 clean:
-	rm -rf build dist asyncutils.egg-info .ruff_cache .pytest_cache .mypy_cache .coverage
+	rm -rf build dist asyncutils.egg-info .ruff_cache .pytest_cache .coverage
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[co]' -delete
 	find . -type f -name '*.so' -delete
 .uv-stamp:
 	curl -LsSf https://astral.sh/uv/install.sh | sh
     uv tool install ruff
+	uv tool install ty
 	touch .uv-stamp
 install: .uv-stamp
 	uv pip install -e .
@@ -23,9 +24,7 @@ ruff: .uv-stamp
 watch:
 	ptw --runner "make test" --onfail "echo 'Tests failed!'"
 type-check:
-	mypy asyncutils
-stubtest: type-check
-	stubtest asyncutils --allowlist=allowlist.txt --strict-type-check-only
+	ty check
 rmclog:
 	rm ChangeLog || true
 clog: rmclog
@@ -45,10 +44,9 @@ help:
 	@echo "  install-silent - The above without output"
 	@echo "  install-dev    - Install the package with development dependencies"
 	@echo "  install-all    - Install the package with all dependencies"
-	@echo "  ruff           - Run ruff linter"
+	@echo "  ruff           - Run the ruff linter"
 	@echo "  watch          - Watch for changes and run tests automatically"
-	@echo "  type-check     - Run mypy for type checking"
-	@echo "  stubtest       - Run stubtest for type stubs validation"
+	@echo "  type-check     - Run ty for type checking"
 	@echo "  rmclog         - Remove existing changelog file"
 	@echo "  clog           - Generate changelog to file named ChangeLog from git history"
 	@echo "  build          - Build the package distributions"

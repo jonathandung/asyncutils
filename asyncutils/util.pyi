@@ -1,4 +1,3 @@
-# mypy: disable-error-code="overload-overlap"
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
 from ._internal.types import AsyncLockLike, DCRV, DualContextManager, EventProt, ExcType, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
@@ -48,7 +47,7 @@ async def safe_cancel(fut: Future[Any], /) -> None:
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload
-def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any, _threadsafe_: Literal[True], **k: Any) -> Future[T]: # type: ignore[overload-cannot-match]
+def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any, _threadsafe_: Literal[True], **k: Any) -> Future[T]:
     '''Run a function `f`, with the provided parameters passed straight through, in the event loop `loop`, and return a future for it.
     Assumes the loop is already running, so that its :meth:`run_in_executor` method is not used.
     Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.

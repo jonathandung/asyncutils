@@ -7,6 +7,7 @@ from asyncutils._internal.submodules import util_all as __all__
 from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, eager_task_factory, ensure_future, iscoroutine, run_coroutine_threadsafe, timeout as _timeout, wait_for
 from functools import partial, wraps
 from sys import audit, exc_info
+from weakref import WeakKeyDictionary
 ignore_cancellation = IgnoreErrors(CancelledError)
 class anullcontext: # noqa: N801
     async def __aenter__(self): ...
@@ -27,11 +28,11 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     if loop is None: loop = get_loop_and_set()
     return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout) if loop.is_running() else loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None): return (BoundedSemaphore if bounded else Semaphore)(getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
-def lockf(f, /, lf=Lock, _lc={}): # noqa: B006
-    if (l := _lc.get(i := id(f))) is None: _lc[i] = l = lf()
+def lockf(f, /, lf=Lock, _lc=WeakKeyDictionary()): # noqa: B008
+    if (l := _lc.get(f)) is None: _lc[f] = l = lf()
     async def wrapped(*a, **k):
         async with l: return await f(*a, **k)
-    wrapped.__del__ = partial(_lc.pop, i, None); return wraps(f)(wrapped)
+    return wraps(f)(wrapped)
 def sync_lock(l, /, timeout=None):
     if not check_methods(l, 'acquire', 'release', 'locked'): raise TypeError('acquire, release and locked methods are required')
     def dec(f):

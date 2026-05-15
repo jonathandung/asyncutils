@@ -67,6 +67,7 @@ class Context:
     TIMER_DEFAULT_PRECISION: int = ...
     MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: HashAlgorithm = ...
     AFRIEVALDS_DEFAULT_K: int = ...
+    AUNZIP_DEFAULT_MAX_QSIZE: int = ...
     AUNZIP_DEFAULT_PUT_BATCH: int = ...
     MERGE_DEFAULT_MAX_QSIZE: int = ...
     TEE_DEFAULT_PUT_EXC: bool = ...
@@ -112,6 +113,7 @@ class Context:
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: Any) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
+    def __getitem__(self, name: str, /) -> Any: '''Contexts also behave like mutable mappings.'''
     def __setitem__(self, name: str, value: Any, /) -> None: '''Alias for :meth:`__setattr__`.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
@@ -125,19 +127,19 @@ class localcontext:
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
-class nonreusablelocalcontext(localcontext):
-    '''Version of :class:`localcontext` that is not reusable. Use this to avoid subtle bugs.'''
+    async def __aenter__(self) -> Context: '''Return the new context after setting it.'''
     @overload
-    def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
+class nonreusablelocalcontext(localcontext): '''Version of :class:`localcontext` that is not reusable. Use this to avoid subtle bugs, especially since it's not that expensive to instantiate a :class:`Context`.'''
 def getcontext() -> Context: '''Return the current context for the active thread.'''
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
-  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (83 as of now!) and more may be added in the future,
+  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (84 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
@@ -187,6 +189,7 @@ RETRY_DEFAULT_TRIES: Final[int]
 TIMER_DEFAULT_PRECISION: Final[int]
 MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: Final[HashAlgorithm]
 AFRIEVALDS_DEFAULT_K: Final[int]
+AUNZIP_DEFAULT_MAX_QSIZE: Final[int]
 AUNZIP_DEFAULT_PUT_BATCH: Final[int]
 MERGE_DEFAULT_MAX_QSIZE: Final[int]
 TEE_DEFAULT_PUT_EXC: Final[bool]

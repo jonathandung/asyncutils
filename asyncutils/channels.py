@@ -1,10 +1,10 @@
-from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, dualcontextmanager, getcontext, iter_to_agen, potent_derive, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation
+from asyncutils import CRITICAL, BusPublishingError, BusShutDown, BusStatsError, BusTimeout, Critical, LoopContextMixin, event_loop, adisembowel, dualcontextmanager, getcontext, iter_to_agen, safe_cancel, safe_cancel_batch, sync_await, to_async, to_sync, ignore_cancellation
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log as L, patch as P
 from asyncutils._internal.compat import Queue, QueueEmpty, QueueShutDown
 from asyncutils._internal.helpers import copy_and_clear, filter_out, get_loop_and_set, subscriptable, fullname
 from asyncutils._internal.submodules import channels_all as __all__
-from _functools import partial # type: ignore[import-not-found]
+from _functools import partial
 from _weakrefset import WeakSet
 from asyncio import iscoroutine, CancelledError, Event, Lock, Semaphore, gather, shield, sleep, wait_for, timeout as _timeout
 from collections import defaultdict, deque, namedtuple
@@ -69,7 +69,7 @@ class Observable(LoopContextMixin):
         if n is None: n = getcontext().OBSERVABLE_DEFAULT_NTIMES_N
         if n <= 0: raise ValueError('n must be positive')
         async def wrapper(*a, **k):
-            nonlocal n; await observer(*a, **k); n -= 1 # type: ignore
+            nonlocal n; await observer(*a, **k); n -= 1 # ty: ignore[unsupported-operator]
             if n == 0: await self.unsubscribe(wrapper)
         self.subscribe_nowait(wrapper); return partial(self.unsubscribe_nowait, wrapper)
     def filter(self, pred, ret_exc=False):
@@ -149,7 +149,7 @@ class EventBus(LoopContextMixin):
     def is_auditing(self): return self._auditing
     auditing = property(is_auditing, lambda self, val, /: (self.start_audit if val else self.stop_audit)())
     def start_audit(self):
-        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True
+        if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True # ty: ignore[unresolved-attribute]
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self._auditing = False
     def add_middleware(self, middleware): self._middlewares[middleware] = None
     def remove_middleware(self, middleware, *, result=None, strict=False):
@@ -206,8 +206,7 @@ class EventBus(LoopContextMixin):
                     if iscoroutine(D := m(event_type, D)): D = await D
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: C(e) # noqa: BLE001
-                except BaseExceptionGroup as e: raise potent_derive(e, BusPublishingError(self, m), ordered=False) # type: ignore[arg-type]
-                except BaseException as e: raise BusPublishingError(self, m) from e # type: ignore[arg-type]
+                except BaseException as e: raise BusPublishingError(self, m) from e # ty: ignore[invalid-argument-type]
             U = self._subscribers
             async with self._lock:
                 if self._tracking: self._published[event_type] += 1
@@ -235,9 +234,9 @@ class EventBus(LoopContextMixin):
         self.raise_for_shutdown()
         if not self._auditing: audit('asyncutils.channels.EventBus.event_stream', id(self), event_type)
         t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=getcontext().EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
-        if item_timeout is _NO_DEFAULT: item_timeout = getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
+        if _NO_DEFAULT.is_(item_timeout): item_timeout = getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
-            while True: yield await wait_for(q.get(), item_timeout) # type: ignore[arg-type]
+            while True: yield await wait_for(q.get(), item_timeout)
         except QueueShutDown: L.info('event stream of %s has been shut down', self.name, exc_info=True)
         except TimeoutError: L.exception('event stream of %s is stopping because of timeout in waiting for item', self.name)
         finally: F.set_result(None); await t
@@ -258,7 +257,7 @@ class EventBus(LoopContextMixin):
         if iscoroutine(e := self._handler(e)): await e
     def clear(self, event_type=_NO_DEFAULT): return self._subscribers.clear() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
     def clear_all(self): self.clear(); self.clear_stats()
-    def clear_wildcards(self): return self.clear(None) # type: ignore[arg-type]
+    def clear_wildcards(self): return self.clear(None)
     def clear_stats(self): self._published.clear()
     async def _safe_callback(self, c, d, t=None, i=None):
         try:

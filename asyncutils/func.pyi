@@ -66,7 +66,7 @@ async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: 
 class RateLimited[T, **P]:
     '''The rate limiter pattern as a decorator (factory). See :class:`~locks.AdvancedRateLimit` for the async context manager version.'''
     @overload
-    def __new__(cls, calls: int, /, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ... # type: ignore[misc]
+    def __new__(cls, calls: int, /, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ...
     @overload
     def __new__(cls, f: Callable[P, Awaitable[T]], /, calls: int, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncLockLike[Any]]=...) -> Self: '''Limit the rate of calls of a function `f`, such that only `calls` calls within `period` seconds, as determined by `timer`, are allowed.'''
     async def __call__(self, *a: P.args, **k: P.kwargs) -> T: ...

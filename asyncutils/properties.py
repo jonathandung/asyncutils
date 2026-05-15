@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute]
 from asyncutils import sync_await
 from asyncutils._internal.compat import Placeholder, partial
 from asyncutils._internal.helpers import fullname, get_loop_and_set, subscriptable

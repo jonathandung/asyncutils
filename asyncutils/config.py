@@ -50,7 +50,7 @@ def g(e, a=False, t=(str, int, bytes), _=k):
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise FaultyConfig(e, type(x), t)
-max_memerrs, e, Executor, get_past_logs, m, M, o, s, _ = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler() # type: ignore[no-redef]
+max_memerrs, e, Executor, get_past_logs, m, M, o, s, _ = k('max_memerrs'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler()
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
@@ -66,9 +66,9 @@ match logging_to := g('log_to'):
     case 'MEMORY':
         from _io import StringIO as J
         def get_past_logs(j=J, _=_):
-            if r := _.stream.getvalue(): _.setStream(j())
+            if r := _.stream.getvalue(): _.setStream(j()) # ty: ignore[unresolved-attribute]
             return r
-        get_past_logs.__text_signature__, s = '()', J(); del J
+        get_past_logs.__text_signature__, s = '()', J(); del J # ty: ignore[unresolved-attribute]
     case 'STDOUT': s = S.stdout
     case 'STDERR': ...
     case 1 if o: s, logging_to = S.stdout, 'STDOUT'
@@ -104,7 +104,7 @@ class debugging:
     def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig))
 debug = debugging()
-I.l = d = l.debug
+I.l = d = l.debug # ty: ignore[invalid-assignment]
 if N.debug:
     debug.__enter__(); d('python %s', S.version)
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
@@ -115,10 +115,10 @@ while A: d(*p())
 def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
-    global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst
+    global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst # ty: ignore[unresolved-global]
 P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'), (__dir__, ''))
 if loaded_all:
     i = I.Module.load
-    for _ in I.s.values(): i(_)
+    for _ in I.s.values(): i(_) # ty: ignore[invalid-argument-type]
     l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
 del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d

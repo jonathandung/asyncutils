@@ -21,7 +21,7 @@ class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
     def __await__(self): yield from self.wait().__await__()
     @abstractmethod
-    def wait(self): ...
+    async def wait(self): ...
 @H.subscriptable
 class AsyncContextMixin(metaclass=ABCMeta):
     __slots__ = ()
@@ -35,7 +35,7 @@ class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     @F.cached_property
     def runner(self):
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): self.loop = l = H.get_loop_and_set()
-        return F.partial(l.run_in_executor, H.create_executor(self, False)) # type: ignore[attr-defined]
+        return F.partial(l.run_in_executor, H.create_executor(self, False)) # ty: ignore[unresolved-attribute]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): ...

@@ -2,7 +2,7 @@ __lazy_modules__ = frozenset(('asyncio', 'time'))
 from asyncutils import EventMixin, EventValueError, ref, getcontext
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.submodules import events_all as __all__
-from _collections import deque # type: ignore[import-not-found]
+from _collections import deque
 from asyncio import timeout as _timeout, wait, wait_for
 from time import monotonic
 class SingleWaiterEventWithValue(EventMixin):
@@ -41,7 +41,7 @@ class EventWithValue(EventMixin):
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):
         if (v := self._value) is None:
-            if default is _NO_DEFAULT: raise EventValueError('no value is set')
+            if _NO_DEFAULT.is_(default): raise EventValueError('no value is set')
             return default
         return v
     async def wait_for_next(self, timeout=None):
@@ -66,6 +66,6 @@ class EventWithValue(EventMixin):
                     if x is not old: await self.wait_for_value(old)
                     if new is (x := await self.wait_for_next()): return True
         except TimeoutError:
-            if force_transition: o = self.get(None); (s := self.set)(old); s(new); s(o, strict=False) # type: ignore[arg-type]
+            if force_transition: o = self.get(None); (s := self.set)(old); s(new); s(o, strict=False)
             return False
     async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))

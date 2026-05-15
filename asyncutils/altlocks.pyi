@@ -51,7 +51,7 @@ class CircuitBreaker:
     @overload
     def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
     @overload
-    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]: # type: ignore[misc]
+    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]:
         '''| Construct a circuit breaker, whose circuit is initially closed.
         | If `name` is passed, use it as its name; return a function wrapping `f` otherwise, deriving the name of the circuit breaker from the function.
         | Pass exceptions that are expected to happen through the `exc` parameter.

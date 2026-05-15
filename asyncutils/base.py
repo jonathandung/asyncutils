@@ -1,8 +1,8 @@
-# type: ignore
+# ty: ignore[unresolved-attribute]
 from asyncutils._internal import helpers as H, log as L, patch as P
 from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
-from asyncutils import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, getcontext, unnest_reverse, ignore_stopaiteration
+from asyncutils import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, getcontext, raise_exc, unnest_reverse, ignore_stopaiteration
 from _functools import partial
 from asyncio import Future, _get_running_loop, all_tasks, gather, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, sleep
 from itertools import repeat
@@ -12,27 +12,28 @@ class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x10000, 0x20000, 0x40000, 0x80000, 0xF0000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
     def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
-        p = (pool := self.__reusable).pop
-        while pool: # pragma: no cover
-            if (L := p()).is_closed() or L.is_running(): continue
+        p, L = (pool := self.__reusable).pop, None
+        while pool and ((L := p()).is_closed() or L.is_running()): ... # pragma: no cover
+        if L is None: return factory()
+        if not self._flags&4:
             with _: L._ready.clear()
             with _: L._scheduled.clear()
-            return L
-        return factory()
-    def clear_flags(self, mask_to_keep=None): self._flags &= (getcontext().EVENT_LOOP_BASE_FLAGS if mask_to_keep is None else mask_to_keep)|self._INTERNAL_MASK
+        return L
+    def factory_reset(self): self._flags &= getcontext().EVENT_LOOP_BASE_FLAGS|self._INTERNAL_MASK
+    def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep|self._INTERNAL_MASK
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
     def from_flags(cls, flags, /, _=c, m=-0x10000):
         if flags&m: raise OverflowError(f'{cls.__qualname__}: flags value {flags:#x} has forbidden bits set')
         r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
-    def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'check_running', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
+    def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
         F, p, s = getcontext().EVENT_LOOP_BASE_FLAGS, k.pop, 1
         for f in _:
             if (x := p(f, None)) is None: ...
             elif x: F |= s
             else: F &= ~s
             s <<= 1
-        if k: raise TypeError(f'{cls.__name__} got unexpected keyword arguments: {", ".join(k)}') # pragma: no cover
+        if k: raise_exc(TypeError, 'asyncutils.base.event_loop: got unexpected keyword arguments', notes=k) # pragma: no cover
         return cls.from_flags(F)
     def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
         if (f := self._flags)&self._ENTERED: # pragma: no cover
@@ -100,9 +101,9 @@ def f(n):
     return adisembowel
 adisembowel, adisembowelleft = map(f, ('pop', 'popleft'))
 async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=False, _=c):
-    audit('asyncutils.base.safe_cancel_batch', _(t)); f = (l := []).append
-    async for _ in (adisembowel if disembowel else iter_to_agen)(t):
-        if not _.done(): _.cancel(); f(_)
+    audit('asyncutils.base.safe_cancel_batch', _(t)); a = (l := []).append
+    async for F in (adisembowel if disembowel else iter_to_agen)(t):
+        if not F.done(): F.cancel(); a(F)
     r = await gather(*l, return_exceptions=True)
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
@@ -111,14 +112,14 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
 async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,PLR0912
     audit('asyncutils.base.iter_to_agen', a(it)); C = getcontext()
     if b(it, '__aiter__') and not (C.ITER_TO_AGEN_DEFAULT_STRICT if strict is None else strict):
-        if _:
+        if sentinel is _NO_DEFAULT:
             async for _ in it: yield _
         elif b(it, 'asend', 'athrow', 'aclose'):
             l = await (_ := it.asend)(None)
             while not c(l, sentinel): l = await _((yield l))
         else:
             async for l in it:
-                if _(l, sentinel): break
+                if c(l, sentinel): break
                 yield l
         return
     elif not b(it, '__iter__'): raise TypeError(f'asyncutils.base.iter_to_agen: cannot iterate over {it!r} synchronously or asynchronously')

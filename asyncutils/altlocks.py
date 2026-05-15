@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute]
 __lazy_modules__ = frozenset(('functools',))
 from asyncutils import AsyncContextMixin, AwaitableMixin, CircuitBreakerError, CircuitHalfOpen, CircuitOpen, Critical, getcontext, iter_to_agen, CRITICAL
 from asyncutils.config import _randinst
@@ -5,7 +6,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import altlocks_all as __all__
-from _collections import deque # type: ignore[import-not-found]
+from _collections import deque
 from asyncio import BrokenBarrierError, Condition, Lock, iscoroutine, sleep, timeout as _timeout
 from functools import wraps
 from itertools import count
@@ -50,7 +51,7 @@ class CircuitBreaker:
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def wrapper(*a, **k):
-            async with self._lock: # type: ignore
+            async with self._lock:
                 if (s := self.state) == 2: # noqa: PLR2004
                     if timer()-self._opened > self._reset: self.state, self._half_open_calls = 1, 0
                     else: raise CircuitOpen(f'asyncutils.altlocks.CircuitBreaker: circuit {self.name} is open')
@@ -58,7 +59,7 @@ class CircuitBreaker:
                     if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise CircuitHalfOpen(f'asyncutils.altlocks.CircuitBreaker: breaker {self.name} exceeded the maximum of {m} calls in the half-open state')
                     self._half_open_calls = c+1
                 try:
-                    async with self._unlock: r = await f(*a, **k) # type: ignore
+                    async with self._unlock: r = await f(*a, **k)
                     if s == 1: self._half_open_calls = self.state = self.fails = 0
                     return r
                 except self._exc:

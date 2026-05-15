@@ -45,7 +45,7 @@ class LineProtocol(Protocol, LoopBoundMixin):
     def write_line(self, line):
         with self._h:
             if not self.connected_transport.is_closing(): self.write_literal(line.encode('utf-8', 'ignore')+self.NEWLINE)
-    def write_literal(self, data): self.connected_transport.write(data) # type: ignore[attr-defined]
+    def write_literal(self, data): self.connected_transport.write(data)
     def eof_received(self):
         self._eof_received = True
         if self._buffer: self.flush()
@@ -73,7 +73,7 @@ class SocketTransport(Transport):
         except OSError as e: warning('%s: read error', fullname(self)); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None and (sock := self._socket) is None: return
-        sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname()
+        sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname() # ty: ignore[unresolved-attribute]
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
         if (s := self._socket) is None: return

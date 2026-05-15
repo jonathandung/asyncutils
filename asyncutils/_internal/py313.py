@@ -1,12 +1,12 @@
+# ty: ignore[unresolved-attribute]
 from asyncutils._internal.helpers import verify_compat
+verify_compat('3.13')
 from itertools import repeat
-if verify_compat('3.13'): from _heapq import heapify_max as heapify, heappop_max as heappop, heapreplace_max as heapreplace, heappush_max as heappush, heappushpop_max as heappushpop # type: ignore[import-not-found]
-else:
-    from _heapq import _heapify_max as heapify, _heappop_max as heappop, _heapreplace_max as heapreplace; from heapq import _siftdown_max, _siftup_max # type: ignore[import-not-found]
-    def heappush(heap, item, /, _=_siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
-    def heappushpop(heap, item, /, _=_siftup_max):
-        if heap and item > (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
-    del _siftdown_max, _siftup_max
+from _heapq import _heapify_max as heapify, _heappop_max as heappop, _heapreplace_max as heapreplace; from heapq import _siftdown_max, _siftup_max # ty: ignore[unresolved-import]
+def heappush(heap, item, /, _=_siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
+def heappushpop(heap, item, /, _=_siftup_max):
+    if heap and item > (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
+del _siftdown_max, _siftup_max
 __all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial'
 j, Placeholder = {}, 'Placeholder'
 def _get_merger(A, _=__import__('_operator').itemgetter):

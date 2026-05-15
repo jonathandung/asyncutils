@@ -4,19 +4,19 @@ from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import console_all as __all__
 import sys as S
 from asyncio import iscoroutine
-from asyncio.futures import _chain_future # type: ignore[import-not-found]
+from asyncio.futures import _chain_future
 from itertools import repeat
 from os import getenv as g
-try: from _pyrepl.console import InteractiveColoredConsole as B
+try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import]
 except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
 _s = object()
 _f = '',
 class ConsoleBase(B):
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches if S.version_info >= (3, 13) else S._clear_type_cache, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
     if C.basic_repl: CAN_USE_PYREPL = False # pragma: no cover
-    else: from _pyrepl.main import CAN_USE_PYREPL
+    else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}): # noqa: B006
-        if (t := type(self)) is __class__: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
+        if (t := type(self)) is ConsoleBase: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
         S.audit(fullname(t), loop)
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f if '.' in modname else ())
@@ -121,7 +121,7 @@ class ConsoleBase(B):
 def _(d, /):
     def load_all(_=d):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
-    load_all.__qualname__, load_all.__module__, load_all.__text_signature__ = load_all.__name__, 'asyncutils', '()'; return load_all
+    load_all.__qualname__, load_all.__module__, load_all.__text_signature__ = load_all.__name__, 'asyncutils', '()'; return load_all # ty: ignore[unresolved-attribute]
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilties library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.\nDo not use functions such as util.sync_await in this REPL, since they are bound to cause deadlocks.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{"running" if self.is_running else "idle"} asyncutils console at {id(self):#x}>'
     @property
@@ -139,7 +139,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     def prehook(self, max_memerrs, _=C.max_memerrs, _r='this console is already running', _a='another console is running'):
         if self._internal_is_running: raise RuntimeError(_r)
         if r := R.getc(): raise RuntimeError(_r if r is self else _a)
-        R.setc(self); super().prehook(_ if max_memerrs is None else max_memerrs)
+        R.setc(self); super().prehook(_ if max_memerrs is None else max_memerrs) # ty: ignore[invalid-argument-type]
     def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=StateCorrupted('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
         if R.unsetc() is not self: S.stderr.write(_m); del S.modules[__name__]
         if _ and isinstance(e := self.exc, BaseException):

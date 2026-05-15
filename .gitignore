@@ -53,9 +53,6 @@ ENV/
 env.bak/
 venv.bak/
 /site
-.mypy_cache/
-.dmypy.json
-dmypy.json
 cython_debug/
 .vscode/
 .ruff_cache/

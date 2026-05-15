@@ -3,7 +3,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.compat import PriorityQueue, Queue
 from asyncutils._internal.helpers import filter_out, fullname, subscriptable
 from asyncutils._internal.submodules import pools_all as __all__
-from _functools import partial # type: ignore[import-not-found]
+from _functools import partial
 from asyncio import Event, Lock, Semaphore, gather, sleep, timeout, wait_for
 from itertools import count, repeat, starmap
 from sys import exc_info
@@ -103,7 +103,7 @@ class AdvancedPool(LoopContextMixin):
                 await self.join(); await self.drain(); return self.uptime
         except TimeoutError: raise TimeoutError('shutdown exceeded timeout') from None
     async def join(self): return await gather(*self._futures, return_exceptions=True)
-    async def map(self, f, /, *its, priority=0, strict=False): return await gather(*map(partial(self.complete, f, _priority_=priority), *its, strict=strict))
+    async def map(self, f, /, *its, priority=0, **_): return await gather(*map(partial(self.complete, f, _priority_=priority), *its, **_))
     async def starmap(self, f, it, /, priority=0): return await gather(*starmap(partial(self.complete, f, _priority_=priority), it))
     async def doublestarmap(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(**k) for k in it))
     async def starmap_withkwds(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await gather(*(f(*a, **k) for a, k in it))

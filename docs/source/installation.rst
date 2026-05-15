@@ -30,7 +30,7 @@ Next, install py-asyncutils:
 .. code-block:: bash
 
   # recommended: pip
-  pip install py-asyncutils==0.9.3
+  pip install py-asyncutils==0.9.4
   # directly from source
   pip install git+https://github.com/jonathandung/asyncutils.git#egg=asyncutils
   # alternatively, after:
@@ -59,20 +59,20 @@ other installation pathways:
 .. code-block:: bash
 
   # pipx
-  pipx install py-asyncutils==0.9.3
+  pipx install py-asyncutils==0.9.4
   # conda
-  conda install -c conda-forge py-asyncutils=0.9.3
+  conda install -c conda-forge py-asyncutils=0.9.4
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.3
+  conda install py-asyncutils==0.9.4
   # uv essentially supports the same interface as pip with uv pip
   # poetry
-  poetry add py-asyncutils@0.9.3
+  poetry add py-asyncutils@0.9.4
   # pdm
-  pdm add py-asyncutils==0.9.3
+  pdm add py-asyncutils==0.9.4
   # pipenv
-  pipenv install py-asyncutils==0.9.3
+  pipenv install py-asyncutils==0.9.4
 
 .. version-added:: 0.9.0
   Created a Makefile to simplify development chores.
@@ -102,7 +102,7 @@ The extras are listed below for reference:
 * docs: Documentation dependencies, including sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The JSON5 parser, specifically used to read format.json5 in tests.
-* lint: pre-commit and mypy. ruff is absent because it is recommended to install it with uv, and that cannot be specified as a dependency directly.
+* lint: pre-commit. ruff and ty are absent because it is recommended to install them with uv, which renders them unspecifiable as dependencies.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
 * test: Test dependencies, including pytest and related plugins

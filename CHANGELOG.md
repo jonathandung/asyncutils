@@ -20,13 +20,11 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.4] - 2026-05-15
+### [0.9.4] - 2026-05-15; newest
 
-Fixed workflows once more and integrated uv more fully.
+Fixed workflows once more and integrated uv more fully; migrated from mypy to ty, removing stubtest step.
 
-## Above versions are unreleased
-
-### [0.9.3] - 2026-05-11; newest
+### [0.9.3] - 2026-05-11
 
 Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
 sphinx-copybutton as an optional dependency.
@@ -168,7 +166,6 @@ Submodules:
 
   Sentinels:
   - RAISE
-  - SYNC_AWAIT
 
 - context
 
@@ -226,7 +223,6 @@ Submodules:
   - PoolError
   - PoolFull
   - PoolShutDown
-  - Deadlock
   - RateLimitExceeded
   - BusError
   - BusTimeout

@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute]
 __lazy_modules__ = frozenset(('asyncio', 'functools'))
 from asyncutils import Critical, MaxIterationsError, RateLimitExceeded, getcontext, iter_to_agen, safe_cancel, wrap_exc, CRITICAL, RAISE, ignore_cancellation
 from asyncutils.config import _randinst
@@ -167,7 +168,7 @@ class RateLimited:
         audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, A, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
-        async with self._lock: # type: ignore
+        async with self._lock:
             d = (n := self._timer())-P
             while T:
                 if (x := p()) > d: A(x); break

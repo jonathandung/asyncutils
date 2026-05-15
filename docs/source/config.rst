@@ -8,10 +8,15 @@ The below environment variables directly affect what this library does, mostly i
 
 * ``AUTILSCFGPATH`` - See below
 * ``PYTHON_BASIC_REPL`` - Not read under ``python -E``
-* ``PYTHONSTARTUP`` - Not executed with ``python -E``
-* ``NO_COLOR`` - Overrides ``FORCE_COLOR`` (python convention)
-* ``FORCE_COLOR`` - Overrides ``TERM=dumb`` with a warning (since this is probably not meant)
-* ``TERM`` - Turn off smart terminal features, including ANSI colour sequences when set to "dumb"
+* ``PYTHONSTARTUP`` - Not executed in console namespace with ``python -E``
+* ``NO_COLOR`` - Overrides ``FORCE_COLOR`` (Python convention); controls both the argument parser and the console
+* ``FORCE_COLOR`` - Overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
+* ``TERM`` - Turn off smart terminal features, including ANSI colour sequences, when set to "dumb"
+
+.. note::
+
+  The argument parser does not consider the ``PYTHON_COLORS`` environment variable, but the console, which uses :mod:`_colorize`, may.
+  To avoid this inconsistency, do not use ``PYTHON_COLORS`` to control :mod:`asyncutils`'s coloring.
 
 Basic Customization
 -------------------

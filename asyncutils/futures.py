@@ -1,12 +1,13 @@
+# ty: ignore[unresolved-import]
 __lazy_modules__ = frozenset(('_contextvars', 'asyncutils._internal.helpers'))
 from asyncutils._internal.helpers import copy_and_clear, fullname
 from asyncutils._internal.submodules import futures_all as __all__
 from _contextvars import copy_context
-from asyncio.futures import Future, _PyFuture # type: ignore[import-not-found]
-from asyncio.tasks import Task, _PyTask, eager_task_factory # type: ignore[import-not-found]
+from asyncio.futures import Future, _PyFuture
+from asyncio.tasks import Task, _PyTask, eager_task_factory
 from sys import audit
 class FB:
-    def __init__(self): self._creation_time = self.get_loop().time() # type: ignore[attr-defined]
+    def __init__(self): self._creation_time = self.get_loop().time() # ty: ignore[unresolved-attribute]
     def __lt__(self, other, /): return self._creation_time < other._creation_time
 class TimeAwareFuture(FB, Future): ...
 class TimeAwareTask(FB, Task): ...
@@ -34,7 +35,7 @@ class AsyncCallbacksFuture(_PyFuture):
         for g, _ in d: b(g, self, context=_)
         for g, _ in e: a(g(), context=_)
         for g, _ in f: b(g, context=_)
-class AsyncCallbacksTask(_PyTask, AsyncCallbacksFuture):
+class AsyncCallbacksTask(_PyTask, AsyncCallbacksFuture): # ty: ignore[inconsistent-mro]
     def __init__(self, coro, **k): _PyTask.__init__(self, coro, **k); self._setup()
 class EagerAsyncCallbacksFuture(AsyncCallbacksFuture):
     def _setup(self): self._loop.set_task_factory(eager_task_factory); super()._setup()

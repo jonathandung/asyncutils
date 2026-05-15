@@ -10,7 +10,7 @@ class Context:
     def __setattr__(self, n, v, /):
         if (n := n.upper()) not in all_contextual_consts: raise AttributeError(f'{type(self).__name__!r} object has no attribute {n!r}')
         if isinstance(v, list):
-            if v and isinstance(v[0], list): v = map(tuple, v)
+            if v and isinstance(v[0], list): v = map(tuple, v) # ty: ignore[invalid-argument-type]
             v = tuple(v)
         super().__setattr__(n, v)
     def replace_from_dct(self, d, /, _=all_contextual_consts):

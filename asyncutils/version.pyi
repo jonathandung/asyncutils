@@ -1,4 +1,3 @@
-# mypy: disable-error-code="override"
 '''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer, with two additional restrictions:
 
@@ -18,12 +17,12 @@ class VersionInfo(str): # noqa: FURB189
         '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
         | Of course, since :func:`~builtins.hash` stupidly returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64 bits), the
         | reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
-    def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.'''
+    def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
     @overload
-    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]:
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: # ty: ignore[invalid-method-override]
         '''Depending on the value of `idx`, corresponds to the following properties:
 
         * 0 -> :attr:`major`
@@ -45,7 +44,7 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __add__(self, n: int, /) -> Self: ...
     @overload
-    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.'''
+    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by `n` patches or the delta `delta`.''' # ty: ignore[invalid-method-override]
     @overload
     def __radd__(self, n: int, /) -> Self: ...
     @overload

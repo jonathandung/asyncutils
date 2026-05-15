@@ -1,3 +1,4 @@
+# ty: ignore[instance-layout-conflict]
 '''Various implementations of future and task classes, eager, time-aware and supporting asynchronous and no-argument callbacks.'''
 from _collections_abc import Callable, Coroutine
 from asyncio.events import AbstractEventLoop

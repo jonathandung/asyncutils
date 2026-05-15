@@ -7,12 +7,12 @@ from _collections_abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
     '''| Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in.
-    | Keyword arguments are as in `potent_derive`.
+    | Keyword arguments are as in :func:`potent_derive`.
 
     .. tip:: Use this only when you must preserve the order, and the faster :func:`unnest_reverse` otherwise.'''
 def unnest_reverse(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]: '''Basically the above but in reverse order, with rare edge cases. More memory- and time-efficient than unnest.'''
@@ -25,6 +25,7 @@ def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ord
 @overload
 def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
     '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
+    | `ordered` defaults to `False`, because that is more efficient.
     | The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
     | The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the predicate and exceptions that are not in `keep` respectively.
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
@@ -39,15 +40,10 @@ def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|N
 @overload
 def raise_exc(exc_typ: ExcType, /, *args: Any, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: Any) -> NoReturn: ...
 @overload
-def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload. Remaining args are as in `potent_derive`.'''
+def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. The variadic `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload, and the remaining arguments are as in :func:`potent_derive`.'''
 def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns `True`.'''
 def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
 def exception_occurred(instance: Any, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
-class Deadlock(BaseException):
-    '''Raised when a potential async deadlock situation is noticed by this module.'''
-    def __init__(self, /, *args: str, noticer: Any=...): ...
-    @property
-    def noticer(self) -> Any: ...
 class StateCorrupted(BaseException):
     '''Raised when the module-internal state is corrupted, usually by a slip-up of some abstraction layer outside of this library, and an exception can be thrown. Should not be caught by users.'''
     def __init__(self, adjective: str, details: str, /): ...
@@ -58,14 +54,11 @@ class StateCorrupted(BaseException):
 class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     '''Raised when a critical error is encountered by exception-handling middleware.'''
     @overload
-    def __new__(cls, exc: E) -> Self: ...
+    def __init__(self, exc: E): ...
     @overload
-    def __new__(cls, exc: None=...) -> Self: '''Construct the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
-    def __init__(self) -> None: ...
+    def __init__(self, exc: None=...): '''Initialize the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
     @property
     def exc(self) -> E: '''The exception that occurred, determined by the raising scope by default.'''
-    @property
-    def __suppress_context__(self) -> Literal[False]: ... # type: ignore[override]
 class VersionError(Exception): '''Base class for all version-related errors.'''
 class VersionConversionError(VersionError): '''Base class for errors thrown when attempting to normalize an object to a version.'''
 class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the :class:`~version.VersionInfo` constructor is negative, for instance.'''
@@ -135,8 +128,8 @@ class LockForceRequest[T](BaseException):
     @property
     def lock(self) -> AsyncLockLike[Any]: '''The lock involved.'''
     def fulfill(self, answer: Any, /) -> None: '''Answer the request with `answer`, after presumably releasing the lock and performing error handling.'''
-    @property
-    def args(self) -> tuple[str, T]: '''The tuple `(error_message, additional_info)`.''' # type: ignore[override]
+    args: tuple[str, T]
+    '''The tuple `(error_message, additional_info)`.'''
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by :func:`~queues.password_queue`.'''
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when the `password_queue` function cannot find the password from the closure variables.'''
@@ -150,22 +143,22 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
     @property
     def op(self) -> str: '''A string representing the operation type.'''
     def __init__(self, op: str, *a: Any): '''Substitute in the arguments to the string (if any) to derive the name of the forbidden operation.'''
-class PasswordError(PasswordQueueError):
+class PasswordError[T](PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
     @property
-    def wrongpass(self) -> Any: '''The wrong password associated with the exception. May be `None` if the wrong password has been garbage collected.'''
+    def wrongpass(self) -> T: '''The wrong password associated with the exception. May be `None` if the wrong password has been garbage collected.'''
     @property
-    def queue(self) -> Q[Any, Any]|None: '''The queue associated with the exception. May be `None` if the queue has been garbage collected.'''
-class WrongPassword(PasswordError, ValueError):
+    def qid(self) -> int: '''The memory address of the queue associated with the exception. Invalid if the queue has been garbage collected.'''
+class WrongPassword[T](PasswordError[T], ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
-    def __init__(self, queue: Q[Any, Any], pwd: Any, /): ...
-class WrongPasswordType[T, R: type](PasswordError, TypeError):
+    def __init__(self, queue: Q[Any, Any, Any], pwd: T, /): ...
+class WrongPasswordType[T, R: type](PasswordError[T], TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, pwd: T, wrongtyp: type[T], queue: Q[Any, Any]|None, correcttyp: R, /): ...
+    def __init__(self, queue: Q[Any, Any, Any]|None, pwd: T, wrongtyp: type[T], correcttyp: R, /): ...
     @property
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
     @property
-    def correcttype(self) -> R|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
+    def correcttype(self) -> R|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected, indicating its instances, and thus the password, and by extension the queue itself, have been destroyed.'''
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of :exc:`GetPasswordMissing` and :exc:`PutPasswordMissing`.'''
     def __init__(self) -> None: ...

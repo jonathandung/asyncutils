@@ -1,11 +1,13 @@
+# ty: ignore[invalid-argument-type]
 from asyncutils import exceptions as E, AsyncCallbacksFuture, LoopBoundMixin, collect, dualcontextmanager, getcontext, iter_to_agen, safe_cancel, sync_await, ignore_valerrs
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
-from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial, Placeholder
+from asyncutils._internal.compat import Queue, QueueEmpty, QueueFull, QueueShutDown, partial as ppartial, Placeholder
 from asyncutils._internal.helpers import get_loop_and_set, fullname
 from asyncutils._internal.log import info
 from asyncutils._internal.submodules import queues_all as __all__
-from _collections import deque # type: ignore[import-not-found]
+from _collections import deque
+from _functools import partial
 from abc import ABCMeta, abstractmethod
 from asyncio import Event, gather, timeout as _timeout, wait_for
 from itertools import count, starmap
@@ -38,23 +40,23 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     except ValueError: F = None
     if protect_get:
         if password_get is _NO_DEFAULT and (F is None or (password_get := F.f_locals.get(get_from := (C.PASSWORD_QUEUE_DEFAULT_GET_FROM if get_from is None else get_from).strip())) is None is (password_get := F.f_globals.get(get_from))): raise _.GetPasswordRetrievalError(get_from)
-        if not isinstance(password_get, gettyp): raise _.WrongPasswordType(None, type(password_get), None, gettyp)
+        if not isinstance(password_get, gettyp): raise _.WrongPasswordType(None, password_get, type(password_get), gettyp)
         if isinstance(password_get, str): password_get, strict = intern(password_get), False
     if protect_put:
         if password_put is _NO_DEFAULT and (F is None or (password_put := F.f_locals.get(put_from := (C.PASSWORD_QUEUE_DEFAULT_PUT_FROM if put_from is None else put_from).strip())) is None is (password_put := F.f_globals.get(put_from))): raise _.PutPasswordRetrievalError(put_from)
-        if not isinstance(password_put, puttyp): raise _.WrongPasswordType(None, type(password_put), None, puttyp)
+        if not isinstance(password_put, puttyp): raise _.WrongPasswordType(None, password_put, type(password_put), puttyp)
         if isinstance(password_put, str): password_put, strict = intern(password_put), False
     def u(pwd):
         if not protect_get: return
         if not pwd: raise _.GetPasswordMissing
         pwd, = pwd
-        if not isinstance(pwd, gettyp): raise _.WrongPasswordType(pwd, type(pwd), q, gettyp)
+        if not isinstance(pwd, gettyp): raise _.WrongPasswordType(q, pwd, type(pwd), gettyp)
         if pwd is not password_get and (strict or not (type(pwd) is type(password_get) and (e := pwd.__eq__(password_get)) is not NotImplemented and e)): raise _.WrongPassword(q, pwd)
     def v(pwd):
         if not protect_put: return
         if not pwd: raise _.PutPasswordMissing
         pwd, = pwd
-        if not isinstance(pwd, puttyp): raise _.WrongPasswordType(pwd, type(pwd), q, puttyp)
+        if not isinstance(pwd, puttyp): raise _.WrongPasswordType(q, pwd, type(pwd), puttyp)
         if pwd is not password_put and (strict or pwd != password_put): raise _.WrongPassword(q, pwd)
     (E := Event()).set(); G, P, U, S, m, b = deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
     if priority:
@@ -67,7 +69,8 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         u(p); _ = G.append
         while not l:
             if S: raise QueueShutDown
-            try: _(F := m()); await F
+            F = m()
+            try: _(F); await F
             except:
                 F.cancel()
                 with ignore_valerrs: G.remove(F)
@@ -126,9 +129,9 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 if not (F := f()).done(): F.set_result(None)
     q = _q(maxsize, lambda: not l, lambda: len(l), full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
-        async def extend(f=partial(put, Placeholder, password_put)):
+        async def extend(f=ppartial(put, Placeholder, password_put)):
             async for i in iter_to_agen(init_items): await f(i)
-        q.cancel_extend = L.create_task(extend()).cancel # type: ignore[no-redef]
+        q.cancel_extend = L.create_task(extend()).cancel
     return q
 class PotentQueueBase(Queue, LoopBoundMixin, metaclass=ABCMeta):
     @abstractmethod
@@ -333,7 +336,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q = await collect(I := iter_to_agen(init_items), maxsize); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # type: ignore[attr-defined]
+    async def start(self, maxsize, init_items): q = await collect(I := iter_to_agen(init_items), maxsize); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # ty: ignore[unresolved-attribute]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)

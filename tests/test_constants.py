@@ -4,9 +4,9 @@ from asyncutils.constants import _NO_DEFAULT
 def test_misc():
     assert 1/math.e == RECIP_E and math.e == 1/RECIP_E # noqa: RUF069
     assert EXECUTORS_FROZENSET.issuperset(POSSIBLE_EXECUTORS) and EXECUTORS_FROZENSET.issubset(POSSIBLE_EXECUTORS)
-    assert RAISE.is_(RAISE) and not RAISE.is_(SYNC_AWAIT) and SYNC_AWAIT.is_(SYNC_AWAIT)
-    assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'asyncutils.constants.RAISE' and SYNC_AWAIT.name == SYNC_AWAIT.__reduce__() == str(SYNC_AWAIT) == 'asyncutils.constants.SYNC_AWAIT'
-    assert not any(_.is_private for _ in (RAISE, SYNC_AWAIT))
+    assert RAISE.is_(RAISE)
+    assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'asyncutils.constants.RAISE'
+    assert not RAISE.is_private
     assert _NO_DEFAULT.is_private
     assert tuple(range(3)) == (CLOSED, HALF_OPEN, OPEN)
 @pytest.fixture

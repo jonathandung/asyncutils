@@ -16,7 +16,7 @@ class sentinel_base:
     @property
     def name(self): return self.__name
     @property
-    def module(self): return self.__mod
+    def module(self): return self.__mod # ty: ignore[unresolved-attribute]
     @classmethod
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')
@@ -50,7 +50,7 @@ class _sentinel(sentinel_base):
     __slots__ = ()
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
     def __reduce__(self): return self.name
-_NO_DEFAULT, RAISE, SYNC_AWAIT = map(_sentinel, ('_NO_DEFAULT', 'RAISE', 'SYNC_AWAIT'))
+_NO_DEFAULT, RAISE = map(_sentinel, ('_NO_DEFAULT', 'RAISE'))
 CLOSED, HALF_OPEN, OPEN = range(3)
 _sentinel._can_instantiate = False
 del _sentinel, P
