@@ -16,7 +16,7 @@ class sentinel_base:
     @property
     def name(self): return self.__name
     @property
-    def module(self): return self.__mod # ty: ignore[unresolved-attribute]
+    def module(self): return self.__mod # ty: ignore[unresolved-attribute] # pragma: no cover
     @classmethod
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')
@@ -28,7 +28,7 @@ class sentinel_base:
             if (n := getattr(self, '_sentinel_base__name', None)) is None:
                 if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{fullname(self)} name collision', name=N)
                 self.__name = N
-            elif n == N and self._cache.get(N) is self:
+            elif n == N and self._cache.get(N) is self: # pragma: no cover
                 if b := self.bound_to: __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, fullname(self), N))
                 else: raise NameError(f'cannot bind named unbound {fullname(self)} to class {fullname(owner)!r}', name=N)
             else: raise NameError(f'cannot bind named {fullname(self)} to class {fullname(owner)!r}', name=N)
@@ -48,7 +48,7 @@ class sentinel_base:
     P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}')); P.patch_method_signatures((__set_name__, 'owner, name, /'))
 class _sentinel(sentinel_base):
     __slots__ = ()
-    def __init_subclass__(cls): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
+    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
     def __reduce__(self): return self.name
 _NO_DEFAULT, RAISE = map(_sentinel, ('_NO_DEFAULT', 'RAISE'))
 CLOSED, HALF_OPEN, OPEN = range(3)

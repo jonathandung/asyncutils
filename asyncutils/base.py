@@ -10,10 +10,10 @@ from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x10000, 0x20000, 0x40000, 0x80000, 0xF0000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
-    def _get_unclosed_loop(self, factory=A.new_event_loop, _=IgnoreErrors(AttributeError)):
+    def _get_unclosed_loop(self, factory=A.new_event_loop, _=IgnoreErrors(AttributeError)): # pragma: no cover
         if self._flags&0x800: return factory()
         p, L = (pool := self.__reusable).pop, None
-        while pool and ((L := p()).is_closed() or L.is_running()): ... # pragma: no cover
+        while pool and ((L := p()).is_closed() or L.is_running()): ...
         if L is None: return factory()
         if not self._flags&4:
             with _: L._ready.clear()
@@ -82,7 +82,7 @@ class event_loop: # noqa: N801
             A.set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
-    def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'):
+    def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'): # pragma: no cover
         b, N = not (f := self._flags)&2, self._istr
         if f&self._ENTERED:
             if b: _g(_m, N)

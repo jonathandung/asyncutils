@@ -55,7 +55,7 @@ silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl',
 match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
     case 'MAKE':
-        T = 'asyncutils_log%d.log'
+        T, m = 'asyncutils_log%d.log', 'x'
         for h in range(1, 0x1001):
             try: logging_to = (s := open(T%h, m)).name; break
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break

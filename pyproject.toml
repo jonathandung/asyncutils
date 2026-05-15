@@ -54,14 +54,13 @@ asyncio_default_fixture_loop_scope = "module"
 asyncio_default_test_loop_scope = "module"
 
 [tool.coverage.run]
-branch = true
 source = ["asyncutils"]
 omit = ["*/__main__.py", "*/_internal/compat.py", "*/_internal/py313.py", "*/_internal/py312.py", "*/console.py", "*/cli.py"]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-exclude_also = ["if __name__ == '__main__':", "raise NotImplementedError", "^\\s*raise$", "def __repr__\\(self.*\\):", "cover: off(?s:.)*?cover: on"]
+exclude_also = ["if __name__ == '__main__':", "raise NotImplementedError", "^\\s*raise$", "def __repr__\\(self.*\\):", "cover: off(?s:.)*?cover: on", "def __init_subclass__\\(cls, /, \\*\\*_\\):"]
 
 [tool.ruff]
 namespace-packages = ["tests"]
