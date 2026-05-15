@@ -4,13 +4,13 @@ from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
 from asyncutils import CRITICAL, Critical, IgnoreErrors, ItemsExhausted, getcontext, raise_exc, unnest_reverse, ignore_stopaiteration
 from _functools import partial
-from asyncio import Future, _get_running_loop, all_tasks, gather, iscoroutine, new_event_loop, run_coroutine_threadsafe, set_event_loop, sleep
+import asyncio as A
 from itertools import repeat
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
     _ENTERED, _SHOULD_CLOSE, _INNER_EXIT, _INNER_AEXIT, _INTERNAL_MASK, __reusable = 0x10000, 0x20000, 0x40000, 0x80000, 0xF0000, []; __slots__ = '_flags', '_istr', '_loop', '_task'
-    def _get_unclosed_loop(self, factory=new_event_loop, _=IgnoreErrors(AttributeError)):
+    def _get_unclosed_loop(self, factory=A.new_event_loop, _=IgnoreErrors(AttributeError)):
         if self._flags&0x800: return factory()
         p, L = (pool := self.__reusable).pop, None
         while pool and ((L := p()).is_closed() or L.is_running()): ... # pragma: no cover
@@ -39,7 +39,7 @@ class event_loop: # noqa: N801
         if (f := self._flags)&self._ENTERED: # pragma: no cover
             if f&0x200: return self._loop
             raise RuntimeError(_)
-        if (l := _get_running_loop()) is None: set_event_loop(l := self._get_unclosed_loop())
+        if (l := A._get_running_loop()) is None: A.set_event_loop(l := self._get_unclosed_loop())
         else: f |= self._SHOULD_CLOSE
         if not f&0x1000 and callable(g := getattr(l, '__enter__', None)): # pragma: no cover
             try: g(); f |= self._INNER_EXIT
@@ -54,7 +54,7 @@ class event_loop: # noqa: N801
             if f&0x200: return False
             raise RuntimeError(_m%N) if v is None else BaseExceptionGroup(_n%N, tuple(unnest_reverse(v))).with_traceback(b)
         f, l = ~e, self._loop
-        if f&0x40: self._task = l.create_task(safe_cancel_batch(all_tasks(l)))
+        if f&0x40: self._task = l.create_task(safe_cancel_batch(A.all_tasks(l)))
         if not f&0x400: self.__reusable.append(l)
         if not ((c := f&self._SHOULD_CLOSE) and f&0x10):
             with _i: l.stop()
@@ -70,7 +70,7 @@ class event_loop: # noqa: N801
             elif not f&0x200: _l.error('%s: __enter__ already called but __exit__ is not present', N)
         if f&self._INNER_AEXIT: # pragma: no cover
             if callable(g := getattr(l, '__aexit__', None)) and not r:
-                try: r = run_coroutine_threadsafe(g(None, None, None) if f&0x8000 else g(t, v, b), l).result()
+                try: r = A.run_coroutine_threadsafe(g(None, None, None) if f&0x8000 else g(t, v, b), l).result()
                 except CRITICAL: _l.critical('%s: critical error while calling __aexit__ of associated event loop', N, exc_info=True)
                 except RuntimeError:
                     if not f&0x100: _l.exception('RuntimeError exiting associated event loop')
@@ -79,7 +79,7 @@ class event_loop: # noqa: N801
             elif not f&0x200: _l.error('%s: __aenter__ already called but __aexit__ is not present', N)
         if f&8 or not (c or f&0x20):
             with _i: l.close()
-            set_event_loop(None)
+            A.set_event_loop(None)
         if not f&0x80: del self._loop
         return r or (q and bool(f&0x100))
     def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'):
@@ -95,7 +95,7 @@ def f(n):
     async def adisembowel(it, /): # pragma: no cover
         if callable(p := getattr(it, n, None)):
             while it: yield p()
-            if callable(p := getattr(it, 'clear', None)) and iscoroutine(p := p()): await p
+            if callable(p := getattr(it, 'clear', None)) and A.iscoroutine(p := p()): await p
         else:
             async for i in iter_to_agen(it): yield i
     return adisembowel
@@ -104,10 +104,10 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
     audit('asyncutils.base.safe_cancel_batch', _(t)); a = (l := []).append
     async for F in (adisembowel if disembowel else iter_to_agen)(t):
         if not F.done(): F.cancel(); a(F)
-    r = await gather(*l, return_exceptions=True)
+    r = await A.gather(*l, return_exceptions=True)
     if callback is not None:
-        async def f(a, /, _=callback): return (await r) if iscoroutine(r := _(a)) else r
-        L = len(r := await gather(*map(f, r), return_exceptions=True))
+        async def f(a, /, _=callback): return (await r) if A.iscoroutine(r := _(a)) else r
+        L = len(r := await A.gather(*map(f, r), return_exceptions=True))
         if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'base.safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,PLR0912
     audit('asyncutils.base.iter_to_agen', a(it)); C = getcontext()
@@ -150,7 +150,7 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
                     if c((l := await _()), sentinel): break
                     yield l
 def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set):
-    audit('asyncutils.base.aiter_to_gen', a(ait)); from asyncio.futures import _chain_future as e; C = getcontext()
+    audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = getcontext(), A.futures._chain_future
     if b(ait, '__iter__') and not (C.AITER_TO_GEN_DEFAULT_STRICT if strict is None else strict): yield from ait; return
     if not b(ait, '__aiter__'): raise TypeError(f'asyncutils.base.aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')
     d = b(ait := aiter(ait), 'asend', 'athrow', 'aclose')
@@ -158,7 +158,7 @@ def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H
         if loop is None: loop = g()
         if loop.is_running():
             if not (C.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES if use_futures is None else use_futures): raise RuntimeError(f'asyncutils.base.aiter_to_gen: cannot convert async iterator {ait!r} to sync in running event loop without using futures')
-            def f(*a, f, c=loop.create_task, g=e, t=Future): return g(c(f(*a)), F := t()) or F.result()
+            def f(*a, f, c=loop.create_task, g=e, t=A.Future): return g(c(f(*a)), F := t()) or F.result()
             if d:
                 f, x = partial(f, f=ait.asend), None
                 while True: x = yield f(x)
@@ -195,7 +195,7 @@ async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran 
 async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_agen(it): yield start, _; start += step
 P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None, strict=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))
-yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)})), sleep.__get__(float('inf'))
+yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)})), A.sleep.__get__(float('inf'))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
 _.__qualname__ = _.__name__ = 'dummy_task'
 del f, _, P, L, b, c, H

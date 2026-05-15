@@ -2,10 +2,9 @@
 import sys
 assert sys.version_info < (3, 14)
 from functools import partial
-from typing import Any, Final
+from typing import Final
 from .types import SupportsRichComparison
-__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial'
-j: dict[str, Any]
+__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial'
 Placeholder: Final[object]
 def heapify[C: SupportsRichComparison](heap: list[C], /) -> None: ...
 def heappop[C: SupportsRichComparison](heap: list[C], /) -> C: ...

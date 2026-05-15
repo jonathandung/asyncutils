@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncutils',))
 from asyncutils import CRITICAL, Critical, aiter_to_gen, new_eager_tasks, safe_cancel_batch, wrap_in_coro
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import compete_all as __all__

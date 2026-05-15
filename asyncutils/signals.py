@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncio.tasks',))
 from asyncutils import CRITICAL, Critical, getcontext, ignore_typeerrs, safe_cancel
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log

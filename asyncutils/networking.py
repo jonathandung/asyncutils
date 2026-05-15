@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncutils._internal.compat', 'asyncutils._internal.helpers'))
 from asyncutils import IgnoreErrors, LoopBoundMixin, dualcontextmanager, getcontext, ignore_cancellation
 from asyncutils._internal.compat import Queue
 from asyncutils._internal.helpers import audit_fullname, fullname

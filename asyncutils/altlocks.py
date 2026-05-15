@@ -7,18 +7,17 @@ from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import altlocks_all as __all__
 from _collections import deque
-from asyncio import BrokenBarrierError, Condition, Lock, iscoroutine, sleep, timeout as _timeout
+import asyncio as A
 from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
-from weakref import WeakValueDictionary
 class Releasing:
     __slots__ = '_lock',
     def __init__(self, lock, /): self._lock = lock
     async def __aenter__(self):
         if not (l := self._lock).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
-        if iscoroutine(r := l.release()): await r
+        if A.iscoroutine(r := l.release()): await r
     async def __aexit__(self, *_): await self._lock.acquire()
 class ResourceGuard(RuntimeError, AsyncContextMixin):
     _inc_cnt = staticmethod(count(1).__next__); __slots__ = 'guarded',
@@ -33,7 +32,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin):
     def guard(cls, obj, /, *, action='using'): return cls(action, obj)
     P.patch_method_signatures((__exit__, P.xsig))
 class UniqueResourceGuard(ResourceGuard):
-    _cache = WeakValueDictionary(); __slots__ = '__weakref__',
+    _cache = __import__('weakref').WeakValueDictionary(); __slots__ = '__weakref__',
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.altlocks.UniqueResourceGuard')
     @classmethod
     def guard(cls, obj, /, **_):
@@ -47,7 +46,7 @@ class CircuitBreaker:
     def __new__(cls, n, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
         if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls._inc_cnt()
-        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), getcontext(); s.name, s._max_fails, s._reset, s._exc, s._opened, s._max_half_open_calls, s._unlock, s._lock = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := Lock()), l; s.state = s.fails = s._half_open_calls = 0; return s if f is None else s(f)
+        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), getcontext(); s.name, s._max_fails, s._reset, s._exc, s._opened, s._max_half_open_calls, s._unlock, s._lock = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := A.Lock()), l; s.state = s.fails = s._half_open_calls = 0; return s if f is None else s(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def wrapper(*a, **k):
@@ -73,10 +72,10 @@ class CircuitBreaker:
     P.patch_classmethod_signatures((__new__, 'name, /, max_fails=None, reset=None, *, exc={}, max_half_open_calls=None'))
 class StatefulBarrier(AwaitableMixin):
     __slots__ = '_broken', '_cond', '_count', '_exc', '_initstate', '_parties', '_state'
-    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._cond, self._initstate, self._broken = parties, BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), Condition(), initstate, False
+    def __init__(self, parties, name='\b', initstate=(), maxstate=None): self._parties, self._exc, self._count, self._state, self._cond, self._initstate, self._broken = parties, A.BrokenBarrierError(f'{fullname(self)} {name} is broken'), 0, deque(maxlen=maxstate), A.Condition(), initstate, False
     async def wait(self, state=None, *, timeout=None):
         try:
-            async with _timeout(timeout), (C := self._cond):
+            async with A.timeout(timeout), (C := self._cond):
                 self.raise_for_abort(); f = (S := self._state).append
                 if (s := self._initstate) is not None:
                     async for _ in iter_to_agen(s): f(_)
@@ -109,7 +108,7 @@ class DynamicThrottle:
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
         if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('asyncutils.altlocks.DynamicThrottle: inconsistent rates after applying bounds')
-        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf, self._rate, self._lc = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate, timer()-1.0/init_rate; self.reset()
+        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._randf, self._rate, self._lc = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, A.Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate, timer()-1.0/init_rate; self.reset()
     @property
     def rate(self): return self._rate
     @rate.setter
@@ -125,7 +124,7 @@ class DynamicThrottle:
     def successes(self): return self._successes
     @property
     def fails(self): return self._fails
-    async def __aenter__(self): await sleep((1.0/self._rate-self.ctime+self._lc)*(1.0+self._randf(self._jitter))); self._lc = self.ctime
+    async def __aenter__(self): await A.sleep((1.0/self._rate-self.ctime+self._lc)*(1.0+self._randf(self._jitter))); self._lc = self.ctime
     async def __aexit__(self, e, /, *_):
         async with self._lock:
             if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._uf if (r := s/t) > self._ub else self._lf if r < self._lb else 1.0; self.reset()

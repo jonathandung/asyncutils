@@ -6,4 +6,4 @@ def run(argv=None):
         with A.event_loop.from_flags(0) as g: return A.AsyncUtilsConsole(g).run(suppress_asyncio_warnings=True, suppress_unawaited_coroutine_warnings=True, always_run_interactive=len(a := S.orig_argv) == 2 and a[0] == S.executable and a[1].endswith(('/bin/autils.exe', '/bin/asyncutils.exe', r'\Scripts\asyncutils.exe', r'\Scripts\autils.exe'))) # noqa: PLR2004
     except BaseException as e:
         if not A.pdb: raise
-        __import__('_warnings').warn('exception with no traceback caught in asyncutils.cli.run; cannot perform autopsy as requested', RuntimeWarning, 2) if (t := e.__traceback__) is None else __import__('pdb').post_mortem(t)
+        __import__('_warnings').warn('asyncutils.cli.run: unprecedented exception with no traceback caught; cannot perform autopsy as requested', RuntimeWarning, 2) if (t := e.__traceback__) is None else __import__('pdb').post_mortem(t)

@@ -305,13 +305,10 @@ class TransientBlockFromLoopRV(Protocol):
 @type_check_only
 class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :deco:`util.dualcontextmanager`. The initialization signature of this class is not documented intentionally.'''
 @type_check_only
-class Sentinel(sentinel_base):
-    '''Common type of sentinels for this module, internal or public.'''
-    def __reduce__(self) -> str: '''These sentinels are accessible in the top level of the :mod:`asyncutils.constants` namespace.'''
+class RaiseType(sentinel_base):
+    '''The type of :const:`constants.RAISE`.'''
+    def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`asyncutils.constants` namespace.'''
     def is_(self, other: object, /) -> TypeGuard[Self]: ...
-@final
-@type_check_only
-class RaiseType(Sentinel): ...
 @final
 @type_check_only
 class WildcardType:
@@ -367,18 +364,18 @@ if sys.platform == 'win32':
     type Seek = Literal[0, 1, 2]
     '''Possible values of the `whence` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
 
-    * 0: :const:`SEEK_SET`
-    * 1: :const:`SEEK_CUR`
-    * 2: :const:`SEEK_END`'''
+    * 0: :const:`~os.SEEK_SET`
+    * 1: :const:`~os.SEEK_CUR`
+    * 2: :const:`~os.SEEK_END`'''
 else:
     type Seek = Literal[0, 1, 2, 3, 4]
     '''Possible values of the `whence` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
 
-    * 0: :const:`SEEK_SET`
-    * 1: :const:`SEEK_CUR`
-    * 2: :const:`SEEK_END`
-    * 3: :const:`SEEK_DATA`
-    * 4: :const:`SEEK_HOLE`'''
+    * 0: :const:`~os.SEEK_SET`
+    * 1: :const:`~os.SEEK_CUR`
+    * 2: :const:`~os.SEEK_END`
+    * 3: :const:`~os.SEEK_DATA`
+    * 4: :const:`~os.SEEK_HOLE`'''
 type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], EveryMethodRVRV[T, R]]
 '''Return type of :func:`func.everymethod`.'''
 type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]

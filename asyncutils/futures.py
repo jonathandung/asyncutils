@@ -1,5 +1,5 @@
 # ty: ignore[unresolved-import]
-__lazy_modules__ = frozenset(('_contextvars', 'asyncutils._internal.helpers'))
+__lazy_modules__ = frozenset(('_contextvars',))
 from asyncutils._internal.helpers import copy_and_clear, fullname
 from asyncutils._internal.submodules import futures_all as __all__
 from _contextvars import copy_context

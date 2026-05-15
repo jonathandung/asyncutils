@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncio', 'asyncutils._internal.compat'))
 from asyncutils import exceptions as E, achain, adisembowel, aenumerate, aiter_from_f, areduce, collect, getcontext, iter_to_agen, iterf, safe_cancel, safe_cancel_batch, take, RAISE, RECIP_E, ignore_qshutdown
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
@@ -21,7 +20,8 @@ async def fmap_parallel(fs, /, *a, **k):
     for r in await to_list(t(f(*a, **k)) async for f in iter_to_agen(fs)): yield await r
 async def map_on_map(outer, inner, it, *, inner_await=False, outer_await=False):
     async for _ in amap(inner, it, await_=inner_await): yield await to_tuple(amap(outer, _, await_=outer_await))
-def aeveryother(it, *, skip_first=False): return aislice(it, skip_first, None, 2)
+def aevery(it, n, *, skip_first=False): return aislice(it, skip_first, None, n)
+def aeveryother(it, *, skip_first=False): return aevery(it, 2, skip_first=skip_first)
 async def agather(it_of_its, return_exceptions=False): return await gather(*await to_list(it_of_its), return_exceptions=return_exceptions)
 def aawgenf2agenf(f, /):
     async def g(*a, **k):
@@ -66,7 +66,7 @@ async def aunzip(ait, *, fillvalue=_NO_DEFAULT, put_batch=None, maxqsize=None, _
     audit('asyncutils.iters.aunzip', fullname(ait)); l = len(t := await anext(ait := iter_to_agen(ait), ())); C = getcontext()
     if maxqsize is None: maxqsize = C.AUNZIP_DEFAULT_MAX_QSIZE
     if put_batch is None: put_batch = C.AUNZIP_DEFAULT_PUT_BATCH
-    if maxqsize < put_batch: raise ValueError('maxqsize cannot be less than put_batch')
+    if maxqsize < put_batch: raise ValueError('asyncutils.iters.aunzip: maxqsize cannot be less than put_batch')
     f = partial(Queue, maxqsize)
     class aunzip_consumer:
         __slots__ = '__q',
@@ -840,5 +840,5 @@ async def aonlinesorter(it=None):
     a, b = map(partial(ppartial, f := ppartial(get_loop_and_set().run_in_executor, e, Placeholder, h := [] if it is None else await to_list(it))), (heappop, heappush)); await f(heapify) # ty: ignore[invalid-argument-type]
     while h:
         if (i := (yield await a())) is not None: await b(i)
-patch_function_signatures((adistinctpermutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleaverandomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiterindex, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asampleweighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'), follow_wrapped=False)
+patch_function_signatures((apolynomialfromroots, 'roots'), (adistinctpermutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleaverandomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiterindex, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asampleweighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'))
 del achain, patch_function_signatures, _adpermpartial, _adpermfull, _atraverse, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, check, check_methods, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _rand, _randinst, _identity, _

@@ -104,8 +104,8 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
     def ascurctx(self) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry.'''
-    def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the context.'''
-    def copy(self) -> Self: '''Return a copy of the context.'''
+    def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the items within the context.'''
+    def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
     def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter=..., incl_newline: bool=...) -> None: '''Pretty print the context to the provided file-like object `file` with the :class:`pprint.PrettyPrinter` instance `pp`, without a trailing newline if `incl_newline=False` is specified.'''
@@ -139,6 +139,7 @@ all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
+
   These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (84 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]

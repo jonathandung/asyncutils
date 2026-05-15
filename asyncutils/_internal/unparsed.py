@@ -19,15 +19,15 @@ def l(p, e=None, /):
         try: f = f['tool']['asyncutils']
         except KeyError: return {}
     if type(f) is dict: return f
-    raise TypeError(f'incorrent json format for asyncutils configuration at {p}; top-level structure should be an object')
+    raise TypeError(f'asyncutils: incorrect configuration format at {p}; top-level structure should be an object/mapping')
 def m(m, a, /, _='see format.json5'): (e := TypeError(m%(c, a))).add_note(_); raise e
 if c := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\' \t\r\n\v\f'): # pragma: no cover
     a('asyncutils/read_config', c)
     if isinstance(v := (d := l(c)).pop('next_config', c), str): a('asyncutils/set_next_config', c, v); E[k] = v
     elif v is None: a('asyncutils/discontinue_config', c); del E[k]
-    else: m('key "next_config" in %s should point to a string or null, not %r', v)
+    else: m('asyncutils: key "next_config" in %s should point to a string or null, not %r', v)
 else:
-    A, f, s, t = __import__('pathlib').Path.cwd(), None, 'asyncutils/try_config', 'pyproject.toml'; a('asyncutils/recurse_configs', A)
+    A, f, s, t, i = __import__('pathlib').Path.cwd(), None, 'asyncutils/try_config', 'pyproject.toml', None; a('asyncutils/recurse_configs', A)
     for i, A in enumerate(__import__('itertools').chain((A,), A.parents)):
         if (A := A/t).is_file():
             a(s, i)
@@ -39,7 +39,7 @@ else:
     del A, f, s, i
 if v := d.pop('context', None):
     for v in v.values():
-        if (t := type(v)) is not dict: m('key "context" in %s should be an object mapping submodule names to objects, not %r', H.fullname(t))
+        if (t := type(v)) is not dict: m('asyncutils: key "context" in %s should be an object mapping submodule names to objects, not %r', H.fullname(t))
         for K, V in v.items():
             if type(V) is dict:
                 for k, v in V.items(): C[f'{K}_{k}'.upper()] = v # noqa: PLW2901

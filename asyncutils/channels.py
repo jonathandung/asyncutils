@@ -6,7 +6,7 @@ from asyncutils._internal.helpers import copy_and_clear, filter_out, get_loop_an
 from asyncutils._internal.submodules import channels_all as __all__
 from _functools import partial
 from _weakrefset import WeakSet
-from asyncio import iscoroutine, CancelledError, Event, Lock, Semaphore, gather, shield, sleep, wait_for, timeout as _timeout
+import asyncio as A
 from collections import defaultdict, deque, namedtuple
 from itertools import repeat, starmap
 from sys import addaudithook, audit
@@ -36,9 +36,9 @@ class Observable(LoopContextMixin):
     async def wait_for_next(self, timeout=None, strict=False):
         async def one_time(*a, **k): F.set_result((a, k)) # noqa: RUF029
         F, u = self.make_fut(), self.subscribe_nowait(one_time)
-        try: return await wait_for(F, timeout)
+        try: return await A.wait_for(F, timeout)
         finally: u(strict)
-    async def wait_until_idle(self, timeout=None): await wait_for(self._event.wait(), timeout)
+    async def wait_until_idle(self, timeout=None): await A.wait_for(self._event.wait(), timeout)
     async def subscribe(self, observer): await self.wait_until_idle(); return self.subscribe_nowait(observer)
     async def unsubscribe(self, observer, strict=False): await self.wait_until_idle(); self.unsubscribe_nowait(observer, strict)
     async def handle_notifications(self):
@@ -47,12 +47,12 @@ class Observable(LoopContextMixin):
             except QueueEmpty: break
     async def handle_unsubscriptions(self):
         async with self._lock: self._data -= (s := self._to_remove); s.clear()
-    async def _notify_helper(self, r, a, k): await gather(*self.make_multiple(obs(*a, **k) for obs in self._data.copy()), return_exceptions=r)
-    def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable', maxsize); self._data, self._lock, self._to_remove, self._queue, self._event = set(init_observers), Lock(), set(), None if maxsize is None else Queue(maxsize), Event()
+    async def _notify_helper(self, r, a, k): await A.gather(*self.make_multiple(obs(*a, **k) for obs in self._data.copy()), return_exceptions=r)
+    def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable', maxsize); self._data, self._lock, self._to_remove, self._queue, self._event = set(init_observers), A.Lock(), set(), None if maxsize is None else Queue(maxsize), A.Event()
     def __iter__(self): return self._data.__iter__()
     def __aiter__(self): return iter_to_agen(self)
     async def __setup__(self): LoopContextMixin.__init__(self)
-    async def __cleanup__(self): await gather(self.handle_notifications(), self.handle_unsubscriptions())
+    async def __cleanup__(self): await A.gather(self.handle_notifications(), self.handle_unsubscriptions())
     def start_accumulation(self): return self.restart_accumulation() or True if self._queue is None else False
     def restart_accumulation(self, flush=False):
         if flush: self.flush_notifications()
@@ -87,7 +87,7 @@ class Observable(LoopContextMixin):
             nonlocal t
             if t is not None: await safe_cancel(t)
             async def notifier():
-                with ignore_cancellation: await sleep(delay); await f(a, k)
+                with ignore_cancellation: await A.sleep(delay); await f(a, k)
             t = self.make(notifier())
         self.subscribe_nowait(debounced); return _
     def throttle(self, interval, ret_exc=False):
@@ -101,7 +101,7 @@ class Observable(LoopContextMixin):
         f, b, c = (_ := type(self)())._notify_helper, [], max(1, count)
         async def buffered(*a, **k):
             b.append((a, k))
-            if len(b) >= c: await gather(*starmap(f, copy_and_clear(b)), return_exceptions=ret_exc)
+            if len(b) >= c: await A.gather(*starmap(f, copy_and_clear(b)), return_exceptions=ret_exc)
         self.subscribe_nowait(buffered); return _
     def at_change(self, key=lambda *a, **k: (a, frozenset(k.items())), ret_exc=False):
         f, l = partial((_ := type(self)())._notify_helper, ret_exc), object()
@@ -120,7 +120,7 @@ class EventBus(LoopContextMixin):
         if max_concurrent is None: max_concurrent = getcontext().EVENT_BUS_DEFAULT_MAX_CONCURRENT
         def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):
             if f(): _(*a)
-        audit('asyncutils.channels.EventBus', name); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), {}, set(), f'{fullname(self)} {name or self._inc_cnt()}', Lock(), False, handler or (lambda _: None), Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+        audit('asyncutils.channels.EventBus', name); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), {}, set(), f'{fullname(self)} {name or self._inc_cnt()}', A.Lock(), False, handler or (lambda _: None), A.Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -187,7 +187,7 @@ class EventBus(LoopContextMixin):
             except KeyError: return False
     def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type), loop=self.loop)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
-    async def _publish_helper(self, d, s, I, *_): await gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
+    async def _publish_helper(self, d, s, I, *_): await A.gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
         p, f = self.sync_start_publish(event_type, data, safe=safe, timeout=timeout, chaperone=chaperone)
         if not wait: return
@@ -203,7 +203,7 @@ class EventBus(LoopContextMixin):
             for m, F in self._middlewares.copy().items():
                 if F is not None and F.done(): continue
                 try:
-                    if iscoroutine(D := m(event_type, D)): D = await D
+                    if A.iscoroutine(D := m(event_type, D)): D = await D
                 except CRITICAL: raise Critical
                 except (ExceptionGroup, Exception) as e: C(e) # noqa: BLE001
                 except BaseException as e: raise BusPublishingError(self, m) from e # ty: ignore[invalid-argument-type]
@@ -211,22 +211,22 @@ class EventBus(LoopContextMixin):
             async with self._lock:
                 if self._tracking: self._published[event_type] += 1
                 s, w = (U[_].copy() for _ in (event_type, None))
-            await gather((f := partial(self._publish_helper, D, safe))(s), f(w, event_type))
-        (P := self._publishers).add(p := self.make(wait_for(g(), timeout))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
+            await A.gather((f := partial(self._publish_helper, D, safe))(s), f(w, event_type))
+        (P := self._publishers).add(p := self.make(A.wait_for(g(), timeout))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
         async def handler(d):
             if F.done(): return
-            if iscoroutine(c := condition(d)): c = await c
+            if A.iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
-        return self.make(wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
+        return self.make(A.wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
     async def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
         async def f():
-            with _: r = await wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
+            with _: r = await A.wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
         await self.subscribe(subscriber, event_type); return self.make(f())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): L.warning('event stream buffer full')
-        try: await wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
+        try: await A.wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
         except QueueShutDown: L.info('event stream is closing', exc_info=True)
         except TimeoutError:
             if q.full(): L.warning('event stream data lost', exc_info=True); q.get_nowait(); q.put_nowait(d)
@@ -236,7 +236,7 @@ class EventBus(LoopContextMixin):
         t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=getcontext().EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = Queue(getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
         if _NO_DEFAULT.is_(item_timeout): item_timeout = getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
-            while True: yield await wait_for(q.get(), item_timeout)
+            while True: yield await A.wait_for(q.get(), item_timeout)
         except QueueShutDown: L.info('event stream of %s has been shut down', self.name, exc_info=True)
         except TimeoutError: L.exception('event stream of %s is stopping because of timeout in waiting for item', self.name)
         finally: F.set_result(None); await t
@@ -246,7 +246,7 @@ class EventBus(LoopContextMixin):
         async with self._lock: self.clear()
         if not preserve_stats: self.clear_stats()
         try:
-            async with _timeout(timeout):
+            async with A.timeout(timeout):
                 self.stream_queue.shutdown(immediate)
                 for _ in repeat(None, self.active_tasks): await f()
         except TimeoutError: L.exception('%s shutdown timed out, some tasks may be incomplete', self.name)
@@ -254,7 +254,7 @@ class EventBus(LoopContextMixin):
             if p := self._publishers: await safe_cancel_batch(p)
             del self._lock, self._handler, self._sem, self._publishers
     async def handle_exception(self, e):
-        if iscoroutine(e := self._handler(e)): await e
+        if A.iscoroutine(e := self._handler(e)): await e
     def clear(self, event_type=_NO_DEFAULT): return self._subscribers.clear() if event_type is _NO_DEFAULT else self._subscribers.pop(event_type, None)
     def clear_all(self): self.clear(); self.clear_stats()
     def clear_wildcards(self): return self.clear(None)
@@ -262,7 +262,7 @@ class EventBus(LoopContextMixin):
     async def _safe_callback(self, c, d, t=None, i=None):
         try:
             async with self._sem:
-                if iscoroutine(r := c(*filter_out(t, s=_NO_DEFAULT), d)): await wait_for(r, i)
+                if A.iscoroutine(r := c(*filter_out(t, s=_NO_DEFAULT), d)): await A.wait_for(r, i)
         except TimeoutError: L.warning('callback %s timed out', fullname(c), exc_info=True)
         except CRITICAL: raise Critical
         except BaseException as e: await self.handle_exception(e) # noqa: BLE001
@@ -272,14 +272,14 @@ class EventBus(LoopContextMixin):
 @subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
-    def __init__(self, *, loop=None, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), get_loop_and_set() if loop is None else loop, Lock() if lock is None else lock; self._make_task()
+    def __init__(self, *, loop=None, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), get_loop_and_set() if loop is None else loop, A.Lock() if lock is None else lock; self._make_task()
     async def _maintainer(self):
-        f, g = sleep.__get__(getcontext().RENDEZVOUS_MAINTENANCE_INTERVAL), self.cleanup
+        f, g = A.sleep.__get__(getcontext().RENDEZVOUS_MAINTENANCE_INTERVAL), self.cleanup
         while True: await f(); g()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
-        except (CancelledError, TimeoutError): return False
-    async def raising_put(self, v, /, *, timeout): await wait_for(await shield(self._put_helper(v)), timeout)
+        except (A.CancelledError, TimeoutError): return False
+    async def raising_put(self, v, /, *, timeout): await A.wait_for(await A.shield(self._put_helper(v)), timeout)
     async def get(self, default=_NO_DEFAULT, *, timeout=None, _=100):
         f = (p := self._putters).popleft
         while p:
@@ -287,7 +287,7 @@ class Rendezvous:
             if not F.done(): F.set_result(None); return v
         if timeout is None and default is not _NO_DEFAULT: return default
         self._getters.append(F := self._loop.create_future())
-        try: return await wait_for(F, timeout)
+        try: return await A.wait_for(F, timeout)
         except TimeoutError:
             if default is _NO_DEFAULT: raise
             return default
@@ -296,7 +296,7 @@ class Rendezvous:
     def cleanup(self): self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
     async def exchange(self, v, /, *, timeout=None, asap=False):
         g, f = self._getters, True
-        async with _timeout(timeout):
+        async with A.timeout(timeout):
             async with self._lock:
                 while g:
                     if not (F := g.popleft()).done(): break
@@ -311,7 +311,7 @@ class Rendezvous:
             else: self._putters.append((v, F := self._loop.create_future()))
         return F
     async def reset(self, _=partial(safe_cancel_batch, disembowel=True)):
-        async with self._lock: await gather(safe_cancel_batch(self._getters, disembowel=True), safe_cancel_batch(F async for _, F in adisembowel(self._putters)))
+        async with self._lock: await A.gather(safe_cancel_batch(self._getters, disembowel=True), safe_cancel_batch(F async for _, F in adisembowel(self._putters)))
         await safe_cancel(self._task); self._make_task()
     def _make_task(self): self._task = self._loop.create_task(self._maintainer())
     P.patch_method_signatures((reset, ''), (state_snapshot, ''), (_maintainer, ''))

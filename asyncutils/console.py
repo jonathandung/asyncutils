@@ -1,4 +1,4 @@
-from asyncutils import __version__ as V, config as C, StateCorrupted
+from asyncutils import __version__ as V, config as C, StateCorrupted as E
 from asyncutils._internal import patch as P, running_console as R
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import console_all as __all__
@@ -140,7 +140,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if self._internal_is_running: raise RuntimeError(_r)
         if r := R.getc(): raise RuntimeError(_r if r is self else _a)
         R.setc(self); super().prehook(_ if max_memerrs is None else max_memerrs) # ty: ignore[invalid-argument-type]
-    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=StateCorrupted('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
+    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=E('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
         if R.unsetc() is not self: S.stderr.write(_m); del S.modules[__name__]
         if _ and isinstance(e := self.exc, BaseException):
             if not isinstance(e, SystemExit): raise _e
@@ -158,4 +158,4 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if b is not None: self._showtraceback(t, v, b, '')
         finally: t = v = b = None
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))
-del _f, _s, g, C, V, B, _, iscoroutine
+del _f, _s, g, C, V, B, _, iscoroutine, E

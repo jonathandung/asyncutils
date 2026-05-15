@@ -7,8 +7,8 @@ def heappush(heap, item, /, _=_siftdown_max): heap.append(item); _(heap, 0, len(
 def heappushpop(heap, item, /, _=_siftup_max):
     if heap and item > (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
 del _siftdown_max, _siftup_max
-__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial'
-j, Placeholder = {}, 'Placeholder'
+__all__ = ('Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial')
+Placeholder = __all__[0]
 def _get_merger(A, _=__import__('_operator').itemgetter):
     if not A: return 0, None
     j = n = len(A)

@@ -2,8 +2,9 @@ def patch_aio_logs(): __import__('logging').getLogger('asyncio').disabled = True
 def patch_unawaited_coroutine_warnings(): __import__('warnings').filterwarnings('ignore', "coroutine '.*' was never awaited", RuntimeWarning)
 def _(t, d, a='__text_signature__', u='<unrepresentable>', c=('__wrapped__', '__func__')):
     def patch(*I, follow_wrapped=True):
-        m, f = {}, True
+        m = {}
         for k, v in I:
+            f = True
             if follow_wrapped:
                 while not (hasattr(k, a) or (i := id(k)) in m): m[i], k, f = k, getattr(k, c[f], k), not f # noqa: PLW2901
             setattr(k, a, t%v.format(u) if v else d)

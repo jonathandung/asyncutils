@@ -7,9 +7,9 @@ __all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUT
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`iters.aguessmin` and :func:`iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
-'''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity, which is also the orderin which the executor options appear in the CLI help.'''
+'''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity, which is also the order in which the executor options appear in the CLI help.'''
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]
-'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)`. Allows for faster membership testing.'''
+'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)`, so that there can be faster membership testing.'''
 class sentinel_base:
     '''Base class for sentinel values. To support versions below Python 3.15, we cannot make use of the built-in :class:`sentinel` type, and this class offers extra methods anyway.'''
     def __new__(cls, name: str=...) -> NoReturn: '''Remember to override this in stubs (change :class:`~typing.NoReturn` to :class:`~typing.Self`) if and only if your subclass can be instantiated by the user.'''
@@ -19,7 +19,7 @@ class sentinel_base:
     @property
     def name(self) -> str: '''Fully qualified name of the sentinel, the only thing that identifies it uniquely. May not be present if impropertly instantiated.'''
     @property
-    def is_private(self) -> bool: '''Whether the sentinel is private (name begins with underscore).'''
+    def is_private(self) -> bool: '''Whether the sentinel is private; that is, the name begins with underscore.'''
     @property
     def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, or `None` if there is none.'''
     @property

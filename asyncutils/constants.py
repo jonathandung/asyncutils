@@ -25,7 +25,7 @@ class sentinel_base:
     def __set_name__(self, owner, name, /, _='NOTE: The following is considered bad practice:\nclass {0}:\n{1} = {2}({3!r})\n...\ninstead, consider:\nclass {0}:\n{1} = {2}()\n'.format):
         N = f'{fullname(owner)}.{name}'.replace('<locals>.', '').replace('<lambda>.', '')
         with self._lock:
-            if (n := getattr(self, '__name', None)) is None:
+            if (n := getattr(self, '_sentinel_base__name', None)) is None:
                 if not self.is_(self._cache.setdefault(N, self)): raise NameError(f'{fullname(self)} name collision', name=N)
                 self.__name = N
             elif n == N and self._cache.get(N) is self:
@@ -33,8 +33,8 @@ class sentinel_base:
                 else: raise NameError(f'cannot bind named unbound {fullname(self)} to class {fullname(owner)!r}', name=N)
             else: raise NameError(f'cannot bind named {fullname(self)} to class {fullname(owner)!r}', name=N)
     def __reduce__(self):
-        try: return type(self), (self.__name,)
-        except AttributeError: raise TypeError(f'cannot pickle unbound instance of {fullname(self)}') from None
+        if (n := getattr(self, '_sentinel_base__name', None)) is None: raise TypeError(f'cannot pickle unbound instance of {fullname(self)}')
+        return type(self), (n,)
     def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
         if getattr(cls, '__slots__', True): raise TypeError('sentinel classes should have empty __slots__')
         cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True

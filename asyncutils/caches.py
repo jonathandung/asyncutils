@@ -3,7 +3,7 @@ from asyncutils import CRITICAL, Critical, LoopContextMixin, event_loop, getcont
 from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import create_executor, fullname
 from asyncutils._internal.submodules import caches_all as __all__
-from asyncio import CancelledError, Event, Lock, gather, iscoroutine, sleep
+import asyncio as A
 from collections import defaultdict, namedtuple
 from functools import lru_cache, wraps
 from sys import audit
@@ -14,7 +14,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         C = getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
-        audit(fullname(self), ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event, self._timer = {}, Lock(), _(lambda _=default_loader, /: _), None, Event(), timer; self.configure(ttl, refresh, processor)
+        audit(fullname(self), ttl, refresh); super().__init__(); self._cache, self._lock, self._loaders, self._task, self._event, self._timer = {}, A.Lock(), _(lambda _=default_loader, /: _), None, A.Event(), timer; self.configure(ttl, refresh, processor)
     def __contains__(self, key): return key in self._cache
     def register_loader(self, key, loader): self._loaders[key] = loader
     def expired(self, key): return self.time_past(key) > self._ttl
@@ -26,7 +26,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         return k
     async def _process_error(self, e, b, /):
         if (x := (c := type(self))._executor) is None: x = create_executor(c)
-        if iscoroutine(r := await self.loop.run_in_executor(x, self._processor, e, b)): await r
+        if A.iscoroutine(r := await self.loop.run_in_executor(x, self._processor, e, b)): await r
     async def get(self, key, loader=None):
         async with self._lock:
             if loader: self.register_loader(key, loader)
@@ -51,11 +51,11 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
         r, t = self._refresh, []
         while True:
             try:
-                await sleep(r)
+                await A.sleep(r)
                 async with self._lock: n, d, f = self._timer(), self._ttl-self._refresh, self.refresh_item; t.extend(self.make_multiple(f(k) for k, v in self._cache.items() if not v.loading and n > d+v.timestamp))
-                if t: await gather(*t, return_exceptions=True); t.clear()
+                if t: await A.gather(*t, return_exceptions=True); t.clear()
             except CRITICAL: raise Critical
-            except CancelledError: raise
+            except A.CancelledError: raise
             except BaseException as e: await self._process_error(e, True) # noqa: BLE001
     async def invalidate(self, key):
         async with self._lock: return self._cache.pop(key, None)
@@ -74,7 +74,7 @@ class AsyncLRUCache:
         async def wrapper(*a, **k):
             K, t, T, S = await self._make_key(f, a, k), self._ttl, self._timer, self._timestamps
             if None is not t < T()-S.get(K, 0.0): c.cache_clear(); del S[K]
-            if iscoroutine(r := c(*a, **k)): r = await r
+            if A.iscoroutine(r := c(*a, **k)): r = await r
             if t: S[K] = T()
             return r
         return wraps(f)(wraps(c, ('cache_info', 'cache_clear'), ())(wrapper))

@@ -8,11 +8,12 @@ class Context:
     def __getattribute__(self, n, /, _=frozenset(('ascurctx', 'replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint', 'from_dct')), u='__'): return super().__getattribute__(n if n in _ or (n.startswith(u) and n.endswith(u)) else n.upper())
     def __getitem__(self, n, /): return super().__getattribute__(n.upper())
     def __setattr__(self, n, v, /):
-        if (n := n.upper()) not in all_contextual_consts: raise AttributeError(f'{type(self).__name__!r} object has no attribute {n!r}')
+        if (n := n.upper()) not in all_contextual_consts: raise AttributeError('attribute not found', name=n, obj=self)
         if isinstance(v, list):
             if v and isinstance(v[0], list): v = map(tuple, v) # ty: ignore[invalid-argument-type]
             v = tuple(v)
         super().__setattr__(n, v)
+    def __delattr__(self, n, /): raise AttributeError('cannot delete attribute', name=n, obj=self)
     def replace_from_dct(self, d, /, _=all_contextual_consts):
         D = self.asdict()
         for n, v in d.items():

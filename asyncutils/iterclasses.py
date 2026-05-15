@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('_collections', '_functools'))
 from asyncutils import LoopBoundMixin, LoopContextMixin, dummy_task, take, iter_to_agen, sync_await
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, patch as P
