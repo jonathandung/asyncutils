@@ -16,7 +16,7 @@ def r(c, /, _='cannot subclass asyncutils.version.%s'):
 def a(c, /, t=tuple(property(lambda o, _=i: o[_]) for i in range(3)), _=r, f=('major', 'minor', 'patch')): c._fields, c._asdict = f, lambda self, _=f: dict(zip(_, self)); c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c._replace = c.__replace__ = lambda self, **k: c(**self._asdict(), **k); c.__init_subclass__ = _(c); return c
 N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xFF
 def b(z): z <<= 1; return ~z if z < 0 else z
-def c(key, _=_, f=b): return (key := f(key))&_, key>>18, (key>>10)&_, key>>9&1
+def c(key, _=_, f=b): return (key := f(key))&_, (key>>9)&_, key>>17, key>>8&1
 @a
 class VersionDelta(tuple):
     __slots__ = (); _make = classmethod(tuple.__new__)

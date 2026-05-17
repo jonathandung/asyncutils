@@ -5,12 +5,13 @@ repos:
       - id: trailing-whitespace
       - id: check-yaml
       - id: check-toml
+      - id: double-quote-string-fixer
       - id: check-added-large-files
         args: [--maxkb=150]
       - id: check-merge-conflict
       - id: detect-private-key
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.15.13
     hooks:
       - id: ruff-check
   - repo: https://github.com/rhysd/actionlint

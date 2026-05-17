@@ -46,7 +46,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = ["-v", "-n", "auto", "--maxfail", "5", "--tb", "short", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "41"]
+addopts = ["-v", "-n", "auto", "--maxfail", "5", "--tb", "short", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "54"]
 minversion = "9.0.3"
 required_plugins = ["pytest-asyncio>=1.3.0", "pytest-cov>=7.1.0", "pytest-sugar>=1.1.1", "pytest-xdist>=3.8.0"]
 asyncio_mode = "auto"

@@ -20,7 +20,11 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.5] - 2026-05-20; newest
+### [0.9.5] - 2026-05-17; newest
+
+#### BREAKING
+
+Changed the default key used when shelving and unshelving versions.
 
 ### [0.9.4] - 2026-05-15
 
@@ -47,430 +51,429 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
 
 #### BREAKING
 
-Declared end of life for all alpha versions.
-Changed version shelving and unshelving schema.
+- Declared end of life for all alpha versions.
+- Changed version shelving and unshelving schema.
+- Added the following to the public API:
 
-Added the following to the public API:
+  - Top level:
+
+    Constants:
+    - \_\_version__
+    - \_\_hexversion__
+    - submodules_map
+    - preloaded_submodules
+    - console_preloaded_submodules
 
-- Top level:
+    Functions:
+    - time_since_boot
 
-  Constants:
-  - \_\_version__
-  - \_\_hexversion__
-  - submodules_map
-  - preloaded_submodules
-  - console_preloaded_submodules
+    Submodules:
 
-  Functions:
-  - time_since_boot
+    - altlocks
 
-Submodules:
+    Classes:
+    - ResourceGuard
+    - UniqueResourceGuard
+    - CircuitBreaker
+    - StatefulBarrier
+    - DynamicThrottle
+    - Releasing
 
-- altlocks
+    - base
 
-  Classes:
-  - ResourceGuard
-  - UniqueResourceGuard
-  - CircuitBreaker
-  - StatefulBarrier
-  - DynamicThrottle
-  - Releasing
+    Classes:
+    - event_loop (context manager)
 
-- base
+    Functions:
+    - adisembowelleft
+    - adisembowel
+    - safe_cancel_batch
+    - iter_to_agen
+    - aiter_to_gen
+    - collect
+    - take
+    - drop
+    - aenumerate
+    - sleep_forever
 
-  Classes:
-  - event_loop (context manager)
+    Awaitables:
+    - dummy_task
+    - yield_to_event_loop
 
-  Functions:
-  - adisembowelleft
-  - adisembowel
-  - safe_cancel_batch
-  - iter_to_agen
-  - aiter_to_gen
-  - collect
-  - take
-  - drop
-  - aenumerate
-  - sleep_forever
+    - buckets
 
-  Awaitables:
-  - dummy_task
-  - yield_to_event_loop
+    Classes:
+    - TokenBucket
+    - LeakyBucket
 
-- buckets
+    - caches
 
-  Classes:
-  - TokenBucket
-  - LeakyBucket
+    Classes:
+    - AsyncLRUCache
+    - CacheWithBackgroundRefresh
 
-- caches
+    - channels
 
-  Classes:
-  - AsyncLRUCache
-  - CacheWithBackgroundRefresh
-
-- channels
-
-  Classes:
-  - Observable
-  - EventBus
-  - Rendezvous
-
-- cli
-
-  Functions:
-  - run
-
-- compete
-
-  Functions:
-  - first_completed
-  - race_with_callback
-  - multi_winner_race_with_callback
-  - convert_to_coro_iter
-  - enhanced_gather
-  - enhanced_staggered_race
-
-- config
-
-  Classes:
-  - debugging
-  - Executor
-
-  Functions:
-  - set_logger_level
-  - get_past_logs
-
-  Constants:
-  - debug
-  - silent
-  - basic_repl
-  - max_memerrs
-  - loaded_all
-  - logging_to
-
-- console
-
-  Classes:
-  - ConsoleBase
-  - AsyncUtilsConsole
-
-- constants
-
-  Classes:
-  - sentinel_base
-
-  Constants:
-  - RECIP_E
-  - EXECUTORS_FROZENSET
-  - POSSIBLE_EXECUTORS
-
-  Sentinels:
-  - RAISE
-
-- context
-
-  Classes:
-  - Context
-  - localcontext (context manager)
-  - nonreusablelocalcontext (context manager)
-
-  Constants:
-  - all_contextual_consts
-  - ... (every constant in the `all_contextual_consts` frozenset)
-
-  Functions:
-  - getcontext
-  - setcontext
-
-- events
-
-  Classes:
-  - SingleWaiterEventWithValue
-  - EventWithValue
-
-- exceptions:
-
-  Classes:
-  - ref
-  - IgnoreErrors
-  - WarningToError
-
-  Constants:
-  - CRITICAL
-
-  Context managers (ignore_*):
-  - ignore_all
-  - ignore_noncritical
-  - ignore_typical
-  - ignore_stopiteration
-  - ignore_stopaiteration
-  - ignore_valerrs
-  - ignore_typeerrs
-
-  Exception types:
-  - Critical
-  - StateCorrupted
-  - VersionError
-  - VersionConversionError
-  - VersionNormalizerMissing
-  - VersionCorrupted
-  - VersionValueError
-  - VersionNormalizerTypeError
-  - VersionNormalizerFault
-  - BulkheadError
-  - BulkheadFull
-  - BulkheadShutDown
-  - PoolError
-  - PoolFull
-  - PoolShutDown
-  - RateLimitExceeded
-  - BusError
-  - BusTimeout
-  - BusShutDown
-  - BusStatsErrors
-  - BusPublishingError
-  - CircuitBreakerError
-  - CircuitHalfOpen
-  - CircuitOpen
-  - EventValueError
-  - FutureCorrupted
-  - MaxIterationsError
-  - ItemsExhausted
-  - LockForceRequest
-  - PasswordQueueError
-  - PasswordRetrievalError
-  - GetPasswordRetrievalError
-  - PutPasswordRetrievalError
-  - ForbiddenOperation
-  - PasswordError
-  - WrongPassword
-  - WrongPasswordType
-  - PasswordMissing
-  - GetPasswordMissing
-  - PutPasswordMissing
-
-  Functions:
-  - unnest
-  - unnest_reverse
-  - potent_derive
-  - prepare_exception
-  - raise_exc
-  - exception_occurred
-  - wrap_exc
-  - unwrap_exc
-
-- func
-
-  Classes:
-  - RateLimited
-
-  Functions:
-  - areduce
-  - iterf
-  - acompose
-  - every
-  - everymethod
-  - timer
-  - retry
-  - throttle
-  - debounce
-  - measure
-  - measure2
-  - benchmark
-  - star
-  - unstar
-
-- futures
-
-  Classes:
-  - AsyncCallbacksFuture
-  - AsyncCallbacksTask
-  - EagerAsyncCallbacksFuture
-  - EagerAsyncCallbacksTask
-  - TimeAwareAsyncCallbacksFuture
-  - TimeAwareAsyncCallbacksTask
-  - TimeAwareFuture
-  - TimeAwareTask
-
-- io
-
-  Classes:
-  - AsyncReadWriteCouple
-  - MemoryMappedIOManager
-
-  Functions:
-  - double_ended_text_pipe
-  - double_ended_binary_pipe
-
-- iterclasses
-
-  Classes:
-  - achain
-  - apeekable
-  - abucket
-
-- iters
-
-  Functions:
-  - ... (There are too many of these, so just refer to the IDE autocomplete or read the stub)
-
-- locks
-
-  Classes:
-  - AdvancedRateLimit
-  - DynamicBoundedSemaphore
-  - PrioritySemaphore
-  - KeyedCondition
-  - RLock
-  - PriorityLock
-  - PriorityRLock
-  - LocksmithBase
-  - MultiCountDownLatch
-
-- misc
-
-  Classes:
-  - StateMachine
-
-  Functions:
-  - gather_with_limited_concurrency
-
-- mixins
-
-  Interfaces/Mixins:
-  - LoopBoundMixin
-  - LoopContextMixin
-  - AwaitableMixin
-  - AsyncContextMixin
-  - ExecutorRequiredAsyncContextMixin
-  - LockMixin
-  - LockWithOwnerMixin
-  - EventMixin
-
-- networking
-
-  Classes:
-  - LineProtocol
-  - LFProtocol
-  - CRLFProtocol
-  - CRProtocol
-  - SocketTransport
-
-- pools
-
-  Classes:
-  - AdvancedPool
-  - ConnectionPool
-  - CallbackAccumulator
-
-- processors
-
-  Classes:
-  - BoundedBatchProcessor
-  - BatchProcessor
-  - Bulkhead
-
-- properties
-
-  Classes:
-  - AsyncProperty
-  - AsyncLockProperty
-  - coercedmethod
-
-- queues
-
-  Interfaces:
-  - PotentQueueBase
-
-  Classes:
-  - SmartQueue
-  - SmartLifoQueue
-  - SmartPriorityQueue
-  - UserPriorityQueue
-
-  Functions:
-  - password_queue
-
-  Context managers (ignore_*):
-  - ignore_qshutdown
-  - ignore_qempty
-  - ignore_qfull
-  - ignore_qerrs
-
-- rwlocks
-
-  Classes:
-  - RWLock
-  - FairRWLock
-  - ReadPreferredRWLock
-  - WritePreferredRWLock
-  - PriorityRWLock
-  - FairPriorityRWLock
-  - WritePreferredPriorityRWLock
-
-- signals
-
-  Functions:
-  - wait_for_signal
-
-- tools
-
-  Functions:
-
-  - loadf
-  - json_to_argv
-  - json_to_argstr
-  - argv_to_json
-  - argstr_to_json
-  - get_cfg_json_format
-  - print_cfg_json_format
-  - get_cmd_help
-  - print_cmd_help
-
-- util
-
-  Context managers (ignore_*):
-  - ignore_cancellation
-
-  Context manager classes:
-  - anullcontext
-
-  Functions:
-  - aawcmf2dcmf
-  - aawcmf2dcmff
-  - dcm
-  - get_future
-  - new_eager_tasks
-  - to_sync
-  - to_async
-  - to_sync_from_loop
-  - sync_await
-  - sync_lock
-  - sync_lock_from_binder
-  - lockf
-  - done_evt
-  - dualcontextmanager
-  - semaphore
-  - aiter_from_f
-  - safe_cancel
-  - transient_block
-  - transient_block_from_loop
-  - wrap_in_coro
-
-- version
-
-  Classes:
-  - VersionInfo
-  - VersionDelta
-
-  Functions:
-  - normalize
-  - normalize_allow_unimplemented
-  - register_normalizer
-  - unregister_normalizer
-  - dispatch_normalizer
-  - autogenerate_normalizers
+    Classes:
+    - Observable
+    - EventBus
+    - Rendezvous
+
+    - cli
+
+    Functions:
+    - run
+
+    - compete
+
+    Functions:
+    - first_completed
+    - race_with_callback
+    - multi_winner_race_with_callback
+    - convert_to_coro_iter
+    - enhanced_gather
+    - enhanced_staggered_race
+
+    - config
+
+    Classes:
+    - debugging
+    - Executor
+
+    Functions:
+    - set_logger_level
+    - get_past_logs
+
+    Constants:
+    - debug
+    - silent
+    - basic_repl
+    - max_memerrs
+    - loaded_all
+    - logging_to
+
+    - console
+
+    Classes:
+    - ConsoleBase
+    - AsyncUtilsConsole
+
+    - constants
+
+    Classes:
+    - sentinel_base
+
+    Constants:
+    - RECIP_E
+    - EXECUTORS_FROZENSET
+    - POSSIBLE_EXECUTORS
+
+    Sentinels:
+    - RAISE
+
+    - context
+
+    Classes:
+    - Context
+    - localcontext (context manager)
+    - nonreusablelocalcontext (context manager)
+
+    Constants:
+    - all_contextual_consts
+    - ... (every constant in the `all_contextual_consts` frozenset)
+
+    Functions:
+    - getcontext
+    - setcontext
+
+    - events
+
+    Classes:
+    - SingleWaiterEventWithValue
+    - EventWithValue
+
+    - exceptions:
+
+    Classes:
+    - ref
+    - IgnoreErrors
+    - WarningToError
+
+    Constants:
+    - CRITICAL
+
+    Context managers (ignore_*):
+    - ignore_all
+    - ignore_noncritical
+    - ignore_typical
+    - ignore_stopiteration
+    - ignore_stopaiteration
+    - ignore_valerrs
+    - ignore_typeerrs
+
+    Exception types:
+    - Critical
+    - StateCorrupted
+    - VersionError
+    - VersionConversionError
+    - VersionNormalizerMissing
+    - VersionCorrupted
+    - VersionValueError
+    - VersionNormalizerTypeError
+    - VersionNormalizerFault
+    - BulkheadError
+    - BulkheadFull
+    - BulkheadShutDown
+    - PoolError
+    - PoolFull
+    - PoolShutDown
+    - RateLimitExceeded
+    - BusError
+    - BusTimeout
+    - BusShutDown
+    - BusStatsErrors
+    - BusPublishingError
+    - CircuitBreakerError
+    - CircuitHalfOpen
+    - CircuitOpen
+    - EventValueError
+    - FutureCorrupted
+    - MaxIterationsError
+    - ItemsExhausted
+    - LockForceRequest
+    - PasswordQueueError
+    - PasswordRetrievalError
+    - GetPasswordRetrievalError
+    - PutPasswordRetrievalError
+    - ForbiddenOperation
+    - PasswordError
+    - WrongPassword
+    - WrongPasswordType
+    - PasswordMissing
+    - GetPasswordMissing
+    - PutPasswordMissing
+
+    Functions:
+    - unnest
+    - unnest_reverse
+    - potent_derive
+    - prepare_exception
+    - raise_exc
+    - exception_occurred
+    - wrap_exc
+    - unwrap_exc
+
+    - func
+
+    Classes:
+    - RateLimited
+
+    Functions:
+    - areduce
+    - iterf
+    - acompose
+    - every
+    - everymethod
+    - timer
+    - retry
+    - throttle
+    - debounce
+    - measure
+    - measure2
+    - benchmark
+    - star
+    - unstar
+
+    - futures
+
+    Classes:
+    - AsyncCallbacksFuture
+    - AsyncCallbacksTask
+    - EagerAsyncCallbacksFuture
+    - EagerAsyncCallbacksTask
+    - TimeAwareAsyncCallbacksFuture
+    - TimeAwareAsyncCallbacksTask
+    - TimeAwareFuture
+    - TimeAwareTask
+
+    - io
+
+    Classes:
+    - AsyncReadWriteCouple
+    - MemoryMappedIOManager
+
+    Functions:
+    - double_ended_text_pipe
+    - double_ended_binary_pipe
+
+    - iterclasses
+
+    Classes:
+    - achain
+    - apeekable
+    - abucket
+
+    - iters
+
+    Functions:
+    - ... (There are too many of these, so just refer to the IDE autocomplete or read the stub)
+
+    - locks
+
+    Classes:
+    - AdvancedRateLimit
+    - DynamicBoundedSemaphore
+    - PrioritySemaphore
+    - KeyedCondition
+    - RLock
+    - PriorityLock
+    - PriorityRLock
+    - LocksmithBase
+    - MultiCountDownLatch
+
+    - misc
+
+    Classes:
+    - StateMachine
+
+    Functions:
+    - gather_with_limited_concurrency
+
+    - mixins
+
+    Interfaces/Mixins:
+    - LoopBoundMixin
+    - LoopContextMixin
+    - AwaitableMixin
+    - AsyncContextMixin
+    - ExecutorRequiredAsyncContextMixin
+    - LockMixin
+    - LockWithOwnerMixin
+    - EventMixin
+
+    - networking
+
+    Classes:
+    - LineProtocol
+    - LFProtocol
+    - CRLFProtocol
+    - CRProtocol
+    - SocketTransport
+
+    - pools
+
+    Classes:
+    - AdvancedPool
+    - ConnectionPool
+    - CallbackAccumulator
+
+    - processors
+
+    Classes:
+    - BoundedBatchProcessor
+    - BatchProcessor
+    - Bulkhead
+
+    - properties
+
+    Classes:
+    - AsyncProperty
+    - AsyncLockProperty
+    - coercedmethod
+
+    - queues
+
+    Interfaces:
+    - PotentQueueBase
+
+    Classes:
+    - SmartQueue
+    - SmartLifoQueue
+    - SmartPriorityQueue
+    - UserPriorityQueue
+
+    Functions:
+    - password_queue
+
+    Context managers (ignore_*):
+    - ignore_qshutdown
+    - ignore_qempty
+    - ignore_qfull
+    - ignore_qerrs
+
+    - rwlocks
+
+    Classes:
+    - RWLock
+    - FairRWLock
+    - ReadPreferredRWLock
+    - WritePreferredRWLock
+    - PriorityRWLock
+    - FairPriorityRWLock
+    - WritePreferredPriorityRWLock
+
+    - signals
+
+    Functions:
+    - wait_for_signal
+
+    - tools
+
+    Functions:
+
+    - loadf
+    - json_to_argv
+    - json_to_argstr
+    - argv_to_json
+    - argstr_to_json
+    - get_cfg_json_format
+    - print_cfg_json_format
+    - get_cmd_help
+    - print_cmd_help
+
+    - util
+
+    Context managers (ignore_*):
+    - ignore_cancellation
+
+    Context manager classes:
+    - anullcontext
+
+    Functions:
+    - aawcmf2dcmf
+    - aawcmf2dcmff
+    - dcm
+    - get_future
+    - new_eager_tasks
+    - to_sync
+    - to_async
+    - to_sync_from_loop
+    - sync_await
+    - sync_lock
+    - sync_lock_from_binder
+    - lockf
+    - done_evt
+    - dualcontextmanager
+    - semaphore
+    - aiter_from_f
+    - safe_cancel
+    - transient_block
+    - transient_block_from_loop
+    - wrap_in_coro
+
+    - version
+
+    Classes:
+    - VersionInfo
+    - VersionDelta
+
+    Functions:
+    - normalize
+    - normalize_allow_unimplemented
+    - register_normalizer
+    - unregister_normalizer
+    - dispatch_normalizer
+    - autogenerate_normalizers
 
 ## Below versions have reached [EOL](https://en.wikipedia.org/wiki/Software_release_life_cycle#End-of-life)
 
