@@ -30,12 +30,12 @@ class VersionInfo(str): # noqa: FURB189
         * 2 -> :attr:`patch`
 
         Sliced accordingly.'''
-    def __lt__(self, other: Any, /) -> bool: '''Whether self precedes the other as a version.'''
-    def __le__(self, other: Any, /) -> bool: '''Whether self precedes or is equal to the other as a version.'''
-    def __gt__(self, other: Any, /) -> bool: '''Whether self succeeds the other as a version.'''
-    def __ge__(self, other: Any, /) -> bool: '''Whether self succeeds or is equal to the other as a version.'''
-    def __eq__(self, other: Any, /) -> bool: '''Whether self is the same version as the other.'''
-    def __ne__(self, other: Any, /) -> bool: '''Whether self is a different version than the other.'''
+    def __lt__(self, other: Any, /) -> bool: '''Whether this version precedes the other as a version.'''
+    def __le__(self, other: Any, /) -> bool: '''Whether this version precedes or is equal to the other as a version.'''
+    def __gt__(self, other: Any, /) -> bool: '''Whether this version succeeds the other as a version.'''
+    def __ge__(self, other: Any, /) -> bool: '''Whether this version succeeds or is equal to the other as a version.'''
+    def __eq__(self, other: Any, /) -> bool: '''Whether this version is the same as the other.'''
+    def __ne__(self, other: Any, /) -> bool: '''Whether this version is different from the other.'''
     def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
     @overload
     def __round__(self, ndigits: int, /) -> NoReturn: ...

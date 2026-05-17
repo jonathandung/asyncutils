@@ -29,7 +29,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and _s(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
     try:
         if x: logger.info('signals.wait_for_signal: signal handler registered successfully for total of %d signals', x); del x
-        else: raise RuntimeError('signals.wait_for_signal: failed to register signal handler')
+        else: raise RuntimeError('asyncutils.signals.wait_for_signal: failed to register signal handler')
         try: s = await wait_for(F, timeout)
         except TimeoutError:
             if raise_on_timeout: raise
@@ -40,7 +40,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             with A.ignore_typeerrs: r = await r
         except possible_errors: logger.exception('signals.wait_for_signal processor %r encountered expected error for signal %s', p, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
         except A.CRITICAL: raise A.Critical
-        except BaseException as e: raise RuntimeError(f'signals.wait_for_signal: unexpected {H.fullname(e)} in processor {p!r} for signal {s.name}') from e
+        except BaseException as e: raise RuntimeError(f'asyncutils.signals.wait_for_signal: unexpected {H.fullname(e)} in processor {p!r} for signal {s.name}') from e
         return r
     finally: await A.safe_cancel(F)
 wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0})' # ty: ignore[unresolved-attribute]

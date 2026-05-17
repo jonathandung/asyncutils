@@ -53,7 +53,7 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
         try: return getattr(self.reader, n)
         except AttributeError as a:
             try: return getattr(self.writer, n)
-            except AttributeError as b: raise ExceptionGroup(f'read-write couple has no attribute {n!r}', (a, b)) from None
+            except AttributeError as b: raise ExceptionGroup(f'asyncutils.io.AsyncReadWriteCouple: did not find attribute {n!r}', (a, b)) from None
 class File(A.LoopContextMixin): # noqa: PLR0904
     __slots__ = '_f', '_fn', '_mmap'
     if S.platform != 'win32':

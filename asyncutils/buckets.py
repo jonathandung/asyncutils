@@ -41,7 +41,7 @@ class LeakyBucket(AsyncContextMixin, LoopBoundMixin):
     @factor.setter
     def factor(self, value, /):
         if self._efs: self._factor = max(self._min_factor, min(self._max_factor, value))
-        else: raise ValueError(f'{fullname(self)}.factor is read-only')
+        else: raise ValueError(f'{fullname(self)}: external_factor_settable=True not passed; cannot set factor')
     @factor.deleter
     def factor(self): self._factor = 1
     def _adjust(self):

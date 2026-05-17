@@ -134,7 +134,7 @@ class RLock(A.LockWithOwnerMixin):
             async with self.__lock:
                 if self._owner is None: self._owner, self._count = current_task(), 1; return True
     def _release(self):
-        if (c := self._count) <= 0: raise RuntimeError(f'release called too many times on {H.fullname(self)}')
+        if (c := self._count) <= 0: raise RuntimeError(f'{H.fullname(self)}: release called too many times')
         if c == 1: self._owner = None
         self._count = c-1
     def locked(self): return self._owner is not None
@@ -155,7 +155,7 @@ class PriorityLock(A.LoopBoundMixin, A.LockWithOwnerMixin):
         self._owner, w = None, self._waiters
         while w:
             if not (F := heappop(w)[-1]).done(): return F.set_result(True)
-        if raise_: raise RuntimeError(f'release called too many times on {H.fullname(self)}')
+        if raise_: raise RuntimeError(f'{H.fullname(self)}: release called too many times')
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is current_task()
@@ -209,7 +209,7 @@ class LocksmithBase:
                     if (r := e.requester) is self: await self.task_reraised_request(lock)
                     else: await gather(self.lock_busy(lock, r), r.lock_busy(lock, self)) # ty: ignore[invalid-argument-type]
                 except BaseException as e: self.raised_other(lock, e)
-                else: self.answer_received(lock, await F)
+                else: await self.answer_received(lock, await F)
             if callable(f := self.handlers.get(type(lock))) and iscoroutine(r := f(lock)): await r
             return True
         else: return self.release_returned_false(lock) if r is False else True
@@ -218,18 +218,19 @@ class LocksmithBase:
     async def purge_waiters(self, lock, /):
         if w := getattr(lock, '_waiters', None): await A.safe_cancel_batch(w, disembowel=True)
     async def host(self, task, lock, /, *, timeout1=_NO_DEFAULT, timeout2=_NO_DEFAULT, timeout3=_NO_DEFAULT):
-        await wait(f := tuple(map(self.wrap_task, (self.force(lock, purge_waiters=False), lock.acquire()))), return_when='FIRST_COMPLETED'); f, a = f
-        if await wait_for(f, A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[0] if timeout1 is _NO_DEFAULT else timeout1): await a
+        await wait(f := tuple(map(self.wrap_task, (self.force(lock, purge_waiters=False), lock.acquire()))), return_when='FIRST_COMPLETED'); f, a, T = *f, A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS
+        if await wait_for(f, T[0] if timeout1 is _NO_DEFAULT else timeout1): await a
         else:
-            try: await wait_for(a, A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[1] if timeout2 is _NO_DEFAULT else timeout2)
-            except TimeoutError: raise TimeoutError(f'failed to acquire lock {lock!r} within {timeout2} seconds') from None
-        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), A.getcontext().LOCKSMITH_DEFAULT_TIMEOUTS[2] if timeout3 is _NO_DEFAULT else timeout3)
+            try: await wait_for(a, T[1] if timeout2 is _NO_DEFAULT else timeout2)
+            except TimeoutError: raise TimeoutError(f'{H.fullname(self)}.host: failed to acquire lock {lock!r} within {timeout2} seconds') from None
+        self.patch_owner(task := self.wrap_task(task), lock); return await wait_for(self._wait_on(task, lock), T[2] if timeout3 is _NO_DEFAULT else timeout3)
     async def _wait_on(self, task, lock, /):
         try: return await task
         finally:
             if lock.locked() and iscoroutine(a := lock.release()): await a
-    async def lock_busy(self, lock, requester, /): log.info('lock busy: %r; requester: %r', lock, requester)
-    async def task_reraised_request(self, lock, /): log.warning('%s.force: running task did not handle request to release %s at %#x properly', H.fullname(self), H.fullname(lock), id(lock))
+    async def lock_busy(self, lock, requester, /): await A.transient_block(self._loop, log.info, 'lock busy: %r; requester: %r', lock, requester)
+    async def task_reraised_request(self, lock, /): await A.transient_block(self._loop, log.warning, '%s.force: running task did not handle request to release %s at %#x properly', H.fullname(self), H.fullname(lock), id(lock))
+    async def answer_received(self, lock, answer, /): await A.transient_block(self._loop, log.info, '%r received answer %r from %r', self, answer, lock)
     def wrap_task(self, a, /): return self._loop.create_task(A.wrap_in_coro(a))
     def patch_owner(self, task, lock, /):
         if hasattr(lock, '_owner'): lock._owner = task
@@ -237,7 +238,6 @@ class LocksmithBase:
     def throw_fallback(self, lock, /): return True
     def eager_fallback(self, lock, /): return True
     def release_returned_false(self, lock, /): return False
-    def answer_received(self, lock, answer, /): log.info('%r received answer %r from %r', self, answer, lock)
     def raised_other(self, lock, exc, /):
         if not isinstance(exc, RuntimeError): log.error('error encountered in attempt to force %s at %#x', H.fullname(lock), id(lock), exc_info=exc)
     async def get_info(self, lock, /): return f'potential deadlock situation involving {H.fullname(lock)} at {id(lock):#x}'

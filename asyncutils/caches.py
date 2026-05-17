@@ -22,7 +22,7 @@ class CacheWithBackgroundRefresh(LoopContextMixin):
     def time_past(self, key): return self._timer()-self._cache[key].timestamp
     def configure(self, ttl, refresh, processor=None, _=lambda *_: None): self._ttl, self._refresh, self._processor = max(ttl, refresh), min(ttl, refresh), processor or getattr(self, '_processor', _)
     def get_loader(self, key):
-        if (k := self._loaders[key]) is None: raise LookupError(f'no loader registered for key {key!r}')
+        if (k := self._loaders[key]) is None: raise LookupError(f'asyncutils.caches.CacheWithBackgroundRefresh: no loader registered for key {key!r}')
         return k
     async def _process_error(self, e, b, /):
         if (x := (c := type(self))._executor) is None: x = create_executor(c)

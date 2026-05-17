@@ -9,7 +9,7 @@ from sys import exc_info
 from threading import Thread, Lock as TLock
 from time import monotonic
 class AdvancedPool(A.LoopContextMixin):
-    __slots__ = '__cnt', '_current', '_kill_at_exit', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
+    __slots__ = '__cnt', '_current', '_kill_at_exit', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property
     def _tiebreak(self): return self.__cnt.__next__()
     def __init__(self, max_workers=None, min_workers=None, qsize=0, scaling=True, kill_at_exit=False): super().__init__(); C = A.getcontext(); self.__cnt, self._tlock, self._max, self._scaling, self._queue, self._workers, self._futures, self._pending, self._shutdown, self._start, self.completed, self._kill_at_exit = count(), TLock(), C.ADVANCED_POOL_DEFAULT_MAX_WORKERS if max_workers is None else max_workers, scaling, PriorityQueue(qsize), set(), set(), 0, False, monotonic(), 0, kill_at_exit; self._current = self._min = C.ADVANCED_POOL_DEFAULT_MIN_WORKERS if min_workers is None else min_workers
@@ -52,7 +52,7 @@ class AdvancedPool(A.LoopContextMixin):
         if self._shutdown: raise A.PoolShutDown(f'{fullname(self)} is shutting down')
     def submit_nowait(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
-        if self.full: raise A.PoolFull('task queue full')
+        if self.full: raise A.PoolFull('asyncutils.pool.AdvancedPool.submit_nowait: task queue full')
         with self._tlock: self._pending += 1
         self._put_nowait_priority(_priority_, (f, a, k, F := self.make_fut())); self.set_adjuster(); return F
     def revive(self): self.__init__(self._max, self._min, self._queue.maxsize, self._scaling, self._kill_at_exit)
@@ -69,16 +69,14 @@ class AdvancedPool(A.LoopContextMixin):
         await self._queue.put((_priority_, self._tiebreak, (f, a, k, F := self.make_fut()))); self.set_adjuster(); return F
     async def shutdown(self, cancel_pending=False, idle_timeout=None, total_timeout=None):
         self._shutdown = True
-        try:
-            async with I.timeout(total_timeout):
-                if cancel_pending: await self._kill_helper()
-                else:
-                    try: await self.wait_for_slot(idle_timeout)
-                    except A.PoolFull: await self._kill_helper()
-                for _ in repeat(None, self._current): await self._queue.put((0, self._tiebreak, None))
-                with self._tlock: self._queue.shutdown(True)
-                await self.join(); await self.drain(); return self.uptime
-        except TimeoutError: raise TimeoutError('shutdown exceeded timeout') from None
+        async with I.timeout(total_timeout):
+            if cancel_pending: await self._kill_helper()
+            else:
+                try: await self.wait_for_slot(idle_timeout)
+                except A.PoolFull: await self._kill_helper()
+            for _ in repeat(None, self._current): await self._queue.put((0, self._tiebreak, None))
+            with self._tlock: self._queue.shutdown(True)
+            await self.join(); await self.drain(); return self.uptime
     async def join(self): return await I.gather(*self._futures, return_exceptions=True)
     async def map(self, f, /, *its, priority=0, **_): return await I.gather(*map(partial(self.complete, f, _priority_=priority), *its, **_))
     async def starmap(self, f, it, /, priority=0): return await I.gather(*starmap(partial(self.complete, f, _priority_=priority), it))
@@ -90,9 +88,12 @@ class AdvancedPool(A.LoopContextMixin):
         self.raise_for_shutdown()
         if not self.full: return 0.0
         try: t = monotonic(); await I.wait_for(self.drain(), timeout); return monotonic()-t
-        except TimeoutError: raise A.PoolFull('timeout waiting for queue space') from None
+        except TimeoutError: raise A.PoolFull('asyncutils.pools.AdvancedPool: timeout waiting for queue space') from None
     async def __cleanup__(self): await self.shutdown(self._kill_at_exit)
-    def __del__(self): self.loop.call_soon_threadsafe(self.shutdown, True, 0.2, 0.2)
+    def __del__(self):
+        try:
+            if (l := self.loop).is_running(): l.call_soon_threadsafe(self.shutdown, True, 0.2, 0.2)
+        except (AttributeError, RuntimeError): ...
     @property
     def full(self): return self._queue.full()
     @property

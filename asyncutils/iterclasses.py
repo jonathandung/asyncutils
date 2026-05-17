@@ -8,11 +8,11 @@ from sys import maxsize as INF
 class achain:
     __slots__ = '_its',
     @classmethod
-    def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = it_of_its; return self
+    def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = A.amap(A.iter_to_agen, it_of_its); return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in A.iter_to_agen(self._its): # ty: ignore[unresolved-attribute]
-            async for _ in A.iter_to_agen(i): yield _
+        async for i in self._its: # ty: ignore[unresolved-attribute]
+            async for _ in i: yield _
 @H.subscriptable
 class apeekable(A.LoopBoundMixin):
     __slots__ = '_cache', '_it'
@@ -62,6 +62,7 @@ class await_later:
     P.patch_classmethod_signatures((__new__, 'aw, /'))
 @H.subscriptable
 class abucket(A.LoopContextMixin):
+    __slots__ = '_cache', '_it', '_key', '_validator'
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
     def __contains__(self, k, /, _=await_later):
         if not self._validator(k): return False

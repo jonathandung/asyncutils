@@ -26,15 +26,15 @@ Cumulative import time of asyncutils: 123.8 ± 11.6 ms; max 138.3 ms, min 107.9 
 
 .. code-block:: bash
 
-  python -SEqm asyncutils -d
+  python -SEqm asyncutils -dl
 
 Time taken to start the console, which includes importing asyncio: 122.1 ± 9.5 ms; max 136.5 ms, min 109.2 ms, n = 10
 
 .. code-block:: bash
 
-  python -SEqm asyncutils -dp
+  python -SEqm asyncutils -dpl
 
-Time taken to actually import asyncio and all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms, min 237.0 ms, n = 10
+Time taken to actually import asyncio along with all 32 submodules: 266.2 ± 13.2 ms; max 282.4 ms, min 237.0 ms, n = 10
 
 .. note::
   :collapsible:

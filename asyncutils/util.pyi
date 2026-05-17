@@ -9,7 +9,7 @@ from asyncio.tasks import Task
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from types import TracebackType
 from typing import Any, Concatenate, Literal, overload
-__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'aiter_from_f', 'anullcontext', 'done_evt', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'aiter_from_f', 'anullcontext', 'dcm', 'done_evt', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.exceptions.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable `aw`, such that it can be passed to :func:`asyncio.create_task`.'''
@@ -43,15 +43,19 @@ def to_async[T, **P](f: Callable[P, T], /, loop: AbstractEventLoop|None=...) -> 
 def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulate the second form of the builtin :func:`iter` function in async, which the :func:`aiter` function does not have.'''
 async def safe_cancel(fut: Future[Any], /) -> None:
     '''Cancel a single future and wait for the cancellation to complete asynchronously. The cancellation itself can be reliably cancelled.
-    See :func:`~base.safe_cancel_batch` for a much more efficient way to cancel multiple futures at once.'''
+
+    .. seealso::
+
+      :func:`~base.safe_cancel_batch`
+        a much more efficient way to cancel multiple futures at once.'''
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload
 def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: Any, _threadsafe_: Literal[True], **k: Any) -> Future[T]:
-    '''Run a function `f`, with the provided parameters passed straight through, in the event loop `loop`, and return a future for it.
-    Assumes the loop is already running, so that its :meth:`run_in_executor` method is not used.
-    Instead, schedule the function to run at the next iteration of the loop. To avoid overhead, the function should thus return fast.
-    If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
+    '''| Run a function `f`, with the provided parameters passed straight through, in the event loop `loop`, and return a future for it.
+    | This function avoids incurring the overhead of calling :meth:`run_in_executor` by instead scheduling the function to run at the next iteration
+    | of the loop. To avoid overhead, the function should thus return fast.
+    | If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of :func:`transient_block` under the specified `loop`.'''
 @overload
 def dualcontextmanager[T, **P](*, use_existing_executor: bool, strict: Literal[True]) -> Callable[[Callable[P, Iterable[T]]], Callable[P, AbstractContextManager[T, bool]]]: ...
@@ -83,5 +87,6 @@ def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, stri
 def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, strict: Literal[False]) -> Callable[P, DualContextManager[T]]: ...
 @overload
 def dualcontextmanager[T, **P](agfunc: Callable[P, AsyncIterable[T]], /, *, strict: bool=...) -> Callable[P, DualContextManager[T]]: '''Convert a callable that returns an (async) iterable, usually an (async) generator function, over exactly one item, into a function returning a non-reusable sync- and async-compatible context manager. Essentially combines :func:`contextlib.contextmanager` and :func:`contextlib.asynccontextmanager` into one decorator.'''
+def dcm[T, **P](f: Callable[P, SupportsIteration[T]], /) -> Callable[P, DualContextManager[T]]: '''Equivalent to :func:`dualcontextmanager` with the default arguments at the time of definition, rather than when the function is decorated.'''
 def aawcmf2dcmff[T, **P](*, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> Callable[[Callable[P, Awaitable[AbstractContextManager[T]|AbstractAsyncContextManager[T]]]], Callable[P, DualContextManager[T]]]: '''A decorator factory converting a function giving an awaitable resolving to an async context manager into a function returning a non-reusable dual context manager using :func:`dualcontextmanager`.'''
 def aawcmf2dcmf[T, **P](f: Callable[P, Awaitable[AbstractContextManager[T]|AbstractAsyncContextManager[T]]], /) -> Callable[P, DualContextManager[T]]: '''Equivalent to `aawcmf2dcmff()(f)`.'''

@@ -18,6 +18,7 @@ def get_cfg_json_format() -> str: '''Get the format of .json configs this module
 def print_cfg_json_format(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the above format into the specified file and flush it (default :data:`~sys.stdout`).'''
 def get_cmd_help() -> str:
     '''Return the command line help as a string containing ANSI color escape sequences.
+
     .. seealso
 
       :func:`print_cmd_help`
@@ -30,5 +31,5 @@ def print_cmd_help(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None:
 def find_help_url(obj: Any=..., /) -> str:
     '''Get the URL of the :mod:`asyncutils` documentation page for `obj`. See the supported calling patterns `here <https://asyncutils.readthedocs.io/en/stable/examples.html>`__.
 
-    .. warning:: The URL returned is not guaranteed to work with strings representing non-existent, undocumented or internal symbols.'''
+    .. caution:: The URL returned is not guaranteed to work with strings representing non-existent, undocumented or internal symbols.'''
 def open_help(obj: Any=..., /) -> bool: '''Open the URL to the documentation of the specified symbol defined in :mod:`asyncutils` via the default browser, returning success.'''

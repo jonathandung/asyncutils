@@ -212,7 +212,7 @@ def asliced(seq, n, strict=False):
     if not strict: return I
     async def r():
         async for s in I:
-            if len(s) != n: raise ValueError(f'length of {seq!r} is not divisible by {n}')
+            if len(s) != n: raise ValueError(f'asyncutils.iters.asliced: length of {seq!r} is not divisible by {n}')
             yield s
     return r()
 def buffer(it, maxsize=0, timeout=None, cooldown=0, *, loop=None):
@@ -752,7 +752,7 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
         async def helper(i, j, d=d):
             async for x, F in aenumerate(d.pop(i, ())):
                 if F.cancelled(): continue
-                if F.done(): raise A.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')
+                if F.done(): raise A.FutureCorrupted(f'asyncutils.iters.agetitems_from_indices: future at index {x} associated with index {i} called on (async) iterable {it!r} had its result/exception set by an external party')
                 F.set_result(j)
         try:
             if M is None:
@@ -768,11 +768,11 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
             e = IndexError(a%i)
             async for x, F in aenumerate(l):
                 if not F.cancelled():
-                    if F.done(): raise ExceptionGroup('asyncutils.iters.agetitems_from_indices: error while processing indices for which items were not successfully got', (e, A.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
+                    if F.done(): raise ExceptionGroup('asyncutils.iters.agetitems_from_indices: error while processing indices for which items were not successfully got', (e, A.FutureCorrupted(f'asyncutils.iters.agetitems_from_indices: future at index {x} associated with index {i} called on (async) iterable {it!r} had its result/exception set by an external party')))
                     F.set_exception(e)
         if finish: await aconsume(I)
         if setatend is None: return
-        if setatend.done() and not setatend.cancelled(): raise A.FutureCorrupted(f'future setatend at {id(setatend):#x} (exact type {H.fullname(setatend)}) passed to agetitems_from_indices had its result set by an external party')
+        if setatend.done() and not setatend.cancelled(): raise A.FutureCorrupted(f'asyncutils.iters.agetitems_from_indices: future setatend at {id(setatend):#x} (exact type {H.fullname(setatend)}) had its result set by an external party')
         setatend.set_result(L.time()-s)
     c = L.create_task(consume())
     if setatend is not None: setatend.add_done_callback(lambda _: setattr(_, '__cancel', t := gather(A.safe_cancel(c), A.safe_cancel_batch(r))) or t.add_done_callback(lambda _: delattr(setatend, '__cancel')))

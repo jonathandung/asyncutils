@@ -1,4 +1,5 @@
 __lazy_modules__ = frozenset(('asyncio.events',))
+from asyncutils._internal import patch as P
 import asyncio.events as E, sys as S
 def filter_out(*a, s=None): yield from filter(lambda x, s=s: s is not x, a)
 def get_loop_and_set(_=(lambda l: l.stop() or l.close()).__get__, f=__import__('atexit').register):
@@ -44,4 +45,5 @@ class Bag(dict): # noqa: FURB189
         try: return self[k]
         except KeyError: raise AttributeError(name=k, obj=self) from None
     __setattr__, __delattr__ = dict.__setitem__, dict.__delitem__
-ismodule.__text_signature__, subscriptable.__text_signature__, fullname.__text_signature__, verify_compat.__text_signature__, get_loop_and_set.__text_signature__ = '(o, /)', '(cls, /)', '(f, /, rmpref=False)', '(v, /)', '()' # ty: ignore[unresolved-attribute]
+P.patch_function_signatures((ismodule, 'o, /'), (subscriptable, 'cls, /'), (fullname, 'f, /, rmpref=False'), (verify_compat, 'v, /'), (get_loop_and_set, ''))
+del P

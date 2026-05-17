@@ -147,13 +147,8 @@ type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
 '''A function or wrapper of any depth thereof.'''
 type SigPatcherArg = tuple[Wrapper, str]
 '''The type of a positional argument passed to a signature-patching function in :mod:`asyncutils._internal.patch`.'''
-@type_check_only
-class Middleware(Protocol):
-    '''| Represents a middleware accepted by :class:`~channels.EventBus`.
-    | To facilitate O(1) removal of middlewares and order preservation, it is unfortunately impossible to add the same middleware into the pipe twice.
-    | Therefore, it is suggested that a lightweight wrapper lambda around a function containing the main logic be used.'''
-    def __call__(self, event_type: str, data: Any, /) -> Any: ...
-    def __hash__(self) -> int: ...
+type Middleware = Callable[[str, Any], Any]
+'''Represents a middleware accepted by :class:`~channels.EventBus`.'''
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''

@@ -26,8 +26,9 @@ A disabled logger is still created to make subsequent logging.getLogger calls re
 Thus, this option cannot avoid the cost of importing logging and instantiating the logger early on.''')
 (a := h())('-e', '--executor', choices=C, metavar=J, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
+The below options are experimental.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
-interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. Experimental; may throw various errors relating to unshareable objects.
+interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. May throw various errors relating to unshareable objects.
 The below options are third-party.
 loky_noreuse: Use a new loky.process_executor.ProcessPoolExecutor every time.
 loky: Reuse a loky.process_executor.ProcessPoolExecutor if possible.

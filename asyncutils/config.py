@@ -121,4 +121,4 @@ if loaded_all:
     i = I.Module.load
     for _ in I.s.values(): i(_) # ty: ignore[invalid-argument-type]
     l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
-del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d
+del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d, FaultyConfig, I

@@ -2,9 +2,9 @@ from asyncutils import _internal as I
 import asyncutils as A, shlex as s
 get_cmd_help, __all__ = I.parsed.p.format_help, I.submodules.tools_all
 def loadf(p, e=None, /, l=I.unparsed.l, _=I.helpers.fullname):
-    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'tools.loadf: __fspath__ method returned {_(p)} instead of str or bytes')
-    if not (isinstance(p, int) or e is None): raise TypeError('did not expect extension')
-    if e == '': raise ValueError('empty extension')
+    if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'asyncutils.tools.loadf: __fspath__ method returned {_(p)} instead of str or bytes')
+    if not (isinstance(p, int) or e is None): raise TypeError('asyncutils.tools.loadf: did not expect extension')
+    if e == '': raise ValueError('asyncutils.tools.loadf: empty extension')
     return l(p.decode() if isinstance(p, bytes) else p, e)
 def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
     f = (R := []).append
@@ -35,9 +35,9 @@ def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initializ
         else: o = g(s)
     if isinstance(o, (classmethod, staticmethod)): o = o.__func__
     elif isinstance(o, property): o = o.fget
-    if h.ismodule(o): s, o = o.__name__, None
+    if h.ismodule(o): s, o = o.__name__, None # ty: ignore[unresolved-attribute]
     elif callable(o): s, o = o.__module__, o.__qualname__
-    elif not isinstance(o, str): raise TypeError(f'tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
+    elif not isinstance(o, str): raise TypeError(f'asyncutils.tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
     s = s.removeprefix('asyncutils.'); return (f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{o}/index.html' if o in M else 'https://asyncutils.readthedocs.io/en/stable/top-level.html') if s == 'asyncutils' else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{s}/index.html#{f"module-asyncutils.{s}" if o is None else f"asyncutils.{s}.{o}"}'
 def open_help(o=None, /): return __import__('webbrowser').open(find_help_url(o))
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()

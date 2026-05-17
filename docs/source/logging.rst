@@ -3,7 +3,7 @@ Logging
 
 Since code is bound to contain bugs, and this library is no exception, logging is an important aspect of :mod:`asyncutils`. Users can also see what
 is being done under the hood and view the timestamps of significant events, without exercising advanced reflection or metaprogramming or attaching a
-tracer or debugger.
+tracer, profiler or debugger.
 
 This module employs logging as provided by the standard library, which may contribute to a significant chunk of the boot time of this module but is
 much too widely used for us to find alternatives such as :mod:`loguru`, especially due to concerns in adding a dependency and compatibility issues.

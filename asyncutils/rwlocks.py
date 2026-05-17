@@ -11,7 +11,7 @@ class Base:
         for s in _: setattr(self, s, getattr(l, s))
         self.__wrapped__ = f
     def __init_subclass__(cls, /, **_):
-        if getattr(cls, '__slots__', True): raise TypeError('__slots__ should be empty tuple')
+        if getattr(cls, '__slots__', True): raise TypeError('__slots__ must be an empty tuple')
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 class RWLock:
     __slots__ = '_wa',
@@ -28,7 +28,7 @@ class RWLock:
             async with self.writing(): return await self.__wrapped__(*a, **k)
     def locked(self): return self._wa # ty: ignore[unresolved-attribute]
     def __init_subclass__(cls, /, **_):
-        if not isinstance(getattr(cls, '__slots__', None), tuple): raise TypeError('__slots__ must be a tuple')
+        if not isinstance(getattr(cls, '__slots__', None), tuple): raise TypeError('__slots__ must be a tuple for asyncutils.rwlocks.RWLock subclass')
         if cls.__new__ is __class__.__new__: cls.__new__ = _rwlock_sub_new # ty: ignore[invalid-assignment,unresolved-reference]
         super().__init_subclass__(**_)
 class ReadPreferredRWLock(RWLock):
@@ -110,7 +110,7 @@ class PriorityRWLock(RWLock):
     __slots__ = '_cnt', '_cond', '_il', '_qd', '_readers'
     def __new__(cls, /, prefer_writers=None): return _rwlock_sub_new(WritePreferredPriorityRWLock if (getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers) else FairPriorityRWLock)
     def __init_subclass__(cls, /, **_):
-        if getattr(cls, '__slots__', None) != (): raise TypeError('__slots__ must be an empty tuple')
+        if getattr(cls, '__slots__', None) != (): raise TypeError('__slots__ must be an empty tuple for asyncutils.rwlocks.PriorityRWLock subclass')
         cls.__new__ = _rwlock_sub_new; super().__init_subclass__(**_) # ty: ignore[invalid-assignment]
     def setup(self): self._cond, self._cnt, self._il, self._wa, self._readers, self._qd = Condition(), 0, Lock(), False, 0, []
     async def _push_item(self, priority, is_writer):

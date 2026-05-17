@@ -136,7 +136,6 @@ Submodules:
   Classes:
   - debugging
   - Executor
-  - FaultyConfig
 
   Functions:
   - set_logger_level
@@ -440,6 +439,7 @@ Submodules:
   Functions:
   - aawcmf2dcmf
   - aawcmf2dcmff
+  - dcm
   - get_future
   - new_eager_tasks
   - to_sync

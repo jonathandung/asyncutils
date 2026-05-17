@@ -1,6 +1,6 @@
 # ty: ignore[unresolved-global]
 from asyncutils._internal import patch as P
-from asyncutils._internal.helpers import check_methods, subscriptable
+from asyncutils._internal.helpers import check_methods, fullname, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
@@ -68,7 +68,7 @@ class StateCorrupted(BaseException):
 class VersionError(Exception): ...
 for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
     def _(self, a=A, b=B):
-        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {type(self).__qualname__!r} has no attribute {a!r}')
+        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {a!r}')
         if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
         return r
     _.__name__, _.__qualname__ = A, f'VersionError.{A}'; setattr(VersionError, A, property(_))

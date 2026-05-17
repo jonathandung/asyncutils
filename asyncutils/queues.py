@@ -26,7 +26,7 @@ class Q:
         for a in zip(cls.__slots__, A): _(s, *a)
         return s
     def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
-        if name not in s: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {name!r}')
+        if name not in s: raise AttributeError(f'password-protected queue has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
     def __init_subclass__(cls, /, _=exc('subclass'), **k): raise _
@@ -327,7 +327,7 @@ class SmartLifoQueue(PotentQueueBase):
         s = self.qsize()
         if i < 0: i += s
         if 0 <= i < s: return self.__queue[i]
-        raise IndexError(f'failed to peek {fullname(self)} item at index {i}')
+        raise IndexError(f'asyncutils.queues.SmartLifoQueue: failed to peek item at index {i}')
     def peek_all(self): return self.__queue.copy()
     def qsize(self): return len(self.__queue)
     def __bool__(self): return bool(self.__queue)

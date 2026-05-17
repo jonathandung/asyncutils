@@ -37,14 +37,16 @@ Some arguments consumed by the Python interpreter are also taken into account by
 * ``-E`` - Omit the query of ``PYTHON_BASIC_REPL`` and the execution of ``PYTHONSTARTUP`` in the console namespace
 * ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this implication already)
 * ``-i`` - Always treat the console as interactive even if standard input is not a TTY
+
   .. warning:: A piped standard input will cause deadlocks or fail for most shells, and this flag may make it worse.
+
 * ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``
 
-.. note::
+.. tip::
 
-  Even if ``python -S`` is used, the ``exit``, ``quit``, ``help`` and ``copyright`` commands will still work as normal in the console since they are
-  implemented natively, albeit with the help of :mod:`_sitebuiltins`. However, accessing them in any fashion other than a bare statement will cause
-  :exc:`NameError` to be thrown.
+  Even if ``python -S`` is used, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and ``license`` commands will still work as normal in
+  the console since they are implemented natively, albeit with the help of :mod:`_sitebuiltins`. However, accessing them in any fashion other than a
+  bare statement will cause :exc:`NameError` to be thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly.
 
 Basic Customization
 -------------------
@@ -160,7 +162,8 @@ methods that leave the original context alone by deriving a new one from it:
 :meth:`~asyncutils.context.Context.__copy__` and :meth:`~asyncutils.context.Context.__replace__` are also implemented to help :func:`copy.copy` and
 :func:`copy.replace` (python 3.13+) respectively.
 
-Even better is to use the :class:`asyncutils.context.nonreusablelocalcontext` context manager.
+It is even better to use :class:`asyncutils.context.nonreusablelocalcontext`, which returns a one-time context manager, or the convenience method
+:meth:`~asyncutils.context.Context.ascurctx` on context objects that wraps it.
 
 For more detailed documentation on context usage, see the :mod:`context` page.
 

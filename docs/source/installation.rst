@@ -52,7 +52,7 @@ or if you wish to obtain the :ref:`extras`:
 .. code-block:: bash
 
   # tools likely enough for developers
-  pip install py-asyncutils[dev]
+  pip install "py-asyncutils[dev]"
   # or the equivalent syntax for extras installation in other package managers
 
 other installation pathways:

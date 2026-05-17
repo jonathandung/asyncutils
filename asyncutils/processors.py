@@ -38,11 +38,11 @@ class BatchProcessor(A.LoopContextMixin):
 class Bulkhead(A.LoopContextMixin):
     __slots__ = '_exc', '_init_val', '_max_rej', '_mtevt', '_processor', '_queue', '_rejected', '_sdfut', '_sem'
     def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
-        if max_concurrent <= 0: raise ValueError('max_concurrent must be positive')
+        if max_concurrent <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_concurrent must be positive')
         C = A.getcontext()
         if max_queue is None: max_queue = C.BULKHEAD_DEFAULT_MAX_QUEUE
         if max_rej is None: max_rej = C.BULKHEAD_DEFAULT_MAX_REJ
-        if max_queue <= 0: raise ValueError('max_queue must be positive')
+        if max_queue <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_queue must be positive')
         super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sdfut, self._mtevt, self._max_rej = Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)

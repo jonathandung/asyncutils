@@ -120,7 +120,7 @@ class EventBus(LoopContextMixin):
         if max_concurrent is None: max_concurrent = getcontext().EVENT_BUS_DEFAULT_MAX_CONCURRENT
         def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):
             if f(): _(*a)
-        audit('asyncutils.channels.EventBus', name); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), {}, set(), f'{fullname(self)} {name or self._inc_cnt()}', A.Lock(), False, handler or (lambda _: None), A.Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+        audit('asyncutils.channels.EventBus', name); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), [], set(), f'{fullname(self)} {name or self._inc_cnt()}', A.Lock(), False, handler or (lambda _: None), A.Semaphore(max_concurrent), False, tracking_stats, WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -151,13 +151,15 @@ class EventBus(LoopContextMixin):
     def start_audit(self):
         if not (self._auditing or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self._auditing = a.added = True # ty: ignore[unresolved-attribute]
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self._auditing = False
-    def add_middleware(self, middleware): self._middlewares[middleware] = None
-    def remove_middleware(self, middleware, *, result=None, strict=False):
-        if (F := self._middlewares.pop(middleware, *(() if strict else (None,)))) is not None:
-            if F.done(): return F.result()
+    def add_middleware(self, middleware): r = len(m := self._middlewares); m.append((middleware, None)); return r
+    def remove_middleware(self, cookie, *, result=None, strict=False):
+        r, m[cookie] = (m := self._middlewares)[cookie], None
+        if r:
+            if (F := r[1]).done(): return F.result()
             F.set_result(result)
+        elif strict: raise ValueError(cookie)
         return result
-    def add_middleware_once(self, middleware, until): return self._middlewares.setdefault(middleware, until) is until
+    def add_temp_middleware(self, middleware, until): self._middlewares.append((middleware, until))
     @(c := dualcontextmanager(use_existing_executor=False, create_executor=False, strict=False))
     def audit_context(self):
         o = not self._auditing
@@ -188,8 +190,8 @@ class EventBus(LoopContextMixin):
     def subscribe_to(self, event_type): return to_sync(partial(self.subscribe, event_type=event_type), loop=self.loop)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_): await A.gather(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
-    async def publish(self, event_type, data=None, *, wait=True, safe=True, timeout=None, chaperone=None):
-        p, f = self.sync_start_publish(event_type, data, safe=safe, timeout=timeout, chaperone=chaperone)
+    async def publish(self, event_type, data=None, *, wait=True, **k):
+        p, f = self.sync_start_publish(event_type, data, **k)
         if not wait: return
         try:
             await p
@@ -197,10 +199,13 @@ class EventBus(LoopContextMixin):
             L.info('%s: publishing of event %r succeeded', self.name, event_type); L.debug('final data: %r', data)
         except TimeoutError: raise BusTimeout(f'publishing of event {event_type!r} in {self.name} took too long') from None
         finally: await safe_cancel(p)
-    def sync_start_publish(self, event_type, data=None, *, safe=True, timeout=None, chaperone=None):
+    def sync_start_publish(self, event_type, data=None, *, safe=None, timeout=None, chaperone=None):
         self.raise_for_shutdown(); f = []
+        if safe is None: safe = getcontext().EVENT_BUS_PUBLISH_DEFAULT_SAFE
         async def g(C=(lambda e, /, a=f.extend, b=f.append: a(e.exceptions) if isinstance(e, BaseExceptionGroup) else b(e)) if chaperone is None else chaperone, D=data):
-            for m, F in self._middlewares.copy().items():
+            for t in self._middlewares:
+                if t is None: continue
+                m, F = t
                 if F is not None and F.done(): continue
                 try:
                     if A.iscoroutine(D := m(event_type, D)): D = await D

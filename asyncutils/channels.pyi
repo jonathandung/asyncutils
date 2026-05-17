@@ -63,14 +63,19 @@ class EventBus(LoopContextMixin):
     | Has extensive telemetry and middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers. Subscribers must be hashable!
     | A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     | Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
-    | Use instances as context managers only for proper setup and shutdown.'''
+
+    .. caution:: Use instances as context managers only for proper setup and shutdown.
+    .. version-changed:: 0.9.5
+      Support for repeated, unhashable middlewares and removal using an opaque cookie was added.'''
     WILDCARD: WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
-        '''| `name`: The name of this event bus, which will appear in error messages.
-        | `handler`: A function that takes an exception having occurred in a subscribers and handles it.
-        | `max_concurrent`: The maximum number of concurrent callbacks; default :const:`context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
-        | `tracking_stats`: Whether to remember the amount of published data to subscribers of each event type.'''
+        '''All the arguments are optional:
+
+        * `name`: The name of this event bus, which will appear in error messages.
+        * `handler`: A function that takes an exception having occurred in a subscribers and handles it.
+        * `max_concurrent`: The maximum number of concurrent callbacks; default :const:`context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
+        * `tracking_stats`: Whether to remember the amount of published data to subscribers of each event type.'''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''
     @overload
@@ -103,7 +108,7 @@ class EventBus(LoopContextMixin):
     def stream_queue(self, val: Queue[tuple[str, Any]|Any], /) -> None: ...
     def is_auditing(self) -> bool: '''Whether the event bus is connected to :func:`sys.audit`.'''
     @property
-    def auditing(self) -> bool: '''Get/set property for :meth:`is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
+    def auditing(self) -> bool: '''Get-set property for :meth:`is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
     @auditing.setter
     def auditing(self, val: bool, /) -> None: ...
     def auditor(self, event: str, args: tuple[object, ...], /) -> None:
@@ -111,19 +116,23 @@ class EventBus(LoopContextMixin):
         | Not an instance method at runtime, just a function as an attribute of the instance.'''
     def start_audit(self) -> None: '''Connect the bus' audit hook to :func:`sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the bus' audit hook. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
-    def add_middleware(self, middleware: Middleware) -> None:
-        '''| Append a middleware to the back of the pipe of middlewares. The middleware must be a hashable callable taking the event type as the first argument and the associated data as the second.
-        | If the middleware does not recognize the event type, it should simply return the data immediately. There is no protection in place against malicious malware besides the user's abstraction.
-        | It is preferred that the middleware be a coroutine function. Each middleware should be extremely optimized, for example through C extensions, to avoid hindrance of the publishing.
-        | When publishing occurs, the first middleware takes the initial data, does some processing asynchronously, and passes the modified data to the second middleware, and so on.
+    def add_middleware(self, middleware: Middleware) -> int:
+        '''| Append a middleware to the back of the pipe of middlewares, and return a permanent cookie that can be passed to :meth:`remove_middleware`
+        | to invalidate it.
+        | The middleware must take the event type as the first argument and the associated data as the second.
+        | If the middleware does not recognize the event type, it should simply return the data immediately.
+        | There is no protection in place against malicious middlewares besides the user's abstraction.
+        | It is preferred that the middleware be a coroutine function. Each middleware should be extremely optimized, such as through C extensions,
+        | to avoid hindrance of the publishing.
+        | When publishing occurs, the first middleware takes the initial data, does some processing asynchronously, and passes the modified data to
+        | the second middleware, and so forth. Insertion order is maintained. This may be different from the typical meaning of a 'middleware'.
         | The output of the final middleware is broadcast to each subscriber concurrently. They cannot see the initial data.'''
-    def remove_middleware(self, middleware: Middleware, *, result: Any=..., strict: bool=...) -> Any:
+    def remove_middleware(self, cookie: int, *, result: Any=..., strict: bool=...) -> Any:
         '''| Remove a previously added middleware, via :meth:`add_middleware` or :meth:`add_middleware_once`, and return its result. Runs in O(1) time.
-        | If `strict` is `True` and the middleware was never added, throw a KeyError.
-        | If the middleware has an associated future :meth:`add_middleware_once` and it is done, return its result. Otherwise, set its result to `result` and return it.'''
-    def add_middleware_once(self, middleware: Middleware, until: Future[Any]) -> bool:
-        '''| Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware.
-        | If the middleware has already been associated with another future, do nothing and return False.'''
+        | If `strict` is `True` and the middleware was never added, throw :exc:`ValueError`.
+        | If the middleware has an associated future :meth:`add_middleware_once` and it is done, return its result. If an exception was set, reraise it.
+        | Otherwise, set its result to `result` and return it.'''
+    def add_temp_middleware(self, middleware: Middleware, until: Future[Any]) -> None: '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware on removal. No cookie is returned in this case.'''
     def audit_context(self) -> DualContextManager[None]: '''Start receiving publications from and sending publications to :func:`sys.audit` upon entry and stop on exit. Use as a context manager.'''
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> DualContextManager[None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''

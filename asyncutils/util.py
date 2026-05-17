@@ -7,8 +7,6 @@ from asyncutils._internal.submodules import util_all as __all__
 from asyncio import BoundedSemaphore, CancelledError, Event, Lock, Semaphore, eager_task_factory, ensure_future, iscoroutine, run_coroutine_threadsafe, timeout as _timeout, wait_for
 from functools import partial, wraps
 from sys import audit, exc_info
-from weakref import WeakKeyDictionary
-ignore_cancellation = IgnoreErrors(CancelledError)
 class anullcontext: # noqa: N801
     async def __aenter__(self): ...
     async def __aexit__(*_): ...
@@ -28,13 +26,13 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
     if loop is None: loop = get_loop_and_set()
     return run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout) if loop.is_running() else loop.run_until_complete(wait_for(ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None): return (BoundedSemaphore if bounded else Semaphore)(getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
-def lockf(f, /, lf=Lock, _lc=WeakKeyDictionary()): # noqa: B008
+def lockf(f, /, lf=Lock, _lc=__import__('weakref').WeakKeyDictionary()): # noqa: B008
     if (l := _lc.get(f)) is None: _lc[f] = l = lf()
     async def wrapped(*a, **k):
         async with l: return await f(*a, **k)
     return wraps(f)(wrapped)
 def sync_lock(l, /, timeout=None):
-    if not check_methods(l, 'acquire', 'release', 'locked'): raise TypeError('acquire, release and locked methods are required')
+    if not check_methods(l, 'acquire', 'release', 'locked'): raise TypeError('asyncutils.util.sync_lock: acquire, release and locked methods are required')
     def dec(f):
         async def wrapper(*a, **k):
             try:
@@ -46,7 +44,7 @@ def sync_lock(l, /, timeout=None):
 def sync_lock_from_binder(f, /, timeout=None):
     def dec(m, /):
         async def wrapper(self, *a, **k):
-            if not check_methods(l := f(self), 'acquire', 'release', 'locked'): raise TypeError('acquire, release and locked methods are required')
+            if not check_methods(l := f(self), 'acquire', 'release', 'locked'): raise TypeError('asyncutils.util.sync_lock_from_binder: acquire, release and locked methods are required')
             try:
                 async with _timeout(timeout): await l.acquire(); return m(self, *a, **k)
             finally:
@@ -76,18 +74,18 @@ class DualContextManager:
     __slots__ = '_aentered', '_ce', '_entered', '_gen', '_st', '_ue'
     def __init__(self, /, *_): self._gen, self._ce, self._ue, self._st = _; self._entered = self._aentered = False
     def __enter__(self):
-        if self._aentered: raise RuntimeError('context manager already entered asynchronously')
-        if self._entered: raise RuntimeError('context manager already entered')
+        if self._aentered: raise RuntimeError('asyncutils.util.dualcontextmanager: context manager already entered asynchronously')
+        if self._entered: raise RuntimeError('asyncutils.util.dualcontextmanager: context manager already entered')
         try: self._gen = g = aiter_to_gen(self._gen, strict=self._st, use_futures=True); self._entered = True; return next(g)
-        except StopIteration: raise RuntimeError("generator didn't yield") from None
+        except StopIteration: raise RuntimeError("asyncutils.util.dualcontextmanager: generator didn't yield") from None
     def __exit__(self, t, v, b, /):
-        if self._aentered: raise RuntimeError('cannot exit async context manager synchronously')
-        if not self._entered: raise RuntimeError('context manager was never entered')
+        if self._aentered: raise RuntimeError('asyncutils.util.dualcontextmanager: cannot exit async context manager synchronously')
+        if not self._entered: raise RuntimeError('asyncutils.util.dualcontextmanager: context manager was never entered')
         g = self._gen
         if t is None:
             try: next(g)
             except StopIteration: return False
-            try: raise RuntimeError("generator didn't stop")
+            try: raise RuntimeError("asyncutils.util.dualcontextmanager: generator didn't stop")
             finally: g.close()
         if v is None: v = t()
         try: g.throw(v)
@@ -96,21 +94,21 @@ class DualContextManager:
             if isinstance(e, StopIteration): return not f
             if f or (isinstance(e, RuntimeError) and isinstance(v, StopIteration) and e.__cause__ is (e := v)): e.__traceback__ = b; return False
             raise
-        try: raise RuntimeError("generator didn't stop after throw")
+        try: raise RuntimeError("asyncutils.util.dualcontextmanager: generator didn't stop after throw")
         finally: g.close()
     def __aenter__(self):
-        if self._aentered: raise RuntimeError('async context manager already entered')
-        if self._entered: raise RuntimeError('async context manager already entered synchronously')
+        if self._aentered: raise RuntimeError('asyncutils.util.dualcontextmanager: async context manager already entered')
+        if self._entered: raise RuntimeError('asyncutils.util.dualcontextmanager: async context manager already entered synchronously')
         try: self._gen = g = iter_to_agen(self._gen, strict=self._st, use_existing_executor=self._ue, create_executor=self._ce); self._aentered = True; return anext(g)
-        except StopAsyncIteration: raise RuntimeError("async generator didn't yield") from None
+        except StopAsyncIteration: raise RuntimeError("asyncutils.util.dualcontextmanager: async generator didn't yield") from None
     async def __aexit__(self, t, v, b, /):
-        if self._entered: raise RuntimeError('cannot exit sync context manager asynchronously')
-        if not self._aentered: raise RuntimeError('async context manager was never entered')
+        if self._entered: raise RuntimeError('asyncutils.util.dualcontextmanager: cannot exit sync context manager asynchronously')
+        if not self._aentered: raise RuntimeError('asyncutils.util.dualcontextmanager: async context manager was never entered')
         g = self._gen
         if t is None:
             try: await anext(g)
             except StopAsyncIteration: return False
-            try: raise RuntimeError("async generator didn't stop")
+            try: raise RuntimeError("asyncutils.util.dualcontextmanager: async generator didn't stop")
             finally: await g.aclose()
         if v is None: v = t()
         try: await g.athrow(v)
@@ -119,7 +117,7 @@ class DualContextManager:
             if isinstance(e, StopAsyncIteration): return not f
             if f or (isinstance(e, RuntimeError) and isinstance(v, StopAsyncIteration) and e.__cause__ is (e := v)): e.__traceback__ = b; return False
             raise
-        try: raise RuntimeError("async generator didn't stop after athrow")
+        try: raise RuntimeError("asyncutils.util.dualcontextmanager: async generator didn't stop after athrow")
         finally: await g.aclose()
 def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor=None, create_executor=None, strict=None):
     if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor, strict=strict)
@@ -136,7 +134,7 @@ def aawcmf2dcmff(**d):
             try: yield r
             finally: await h(c.__exit__, *exc_info())
         return _(g)
-    return f
-aawcmf2dcmf = aawcmf2dcmff()
+    f.__text_signature__ = '(f, /)'; return f # ty: ignore[unresolved-attribute]
+dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], IgnoreErrors(CancelledError)
 patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

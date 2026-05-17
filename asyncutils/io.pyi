@@ -39,7 +39,7 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     async def read1(self, n: int=..., /) -> T: '''Call the :meth:`read1` method on the reader.'''
     async def readall(self) -> T: '''Read all characters from the reader until EOF. If the `readall` method is not present, call `read` with no arguments without handling the non-blocking case.'''
     async def readinto(self, b: Buffer, /) -> int:
-        '''| Read into `b` from the reader, returning the number of bytes read.
+        '''| Read into the writable bytes-like object `b` from the reader, returning the number of bytes read.
         | Calls the :meth:`readinto` method of the reader if it exists and falls back to the :meth:`read` method.
         | The case where the underlying implementation of :meth:`read` returns `None` or raises :exc:`BlockingIOError` is not considered.'''
     async def readinto1(self, b: Buffer, /) -> int: '''Call the :meth:`readinto1` method on the reader. No fallback.'''

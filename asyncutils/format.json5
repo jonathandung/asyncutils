@@ -101,6 +101,7 @@ Some keys can have various types, as detailed by the comments attached. */
     channels: {
       event_bus: {
         default_max_concurrent: 64,
+        publish_default_safe: true,
         stream_default_buffer_size: 100,
         stream_default_item_timeout: 3.0,
         stream_default_timeout: 5.0

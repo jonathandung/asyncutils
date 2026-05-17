@@ -8,7 +8,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
         a(int(j, 0) if isinstance(j, str) else int(j))
         if i == 2: break
     else: r += (0 for _ in range(2-i))
-    if any(map(f, r)): raise e('major, minor and patch should all be positive')
+    if any(map(f, r)): raise e('asyncutils.version.normalize: major, minor and patch should all be positive')
     return tuple(r)
 def r(c, /, _='cannot subclass asyncutils.version.%s'):
     def f(_=TypeError(_%c.__name__)): raise _ # pragma: no cover
@@ -28,14 +28,14 @@ class VersionInfo(str): # noqa: FURB189
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
     def __hash__(self): return (x := self._hash())+(x > -2)
-    def shelve(self, path, /, key=5, _=_, g=c):
+    def shelve(self, path, /, key=0x659db, _=_, g=c):
         x, h, y, l = g(key); y ^= self._hash()
         with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
-    def unshelve(cls, path, /, key=5, _=_, g=c):
+    def unshelve(cls, path, /, key=0x659db, _=_, g=c):
         x, h, y, l = g(key)
         with open(path, 'rb') as f:
-            if (r := f.read)(1)[0] != h: raise ValueError('bad key')
+            if (r := f.read)(1)[0] != h: raise ValueError('asyncutils.version.VersionInfo.unshelve: bad key')
             return cls._unhash(int.from_bytes(((i+x)&_ for i in r()), 'little' if l else 'big', signed=True)^y)
     @classmethod
     def from_hash(cls, hashed, _=E.VersionValueError('hash cannot be -1')):
@@ -50,7 +50,7 @@ class VersionInfo(str): # noqa: FURB189
         from asyncutils import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _
-    def is_current_version(self): return __class__.get_current_version() == self
+    def is_current_version(self): return __class__.get_current_version().parts == self.parts
     def __round__(self, n=None, /): return __class__(self[:n])
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
@@ -84,10 +84,10 @@ class VersionInfo(str): # noqa: FURB189
     def next_minor(self): return __class__(self[0], self[1]+1)
     def next_major(self): return __class__(self[0]+1, 0)
     def change_sep(self, sep): return self.replace('.', sep)
-    def __setattr__(self, name, value, /): raise AttributeError(f'attribute {name!r} cannot be set to {value!r} on {__class__.__name__} object')
+    def __setattr__(self, name, value, /): raise AttributeError(f'asyncutils.version.VersionInfo: immutable attribute: {name!r}')
     def __int__(self, _=0x100):
         M, m, p = self
-        if not 0 <= p < _ > m >= 0: raise OverflowError(f'cannot pack version {self} into an integer')
+        if not 0 <= p < _ > m >= 0: raise OverflowError(f'asyncutils.version.VersionInfo: cannot pack version {self} into an integer')
         return p|m<<8|M<<16
     @property
     def is_api_unstable(self): return self[0] == 0

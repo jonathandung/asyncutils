@@ -11,22 +11,22 @@ class AsyncProperty:
     def __new__(cls, fget=None, fset=None, fdel=None, *, doc=None, strict=True):
         if fget is None: return partial(cls, Placeholder, fset, fdel, doc=doc, strict=strict)
         (_ := super().__new__(cls)).fget, _.fset, _.fdel, _.__doc__, _._deleted, _._loop, _._strict = fget, fset, fdel, doc or getattr(fget, '__doc__', None), set(), get_loop_and_set(), strict; return _
-    def __get__(self, obj, _=None, /): self._raise_for_unbound(); return self._get_helper(f'unreadable attribute: {self._name}') if (f := self.fget) is None else self if obj is None else self._get_helper('cannot get deleted attribute') if obj in self._deleted else self._helper(f, obj)
+    def __get__(self, obj, _=None, /): self._raise_for_unbound(); return self._get_helper(f'asyncutils.properties.AsyncProperty: unreadable attribute: {self._name}') if (f := self.fget) is None else self if obj is None else self._get_helper('asyncutils.properties.AsyncProperty: cannot get deleted attribute') if obj in self._deleted else self._helper(f, obj)
     def __set__(self, obj, val, /):
         self._raise_for_unbound()
-        if (f := self.fset) is None: return self._set_helper('immutable attribute', val)
-        if obj in self._deleted: return self._set_helper('cannot set deleted attribute', val)
+        if (f := self.fset) is None: return self._set_helper('asyncutils.properties.AsyncProperty: immutable attribute', val)
+        if obj in self._deleted: return self._set_helper('asyncutils.properties.AsyncProperty: cannot set deleted attribute', val)
         self._helper(f, obj, val, c='set')
     def __delete__(self, obj, /):
         self._raise_for_unbound()
         if (f := self.fdel) is None:
-            if self._strict: raise AttributeError('undeletable attribute', name=self._name)
+            if self._strict: raise AttributeError('asyncutils.properties.AsyncProperty: undeletable attribute', name=self._name)
             return self._deleted.add(obj)
         self._helper(f, obj, c='delete')
     def __set_name__(self, typ, name, /): self._name, self._cls = name, typ
     def __repr__(self): return f'{fullname(self)}({self.fget!r}, {self.fset!r}, {self.fdel!r}, doc={self.__doc__!r}, strict={self._strict})'
     def _raise_for_unbound(self):
-        if not all(hasattr(self, _) for _ in ('_name', '_cls')): raise TypeError(f'instance of {type(self)._name} is not bound to a class')
+        if not all(hasattr(self, _) for _ in ('_name', '_cls')): raise TypeError(f'{self!r} is not bound to a class')
     def _get_helper(self, msg):
         if self._strict: raise AttributeError(msg, name=self._name)
         return self
@@ -61,6 +61,6 @@ class coercedmethod: # noqa: N801
     def __set_name__(self, typ, name, /): self.__o, self.__n = typ, name
     def __getattr__(self, n, /): return getattr(self.__f, n)
     def __get__(self, obj, typ=None, /):
-        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__n!r}', name=self.__n) if typ is self.__o else RuntimeError('incorrectly bound coercedmethod')
-        if not (typ is None or isinstance(obj, typ)): raise TypeError('coercedmethod.__get__ called incorrectly')
+        if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__n!r}', name=self.__n) if typ is self.__o else RuntimeError('incorrectly bound asyncutils.properties.coercedmethod')
+        if not (typ is None or isinstance(obj, typ)): raise TypeError('asyncutils.properties.coercedmethod.__get__ called incorrectly')
         return lambda *a, **k: self.__f(obj, *a, **k)

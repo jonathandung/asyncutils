@@ -24,7 +24,7 @@ class event_loop: # noqa: N801
     def copy_flags(self): return self.from_flags(self._flags&~self._INTERNAL_MASK)
     @classmethod
     def from_flags(cls, flags, /, _=c, m=-0x10000):
-        if flags&m: raise OverflowError(f'{cls.__qualname__}: flags value {flags:#x} has forbidden bits set')
+        if flags&m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
         r._flags, r._istr = flags, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
         F, p, s = getcontext().EVENT_LOOP_BASE_FLAGS, k.pop, 1
@@ -108,7 +108,7 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
     if callback is not None:
         async def f(a, /, _=callback): return (await r) if A.iscoroutine(r := _(a)) else r
         L = len(r := await A.gather(*map(f, r), return_exceptions=True))
-        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'base.safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
+        if raising and (E := tuple(unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'asyncutils.base.safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
 async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,PLR0912
     audit('asyncutils.base.iter_to_agen', a(it)); C = getcontext()
     if b(it, '__aiter__') and not (C.ITER_TO_AGEN_DEFAULT_STRICT if strict is None else strict):
