@@ -20,7 +20,9 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.4] - 2026-05-15; newest
+### [0.9.5] - 2026-05-20; newest
+
+### [0.9.4] - 2026-05-15
 
 Fixed workflows once more and integrated uv more fully; migrated from mypy to ty, removing stubtest step.
 
@@ -359,7 +361,6 @@ Submodules:
 - pools
 
   Classes:
-  - Pool
   - AdvancedPool
   - ConnectionPool
   - CallbackAccumulator

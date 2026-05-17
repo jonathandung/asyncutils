@@ -30,7 +30,7 @@ Next, install py-asyncutils:
 .. code-block:: bash
 
   # recommended: pip
-  pip install py-asyncutils==0.9.4
+  pip install py-asyncutils==0.9.5
   # directly from source
   pip install git+https://github.com/jonathandung/asyncutils.git
   # alternatively, after:
@@ -60,25 +60,25 @@ other installation pathways:
 .. code-block:: bash
 
   # pipx
-  pipx install py-asyncutils==0.9.4
+  pipx install py-asyncutils==0.9.5
   # conda
-  conda install -c conda-forge py-asyncutils=0.9.4
+  conda install -c conda-forge py-asyncutils=0.9.5
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.4
+  conda install py-asyncutils==0.9.5
   # uv essentially supports the same interface as pip with uv pip
   # poetry
-  poetry add py-asyncutils@0.9.4
+  poetry add py-asyncutils@0.9.5
   # pdm
-  pdm add py-asyncutils==0.9.4
+  pdm add py-asyncutils==0.9.5
   # pipenv
-  pipenv install py-asyncutils==0.9.4
+  pipenv install py-asyncutils==0.9.5
 
 .. version-added:: 0.9.0
   Created a Makefile to simplify development chores.
 
-.. version-changed:: 0.9.4
+.. version-changed:: 0.9.5
   Used more of uv in the Makefile.
 
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
@@ -108,10 +108,10 @@ The extras are listed below for reference:
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
 * test: Test dependencies, including pytest and related plugins
 
-.. version-removed:: 0.9.4
+.. version-removed:: 0.9.5
   The pub extra, because uv already provides that functionality.
 
-.. version-removed:: 0.9.4
+.. version-removed:: 0.9.5
   mypy is no longer in any extra.
 
 .. version-changed:: 0.9.3

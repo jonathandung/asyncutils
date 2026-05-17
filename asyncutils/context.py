@@ -8,12 +8,12 @@ class Context:
     def __getattribute__(self, n, /, _=frozenset(('ascurctx', 'replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint', 'from_dct')), u='__'): return super().__getattribute__(n if n in _ or (n.startswith(u) and n.endswith(u)) else n.upper())
     def __getitem__(self, n, /): return super().__getattribute__(n.upper())
     def __setattr__(self, n, v, /):
-        if (n := n.upper()) not in all_contextual_consts: raise AttributeError('attribute not found', name=n, obj=self)
+        if (n := n.upper()) not in all_contextual_consts: raise AttributeError('asyncutils.context.Context: attribute not found', name=n, obj=self)
         if isinstance(v, list):
             if v and isinstance(v[0], list): v = map(tuple, v) # ty: ignore[invalid-argument-type]
             v = tuple(v)
         super().__setattr__(n, v)
-    def __delattr__(self, n, /): raise AttributeError('cannot delete attribute', name=n, obj=self)
+    def __delattr__(self, n, /): raise AttributeError('asyncutils.context.Context: cannot delete attribute', name=n, obj=self)
     def replace_from_dct(self, d, /, _=all_contextual_consts):
         D = self.asdict()
         for n, v in d.items():
@@ -38,13 +38,13 @@ def getcontext(_=_, d=Context()):
     try: return _.get()
     except LookupError: _.set(d); return d
 def setcontext(c, /, _=_):
-    if not isinstance(c, Context): raise TypeError('setcontext: ctx must be an instance of asyncutils.context.Context')
+    if not isinstance(c, Context): raise TypeError('asyncutils.context.setcontext: ctx must be an instance of asyncutils.context.Context')
     _.set(c)
 class localcontext:
     __slots__ = 'new_ctx', 'saved_ctx'
     def __init__(self, ctx=None, **k):
         if ctx is None: ctx = getcontext()
-        if type(ctx) is not Context: raise TypeError('localcontext: ctx must be an instance of asyncutils.context.Context')
+        if type(ctx) is not Context: raise TypeError('asyncutils.context.localcontext: ctx must be an instance of asyncutils.context.Context')
         self.new_ctx = ctx.replace_from_dct(k)
     def __enter__(self): self.saved_ctx = getcontext(); setcontext(c := self.new_ctx); return c
     def __exit__(self, /, *_):

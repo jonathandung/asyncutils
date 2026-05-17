@@ -1,12 +1,12 @@
 '''| Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes, and memory maps.
 | Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.'''
-from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV
+from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV, Reader, Writer
 from .config import Executor
 from .mixins import LoopContextMixin
-from _collections_abc import Callable, Iterable, Mapping
+from _collections_abc import Buffer, Callable, Iterable, Mapping
 from contextlib import AbstractAsyncContextManager
 from mmap import mmap
-from typing import IO, Any, Literal, NoReturn
+from typing import Any, Literal, NoReturn
 from weakref import WeakSet
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'double_ended_binary_pipe', 'double_ended_text_pipe'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[str, str], AsyncReadWriteCouple[str, str]]:
@@ -14,34 +14,49 @@ def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> t
     | Pass a function that returns a tuple of two integer file descriptors for `pipe_impl` (default :func:`os.pipe`) to customize this behaviour.'''
 def double_ended_binary_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> tuple[AsyncReadWriteCouple[bytes, bytes], AsyncReadWriteCouple[bytes, bytes]]: '''The above, but in binary mode.'''
 class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
-    '''| An asynchronous file-like interface to a readable and writable object, which really just delegates its methods to the underlying reader and writer.
-    | The methods are made truly async using an executor and event loop, the type of which is determined from the module configuration.'''
+    '''| An asynchronous file-like interface to a readable and writable object.
+    | Delegates its methods to the underlying reader and writer, but achieves non-blockingness by running in an executor, preferrably managing
+    | threads but determined by the module configuration.
+
+    .. warning:: This class is not designed to wrap :mod:`asyncio` streams because their methods are different and already async.
+
+    .. seealso::
+
+      :class:`io.BufferedRWPair`
+        The standard library synchronous equivalent.'''
     @property
-    def reader(self) -> IO[T]: '''The underlying reader.'''
+    def reader(self) -> Reader[T]: '''The underlying reader.'''
     @property
-    def writer(self) -> IO[R]: '''The underlying writer.'''
+    def writer(self) -> Writer[R]: '''The underlying writer.'''
     @property
     def executor(self) -> Executor: '''The underlying executor.'''
-    def __init__(self, reader: IO[T], writer: IO[R], /, executor: Executor|None=...): '''Initialize the couple with the given reader and writer.'''
+    def __init__(self, reader: Reader[T], writer: Writer[R], /, executor: Executor|None=...): '''Initialize the couple with the given reader, writer and optionally a :pep:`3148` executor to call the file methods in, after checking that the reader is readable and the writer is writable.'''
     def __getattr__(self, name: str, /) -> Any: ...
+    async def __cleanup__(self) -> None: ...
     async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
     async def flush(self) -> None: '''Asynchronously flush the writer.'''
     async def read(self, n: int=..., /) -> T: '''Read `n` characters from the reader.'''
+    async def read1(self, n: int=..., /) -> T: '''Call the :meth:`read1` method on the reader.'''
+    async def readall(self) -> T: '''Read all characters from the reader until EOF. If the `readall` method is not present, call `read` with no arguments without handling the non-blocking case.'''
+    async def readinto(self, b: Buffer, /) -> int:
+        '''| Read into `b` from the reader, returning the number of bytes read.
+        | Calls the :meth:`readinto` method of the reader if it exists and falls back to the :meth:`read` method.
+        | The case where the underlying implementation of :meth:`read` returns `None` or raises :exc:`BlockingIOError` is not considered.'''
+    async def readinto1(self, b: Buffer, /) -> int: '''Call the :meth:`readinto1` method on the reader. No fallback.'''
     async def readline(self, limit: int=..., /) -> T: '''Read a line, of length at most `limit`, from the reader.'''
     async def readlines(self, hint: int=..., /) -> list[T]: '''Collect lines of the file into a list until at least `hint` characters are read (if available), and a line boundary is encountered.'''
     async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at `size` (or the current position if not passed), and return the new file size.'''
     async def write(self, s: R, /) -> int: '''Write `s` into the writer, returning the number of characters written.'''
     async def writelines(self, lines: Iterable[R], /) -> None: '''Write the lines from the iterable into the writer without adding newline as separators.'''
-    def fileno(self) -> NoReturn: '''Raise :exc:`OSError`.'''
-    def isatty(self) -> bool: '''Whether at least one of the reader or the writer is connected to a terminal.'''
-    def readable(self) -> bool: '''Whether the reader can be read from.'''
-    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise :exc:`OSError`.'''
-    def seekable(self) -> bool: '''Whether both streams support random access.'''
-    def tell(self) -> NoReturn: '''Raise :exc:`OSError`.'''
-    def writable(self) -> bool: '''Whether the writer can be written into.'''
+    def fileno(self) -> NoReturn: '''Raise :exc:`OSError` with errno `EBADF`.'''
+    def isatty(self) -> NoReturn: '''Raise :exc:`OSError` with errno `ENOTSUP`.'''
+    def readable(self) -> Literal[True]: '''Return `True`, because prior verification has been done that the reader is readable, and that is assumed not to be invalidated.'''
+    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise :exc:`OSError` with errno `ESPIPE`.'''
+    def seekable(self) -> Literal[False]: '''The couple itself is not seekable, but the reader and writer may be..'''
+    def tell(self) -> NoReturn: '''Raise :exc:`OSError` with errno `ESPIPE`.'''
+    def writable(self) -> Literal[True]: '''Return `True`, because prior verification has been done that the writer is writable, and that is assumed not to be invalidated.'''
     @property
-    def closed(self) -> bool: '''Whether the file has been closed.'''
-    __cleanup__ = aclose
+    def closed(self) -> bool: '''Whether both the reader and writer have been closed.'''
 class MemoryMappedIOManager(LoopContextMixin):
     '''An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
 

@@ -9,9 +9,13 @@ __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'St
 class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync- and async-compatible context manager.'''
     @property
-    def guarded(self) -> bool: ...
-    def __init__(self, action: str=..., rname: object=...): ...
-    def __enter__(self) -> None: '''Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception if the resource is already being guarded; mark the resource as guarded otherwise.'''
+    def guarded(self) -> bool: '''Whether the resource is currently being guarded.'''
+    def __init__(self, action: str=..., rname: object=...):
+        '''| `action` is used in error messages to describe the action being attempted on the resource, such as "access" or "close".
+        | `rname` is used in error messages to describe the resource by calling its :meth:`__repr__`; if not passed, an index is automatically assigned to the resource.'''
+    def __enter__(self) -> None:
+        '''| Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception, if the resource is already being guarded.
+        | Otherwise, mark the resource as guarded, such that :attr:`guarded` gives `True`.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload

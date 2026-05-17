@@ -6,18 +6,19 @@ def loadf(p, e=None, /, l=I.unparsed.l, _=I.helpers.fullname):
     if not (isinstance(p, int) or e is None): raise TypeError('did not expect extension')
     if e == '': raise ValueError('empty extension')
     return l(p.decode() if isinstance(p, bytes) else p, e)
-def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, *, strict=True):
-    f, l = (R := []).append, (p := (m := loadf(p)).pop)('logging_to', s := 'STDERR')
-    if p('no_log', False) or l == 'NULL': f('-n')
+def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
+    f = (R := []).append
+    if s := (p := (m := loadf(p)).pop)('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
+    if (l := p('max_memerrs', None)) != 3: f('-m'); f(str(l)) # noqa: PLR2004
+    if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
+    if (l := p('logging_to', s := 'STDERR')) == 'NULL' or p('no_log', False): f('-n')
     elif l != s:
         f('-l')
         if l != 'MAKE': f(l)
-    if s := p('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
-    if isinstance(l := p('max_memerrs', None), int): f('-m'); f(str(l))
-    if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
     if (r := f'-{"".join(c for k, c in D if p(k, False))}{("Q"*-l if (l := p("V", 0)-p("Q", 0)) < 0 else "V"*l)}') != '-':
         if R: R[0] = r+R[0][1:]
         else: f(r)
+    for k in a: p(k, None)
     if strict and m: g(ValueError, 'unknown keys in config file', notes=m)
     return R
 def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(p, strict=strict))

@@ -1,4 +1,4 @@
-from asyncutils import __version__ as V, config as C, StateCorrupted as E
+from asyncutils import __version__ as V, config as C, exceptions as E
 from asyncutils._internal import patch as P, running_console as R
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import console_all as __all__
@@ -15,8 +15,8 @@ class ConsoleBase(B):
     LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches if S.version_info >= (3, 13) else S._clear_type_cache, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
     if C.basic_repl: CAN_USE_PYREPL = False # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
-    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}): # noqa: B006
-        if (t := type(self)) is ConsoleBase: raise TypeError('cannot instantiate asyncutils.console.ConsoleBase; subclass instead')
+    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # noqa: B006
+        if (t := type(self)) is ConsoleBase: _r(TypeError, 'cannot instantiate asyncutils.console.ConsoleBase', notes='tip: subclass instead')
         S.audit(fullname(t), loop)
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f if '.' in modname else ())
@@ -140,7 +140,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if self._internal_is_running: raise RuntimeError(_r)
         if r := R.getc(): raise RuntimeError(_r if r is self else _a)
         R.setc(self); super().prehook(_ if max_memerrs is None else max_memerrs) # ty: ignore[invalid-argument-type]
-    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=E('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
+    def posthook(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=E.StateCorrupted('console-internal', "attribute 'exc' of console was set to a non-SystemExit exception")):
         if R.unsetc() is not self: S.stderr.write(_m); del S.modules[__name__]
         if _ and isinstance(e := self.exc, BaseException):
             if not isinstance(e, SystemExit): raise _e

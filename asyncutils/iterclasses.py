@@ -37,7 +37,7 @@ class apeekable(A.LoopBoundMixin):
         if isinstance(i, slice):
             if (c := 1 if (s := i.step) is None else int(s)) > 0: a, b = 0 if (s := i.start) is None else int(s), INF if (s := i.stop) is None else int(s)
             elif c < 0: a, b = -1 if (s := i.start) is None else int(s), _ if (s := i.stop) is None else int(s)
-            else: raise ValueError('slice step cannot be zero')
+            else: raise ValueError('asyncutils.iterclasses.apeekable: slice step cannot be zero')
             if a < 0 or b < 0:
                 async for s in A.iter_to_agen(self._it): f(s)
             elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:

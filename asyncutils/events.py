@@ -13,13 +13,13 @@ class SingleWaiterEventWithValue(EventMixin):
     def is_set(self): return False if (w := self._waiter) is None else w.done()
     async def wait_for_next(self, timeout=None, *, strict=False):
         if w := self._waiter:
-            if strict: raise RuntimeError('another waiter is waiting')
+            if strict: raise RuntimeError('asyncutils.events.SingleWaiterEventWithValue: another waiter is waiting')
         else: self._waiter = w = self.make_fut()
         try: return await wait_for(w, timeout)
         finally: self._waiter = None
     def get(self, default=_NO_DEFAULT):
         if (w := self._waiter) is None or not w.done():
-            if default is _NO_DEFAULT: raise EventValueError('no value is set')
+            if default is _NO_DEFAULT: raise EventValueError('asyncutils.events.SingleWaiterEventWithValue: no value is set')
             return default
         return w.result()
     def clear(self): self._waiter = None
@@ -31,7 +31,7 @@ class EventWithValue(EventMixin):
     def set(self, value, *, strict=True):
         if value != self._value: self._value = value; self._record_hist()
         if value is None:
-            if strict: raise EventValueError('use clear instead')
+            if strict: raise EventValueError('asyncutils.events.EventWithValue: use clear instead')
         else:
             f, w = (t := []).append, self._waiters
             for _ in w: f(_) if _.done() else _.set_result(value)
@@ -41,7 +41,7 @@ class EventWithValue(EventMixin):
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):
         if (v := self._value) is None:
-            if _NO_DEFAULT.is_(default): raise EventValueError('no value is set')
+            if _NO_DEFAULT.is_(default): raise EventValueError('asyncutils.events.EventWithValue: no value is set')
             return default
         return v
     async def wait_for_next(self, timeout=None):

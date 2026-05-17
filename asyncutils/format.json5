@@ -132,6 +132,7 @@ Some keys can have various types, as detailed by the comments attached. */
     io: {memory_mapped_io_manager_default_checksum_alg: "blake2s"},
     iters: {
       afrievalds_default_k: 2,
+      aonlinesorter_default_slow: false,
       aunzip: {
         default_max_qsize: 64,
         default_put_batch: 16
@@ -153,8 +154,7 @@ Some keys can have various types, as detailed by the comments attached. */
       line_protocol_default_buffer_size: 4096,
       socket_transport_limits: [2048, 8192]
     },
-    pool: {
-      pool_default_workers: 4,
+    pools: {
       advanced_pool: {
         default_max_workers: 5,
         default_min_workers: 1,

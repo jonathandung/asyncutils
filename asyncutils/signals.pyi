@@ -34,4 +34,4 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], /, *S: int, time
     .. note::
       There is limited support for signals on Windows and this function may not work as expected even with the little signals it provides.
       Therefore, the function emits a warning unless the console is running, in which case it would be much too annoying.
-    '''
+'''

@@ -7,16 +7,44 @@ Environment Variables
 The below environment variables directly affect what this library does, mostly in its console, and by extension, the command line:
 
 * ``AUTILSCFGPATH`` - See below
-* ``PYTHON_BASIC_REPL`` - Not read under ``python -E``
-* ``PYTHONSTARTUP`` - Not executed in console namespace with ``python -E``
-* ``NO_COLOR`` - Overrides ``FORCE_COLOR`` (Python convention); controls both the argument parser and the console
-* ``FORCE_COLOR`` - Overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
+* ``FORCE_COLOR`` - Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
+
+  .. attention:: ``FORCE_COLOR``, ``NO_COLOR`` and ``TERM=dumb`` control both the argument parser and the PyREPL console.
+
+* ``NO_COLOR`` - Force coloured output to be disabled; overrides ``FORCE_COLOR``
+
+  .. note:: The override is an arbitrary Python convention. It may be different in other languages.
+
+.. ifconfig:: py313
+
+  * ``PYTHON_BASIC_REPL`` - Use the pre-3.13 REPL if equal to "1", even if the newer REPL may be available
+
+    .. important:: The console will set this variable to "1" when it sees TERM=dumb as long as ``-E`` is not passed to the Python interpreter.
+
+* ``PYTHONSTARTUP`` - Decode the file here with :mod:`tokenize` and execute as a Python source file, making its symbols accessible from the console
 * ``TERM`` - Turn off smart terminal features, including ANSI colour sequences, when set to "dumb"
 
 .. note::
 
-  The argument parser does not consider the ``PYTHON_COLORS`` environment variable, but the console, which uses :mod:`_colorize`, may.
-  To avoid this inconsistency, do not use ``PYTHON_COLORS`` to control :mod:`asyncutils`'s coloring.
+  The argument parser does not consider the ``PYTHON_COLORS`` environment variable, but the coloured edition of the console, which uses
+  :mod:`_colorize` under the hood, may. To avoid this inconsistency, do not use ``PYTHON_COLORS`` to customize :mod:`asyncutils`'s coloring.
+
+Arguments to Python that are considered
+---------------------------------------
+
+Some arguments consumed by the Python interpreter are also taken into account by the library:
+
+* ``-E`` - Omit the query of ``PYTHON_BASIC_REPL`` and the execution of ``PYTHONSTARTUP`` in the console namespace
+* ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this implication already)
+* ``-i`` - Always treat the console as interactive even if standard input is not a TTY
+  .. warning:: A piped standard input will cause deadlocks or fail for most shells, and this flag may make it worse.
+* ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``
+
+.. note::
+
+  Even if ``python -S`` is used, the ``exit``, ``quit``, ``help`` and ``copyright`` commands will still work as normal in the console since they are
+  implemented natively, albeit with the help of :mod:`_sitebuiltins`. However, accessing them in any fashion other than a bare statement will cause
+  :exc:`NameError` to be thrown.
 
 Basic Customization
 -------------------
@@ -24,7 +52,8 @@ Basic Customization
 An extensible, two-part configuration system is in place. The first part is static/frozen, detailed below.
 
 It includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation
-using the ``AUTILSCFGPATH`` environment variable (all uppercase for Windows support), which should point to an absolute path to a configuration file.
+using the ``AUTILSCFGPATH`` environment variable, which should point to an absolute path to a configuration file.
+
 ``AUTILSCFGPATH`` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown as
 appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types, but you may see
 raw :exc:`ModuleNotFoundError`'s if the library cannot be located or executed.

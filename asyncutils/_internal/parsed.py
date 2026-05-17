@@ -6,7 +6,7 @@ Has CLI and colored REPL support for quick development.
 On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line; this format differs from that described below.
 
-Use the AUTILSCFGPATH environment variable to specify a path to a .json or .jsonl file containing the default configuration.
+Use the AUTILSCFGPATH environment variable to specify a path to a file of a supported type containing the default configuration.
 A --config option is not offered due to the complexity of implementation and ease to revert to a default config within a one-off config.
 See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 

@@ -67,7 +67,7 @@ class Observable(LoopContextMixin):
     def subscribe_syncf(self, observer): self._data.add(_ := to_async(observer, self.loop)); return partial(self.unsubscribe_nowait, _)
     def ntimes(self, observer, n=None):
         if n is None: n = getcontext().OBSERVABLE_DEFAULT_NTIMES_N
-        if n <= 0: raise ValueError('n must be positive')
+        if n <= 0: raise ValueError('asyncutils.channels.Observable.ntimes: n must be positive')
         async def wrapper(*a, **k):
             nonlocal n; await observer(*a, **k); n -= 1 # ty: ignore[unsupported-operator]
             if n == 0: await self.unsubscribe(wrapper)
@@ -220,7 +220,7 @@ class EventBus(LoopContextMixin):
             if c: F.set_result(d)
         return self.make(A.wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
     async def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=ignore_cancellation.combined(TimeoutError)): # noqa: B008
-        if fut.done(): raise RuntimeError('subscribe_until: fut is already done')
+        if fut.done(): raise RuntimeError('asyncutils.channels.EventBus.subscribe_until: fut is already done')
         async def f():
             with _: r = await A.wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
         await self.subscribe(subscriber, event_type); return self.make(f())

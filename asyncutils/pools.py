@@ -1,6 +1,6 @@
 import asyncutils as A, asyncio as I
 from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.compat import PriorityQueue, Queue
+from asyncutils._internal.compat import PriorityQueue
 from asyncutils._internal.helpers import filter_out, fullname, subscriptable
 from asyncutils._internal.submodules import pools_all as __all__
 from _functools import partial
@@ -8,28 +8,6 @@ from itertools import count, repeat, starmap
 from sys import exc_info
 from threading import Thread, Lock as TLock
 from time import monotonic
-@subscriptable
-class Pool(A.LoopContextMixin):
-    __slots__ = '_event', '_func', '_it', '_queue', '_sem', '_task'
-    def __init__(self, f, it, /, workers=None): self._func, self._it, self._sem, self._queue, self._task, self._event = f, it, I.Semaphore(A.getcontext().POOL_DEFAULT_WORKERS if workers is None else workers), Queue(1), None, I.Event()
-    async def process(self, item):
-        async with self._sem: await self._queue.put(await self._func(item))
-    async def _consumer(self):
-        try:
-            async for _ in A.iter_to_agen(self._it): await self.process(_)
-        finally: await self._queue.put(A.wrap_exc(StopAsyncIteration('pool ran out of items'))); self._event.set()
-    def __aiter__(self): self._task = self.make(self._consumer()); return self
-    async def __anext__(self):
-        if self._event.is_set() and self._queue.empty(): raise StopAsyncIteration('pool ran out of items')
-        try:
-            if A.exception_occurred(i := await self._queue.get()) and isinstance(e := A.unwrap_exc(i), StopAsyncIteration): raise e
-            return i
-        finally:
-            if t := self._task: t.cancel()
-    async def __setup__(self): super().__init__()
-    async def aclose(self):
-        if t := self._task: await A.safe_cancel(t)
-    __cleanup__ = aclose
 class AdvancedPool(A.LoopContextMixin):
     __slots__ = '__cnt', '_current', '_kill_at_exit', '_max', '_max', '_min', '_pending', '_queue', '_scaling', '_shutdown', '_start', '_workers', 'completed'
     @property

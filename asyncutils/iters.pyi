@@ -464,9 +464,17 @@ def arunningmean[X: (int|float, complex)](it: SupportsIteration[X]) -> AsyncGene
 @overload
 def apowersetofsets[H: Hashable](it: SupportsIteration[H], *, frozen: Literal[True]=...) -> AsyncGenerator[frozenset[H]]: ...
 @overload
-def apowersetofsets[H: Hashable](it: SupportsIteration[H], *, frozen: Literal[False]) -> AsyncGenerator[set[H]]: '''Yield all the subsets of the items in the (async) iterable after consuming it at once, as :class:`frozenset`'s if `frozen` is `True` (the default) and :class:`set`'s otherwise.'''
+def apowersetofsets[H: Hashable](it: SupportsIteration[H], *, frozen: Literal[False]) -> AsyncGenerator[set[H]]: '''Yield all the subsets of the items in the (async) iterable of hashable objects after consuming it at once and removing duplicates, as :class:`frozenset`'s if `frozen` is `True` (the default) and :class:`set`'s otherwise.'''
 def aserialize[T](it: SupportsIteration[T]) -> AsyncGenerator[T]: '''Protect an (async) iterable from being consumed by many parties concurrently by applying an async lock.'''
 @overload
-def aonlinesorter[T](it: SupportsIteration[T]) -> AsyncGenerator[T, T|None]: ...
+def aonlinesorter[T](it: SupportsIteration[T], *, key: Callable[[T], SupportsRichComparison], reverse: bool=..., slow: bool=...) -> AsyncGenerator[T, T|None]: ...
 @overload
-def aonlinesorter[T]() -> AsyncGenerator[T, T|None]: '''Sort items from an async iterable and those sent in on the fly in the async generator interface. Does not work well with items that are `None`.'''
+def aonlinesorter[C: SupportsRichComparison](it: SupportsIteration[C], *, reverse: bool=..., slow: bool=...) -> AsyncGenerator[C, C|None]: ...
+@overload
+def aonlinesorter[T](*, key: Callable[[T], SupportsRichComparison], reverse: bool=..., slow: bool=...) -> AsyncGenerator[T, T|None]: ...
+@overload
+def aonlinesorter[C: SupportsRichComparison](*, reverse: bool=..., slow: bool=...) -> AsyncGenerator[C, C|None]:
+    '''| Sort items from an (async) iterable and those sent in on the fly in the async generator interface, according to `key` and `reverse`.
+    | Does not work well with items that are `None`.
+    | Evaluates the truthiness of the `slow` parameter every time a new item is received, and if it is `True`, offloads the evaluation of the `key` for
+    | that item to an executor.'''

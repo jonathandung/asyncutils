@@ -7,7 +7,7 @@ class sentinel_base:
     def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframemodulename):
         cls._assert_can_instantiate()
         if name is None: return super().__new__(cls)
-        if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('invalid name')
+        if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('asyncutils.constants.sentinel_base: invalid name')
         if (m := g(1)) is not None: name = f'{m}.{name}'
         if (o := (c := cls._cache).get(name)) is None:
             (o := super().__new__(cls)).__name, o.__mod = name, m
@@ -36,7 +36,7 @@ class sentinel_base:
         if (n := getattr(self, '_sentinel_base__name', None)) is None: raise TypeError(f'cannot pickle unbound instance of {fullname(self)}')
         return type(self), (n,)
     def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
-        if getattr(cls, '__slots__', True): raise TypeError('sentinel classes should have empty __slots__')
+        if getattr(cls, '__slots__', True): raise TypeError('asyncutils.constants.sentinel_base: sentinel classes should have empty __slots__')
         cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True
     @property
     def is_private(self): return (self.back or '').startswith('_')

@@ -12,7 +12,7 @@ async def first_completed(*C, ret_exc=False, timeout=None, loop=None, _=A, f=H.g
             for F in (await _.wait(t := tuple(new_eager_tasks(*C)), return_when='FIRST_COMPLETED'))[0]: return e if ret_exc and (e := F.exception()) else F.result()
     finally: audit('asyncutils.compete.first_completed/end', L); await safe_cancel_batch(t)
 async def race_with_callback(*C, winner=None, loser=None, timeout=None, _=A):
-    if not C: raise TypeError('pass in at least one coroutine to race_with_callback')
+    if not C: raise TypeError('asyncutils.compete.race_with_callback: pass in at least one coroutine')
     audit('asyncutils.compete.race_with_callback/start', L := len(C)); d, p = await _.wait(new_eager_tasks(*C), return_when='FIRST_COMPLETED', timeout=timeout)
     try:
         if not d: return
@@ -21,7 +21,7 @@ async def race_with_callback(*C, winner=None, loser=None, timeout=None, _=A):
         return w
     finally: audit('asyncutils.compete.race_with_callback/end', L); await safe_cancel_batch(p, callback=loser)
 async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, _=__import__('_operator').methodcaller('result'), A=A): # noqa: B008
-    if not C: raise TypeError('pass in at least one coroutine to multi_winner_race_with_callback')
+    if not C: raise TypeError('asyncutils.compete.multi_winner_race_with_callback: pass in at least one coroutine')
     audit('asyncutils.compete.multi_winner_race_with_callback/start', L := len(C)); d, p = await A.wait(new_eager_tasks(*C), timeout=timeout); d = map(_, d)
     try:
         if winner is None: return list(d)
@@ -45,7 +45,7 @@ def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=A.iscor
             if not _c(i, '__await__'):
                 if _c(i, '__aiter__'): yield handle_aiter(i)
                 elif _c(i, '__iter__'): yield handle_iter(i)
-                elif not skip_invalid: raise TypeError(f'invalid item in {cfs!r}: {i!r}') from None
+                elif not skip_invalid: raise TypeError(f'asyncutils.compete.convert_to_coro_iter: invalid item in {cfs!r}: {i!r}') from None
                 continue
         yield wrap_in_coro(i)
 def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs, loop=loop)), delay, loop=loop)

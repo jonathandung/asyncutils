@@ -4,8 +4,7 @@ from asyncutils._internal.helpers import check_methods, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
-t, a = lambda _: True, lambda _: None
-def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=t, ack1=a, ack2=a, ack3=a, _=audit):
+def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit):
     _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
@@ -141,10 +140,10 @@ class WrongPasswordType(PasswordError, TypeError):
     @property
     def correcttype(self): return self._refc()
 class PasswordMissing(PasswordQueueError, TypeError):
-    def __init__(self): raise TypeError('use GetPasswordMissing or PutPasswordMissing instead')
+    def __init__(self): raise TypeError('asyncutils.exceptions.PasswordMissing: use GetPasswordMissing or PutPasswordMissing instead')
     def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # ty: ignore[invalid-assignment]
-class GetPasswordMissing(PasswordMissing, m='no password provided when trying to get from password-protected queue'): ...
-class PutPasswordMissing(PasswordMissing, m='no password provided when trying to put to password-protected queue'): ...
+class GetPasswordMissing(PasswordMissing, m='asyncutils.queues.password_queue: no password provided when trying to get from password-protected queue'): ...
+class PutPasswordMissing(PasswordMissing, m='asyncutils.queues.password_queue: no password provided when trying to put to password-protected queue'): ...
 def __getattr__(n, /):
     match n:
         case 'WarningToError':
@@ -154,7 +153,7 @@ def __getattr__(n, /):
                 def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
                 def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # ty: ignore[invalid-argument-type]
                 def __exit__(self, t, /, *_):
-                    if (c := self._cm) is None: raise RuntimeError('__aexit__ called without prior __aenter__ call')
+                    if (c := self._cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __aexit__ called without prior __aenter__ call')
                     c.__exit__(t, *_)
                 async def __aenter__(self): return self.__enter__()
                 async def __aexit__(self, /, *_): self.__exit__(*_)
@@ -185,4 +184,4 @@ def __getattr__(n, /):
         case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
         case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
     return globals()[n]
-del t, a, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception, subscriptable
+del s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception, subscriptable

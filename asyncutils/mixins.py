@@ -53,7 +53,7 @@ class LockMixin(metaclass=ABCMeta):
     def locked(self): ...
     async def __aenter__(self):
         if await self.acquire(): return self._lock_factory()
-        raise RuntimeError('failed to acquire lock')
+        raise RuntimeError('asyncutils.mixins.LockMixin: failed to acquire lock')
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a
     def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301

@@ -27,7 +27,7 @@ def aawgenf2agenf(f, /):
         async for _ in await f(*a, **k): yield _
     return wraps(f)(g)
 def tee(it, n=2, *, maxqsize=None, put_exc=None, loop=None):
-    if n <= 0: raise ValueError('n must be positive')
+    if n <= 0: raise ValueError('asyncutils.iters.tee: n must be positive')
     if n == 1: return iter_to_agen(it),
     if loop is None: loop = H.get_loop_and_set()
     C = getcontext()
@@ -178,7 +178,7 @@ async def batch(it, n, *, item_timeout=None, strict=False):
                 except TimeoutError:
                     if b: break
             if b:
-                if strict and i < n-1: raise ValueError('incomplete batch')
+                if strict and i < n-1: raise ValueError('asyncutils.iters.batch: incomplete batch')
                 yield H.copy_and_clear(b)
         except CancelledError:
             if b: yield H.copy_and_clear(b)
@@ -244,7 +244,7 @@ async def asplitat(it, pred, maxsplit=-1, keep_sep=False):
     yield b
 def batch_process(items, size, processor): return amap(processor, batch(items, size), await_=True)
 async def window(it, size, step=1):
-    if not size >= 1 <= step: raise ValueError('size and step should both be >=1')
+    if not size >= 1 <= step: raise ValueError('asyncutils.iters.window: size and step should both be >=1')
     a, c = (b := deque(maxlen=size)).append, 0
     async for i in iter_to_agen(it):
         a(i)
@@ -262,16 +262,16 @@ async def aany(it):
 async def aisempty(it):
     async for _ in iter_to_agen(it): return False
     return True
-async def _aextreme(it, key, default, cmp):
-    if (r := await anext(I := iter_to_agen(it), _NO_DEFAULT)) is _NO_DEFAULT:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed with no default value')
-        return default
-    k = key(r)
+async def _aextreme(I, K, d, c, /):
+    if (r := await anext(I := iter_to_agen(I[0] if len(I) == 1 else I), _NO_DEFAULT)) is _NO_DEFAULT:
+        if d is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to asyncutils.iters.amax or asyncutils.iters.amin with no default value')
+        return d
+    k = K(r)
     async for i in I:
-        if cmp(x := key(i), k): k, r = x, i
+        if c(x := K(i), k): k, r = x, i
     return r
-def amax(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it[0] if len(it) == 1 else it, key, default, O.gt)
-def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it[0] if len(it) == 1 else it, key, default, O.lt)
+def amax(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.gt)
+def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.lt)
 async def azip(*I, strict=False, _=A.ignore_stopaiteration.combined(RuntimeError)): # noqa: B008
     I = tuple(map(iter_to_agen, I))
     with _:
@@ -293,7 +293,7 @@ async def afilter(f, it):
 def amapif(f, p, it, /, await_=False): return amap(f, afilter(p, it), await_)
 def amultimapif(f, p, /, *its, await_=False): return astarmap(f, afilter(p, azip(*its)), await_)
 async def arange(a, b=None, c=1, /):
-    if not c: raise ValueError('step cannot be zero')
+    if not c: raise ValueError('asyncutils.iters.arange: step cannot be zero')
     if b is None: a, b = 0, a
     f = b.__lt__ if c < 0 else b.__gt__
     while f(a): yield a; a += c
@@ -345,7 +345,7 @@ async def agroupby(it, key=_identity):
         if ck == t: await aconsume(g)
 async def aislice(it, /, *a, _=lambda x: x if x is None else int(x, 0) if isinstance(x, str) else int(x)):
     x, y, z = 0 if (s := slice(*map(_, a))).start is None else s.start, s.stop, 1 if s.step is None else s.step
-    if x < 0 or (y is not None and y < 0) or z <= 0: raise ValueError('invalid indices')
+    if x < 0 or (y is not None and y < 0) or z <= 0: raise ValueError('asyncutils.iters.aislice: invalid indices')
     I, n = acount() if y is None else arange(max(x, y)), x
     async for i, j in azip(I, it):
         if i == n: yield j; n += z
@@ -368,7 +368,7 @@ async def atriplewise(it):
     a, b, c = tee(iter_to_agen(it), 3, maxqsize=3); await gather(*(anext(g, None) for g in (b, c, c)))
     return azip(a, b, c)
 async def aproduct(*its, repeat=1):
-    if repeat < 0: raise ValueError('repeat cannot be negative')
+    if repeat < 0: raise ValueError('asyncutils.iters.aproduct: repeat cannot be negative')
     r = [()]
     async for p in arepeat(amap(to_tuple, its, await_=True), repeat): r = [(*x, y) for x in r async for y in p]
     for _ in r: yield _
@@ -439,7 +439,7 @@ async def aallequal(it, key=_identity, strict=False):
     async for _ in (I := agroupby(it, key)):
         async for _ in I: return False
         return True
-    if strict: raise ValueError('iterable provided is empty')
+    if strict: raise ValueError('asyncutils.aallequal: iterable cannot be empty with strict=True')
     return True
 async def acombinations(it, r):
     if r > (n := len(p := await to_tuple(it))): return
@@ -567,7 +567,7 @@ async def auniquetoeach(*its):
 async def aderangements(it, r=None):
     async for _ in acompress(apermutations(X := await to_tuple(it), r), amap(aall, amap(partial(amap, O.is_not), arepeat(Y := tuple(range(len(X)))), apermutations(Y, r)), await_=True)): yield _
 def aintersperse(e, it, n=1):
-    if n <= 0: raise ValueError('n must be positive')
+    if n <= 0: raise ValueError('asyncutils.iters.aintersperse: n must be positive')
     return aislice(ainterleave_stopearly(arepeat(e), it), 1, None) if n == 1 else aflatten(aislice(ainterleave_stopearly(arepeat((e,)), batch(it, n)), 1, None))
 def ainterleave_stopearly(*its): return aflatten(azip(*its))
 def aspy(it, n=1): p, q = tee(it, maxqsize=n); return A.take(q, n), p
@@ -768,7 +768,7 @@ def agetitems_from_indices(it, indices, setatend=None, finish=False, _='index %r
             e = IndexError(a%i)
             async for x, F in aenumerate(l):
                 if not F.cancelled():
-                    if F.done(): raise ExceptionGroup('error while processing indices for which items were not successfully got', (e, A.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
+                    if F.done(): raise ExceptionGroup('asyncutils.iters.agetitems_from_indices: error while processing indices for which items were not successfully got', (e, A.FutureCorrupted(f'future at index {x} associated with index {i} in the agetitems_from_indices function called on (async) iterable {it!r} had its result/exception set by an external party')))
                     F.set_exception(e)
         if finish: await aconsume(I)
         if setatend is None: return
@@ -789,7 +789,7 @@ async def aforever():
     while True: yield
 async def _aguess(it, estlen, key, default, finish_event, cmp, _=_aextreme):
     if (r := await _(A.take(I := iter_to_agen(it), M.ceil(estlen*A.RECIP_E)), key, _NO_DEFAULT, cmp)) is _NO_DEFAULT:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed with no default value')
+        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to asyncutils.iters.aguessmax or asyncutils.iters.aguessmin with no default value')
         return default
     k = key(r)
     try:
@@ -833,11 +833,15 @@ async def aserialize(it):
     l, n = Lock(), iter_to_agen(it).__anext__
     while True:
         async with l: yield await n()
-async def aonlinesorter(it=None):
-    audit('asyncutils.iters.aonlinesorter'); from _heapq import heapify, heappop, heappush
+async def aonlinesorter(it=None, *, key=_identity, reverse=False, slow=None):
+    audit('asyncutils.iters.aonlinesorter'); c, i = Z if reverse else __import__('_heapq'), 0
+    if slow is None: slow = getcontext().AONLINESORTER_DEFAULT_SLOW
     if (e := getattr(aonlinesorter, 'executor', None)) is None: e = H.create_executor(aonlinesorter)
-    a, b = map(partial(Z.partial, f := Z.partial(H.get_loop_and_set().run_in_executor, e, Z.Placeholder, h := [] if it is None else await to_list(it))), (heappop, heappush)); await f(heapify) # ty: ignore[invalid-argument-type]
-    while h:
-        if (i := (yield await a())) is not None: await b(i)
+    p = partial(H.get_loop_and_set().run_in_executor, e)
+    if it is None: it = []
+    else: await p(c.heapify, it := await to_list(it))
+    a, b, q = partial(c.heappop, it), partial(c.heappush, it), partial(p, key)
+    while it:
+        if (j := (yield a()[1])) is not None: b(((await q(j)) if slow else key(j), i, j)); i += 1
 patch_function_signatures((apolynomialfromroots, 'roots'), (adistinctpermutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleaverandomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiterindex, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asampleweighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandomderangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflattentensor, 'tensor, base_typ={}'), (arandompermutation, 'it, r=None'))
 del patch_function_signatures, _adpermpartial, _adpermfull, _atraverse, _aunzip_put, _aguess, _aargminmax, _aextreme, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _rand, _randinst, _identity, _

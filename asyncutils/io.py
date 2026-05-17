@@ -1,7 +1,7 @@
 # ty: ignore[unresolved-attribute]
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import io_all as __all__
-import asyncutils as A, os as O, sys as S
+import asyncutils as A, errno as E, os as O, sys as S
 from _functools import partial
 from asyncio import Lock, gather
 from contextlib import asynccontextmanager
@@ -17,24 +17,33 @@ P.patch_function_signatures(*((_, s) for _ in t))
 class AsyncReadWriteCouple(A.LoopContextMixin):
     __slots__ = 'executor', 'reader', 'writer'
     def __init__(self, r, w, /, executor=None):
+        if not r.readable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: reader {r!r} is not readable')
+        if not w.writable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: writer {w!r} is not writable')
         super().__init__()
         if executor is None: self._init_executor()
         else: self.executor = executor
         self.reader, self.writer = r, w
     async def _run(self, f, *a): return await self.loop.run_in_executor(self.executor, f, *a)
     def read(self, n=-1, /): return self._run(self.reader.read, n)
+    def read1(self, n=-1, /): return self._run(self.reader.read1, n)
+    def readall(self): return self._run(r.read if (f := getattr(r := self.reader, 'readall', None)) is None else f)
+    async def readinto(self, b, /):
+        if (f := getattr(r := self.reader, 'readinto', None)) is not None: return await self._run(f, b)
+        if (m := memoryview(b)).readonly: raise TypeError('asyncutils.io.AsyncReadWriteCouple: cannot read into a read-only buffer')
+        if l := len(d := await self._run(r.read, m.nbytes)): m[:l] = d
+        return l
+    def readinto1(self, b, /): return self._run(self.reader.readinto1, b)
     def readline(self, limit=-1, /): return self._run(self.reader.readline, limit)
     def readlines(self, hint=-1, /): return self._run(self.reader.readlines, hint)
     def write(self, s, /): return self._run(self.writer.write, s)
     def writelines(self, lines, /): return self._run(self.writer.writelines, lines)
-    def fileno(self): raise OSError('cannot determine fileno of read-write couple')
-    def isatty(self): return self.reader.isatty() or self.writer.isatty()
-    def readable(self): return self.reader.readable()
-    def writable(self): return self.writer.writable()
+    def fileno(self): A.raise_exc(OSError, E.EBADF, 'asyncutils.io.AsyncReadWriteCouple: ambiguous file descriptor query', notes='delegate to reader or writer as appropriate')
+    def isatty(self): A.raise_exc(OSError, E.ENOTSUP, 'asyncutils.io.AsyncReadWriteCouple: ambiguous isatty query', notes='delegate to reader or writer as appropriate')
+    readable = writable = lambda _, /: True
     def flush(self): return self._run(self.writer.flush)
-    def seekable(self): return self.reader.seekable() and self.writer.seekable()
-    def seek(self, offset, whence=0, /): raise OSError('cannot use seek on read-write couple') # noqa: ARG002
-    def tell(self): raise OSError('cannot use tell on read-write couple')
+    def seekable(self): return False
+    def seek(self, offset, whence=0, /): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: cannot use seek on read-write couple', notes='delegate to reader or writer as appropriate') # noqa: ARG002
+    def tell(self): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: tell is not supported', notes='delegate to reader or writer as appropriate')
     def truncate(self, size=None, /): return self._run(self.writer.truncate, size)
     async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self.executor.shutdown()
     __cleanup__, _init_executor = aclose, H.create_executor
@@ -78,7 +87,7 @@ class File(A.LoopContextMixin): # noqa: PLR0904
     def tell(self): return self._mmap.tell()
     def size(self): return self._mmap.size()
     def isatty(self): return self._f.isatty()
-    readable = writable = seekable = lambda _, /: True
+    readable = writable = seekable = AsyncReadWriteCouple.readable
     def _flush(self, offset, size, _=H.filter_out): self._f.flush(); self._mmap.flush(offset, *_(size))
     def _trunc_from(self, data, offset): c = (m := self._mmap).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
     def _read(self, offset, size): return self._mmap[offset:None if size < 0 else offset+size]
@@ -99,7 +108,8 @@ class File(A.LoopContextMixin): # noqa: PLR0904
         except: return False # noqa: E722
     def fill(self, pattern, offset=0, count=1): return self.write(pattern*count, offset)
     async def compare(self, other, /, size=-1, offset_self=0, offset_other=0): return (await self.read(offset_self, size)) == (await other.read(offset_other, size))
-    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0): return sum((i^j).bit_count() for i, j in zip(await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0))
+    async def hamming_dist(self, other, /, size=-1, offset_self=0, offset_other=0, _=tuple(map(int.bit_count, range(0x100)))): return sum(_[i^j] for i, j in zip(await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0)) # noqa: B008
+    async def hamming_dist_bytes(self, other, /, size=-1, offset_self=0, offset_other=0): return sum(i != j for i, j in zip(await self.read(offset_self, size), await other.read(offset_other, size), strict=size > 0))
     async def read_until(self, delim, offset=0, maxsize=-1): return (d, offset+len(d)) if (p := (d := await self.read(offset, maxsize)).find(delim)) == -1 else (d[:p+(l := len(delim))], offset+p+l)
     async def insert(self, data, offset): await self.write(data if offset > await self.run(self.size) else data+await self.read(offset), offset)
     async def delete(self, offset, size):
@@ -209,4 +219,4 @@ class MemoryMappedIOManager(A.LoopContextMixin):
             async with self.open(p) as f: return p, await (f.search if allow_overlapping else f.search_nonoverlapping)(pattern, o, max_per_file)
         return {k: v for k, v in await gather(*starmap(searchf, paths.items())) if v}
     P.patch_method_signatures((__init__, 'executor=None'), (prefetch_files, '*paths, init_size=0'), (_open, 'init_size, path, mode, /'))
-del f, H, P, S, _, File, O
+del f, H, P, S, _, File, O, t

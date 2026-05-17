@@ -14,7 +14,7 @@ is no level such as 'trace' or 'subwarning'.
 While we also use auditing for applications where it is deemed useful to have custom behaviour programatically triggered, we follow the DRY (don't
 repeat yourself) philosophy, such that most audit events and logs are mutually exclusive, and anything displayed in the console banner is not logged.
 
-.. hint::
+.. tip::
   :collapsible:
 
   If logging is still desired then, an audit hook that calls the logger if and only if the name of the event begins with 'asyncutils' should be added

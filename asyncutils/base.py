@@ -160,19 +160,19 @@ def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H
             if not (C.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES if use_futures is None else use_futures): raise RuntimeError(f'asyncutils.base.aiter_to_gen: cannot convert async iterator {ait!r} to sync in running event loop without using futures')
             def f(*a, f, c=loop.create_task, g=e, t=A.Future): return g(c(f(*a)), F := t()) or F.result()
             if d:
-                f, x = partial(f, f=ait.asend), None
-                while True: x = yield f(x)
+                p, x = partial(f, f=ait.asend), None
+                while True: x = yield p(x)
             else:
-                f = partial(f, f=ait.__anext__)
-                while True: yield f()
+                p = partial(f, f=ait.__anext__)
+                while True: yield p()
         else:
             a = loop.run_until_complete
             if d:
-                f, x = ait.asend, None
-                while True: x = yield a(f(x))
+                p, x = ait.asend, None
+                while True: x = yield a(p(x))
             else:
-                f = ait.__anext__
-                while True: yield a(f())
+                p = ait.__anext__
+                while True: yield a(p())
 async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base.take: ran out of items'):
     if n is None:
         async for i in iter_to_agen(it): yield i

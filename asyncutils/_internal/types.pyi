@@ -21,6 +21,14 @@ from io import _WrappedBuffer, TextIOWrapper
 from types import CodeType, FrameType, FunctionType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
 @type_check_only
+class Reader[T](Protocol):
+    ''':class:`io.Reader` is not used due to version compatibility issues.'''
+    def read(self, size: int=..., /) -> T: ...
+@type_check_only
+class Writer[T](Protocol):
+    ''':class:`io.Writer` is not used due to version compatibility issues.'''
+    def write(self, data: T, /) -> int: ...
+@type_check_only
 class SupportsLT(Protocol):
     '''An object that implements the < operator.'''
     def __lt__(self, other: Self, /) -> bool: ...
@@ -278,6 +286,7 @@ class MemoryMappedFile(LoopContextMixin):
     async def fill(self, pattern: bytes, offset: int=..., count: int=...) -> None: '''Fill a range of the file with a repeating pattern of bytes.'''
     async def compare(self, other: Self, /, size: int=..., offset_self: int=..., offset_other: int=...) -> bool: '''Compare a range of bytes in this file with a range in another file.'''
     async def hamming_dist(self, other: Self, /, size: int=..., offset_self: int=..., offset_other: int=...) -> int: '''Calculate the Hamming distance in bits between a range of bytes in this file and a range in another file.'''
+    async def hamming_dist_bytes(self, other: Self, /, size: int=..., offset_self: int=..., offset_other: int=...) -> int: '''Calculate the Hamming distance in bytes between a range of bytes in this file and a range in another file.'''
     async def read_until(self, delim: bytes, offset: int=..., maxsize: int=...) -> tuple[bytes, int]: '''Read bytes from the file until the delimiter is found or the maximum size is reached.'''
     async def insert(self, data: bytes, offset: int) -> None: '''Insert data into the file at the specified offset.'''
     async def delete(self, offset: int, size: int) -> None: '''Delete a range of bytes from the file.'''

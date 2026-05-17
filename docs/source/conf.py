@@ -1,12 +1,14 @@
-__import__('sys').path.insert(0, __import__('os').path.abspath('../..'))
+import sys, os
+sys.path.insert(0, os.path.abspath('../..'))
+def setup(app): app.add_config_value('py313', sys.version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs')
 project = 'asyncutils'
 author = 'Jonathan Dung'
 copyright = '2026-%Y Jonathan Dung'
 version = '0.9'
-release = '0.9.4'
+release = '0.9.5'
 need_sphinx = '9.1.0'
 default_role = 'py:obj'
-extensions = ['autoapi.extension', 'myst_parser', 'notfound.extension', 'sphinx_copybutton', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
+extensions = ['autoapi.extension', 'myst_parser', 'notfound.extension', 'sphinx_copybutton', 'sphinx.ext.ifconfig', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
 source_suffix = {'.rst': 'restructuredtext', '.md': 'markdown'}
 suppress_warnings = ['autoapi.python_import_resolution']
 html_theme = 'furo'

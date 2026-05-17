@@ -9,7 +9,7 @@ class LineProtocol(Protocol, A.LoopBoundMixin):
     def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):
-        if (t := self.transport) is None: raise ConnectionError('no transport connected')
+        if (t := self.transport) is None: raise ConnectionError('asyncutils.networking.LineProtocol: no transport connected')
         return t
     def connection_made(self, transport): self.transport = transport
     def connection_lost(self, exc):
@@ -17,7 +17,7 @@ class LineProtocol(Protocol, A.LoopBoundMixin):
             with self._h: t.abort()
         self._lines.shutdown(); self._closed = True
         if w := self._drain_waiter:
-            if not w.done(): w.set_exception(ConnectionError('transport connection lost') if exc is None else exc)
+            if not w.done(): w.set_exception(ConnectionError('asyncutils.networking.LineProtocol: transport connection lost') if exc is None else exc)
             self._drain_waiter = None
     def close(self):
         if t := self.transport:
@@ -107,6 +107,6 @@ class SocketTransport(Transport):
         self._closing = True; self._protocol.connection_lost(e); self.disconnect_sock()
     def get_protocol(self): return self._protocol
     def set_protocol(self, protocol):
-        if not isinstance(protocol, LineProtocol): raise TypeError('protocol for SocketTransport should be a LineProtocol')
+        if not isinstance(protocol, LineProtocol): raise TypeError('asyncutils.networking.SocketTransport: protocol should be a LineProtocol')
         self._protocol.connection_lost(None); protocol.connection_made(self); self._protocol = protocol; self.connect_sock()
     def abort(self): self.loop.call_soon(self.close)

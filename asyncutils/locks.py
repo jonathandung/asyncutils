@@ -13,7 +13,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     def bound(self): return self._bound_value
     @bound.setter
     def bound(self, value, /):
-        if value < 0: raise ValueError('bound must be non-negative')
+        if value < 0: raise ValueError('asyncutils.locks.DynamicBoundedSemaphore: bound must be non-negative')
         d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft # ty: ignore[unresolved-attribute]
         while d and W:
             if not (w := f()).done(): w.set_result(None); d -= 1
@@ -49,7 +49,7 @@ class PrioritySemaphore(A.LoopBoundMixin, A.LockMixin):
         return True
     def release(self, strict=False):
         if w := self._waiters: heappop(w)[-1].set_result(None)
-        elif strict: raise RuntimeError('release called too many times')
+        elif strict: raise RuntimeError('asyncutils.locks.PrioritySemaphore: release called too many times')
         self._value += 1
     def locked(self): return self._value < 0
     def reset(self):
@@ -74,7 +74,7 @@ class KeyedCondition(A.LoopBoundMixin, A.LockMixin):
         finally: g(F)
     async def wait_all(self, timeout=None): self.assert_locked(); await wait_for(gather(*frozenset().union(*self._specific_waiters.values()), return_exceptions=True), timeout)
     def assert_locked(self):
-        if not self.locked(): raise RuntimeError('must acquire condition to notify')
+        if not self.locked(): raise RuntimeError('asyncutils.locks.KeyedCondition: must acquire condition to notify')
     def notify(self, key, n=1, strict=False):
         if n <= 0:
             if strict: raise ValueError(f'{H.fullname(self)}: n must be positive')
@@ -175,9 +175,9 @@ class LocksmithBase:
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
         def register(t, H=cls.handlers, h=h):
-            if not isinstance(t, type): raise TypeError('non-type cannot be registered')
+            if not isinstance(t, type): raise TypeError('asyncutils.locks.LocksmithBase: non-type cannot be registered')
             if shadow: H[t] = h
-            elif h is not (h := H.setdefault(t, h)): raise KeyError('handler for type already registered', t, h)
+            elif h is not (h := H.setdefault(t, h)): raise KeyError('asyncutils.locks.LocksmithBase: handler for type already registered', t, h)
             return t
         return register
     @property
