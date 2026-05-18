@@ -14,13 +14,19 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Docs
 
-51% complete
+60% complete
 
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
+### [0.9.6] - 2026-05-19; unreleased
+
+Re-committed .markdownlint.json to version control; documentation nears completion.
+
 ### [0.9.5] - 2026-05-17; newest
+
+Some bugfixes.
 
 #### BREAKING
 

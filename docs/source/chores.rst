@@ -3,6 +3,12 @@ Development Chores
 
 This file aims to detail guidelines for some repetitive tasks contributors to this library may need to complete in different recurring scenarios.
 
+.. hint::
+  :collapsible:
+
+  The Makefile is sometimes a handy companion in development. Execute ``make help`` to see the available Makefile targets.
+  More of them will likely be added on popular demand.
+
 Bumping the version
 -------------------
 
@@ -51,6 +57,7 @@ complete the following:
   - in the :data:`~context.all_contextual_constants` docstring,
   - within the :data:`~context.Context` fake dataclass body, and
   - at the top level.
+
   Keep alphabetical order within the submodule concerned, with submodules ordered alphabetically as well.
 * asyncutils/_internal/unparsed.py
 

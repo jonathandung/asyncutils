@@ -55,6 +55,9 @@ See the [configuration guide](https://asyncutils.readthedocs.io/en/stable/config
 
 ## Remarks
 
+Regarding .markdownlint.json, even though there is no longer a pre-commit or workflow step requiring it, it contains the most basic ignores suitable
+for this project's files and should be respected. It will be auto-detected by relevant IDE extensions and allows running the linter locally.
+
 It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related
 features.
 

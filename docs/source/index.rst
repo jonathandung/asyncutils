@@ -64,7 +64,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 
 .. version-changed:: 0.9.2
 
-  Started releasing documentation in pdf and htmlzip formats.
+  Started releasing documentation in PDF and zipped HTML formats.
 
 .. version-removed:: 0.9.0
 
@@ -72,12 +72,7 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 
 .. version-changed:: 0.8.18
 
-  Completed the backport of the project to Python 3.12 and Python 3.14.
-
-.. hint::
-  :collapsible:
-
-  Execute ``make help`` to see the available Makefile targets, more of which will be added on popular demand.
+  Completed the backport of the project to Python 3.12 and Python 3.13.
 
 .. note::
   :collapsible: closed

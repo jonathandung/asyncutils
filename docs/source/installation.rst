@@ -75,11 +75,11 @@ other installation pathways:
   # pipenv
   pipenv install py-asyncutils==0.9.5
 
-.. version-added:: 0.9.0
-  Created a Makefile to simplify development chores.
-
 .. version-changed:: 0.9.5
   Used more of uv in the Makefile.
+
+.. version-added:: 0.9.0
+  Created a Makefile to simplify development chores.
 
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 

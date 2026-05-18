@@ -21,7 +21,7 @@ class AdvancedRateLimit(LoopBoundMixin, LockMixin[None]):
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):
         '''| `rate` (required): The initial rate at which tokens refill.
         | `capacity`: The maximum rate, defaulting to the current rate.
-        | `fair`: Whether to maintain FIFO for waiters; default `True`.'''
+        | `fair`: Whether to maintain FIFO (first in, first out) for waiters; default `True`.'''
     async def acquire(self, tokens: float=..., timeout: float|None=...) -> Literal[True]: '''Acquire the specified number of tokens from the rate limiter (default :const:`context.ADVANCED_RATE_LIMIT_DEFAULT_TOKENS`), waiting until the timeout expires and signalling :exc:`TimeoutError` if necessary.'''
     async def release(self, tokens: float=...) -> None: ...
     async def set_rate(self, new: float) -> None: ...

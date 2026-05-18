@@ -90,7 +90,7 @@ class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
     async def wait(self, timeout=None, **k):
         try: return self.get()
         except ValueError: return await self.wait_for_next(timeout, **k)
-    async def stream_history_for(self, duration=None):
+    async def stream_values_for(self, duration=None):
         try:
             async with _timeout(duration):
                 while True: yield await self

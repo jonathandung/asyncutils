@@ -31,8 +31,11 @@ class EventWithValue[T](EventMixin[T]):
     def history_asdict(self) -> dict[float, T]: '''Above, but as a dictionary.'''
     def recent_history(self, duration: float|None=...) -> Generator[tuple[float, T]]: '''Yield recent history entries in order; what qualifies as recent depends on `duration`, defaulting to :const:`context.EVENT_WITH_VALUE_DEFAULT_RECENT`.'''
     async def wait_for_transition(self, old: T, new: T, timeout: float|None=..., *, force_transition: bool=...) -> bool:
-        '''| Wait until the value is set to `old`, and then `new`.
+        '''| Wait until the value is set to `old`, and then `new`, in that order.
         | `timeout` defaults to :const:`context.EVENT_WITH_VALUE_DEFAULT_TIMEOUT`
         | On timeout, if `force_transition` is `True`, cause the transition to happen manually.
-        | Return whether the transition occurred naturally.'''
+        | Return whether the transition occurred naturally.
+
+        .. version-changed:: 0.9.6
+          Fixed a bug where overlapping potential transitions are not considered.'''
     async def wait_for_transition_unordered(self, a: T, b: T, timeout: float|None=..., *, force_transition: bool=...) -> bool: '''Wait until either `a` transitions to `b` or `b` transitions to `a`, with the preference being for the former.'''

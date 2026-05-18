@@ -34,19 +34,30 @@ Arguments to Python that are considered
 
 Some arguments consumed by the Python interpreter are also taken into account by the library:
 
-* ``-E`` - Omit the query of ``PYTHON_BASIC_REPL`` and the execution of ``PYTHONSTARTUP`` in the console namespace
-* ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this implication already)
+*
+  .. ifconfig:: py313
+
+    ``-E`` - Omit the execution of ``PYTHONSTARTUP`` in the console namespace and the query of ``PYTHON_BASIC_REPL``
+
+  .. ifconfig:: not py313
+
+    ``-E`` - Omit the execution of ``PYTHONSTARTUP`` in the console namespace
+
+* ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this relationship out-of-the-box; documented here for completeness)
 * ``-i`` - Always make the console interactive even if standard input is not a TTY
 
-  .. warning:: A piped standard input will cause deadlocks or fail for most shells, and this flag may make it worse.
+  .. warning::
+    A piped standard input will cause deadlocks or fail for most shells, and this flag may make it worse. It is thus declared experimental and
+    unstable; you might see this anomaly vanish after a single patch version, or in a commit that does not bump the patch.
 
 * ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``
 
 .. tip::
 
-  Even if ``python -S`` is used, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and ``license`` commands will still work as normal in
-  the console since they are implemented natively, albeit with the help of :mod:`_sitebuiltins`. However, accessing them in any fashion other than a
-  bare statement will cause :exc:`NameError` to be thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly.
+  Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and
+  ``license`` commands will still work as normal in the console since they are implemented natively, albeit with the help of :mod:`_sitebuiltins`.
+  This is attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError`
+  to be thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly, but that is not related to ``-S``.
 
 Basic Customization
 -------------------
@@ -93,12 +104,15 @@ XML    .xml           xmltodict          xmltodict
 
   Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
   Be especially careful with XML. It is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
-  Thus, write your configs yourself to avoid malicious inputs exhausting computing resources.
+  In any case, write your configs yourself to avoid malicious inputs exhausting computing resources.
 
 .. seealso::
 
   `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
-    a vulnerability of the :class:`xml.sax.saxutils.XMLGenerator` class of the standard library used by :mod:`xmltodict` without input sanitization
+    a vulnerability of the :class:`~xml.sax.saxutils.XMLGenerator` class from the standard library used by :mod:`xmltodict` without input
+    sanitization
+
+    .. note:: This exploit is disputed.
 
   `the CVE database <https://www.cve.org/CVERecord>`__
     for any new vulnerabilities
@@ -147,7 +161,7 @@ One may find it useful to alter the context dynamically without creating a new c
     observable_default_ntimes_n=3, # lowercase or mixed-case is allowed but not recommended
     lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1, # fields do not have to be in order
     WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2] # list will be automatically converted into tuple
-  ) # check if a string is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
+  ) # check if a string `name` is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
 
 However, due care must be exercised to avoid messing up other parts of your program relying on this context. It is advisable to call the following
 methods that leave the original context alone by deriving a new one from it:
@@ -156,8 +170,14 @@ methods that leave the original context alone by deriving a new one from it:
 * :meth:`~asyncutils.context.Context.replace`
 * :meth:`~asyncutils.context.Context.replace_from_dct`
 
-:meth:`~asyncutils.context.Context.__copy__` and :meth:`~asyncutils.context.Context.__replace__` are also implemented to help :func:`copy.copy` and
-:func:`copy.replace` (python 3.13+) respectively.
+.. ifconfig:: py313
+
+  :meth:`~asyncutils.context.Context.__copy__` and :meth:`~asyncutils.context.Context.__replace__` are also implemented to help :func:`copy.copy`
+  and :func:`copy.replace` respectively.
+
+.. ifconfig:: not py313
+
+  :meth:`~asyncutils.context.Context.__copy__` is also implemented to help :func:`copy.copy`.
 
 It is even better to use :class:`asyncutils.context.nonreusablelocalcontext`, which returns a one-time context manager, or the convenience method
 :meth:`~asyncutils.context.Context.ascurctx` on context objects that wraps it.
