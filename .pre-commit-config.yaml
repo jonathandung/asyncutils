@@ -33,7 +33,8 @@ repos:
       - id: ty
         name: ty
         entry: ty check
-        language: system
+        language: python
         files: \.pyi?$
         pass_filenames: false
         require_serial: true
+        additional_dependencies: ['ty']

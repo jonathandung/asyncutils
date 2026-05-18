@@ -112,7 +112,7 @@ The extras are listed below for reference:
   The pub extra, because uv already provides that functionality.
 
 .. version-removed:: 0.9.5
-  mypy is no longer in any extra.
+  mypy is no longer in any extra, since ty provides type checking.
 
 .. version-changed:: 0.9.3
   Removed the pytest-local-badge dependency from the test extra.
