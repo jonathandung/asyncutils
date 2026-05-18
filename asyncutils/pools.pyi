@@ -108,7 +108,7 @@ class CallbackAccumulator[T, **P](deque[T], AsyncContextMixin[CallbackAccumulato
     .. note:: This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.
     .. admonition:: Implementation detail
 
-      This class subclasses :class:`~collections.deque`.'''
+      The fact that this class currently subclasses :class:`~collections.deque` is subject to change.'''
     @overload
     def __init__(self, name: str, it: SupportsIteration[Callable[P, T]], maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...): ...
     @overload

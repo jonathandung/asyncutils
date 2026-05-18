@@ -270,7 +270,7 @@ class MemoryMappedFile(LoopContextMixin):
     def readable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
     def writable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
     def seekable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
-    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=...) -> None: '''Write each line in `lines`, followed by `sep`, into the file.'''
+    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in `lines`, followed by `sep`, into the file. If `minimize_writes` is `True` (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
     async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified `encoding` and `errors`.'''
     async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified `encoding` and `errors`.'''
     @overload
@@ -290,7 +290,7 @@ class MemoryMappedFile(LoopContextMixin):
     def search_lazy_nonoverlapping(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''The above, but ensure the offsets returned do not overlap using a greedy approach.'''
     async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Return a list of the offsets of the first `max_results` occurrences of `pattern` in the file starting from `offset`.'''
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
-    async def compact(self) -> None: '''Reduce the size of the file by stripping all contiguous null bytes at the end.'''
+    async def compact(self) -> int: '''Reduce the size of the file by stripping all contiguous null bytes at the end, and return the number of bytes removed.'''
 @type_check_only
 class AUnzipConsumer[T]:
     '''The type of each consumer in the tuple return value of :func:`iters.aunzip`.'''

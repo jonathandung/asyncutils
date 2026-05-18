@@ -62,5 +62,5 @@ class coercedmethod: # noqa: N801
     def __getattr__(self, n, /): return getattr(self.__f, n)
     def __get__(self, obj, typ=None, /):
         if obj is None: raise AttributeError(f'class {fullname(typ)} has no attribute {self.__n!r}', name=self.__n) if typ is self.__o else RuntimeError('incorrectly bound asyncutils.properties.coercedmethod')
-        if not (typ is None or isinstance(obj, typ)): raise TypeError('asyncutils.properties.coercedmethod.__get__ called incorrectly')
+        if not (typ is None or isinstance(obj, typ)): raise TypeError('asyncutils.properties.coercedmethod: __get__ called incorrectly')
         return lambda *a, **k: self.__f(obj, *a, **k)

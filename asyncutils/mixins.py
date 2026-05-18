@@ -1,8 +1,7 @@
 __lazy_modules__ = frozenset(('asyncio',))
 from asyncutils import safe_cancel_batch
-from asyncutils._internal import helpers as H
 from asyncutils._internal.submodules import mixins_all as __all__
-import functools as F
+import functools as F, asyncutils._internal.helpers as H
 from abc import ABCMeta, abstractmethod
 from asyncio import iscoroutine, timeout as _timeout
 class LoopContextMixin(H.LoopMixinBase):

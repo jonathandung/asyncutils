@@ -41,16 +41,19 @@ After verifying the integrity of the field name according to this metric, naviga
 complete the following:
 
 * asyncutils/format.json5
+
   Find the submodule and add in part of the option name in the object under the appropriate pattern. If this causes there to be more than one option
   for a utility with no dedicated mapping having it as key, create one and move the other in. If these guidelines sound vague, surrounding keys will
   help you.
 * asyncutils/context.pyi
+
   Be sure to update the contextual constant count:
   - in the :data:`~context.all_contextual_constants` docstring,
   - within the :data:`~context.Context` fake dataclass body, and
   - at the top level.
   Keep alphabetical order within the submodule concerned, with submodules ordered alphabetically as well.
 * asyncutils/_internal/unparsed.py
+
   There should be a massive dictionary affixed with ``# pragma: allowlist secret`` that contains the option names mapped to their factory defaults.
   Edit that dictionary accordingly.
 
@@ -62,7 +65,7 @@ Adding a documentation page
    redirection, though the MyST parser is improving to accommodate these.
 2. Choose a location: docs/source or the project root.
 3. If the page is of paramount importance even to end users or people doing a read-through of the project, expand the README with a new section
-containing a summary and linking to the page on the bottom.
+   containing a summary and linking to the page on the bottom.
 4. Update the relevant table of contents tree (toctree) in docs/source/index.rst. Do not move documents across the four different trees.
 5. If copying from the root to the Read the Docs page is required during build, so that users can see it in both places, update .readthedocs.yaml
    by adding a cp (copy) statement in the post_create_environment job, following the syntax of its sibling commands.

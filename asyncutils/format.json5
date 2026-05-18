@@ -130,7 +130,12 @@ Some keys can have various types, as detailed by the comments attached. */
       },
       timer_default_precision: 7
     },
-    io: {memory_mapped_io_manager_default_checksum_alg: "blake2s"},
+    io: {
+      memory_mapped_io_manager: {
+        default_checksum_alg: "blake2s",
+        default_minimize_writes: true
+      }
+    },
     iters: {
       afrievalds_default_k: 2,
       aonlinesorter_default_slow: false,

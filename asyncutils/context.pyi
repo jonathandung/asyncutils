@@ -67,6 +67,7 @@ class Context:
     RETRY_DEFAULT_TRIES: int = ...
     TIMER_DEFAULT_PRECISION: int = ...
     MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: HashAlgorithm = ...
+    MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES: bool = ...
     AFRIEVALDS_DEFAULT_K: int = ...
     AONLINESORTER_DEFAULT_SLOW: bool = ...
     AUNZIP_DEFAULT_MAX_QSIZE: int = ...
@@ -141,7 +142,7 @@ all_contextual_consts: frozenset[str]
 
 .. note::
 
-  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (85 as of now!) and more may be added in the future,
+  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (86 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
@@ -191,6 +192,7 @@ RETRY_DEFAULT_MAX_DELAY: Final[float]
 RETRY_DEFAULT_TRIES: Final[int]
 TIMER_DEFAULT_PRECISION: Final[int]
 MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: Final[HashAlgorithm]
+MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES: Final[bool]
 AFRIEVALDS_DEFAULT_K: Final[int]
 AONLINESORTER_DEFAULT_SLOW: Final[bool]
 AUNZIP_DEFAULT_MAX_QSIZE: Final[int]

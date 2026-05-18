@@ -97,9 +97,13 @@ class File(A.LoopContextMixin): # noqa: PLR0904
         if hint < 0: yield from map(bytes, self._mmap); return
         f = self._readline
         while hint > 0: b, n = f(0, None, False); yield b; hint -= n
-    async def writelines(self, lines, /, *, sep=b''):
-        f = self.write
-        for l in lines: await f(l+sep)
+    async def writelines(self, lines, /, *, sep=b'', minimize_writes=None):
+        f, lines = self.write, A.iter_to_agen(lines)
+        if A.getcontext().MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES if minimize_writes is None else minimize_writes: return await f(sep.join(await A.to_list(lines)))
+        if sep:
+            async for l in lines: await f(l); await f(sep)
+        else:
+            async for l in lines: await f(l)
     async def read_str(self, offset=0, size=-1, encoding='utf-8', errors='strict'): return (await self.read(offset, size)).decode(encoding, errors)
     def write_str(self, text, offset=0, encoding='utf-8', errors='strict'): return self.write(text.encode(encoding, errors), offset)
     def smart_write(self, data, offset=0, encoding='utf-8', errors='strict'): return self.write(data.encode(encoding, errors) if isinstance(data, str) else data, offset)
@@ -136,8 +140,8 @@ class File(A.LoopContextMixin): # noqa: PLR0904
     def search(self, pattern, offset=0, max_results=None): return A.collect(self.search_lazy(pattern, offset), max_results)
     def search_nonoverlapping(self, pattern, offset=0, max_results=None): return A.collect(self.search_lazy_nonoverlapping(pattern, offset), max_results)
     async def compact(self):
-        for i in range(len(c := await self.read())-1, -1, -1):
-            if c[i]: await self.run(self.resize, i+1); break
+        for i in range(len(c := await self.read())):
+            if c[~i]: await self.run(self.resize, c-i); return i
     def __init_subclass__(cls, *, m, r):
         @staticmethod
         async def run(f, /, *a, r=r): return await r(f, *a)
