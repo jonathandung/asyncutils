@@ -56,6 +56,18 @@ def tee(it, n=2, *, maxqsize=None, put_exc=None, loop=None):
         finally:
             for q in Q: q.shutdown()
     t = loop.create_task(feed()); return tuple(map(iterator, Q))
+async def adoublestarmap(f, it, /, await_=False):
+    it = iter_to_agen(it)
+    if await_:
+        async for _ in it: yield await f(**_)
+    else:
+        async for _ in it: yield f(**_)
+async def astarmap_withkwds(f, it, /, await_=False):
+    it = iter_to_agen(it)
+    if await_:
+        async for a, k in it: yield await f(*a, **k)
+    else:
+        async for a, k in it: yield f(*a, **k)
 async def aloops(n):
     for _ in repeat(None, n): yield
 async def _aunzip_put(Q, t):

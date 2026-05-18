@@ -58,8 +58,8 @@ class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
 class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(I.Transport):
     __slots__ = '_buffer', '_closing', '_limits', '_protocol', '_socket'; _h = A.IgnoreErrors(OSError)
-    @classmethod
-    def make_protocol(cls): return LineProtocol()
+    @staticmethod
+    def make_protocol(): return LineProtocol()
     @property
     def loop(self): return p.loop if isinstance(p := self._protocol, LineProtocol) else NotImplemented
     def __init__(self, sock=None):

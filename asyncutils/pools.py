@@ -4,7 +4,7 @@ from asyncutils._internal.compat import PriorityQueue
 from asyncutils._internal.helpers import filter_out, fullname, subscriptable
 from asyncutils._internal.submodules import pools_all as __all__
 from _functools import partial
-from itertools import count, repeat, starmap
+from itertools import count, repeat
 from sys import exc_info
 from threading import Thread, Lock as TLock
 from time import monotonic
@@ -31,11 +31,6 @@ class AdvancedPool(A.LoopContextMixin):
                     with self._tlock: self.completed += 1; self._pending -= 1
         except A.CRITICAL as e: g(_.set_exception, A.Critical(e))
         else: g(_.set_result, x)
-    def _adjust_workers(self):
-        if not self._scaling: return
-        C = A.getcontext()
-        if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
-        elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     def _scale_to(self, new):
         if (d := new-self._current) > 0:
             a, b, f, g = self._workers.add, self._futures.add, self._worker_loop, self.make_fut
@@ -45,20 +40,21 @@ class AdvancedPool(A.LoopContextMixin):
             for _ in repeat(None, -d): f(0, None)
         self._current = new
     def _put_nowait_priority(self, priority, item): self._queue.put_nowait((priority, self._tiebreak, item))
-    def set_adjuster(self, raising=False):
-        if self._scaling: self._adjust_workers()
-        elif raising: raise A.PoolError(f'{fullname(self)} is non-scaling')
+    def _set_adjuster(self):
+        if not self._scaling: return
+        C = A.getcontext()
+        if (l := self._pending/((c := self._current) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self._max): self._scale_to(min(M, c+max(1, c>>1)))
+        elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self._min): self._scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     def raise_for_shutdown(self):
         if self._shutdown: raise A.PoolShutDown(f'{fullname(self)} is shutting down')
     def submit_nowait(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         if self.full: raise A.PoolFull('asyncutils.pool.AdvancedPool.submit_nowait: task queue full')
         with self._tlock: self._pending += 1
-        self._put_nowait_priority(_priority_, (f, a, k, F := self.make_fut())); self.set_adjuster(); return F
-    def revive(self): self.__init__(self._max, self._min, self._queue.maxsize, self._scaling, self._kill_at_exit)
+        self._put_nowait_priority(_priority_, (f, a, k, F := self.make_fut())); self._set_adjuster(); return F
     async def _kill_helper(self):
-        from asyncutils import ignore_qempty as C; f, g = (q := self._queue).get_nowait, q.task_done
-        with self._tlock, C:
+        f, g = (q := self._queue).get_nowait, q.task_done
+        with self._tlock, A.ignore_qempty:
             while True:
                 if (F := f()[2]) is not None: await A.safe_cancel(F[-1])
                 g()
@@ -66,22 +62,21 @@ class AdvancedPool(A.LoopContextMixin):
     async def submit(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         with self._tlock: self._pending += 1
-        await self._queue.put((_priority_, self._tiebreak, (f, a, k, F := self.make_fut()))); self.set_adjuster(); return F
-    async def shutdown(self, cancel_pending=False, idle_timeout=None, total_timeout=None):
-        self._shutdown = True
-        async with I.timeout(total_timeout):
-            if cancel_pending: await self._kill_helper()
-            else:
-                try: await self.wait_for_slot(idle_timeout)
-                except A.PoolFull: await self._kill_helper()
-            for _ in repeat(None, self._current): await self._queue.put((0, self._tiebreak, None))
-            with self._tlock: self._queue.shutdown(True)
-            await self.join(); await self.drain(); return self.uptime
+        await self._queue.put((_priority_, self._tiebreak, (f, a, k, F := self.make_fut()))); self._set_adjuster(); return F
+    async def shutdown(self, cancel_pending=False, idle_timeout=None):
+        self._shutdown, p = True, (q := self._queue).put
+        if cancel_pending: await self._kill_helper()
+        else:
+            try: await self.wait_for_slot(idle_timeout)
+            except A.PoolFull: await self._kill_helper()
+        for _ in repeat(None, self._current): await p((0, self._tiebreak, None))
+        with self._tlock: q.shutdown(True)
+        await self.join(); return self.uptime
     async def join(self): return await I.gather(*self._futures, return_exceptions=True)
-    async def map(self, f, /, *its, priority=0, **_): return await I.gather(*map(partial(self.complete, f, _priority_=priority), *its, **_))
-    async def starmap(self, f, it, /, priority=0): return await I.gather(*starmap(partial(self.complete, f, _priority_=priority), it))
-    async def doublestarmap(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await I.gather(*(f(**k) for k in it))
-    async def starmap_withkwds(self, f, it, /, priority=0): f = partial(self.complete, f, _priority_=priority); return await I.gather(*(f(*a, **k) for a, k in it))
+    async def map(self, f, /, *its, priority=0, strict=False): return await A.agather(A.amap(partial(self.complete, f, _priority_=priority), *its, strict=strict))
+    async def starmap(self, f, it, /, priority=0): return await A.agather(A.astarmap(partial(self.complete, f, _priority_=priority), it))
+    async def doublestarmap(self, f, it, /, priority=0): return await A.agather(A.adoublestarmap(partial(self.complete, f, _priority_=priority), it))
+    async def starmap_withkwds(self, f, it, /, priority=0): return await A.agather(A.astarmap_withkwds(partial(self.complete, f, _priority_=priority), it))
     async def resize(self, min_workers, max_workers): M = max(max_workers, m := max(1, min_workers)); self._scale_to(min(max(self._current, m), M)); self._min, self._max = m, M
     def drain(self): return self._queue.join()
     async def wait_for_slot(self, timeout=None):
@@ -92,7 +87,7 @@ class AdvancedPool(A.LoopContextMixin):
     async def __cleanup__(self): await self.shutdown(self._kill_at_exit)
     def __del__(self):
         try:
-            if (l := self.loop).is_running(): l.call_soon_threadsafe(self.shutdown, True, 0.2, 0.2)
+            if (l := self.loop).is_running(): l.call_soon_threadsafe(self.shutdown, True, 0.2)
         except (AttributeError, RuntimeError): ...
     @property
     def full(self): return self._queue.full()
@@ -138,10 +133,10 @@ class ConnectionPool(A.LoopBoundMixin):
             async for a, k in A.take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
         self._maintainer = self.make(self._maintain())
     async def stop(self):
-        if (m := self._maintainer): await A.safe_cancel(m)
-        while self._pool: self._cleaner(self._pool.pop())
-        for _ in self._in_use: self._cleaner(_)
-        self._in_use.clear()
+        if m := self._maintainer: await A.safe_cancel(m)
+        p, c, f = (P := self._pool).pop, self._cleaner, (u := self._in_use).pop
+        while P: c(p())
+        while u: c(f())
     async def __aenter__(self): await self.start(); return self
     async def __aexit__(self, /, *_): await self.stop()
     @property
@@ -150,7 +145,8 @@ class ConnectionPool(A.LoopBoundMixin):
     def available(self): return len(self._pool)
     @property
     def in_use(self): return len(self._in_use)
-class CallbackAccumulator(__import__('_collections').deque, A.AsyncContextMixin):
+class CallbackAccumulator(__import__('_collections').deque, A.ExecutorRequiredAsyncContextMixin):
+    __slots__ = 'call_once', 'default_getter', 't'
     def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(A.aiter_to_gen(it), maxlen); self.t, self.call_once, self.default_getter = tuple(filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
@@ -158,10 +154,12 @@ class CallbackAccumulator(__import__('_collections').deque, A.AsyncContextMixin)
     def __exit__(self, /, *_): a, k = self.default_getter(); self(*a, **k)
     def add(self, o, /): self.append(getattr(o, *self.t))
     def offer_last(self, o, /):
-        if (x := self.maxlen) is None or x > len(self): self.add(o)
+        if (x := self.maxlen) is None or x > len(self): self.add(o); return True
+        return False
     @property
     def callbacks(self): return self.copy()
     def __iter__(self):
         if self.call_once:
-            while self: yield self.pop()
+            p = self.popleft
+            while self: yield p()
         else: yield from self.callbacks
