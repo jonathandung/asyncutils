@@ -21,17 +21,22 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
   top-level
   api/index
   examples
-  benchmark
   glossary
+
+.. toctree::
+  :caption: Development
+
+  contributing
+  chores
+  benchmark
+  ai-use
 
 .. toctree::
   :caption: About the project
   :hidden:
 
   compat
-  contributing
   conduct
-  ai-use
   support
   security
   changelog

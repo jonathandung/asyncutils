@@ -21,6 +21,9 @@ class Module:
     def __setattr__(self, n, v, /):
         if n in self.__slots__: raise AttributeError('immutable attribute', name=n, obj=self)
         setattr(self.load(), n, v)
+    def __delattr__(self, n, /):
+        if n in self.__slots__: raise AttributeError('cannot delete attribute', name=n, obj=self)
+        delattr(self.load(), n)
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s):

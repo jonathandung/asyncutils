@@ -1,4 +1,5 @@
-'''Backport of :class:`functools.partial` that supports placeholders, as well as max-heap variants of :mod:`heapq` functions, to python 3.13 or under.'''
+'''| Backport of :class:`functools.partial` that supports passing placeholders, as well as max-heap variants of :mod:`heapq` functions, to python 3.13
+| or under. It is impossible to satisfy type checkers when using this implementation, because they would assume placeholders as ordinary arguments.'''
 import sys
 assert sys.version_info < (3, 14)
 from functools import partial

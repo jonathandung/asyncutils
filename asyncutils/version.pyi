@@ -1,8 +1,5 @@
 '''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
-| :mod:`asyncutils` uses a subset of SemVer, with two additional restrictions:
-
-* MINOR VERSIONS CANNOT SPAN MORE THAN 256 PATCHES.
-* MAJOR VERSIONS CANNOT SPAN MORE THAN 256 MINOR VERSIONS.'''
+| :mod:`asyncutils` uses a subset of SemVer.'''
 from ._internal.types import IntCompatible, Openable, ValidSlice
 from _collections_abc import Callable, Iterable, Iterator
 from typing import Any, Literal, NamedTuple, NoReturn, Self, final, overload
@@ -29,7 +26,7 @@ class VersionInfo(str): # noqa: FURB189
         * 1 -> :attr:`minor`
         * 2 -> :attr:`patch`
 
-        Sliced accordingly.'''
+        Slicing works accordingly.'''
     def __lt__(self, other: Any, /) -> bool: '''Whether this version precedes the other as a version.'''
     def __le__(self, other: Any, /) -> bool: '''Whether this version precedes or is equal to the other as a version.'''
     def __gt__(self, other: Any, /) -> bool: '''Whether this version succeeds the other as a version.'''

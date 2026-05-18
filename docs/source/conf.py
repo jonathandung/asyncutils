@@ -1,5 +1,5 @@
-import sys, os
-sys.path.insert(0, os.path.abspath('../..'))
+import pathlib, sys
+sys.path.insert(0, str(pathlib.Path.cwd().parent.parent))
 def setup(app): app.add_config_value('py313', sys.version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs')
 project = 'asyncutils'
 author = 'Jonathan Dung'

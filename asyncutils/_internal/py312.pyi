@@ -1,4 +1,5 @@
-'''Backport of :class:`asyncio.queues.Queue` with a :meth:`~asyncio.queues.Queue.shutdown` method to python 3.12 or under.'''
+'''| Backport of :class:`asyncio.queues.Queue` with a :meth:`~asyncio.queues.Queue.shutdown` method to python 3.12 or under.
+| Error messages are kept in line with those in the standard library for consistency.'''
 import sys
 assert sys.version_info < (3, 13)
 from asyncio.queues import Queue as BaseQueue

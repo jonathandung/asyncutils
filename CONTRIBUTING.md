@@ -12,9 +12,6 @@ interactions with the project.
 2. If applicable, [update the README](https://github.com/jonathandung/asyncutils/edit/main/README.md) with details of changes to the interface,
 including new environment variables, useful file locations and container parameters where appropriate. There should already be a section for each of
 the above cases. Do not add extraneous new sections without another issue.
-3. If this PR bumps the version, as previously discussed with an owner or maintainer, increase the version number in the relevant locations. A simple
-find-and-replace should suffice, but pay extra attention to the pyproject.toml and CHANGELOG.md files. Only maintainers are allowed to increment the
-minor version. The versioning scheme we use is [SemVer](https://semver.org/spec/v2.0.0.html), but we currently only have major, minor and patch parts
-for simplicity.
+3. If this PR bumps the version, as previously discussed with an owner or maintainer, increase the version number in the relevant locations. Only maintainers are allowed to increment the minor version. The versioning scheme we use is [SemVer](https://semver.org/spec/v2.0.0.html), but we currently only have major, minor and patch parts for simplicity.
 4. Once you have the sign-off of two other developers, you may either merge the PR yourself if you have permission, or ask the second reviewer to do
 so on your behalf otherwise.

@@ -30,7 +30,7 @@ this table take inspiration.
     - Raised when :mod:`asyncutils` retrieves an event loop ``loop``, creating one if necessary, and sets it as the event loop for the current thread if not already set.
   * - asyncutils/recurse_configs
     - ``cwd``: :class:`~pathlib.Path`
-    - Raised when the environment variable pointing to a config file is not set, and library resorts to beginning traversing the parents of the current working directory sequentially to look for pyproject.toml files having a ``[tool.asyncutils]`` section.
+    - Raised when the environment variable pointing to a config file is not set, and library resorts to beginning traversing the parents of the current working directory sequentially to look for pyproject.toml files with a (possibly empty) ``[tool.asyncutils]`` section.
   * - asyncutils/try_config
     - ``level``: :class:`int`
     - Raised when asyncutils finds a file named pyproject.toml in the ``level``-th parent of the current working directory (but hasn't parsed it yet).
@@ -39,7 +39,7 @@ this table take inspiration.
     - Raised when :mod:`asyncutils` reads its configuration file expected to be in json format at ``cfg_path`` (not guaranteed to be absolute).
   * - asyncutils/discontinue_config
     - ``cfg_path``: :class:`str`
-    - Raised when :mod:`asyncutils` no longer uses the configuration file at ``cfg_path``, since its ``next_config`` key corresponds to ``null``.
+    - Raised when :mod:`asyncutils` no longer uses the configuration file at ``cfg_path``, since its ``next_config`` key corresponds to null or equivalent.
   * - asyncutils/set_next_config
     - ``old_path``: :class:`str`, ``new_path``: :class:`str`
     - Raised when :mod:`asyncutils` changes its configuration file from that at ``old_path`` to that at ``new_path``, as dictated by the ``next_config`` field.

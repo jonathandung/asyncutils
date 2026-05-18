@@ -36,7 +36,7 @@ Some arguments consumed by the Python interpreter are also taken into account by
 
 * ``-E`` - Omit the query of ``PYTHON_BASIC_REPL`` and the execution of ``PYTHONSTARTUP`` in the console namespace
 * ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this implication already)
-* ``-i`` - Always treat the console as interactive even if standard input is not a TTY
+* ``-i`` - Always make the console interactive even if standard input is not a TTY
 
   .. warning:: A piped standard input will cause deadlocks or fail for most shells, and this flag may make it worse.
 
@@ -99,9 +99,6 @@ XML    .xml           xmltodict          xmltodict
 
   `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
     a vulnerability of the :class:`xml.sax.saxutils.XMLGenerator` class of the standard library used by :mod:`xmltodict` without input sanitization
-
-  `GitHub issue <https://github.com/python/cpython/issues/149231>`__
-    a quadratic complexity case in the parsing of a TOML by :mod:`tomllib` where a key has many dot-separated parts
 
   `the CVE database <https://www.cve.org/CVERecord>`__
     for any new vulnerabilities

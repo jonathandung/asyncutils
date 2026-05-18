@@ -16,6 +16,10 @@ class Module:
         '''.. version-changed:: 0.9.4
 
         Loading is triggered by any attribute assignment. Previously, it failed with an :exc:`AttributeError`.'''
+    def __delattr__(self, name: str, /) -> None:
+        '''.. version-changed:: 0.9.6
+
+        Loading is triggered by any attribute deletion. Previously, it failed with an :exc:`AttributeError`.'''
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def load(self) -> ModuleType: '''Load the submodule and replace the dummy with the actual submodule in :data:`~asyncutils.submodules_map`. Triggered on attribute access or an explicit call.'''
     @property
