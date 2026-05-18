@@ -132,7 +132,7 @@ class LockForceRequest[T](BaseException):
     '''The tuple `(error_message, additional_info)`.'''
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by :func:`~queues.password_queue`.'''
 class PasswordRetrievalError(PasswordQueueError):
-    '''Raised when the `password_queue` function cannot find the password from the closure variables.'''
+    '''Raised when :func:`~queues.password_queue` cannot find the password from the closure variables.'''
     @property
     def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...

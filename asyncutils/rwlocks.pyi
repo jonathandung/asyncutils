@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Literal, Self, overload
 __all__ = 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):
-    '''Base class for readers-writer locks.'''
+    '''Common base class for all readers-writer locks.'''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredRWLock: ...
     @overload

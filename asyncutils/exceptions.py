@@ -1,4 +1,3 @@
-# ty: ignore[unresolved-global]
 from asyncutils._internal import patch as P
 from asyncutils._internal.helpers import check_methods, fullname, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
@@ -144,44 +143,41 @@ class PasswordMissing(PasswordQueueError, TypeError):
     def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # ty: ignore[invalid-assignment]
 class GetPasswordMissing(PasswordMissing, m='asyncutils.queues.password_queue: no password provided when trying to get from password-protected queue'): ...
 class PutPasswordMissing(PasswordMissing, m='asyncutils.queues.password_queue: no password provided when trying to put to password-protected queue'): ...
+class IgnoreErrors:
+    __slots__ = 'but', 'exc'
+    def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
+    def __enter__(self): return self
+    def __exit__(self, t, /, *_): return False if t is None else issubclass(t, self.exc) and not issubclass(t, self.but)
+    def __repr__(self): return f'IgnoreErrors{self.exc!r}.excluding{self.but!r}'
+    async def __aenter__(self): return self
+    async def __aexit__(self, /, *_): return self.__exit__(*_)
+    def excluding(self, *O, _=__import__('itertools').chain): return type(self)(*self.exc, exclude=_(self.but, O))
+    def combined(self, *O, _=check_methods):
+        f, g, h, j, p = (S := set(self.exc)).update, (P := set(self.but)).update, S.add, (d := []).extend, d.pop
+        for o in O:
+            if isinstance(o, IgnoreErrors): f(o.exc); g(o.but)
+            elif isinstance(o, type): h(o)
+            elif _(o, '__iter__'): j(o)
+        while d:
+            if isinstance(o := p(), type): h(o)
+            else: f(o.exc); g(o.but)
+        return type(self)(*S, exclude=P)
+    P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.xsig), (__aexit__, P.xsig)); del r
+ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
+ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError))
 def __getattr__(n, /):
-    match n:
-        case 'WarningToError':
-            global WarningToError
-            class WarningToError:
-                __slots__ = '_cm', '_w'
-                def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
-                def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # ty: ignore[invalid-argument-type]
-                def __exit__(self, t, /, *_):
-                    if (c := self._cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __aexit__ called without prior __aenter__ call')
-                    c.__exit__(t, *_)
-                async def __aenter__(self): return self.__enter__()
-                async def __aexit__(self, /, *_): self.__exit__(*_)
-                P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
-        case 'IgnoreErrors'|'ignore_all'|'ignore_noncritical'|'ignore_typical'|'ignore_stopiteration'|'ignore_stopaiteration'|'ignore_valerrs'|'ignore_typeerrs':
-            global IgnoreErrors, ignore_all, ignore_noncritical, ignore_typical, ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs
-            class IgnoreErrors:
-                __slots__ = 'but', 'exc'
-                def __init__(self, /, *_, exclude=(), d=(Exception,)): a, b = map(frozenset, (_ or d, exclude)); a, b = a-b, b-a; self.exc, self.but = map(tuple, (a, (c for c in b if any(d in a for d in c.__mro__))))
-                def __enter__(self): return self
-                def __exit__(self, t, /, *_): return False if t is None else issubclass(t, self.exc) and not issubclass(t, self.but)
-                def __repr__(self): return f'IgnoreErrors{self.exc!r}.excluding{self.but!r}'
-                async def __aenter__(self): return self
-                async def __aexit__(self, /, *_): return self.__exit__(*_)
-                def excluding(self, *O, _=__import__('itertools').chain): return type(self)(*self.exc, exclude=_(self.but, O))
-                def combined(self, *O, _=check_methods):
-                    f, g, h, j, p = (S := set(self.exc)).update, (P := set(self.but)).update, S.add, (d := []).extend, d.pop
-                    for o in O:
-                        if isinstance(o, IgnoreErrors): f(o.exc); g(o.but) # ty: ignore[unresolved-reference]
-                        elif isinstance(o, type): h(o)
-                        elif _(o, '__iter__'): j(o)
-                    while d:
-                        if isinstance(o := p(), type): h(o)
-                        else: f(o.exc); g(o.but)
-                    return type(self)(*S, exclude=P)
-                P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.xsig), (__aexit__, P.xsig)); del r
-            ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors(); ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError))
-        case str(): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
-        case _: raise TypeError(f'unexpected non-string attribute name: {n!r}')
-    return globals()[n]
+    if n == 'WarningToError':
+        global WarningToError # ty: ignore[unresolved-global]
+        class WarningToError:
+            __slots__ = '_cm', '_w'
+            def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
+            def __enter__(self, _=__import__('warnings')): self._cm = c = _.catch_warnings(); c.__enter__(); _.simplefilter('error', self._w); return self # ty: ignore[invalid-argument-type]
+            def __exit__(self, t, /, *_):
+                if (c := self._cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __aexit__ called without prior __aenter__ call')
+                c.__exit__(t, *_)
+            async def __aenter__(self): return self.__enter__()
+            async def __aexit__(self, /, *_): self.__exit__(*_)
+            P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
+        return WarningToError
+    raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
 del s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception, subscriptable

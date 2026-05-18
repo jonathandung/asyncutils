@@ -12,11 +12,11 @@ from functools import partial, wraps
 from itertools import count, repeat
 from sys import audit
 from time import perf_counter
-def acompose(*F, wrap_last=True):
+def acompose(*F, wrap_last=True, _=A.iscoroutine):
     async def composed(*a, **k):
-        if A.iscoroutine(r := next(I := reversed(F))(*a, **k)): r = await r
+        if _(r := next(I := reversed(F))(*a, **k)): r = await r
         for f in I:
-            if A.iscoroutine(r := f(r)): r = await r
+            if _(r := f(r)): r = await r
         return r
     return wraps(F[-1])(composed) if wrap_last else composed
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):

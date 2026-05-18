@@ -35,7 +35,7 @@ class sentinel_base:
     def __reduce__(self):
         if (n := getattr(self, '_sentinel_base__name', None)) is None: raise TypeError(f'cannot pickle unbound instance of {fullname(self)}')
         return type(self), (n,)
-    def __init_subclass__(cls, lock_impl=__import__('_thread').allocate_lock):
+    def __init_subclass__(cls, *, lock_impl=__import__('_thread').allocate_lock):
         if getattr(cls, '__slots__', True): raise TypeError('asyncutils.constants.sentinel_base: sentinel classes should have empty __slots__')
         cls._cache, cls._lock, cls._can_instantiate = {}, lock_impl(), True
     @property

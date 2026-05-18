@@ -105,7 +105,7 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_STRICT: bool = ...
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
-    def ascurctx(self) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry.'''
+    def ascurctx(self) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. `ctx.ascurctx()` is syntactic sugar for `nonreusablelocalcontext(ctx)`'''
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the items within the context.'''
     def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod
@@ -143,7 +143,8 @@ all_contextual_consts: frozenset[str]
 .. note::
 
   These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (86 as of now!) and more may be added in the future,
-  and the recommended way to get their values is to query them on the actual context object anyway.'''
+  and the recommended way to get their values is to query them on the actual context object anyway.
+  They are still provided below to facilitate type checking.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]

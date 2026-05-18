@@ -11,11 +11,11 @@ from contextlib import AbstractContextManager
 from typing import Any, Final, Literal, Self, overload
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
-'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown`.'''
 ignore_qempty: Final[IgnoreErrors]
-'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown and asyncio.QueueEmpty.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueEmpty`.'''
 ignore_qfull: Final[IgnoreErrors]
-'''Instance of :class:`exceptions.IgnoreErrors` that suppresses asyncio.QueueShutDown and asyncio.QueueFull.'''
+'''Instance of :class:`exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueFull`.'''
 ignore_qerrs: Final[IgnoreErrors]
 '''Instance of :class:`exceptions.IgnoreErrors` that suppresses all asyncio queue-related errors.'''
 @overload
