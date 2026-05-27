@@ -1,0 +1,18 @@
+version: 2
+sphinx:
+  configuration: docs/source/conf.py
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: latest
+  jobs:
+    post_create_environment: [scripts/rtd.sh]
+formats:
+  - htmlzip
+  - pdf
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - themes

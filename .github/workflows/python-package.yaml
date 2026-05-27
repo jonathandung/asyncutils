@@ -1,0 +1,43 @@
+name: Python package
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  code-quality: write
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6.0.2
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+      with:
+        python-version: 3.12
+        cache-python: true
+        activate-environment: true
+    - run: uvx ruff check --output-format=github && uvx ty check --output-format=github
+  test:
+    needs: lint
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.12", "3.15.0-beta.1"]
+    steps:
+    - uses: actions/checkout@v6.0.2
+    - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+      with:
+        python-version: ${{matrix.python-version}}
+        cache-python: true
+    - run: uv run --with ".[test]" pytest -vvp asyncio -p pytest_cov -p no:asyncio-cooperative -p no:local_badge --maxfail 0 --cov asyncutils --cov-report xml --tb long
+    - if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15.0-beta.1' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)}}
+      uses: actions/upload-code-coverage@v1.2.0
+      with:
+        report: coverage.xml
+        language: Python

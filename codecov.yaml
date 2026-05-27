@@ -1,0 +1,13 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+coverage:
+  status:
+    project:
+      default:
+        threshold: 2%
+    patch:
+      default:
+        threshold: 2%
