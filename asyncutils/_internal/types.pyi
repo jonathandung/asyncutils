@@ -67,7 +67,7 @@ class SupportsSlicing[T](GenericSized[T], Protocol):
     @overload
     def __getitem__(self, idx: SupportsIndex, /) -> T: ...
     def __len__(self) -> int: ...
-    def __reversed__(self) -> Iterator[T]: '''The requirements for this protocol makes its conformants automatically reversible.'''
+    def __reversed__(self) -> Iterator[T]: '''The requirements for this protocol makes children automatically reversible.'''
 @type_check_only
 class CanClearAndCopy[T](Protocol):
     '''An iterable that supports clearing and shallow copying.'''
@@ -76,7 +76,7 @@ class CanClearAndCopy[T](Protocol):
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
 class PathLike[T](Protocol):
-    '''An object that represents a path. Basically :class:`os.PathLike`, but a Protocol.'''
+    '''An object that represents a path. Basically :class:`os.PathLike`, but a :class:`~typing.Protocol`.'''
     def __fspath__(self) -> T: ...
 @type_check_only
 class SupportsPop[T](Protocol):
@@ -361,7 +361,7 @@ type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''
 type All = tuple[str, ...]
 '''Type of the `__all__` attributes of the submodules of :mod:`asyncutils`.'''
-type Submodule = Literal['altlocks', 'base', 'buckets', 'caches', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
+type Submodule = Literal['altlocks', 'base', 'buckets', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
 '''Type of strings representing asyncutils submodule names.'''
 type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool']
 '''Type of strings representing executors that can be passed to -e/--executor.'''

@@ -7,32 +7,33 @@ from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import func_all as __all__
 import asyncio as I, asyncutils as A
 from collections import deque, namedtuple
-from functools import partial, wraps
+from functools import partial, update_wrapper, wraps
 from itertools import count, repeat
 from sys import audit
 from time import perf_counter
 def acompose(*F, wrap_last=True, _=I.iscoroutine):
-    async def composed(*a, **k):
+    async def g(*a, **k):
         if _(r := next(I := reversed(F))(*a, **k)): r = await r
         for f in I:
             if _(r := f(r)): r = await r
         return r
-    return wraps(F[-1])(composed) if wrap_last else composed
+    if wrap_last: update_wrapper(g, F[-1])
+    return g
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     async for _ in A.iter_to_agen(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
     return initial
 def star(f, /):
-    async def wrapper(a=(), k=None, /): return await f(*a, **(k or {}))
-    return wraps(f)(wrapper)
+    async def g(a=(), k=None, /): return await f(*a, **(k or {}))
+    return wraps(f)(g)
 def unstar(f, /):
-    async def wrapper(*a, **k): return await f(a, k)
-    return wraps(f)(wrapper)
+    async def g(*a, **k): return await f(a, k)
+    return wraps(f)(g)
 def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, _='func.every: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
         if stop_when and stop_when.done(): log.warning('func.every: future to stop periodic coroutine %s is already done', n)
-        async def wrapper(*a, **k):
+        async def g(*a, **k):
             log.debug('func.every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
             if stop_when is None: stop_when = loop.create_future()
             if wait_first: await I.sleep(intvl)
@@ -55,13 +56,13 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
                 if stop_on_exc or default is A.RAISE: raise A.MaxIterationsError(_%T)
                 (log.info if verbose or q else log.debug)(_, *T)
             if not q: return default
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     return dec
 def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, _='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
         n = getattr(f, '__qualname__', '<name unknown>')
-        async def wrapper(self, /, *a, **k):
+        async def g(self, /, *a, **k):
             log.debug('func.everymethod: periodic task started'); q = default is _NO_DEFAULT
             if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('func.everymethod: future to stop periodic coroutine %s is already done', n)
             if wait_first: await I.sleep(intvl)
@@ -84,11 +85,11 @@ def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False,
                 if stop_on_exc or default is A.RAISE: raise A.MaxIterationsError(_%T)
                 (log.info if verbose or q else log.debug)(_, *T)
             if not q: return default
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     return dec
 def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=perf_counter, ns=False, _='nano', c='func.timer: function %s finished in %.*f %sseconds.', d='func.timer: received expected error from function %s after %.*f %sseconds: %s'):
     if precision is None: precision = A.getcontext().TIMER_DEFAULT_PRECISION-ns*9
-    async def wrapper(*a, **k):
+    async def g(*a, **k):
         s = timer()
         try:
             r = await f(*a, **k); e = timer()-s
@@ -99,7 +100,7 @@ def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=pe
             e = timer()-s
             if should_log: log.warning(d, fullname(f), precision, e, _ if ns else '', b, exc_info=True)
             return A.wrap_exc(b), e
-    return wraps(f)(wrapper)
+    return wraps(f)(g)
 def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, exc=Exception, on_retry=(_ := lambda *_: None), on_success=_, random=_randinst.random):
     c = A.getcontext()
     if tries is None: tries = c.RETRY_DEFAULT_TRIES
@@ -108,7 +109,7 @@ def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, 
     if max_delay is None: max_delay = c.RETRY_DEFAULT_MAX_DELAY
     if jitter is None: jitter = c.RETRY_DEFAULT_JITTER
     def dec(f):
-        async def wrapper(*a, **k):
+        async def g(*a, **k):
             c, l, b = 0, 0.0, 1
             for i in range(tries-1):
                 try: r = await f(*a, **k)
@@ -120,33 +121,33 @@ def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, 
                     if I.iscoroutine(t := on_success(i, l)): await t
                     return r
             return await f(*a, **k)
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     return dec
 def throttle(lim, timer=perf_counter):
     l = 0.0
     def dec(f, /):
-        async def wrapper(*a, **k):
+        async def g(*a, **k):
             nonlocal l
             if w := max(0, 1/lim-timer()+l): await I.sleep(w)
             l = timer(); return await f(*a, **k)
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     return dec
 def debounce(wait):
     def dec(f, /, l=None):
         (L := get_loop_and_set()).set_task_factory(I.eager_task_factory); g, h = L.create_task, I.sleep.__get__(wait)
-        async def wrapper(*a, **k):
+        async def j(*a, **k):
             nonlocal l
             if l: await A.safe_cancel(l)
             l = g(h())
             with A.ignore_cancellation: await l; return await f(*a, **k)
-        return wraps(f)(wrapper)
+        return wraps(f)(j)
     return dec
 def iterf(n, /):
     def dec(f, /):
-        async def wrapper(x, /):
+        async def g(x, /):
             for _ in repeat(None, n): x = await f(x)
             return x
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     return dec
 async def measure(f, /, *, timer=perf_counter): s = timer(); return await f(), timer()-s
 async def measure2(f, /, **k): return (await measure(f, **k))[1]

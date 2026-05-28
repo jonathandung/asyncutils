@@ -65,7 +65,7 @@ class Observable(A.LoopContextMixin):
         if asap and self._event.is_set(): self.unsubscribe_nowait(observer)
         else: self._to_remove.add(observer)
     def unsubscribe_nowait(self, observer, strict=False): getattr(self._data, 'remove' if strict else 'discard')(observer)
-    def subscribe_syncf(self, observer): return self.subscribe_nowait(A.to_async(observer, self.loop))
+    def subscribe_syncf(self, observer): return self.subscribe_nowait(A.to_async(observer))
     def ntimes(self, observer, n=None):
         if n is None: n = A.getcontext().OBSERVABLE_DEFAULT_NTIMES_N
         if n <= 0: raise ValueError('asyncutils.channels.Observable.ntimes: n must be positive')

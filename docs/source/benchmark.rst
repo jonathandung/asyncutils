@@ -81,13 +81,15 @@ Cumulative import time of asyncutils: 147.34 ± 7.53 ms; max 156.40 ms, min 131.
 
   python -Iqm asyncutils -dl
 
-Time taken to start the console, which includes importing asyncio: 99.89 ± 6.19 ms; max 110.25 ms, min 91.97 ms, n = 10
+Time taken to start the console, which includes importing :mod:`asyncio`: 99.89 ± 6.19 ms; max 110.25 ms, min 91.97 ms, n = 10
 
 .. code-block:: bash
 
   python -Iqm asyncutils -dpl
 
-Time taken to actually import asyncio along with all 32 ordinary submodules and required internal submodules: 196.96 ± 18.30 ms; max 225.08 ms, min 172.51 ms, n = 10
+Time taken to import :mod:`asyncio` along with all 31 ordinary submodules: 196.96 ± 18.30 ms; max 225.08 ms, min 172.51 ms, n = 10
+
+.. note:: Up to 10 required internal submodules are also fetched.
 
 .. version-added:: 0.9.10
 

@@ -1,9 +1,9 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
 from ._internal.types import AsyncLockLike, Exceptable, ExcType, SupportsIteration, Timer
 from .mixins import AsyncContextMixin, AwaitableMixin
-from _collections_abc import Awaitable, Callable, Coroutine
+from _collections_abc import Awaitable, Callable
 from collections import deque
-from types import TracebackType
+from types import CoroutineType, TracebackType
 from typing import Any, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
@@ -55,7 +55,7 @@ class CircuitBreaker:
     @overload
     def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
     @overload
-    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, Coroutine[Any, Any, T]]:
+    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, CoroutineType[Any, Any, T]]:
         '''| Construct a circuit breaker, whose circuit is initially closed.
         | If `name` is passed, use it as its name; return a function wrapping `f` otherwise, deriving the name of the circuit breaker from the function.
         | This derivation follows exactly one level of :attr:`__wrapped__`-based wrapping after retrieving the :attr:`__func__` attribute if present.
@@ -66,7 +66,7 @@ class CircuitBreaker:
         | half-open state.
         | If the function completes successfully when the breaker is half-open under `max_half_open_calls` (default
         | :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS`) tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
-    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, Coroutine[Any, Any, T]]:
+    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, CoroutineType[Any, Any, T]]:
         '''| Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature but strictly returning a coroutine.
         | `timer` (default :func:`time.monotonic`) is used to get the current time for timeout calculation.
         | If passed, `default` is returned if an expected exception is raised, also suppressing that exception.

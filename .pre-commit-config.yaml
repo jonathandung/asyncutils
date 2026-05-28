@@ -7,17 +7,13 @@ repos:
       - id: check-toml
       - id: double-quote-string-fixer
       - id: check-added-large-files
-        args: [--maxkb=150]
+        args: [--maxkb=100]
       - id: check-merge-conflict
       - id: detect-private-key
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.14
     hooks:
       - id: ruff-check
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
-    hooks:
-      - id: actionlint
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
@@ -27,4 +23,4 @@ repos:
     rev: v1.0.2
     hooks:
       - id: sphinx-lint
-        args: ['--enable', 'default-role']
+        args: [--enable, default-role]

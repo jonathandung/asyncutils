@@ -7,7 +7,7 @@ N: Final[Bag]
 '''The frozen part of the configuration as a light namespace-like object.'''
 C: Final[dict[str, Any]]
 '''The contextual portion of the configuration as a flattened :class:`dict` mapping upper-case keys to values.'''
-D: Final[dict[str, str]]
+Z: Final[dict[str, str]]
 '''A :class:`dict` mapping file extensions to module names for loading config files. Is queried by :func:`tools.loadf`. Stable.'''
 c: Final[str]
 '''The path to the config file used, or an empty string if no config file was read.'''

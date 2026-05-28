@@ -1,11 +1,11 @@
 '''Utilities that cannot be easily classified into any submodule.'''
-from ._internal.types import SupportsIteration, ExcType
-from .mixins import ExecutorRequiredAsyncContextMixin
+from ._internal.types import ExcType, SupportsIteration, Timer
+from .mixins import ExecutorRequiredAsyncContextMixin, LoopContextMixin
 from _collections_abc import Awaitable, Callable, Generator, Iterable, Mapping
 from collections import deque
 from types import TracebackType
-from typing import Any, Self, Literal, overload
-__all__ = 'CallbackAccumulator', 'StateMachine', 'gather_with_limited_concurrency'
+from typing import Any, NoReturn, Self, Literal, overload
+__all__ = 'CacheWithBackgroundRefresh', 'CallbackAccumulator', 'StateMachine', 'gather_with_limited_concurrency'
 class StateMachine:
     '''A simple asynchronous state machine accepting string states.'''
     def __init__(self, state: str): '''Initialize the state machine with the given initial state.'''
@@ -52,3 +52,35 @@ class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncCo
     @property
     def callbacks(self) -> Self: '''Return a view of the callbacks currently stored in the accumulator.'''
     def __iter__(self) -> Generator[Callable[P, T]]: '''Iterate through the callbacks.'''
+class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
+    '''| A cache that automatically refreshes entries in the background before expiry. Use as an async context manager only.
+    | Maintains entries with TTL values and proactively reloads their values from registered loaders in the background when they approach expiration.
+    | This ensures availability of fresh data without blocking get operations.'''
+    @overload
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, default_loader: Callable[[T], R], processor: Callable[[BaseException, bool], object]=..., timer: Timer=...): ...
+    @overload
+    def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
+        '''All arguments are optioanl:
+
+        * `ttl`: Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
+        * `refresh`: Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
+        * `processor`: Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
+        * `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
+        * `default_loader`: The loader to load values from keys for which specific loaders have not been registered.'''
+    def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
+    def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
+    def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
+    def should_refresh(self, key: T) -> bool: '''Whether the key should be refreshed at this instant.'''
+    def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
+    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re)configure the cache with the given `ttl`, `refresh` and `processor`.'''
+    def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising :exc:`LookupError` if there is none.'''
+    async def __setup__(self) -> None: ...
+    async def __cleanup__(self) -> None: ...
+    async def clear(self) -> None: '''Remove all entries from the cache asynchronously.'''
+    async def get(self, key: T, loader: Callable[[T], R]|None=...) -> R:
+        '''| Get the value for the key from the cache.
+        | If the key is expired, it is immediately loaded; if it is within the refresh window, return the current value and trigger background refresh.'''
+    async def invalidate(self, key: T) -> R|None: '''Remove a key from the cache, returning the corresponding value if it was in the cache.'''
+    async def load_item(self, key: T) -> None: '''Load the entry for a key and store it in the cache.'''
+    async def refresh_item(self, key: T) -> None: '''Refresh an entry in the background.'''
+    async def refresh_loop(self) -> NoReturn: '''This task runs continuously in the background, checking for entries requiring refresh and spawning tasks to do so.'''

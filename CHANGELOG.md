@@ -14,17 +14,21 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-57% coverage, 73 tests
+58% coverage, 75 tests
 
 ### Docs
 
-91% complete
+92% complete
 
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.9] - 2026-05-26; newest
+### [0.9.10] - 2026-05-28; newest
+
+Removed actionlint step; integrated CodeQL fully.
+
+### [0.9.9] - 2026-05-26
 
 Added more tests and more badges to the readme; removed codecov upload step superseded by GitHub Code Quality.
 
@@ -125,12 +129,6 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     Classes:
     - TokenBucket
     - LeakyBucket
-
-    - caches
-
-    Classes:
-    - AsyncLRUCache
-    - CacheWithBackgroundRefresh
 
   - channels
 
@@ -367,6 +365,7 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     Classes:
     - CallbackAccumulator
     - StateMachine
+    - CacheWithBackgroundRefresh
 
     Functions:
     - gather_with_limited_concurrency
@@ -473,6 +472,7 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     Functions:
     - aawcmf2dcmf
     - aawcmf2dcmff
+    - afcopy
     - dcm
     - get_future
     - new_eager_tasks
@@ -610,7 +610,7 @@ Added more complicated patterns and procedures such as `channels.Observable` and
 
 ### [0.3.0] - 2025-08-2x
 
-Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `caches.CacheWithBackgroundRefresh`.
+Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `misc.CacheWithBackgroundRefresh`.
 
 ### [0.2.0] - 2025-07-0x
 

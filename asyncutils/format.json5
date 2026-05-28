@@ -91,13 +91,6 @@ Some keys can have various types, as detailed by the comments attached. */
         wait_for_tokens_tick: 0.1
       }
     },
-    caches: {
-      async_lru_cache_default_maxsize: 128,
-      background_refresh_cache: {
-        default_refresh: 15.0,
-        default_ttl: 60.0
-      }
-    },
     channels: {
       event_bus: {
         default_max_concurrent: 64,
@@ -155,7 +148,13 @@ Some keys can have various types, as detailed by the comments attached. */
       priority_semaphore_default_value: 1
     },
     locksmiths: {locksmith_base_default_timeouts: [1.0, 0.1, null]},
-    misc: {gather_with_limited_concurrency_default_max_concurrent: 8},
+    misc: {
+      gather_with_limited_concurrency_default_max_concurrent: 8,
+      background_refresh_cache: {
+        default_refresh: 15.0,
+        default_ttl: 60.0
+      }
+    },
     networking: {
       line_protocol_default_buffer_size: 4096,
       socket_transport_limits: [2048, 8192]

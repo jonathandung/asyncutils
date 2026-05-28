@@ -8,7 +8,7 @@ from itertools import repeat
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
-    __reusable = []; __slots__ = '_flags', '_istr', '_loop', '_state', '_task' # noqa: RUF012
+    __reusable, constructor_args = [], ('dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'); __slots__ = '_flags', '_istr', '_loop', '_state', '_task'
     def _get_unclosed_loop(self, factory=I.new_event_loop, _=A.IgnoreErrors(AttributeError)): # pragma: no cover
         if self._flags&0x800: return factory()
         p, L = (pool := self.__reusable).pop, None
@@ -25,14 +25,14 @@ class event_loop: # noqa: N801
     def from_flags(cls, flags, /, _=c, m=-0x10000):
         if flags&m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
         r._flags, r._state, r._istr = flags, 0, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
-    def __new__(cls, _=('dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error'), /, **k):
+    def __new__(cls, /, **k):
         F, p, s = A.getcontext().EVENT_LOOP_BASE_FLAGS, k.pop, 1
-        for f in _:
+        for f in cls.constructor_args:
             if (x := p(f, None)) is None: ...
             elif x: F |= s
             else: F &= ~s
             s <<= 1
-        if k: A.raise_exc(TypeError, 'asyncutils.base.event_loop: got unexpected keyword arguments', notes=k) # pragma: no cover
+        if k: A.raise_exc(TypeError, 'asyncutils.base.event_loop: got unexpected keyword arguments; shown below', notes=k) # pragma: no cover
         return cls.from_flags(F)
     def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
         f = self._flags
@@ -94,7 +94,8 @@ class event_loop: # noqa: N801
         if f&1: self._flags = f^0x400
         if self.__exit__(*exc_info()) and b: _g(_w, n)
     def __reduce__(self, /): return self.from_flags, (self._flags,)
-    P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig), (__del__, ''), (_get_unclosed_loop, 'factory={}')); P.patch_classmethod_signatures((from_flags, 'flags, /'))
+    def __repr__(self, _=c): return f'{_(self)}.from_flags({self._flags:#4x})'
+    P.patch_method_signatures((__enter__, ''), (__exit__, P.xsig), (__del__, ''), (_get_unclosed_loop, 'factory={}')); P.patch_classmethod_signatures((from_flags, 'flags, /'), (__new__, f'*, {"={0}, ".join(constructor_args)}={{0}}'))
 def f(n):
     async def adisembowel(it, /): # pragma: no cover
         if callable(p := getattr(it, n, None)):

@@ -69,12 +69,6 @@ inspiration.
   * - asyncutils.buckets.LeakyBucket
     - ``capacity``: :class:`float`, ``leak``: :class:`float`
     - Raised when :class:`~asyncutils.buckets.LeakyBucket` is instantiated, with ``capacity`` being the maximum number of tokens and ``leak`` the leak rate.
-  * - asyncutils.caches.CacheWithBackgroundRefresh
-    - ``ttl``: :class:`float`, ``refresh``: :class:`float`
-    - Raised when :class:`~asyncutils.caches.CacheWithBackgroundRefresh` is instantiated, with ``ttl`` being the time to live of cache entries and ``refresh`` the time before expiry at which background refreshes are triggered.
-  * - asyncutils.caches.AsyncLRUCache
-    - ``maxsize``: :class:`int`, ``ttl``: :class:`float|None`
-    - Raised when :class:`~asyncutils.caches.AsyncLRUCache` is instantiated, with ``maxsize`` being the maximum number of entries and ``ttl`` their time to live.
   * - asyncutils.channels.Observable
     - ``maxsize``: :class:`int|None`
     - Raised when :class:`~asyncutils.channels.Observable` is instantiated, with ``maxsize`` being the maximum number of subscribers or ``None`` if there is no such limit.
@@ -165,6 +159,9 @@ inspiration.
   * - asyncutils.locksmiths.LocksmithBase.force
     - ``saddr``: :class:`int`, ``laddr``: :class:`int`
     - Raised when :meth:`~asyncutils.locksmiths.LocksmithBase.force` is called, with the memory addresses of the locksmith instance and the lock being forced in that order as arguments. Audit hooks can choose to block the force by raising or take action in response.
+  * - asyncutils.misc.CacheWithBackgroundRefresh
+    - ``ttl``: :class:`float`, ``refresh``: :class:`float`
+    - Raised when :class:`~asyncutils.misc.CacheWithBackgroundRefresh` is instantiated, with ``ttl`` being the time to live of cache entries and ``refresh`` the time before expiry at which background refreshes are triggered.
   * - asyncutils.networking.LineProtocol
     - \
     - Raised when :class:`~asyncutils.networking.LineProtocol` is instantiated.

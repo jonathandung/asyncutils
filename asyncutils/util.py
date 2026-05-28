@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute]
 __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools'))
 import asyncio as I, asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
@@ -16,7 +17,12 @@ def done_evt(*, evtcls=I.Event): (E := evtcls()).set(); return E
 def done_fut(res=None, *, futcls=I.Future): F = futcls(); F.set_exception(A.unwrap_exc(res)) if A.exception_occurred(res) else F.set_result(res); return F
 def get_future(aw, loop=None): return (get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
 def new_eager_tasks(*aws): (l := get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)
-def to_sync(f, /, timeout=None, loop=None): audit('asyncutils.util.to_sync', fullname(f)); return wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop))
+def _fcopy(f, /): return wraps(f)(lambda *a, **k: f(*a, **k)) # noqa: PLW0108
+def afcopy(f, /): return wraps(f)(lambda *a, **k: wrap_in_coro(f(*a, **k)))
+def to_sync(f, /, timeout=None, loop=None):
+    audit('asyncutils.util.to_sync', fullname(f))
+    if (f := getattr(f, '__sync__', f)) is not f: return f
+    (g := afcopy(f)).__sync__ = r = wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop)); r.__async__ = g; return r
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
 def _set_call(F, f, /): F.set_result(f())
 def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_set_call, F := l.create_future(), partial(f, *a, **k)); return F
@@ -28,37 +34,36 @@ def sync_await(aw, *, timeout=None, loop=None, _='_thread_id'):
 def semaphore(bounded=False, workers=None): return (I.BoundedSemaphore if bounded else I.Semaphore)(A.getcontext().SEMAPHORE_DEFAULT_VALUE if workers is None else workers)
 def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # noqa: B008
     if (l := _lc.get(f)) is None: _lc[f] = l = lf()
-    async def wrapped(*a, **k):
+    async def r(*a, **k):
         async with l: return await f(*a, **k)
-    return wraps(f)(wrapped)
+    return wraps(f)(r)
 def sync_lock(l, /, timeout=None):
     if not check_methods(l, 'acquire', 'release', 'locked'): raise TypeError('asyncutils.util.sync_lock: acquire, release and locked methods are required')
     def dec(f):
-        async def wrapper(*a, **k):
+        async def g(*a, **k):
             try:
                 async with I.timeout(timeout): await l.acquire(); return f(*a, **k)
             finally:
                 if l.locked() and I.iscoroutine(r := l.release()): await r
-        return wraps(f)(to_sync(wrapper))
+        return wraps(f)(to_sync(g))
     return dec
 def sync_lock_from_binder(f, /, timeout=None):
     def dec(m, /):
-        async def wrapper(self, *a, **k):
-            if not check_methods(l := f(self), 'acquire', 'release', 'locked'): raise TypeError('asyncutils.util.sync_lock_from_binder: acquire, release and locked methods are required')
+        async def g(s, /, *a, **k):
+            if not check_methods(l := f(s), 'acquire', 'release', 'locked'): raise TypeError('asyncutils.util.sync_lock_from_binder: acquire, release and locked methods are required')
             try:
-                async with I.timeout(timeout): await l.acquire(); return m(self, *a, **k)
+                async with I.timeout(timeout): await l.acquire(); return m(s, *a, **k)
             finally:
                 if l and l.locked() and I.iscoroutine(l := l.release()): await l
-        return wraps(m)(to_sync(wrapper))
+        return wraps(m)(to_sync(g))
     return dec
-def to_async(f=None, /, loop=None):
-    if f is None: return lambda f, /: to_async(f, loop)
+def to_async(f, /):
     audit('asyncutils.util.to_async', fullname(f))
-    if loop is None: loop = get_loop_and_set()
-    async def wrapper(*a, **k):
-        if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
-        return await loop.run_in_executor(e, partial(f, *a, **k))
-    return wraps(f)(wrapper)
+    if (f := getattr(f, '__async__', f)) is not f: return f
+    if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
+    r = partial(get_loop_and_set().run_in_executor, e)
+    async def h(*a, **k): return await r(partial(f, *a, **k))
+    g.__async__, h.__sync__ = wraps(f)(h), (g := _fcopy(f)); return h
 async def aiter_from_f(f, s=_NO_DEFAULT, /):
     while True:
         if (r := await f()) is s or r == s: break
@@ -135,7 +140,7 @@ def aawcmf2dcmff(**d):
             try: yield r
             finally: await h(c.__exit__, *exc_info())
         return _(g)
-    f.__text_signature__ = '(f, /)'; return f # ty: ignore[unresolved-attribute]
+    f.__text_signature__ = '(f, /)'; return f
 dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], A.IgnoreErrors(I.CancelledError)
 patch_function_signatures((lockf, 'f, /, lf={}'), (sync_await, 'aw, *, timeout=None, loop=None'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

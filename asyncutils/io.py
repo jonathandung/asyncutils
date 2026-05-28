@@ -15,7 +15,7 @@ double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'),
 P.patch_function_signatures(*((_, s) for _ in t))
 @H.subscriptable
 class AsyncReadWriteCouple(A.LoopContextMixin):
-    __slots__ = '_aso', '_executor', 'reader', 'writer'; executor = None
+    __slots__ = '_aso', '_executor', 'reader', 'writer'; executor, AMBIGUOUS_CALL_TIP = None, 'tip: delegate to reader or writer as appropriate'
     def __init__(self, r, w, /, executor=None, _=H.create_executor, *, find_attr_on_writer_first=False):
         if not r.readable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: reader {r!r} is not readable')
         if not w.writable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: writer {w!r} is not writable')
@@ -34,13 +34,13 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
     def readlines(self, hint=-1, /): return self._run(self.reader.readlines, hint)
     def write(self, s, /): return self._run(self.writer.write, s)
     def writelines(self, lines, /): return self._run(self.writer.writelines, lines)
-    def fileno(self): A.raise_exc(OSError, E.EBADF, 'asyncutils.io.AsyncReadWriteCouple: ambiguous file descriptor query', notes='delegate to reader or writer as appropriate')
-    def isatty(self): A.raise_exc(OSError, E.ENOTSUP, 'asyncutils.io.AsyncReadWriteCouple: ambiguous isatty query', notes='delegate to reader or writer as appropriate')
+    def fileno(self): A.raise_exc(OSError, E.EBADF, 'asyncutils.io.AsyncReadWriteCouple: ambiguous file descriptor query', notes=self.AMBIGUOUS_CALL_TIP)
+    def isatty(self): A.raise_exc(OSError, E.ENOTSUP, 'asyncutils.io.AsyncReadWriteCouple: ambiguous isatty query', notes=self.AMBIGUOUS_CALL_TIP)
     readable = writable = lambda _, /: True
     def flush(self): return self._run(self.writer.flush)
     def seekable(self): return False
-    def seek(self, offset, whence=0, /): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: cannot use seek on read-write couple', notes='delegate to reader or writer as appropriate') # noqa: ARG002
-    def tell(self): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: tell is not supported', notes='delegate to reader or writer as appropriate')
+    def seek(self, offset, whence=0, /): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: cannot use seek on read-write couple', notes=self.AMBIGUOUS_CALL_TIP) # noqa: ARG002
+    def tell(self): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: tell is not supported', notes=self.AMBIGUOUS_CALL_TIP)
     def truncate(self, size=None, /): return self._run(self.writer.truncate, size)
     async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self._executor.shutdown()
     __cleanup__ = aclose

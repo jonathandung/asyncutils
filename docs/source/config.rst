@@ -170,7 +170,7 @@ XML    .xml           xmltodict          xmltodict
 INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
 
 It is currently possible to associate file extensions not shown above with other libraries providing a :func:`load` function taking a file object and
-returning a dictionary, by modifying the :data:`_internal.unparsed.D` map from file extensions to names of corresponding modules. However,
+returning a dictionary, by modifying the :data:`_internal.unparsed.Z` map from file extensions to names of corresponding modules. However,
 it is believed that the options offered are versatile enough to fit every individual need, so this functionality is just a minor trait of the
 implementation that just so happens to have been declared stable.
 

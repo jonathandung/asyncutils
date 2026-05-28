@@ -1,12 +1,12 @@
 '''A special module used to set up the :mod:`asyncutils` module namespace.
 
-.. danger:: Modifying its contents or reloading it at runtime may break the module.'''
+.. danger:: Modifying the module's contents or reloading it at runtime may break the module.'''
 from .types import All, Submodule
 from types import ModuleType
 from typing import Any, Final, Self, final, overload
 @final
 class Module:
-    '''The actual type of submodule proxies. Only user-facing methods have docstrings here.'''
+    '''The actual type of submodule proxies, implemented as transparently as possible. Only user-facing methods have docstrings here.'''
     @overload
     def __new__(cls, name: Submodule, /) -> Self|ModuleType: ...
     @overload

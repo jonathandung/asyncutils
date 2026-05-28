@@ -33,7 +33,7 @@ As to how the loquacity and output whereabouts of the logger can be altered, ref
 .. literalinclude:: ../../asyncutils/format.json5
   :language: json5
   :caption: json-based or command-line configuration
-  :lines: 4-13,18-20,27-30,214
+  :lines: 4-13,18-20,27-30,213
   :force:
 
 The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>".

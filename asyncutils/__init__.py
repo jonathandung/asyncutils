@@ -9,5 +9,5 @@ def __getattr__(n, /, _=globals()):
     try: return _[n]
     except KeyError: return I.Module(n) # pragma: no cover
 from asyncutils.version import VersionInfo as V
-time_since_boot.__text_signature__, __hexversion__, console_preloaded_submodules = '()', int(__version__ := V('0.9.9')), (preloaded_submodules := frozenset(('constants', 'context', 'cli', 'exceptions', 'version'))).union(('base', 'config', 'console')) # ty: ignore[unresolved-attribute]
+time_since_boot.__text_signature__, __hexversion__, console_preloaded_submodules = '()', int(__version__ := V('0.9.10')), (preloaded_submodules := frozenset(('constants', 'context', 'cli', 'exceptions', 'version'))).union(('base', 'config', 'console')) # ty: ignore[unresolved-attribute]
 del V, I, T, M

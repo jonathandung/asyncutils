@@ -5,7 +5,6 @@ from typing import Final
 altlocks_all: Final[All]
 base_all: Final[All]
 buckets_all: Final[All]
-caches_all: Final[All]
 channels_all: Final[All]
 cli_all: Final[All]
 compete_all: Final[All]

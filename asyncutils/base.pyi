@@ -9,6 +9,8 @@ __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'colle
 @final
 class event_loop: # noqa: N801
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
+    constructor_args: tuple[str, ...]
+    '''A tuple of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
     def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., dont_try_clear_tasks_on_reuse: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all are applied on top of :const:`context.EVENT_LOOP_BASE_FLAGS`.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
     @overload
@@ -94,4 +96,4 @@ dummy_task: GeneratorCoroutine[Never, Any, Any]
 
   This is achieved by setting the :const:`inspect.CO_ITERABLE_COROUTINE` flag on the code of a generator function.'''
 yield_to_event_loop: Awaitable[None]
-'''An awaitable, picklable singleton that yields control to the event loop for one iteration when awaited.'''
+'''An awaitable and picklable singleton that yields control to the event loop for exactly one iteration when awaited, much like `asyncio.sleep(s)` for non-positive `s`.'''

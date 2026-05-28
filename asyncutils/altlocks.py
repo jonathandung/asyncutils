@@ -48,7 +48,7 @@ class CircuitBreaker:
         audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s._max_fails, s._reset, s._exc, s._opened, s._max_half_open_calls, s._unlock, s._lock = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l; s.state = s.fails = s._half_open_calls = 0; return s if f is None else s(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
-        async def wrapper(*a, **k):
+        async def g(*a, **k):
             async with self._lock:
                 if (s := self.state) == 2: # noqa: PLR2004
                     if timer()-self._opened > self._reset: self.state, self._half_open_calls = 1, 0
@@ -67,7 +67,7 @@ class CircuitBreaker:
                     return default
                 except A.CRITICAL: raise A.Critical
                 except BaseException as e: raise A.CircuitBreakerError(f'asyncutils.altlocks.CircuitBreaker: unexpected {fullname(e)} in {fullname(f)} under breaker {self.name!r}') from e
-        return wraps(f)(wrapper)
+        return wraps(f)(g)
     P.patch_classmethod_signatures((__new__, 'name, /, max_fails=None, reset=None, *, exc={}, max_half_open_calls=None'))
 class StatefulBarrier(A.AwaitableMixin):
     __slots__ = '_broken', '_cond', '_count', '_exc', '_initstate', '_parties', '_state'

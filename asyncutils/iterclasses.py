@@ -43,11 +43,7 @@ class apeekable(A.LoopBoundMixin):
             elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
                 async for s in A.take(self._it, d): f(s)
             return tuple(C)[a:b:c]
-        l, i = len(C), int(i)
-        if i < 0:
-            async for s in A.iter_to_agen(self._it): f(s)
-        elif i >= l:
-            async for s in A.take(self._it, i-l+1): f(s)
+        async for s in A.iter_to_agen(self._it) if (i := i.__index__()) < 0 else A.empty_agen() if i < (l := len(C)) else A.take(self._it, i-l+1): f(s)
         return C[i]
     P.patch_method_signatures((__getitem__, 'idx, /'))
 class await_later:
