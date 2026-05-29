@@ -3,6 +3,7 @@ from asyncutils.iterclasses import *
 from asyncutils.iters import *
 from asyncio import CancelledError, create_task, gather, sleep
 from _collections import deque
+from _operator import is_
 from pytest import fail, mark, raises
 from tests.conftest import mk
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10)))
@@ -37,9 +38,12 @@ async def test_sleep_forever():
 async def test_dummies():
     await gather(yield_to_event_loop, dummy_task)
     for i in dummy_task: fail(f'dummy_task should be empty; got {i}')
+    async for i in aloops(4): assert i is None
 @mk
 async def test_adisembowel():
-    assert await vecs_eq(aappend(0, adisembowel([1, 2, 3])), areversed(range(4)), __import__('_operator').is_)
+    assert await vecs_eq(aappend(0, adisembowel([1, 2, 3])), areversed(range(4)), is_)
     dq = deque()
     async for i in achain.from_iterable(amap(arange, arange(1, 4))): dq.append(i)
-    assert await vecs_eq(adisembowelleft(dq), await agather(amap(sleep.__get__(0), (0, 0, 1, 0, 1, 2))), __import__('_operator').is_)
+    assert await vecs_eq(adisembowelleft(dq), await agather(amap(sleep.__get__(0), (0, 0, 1, 0, 1, 2))), is_)
+@mk
+async def test_aaccumulate(): assert await vecs_eq(aaccumulate(range(10)), (0, 1, 3, 6, 10, 15, 21, 28, 36), strict=False)

@@ -183,19 +183,8 @@ async-safe and mutable, thanks to :mod:`contextvars`. The sheer magnitude of opt
 By convention, they are called contextual constants since no code in this library is expected to change their values, only reading from them to
 determine things from dynamic default arguments to frequencies of background tasks and internal thresholds.
 
-One may find it useful to alter the context dynamically without creating a new context. This can be achieved as follows:
-
-.. code-block:: python
-
-  asyncutils.getcontext().update( # call the update method of the current context to modify in-place
-    {'SOCKET_TRANSPORT_LIMITS': (1024, 16384)}, # can optionally pass in a dictionary as the first and only positional argument
-    ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR=True, # fields go here; keyword arguments are accepted
-    observable_default_ntimes_n=3, # lowercase or mixed-case is allowed but not recommended
-    lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1, # fields do not have to be in order
-    WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2] # list will be automatically converted into tuple
-  ) # check if a string `name` is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
-
-Due care must be exercised to avoid messing up other parts of your program relying on this context.
+One may find it useful to alter the context dynamically without creating a new context. This can be achieved by calling
+:meth:`~context.Context.update`.
 
 .. seealso::
 

@@ -3,7 +3,7 @@ test:
 	pytest -p asyncio-cooperative -p no:asyncio -p no:pytest_cov --no-local-badge --maxfail 5
 test-with-badges:
 	pytest -p asyncio-cooperative -p no:asyncio -p no:pytest_cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 25 --local-badge-generate duration skipped status warnings xfailed
-	pytest -p asyncio -p pytest_cov -p no:asyncio-cooperative --maxfail 0 --cov asyncutils --cov-report term-missing --cov-fail-under 57 --local-badge-output-dir assets --local-badge-generate cov
+	pytest -p asyncio -p pytest_cov -p no:asyncio-cooperative --maxfail 0 --cov asyncutils --cov-report term-missing --cov-fail-under 58 --local-badge-output-dir assets --local-badge-generate cov
 clean:
 	rm -rf build dist py_asyncutils.egg-info .ruff_cache .pytest_cache .coverage .uv-stamp docs/build docs/source/api docs/source/help.rst docs/source/makefile-usage.rst
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

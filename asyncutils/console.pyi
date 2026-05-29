@@ -9,18 +9,23 @@ from code import InteractiveConsole
 from collections import ChainMap
 from concurrent.futures import Future
 from types import CodeType, ModuleType
-from typing import Any, ClassVar, Self, TypeGuard, final, overload
+from typing import Any, ClassVar, Literal, Self, TypeGuard, final, overload
+import sys
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
     '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`~_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by :mod:`asyncio.__main__` and highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
-    STATEMENT_FAILED: ClassVar[object]
-    '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument `name` is not provided to the subclass constructor.'''
-    CAN_USE_PYREPL: ClassVar[bool]
-    '''Whether :mod:`_pyrepl` enhancements are available and allowed.'''
+    if sys.version_info >= (3, 13):
+        CAN_USE_PYREPL: ClassVar[bool]
+        '''Whether :mod:`_pyrepl` enhancements are available and allowed.'''
+        STATEMENT_FAILED: ClassVar[object]
+        '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
+    else:
+        CAN_USE_PYREPL: ClassVar[Literal[False]]
+        '''PyREPL is only available on Python 3.13 and above.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
     '''| module name -> (locals of console of corresponding type -> Any)
     | Add handlers for the module of your own console with `native_handler` and other modules with `other_handlers`.'''

@@ -3,7 +3,7 @@ def setup(app): app.add_config_value('py313', sys.version_info >= (3, 13), 'env'
 project = 'asyncutils'
 author = 'Jonathan Dung'
 version = '0.9'
-release = '0.9.9'
+release = '0.9.10'
 copyright = '2026 Jonathan Dung'
 need_sphinx = '9.1.0'
 extensions = ['autoapi.extension', 'notfound.extension', 'sphinx_copybutton', 'sphinx.ext.ifconfig', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
@@ -18,7 +18,7 @@ if os.getenv('READTHEDOCS') == 'True':
 else:
     html_theme = 'sphinx_book_theme'
     suppress_warnings += ('ref.doc', 'toc.not_readable')
-html_short_title = 'asyncutils 0.9.9 docs'
+html_short_title = 'asyncutils 0.9.10 docs'
 autoapi_dirs = ['../../asyncutils']
 autoapi_file_patterns = ['*.pyi']
 autoapi_ignore = ['*/_internal/helpers.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=82.0.1", "wheel>=0.47.0"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.11.17"]
+build-backend = "uv_build"
 
 [project]
 name = "py-asyncutils"
@@ -86,7 +86,7 @@ typing-extensions = false
 "asyncutils/_internal/py31*.pyi" = ["S101"]
 "tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
 "asyncutils/__init__.py" = ["E402"]
-"asyncutils/_internal/compat.py" = ["PLR2004"]
+"asyncutils/_internal/compat.py" = ["F821", "PLC3002", "PLR2004"]
 "asyncutils/_internal/unparsed.py" = ["B020"]
 "asyncutils/_internal/py312.py" = ["ARG002", "SIM105"]
 "asyncutils/base.py" = ["B008", "E722", "RUF029"]
@@ -118,7 +118,7 @@ docstring-quotes = "single"
 mypy-init-return = true
 
 [tool.ruff.lint.mccabe]
-max-complexity = 24
+max-complexity = 22
 
 [tool.ruff.lint.pyflakes]
 allowed-unused-imports = ["asyncutils._internal.submodules"]
@@ -132,6 +132,7 @@ max-public-methods = 41
 max-branches = 16
 max-nested-blocks = 5
 max-statements-in-try = 8
+max-statements = 54
 
 [tool.ty.analysis]
 allowed-unresolved-imports = ["_collections.**", "_functools.**", "_heapq.**", "yaml.**", "asyncio.futures._chain_future", "asyncutils.config._randinst", "asyncutils.constants._NO_DEFAULT"]
@@ -148,4 +149,8 @@ all = "error"
 include = ["asyncutils"]
 
 [tool.uv]
-required-version = ">=0.11.16"
+required-version = ">=0.11.17"
+
+[tool.uv.build-backend]
+module-name = "asyncutils"
+module-root = ""

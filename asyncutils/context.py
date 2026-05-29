@@ -1,9 +1,10 @@
+# ty: ignore[unresolved-reference]
 from asyncutils._internal import patch as P
 from asyncutils._internal.compat import p
 from asyncutils._internal.submodules import context_all as __all__
 from asyncutils._internal.unparsed import C
 _, k, all_contextual_consts = __import__('_contextvars').ContextVar('asyncutils_contextvar'), None, frozenset(C)
-class Context:
+class Context: # noqa: PLW1641
     __slots__ = tuple(C); exec(f'def __new__(cls,/,*,{",".join(f"{k}={v!r}" for k, v in C.items())}):\n\t(_:=object.__new__(cls)).{"\n\t_.".join(f"{k}={k}" for k in __slots__)}\n\treturn _') # noqa: S102
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.context.Context')
     def __getattribute__(self, n, /, _=frozenset(('ascurctx', 'replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint', 'from_dct')), u='__'): return super().__getattribute__(n if n in _ or (n.startswith(u) and n.endswith(u)) else n.upper())
@@ -25,15 +26,19 @@ class Context:
             if not m: continue
             for n, v in m.items():
                 if (n := n.upper()) in _: setattr(self, n, v)
-    def ascurctx(self): return nonreusablelocalcontext(self)
+    def ascurctx(self, **k): return nonreusablelocalcontext(self, **k)
+    def __eq__(self, o, /):
+        if type(o) is not __class__: return False
+        f, g = map(object.__getattribute__.__get__, (self, o)); return all(f(k) == g(k) for k in self.__slots__)
     @classmethod
     def from_dct(cls, d, /): return cls(**{k.upper(): v for k, v in d.items()})
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
     def copy(self): return type(self)(**self.asdict())
     def replace(self, /, **k): return self.replace_from_dct(k)
-    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=None, incl_newline=True): file.write('Context.from_dct(\n'); (pp or p)._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*incl_newline, file=file, flush=flush) # pragma: no cover
+    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=None, incl_newline=True): file.write('Context.from_dct(\n'); (pp or p)._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*incl_newline, file=file, flush=flush)
     def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _(), incl_newline=False); return s.getvalue()
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
+    def __reduce__(self): return __class__.from_dct, (self.asdict(),)
     __copy__, __replace__, __setitem__ = copy, replace, __setattr__; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
 def getcontext(_=_, d=Context()):
     try: return _.get()
@@ -43,7 +48,7 @@ def setcontext(c, /, _=_):
     _.set(c)
 class localcontext:
     __slots__ = 'new_ctx', 'saved_ctx'
-    def __init__(self, ctx=None, **k):
+    def __init__(self, /, ctx=None, **k):
         if ctx is None: ctx = getcontext()
         if type(ctx) is not Context: raise TypeError('asyncutils.context.localcontext: ctx must be an instance of asyncutils.context.Context')
         self.new_ctx = ctx.replace_from_dct(k)

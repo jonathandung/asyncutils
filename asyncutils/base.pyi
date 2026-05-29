@@ -4,12 +4,12 @@ from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Callable,
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from types import TracebackType
-from typing import Any, Literal, Never, NoReturn, Self, final, overload
+from typing import Any, Final, Literal, Never, NoReturn, Self, final, overload
 __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class event_loop: # noqa: N801
     '''A context manager to manage lifecycles of asyncio-native event loops.'''
-    constructor_args: tuple[str, ...]
+    constructor_args: Final = 'dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error' # noqa: PYI015
     '''A tuple of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
     def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., dont_try_clear_tasks_on_reuse: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all are applied on top of :const:`context.EVENT_LOOP_BASE_FLAGS`.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying asyncio event loop, which is fetched on demand.'''
@@ -21,6 +21,10 @@ class event_loop: # noqa: N801
     def factory_reset(self) -> None: '''Restore the default settings from the context (i.e., set the flags to :const:`context.EVENT_LOOP_BASE_FLAGS`).'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration of the manager to the equivalent of passing all keyword arguments as `False`, except those covered by `mask_to_keep`.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
+    @overload
+    def flags_eq(self, other: Self, /) -> bool: ...
+    @overload
+    def flags_eq(self, flags: int, /) -> bool: '''Return whether the configuration of this manager is the same as that of `other`, regardless of their respective states.'''
     @classmethod
     def from_flags(cls, flags: int, /) -> Self: '''Construct an instance from `flags`, a bitwise or of options (default :const:`context.EVENT_LOOP_BASE_FLAGS`).'''
     def _get_unclosed_loop(self, factory: Callable[[], AbstractEventLoop]=...) -> AbstractEventLoop: '''Return a usable :mod:`asyncio` event loop from the internal pool, or a new event loop if there are none.'''

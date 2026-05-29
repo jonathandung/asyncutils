@@ -1,10 +1,30 @@
 import pytest
-from asyncutils import context
+from asyncutils import event_loop
+from asyncutils.context import *
 def test_mod():
-    with pytest.raises(AttributeError): context.Context().foo = None
-    with pytest.raises(TypeError): context.setcontext(None)
-    ctx = context.getcontext()
-    assert isinstance(ctx, context.Context)
-    assert ctx is context.getcontext()
-    assert ctx.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR and ctx.RWLOCK_DEFAULT_PREFER_WRITERS
-    assert ctx is not context.Context()
+    with pytest.raises(AttributeError): Context().foo = None
+    with pytest.raises(TypeError): setcontext(None)
+    ctx = getcontext()
+    assert isinstance(ctx, Context)
+    assert ctx is getcontext()
+    assert ctx.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR and ctx['RWLOCK_DEFAULT_PREFER_WRITERS']
+    assert ctx is not Context()
+    assert all_contextual_consts == frozenset(Context.__slots__)
+    assert eval(str(ctx), d := {'__name__': 'asyncutils.context', 'Context': Context}) == eval(repr(ctx), d) == ctx
+    d = ctx.asdict()
+    assert 'EVENT_LOOP_BASE_FLAGS' in d
+    d['TIMER_DEFAULT_PRECISION'] = 4
+    assert ctx.TIMER_DEFAULT_precision == 7 and ctx['SOCKET_TRANSPORT_limits'] == (2048, 8192)
+    assert len(event_loop.constructor_args) == 16
+    with ctx.ascurctx(event_loop_base_flags=5) as c:
+        assert c is not ctx
+        evl = event_loop(**{event_loop.constructor_args[0]: False})
+        assert evl._flags == 4
+        evl.clear_flags(3)
+        assert hash(evl) == 0
+        evl.factory_reset()
+        assert evl._flags == 5
+        evl = evl.copy_flags()
+    assert evl._flags == 5
+    evl.factory_reset()
+    assert evl._flags == 0

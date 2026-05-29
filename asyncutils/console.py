@@ -1,5 +1,5 @@
 from asyncutils import __version__ as V, config as C, exceptions as E
-from asyncutils._internal import patch as P, running_console as R
+from asyncutils._internal import patch as P, running_console as R, log
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import console_all as __all__
 import sys as S
@@ -12,7 +12,7 @@ except ImportError: from code import InteractiveConsole as B; C.basic_repl = Tru
 _s = object()
 _f = '',
 class ConsoleBase(B):
-    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches if S.version_info >= (3, 13) else S._clear_type_cache, g=__import__('gc').collect, d=__import__('logging').getLogger('asyncutils').debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False # noqa: B008
+    LOCALS_HANDLERS, interrupt_hooks, memerr_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=S._clear_internal_caches if S.version_info >= (3, 13) else S._clear_type_cache, g=__import__('gc').collect, d=log.debug: f() or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
     if C.basic_repl: CAN_USE_PYREPL = False # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('_contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # noqa: B006
@@ -26,7 +26,7 @@ class ConsoleBase(B):
         def close(p=None, /, _=loop.close):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support.', __spec__=__spec__, __annotations__={})
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={})
         if H > 0x30e00a0: d['__annotate__'] = g('__annotate__') # cover: off
         if H < 0x30f00a1:
             for k in _: d[k] = g(k)
@@ -154,4 +154,4 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_firstlineno == f and c.co_name == m and (b := b.tb_next) is None: return
         self._showtraceback(t, v, b, '')
     P.patch_method_signatures((showtraceback, ''), (posthook, ''), (prehook, 'max_memerrs'), (write_special, 'msg'))
-del _f, _s, g, C, V, B, _, iscoroutine, E
+del _f, _s, g, C, V, B, _, iscoroutine, E, log

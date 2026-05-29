@@ -1,10 +1,10 @@
 # ty: ignore[unresolved-attribute]
-from asyncutils._internal import helpers as H, log as L, patch as P
+from asyncutils._internal import compat as Z, helpers as H, log as L, patch as P
 from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
 from _functools import partial
 import asyncutils as A, asyncio as I
-from itertools import repeat
+from itertools import batched, repeat
 from sys import audit, exc_info
 b, c = H.check_methods, H.fullname
 class event_loop: # noqa: N801
@@ -21,9 +21,10 @@ class event_loop: # noqa: N801
     def factory_reset(self): self._flags = A.getcontext().EVENT_LOOP_BASE_FLAGS
     def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep
     def copy_flags(self): return self.from_flags(self._flags)
+    def flags_eq(self, o, /): return self._flags == (o if isinstance(o, int) else o._flags)
     @classmethod
-    def from_flags(cls, flags, /, _=c, m=-0x10000):
-        if flags&m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
+    def from_flags(cls, flags, /, _=c, m=0x10000):
+        if not 0 <= flags < m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
         r._flags, r._state, r._istr = flags, 0, f'{_(cls)} at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, **k):
         F, p, s = A.getcontext().EVENT_LOOP_BASE_FLAGS, k.pop, 1
@@ -34,6 +35,7 @@ class event_loop: # noqa: N801
             s <<= 1
         if k: A.raise_exc(TypeError, 'asyncutils.base.event_loop: got unexpected keyword arguments; shown below', notes=k) # pragma: no cover
         return cls.from_flags(F)
+    def __hash__(self): return self._flags
     def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
         f = self._flags
         if (s := self._state)&1: # pragma: no cover
@@ -52,7 +54,7 @@ class event_loop: # noqa: N801
             except BaseException as e:
                 if not f&0x200: raise RuntimeError(f'{self._istr}: exception occurred while calling __aenter__ of associated event loop: {e}') from e
         self._loop, self._state = l, s+1; return l
-    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=A.IgnoreErrors(RuntimeError), _l=L): # noqa: PLR0912
+    def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=A.IgnoreErrors(RuntimeError), _l=L): # noqa: C901,PLR0912
         n, f, l = self._istr, self._flags, self._loop
         if not (s := self._state)&1:
             if f&0x200: return False
@@ -114,8 +116,14 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
         async def f(a, /, _=callback): return (await r) if I.iscoroutine(r := _(a)) else r
         L = len(r := await I.gather(*map(f, r), return_exceptions=True))
         if raising and (E := tuple(A.unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'asyncutils.base.safe_cancel_batch: {f"flattened {L} exception (groups)" if len(E) < L else f"collected {L} exceptions"} thrown by callback function {callback!r}', E)
-async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,PLR0912
-    audit('asyncutils.base.iter_to_agen', a(it)); C = A.getcontext()
+async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,C901,PLR0912
+    audit('asyncutils.base.iter_to_agen', a(it))
+    if type(it) in Z.s:
+        for i in batched(it, 0x400):
+            for _ in i: yield _
+            await A.yield_to_event_loop
+        return
+    C = A.getcontext()
     if b(it, '__aiter__') and not (C.ITER_TO_AGEN_DEFAULT_STRICT if strict is None else strict):
         if sentinel is _NO_DEFAULT:
             async for _ in it: yield _
@@ -139,9 +147,9 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
         if e is None:
             if g:
                 l = (_ := it.send)(None)
-                while not c(l, sentinel): l = _((yield l))
+                while not c(l, sentinel): l = _((yield l)); await A.yield_to_event_loop
             else:
-                while not c(l := next(it, sentinel), sentinel): yield l
+                while not c(l := next(it, sentinel), sentinel): yield l; await A.yield_to_event_loop
         else:
             def r(*a, _=h().run_in_executor, e=e): return partial(_, e, *a)
             if g:
@@ -191,12 +199,12 @@ async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base
         for _ in repeat(default, n): yield _
 async def collect(it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
 async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items'):
-    i, it = 0, iter_to_agen(it)
-    async for i, _ in aenumerate(it):
-        if i >= n: yield _
-    if i < n:
+    async for i, j in aenumerate(it := iter_to_agen(it)):
+        if i == n: yield j; break
+    else:
         if raising: raise A.ItemsExhausted(m)
-        else: _(m)
+        _(m); return
+    async for j in it: yield j
 async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_agen(it): yield start, _; start += step
 P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None, strict=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))

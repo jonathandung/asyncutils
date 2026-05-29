@@ -14,17 +14,17 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-58% coverage, 75 tests
+58% coverage, 77 tests
 
 ### Docs
 
-92% complete
+93% complete
 
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.10] - 2026-05-28; newest
+### [0.9.10] - 2026-05-29; newest
 
 Removed actionlint step; integrated CodeQL fully.
 

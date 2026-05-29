@@ -10,7 +10,7 @@ def pwd(): return _randinst.randbytes(8)
 @mk
 async def test_pwdq(pwd):
     Q = password_queue(pwd, maxsize=2, init_items=[0, 1], can_change_put=True, puttyp=bytes)
-    await sleep(0)
+    await sleep(0.05)
     assert Q.full() and not Q.cancel_extend(41)
     with raises(QueueFull): Q.put_nowait(-1, pwd)
     assert Q.change_put_password(pwd, pwd := pwd[::-1]) and not Q.change_get_password(pwd, pwd)

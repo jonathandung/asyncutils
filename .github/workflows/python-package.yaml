@@ -9,7 +9,7 @@ permissions:
   contents: read
   code-quality: write
 jobs:
-  lint:
+  lint-and-test-with-cov:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6.0.2
@@ -17,18 +17,28 @@ jobs:
         ref: ${{github.event.pull_request.head.sha || github.sha}}
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       with:
-        python-version: 3.12
+        enable-cache: true
+        python-version: 3.15.0-beta.1
         cache-python: true
         activate-environment: true
     - run: uvx ruff check --output-format=github && uvx ty check --output-format=github
+    - run: uv run --with ".[test]" pytest -vv -p asyncio -p pytest_cov -p no:asyncio-cooperative --no-local-badge --maxfail 0 --tb long --cov asyncutils --cov-report xml
+    - if: ${{github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository}}
+      uses: actions/upload-code-coverage@v1.2.0
+      with:
+        file: coverage.xml
+        language: Python
+        label: code-coverage/pytest
   test:
-    needs: lint
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.12", "3.15.0-beta.1"]
+        exclude:
+          - os: ubuntu-latest
+            python-version: "3.15.0-beta.1"
     steps:
     - uses: actions/checkout@v6.0.2
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
@@ -36,10 +46,4 @@ jobs:
         enable-cache: true
         python-version: ${{matrix.python-version}}
         cache-python: true
-    - run: uv run --with ".[test]" pytest -vv -p asyncio -p pytest_cov -p no:asyncio-cooperative -p no:local_badge --maxfail 0 --cov asyncutils --cov-report xml --tb long
-    - if: ${{matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15.0-beta.1' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)}}
-      uses: actions/upload-code-coverage@v1.2.0
-      with:
-        file: coverage.xml
-        language: Python
-        label: code-coverage/pytest
+    - run: uv run --with ".[test]" pytest -vv -p asyncio -p no:pytest_cov -p no:asyncio-cooperative --no-local-badge --maxfail 0 --tb long

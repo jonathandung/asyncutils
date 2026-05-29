@@ -19,6 +19,7 @@ def test_helpers():
     assert not helpers.check_methods(_(), 'foo')
     assert not helpers.check_methods(o, 'foo')
 def test_submods_lazy_loading():
+    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo
     module = mod.initialize.Module
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
     with raises(TypeError, match='cannot subclass the type of asyncutils submodule objects'): type('', (module,), {})

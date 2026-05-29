@@ -32,7 +32,7 @@ Next, install py-asyncutils:
 .. code-block:: bash
 
   # recommended: pip
-  pip install py-asyncutils==0.9.9
+  pip install py-asyncutils==0.9.10
   # directly from source
   pip install git+https://github.com/jonathandung/asyncutils.git
   # alternatively, after:
@@ -62,20 +62,20 @@ other installation pathways:
 .. code-block:: bash
 
   # pipx
-  pipx install py-asyncutils==0.9.9
+  pipx install py-asyncutils==0.9.10
   # conda
-  conda install -c conda-forge py-asyncutils=0.9.9
+  conda install -c conda-forge py-asyncutils=0.9.10
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.9
+  conda install py-asyncutils==0.9.10
   # uv essentially supports the same interface as pip with uv pip
   # poetry
-  poetry add py-asyncutils@0.9.9
+  poetry add py-asyncutils@0.9.10
   # pdm
-  pdm add py-asyncutils==0.9.9
+  pdm add py-asyncutils==0.9.10
   # pipenv
-  pipenv install py-asyncutils==0.9.9
+  pipenv install py-asyncutils==0.9.10
 
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 
@@ -105,11 +105,8 @@ The extras are listed below for reference:
 * test: Test dependencies, including pytest and related plugins
 * themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.
 
-.. version-removed:: 0.9.10
-  pytest-timeout is no longer in any extra, because it does not seem compatible with async tests.
-
 .. version-changed:: 0.9.9
-  Added pytest-asyncio-cooperative and pytest-timeout to the test extra.
+  Added pytest-asyncio-cooperative to the test extra.
 
 .. version-added:: 0.9.7
   The themes extra, to make CI/CD steps involving documentation deployment more convenient.

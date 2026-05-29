@@ -333,11 +333,27 @@ async def aaccumulate(it, func=O.add, *, initial=None):
 async def acompress(data, selectors):
     async for i, j in azip(data, selectors):
         if j: yield i
-async def adropwhile(pred, it):
-    I = iter_to_agen(it)
-    async for _ in I:
-        if not pred(_): yield _; break
-    async for _ in I: yield _
+async def adropwhile(pred, it, *, skip_first=False):
+    async for _ in (it := iter_to_agen(it)):
+        if pred(_): continue
+        if not skip_first: yield _
+        break
+    async for _ in it: yield _
+async def ac3merge(seqs):
+    seqs, g, d, c = await to_list(afilter(None, seqs)), (n := []).append, n.clear, None
+    while seqs:
+        for s in seqs:
+            c = s[0]
+            for t in seqs:
+                next(t := iter(t))
+                if any(H.check(_, c) for _ in t): c = None; break
+            else: break
+        if c is None: raise ValueError('asyncutils.iters.ac3merge: cannot resolve sequences')
+        yield c
+        for s in seqs:
+            if s[0] == c: del s[0]
+            if s: g(s)
+        seqs = tuple(n); d()
 def afilterfalse(f, it): return afilter(lambda i: not (f or bool)(i), it)
 async def agroupby(it, key=_identity):
     I, e = iter_to_agen(it), False
@@ -435,7 +451,7 @@ async def amatprod(it, start):
     return start
 def atail(n, it, /): return aislice(it, max(0, len(it)-n), None)
 async def to_tuple(it, /): return tuple(await to_list(it))
-async def to_list(it, /): return [_ async for _ in iter_to_agen(it)]
+async def to_list(it, /, loop=None): return await A.transient_block(loop or H.get_loop_and_set(), list, it) if type(it) in Z.s else [_ async for _ in iter_to_agen(it)]
 async def aconsume(it, n=None, _=H.check_methods):
     if n == 0: return
     if n: it = A.take(it, n, default=A.RAISE)

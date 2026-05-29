@@ -77,6 +77,16 @@ name 'DynamicBoundedSemaphore' is not defined
 >>> open_help(open_help) # Opens the https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#asyncutils.tools.open_help page\
 ... # in the system default browser using the standard webbrowser library and returns success
 True
+>>> # example 5: context
+>>> asyncutils.getcontext().update( # call the update method of the current context to modify in-place
+...   {'SOCKET_TRANSPORT_LIMITS': (1024, 16384)}, # can optionally pass in a dictionary as the first and only positional argument
+...   ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR=True, # fields go here; keyword arguments are accepted
+...   observable_default_ntimes_n=3, # lowercase or mixed-case is allowed but not recommended
+...   lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1, # fields do not have to be in order
+...   WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2] # list will be automatically converted into tuple
+... ) # check if a string `name` is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
+
+Due care must be exercised to avoid messing up other parts of your program relying on this context.
 ```
 
 The following commands can all enter the console to verify the above, ordered in approximately descending order of preference. They have no known

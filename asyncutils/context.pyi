@@ -4,7 +4,7 @@ from _collections_abc import Sequence
 from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType
-from typing import Any, Final, Self, final, overload
+from typing import Any, ClassVar, Final, Self, final, overload
 __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'nonreusablelocalcontext', 'setcontext'
 @final
 @dataclass(slots=True, kw_only=True, match_args=False)
@@ -107,7 +107,7 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_STRICT: bool = ...
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
-    def ascurctx(self) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. `ctx.ascurctx()` is syntactic sugar for `nonreusablelocalcontext(ctx)`'''
+    def ascurctx(self, **k: Any) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. `ctx.ascurctx()` is syntactic sugar for `nonreusablelocalcontext(ctx)`'''
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the items within the context.'''
     def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod
@@ -117,8 +117,11 @@ class Context:
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
+    def __eq__(self, other: object, /) -> bool: '''Two contexts are considered equal if they are of the same type and all of their fields are equal.'''
     def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mutable mappings.'''
     def __setitem__(self, name: str, value: object, /) -> None: '''Alias for :meth:`__setattr__`.'''
+    __hash__: ClassVar[None]
+    '''Contexts are not hashable since they are mutable.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
     def __init__(self, ctx: Context=..., **k: object): '''Note that the context of the current thread is to be set to a shallow copy of `ctx`, defaulting to the current context, with replacements from the keyword arguments.'''
@@ -143,7 +146,6 @@ all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
-
   These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (87 as of now!) and more may be added in the future,
   and the recommended way to get their values is to query them on the actual context object anyway.
   They are still provided below to facilitate type checking.'''
