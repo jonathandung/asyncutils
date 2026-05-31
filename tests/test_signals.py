@@ -14,8 +14,8 @@ def wait_partial(): return __import__('_functools').partial(wait_for_signal, pro
 @mark.skipif(win := sys.platform == 'win32', reason='difficult to test signal handling on Windows')
 async def test_signal_log(wait_partial):
     with raises(Log, match=r'signals\.wait_for_signal: invalid signal None'): await wait_partial(None)
-    with raises(Log, match=r'signals\.wait_for_signal: timed out'): await wait_partial(4, timeout=0.05)
-    with raises(Log, match=r'signals\.wait_for_signal: timed out' if sys.platform == 'darwin' else r'signals\.wait_for_signal: (insufficient permissions|error registering signal handler) for signal SIGSTOP'): await wait_partial(19, timeout=0.05)
+    with raises(Log, match=r'signals\.wait_for_signal: timed out'): await wait_partial(4, timeout=0.02)
+    with raises(Log, match=r'signals\.wait_for_signal: timed out' if sys.platform == 'darwin' else r'signals\.wait_for_signal: (insufficient permissions|error registering signal handler) for signal SIGSTOP'): await wait_partial(19, timeout=0.02)
 @mk
 async def test_signal_raise(wait_partial):
-    with raises(TimeoutError), warns(RuntimeWarning, match=r'signals\.wait_for_signal has limited functionality on Windows') if win else WarningToError(): await wait_partial(Signals.SIGFPE, timeout=0.05, raise_on_timeout=True)
+    with raises(TimeoutError), warns(RuntimeWarning, match=r'signals\.wait_for_signal has limited functionality on Windows') if win else WarningToError(): await wait_partial(Signals.SIGFPE, timeout=0.02, raise_on_timeout=True)

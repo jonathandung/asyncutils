@@ -85,7 +85,7 @@ class AdvancedPool(A.LoopContextMixin):
     async def __cleanup__(self): await self.shutdown(self._kill_at_exit)
     def __del__(self):
         try:
-            if (l := self.loop).is_running(): A.sync_await(self.shutdown(True, 0.05), loop=l, timeout=0.1)
+            if (l := self.loop).is_running(): A.sync_await(self.shutdown(True, 0.03), loop=l, timeout=0.05)
         except (AttributeError, RuntimeError, TimeoutError): ...
     @property
     def full(self): return self._queue.full()

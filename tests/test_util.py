@@ -2,7 +2,7 @@ import asyncio, pytest
 from asyncutils.util import *
 from tests.conftest import mk
 import itertools
-def test_sync_await(): assert sync_await(asyncio.sleep(0.03, 1), timeout=0.05) == 1
+def test_sync_await(): assert sync_await(asyncio.sleep(0.02, 1), timeout=0.04) == 1
 @to_sync
 async def g(x): return x<<1
 def test_to_sync(): assert g(4) == 8
@@ -15,7 +15,7 @@ async def test_basic():
     assert done_evt().is_set()
     assert await done_fut(42) == 42
     assert [i async for i in aiter_from_f(to_async(itertools.count().__next__), 10)] == list(range(10))
-    await safe_cancel(asyncio.create_task(safe_cancel(t := asyncio.create_task(asyncio.sleep(0.05, 3)))))
+    await safe_cancel(asyncio.create_task(safe_cancel(t := asyncio.create_task(asyncio.sleep(0.03, 3)))))
     c = afcopy(asyncio.create_task)(asyncio.sleep(0, 1))
     assert not c.cr_running
     assert await c == 1
