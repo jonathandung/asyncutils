@@ -1,10 +1,9 @@
 import asyncutils as A, signal as B, sys as M
-from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log, helpers as H
 from asyncutils._internal.running_console import getc
 from asyncutils._internal.submodules import signals_all as __all__
 from asyncio.tasks import wait_for
-async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=_NO_DEFAULT, sigs=None, logger=log): # noqa: PLR0912,PLR0915
+async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=None, sigs=None, logger=log): # noqa: PLR0912,PLR0915
     if loop is None: loop = H.get_loop_and_set()
     P, x, a, h = (S := {*S, *(A.getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs)}).pop, 0, (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(B.Signals(s)); M.audit('asyncutils.signals.wait_for_signal', S)
     if M.platform == 'win32':
@@ -37,9 +36,9 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         try:
             r = p(s)
             with A.ignore_typeerrs: r = await r
-        except possible_errors: logger.exception('signals.wait_for_signal processor %r encountered expected error for signal %s', p, s); return None if default_on_processor_failure is _NO_DEFAULT else default_on_processor_failure
+        except possible_errors: logger.exception('signals.wait_for_signal processor %r encountered error for signal %s', p, s); return default_on_processor_failure
         except A.CRITICAL: raise A.Critical
         except BaseException as e: raise RuntimeError(f'asyncutils.signals.wait_for_signal: unexpected {H.fullname(e)} in processor {p!r} for signal {s.name}') from e
         return r
     finally: await A.safe_cancel(F)
-wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure={0}, logger={0})' # ty: ignore[unresolved-attribute]
+wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure=None, logger={0})' # ty: ignore[unresolved-attribute]

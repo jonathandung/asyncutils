@@ -94,7 +94,7 @@ def test_py313():
     assert m.heapreplace(h, 10) == 8 and m.heappushpop(h, 13) == 13
     assert m.heappop(h) == 10
     assert m.heappop(h) == 5
-    assert m == [3, 1]
+    assert h == [3, 1]
     with raises(TypeError, match='trailing Placeholders are not allowed'): m.partial(lambda *_: None, m.Placeholder)
     sio = StringIO()
     p = m.partial(print, 'baz', m.Placeholder, 'foo', end='bar', file=sio)

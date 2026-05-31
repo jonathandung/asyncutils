@@ -14,17 +14,21 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-58% coverage, 76 tests
+58% coverage, 75 tests
 
 ### Docs
 
-93% complete
+95% complete
 
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.10] - 2026-05-29; newest
+### [0.9.11] - 2026-06-02; newest
+
+Upgraded to Python 3.15.0b2.
+
+### [0.9.10] - 2026-05-29
 
 Removed actionlint step; integrated CodeQL fully.
 

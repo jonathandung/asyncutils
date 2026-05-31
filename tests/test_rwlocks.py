@@ -9,10 +9,10 @@ async def test_rwlock(lockt):
     async with lock.reading():
         async with lock.reading():
             task = create_task((c := lock.writing()).__aenter__())
-            await sleep(0.05)
+            await sleep(0.02)
             assert not task.done()
-        await sleep(0.05)
+        await sleep(0.02)
         assert not task.done()
-    await sleep(0.05)
+    await sleep(0.02)
     assert task.done()
     await c.__aexit__(None, None, None)
