@@ -18,7 +18,7 @@ jobs:
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
       with:
         enable-cache: true
-        python-version: 3.15.0-beta.1
+        python-version: 3.15.0-beta.2
         cache-python: true
         activate-environment: true
     - run: uvx ruff check --output-format=github && uvx ty check --output-format=github
@@ -29,16 +29,16 @@ jobs:
         file: coverage.xml
         language: Python
         label: code-coverage/pytest
-  test:
+  cross-platform-tests:
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.12", "3.15.0-beta.1"]
+        python-version: ["3.12", "3.15.0-beta.2"]
         exclude:
           - os: ubuntu-latest
-            python-version: "3.15.0-beta.1"
+            python-version: 3.15.0-beta.2
     steps:
     - uses: actions/checkout@v6.0.2
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b

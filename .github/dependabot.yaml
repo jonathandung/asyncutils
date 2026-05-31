@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "uv"
-    directory: "/"
+  - directory: "/"
+    package-ecosystem: "uv"
     schedule:
       interval: "weekly"

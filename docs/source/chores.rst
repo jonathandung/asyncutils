@@ -50,7 +50,7 @@ After reviewing the pitch, the collaborator will step in and make necessary chan
 For collaborators and those interested, this is the general procedure:
 
 1. Edit the setup of the argument parser and the dictionary of defaults :data:`N` in ``_internal/unparsed.py``. It is not a :class:`frozendict`
-   because the class was introduced in Python 3.15.
+   because the class was introduced in Python 3.15. (It will be in asyncutils 7.0, however.)
 2. Edit ``format.json5`` by adding the key in the same order as the new help from the parser appears and a comment describing what it does, and take
    note of the line numbers where the pairs corresponding to logging configuration are shifted to.
 3. If the value of the configuration option is to be accessible by users at runtime, it should be in the form of a symbol in :mod:`config`.

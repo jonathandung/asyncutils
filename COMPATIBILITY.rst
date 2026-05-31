@@ -16,22 +16,17 @@ be upheld; that is, users need not worry about support for the newest version an
 corresponds to, which is the one in the development (alpha, beta, rc) phase. See :pep:`602` for a detailed explanation, and the `status of Python
 versions <https://devguide.python.org/versions>`__.
 
-asyncutils versions
--------------------
-
-Due to this library being in an early stage of development, it is not suitable to make a 1.0 release, which is really when the backward compatibility
-concerns start flooding in. Currently, no guarantees regarding breaking changes or API stability are made, even in the same patch version, but
-hopefully that soon changes; this is currently planned to take place in late June.
-
 Support matrix
 --------------
 
-================== ===============
-asyncutils version CPython version
-================== ===============
-7.0 - 7.11         3.15+
-6.0 - 6.11         3.14+
-5.0 - 5.11         3.13+
-0.8.18 - 4.11      3.12+
-0.8.0 - 0.8.17     3.14+
-================== ===============
+===================== ===============
+asyncutils version    CPython version
+===================== ===============
+7.0 - 7.11            3.15+
+6.0 - 6.11            3.14+
+5.0 - 5.11            3.13+
+1.0 - 4.11            3.12+
+0.9.0 - 0.9.1x (beta) 3.12+
+0.8.18 - 0.8.28 (EOL) 3.12+
+0.8.0 - 0.8.17 (EOL)  3.14+
+===================== ===============

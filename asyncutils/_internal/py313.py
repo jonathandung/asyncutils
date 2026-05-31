@@ -5,7 +5,7 @@ from itertools import repeat
 from _heapq import _heapify_max as heapify, _heappop_max as heappop, _heapreplace_max as heapreplace; from heapq import _siftdown_max, _siftup_max # ty: ignore[unresolved-import]
 def heappush(heap, item, /, _=_siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
 def heappushpop(heap, item, /, _=_siftup_max):
-    if heap and item > (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
+    if heap and item < (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
     return item
 del _siftdown_max, _siftup_max
 __all__ = ('Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial')

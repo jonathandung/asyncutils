@@ -26,11 +26,11 @@ Takes pride in:
 
 ## Setup
 
-This package probably wouldn't work on alternate Python implementations. Make sure you have CPython 3.12 or above (even 3.15 will do), and at least
-one of many Python package managers you're comfortable with.
+This package probably wouldn't work on alternate Python implementations. Make sure you have CPython 3.12 or above (even a pre-release of 3.15 will
+do), and at least one Python package manager you're comfortable with.
 
-Discounting the installation, no extra setup is usually needed. See the
-[installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html) for more.
+Discounting the installation, no extra setup is needed. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html)
+for more.
 
 ## Usage
 

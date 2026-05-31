@@ -64,7 +64,7 @@ class VersionInfo(str): # noqa: FURB189
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408,PLR0911
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'v'+'.'.join(map(str, self if self[2] else self[:2 if self[1] else 1]))

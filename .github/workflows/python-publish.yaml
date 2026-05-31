@@ -15,7 +15,7 @@ jobs:
     steps:
       - run: |
           RELNAME="${{github.event.release.name}}"
-          if [[ ! $RELNAME =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! $RELNAME =~ ^\d+\.(25[0-6]|2[0-4]\d|1\d{2}|[1-9]?\d)+\.(25[0-6]|2[0-4]\d|1\d{2}|[1-9]?\d)$ ]]; then
             exit 1
           fi
       - uses: actions/checkout@v6.0.2

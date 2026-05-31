@@ -2,7 +2,7 @@ import asyncio, pytest
 from asyncutils.util import *
 from tests.conftest import mk
 import itertools
-def test_sync_await(): assert sync_await(asyncio.sleep(0.05, 1), timeout=0.1) == 1
+def test_sync_await(): assert sync_await(asyncio.sleep(0.03, 1), timeout=0.05) == 1
 @to_sync
 async def g(x): return x<<1
 def test_to_sync(): assert g(4) == 8

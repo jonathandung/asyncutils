@@ -5,7 +5,7 @@ import logging as L, sys as S
 def __dir__(_=__all__): return _
 class FaultyConfig(BaseException):
     def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {", ".join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
-def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # noqa: B008,PLR0912 # pragma: no cover
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # noqa: B008,PLR0911,PLR0912 # pragma: no cover
     if not isinstance(e, str): raise TypeError('asyncutils: executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
