@@ -75,14 +75,14 @@ class LockMixin[T](ABC):
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Release the lock and optionally perform handling according to the exception occurred.'''
-class LockWithOwnerMixin[T: (None, Coroutine[Any, Any, None])](LockMixin[None]):
+class LockWithOwnerMixin[R: (None, Coroutine[Any, Any, None])](LockMixin[None]):
     '''Mixin for locks that can report their owner (the task currently holding it).'''
     @property
     @abstractmethod
     def is_owner(self) -> bool: '''Should evaluate to `True` if the current task is the owner of the lock'''
     @abstractmethod
-    def _release(self) -> T: '''Will be wrapped by :meth:`release` to throw :exc:`RuntimeError` if the current task is not the owner of the lock.'''
-    def release(self) -> T: ...
+    def _release(self) -> R: '''Will be wrapped by :meth:`release` to throw :exc:`RuntimeError` if the current task is not the owner of the lock.'''
+    def release(self) -> R: ...
 class LoopBoundMixin(LoopMixinBase): '''Mixin to bind event loops lazily for classes that need to create futures.'''
 class EventMixin[T](AwaitableMixin[T], LoopBoundMixin, ABC):
     '''| Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some mixin

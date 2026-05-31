@@ -50,7 +50,7 @@ class Bulkhead(A.LoopContextMixin):
             self._rejected = x+1; raise A.BulkheadFull(f'{fullname(self)} queue full') from None
         if self.is_shutdown: raise A.BulkheadShutDown(f'{fullname(self)} is shutting down')
         async with self._sem:
-            try: return await self.make(await self._queue.get())
+            try: await (await self._queue.get())
             except (QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{fullname(self)} is shutting down') from None
             except self._exc as e:
                 if p := self._processor: await p(e)

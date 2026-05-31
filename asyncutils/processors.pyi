@@ -1,7 +1,7 @@
 '''Processors for asynchronous tasks.'''
 from ._internal.types import Exceptable, SupportsIteration, Timer
 from .mixins import LoopContextMixin
-from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine
+from _collections_abc import AsyncGenerator, Awaitable, Callable
 from typing import Any, Literal
 __all__ = 'BatchProcessor', 'BoundedBatchProcessor', 'Bulkhead'
 class BoundedBatchProcessor[T, R]:
@@ -20,7 +20,8 @@ class BatchProcessor[T](LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
 class Bulkhead(LoopContextMixin):
-    '''Limit the number of concurrent executions of a processor, with an optional queue for pending executions and an optional callback for handling exceptions raised by the processor.
+    '''| Limit the number of concurrent executions of coroutines, with an optional queue for pending executions and an optional callback that
+    | handles exceptions raised by the processor.
 
     .. caution:: Use instances of this class as async context managers to ensure proper cleanup.'''
     def __init__(self, max_concurrent: int, *, max_queue: int=..., max_rej: int=..., exc: Exceptable=..., processor: Callable[[BaseException], Awaitable[None]]=...) -> None:
@@ -29,7 +30,7 @@ class Bulkhead(LoopContextMixin):
         | `max_rej`: maximum number of rejections allowed before the bulkhead shuts down and rejects all new executions. Negative value means no limit. Default :const:`context.BULKHEAD_DEFAULT_MAX_REJ`.
         | `exc`: the type of exceptions that the processor may raise and should be caught and passed to the `processor` callback. Default `Exception`.'''
     async def __cleanup__(self) -> None: ...
-    async def execute(self, coro: Coroutine[Any, Any, Any]) -> None: '''Execute a coroutine, applying the bulkhead constraints.'''
+    async def execute(self, coro: Awaitable[Any]) -> None: '''Queue a coroutine `coro` to be executed and execute a coroutine that may not be the same as `coro`. Bulkhead constraints are applied, and the return value is lost.'''
     @property
     def available_slots(self) -> int: '''The number of slots available on the bulkhead.'''
     @property
@@ -46,4 +47,4 @@ class Bulkhead(LoopContextMixin):
     def rejected(self) -> int: '''The number of rejected executions so far.'''
     async def wait_until_idle(self, timeout: float|None=...) -> Literal[True]: '''Wait until no tasks are running.'''
     async def wait_for_shutdown(self, timeout: float|None=...) -> None: '''Wait until the bulkhead enters the shutdown phase.'''
-    async def shutdown(self, timeout: float|None=...) -> list[Coroutine[Any, Any, Any]]: '''Shut down the bulkhead.'''
+    async def shutdown(self, timeout: float|None=...) -> list[Awaitable[Any]]: '''Shut down the bulkhead and return all incomplete tasks.'''

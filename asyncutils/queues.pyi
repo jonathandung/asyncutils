@@ -3,7 +3,7 @@
 from ._internal.types import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
 from .exceptions import IgnoreErrors
 from .mixins import LoopBoundMixin
-from _collections_abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
+from _collections_abc import AsyncGenerator, Awaitable, Callable, Generator
 from abc import ABC, abstractmethod
 from asyncio.futures import Future
 from asyncio.queues import Queue
@@ -166,10 +166,10 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def enumerate(self, *, lifo: Literal[False]=...) -> SmartQueue[tuple[int, T]]: ...
     @overload
     def enumerate(self, *, lifo: Literal[True]) -> SmartLifoQueue[tuple[int, T]]: '''Return a queue containing the items from enumerate applied on this queue and empty it in the process.'''
-    def map_nowait[R](self, f: Callable[[T], Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
-    def starmap_nowait[R](self, f: Callable[..., Coroutine[Any, Any, R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
+    def map_nowait[R](self, f: Callable[[T], Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
+    def starmap_nowait[R](self, f: Callable[..., Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
     def filter_nowait(self, pred: Callable[[T], bool]=..., /) -> tuple[list[T], int]: '''Filter items in the queue by a predicate and return a list of removed items and an integer; the items in the returned list after the index corresponding to that integer were items rejected from the queue due to the queue being full.'''
-    def enumerate_nowait(self) -> Generator[tuple[int, T], None, None]: '''`queue.enumerate_nowait()` is equivalent to `await iters.to_list(queue.drain_persistent())`.'''
+    def enumerate_nowait(self, start: int=..., *, step: int=...) -> Generator[tuple[int, T], None, None]: '''Do the equivalent of zipping `itertools.count(start, step)` with the items of the queue. When the returned generator is advanced and the queue is empty at that moment, the generator stops entirely.'''
 class SmartQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...

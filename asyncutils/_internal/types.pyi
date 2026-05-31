@@ -18,7 +18,7 @@ from asyncio.futures import Future
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from io import _WrappedBuffer, TextIOWrapper
-from types import CodeType, FrameType, FunctionType, TracebackType
+from types import CodeType, CoroutineType, FrameType, FunctionType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
 @type_check_only
 class Reader[T](Protocol):
@@ -187,11 +187,11 @@ class PutProtectedQProt[V, T](QProt[Any, V, T], Protocol):
     async def put(self, item: T, pwd: V) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
     def put_nowait(self, item: T, pwd: V) -> None: '''Put an item into the password-protected queue, if the password provided was correct; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQProt[V, T], QProt[R, V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords, which may or may not be the same.'''
+class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQProt[V, T], QProt[R, V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
     '''The return type of the :meth:`~rwlocks.RWLock.reader` and :meth:`~rwlocks.RWLock.writer` methods of :class:`~rwlocks.RWLock` and subclasses thereof.'''
-    def __call__(self, *a: P.args, **k: P.kwargs) -> Coroutine[Any, Any, T]: ...
+    def __call__(self, *a: P.args, **k: P.kwargs) -> CoroutineType[Any, Any, T]: ...
     def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a reader.'''
     def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a writer.'''
 @type_check_only
@@ -205,11 +205,11 @@ class EveryMethodFT[T, R](Protocol):
 @type_check_only
 class DecoratorFactoryRV(Protocol):
     '''The return type of various decorator factories in :mod:`func`, including :func:`~func.debounce`, :func:`~func.throttle` and :func:`~func.debounce`.'''
-    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: ...
+    def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T]]: ...
 @type_check_only
 class EveryRV[T](Protocol):
     '''The return type of :func:`func.every`.'''
-    def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T|None]]: ...
+    def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T|None]]: ...
 @type_check_only
 class SubscriptionRV(Protocol):
     '''Return type of the :meth:`~channels.Observable.subscribe`, :meth:`~channels.Observable.subscribe_nowait` and :meth:`~channels.Observable.ntimes` methods of :class:`channels.Observable`.'''

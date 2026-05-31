@@ -1,13 +1,13 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
 from ._internal.types import AsyncLockLike, DCRV, DualContextManager, EventProt, ExceptionWrapper, ExcType, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
-from _collections_abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Coroutine, Generator, Iterable
+from _collections_abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Event, Lock, Semaphore
 from asyncio.tasks import Task
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
-from types import TracebackType
+from types import CoroutineType, TracebackType
 from typing import Any, Concatenate, Literal, Never, overload
 __all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afcopy', 'aiter_from_f', 'anullcontext', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
@@ -40,7 +40,7 @@ def done_fut[T](res: T) -> Future[T]: ...
 def done_fut(res: None=...) -> Future[None]: ...
 @overload
 def done_fut(exc: ExceptionWrapper, /) -> Future[Never]: '''Return a future that is already done with the result `res` or the exception wrapped by the wrapper `exc` if it is an exception wrapper returned by :func:`exceptions.wrap_exc`, with type `futcls` if passed and :class:`asyncio.futures.Future` by default.'''
-def afcopy[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, Coroutine[Any, Any, T]]: '''Return a copy of the async function `f` with the same signature and attributes.'''
+def afcopy[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T]]: '''Return a copy of the async function `f` with the same signature and attributes.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''| Wrap an arbitrary awaitable `aw` in a task under `loop`, creating one and setting if required, and begin waiting on it.
     | Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
@@ -53,10 +53,10 @@ def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEv
 def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: ...
 @overload
 def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Simple helper function returning a (bounded) semaphore of value `workers`, defaulting to :const:`context.SEMAPHORE_DEFAULT_VALUE`.'''
-def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, Coroutine[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by `lf`, to a function `f` that returns an awaitable, also converting it to an async function.'''
+def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by `lf`, to a function `f` that returns an awaitable, also converting it to an async function.'''
 def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable[P, Awaitable[T]]], Callable[P, T]]: '''Decorator factory to ensure a function returning an awaitable only be called if a lock is acquired within `timeout`, also converting it to a sync function.'''
 def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of :func:`sync_lock`, where `binder` is a function returning a suitable lock from the instance.'''
-def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, Coroutine[Any, Any, T]]:
+def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
     '''| Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy
     | initialized and shared by all :func:`to_async`-transformed callables.
     | If the argument was returned by :func:`to_sync`, a copy of the original async function is returned.

@@ -301,10 +301,9 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
             try: h(i)
             except D.QueueFull: g(i)
         return r, j
-    def enumerate_nowait(self):
-        i = 0
+    def enumerate_nowait(self, start=0, *, step=1):
         with ignore_qempty:
-            while True: yield i, self.get_nowait(); i += 1
+            while True: yield start, self.get_nowait(); start += step
     P.patch_method_signatures((filter_nowait, 'pred=bool'), (transaction, ''), (drain_persistent, 'max_items=None, timeout=None'))
 class SmartQueue(PotentQueueBase):
     def _init(self, maxsize): self.__queue = deque(maxlen=maxsize if maxsize > 0 else None)
