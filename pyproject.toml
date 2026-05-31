@@ -7,7 +7,7 @@ name = "py-asyncutils"
 version = "0.9.10"
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
-description = "A library containing versatile tools to well complement the asyncio framework. Not as performant as C extensions, but startup speed is great considering the features it provides."
+description = "A library containing versatile tools to well complement the asyncio framework."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -93,7 +93,7 @@ typing-extensions = false
 "asyncutils/config.py" = ["BLE001", "F821", "SIM115"]
 "asyncutils/console.py" = ["BLE001", "PLR2004"]
 "asyncutils/exceptions.py" = ["PLW0603"]
-"asyncutils/func.py" = ["E722"]
+"asyncutils/func.py" = ["E722", "PLR0913"]
 "asyncutils/io.py" = ["PLR6301", "PLW0603", "PLW2901"]
 "asyncutils/iters.py" = ["N801", "PLR2004", "RUF029"]
 "asyncutils/locksmiths.py" = ["E722", "PLR6301"]
@@ -125,8 +125,8 @@ allowed-unused-imports = ["asyncutils._internal.submodules"]
 
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = ["__replace__", "__setup__", "__cleanup__"]
-max-returns = 10
-max-args = 12
+max-returns = 6
+max-args = 11
 max-positional-args = 6
 max-public-methods = 41
 max-branches = 16

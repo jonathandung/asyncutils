@@ -4,7 +4,7 @@ from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_s
 from asyncutils._internal.submodules import locksmiths_all as __all__
 from enum import IntEnum
 from sys import audit
-ForceResult, RecognitionResult = IntEnum('ForceResult', 'UNFORCABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), IntEnum('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
+ForceResult, RecognitionResult = IntEnum('ForceResult', 'UNFORCABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), IntEnum('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
@@ -28,7 +28,7 @@ class LocksmithBase:
                 except A.CRITICAL: raise A.Critical
                 except: return RecognitionResult.FAILED_ACK
             r.add(l); return RecognitionResult.SUCCESS
-    async def force(self, l, /, info=_NO_DEFAULT, *, purge_waiters=True): # noqa: PLR0912
+    async def force(self, l, /, info=_NO_DEFAULT, *, purge_waiters=True):
         audit('asyncutils.locksmiths.LocksmithBase.force', id(self), id(l))
         async with self._lock:
             if not self.can_force_lock_held(l): return ForceResult.UNFORCABLE
@@ -36,26 +36,29 @@ class LocksmithBase:
         try:
             if I.iscoroutine(r := l.release()): r = await r
         except A.CRITICAL: raise A.Critical
-        except:
-            if self.find_owner(l) is (o := I.current_task(self._loop)):
-                if o is None: return await self.throw_fallback(l)
-                if (c := o.get_coro()) is None: return await self.eager_fallback(l)
-                E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, info) # ty: ignore[invalid-argument-type]
-                try: c.throw(E)
-                except A.CRITICAL as e: return self.task_raised_critical(l, e)
-                except A.LockForceRequest as e:
-                    if (r := e.requester) is not self: await I.gather(self.lock_busy(l, r), r.lock_busy(l, self))
-                    elif e is E: await self.task_reraised_request(l)
-                    else: return await self.already_forcing(l)
-                except BaseException as e: await self.task_raised_other(l, e) # noqa: BLE001
-                else: await self.answer_received(l, await F)
-            try:
-                if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
-            except A.CRITICAL: raise A.Critical
-            return ForceResult.SUCCESS
+        except: return await self._force_except(l, info)
         else: return await self.release_returned_false(l) if r is False else ForceResult.RELEASED
         finally:
             if purge_waiters: await self.purge_waiters(l)
+    async def _force_except(self, l, i, /):
+        if self.find_owner(l) is (o := I.current_task(self._loop)):
+            if o is None: return await self.throw_fallback(l)
+            if (c := o.get_coro()) is None: return await self.eager_fallback(l)
+            if r := await self._force_is_owner(l, i, c): return r
+        try:
+            if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
+        except A.CRITICAL: raise A.Critical
+        return ForceResult.SUCCESS
+    async def _force_is_owner(self, l, i, c, /):
+        E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
+        try: c.throw(E)
+        except A.CRITICAL as e: return self.task_raised_critical(l, e)
+        except A.LockForceRequest as e:
+            if (r := e.requester) is not self: await I.gather(self.lock_busy(l, r), r.lock_busy(l, self))
+            elif e is E: await self.task_reraised_request(l)
+            else: return await self.already_forcing(l)
+        except BaseException as e: await self.task_raised_other(l, e) # noqa: BLE001
+        else: await self.answer_received(l, await F)
     async def purge_waiters(self, l, /):
         if w := getattr(l, '_waiters', None): await A.safe_cancel_batch(w, disembowel=True)
     async def host(self, t, l, /, *, timeout1=_NO_DEFAULT, timeout2=_NO_DEFAULT, timeout3=_NO_DEFAULT):

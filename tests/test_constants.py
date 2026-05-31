@@ -8,9 +8,8 @@ def test_misc():
     assert RAISE.name == RAISE.__reduce__() == str(RAISE) == 'asyncutils.constants.RAISE'
     assert not RAISE.is_private
     assert _NO_DEFAULT.is_private
-    assert tuple(range(3)) == (CLOSED, HALF_OPEN, OPEN)
 @pytest.fixture
-def ctxmgr(): return pytest.raises(TypeError, match="cannot instantiate '.*'")
+def ctxmgr(): return pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
 @pytest.mark.parametrize('cls', (sentinel_base, type(RAISE)))
 def test_sentinels(cls, ctxmgr):
     with ctxmgr: cls()

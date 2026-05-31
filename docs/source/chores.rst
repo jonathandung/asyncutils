@@ -20,7 +20,7 @@ certain locations. Instead, follow these steps:
 6. If you include your desired remarks in the PR under a "Release Notes" section, those will be used as the release notes instead after the developer
    tries their best to correct grammatical or spelling mistakes.
 
-.. note:: Our release schedule, though stabilizing, does not concern the frequency of patch releases.
+.. note:: Our release schedule, though stabilizing, does not concern the frequency of patch releases, while that is usually every 2-3 days as of now.
 
 .. note::
   :collapsible:
@@ -33,19 +33,19 @@ Adding a new submodule
 ----------------------
 
 1. Search for 'rwlocks' (without the quotes) across all files in the repository, excluding asyncutils/rwlocks.py, asyncutils/_internal/types.pyi and
-   this file. This should reveal all the locations where submodule names are referenced without fail.
+   this file. This should reveal all the locations where submodule names are referenced. Still check each one to see if it is a correct place.
 2. Insert the new submodule name as a string in those occurrences, maintaining alphabetical order where applicable.
 3. Bear in mind that the submodule name should not have more than one word, should not contain underscores or uppercase letters, and a stub should be
    created for it that contributors should update in parallel. The stubtest tool from mypy will not work because we use ty ignores that mypy doesn't
-   recognize, and stubtest will report something along the lines of "Not checking due to mypy build errors".
+   recognize, causing stubtest to report something along the lines of "Not checking due to mypy build errors".
 4. Add a test file for the new submodule importing all names from the submodule.
 
 Adding a new configuration option
 ---------------------------------
 
 This will not usually be done by a contributor, only a collaborator, because there should be evidence that the change is imperative or desirable in a
-dedicated GitHub discussions thread. After reviewing the pitch, the collaborator will step in and make necessary changes to the argument parser,
-documentation and internal machinery.
+dedicated GitHub discussions thread. Stack Overflow is only for general questions; you should really not be tagging :mod:`asyncutils` there.
+After reviewing the pitch, the collaborator will step in and make necessary changes to the argument parser, documentation and internal machinery.
 
 For collaborators and those interested, this is the general procedure:
 
@@ -57,7 +57,7 @@ For collaborators and those interested, this is the general procedure:
 4. Update config.pyi, noting the line numbers at which the logging-related declarations appear.
 5. Edit the definition of :func:`tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as promised.
 6. Update the literalincludes in logging.rst with the line numbers marked down from steps 2 and 4.
-7. Execute the platform-suitable genhelp batch file.
+7. Execute the platform-suitable genhelp batch file as a sanity check, but do not commit the outputs.
 
 Adding a new contextual constant
 --------------------------------
@@ -88,8 +88,8 @@ complete the following:
   Keep alphabetical order within the submodule concerned, with submodules ordered alphabetically as well.
 * asyncutils/_internal/unparsed.py
 
-  There should be a massive dictionary called :data:`~asyncutils._internal.unparsed.C` that contains the option names mapped to their factory defaults.
-  Edit it accordingly.
+  There should be a massive dictionary called :data:`~asyncutils._internal.unparsed.C` that contains the option names mapped to their factory
+  defaults on line 5. Edit it accordingly.
 
 Updating config.pyi
 -------------------
@@ -118,7 +118,7 @@ Changing help messages for command-line arguments
 
 Remember not to indent the help strings when using multiline strings; keep them at the left margin such that they display correctly.
 
-If you want to preview the changes to the argument parser help in the form of an HTML page, run ``./scripts/genhelp.sh`` on Unix or
+If you want to preview the changes to the argument parser help in the form of an HTML page, run ``scripts/genhelp.sh`` on Unix or
 ``.\scripts\win\genhelp.ps1`` on Windows before running the sphinx-build command. Do not, however, commit the resultant file.
 
 Modifying the Makefile
@@ -127,7 +127,7 @@ Modifying the Makefile
 Remember to sync up the Makefile with ``make.bat`` in the same directory, and vice versa. If you wish to remove a target, it must have exceeded a
 previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output.
 
-If you want to preview the changes to the help message in the form of the eventually created page, run ``./scripts/genmakefileusage.sh`` on Unix or
+If you want to preview the changes to the help message in the form of the eventually created page, run ``scripts/genmakefileusage.sh`` on Unix or
 ``.\scripts\win\genmakefileusage.ps1`` on Windows before running ``sphinx-build``. Do not, however, commit the resultant file.
 
 Adding tests
@@ -151,7 +151,7 @@ verify the test is written correctly and your implementation is resilient agains
 Before committing, run the whole test suite by entering the following command at the project root to check for regressions and update the relevant
 static badges in the README:
 
-.. code-block:: bash
+::
 
   make test-with-badges
 

@@ -3,7 +3,7 @@ from ._internal.types import Executor, RaiseType
 from _collections_abc import Callable
 from threading import Lock
 from typing import Final, Self
-__all__ = 'CLOSED', 'EXECUTORS_FROZENSET', 'HALF_OPEN', 'OPEN', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'sentinel_base'
+__all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'sentinel_base'
 RECIP_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`~iters.aguessmin` and :func:`~iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
@@ -29,9 +29,3 @@ class sentinel_base:
     def is_(self, other: object, /) -> bool: ''':func:`operator.is_` for sentinels.'''
 RAISE: Final[RaiseType]
 '''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
-CLOSED: Final[int]
-'''The closed state of a circuit breaker.'''
-HALF_OPEN: Final[int]
-'''The half-open state of a circuit breaker.'''
-OPEN: Final[int]
-'''The open state of a circuit breaker.'''

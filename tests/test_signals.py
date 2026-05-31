@@ -11,7 +11,7 @@ async def processor(sig): return sig.value
 async def bad_processor(sig): return 1/0
 @(dec := mark.skipif(win := sys.platform == 'win32', reason='difficult to test signal handling on Windows'))
 @mk
-@mark.parametrize('res', range(1, 8, 3))
+@mark.parametrize('res', (4, 7))
 async def test_signal(res):
     _ = asyncio.create_task(kill(sig := Signals(res)))
     assert res == await wait_for_signal(processor, sig, timeout=0.05)

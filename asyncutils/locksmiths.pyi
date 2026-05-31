@@ -15,9 +15,10 @@ class ForceResult(IntEnum):
     NO_CURRENT_TASK = 2
     OWNER_COMPLETED = 3
     ALREADY_BEING_FORCED = 4
-    RELEASED_WITH_FALSE = 5
-    SUCCESS = 6
-    RELEASED = 7
+    FAILURE = 5
+    RELEASED_WITH_FALSE = 6
+    SUCCESS = 7
+    RELEASED = 8
 class RecognitionResult(IntEnum):
     '''The possible results of a recognition attempt.'''
     FAILED_PRELIM = 1
@@ -57,4 +58,4 @@ class LocksmithBase:
     def preliminary_check_lock(self, lock: AsyncLockLike[Any], /) -> bool: '''Return whether the lock passes preliminary checks for recognition. The default implementation checks whether the lock has the :meth:`acquire`, :meth:`release`, and :meth:`locked` methods.'''
     def can_force_lock_held(self, lock: AsyncLockLike[Any], /) -> bool: '''Return whether the locksmith can force the lock, given that the internal lock is held. The default implementation allows forcing if the lock is recognized and not currently locked.'''
     def patch_owner(self, task: Task[Any], lock: AsyncLockLike[Any], /) -> None: '''Change the owner of the lock to the given task. The default implementation sets the :attr:`_owner` attribute of the lock to the task, if it exists.'''
-    def task_raised_critical(self, lock: AsyncLockLike[Any], exc: BaseException, /) -> ForceResult: '''Called when a task raises a critical exception in response to a force request. The default implementation re-raises the exception wrapped in :class:`asyncutils.Critical`, rather than returning any value to :meth:`force`. This is not async because it is imperative that the exception be dealt with quickly.'''
+    def task_raised_critical(self, lock: AsyncLockLike[Any], exc: BaseException, /) -> Literal[ForceResult.FAILURE]: '''Called when a task raises a critical exception in response to a force request. The default implementation throws the exception wrapped in :class:`asyncutils.Critical`, rather than returning any value to :meth:`force`. This is not async because it is imperative that the exception be dealt with quickly. Subclasses can choose to return :const:`ForceResult.FAILURE` after some handling as well.'''

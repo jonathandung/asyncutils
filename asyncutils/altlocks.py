@@ -41,28 +41,29 @@ class UniqueResourceGuard(ResourceGuard):
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear() # pragma: no cover
     P.patch_method_signatures((guard, "obj, /, *, action='using'"))
 class CircuitBreaker:
+    CLOSED, HALF_OPEN, OPEN = range(3)
     __slots__ = '_exc', '_half_open_calls', '_lock', '_max_fails', '_max_half_open_calls', '_opened', '_reset', '_unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, n, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
         if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls._inc_cnt()
-        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s._max_fails, s._reset, s._exc, s._opened, s._max_half_open_calls, s._unlock, s._lock = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l; s.state = s.fails = s._half_open_calls = 0; return s if f is None else s(f)
+        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s._max_fails, s._reset, s._exc, s._opened, s._max_half_open_calls, s._unlock, s._lock, s.state = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l, s.CLOSED; s.fails = s._half_open_calls = 0; return s if f is None else s(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def g(*a, **k):
             async with self._lock:
-                if (s := self.state) == 2: # noqa: PLR2004
-                    if timer()-self._opened > self._reset: self.state, self._half_open_calls = 1, 0
+                if (s := self.state) == self.OPEN:
+                    if timer()-self._opened > self._reset: self.state, self._half_open_calls = self.HALF_OPEN, 0
                     else: raise A.CircuitOpen(f'asyncutils.altlocks.CircuitBreaker: circuit {self.name} is open')
-                elif s == 1:
+                elif s == self.HALF_OPEN:
                     if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise A.CircuitHalfOpen(f'asyncutils.altlocks.CircuitBreaker: breaker {self.name} exceeded the maximum of {m} calls in the half-open state')
                     self._half_open_calls = c+1
                 try:
                     async with self._unlock: r = await f(*a, **k)
-                    if s == 1: self._half_open_calls = self.state = self.fails = 0
+                    if s == self.HALF_OPEN: self._half_open_calls = self.fails = 0; self.state = self.CLOSED
                     return r
                 except self._exc:
-                    self.fails = x = self.fails+1
-                    if x >= self._max_fails: self._opened, self.state, self.fails = timer(), 2, 0
+                    if (x := self.fails+1) < self._max_fails: self.fails = x
+                    else: self._opened, self.state, self.fails = timer(), self.OPEN, 0
                     if default is _NO_DEFAULT: raise
                     return default
                 except A.CRITICAL: raise A.Critical

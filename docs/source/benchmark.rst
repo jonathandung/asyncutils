@@ -37,7 +37,7 @@ Baseline: asyncio
 
 .. version-added:: 0.9.1
 
-.. code-block:: bash
+::
 
   python -IqX importtime -c "import asyncio"
 
@@ -45,7 +45,7 @@ Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49
 
 .. version-added:: 0.9.10
 
-.. code-block:: bash
+::
 
   time printf "raise SystemExit\n" | python -Iqm asyncio 2>/dev/null
 
@@ -65,7 +65,7 @@ n = 10
 asyncutils
 ----------
 
-.. code-block:: bash
+::
 
   python -IqX importtime -c "import asyncutils"
 
@@ -77,13 +77,13 @@ Cumulative import time of asyncutils: 147.34 ± 7.53 ms; max 156.40 ms, min 131.
   The figures below are relative to the time when ``asyncutils/__init__.py`` is executed, and may not reflect the actual time taken, because Python
   is not free to boot up itself, having to perform various initialization tasks.
 
-.. code-block:: bash
+::
 
   python -Iqm asyncutils -dl
 
 Time taken to start the console, which includes importing :mod:`asyncio`: 99.89 ± 6.19 ms; max 110.25 ms, min 91.97 ms, n = 10
 
-.. code-block:: bash
+::
 
   python -Iqm asyncutils -dpl
 
@@ -93,7 +93,7 @@ Time taken to import :mod:`asyncio` along with all 31 ordinary submodules: 196.9
 
 .. version-added:: 0.9.10
 
-.. code-block:: bash
+::
 
   time printf "raise SystemExit\n" | asyncutils 2>/dev/null
 
@@ -105,7 +105,7 @@ Time taken to start and immediately exit the asyncutils console, timed like the 
 
 n = 10
 
-.. code-block:: bash
+::
 
   time printf "load_all()\nraise SystemExit\n" | asyncutils 2>/dev/null
 

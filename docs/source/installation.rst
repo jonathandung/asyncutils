@@ -3,9 +3,10 @@ Installation
 
 .. version-added:: 0.8.20
 
-No setup is required, besides ensuring that your package manager is updated to the latest version as follows:
+.. version-changed:: 0.9.10
+  Use uv as the build backend in pyproject.toml.
 
-.. code-block:: bash
+No setup is required, besides ensuring that your package manager is updated to the latest version as follows::
 
   # pip:
   pip install -U pip
@@ -27,55 +28,36 @@ No setup is required, besides ensuring that your package manager is updated to t
 .. version-added:: 0.8.13
   Achieved distribution on conda-forge and by extension, conda installation support.
 
-Next, install py-asyncutils:
-
-.. code-block:: bash
+Next, install py-asyncutils::
 
   # recommended: pip
-  pip install py-asyncutils==0.9.10
-  # directly from source
+  pip install py-asyncutils==|version|  # directly from source
   pip install git+https://github.com/jonathandung/asyncutils.git
-  # alternatively, after:
+  # for development, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
-  # you have options (a):
-  pip install .
-  # (b):
-  make install # verbose; or
+  # you have the three options below:
+  pip install -e .
+  make install
   make install-silent # no clutter
-  # uses Make, though pip is still used under the hood
-  # or if you are not on a unix-like system and don't have pip for some reason:
-  python -m build
-  python -m installer dist/*.whl
-  # you should really install pip in this case, since build and installer are still required
+  # the last two options need GNU Make on *nix, but the Windows version points to a batch file.
+  # uv is invoked under the hood and installed if absent; pip is not needed!
 
-or if you wish to obtain the :ref:`extras`:
+other installation pathways::
 
-.. code-block:: bash
-
-  # tools likely enough for developers
-  pip install "py-asyncutils[dev]"
-  # or the equivalent syntax for extras installation in other package managers
-
-other installation pathways:
-
-.. code-block:: bash
-
-  # pipx
-  pipx install py-asyncutils==0.9.10
-  # conda
-  conda install -c conda-forge py-asyncutils=0.9.10
+  pipx install py-asyncutils==|version| # pipx
+  conda install -c conda-forge py-asyncutils=|version| # conda
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  conda install py-asyncutils==0.9.10
+  conda install py-asyncutils==|version|
   # uv essentially supports the same interface as pip with uv pip
-  # poetry
-  poetry add py-asyncutils@0.9.10
-  # pdm
-  pdm add py-asyncutils==0.9.10
-  # pipenv
-  pipenv install py-asyncutils==0.9.10
+  poetry add py-asyncutils@|version| # poetry
+  pdm add py-asyncutils==|version| # pdm
+  pipenv install py-asyncutils==|version| # pipenv
+  # no package manager (needs the build and installer packges)
+  python -m build # generate sdist and wheel in dist/
+  python -m installer dist/*.whl # install from the wheel
 
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 

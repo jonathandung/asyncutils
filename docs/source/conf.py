@@ -1,5 +1,6 @@
 import sys, os
-def setup(app): app.add_config_value('py313', sys.version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs')
+from sphinx.directives.code import CodeBlock
+def setup(app, f=__import__('_operator').methodcaller('replace', '|version|', release)): app.add_config_value('py313', sys.version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs'); app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
 author = 'Jonathan Dung'
 version = '0.9'
@@ -21,7 +22,7 @@ else:
 html_short_title = 'asyncutils 0.9.10 docs'
 autoapi_dirs = ['../../asyncutils']
 autoapi_file_patterns = ['*.pyi']
-autoapi_ignore = ['*/_internal/helpers.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/log.pyi', '*/_internal/compat.pyi', '*/_internal/py312.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']
+autoapi_ignore = ['*/_internal/compat.pyi', '*/_internal/helpers.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']
 autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
 autoapi_options = ['members', 'undoc-members', 'private-members', 'show-inheritance', 'show-module-summary', 'special-members']
@@ -31,3 +32,6 @@ copybutton_exclude = '.linenos, .gp, .go'
 copybutton_prompt_text = '>>> '
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 viewcode_line_numbers = True
+rst_epilog = f'\n.. |version| replace:: {release}\n'
+maximum_signature_line_length = 120
+highlight_language = 'bash'

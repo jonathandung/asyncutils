@@ -47,3 +47,11 @@ async def test_adisembowel():
     assert await vecs_eq(adisembowelleft(dq), await agather(amap(sleep.__get__(0), (0, 0, 1, 0, 1, 2))), is_)
 @mk
 async def test_aaccumulate(): assert await vecs_eq(aaccumulate(range(10)), (0, 1, 3, 6, 10, 15, 21, 28, 36), strict=False)
+@mk
+async def test_aonline_sorter():
+    s = aonline_sorter([-1, -2], key=hash)
+    assert await anext(s) == -1
+    assert await s.asend(3) == -2
+    assert await s.asend(-4) == -4
+    assert await s.asend(5) == 3
+    assert await vecs_eq(s, (5,))

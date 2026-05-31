@@ -51,7 +51,7 @@ The below environment variables directly affect what this library does, mostly i
     detailing how Python itself handles the colour-related environment variables above
 
 .. version-changed:: 0.9.10
-  Made consideration of environment variables coonsistent with specifications, no longer incorrectly requiring them to be set to "1"
+  Made consideration of environment variables coonsistent with specifications, no longer incorrectly requiring them to be set to "1".
 
 Arguments to Python that are considered
 ---------------------------------------

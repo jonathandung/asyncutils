@@ -3,11 +3,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-permissions:
-  contents: read
-  id-token: write
 jobs:
   publish:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -15,7 +15,7 @@ jobs:
     steps:
       - run: |
           RELNAME="${{github.event.release.name}}"
-          if [[! $RELNAME =~ ^[0-9]+.[0-9]+.[0-9]+$ ]]; then
+          if [[ ! $RELNAME =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             exit 1
           fi
       - uses: actions/checkout@v6.0.2
@@ -25,5 +25,4 @@ jobs:
           python-version: 3.14
           cache-python: true
           activate-environment: true
-      - name: Upload to PyPI
-        run: uv pip install -e . && uv build && uv publish
+      - run: uv build && uv publish

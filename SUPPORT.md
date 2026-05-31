@@ -41,7 +41,7 @@ For quick questions, consider:
 
 See [the security policy](https://asyncutils.readthedocs.io/en/stable/security.html) for details.
 
-## 🔧 Common Issues & Solutions
+## Common Issues & Solutions
 
 ### Installation Problems
 
@@ -54,8 +54,8 @@ pip install -U py-asyncutils
 # Check for dependency shenanigans
 pip check # Exit code should be zero
 
-# I personally also use:
-pip install -U pipdeptree # If you are limited to pip
+# If you are limited to pip:
+pip install -U pipdeptree
 pipdeptree # Pretty print the pip packages dependency tree
 pipdeptree --packages py-asyncutils # Show only the dependents and dependencies of this package
 

@@ -30,9 +30,9 @@ inspiration.
   * - asyncutils/get_loop_and_set
     - ``loop``: :class:`~asyncio.base_events.BaseEventLoop`
     - Raised when :mod:`asyncutils` retrieves an event loop ``loop``, creating one if necessary, and sets it as the event loop for the current thread if not already set.
-  * - asyncutils/recurse_configs
+  * - asyncutils/recurse_dirs
     - ``cwd``: :class:`~pathlib.Path`
-    - Raised when the environment variable pointing to a config file is not set, and library resorts to beginning traversing the parents of the current working directory sequentially to look for pyproject.toml files with a (possibly empty) ``[tool.asyncutils]`` section.
+    - Raised when the environment variable pointing to a config file is not set, and library resorts to beginning to traverse the parents of the current working directory sequentially to look for pyproject.toml files with a (possibly empty) ``[tool.asyncutils]`` section.
   * - asyncutils/try_config
     - ``level``: :class:`int`
     - Raised when asyncutils finds a file named pyproject.toml in the ``level``-th parent of the current working directory (but hasn't parsed it yet).
@@ -138,9 +138,9 @@ inspiration.
   * - asyncutils.io.double_ended_pipe
     - ``reader1``: :class:`int`, ``writer1``: :class:`int`, ``reader2``: :class:`int`, ``writer2``: :class:`int`
     - Raised when :func:`~asyncutils.io.double_ended_text_pipe` or :func:`~asyncutils.io.double_ended_binary_pipe` is called, with the file descriptors of the reader and writer ends of both pipes as arguments.
-  * - asyncutils.iterclasses.online_sorter
-    - \
-    - Raised when :class:`~asyncutils.iterclasses.online_sorter` is instantiated.
+  * - asyncutils.iters.aonline_sorter
+    - ``iaddr``: :class:`int`
+    - Raised when :class:`~asyncutils.iters.aonline_sorter` is called on an (async) iterable with memory address ``iaddr``.
   * - asyncutils.iters.agetitems_from_indices
     - ``tname``: :class:`str`
     - Raised when :func:`~asyncutils.iters.agetitems_from_indices` is called on an iterable, the type of which has full name ``tname``.

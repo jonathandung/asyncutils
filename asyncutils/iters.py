@@ -67,6 +67,10 @@ async def astarmap_with_kwds(f, it, /, await_=False):
     else:
         async for a, k in it: yield f(*a, **k)
 async def aloops(n):
+    m, n = divmod(n, 1024)
+    for _ in repeat(None, m):
+        for _ in repeat(None, 1024): yield
+        await A.yield_to_event_loop
     for _ in repeat(None, n): yield
 async def _aunzip_put(*_):
     for q, i in zip(*_):
@@ -258,7 +262,7 @@ async def window(it, size, step=1):
     async for i in iter_to_agen(it):
         a(i)
         if len(b) == size:
-            if not c%step: size, step = (yield tuple(b)) or (size, step)
+            if not c%step and (t := (yield tuple(b))) is not None: size, step = t
             c += 1
 async def aall(it):
     async for _ in iter_to_agen(it):
@@ -857,12 +861,12 @@ async def aserialize(it):
     while True:
         async with l: yield await n()
 async def aonline_sorter(it, *, key=_identity, reverse=False, slow=None):
-    audit('asyncutils.iters.aonline_sorter'); c, i = Z if reverse else __import__('_heapq'), 0
+    audit('asyncutils.iters.aonline_sorter', id(it)); c = Z if reverse else __import__('_heapq')
     if slow is None: slow = getcontext().AONLINESORTER_DEFAULT_SLOW
     if (e := getattr(aonline_sorter, 'executor', None)) is None: e = H.create_executor(aonline_sorter)
     q = partial(p := partial(H.get_loop_and_set().run_in_executor, e), key)
     await p(c.heapify, it := [(await q(x) if slow else key(x), i, x) async for i, x in aenumerate(it)])
-    a, b = partial(c.heappop, it), partial(c.heappush, it)
+    a, b, i = partial(c.heappop, it), partial(c.heappush, it), len(it)
     while it:
         if (j := (yield a()[2])) is not None: b(((await q(j)) if slow else key(j), i, j)); i += 1
 P.patch_function_signatures((aonline_sorter, 'it, *, key={}, reverse=False, slow=None'), (aside_effect, 'f, it, /, *, size=None, before=None, after=None'), (apolynomial_from_roots, 'roots'), (adistinct_permutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleave_randomly, 'its'), (ahammingdist, 'i1, i2, /, cmpeq={}'), (aiter_idx, 'it, value, start=0, stop=None'), (amergesortedby, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asample_weighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandomcombination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandomproduct, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandom_derangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflatten_tensor, 'tensor, base_typ={}'), (arandom_permutation, 'it, r=None'))

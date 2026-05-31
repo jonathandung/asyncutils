@@ -4,25 +4,27 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.9.x | :white_check_mark: |
-| 0.8.x | :x: |
+| 0.9.x | ✅ |
+| 0.8.x | ❌ |
 
 ## Reporting a Vulnerability
 
-I think it highly unlikely there will be any security vulnerabilities in the near future since this project is should not see much applications in
-related fields, but this is still included for compliance. Please report as described below.
+I think it highly unlikely there will be any security vulnerabilities in the near future, since the nature of this project should not see much
+applications in related fields, but this is still included for compliance with OpenSSF Best Practices standards. Please report as follows:
 
 - GitHub-native method
 
-  Go to the [Security tab](https://github.com/jonathandung/asyncutils/security) and click on "Report a vulnerability" in the upper right corner.
+  Navigate to the [security tab](https://github.com/jonathandung/asyncutils/security), then click on "Report a vulnerability" in the upper right
+  corner. Comprehensive guidelines should be shown.
 
 - Via email
 
   [Send me an email](mailto:jonathandung@yahoo.com).
 
-  If possible, encrypt your message with PGP; the fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`, and the public key is shown below.
+  If possible, encrypt your message with [PGP](https://www.openpgp.org). The fingerprint is `836B3C7AA3DAC6337F61CD2D2A5943B64B0994DE`, and the
+  public key is shown below.
 
-  *You should always check the key against the fingerprint first in case either was compromised.*
+  *Always check the key against the fingerprint first in case the former was compromised.*
 
 ```text
 -----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -42,8 +44,8 @@ O01JPuZoia5kAQ==
 -----END PGP PUBLIC KEY BLOCK-----
 ```
 
-The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please state that in the email.
+The creator thanks you for your report in this unfortunate scenario. If you wish not to be acknowledged, please specify in the email.
 
-Please note that reporting such potential exploits, if they are to emerge, via public channels such as the issues tab is a sure-fire way to notify
-the attackers (if any), who may then adjust their strategy. Therefore, you should ensure the communication method chosen is not compromised according
-to the guidelines above.
+Please note that reporting such potential exploits, if they are to emerge, via public channels such as the issues tab, is a sure-fire way to notify
+the attackers (if any), who may then adjust their strategy. Therefore, you should ensure the communication method chosen is secure according to the
+directions above.

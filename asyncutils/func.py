@@ -13,8 +13,8 @@ from sys import audit
 from time import perf_counter
 def acompose(*F, wrap_last=True, _=I.iscoroutine):
     async def g(*a, **k):
-        if _(r := next(I := reversed(F))(*a, **k)): r = await r
-        for f in I:
+        if _(r := next(i := reversed(F))(*a, **k)): r = await r
+        for f in i:
             if _(r := f(r)): r = await r
         return r
     if wrap_last: update_wrapper(g, F[-1])
@@ -28,10 +28,10 @@ def star(f, /):
 def unstar(f, /):
     async def g(*a, **k): return await f(a, k)
     return wraps(f)(g)
-def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, _='func.every: periodic coroutine %s reached the maximum of %d iterations'):
+def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.every: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
-        n = getattr(f, '__qualname__', '<name unknown>')
+        n = getattr(f, '__qualname__', default_fname)
         if stop_when and stop_when.done(): log.warning('func.every: future to stop periodic coroutine %s is already done', n)
         async def g(*a, **k):
             log.debug('func.every: periodic task started'); q = default is _NO_DEFAULT; nonlocal stop_when
@@ -58,10 +58,10 @@ def every(intvl, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=
             if not q: return default
         return wraps(f)(g)
     return dec
-def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, _='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
+def everymethod(intvl, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = get_loop_and_set()
     def dec(f, /):
-        n = getattr(f, '__qualname__', '<name unknown>')
+        n = getattr(f, '__qualname__', default_fname)
         async def g(self, /, *a, **k):
             log.debug('func.everymethod: periodic task started'); q = default is _NO_DEFAULT
             if (stop_when := loop.create_future() if stop_when_getter is None else stop_when_getter(self)).done(): log.warning('func.everymethod: future to stop periodic coroutine %s is already done', n)

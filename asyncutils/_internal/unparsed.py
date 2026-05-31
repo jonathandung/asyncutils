@@ -27,7 +27,7 @@ if c := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\'
     elif v is None: a('asyncutils/discontinue_config', c); del E[k]
     else: m('asyncutils: key "next_config" in %s should point to a string or null, not %r', v)
 else:
-    A, f, s, t, i = __import__('pathlib').Path.cwd(), None, 'asyncutils/try_config', 'pyproject.toml', None; a('asyncutils/recurse_configs', A)
+    A, f, s, t, i = __import__('pathlib').Path.cwd(), None, 'asyncutils/try_config', 'pyproject.toml', None; a('asyncutils/recurse_dirs', A)
     for i, A in enumerate(__import__('itertools').chain((A,), A.parents)):
         if (A := A/t).is_file():
             a(s, i)

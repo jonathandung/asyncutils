@@ -4,7 +4,7 @@ from .mixins import AsyncContextMixin, AwaitableMixin
 from _collections_abc import Awaitable, Callable
 from collections import deque
 from types import CoroutineType, TracebackType
-from typing import Any, NoReturn, Self, final, overload
+from typing import Any, ClassVar, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync- and async-compatible context manager.'''
@@ -52,6 +52,12 @@ class Releasing:
 class CircuitBreaker:
     '''| The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
     | Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.'''
+    CLOSED: ClassVar[int]
+    '''The closed state of a circuit breaker.'''
+    HALF_OPEN: ClassVar[int]
+    '''The half-open state of a circuit breaker.'''
+    OPEN: ClassVar[int]
+    '''The open state of a circuit breaker.'''
     @overload
     def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
     @overload
@@ -60,15 +66,16 @@ class CircuitBreaker:
         | If `name` is passed, use it as its name; return a function wrapping `f` otherwise, deriving the name of the circuit breaker from the function.
         | This derivation follows exactly one level of :attr:`__wrapped__`-based wrapping after retrieving the :attr:`__func__` attribute if present.
         | Pass exceptions that are expected to happen through the `exc` parameter.
-        | When the decorated function fails more than `max_fails` times (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers
-        | (opens the circuit) and disallows further calls of the wrapped functions by throwing an exception.
+        | When the decorated function fails more than `max_fails` times (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker
+        | triggers (opens the circuit, so to say) and disallows further calls of the wrapped functions by throwing an exception.
         | This state persists until the `reset` timeout expires (default :const:`context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the
         | half-open state.
         | If the function completes successfully when the breaker is half-open under `max_half_open_calls` (default
         | :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS`) tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, CoroutineType[Any, Any, T]]:
-        '''| Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature but strictly returning a coroutine.
-        | `timer` (default :func:`time.monotonic`) is used to get the current time for timeout calculation.
+        '''| Apply the circuit breaker to a function `f` returning an awaitable, and return a wrapper function with the same signature that
+        | strictly returns coroutines.
+        | `timer` (default :func:`time.monotonic`) is used to get the current time to calculate the timeout.
         | If passed, `default` is returned if an expected exception is raised, also suppressing that exception.
 
         .. caution:: Care should be taken when applying the same circuit breaker to multiple functions, as the calls counters will be shared.'''
@@ -83,7 +90,7 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     @overload
     def __init__(self, parties: int, name: str=..., *, maxstate: int|None=...): ...
     @overload
-    def __init__(self, parties: int, *, initstate: SupportsIteration[T], maxstate: int|None=...) -> None: ...
+    def __init__(self, parties: int, *, initstate: SupportsIteration[T], maxstate: int|None=...): ...
     @overload
     def __init__(self, parties: int, name: str, initstate: SupportsIteration[T], maxstate: int|None=...):
         '''| `parties` (required): number of parties required to break the barrier

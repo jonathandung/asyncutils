@@ -44,7 +44,7 @@ This is asyncutils v0.9.10.
 This library is currently in the beta stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. See [the compatibility page](https://asyncutils.readthedocs.io/en/stable/compat.html).
 
-See [this page](https://github.com/jonathandung/asyncutils/tags) for the version tags up to now.
+See [all version tags up to now](https://github.com/jonathandung/asyncutils/tags).
 
 ## Configuration
 
@@ -57,8 +57,8 @@ See the [configuration guide](https://asyncutils.readthedocs.io/en/stable/config
 Regarding .markdownlint.json, even though there is no longer a pre-commit or workflow step requiring it, it contains the most basic ignores suitable
 for this project's files and should be respected. It will be auto-detected by relevant IDE extensions and allows running the linter locally.
 
-It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop related
-features.
+It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop and async
+generator related features, since their behaviours are central points of confusion and have troubled me greatly in the development of this library.
 
 ## Resources
 

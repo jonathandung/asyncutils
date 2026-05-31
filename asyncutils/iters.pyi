@@ -483,11 +483,14 @@ def aserialize[T](it: SupportsIteration[T]) -> AsyncGenerator[T]: '''Protect an 
 def aonline_sorter[T](it: SupportsIteration[T], *, key: Callable[[T], SupportsRichComparison], reverse: bool=..., slow: bool=...) -> AsyncGenerator[T, T|None]: ...
 @overload
 def aonline_sorter[C: SupportsRichComparison](it: SupportsIteration[C], *, reverse: bool=..., slow: bool=...) -> AsyncGenerator[C, C|None]:
-    '''| Sort items from an (async) iterable and those sent in on the fly in the async generator interface, according to `key` and `reverse`.
+    '''| Sort items from an (async) iterable and those sent in on the fly in the async generator interface (i.e. by awaiting
+    | the return value of :meth:`~types.AsyncGeneratorType.asend`), according to `key` and `reverse`.
     | Does not work well with items that are `None`.
     | Evaluates the truthiness of the `slow` parameter every time a new item is received, and if it is `True`, offloads the evaluation of the
     | `key` for that item to an executor, such that the :meth:`__bool__` method on `slow` may reflect the state of the program but can also be
     | a plain boolean.
+
+    .. note:: Uses a stable variant of heap sort internally, which is O(n log n) time and O(n) space.
 
     .. version-changed:: 0.9.9
 
