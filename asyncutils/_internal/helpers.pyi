@@ -3,7 +3,7 @@
 .. warning:: These are undocumented and unstable, and will remain so. This stub file exists for the convenience of development only.'''
 from .types import CanClearAndCopy
 from ..config import Executor
-from _collections_abc import Awaitable, Callable, Generator, Iterable
+from collections.abc import Awaitable, Callable, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.tasks import Task

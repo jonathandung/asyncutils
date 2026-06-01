@@ -28,7 +28,7 @@ As to how the loquacity and output whereabouts of the logger can be altered, ref
 
 .. literalinclude:: ../../asyncutils/config.pyi
   :language: python
-  :caption: relevant portion of the stub of the :mod:`config` submodule
+  :caption: relevant portion of the stub of the :mod:`~asyncutils.config` submodule
   :lines: 20-40,51-
   :force:
 

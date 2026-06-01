@@ -1,7 +1,7 @@
 '''Various compatibility shims for older Python versions.'''
 from .types import SupportsRichComparison
 import sys as m
-from _collections_abc import Iterable
+from collections.abc import Iterable
 from pprint import PrettyPrinter
 from typing import Any, Final
 from functools import partial

@@ -20,8 +20,8 @@ jobs:
         enable-cache: true
         python-version: 3.15.0-beta.2
         cache-python: true
-        activate-environment: true
-    - run: uvx ruff check --output-format=github && uvx ty check --output-format=github
+    - run: uvx ruff check --output-format=github
+    - run: uvx ty check --output-format=github
     - run: uv run --with ".[test]" pytest -vv -p asyncio -p pytest_cov -p no:asyncio-cooperative --no-local-badge --maxfail 0 --tb long --cov asyncutils --cov-report xml
     - if: ${{github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository}}
       uses: actions/upload-code-coverage@v1.2.0

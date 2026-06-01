@@ -293,9 +293,9 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
     def map_nowait(self, f, /): return A.sync_await(gather(*map(f, self.peek_all())), loop=self.loop)
     def starmap_nowait(self, f, /): return A.sync_await(gather(*starmap(f, self.peek_all())), loop=self.loop)
     def filter_nowait(self, pred=bool, /):
-        f, g = (k := []).append, (r := []).append
+        f, g, a = (k := []).append, (r := []).append, self.get_nowait
         with ignore_qempty:
-            while True: (f if pred(i := self.get_nowait()) else g)(i)
+            while True: (f if pred(i := a()) else g)(i)
         h, j = self.put_nowait, len(r)
         for i in k:
             try: h(i)

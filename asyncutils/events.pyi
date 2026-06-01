@@ -1,7 +1,7 @@
 '''| Classes that extend the functionality of :class:`~asyncio.locks.Event` with the interface it specifies, without inheriting from it.
 | Not at all related to the :mod:`asyncio.events` submodule, which manages the event loop, despite the common name.'''
 from .mixins import EventMixin
-from _collections_abc import Generator
+from collections.abc import Generator
 from typing import Literal, overload
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
@@ -18,7 +18,7 @@ class EventWithValue[T](EventMixin[T]):
     @overload
     def set(self, value: None, *, strict: Literal[False]) -> None: ...
     @overload
-    def set(self, value: T, *, strict: bool=...) -> None: '''Set the result of the event and wake up waiters. If `strict` is `True`, throws an error when the value is `None`.'''
+    def set(self, value: T, *, strict: bool=...) -> None: '''Set the result of the event and wake up waiters. If `strict` is ``True``, throws an error when the value is ``None``.'''
     def remove_done_waiters(self) -> None: '''Should be run periodically to cleanup the internal queue of waiters, removing those having already completed.'''
     def set_once(self, value: T) -> None: '''Set the result to `value`, and then immediately revert it to the original. Waiters are triggered twice.'''
     def clear(self) -> None: '''Unset the result of the event.'''
@@ -33,7 +33,7 @@ class EventWithValue[T](EventMixin[T]):
     async def wait_for_transition(self, old: T, new: T, timeout: float|None=..., *, force_transition: bool=...) -> bool:
         '''| Wait until the value is set to `old`, and then `new`, in that order.
         | `timeout` defaults to :const:`context.EVENT_WITH_VALUE_DEFAULT_TIMEOUT`
-        | On timeout, if `force_transition` is `True`, cause the transition to happen manually.
+        | On timeout, if `force_transition` is ``True``, cause the transition to happen manually.
         | Return whether the transition occurred naturally.
 
         .. version-changed:: 0.9.6

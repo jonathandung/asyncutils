@@ -1,7 +1,7 @@
 '''Utilities that cannot be easily classified into any submodule.'''
 from ._internal.types import ExcType, SupportsIteration, Timer
 from .mixins import ExecutorRequiredAsyncContextMixin, LoopContextMixin
-from _collections_abc import Awaitable, Callable, Generator, Iterable, Mapping
+from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping
 from collections import deque
 from types import TracebackType
 from typing import Any, NoReturn, Self, Literal, overload
@@ -11,7 +11,7 @@ class StateMachine:
     def __init__(self, state: str): '''Initialize the state machine with the given initial state.'''
     def add(self, from_state: str, to_state: str, condition: Callable[[str, str], Awaitable[Any]]|None=...) -> None:
         '''| Add a condition to the transition from `from_state` to `to_state`.
-        | If any condition is `None` or returns a truthy value taking the current and new states as positional arguments, the transition is allowed.'''
+        | If any condition is ``None`` or returns a truthy value taking the current and new states as positional arguments, the transition is allowed.'''
     def on_enter[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when `state` is entered.'''
     def on_exit[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when `state` is exited.'''
     async def transition(self, state: str) -> bool: '''Transition from the current state to the new `state`.'''
@@ -38,8 +38,8 @@ class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncCo
 
         * `name` is the name of attribute gotten on the argument to :meth:`add`.
         * `maxlen` is the maximum number of callbacks that can be stored.
-        * `default` is the default return value of the context manager if no callbacks are added or `call_once` is `False`.
-        * If `call_once` is `True`, the callbacks will be called only once when the context manager exits, and then cleared. If `False`, they will be called every time the context manager exits until they are manually cleared.
+        * `default` is the default return value of the context manager if no callbacks are added or `call_once` is ``False``.
+        * If `call_once` is ``True``, the callbacks will be called only once when the context manager exits, and then cleared. If ``False``, they will be called every time the context manager exits until they are manually cleared.
         * `default_getter` is a function that returns the default arguments to call the callbacks with when the context manager exits. By default, it returns the exception info if `name` is `'__exit__'` and empty arguments otherwise.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> None: ...
     def __enter__(self) -> Self: '''Enter the context manager.'''

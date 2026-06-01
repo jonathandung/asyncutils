@@ -1,7 +1,7 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
 from ._internal.types import AsyncLockLike, DCRV, DualContextManager, EventProt, ExceptionWrapper, ExcType, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
-from _collections_abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Generator, Iterable
+from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Generator, Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.locks import BoundedSemaphore, Event, Lock, Semaphore
@@ -15,10 +15,8 @@ ignore_cancellation: IgnoreErrors
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable `aw`, such that it can be passed to :func:`asyncio.create_task`.'''
 class anullcontext: # noqa: N801
     '''Simple async-only version of :class:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
-    .. note:: This does not support the `enter_result` argument of the original.
-    .. version-changed:: 0.8.25
-       The library no longer uses this class internally.
-'''
+
+    .. note:: This does not support the `enter_result` argument of the original.'''
     async def __aenter__(self) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
@@ -82,7 +80,7 @@ def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: obje
     '''| Run a function `f`, with the provided parameters passed straight through, in the event loop `loop`, and return a future for it.
     | This function avoids incurring the overhead of calling :meth:`~asyncio.loop.run_in_executor` by instead scheduling the function to run at the next iteration
     | of the loop. To avoid overhead, the function should thus return fast.
-    | If `_threadsafe_` is `True`, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
+    | If `_threadsafe_` is ``True``, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''
 def transient_block_from_loop(loop: AbstractEventLoop, *, threadsafe: bool=...) -> TransientBlockFromLoopRV: '''Return the partial of :func:`transient_block` under the specified `loop`.'''
 @overload
 def dualcontextmanager[T, **P](*, use_existing_executor: bool, strict: Literal[True]) -> Callable[[Callable[P, Iterable[T]]], Callable[P, AbstractContextManager[T, bool]]]: ...

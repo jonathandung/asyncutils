@@ -2,7 +2,7 @@
 | limiting collateral damage and hindrance of the control flow of the program as much as possible and allowing customization of behaviour in
 | different steps regarding some locks.'''
 from ._internal.types import AsyncLockLike
-from _collections_abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from enum import IntEnum
@@ -49,12 +49,12 @@ class LocksmithBase:
     async def task_reraised_request(self, lock: AsyncLockLike[Any], /) -> None: '''Called when a task that was forced to release the lock does not handle or reraises the exception.'''
     async def throw_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but there is no current task that owns it or it could not be found, and no task appears to be running. Its return value is returned by :meth:`force`.'''
     async def eager_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but the owner task appears to have completed, since it has no coroutine. Its return value is returned by :meth:`force`.'''
-    async def release_returned_false(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock and its release method returns `False`, which is a common convention for indicating that the lock was not actually released. Its return value is returned by :meth:`force`.'''
+    async def release_returned_false(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock and its release method returns ``False``, which is a common convention for indicating that the lock was not actually released. Its return value is returned by :meth:`force`.'''
     async def already_forcing(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but it is already being forced by another locksmith, which is detected when the task that owns the lock raises the exception thrown by :meth:`force` instead of handling it. Its return value is returned by :meth:`force`.'''
     async def answer_received(self, lock: AsyncLockLike[Any], answer: object, /) -> None: '''Called when a task that was forced to release the lock responds to the exception thrown by :meth:`force` by setting a value on it, which is detected by :meth:`host`. `answer` is the value that the task set on the exception.'''
     async def task_raised_other(self, lock: AsyncLockLike[Any], exc: BaseException, /) -> None: '''Called when a task raises a non-critical exception in response to a force request. The default implementation logs the exception if it is not a :class:`RuntimeError`, since those are commonly raised when a task is cancelled.'''
     def wrap_task[T](self, aw: Awaitable[T], /) -> Task[T]: '''Wrap the given awaitable in a task using the locksmith's event loop.'''
-    def find_owner(self, lock: AsyncLockLike[Any], /) -> Task[Any]|None: '''Return the owner of the lock, if it can be found. The default implementation assumes that the :attr:`_owner` attribute of the lock, if present, points to the task that owns it or `None`.'''
+    def find_owner(self, lock: AsyncLockLike[Any], /) -> Task[Any]|None: '''Return the owner of the lock, if it can be found. The default implementation assumes that the :attr:`_owner` attribute of the lock, if present, points to the task that owns it or ``None``.'''
     def preliminary_check_lock(self, lock: AsyncLockLike[Any], /) -> bool: '''Return whether the lock passes preliminary checks for recognition. The default implementation checks whether the lock has the :meth:`acquire`, :meth:`release`, and :meth:`locked` methods.'''
     def can_force_lock_held(self, lock: AsyncLockLike[Any], /) -> bool: '''Return whether the locksmith can force the lock, given that the internal lock is held. The default implementation allows forcing if the lock is recognized and not currently locked.'''
     def patch_owner(self, task: Task[Any], lock: AsyncLockLike[Any], /) -> None: '''Change the owner of the lock to the given task. The default implementation sets the :attr:`_owner` attribute of the lock to the task, if it exists.'''

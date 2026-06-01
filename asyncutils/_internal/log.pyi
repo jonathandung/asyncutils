@@ -1,6 +1,6 @@
 '''This module re-exports all the attributes of the logger used by :mod:`asyncutils`.'''
 import logging as L
-from _collections_abc import Mapping
+from collections.abc import Mapping
 from typing import Final
 name: Final[str]
 level: int

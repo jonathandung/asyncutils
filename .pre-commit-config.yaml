@@ -12,9 +12,12 @@ repos:
       - id: check-illegal-windows-names
       - id: check-case-conflict
       - id: check-merge-conflict
-      - id: detect-private-key
       - id: file-contents-sorter
         files: ^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py)$
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.15
     hooks:

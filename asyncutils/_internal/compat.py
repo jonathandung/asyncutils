@@ -1,5 +1,5 @@
 import sys as S, collections as C
-__all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'p', 'partial'
+__all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'p', 'partial', 's'
 c, V, b = not (g := (E := __import__('os').environ).get)('NO_COLOR'), S.version_info, bool(g('PYTHON_BASIC_REPL')) if (r := not (F := S.flags).ignore_environment) else None
 if d := g('TERM') == 'dumb':
     if g('FORCE_COLOR'): __import__('_warnings').warn('possibly undesired conflict in environment variables: non-empty FORCE_COLOR overrides TERM=dumb', RuntimeWarning)

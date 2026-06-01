@@ -1,6 +1,6 @@
 '''Implementation of an `interactive async console base class <https://asyncutils.readthedocs.io/en/stable/api/asyncutils/console/index.html#asyncutils.console.AsyncUtilsConsole>`_, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.types import ExcType
-from _collections_abc import Callable, Coroutine, Iterable
+from collections.abc import Callable, Coroutine, Iterable
 from _contextvars import Context
 from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop
@@ -46,7 +46,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     @property
     def retcode(self) -> int: '''The integer return code of the console. If the console has not exited, return 0.'''
     @property
-    def exc(self) -> SystemExit|None: '''The :exc:`SystemExit` instance that caused the console to exit, or `None` if the console has not exited.'''
+    def exc(self) -> SystemExit|None: '''The :exc:`SystemExit` instance that caused the console to exit, or ``None`` if the console has not exited.'''
     @final
     @property
     def memory_errors(self) -> int: '''The number of :exc:`MemoryError`'s that have occurred.'''
@@ -80,7 +80,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         | The strings `exitmsg` and `threadname` should support `%`-formatting, the placeholder being the module name.
         | Pass a negative value for `max_memerrs` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
         | If `always_install_completer` is True, set the completer on readline as long as readline is available.
-        | Pass `True` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
+        | Pass ``True`` for `suppress_asyncio_warnings` and `suppress_unawaited_coroutine_warnings` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.
         | If you wish the console to act like a console even when stdin is piped, pass `always_run_interactive=True` or start Python with the `-i` flag.'''
     def showtraceback(self) -> None: '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing (this differs from the superclass behaviour).'''
     @final

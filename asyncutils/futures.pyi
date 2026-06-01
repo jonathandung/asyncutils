@@ -1,5 +1,5 @@
 '''Various implementations of future and task classes, eager, time-aware and supporting asynchronous and no-argument callbacks.'''
-from _collections_abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from asyncio.tasks import Task

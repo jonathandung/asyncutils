@@ -1,18 +1,19 @@
 # ty: ignore[invalid-method-override]
 '''| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
 | This is a fake module, and neither it nor any of its symbols exist at runtime.
-| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with `from asyncutils._internal.types import *`.
+| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with
+| ``from asyncutils._internal.types import *``.
 
-.. tip:: For inline type annotations, wrap the imports in `if TYPE_CHECKING:` blocks.
+.. tip:: For inline type annotations, wrap the imports in ``if TYPE_CHECKING:`` blocks.
 .. tip::
 
-  Besides, run `from __future__ import annotations` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted even
+  Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted even
   prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.'''
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys
-from _collections_abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
+from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from concurrent.futures import Future as SyncFuture
@@ -38,7 +39,7 @@ class SupportsGT(Protocol):
     def __gt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class AsyncContextManager[T](Protocol):
-    '''An asynchronous context manager. Basically a protocol version of :class:`contextlib.AbstractAsyncContextManager` with proper overloads.'''
+    '''A protocol version of :class:`contextlib.AbstractAsyncContextManager` with proper overloads.'''
     async def __aenter__(self) -> T: ...
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool|None: ...
@@ -53,7 +54,7 @@ class AsyncLockLike[T](AsyncContextManager[T], Protocol):
 @type_check_only
 class FutWrapType(Protocol):
     '''The signature of the functions accepted for the `futwrap` parameter in :func:`~compete.convert_to_coro_iter`.'''
-    def __call__(self, future: Future[Any]|SyncFuture[Any], *, loop: AbstractEventLoop|None) -> Future[Any]: ...
+    def __call__[T](self, future: Future[T]|SyncFuture[T], *, loop: AbstractEventLoop|None) -> Future[T]: ...
 @type_check_only
 class GenericSized[T](Protocol):
     '''A generic version of :class:`typing.Sized`.'''
@@ -142,11 +143,11 @@ class FuncProxy[W](Protocol):
     @property
     def __func__(self) -> W: ...
 type Proxy[W] = FuncProxy[W]|FuncWrapper[W]
-'''A supposed callable object having a :attr:`__wrapped__` or :attr:`__func__` attribute pointing to the callable it wraps.'''
+'''A supposed callable object having a :attr:`FuncWrapper.__wrapped__` or :attr:`~method.__func__` attribute pointing to the callable it wraps.'''
 type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
 '''A function or wrapper of any depth thereof.'''
 type SigPatcherArg = tuple[Wrapper, str]
-'''The type of a positional argument passed to a signature-patching function in :mod:`asyncutils._internal.patch`.'''
+'''The type of a positional argument passed to a signature-patching function in :mod:`_internal.patch`.'''
 type Middleware = Callable[[str, Any], Any]
 '''Represents a middleware accepted by :class:`~channels.EventBus`.'''
 @type_check_only
@@ -169,11 +170,11 @@ class QProt[R, V, T](Protocol):
     def cancel_extend(self, msg: object=...) -> bool:
         '''| Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will
         | be the argument for the :exc:`~asyncio.exceptions.CancelledError` seen by the extender if any.
-        | Return `False` if the task is already done or cancelled, or there was no task to begin with.'''
+        | Return ``False`` if the task is already done or cancelled, or there was no task to begin with.'''
     def empty(self) -> bool: '''Check if the queue is empty.'''
     def full(self) -> bool: '''Check if the queue is full.'''
     async def join(self) -> None: '''Wait until :meth:`task_done` has been called for each item put into the queue.'''
-    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is `True`, pending gets raise immediately even if the queue is not empty.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is ``True``, pending gets raise immediately even if the queue is not empty.'''
     def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempt to change the get password of the password-protected queue to `new_pwd` given `old_pwd` and return success. Always fails if the queue does not protect gets or is empty and has been shut down.'''
     def change_put_password(self, old_pwd: V, new_pwd: V) -> bool: '''Attempt to change the put password of the password-protected queue to `new_pwd` given `old_pwd` and return success. Always fails if the queue does not protect puts or has been shut down.'''
 @type_check_only
@@ -212,11 +213,12 @@ class EveryRV[T](Protocol):
     def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T|None]]: ...
 @type_check_only
 class SubscriptionRV(Protocol):
-    '''Return type of the :meth:`~channels.Observable.subscribe`, :meth:`~channels.Observable.subscribe_nowait` and :meth:`~channels.Observable.ntimes` methods of :class:`channels.Observable`.'''
+    '''Return type of the :meth:`channels.Observable.subscribe`, :meth:`channels.Observable.subscribe_nowait` and :meth:`channels.Observable.ntimes` methods of :class:`channels.Observable`.'''
     def __call__(self, strict: bool=...) -> None: ...
 @type_check_only
 class StateSnapshot(NamedTuple):
-    '''Type of snapshots of the current state of a :class:`channels.Rendezvous` object as returned by its :meth:`state_snapshot` method.'''
+    '''Type of snapshots of the current state of a :class:`channels.Rendezvous` object as returned by its
+    :meth:`channels.Rendezvous.state_snapshot` method.'''
     num_getters: int
     '''Current number of slots waiting for values.'''
     num_putters: int
@@ -245,9 +247,9 @@ class MemoryMappedFile(LoopContextMixin):
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: '''Advise the kernel about how to handle the memory map by making the ``madvise`` system call.'''
     async def read(self, offset: int=..., size: int=...) -> bytes: '''Read `size` bytes from the file at `offset`. A negative `size` reads until the end of the file.'''
     async def write(self, data: bytes, offset: int=...) -> None: '''Write `data` into the file at `offset`.'''
-    async def readline(self, offset: int=..., size: int|None=..., incl_newline: bool=...) -> bytes: '''Read a line from the file at `offset`, up to a maximum of `size` bytes if `size` is not `None`, and return it, optionally including the newline character.'''
+    async def readline(self, offset: int=..., size: int|None=..., incl_newline: bool=...) -> bytes: '''Read a line from the file at `offset`, up to a maximum of `size` bytes if `size` is not ``None``, and return it, optionally including the newline character.'''
     async def readlines(self, hint: int=...) -> list[bytes]: '''Read lines from the file until the total size of the lines read reaches or exceeds `hint` if `hint` is non-negative, and return a list of the lines read.'''
-    async def flush(self, offset: int=..., size: int|None=..., /) -> None: '''Flush the file, or a portion of it if `offset` and `size` are specified. If `size` is `None`, flush until the end of the file.'''
+    async def flush(self, offset: int=..., size: int|None=..., /) -> None: '''Flush the file, or a portion of it if `offset` and `size` are specified. If `size` is ``None``, flush until the end of the file.'''
     async def move(self, dest: int, src: int, count: int) -> None: '''Move `count` bytes of data within the file starting from `src` to `dest`.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
@@ -270,10 +272,10 @@ class MemoryMappedFile(LoopContextMixin):
     def tell(self) -> int: '''Return the current file pointer position.'''
     def size(self) -> int: '''Return the size of the file in bytes.'''
     def isatty(self) -> bool: '''Return whether the file is connected to a TTY device.'''
-    def readable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
-    def writable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
-    def seekable(self) -> Literal[True]: '''Implemented to always return `True` to satisfy the file interface.'''
-    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in `lines`, followed by `sep`, into the file. If `minimize_writes` is `True` (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
+    def readable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
+    def writable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
+    def seekable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
+    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in ``lines``, followed by ``sep``, into the file. If ``minimize_writes`` is ``True`` (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
     async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified `encoding` and `errors`.'''
     async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified `encoding` and `errors`.'''
     @overload
@@ -313,7 +315,7 @@ class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContex
 @type_check_only
 class RaiseType(sentinel_base):
     '''The type of :const:`constants.RAISE`.'''
-    def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`asyncutils.constants` namespace.'''
+    def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`constants` namespace.'''
     def is_(self, other: object, /) -> TypeGuard[Self]: '''Allows for effective type narrowing.'''
 @final
 @type_check_only
@@ -350,27 +352,27 @@ type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing one of the operators < and >.'''
 type ExcType = type[BaseException]
-'''The type of `exc_typ` in :meth:`__exit__` and :meth:`__aexit__` methods.'''
+'''The type of ``exc_typ`` in :meth:~`object.__exit__` and :meth:`~object.__aexit__` methods.'''
 type Exceptable = ExcType|tuple[ExcType, ...]
 '''The type of objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to the built-in :func:`open` function.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
-'''A slice with start, stop and step being integers or `None`, representing a slice that typical sequences supporting slicing should accept.'''
+'''A slice with start, stop and step being integers or ``None``, representing a slice that typical sequences supporting slicing should accept.'''
 type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''
 type All = tuple[str, ...]
-'''Type of the `__all__` attributes of the submodules of :mod:`asyncutils`.'''
+'''Type of the :attr:`~module.__all__` attributes of the submodules of :mod:`asyncutils`.'''
 type Submodule = Literal['altlocks', 'base', 'buckets', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version']
-'''Type of strings representing asyncutils submodule names.'''
+'''Type of strings representing :mod:`asyncutils` submodule names.'''
 type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The BLAKE2 family of algorithms, fast and somewhat secure with a low probability of collision, is the default choice.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
-'''The type of the return values of the :meth:`~asyncutils.io.MemoryMappedIOManager.open`, :meth:`~asyncutils.io.MemoryMappedIOManager.create` and :meth:`~asyncutils.io.MemoryMappedIOManager.create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
+'''The type of the return values of the :meth:`io.MemoryMappedIOManager.open`, :meth:`io.MemoryMappedIOManager.create` and :meth:`io.MemoryMappedIOManager.create_sparsef` methods of :class:`io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
-'''The type of the :attr:`~asyncutils.io.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
+'''The type of the :attr:`io.MemoryMappedIOManager.open_files` property of :class:`io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]
 '''The type of subscribers for :class:`channels.EventBus`.'''
 type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]

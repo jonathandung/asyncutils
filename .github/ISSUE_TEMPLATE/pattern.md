@@ -12,13 +12,13 @@ An approximate picture of how the pattern would be used.
 
 ## Pitch the pattern
 
-Why include it in this library? Where?
+Why include it in this library? Where? Is a new submodule required?
 
 ## Draft
 
 ```python
-# Write some code for the pattern here. Pseudocode or even plain text is acceptable, in which case the language of this code block should be changed
-# accordingly.
+# Write some code for the pattern here. At this stage, pseudocode or even plain text is acceptable, in which case the language of this code block
+# should be changed accordingly.
 ```
 
 ## Screenshots
@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain the usage of your pattern.
 
 ## Additional context
 
-Add any other context here.
+Include any other context here.
 
 ## Links
 

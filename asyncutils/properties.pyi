@@ -1,6 +1,6 @@
 '''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
 from ._internal.types import AsyncLockLike
-from _collections_abc import Awaitable, Callable, Hashable
+from collections.abc import Awaitable, Callable, Hashable
 from asyncio.locks import Lock
 from typing import Any, Concatenate, Self, final, overload
 __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
@@ -15,10 +15,10 @@ class AsyncProperty[T, R]:
         | If the getter is not provided, return a partial decorator instead. In that overload, none of the accessors are to be passed.
         | `doc`, if passed, will be the docstring of the property in the form of the :attr:`__doc__` attribute. Otherwise, an attempt is made to
         | find it on the getter.
-        | `strict` defaults to `True`, and controls whether performing an operation that invokes an unset accessor is allowed.
+        | `strict` defaults to ``True``, and controls whether performing an operation that invokes an unset accessor is allowed.
         | If the property has no getter (only possible with explicit `fget=None` and at least one of `fset` and `fdel` passed, which is rare),
         | accessing the attribute on instances would return the property itself if `strict=False` and raise an :exc:`AttributeError` otherwise.
-        | If `hide` is `True` (default `False`), accessing the attribute on the class it is defined in would raise as if the property didn't exist.'''
+        | If `hide` is ``True`` (default ``False``), accessing the attribute on the class it is defined in would raise as if the property didn't exist.'''
     @overload
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Self|T: ...
     @overload
@@ -31,13 +31,13 @@ class AsyncProperty[T, R]:
     def setter(self, fset: Callable[[R, T], Awaitable[None]], /) -> Self: '''Return another async property with the given function as the setter.'''
     def deleter(self, fdel: Callable[[R], Awaitable[None]], /) -> Self: '''Return another async property with the given function as the deleter.'''
     @property
-    def fget(self) -> Callable[[R], Awaitable[T]]|None: '''The getter function for this property, or `None` if it doesn't exist.'''
+    def fget(self) -> Callable[[R], Awaitable[T]]|None: '''The getter function for this property, or ``None`` if it doesn't exist.'''
     @property
-    def fset(self) -> Callable[[R, T], Awaitable[None]]|None: '''The setter function for this property, or `None` if it doesn't exist.'''
+    def fset(self) -> Callable[[R, T], Awaitable[None]]|None: '''The setter function for this property, or ``None`` if it doesn't exist.'''
     @property
-    def fdel(self) -> Callable[[R], Awaitable[None]]|None: '''The deleter function for this property, or `None` if it doesn't exist.'''
+    def fdel(self) -> Callable[[R], Awaitable[None]]|None: '''The deleter function for this property, or ``None`` if it doesn't exist.'''
     @property
-    def __doc__(self) -> str|None: '''The docstring for this property, or `None` if it doesn't exist.'''
+    def __doc__(self) -> str|None: '''The docstring for this property, or ``None`` if it doesn't exist.'''
     @property
     def __name__(self) -> str: '''The name of this property, determined by the function it decorates.'''
 class AsyncLockProperty[T, R: Hashable](AsyncProperty[T, R]):
@@ -61,7 +61,7 @@ class AsyncLockProperty[T, R: Hashable](AsyncProperty[T, R]):
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=..., lock_getter: Callable[[R], AsyncLockLike[Any]]|None=...) -> Self: ...
     def get_lock(self, obj: R) -> AsyncLockLike[Any]: '''Get the lock for the given object, applying a cache that unfortunately requires the object to be hashable and weakly referencable.'''
     @property
-    def __doc__(self) -> str|None: '''The docstring for this property, or `None` if it doesn't exist.'''
+    def __doc__(self) -> str|None: '''The docstring for this property, or ``None`` if it doesn't exist.'''
     @property
     def __name__(self) -> str: '''The name of this property, determined by the function it decorates.'''
 @final

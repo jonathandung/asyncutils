@@ -1,6 +1,6 @@
 ---
 name: Documentation issue
-about: Point out an issue with documentation, including inconsistency with runtime behaviour that is likely not a bug
+about: Point out an issue with documentation
 title: ''
 labels: docs
 assignees: jonathandung
@@ -8,15 +8,16 @@ assignees: jonathandung
 
 ## Type
 
-If the issue is a minor typo or tiny grammar fault, open a PR directly.
-Otherwise, do not open a PR until your issue has been triaged.
+If the issue is a minor typo or tiny grammar fault, open a PR directly. Otherwise, do not open a PR until your issue has been triaged.
 
-Only report issues with the latest version of the docs, not the stable build.
-If the referenced build is outdated by five builds or more, the issue will be closed.
+This template applies to inconsistencies with runtime behaviour that are likely not programmatic bugs.
+
+Only report issues with the latest version of the docs, not the stable build. If the referenced build is outdated by five builds or more at the time
+of opening, the issue will be closed.
 
 ## Links
 
-Link to the generated html page or the source file (.rst; .pyi if issue lies in API reference from stub docstrings) in this section.
+Link to the generated html page or the source file (`.rst`; `.pyi` if issue lies in API reference from stub docstrings) in this section.
 
 For the reviewer's convenience, you are encouraged to include both.
 

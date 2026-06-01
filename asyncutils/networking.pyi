@@ -1,7 +1,7 @@
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
 from ._internal.types import DualContextManager
 from .mixins import LoopBoundMixin
-from _collections_abc import Iterable
+from collections.abc import Iterable
 from asyncio.events import AbstractEventLoop
 from asyncio.protocols import Protocol
 from asyncio.transports import Transport, WriteTransport
@@ -33,7 +33,7 @@ class LineProtocol(Protocol, LoopBoundMixin):
     def write_line(self, line: str) -> None: '''Write the string `line` to the transport, followed by the newline sequence.'''
     def write_literal(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline.'''
     def eof_received(self) -> None: '''Called when the other end signals it won't send any more data, for example by calling :meth:`Transport.write_eof`, which closes the transport.'''
-    async def read_line(self) -> str|None: '''Read a line from the internal buffer and return it, or `None` if EOF is reached.'''
+    async def read_line(self) -> str|None: '''Read a line from the internal buffer and return it, or ``None`` if EOF is reached.'''
     async def drain(self) -> None: '''Wait until the transport is ready for more data to be written (i.e. the write buffer is flushed).'''
     async def write_line_with_backpressure(self, line: str) -> None: '''Write the string `line` to the transport, followed by the newline sequence, after draining it.'''
     async def write_literal_with_backpressure(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline, after draining it.'''
@@ -49,15 +49,15 @@ class SocketTransport(Transport):
     def __init__(self, sock: socket|None=...): '''Initialize the transport, connecting the socket immediately if given.'''
     def _reset_extra(self) -> None: ...
     def connect_sock(self, sock: socket=...) -> None: '''Connect the transport to the given socket.'''
-    def disconnect_sock(self) -> socket|None: '''Disconnect the transport from its socket and return it, or `None` if not connected.'''
+    def disconnect_sock(self) -> socket|None: '''Disconnect the transport from its socket and return it, or ``None`` if not connected.'''
     def sock_context(self, sock: socket) -> DualContextManager[None]: '''Return a context manager, both sync and async, that connects the transport to the given socket on entry and disconnects it on exit.'''
     def write(self, data: Iterable[int]) -> None: '''Write the given iterable over integers in `range(256)` interpreted as characters into the transport.'''
     def get_write_buffer_size(self) -> int: '''Return the current size of the output buffer used by the transport.'''
     def get_write_buffer_limits(self) -> tuple[int, int]: '''Get the high and low watermarks for write flow control. Return a tuple `(low, high)`, where `low` and `high` are positive number of bytes.'''
     def set_write_buffer_limits(self, high: int|None=..., low: int|None=...) -> None: '''Set the high and low watermarks for write flow control in bytes.'''
     def write_eof(self) -> None: '''Close the write end of the transport after flushing all buffered data. Data may still be received.'''
-    def can_write_eof(self) -> Literal[True]: '''Stub implementation that always returns `True`.'''
+    def can_write_eof(self) -> Literal[True]: '''Stub implementation that always returns ``True``.'''
     def is_closing(self) -> bool: '''Return whether the transport is closing or already closed.'''
-    def close(self, e: Exception|None=...) -> None: '''Close the transport and flush the outgoing data buffer. No more data will be received. After all buffered data is flushed, the protocol's :meth:`connection_lost` method will be called with `None` as argument. The transport is not to be used once closed.'''
+    def close(self, e: Exception|None=...) -> None: '''Close the transport and flush the outgoing data buffer. No more data will be received. After all buffered data is flushed, the protocol's :meth:`connection_lost` method will be called with ``None`` as argument. The transport is not to be used once closed.'''
     def get_protocol(self) -> LineProtocol: '''Return the current protocol. For this class, it is expected to always be a :class:`LineProtocol` or one of its subclasses.'''
     def abort(self) -> None: '''Close the transport immediately, without waiting for pending operations to complete.'''

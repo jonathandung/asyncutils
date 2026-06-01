@@ -3,7 +3,7 @@ from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, Middle
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
-from _collections_abc import Callable, Generator, Iterable
+from collections.abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
@@ -26,12 +26,12 @@ def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ord
 def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
     '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening
     | when necessary.
-    | `ordered` defaults to `False`, because that is more efficient.
+    | `ordered` defaults to ``False``, because that is more efficient.
     | The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
     | The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the
     | predicate and exceptions that are not in `keep` respectively.
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
-    | If `raise_critical` is `True`, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
+    | If `raise_critical` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
     | propagate it.
     | `notes` is attached to the group using :meth:`~BaseException.add_note`.
     | The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
@@ -44,7 +44,7 @@ def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|N
 def raise_exc(exc_typ: ExcType, /, *args: object, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: object) -> NoReturn: ...
 @overload
 def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. The variadic `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload, and the remaining arguments are as in :func:`potent_derive`.'''
-def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns `True`.'''
+def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns ``True``.'''
 def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
 def exception_occurred(instance: object, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class StateCorrupted(BaseException):
@@ -69,29 +69,29 @@ class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     '''Raised when no normalizer is registered for an unrecognized object.'''
     def __init__(self, obj: T, /): ...
     @property
-    def obj(self) -> T|None: '''The unrecognized object. `None` if garbage collected.'''
+    def obj(self) -> T|None: '''The unrecognized object. ``None`` if garbage collected.'''
 class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     '''Raised when a custom normalizer returns anything but an iterable of integers.'''
     def __init__(self, normalizer: Callable[[T], object], obj: T, /): ...
     @property
-    def normalizer(self) -> Callable[[T], Any]|None: '''The normalizer at fault. `None` if garbage collected.'''
+    def normalizer(self) -> Callable[[T], Any]|None: '''The normalizer at fault. ``None`` if garbage collected.'''
     @property
-    def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned. `None` if garbage collected.'''
+    def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned. ``None`` if garbage collected.'''
 class VersionNormalizerFault[T](VersionConversionError):
     '''Wraps any errors thrown by a custom normalizer, intentionally or otherwise.'''
     def __init__(self, normalizer: Callable[[T], Iterable[int]], obj: T, exc: BaseException, /): ...
     @property
-    def normalizer(self) -> Callable[[T], Iterable[int]]|None: '''The normalizer at fault. `None` if garbage collected.'''
+    def normalizer(self) -> Callable[[T], Iterable[int]]|None: '''The normalizer at fault. ``None`` if garbage collected.'''
     @property
-    def obj(self) -> T|None: '''The handled object. `None` if garbage collected.'''
+    def obj(self) -> T|None: '''The handled object. ``None`` if garbage collected.'''
     @property
-    def exc(self) -> BaseException|None: '''The exception thrown. `None` if garbage collected.'''
+    def exc(self) -> BaseException|None: '''The exception thrown. ``None`` if garbage collected.'''
 class VersionCorrupted(VersionError, RuntimeError):
     '''Raised when internal state consistency checks of a version fail, indicating modifications by the user affected private state.'''
     def __init__(self, obj: VersionInfo, /): ...
     def __getattr__(self, name: str, /) -> Any: ...
     @property
-    def obj(self) -> VersionInfo|None: '''The instance of :class:`~version.VersionInfo` having been corrupted. `None` if garbage collected.'''
+    def obj(self) -> VersionInfo|None: '''The instance of :class:`~version.VersionInfo` having been corrupted. ``None`` if garbage collected.'''
 class BulkheadError(RuntimeError): '''Raised when there is an error in bulkhead processing.'''
 class BulkheadFull(BulkheadError): '''Raised when a bulkhead is full and a party requests it to execute a coroutine.'''
 class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut down and a party requests it to execute a coroutine.'''
@@ -149,7 +149,7 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
 class PasswordError[T](PasswordQueueError):
     '''Raised when the wrong password is provided to the get or put methods of a password-protected queue.'''
     @property
-    def wrongpass(self) -> T: '''The wrong password associated with the exception. May be `None` if the wrong password has been garbage collected.'''
+    def wrongpass(self) -> T: '''The wrong password associated with the exception. May be ``None`` if the wrong password has been garbage collected.'''
     @property
     def qid(self) -> int: '''The memory address of the queue associated with the exception. Invalid if the queue has been garbage collected.'''
 class WrongPassword[T](PasswordError[T], ValueError):
@@ -159,9 +159,9 @@ class WrongPasswordType[T, R: type](PasswordError[T], TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
     def __init__(self, queue: QProt[Any, Any, Any]|None, pwd: T, wrongtyp: type[T], correcttyp: R, /): ...
     @property
-    def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be `None` if the wrong password type has been garbage collected.'''
+    def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be ``None`` if the wrong password type has been garbage collected.'''
     @property
-    def correcttype(self) -> R|None: '''The correct password type associated with the exception. May be `None` if the wrong password type has been garbage collected, indicating its instances, and thus the password, and by extension the queue itself, have been destroyed.'''
+    def correcttype(self) -> R|None: '''The correct password type associated with the exception. May be ``None`` if the wrong password type has been garbage collected, indicating its instances, and thus the password, and by extension the queue itself, have been destroyed.'''
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of :exc:`GetPasswordMissing` and :exc:`PutPasswordMissing`.'''
     def __init__(self) -> None: ...

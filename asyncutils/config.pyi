@@ -19,9 +19,9 @@ class debugging:
     @property
     def level(self) -> int: '''The current level of the :mod:`asyncutils` logger, as an integer.'''
     @property
-    def orig_level(self) -> int|None: '''The original logger level as an integer, before this context was entered, or `None` if it was not.'''
+    def orig_level(self) -> int|None: '''The original logger level as an integer, before this context was entered, or ``None`` if it was not.'''
     @property
-    def orig_name(self) -> str|None: '''The original logger level name as a string, before this context was entered, or `None` if it was not.'''
+    def orig_name(self) -> str|None: '''The original logger level name as a string, before this context was entered, or ``None`` if it was not.'''
     @property
     def entered(self) -> bool: '''Whether the context is entered.'''
     def __enter__(self) -> Self: '''Start debugging. More output is produced; where to depends on the user's own configuration, accessible via :data:`logging_to` and :attr:`debug.level`.'''

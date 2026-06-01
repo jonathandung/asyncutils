@@ -3,6 +3,8 @@ Configuration
 
 .. version-added:: 0.8.21
 
+.. currentmodule:: asyncutils.context
+
 Environment Variables
 ---------------------
 
@@ -16,7 +18,7 @@ The below environment variables directly affect what this library does, mostly i
   Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
 
   .. attention::
-    `FORCE_COLOR <force-color.org>`__, `NO_COLOR <no-color.org>`__ and ``TERM=dumb`` control both the argument parser and the PyREPL console.
+    `FORCE_COLOR <force-color.org>`__, `NO_COLOR <no-color.org>`__ and :manpage:`TERM <term(7)>` control both the argument parser and the PyREPL console.
 
 .. envvar:: NO_COLOR
 
@@ -42,7 +44,7 @@ The below environment variables directly affect what this library does, mostly i
 
 .. note::
 
-  The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses :mod:`_colorize` under the hood,
+  The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses ``_colorize`` under the hood,
   may. To avoid this inconsistency, do not use it to customize :mod:`asyncutils`'s coloring.
 
 .. seealso::
@@ -80,9 +82,9 @@ Some arguments consumed by the Python interpreter are also taken into account by
 
 .. tip::
   Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and
-  ``license`` commands will still work as normal in the console since they are implemented natively, albeit with the help of :mod:`_sitebuiltins`.
-  This is attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError`
-  to be thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly, but that is not related to ``-S``.
+  ``license`` commands will still work as normal in the console since they are implemented natively, with the help of ``_sitebuiltins``. This is
+  attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError` to be
+  thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly, but that is not related to ``-S``.
 
 .. seealso::
 
@@ -132,7 +134,7 @@ XML    .xml           xmltodict          xmltodict
 
 .. version-added:: 0.9.3
   Support for the XML (Extensible Markup Language) format.
-  Be especially careful with using it, because it is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
+  Be especially careful with using XML, because it is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
 
 .. version-added:: 0.9.2
   Support for the TOML (Tom's Obvious Minimal Language) and YAML (YAML Ain't Markup Language) formats.
@@ -142,8 +144,8 @@ XML    .xml           xmltodict          xmltodict
 .. seealso::
 
   `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
-    a vulnerability of the :class:`~xml.sax.saxutils.XMLGenerator` class from the standard library used by :mod:`xmltodict` without input
-    sanitization
+    a vulnerability of the :class:`~xml.sax.saxutils.XMLGenerator` class from the standard library used by
+    `xmltodict <https://pypi.org/project/xmltodict/>`__ without input sanitization
 
     .. note:: This exploit is disputed by the maintainers of the project.
 
@@ -169,10 +171,9 @@ XML    .xml           xmltodict          xmltodict
 
 INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
 
-It is currently possible to associate file extensions not shown above with other libraries providing a :func:`load` function taking a file object and
-returning a dictionary, by modifying the :data:`_internal.unparsed.Z` map from file extensions to names of corresponding modules. However,
-it is believed that the options offered are versatile enough to fit every individual need, so this functionality is just a minor trait of the
-implementation that just so happens to have been declared stable.
+It is currently possible to associate file extensions not shown above with other libraries providing a ``load`` function taking a file object and
+returning a dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
+However, it is believed that the options offered are versatile enough to fit every individual need.
 
 Contextual "Constants"
 ----------------------
@@ -183,39 +184,38 @@ async-safe and mutable, thanks to :mod:`contextvars`. The sheer magnitude of opt
 By convention, they are called contextual constants since no code in this library is expected to change their values, only reading from them to
 determine things from dynamic default arguments to frequencies of background tasks and internal thresholds.
 
-One may find it useful to alter the context dynamically without creating a new context. This can be achieved by calling
-:meth:`~context.Context.update`.
+One may find it useful to alter the context dynamically without creating a new context. This can be achieved by calling :meth:`Context.update`.
 
 .. seealso::
 
-  :meth:`~context.Context.copy`
+  :meth:`Context.copy`
     \
 
-  :meth:`~context.Context.replace`
+  :meth:`Context.replace`
     \
 
-  :meth:`~context.Context.replace_from_dct`
+  :meth:`Context.replace_from_dct`
     It is advisable to call these methods, each of which leaves the original context alone and derives a new one from it.
 
 .. ifconfig:: py313
 
-  :meth:`~context.Context.__copy__` and :meth:`~context.Context.__replace__` are also implemented to help :func:`copy.copy`
+  :meth:`Context.__copy__` and :meth:`Context.__replace__` are also implemented to help :func:`copy.copy`
   and :func:`copy.replace` respectively.
 
 .. ifconfig:: not py313
 
-  :meth:`~context.Context.__copy__` is also implemented to help :func:`copy.copy`.
+  :meth:`Context.__copy__` is also implemented to help :func:`copy.copy`.
 
-It is even better to use :class:`context.nonreusablelocalcontext`, which returns a one-time context manager, or the convenience method
-:meth:`~context.Context.ascurctx` on context objects that wraps it.
+It is even better to use :class:`nonreusablelocalcontext`, which returns a one-time context manager, or the convenience method
+:meth:`Context.ascurctx` on context objects that wraps it.
 
 .. version-changed:: 0.8.27
-  Started to recommend the use of :class:`~context.nonreusablelocalcontext` rather than its parent class, :class:`~context.localcontext`.
+  Started to recommend the use of :class:`nonreusablelocalcontext` rather than its parent class, :class:`localcontext`.
 
-For more detailed documentation on context usage, see the :mod:`context` page.
+For more detailed documentation on context usage, see the :mod:`~asyncutils.context` page.
 
 .. tip::
   :collapsible:
 
-  You can think of the :class:`~context.Context` class as similar to :class:`decimal.Context`, but with different methods and attributes
+  You can think of the :class:`Context` class as similar to :class:`decimal.Context`, but with different methods and attributes
   and customizing an entire module insteasd of quirks and traps of the operations of a single class.

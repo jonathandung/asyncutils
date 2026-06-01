@@ -1,5 +1,5 @@
-asyncutils |version|: makes async straightforward and enjoyable
-===========================================================
+asyncutils: makes async straightforward and enjoyable
+=====================================================
 
 **PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`__
 

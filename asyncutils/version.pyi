@@ -1,7 +1,7 @@
 '''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer.'''
 from ._internal.types import IntCompatible, Openable, ValidSlice
-from _collections_abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from typing import Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
@@ -126,7 +126,7 @@ class VersionDelta(NamedTuple):
 def normalize(o: object, /) -> tuple[int, int, int]:
     '''| Return a :class:`tuple` of three integers `(major, minor, patch)` from the information provided by the object as extracted by registered
     | normalizers.
-    | A normalizer can return `None` for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo`
+    | A normalizer can return ``None`` for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo`
     | will delegate to that object.
     | If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.
 

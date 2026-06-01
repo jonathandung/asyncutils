@@ -11,8 +11,8 @@ Bumping the version
 Using something like ``uv version --bump patch`` to increment the patch version may not work because the version as a string is hardcoded into
 certain locations. Instead, follow these steps:
 
-1. Do a per-file find-and-replace in your preferred IDE after inspecting each instance to avoid unintended changes. :data:`__version__` is already
-   instantiated from a string to streamline this step.
+1. Do a per-file find-and-replace in your preferred IDE after inspecting each instance to avoid unintended changes. :data:`~asyncutils.__version__`
+   is already instantiated from a string to streamline this step.
 2. In pyproject.toml, there may be optional dependencies whose version coincides with the project's, so take care not to modify those as well.
 3. Also exclude the changelog file (CHANGELOG.md, at the project root) from the replace operation.
 4. A core developer of this project will help you create a GitHub release with the default release notes.
@@ -49,13 +49,14 @@ After reviewing the pitch, the collaborator will step in and make necessary chan
 
 For collaborators and those interested, this is the general procedure:
 
-1. Edit the setup of the argument parser and the dictionary of defaults :data:`N` in ``_internal/unparsed.py``. It is not a :class:`frozendict`
-   because the class was introduced in Python 3.15. (It will be in asyncutils 7.0, however.)
+1. Edit the setup of the argument parser and the dictionary of defaults ``N`` in ``_internal/unparsed.py``.
 2. Edit ``format.json5`` by adding the key in the same order as the new help from the parser appears and a comment describing what it does, and take
    note of the line numbers where the pairs corresponding to logging configuration are shifted to.
-3. If the value of the configuration option is to be accessible by users at runtime, it should be in the form of a symbol in :mod:`config`.
-4. Update config.pyi, noting the line numbers at which the logging-related declarations appear.
-5. Edit the definition of :func:`tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as promised.
+3. If the value of the configuration option is to be accessible by users at runtime, it should be in the form of a symbol in
+   :mod:`~asyncutils.config`.
+4. Update ``config.pyi``, noting the line numbers at which the logging-related declarations appear.
+5. Edit the definition of :func:`~asyncutils.tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as
+   promised.
 6. Update the literalincludes in logging.rst with the line numbers marked down from steps 2 and 4.
 7. Execute the platform-suitable genhelp batch file as a sanity check, but do not commit the outputs.
 
@@ -81,15 +82,15 @@ complete the following:
 
   Be sure to update the contextual constant count:
 
-  - in the :data:`~context.all_contextual_constants` docstring,
-  - within the :data:`~context.Context` fake dataclass body, and
+  - in the :data:`~asyncutils.context.all_contextual_constants` docstring,
+  - within the :data:`~asyncutils.context.Context` fake dataclass body, and
   - at the top level.
 
   Keep alphabetical order within the submodule concerned, with submodules ordered alphabetically as well.
 * asyncutils/_internal/unparsed.py
 
-  There should be a massive dictionary called :data:`~asyncutils._internal.unparsed.C` that contains the option names mapped to their factory
-  defaults on line 5. Edit it accordingly.
+  There should be a massive dictionary assigned to the name ``C`` that contains the option names mapped to their factory defaults on line 5. Edit it
+  accordingly.
 
 Updating config.pyi
 -------------------
@@ -176,4 +177,4 @@ PR if they don't appear with a passing status.
 
 The test ought to go in the test source file corresponding to the submodule from which the feature can be publicly imported, even if its
 implementation is spread across files, with the exceptions of the base and iterclasses submodules, whose tests I find inseparable with the logic for
-tests for :mod:`iters`, compelling me to put them into ``tests/test_iters.py`` together.
+tests for :mod:`~asyncutils.iters`, compelling me to put them into ``tests/test_iters.py`` together.

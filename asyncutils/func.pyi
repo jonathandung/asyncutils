@@ -1,6 +1,6 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
 from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
-from _collections_abc import Awaitable, Callable, Iterable, Mapping
+from collections.abc import Awaitable, Callable, Iterable, Mapping
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from types import CoroutineType
@@ -23,8 +23,8 @@ def every[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_e
 def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., loop: AbstractEventLoop|None=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryRV[T]:
     '''| A decorator factory that repeats a function regularly, useful for periodic monitoring tasks.
     | The resultant function will run every `intvl` seconds, as determined by `timer`, at most `max_iterations` times. If `count_f` is True, this time includes the execution time of the function.
-    | If `wait_first` is `True`, sleep for `intvl` seconds before the first execution.
-    | If `stop_on_exc` is `True`, the function returns once the decorated function throws any exception or `stop_when` is cancelled.
+    | If `wait_first` is ``True``, sleep for `intvl` seconds before the first execution.
+    | If `stop_on_exc` is ``True``, the function returns once the decorated function throws any exception or `stop_when` is cancelled.
     | `verbose` makes the function treat exceptions more severely output-wise.
     | Once the result of `stop_when` is set, the function returns that result, which should be None or the same type as the return type of the decorated function after awaiting.
     | However, the task is guaranteed to be run at least once.

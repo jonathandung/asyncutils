@@ -15,7 +15,7 @@ source if possible. Also link to the source file here; a permalink (not /blob/ma
 
 ```python
 # minimal reproducible example as Python snippet here
-# include all used references in imports, such that this code is self-contained
+# make this code self-contained by including all used references in imports
 ```
 
 ## Expected behavior

@@ -1,7 +1,7 @@
 '''Bridges between asynchronous consumers/subscribers and producers/publishers.'''
 from ._internal.types import DualContextManager, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
 from .mixins import LoopContextMixin
-from _collections_abc import AsyncGenerator, Callable, Iterable, Iterator, Mapping
+from collections.abc import AsyncGenerator, Callable, Iterable, Iterator, Mapping
 from _weakrefset import WeakSet
 from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
@@ -22,32 +22,32 @@ class Observable[**P](LoopContextMixin):
     @overload
     async def notify(self, *a: P.args, **k: P.kwargs) -> None: ...
     @overload
-    async def notify(self, *a: object, _ret_exc_: bool=..., **k: object) -> None: '''Notify the observers with the parameters passed in. If another notification is in progress, it will be queued to be completed by that notification. If `_ret_exc_` is `True` (default `False`), exceptions occurring in any observer is not propagated.'''
+    async def notify(self, *a: object, _ret_exc_: bool=..., **k: object) -> None: '''Notify the observers with the parameters passed in. If another notification is in progress, it will be queued to be completed by that notification. If `_ret_exc_` is ``True`` (default ``False``), exceptions occurring in any observer is not propagated.'''
     @overload
     def notify_sequential(self, *a: P.args, **k: P.kwargs) -> AsyncGenerator[Any]: ...
     @overload
     def notify_sequential(self, *a: object, _silent_: bool=..., _persistent_: bool=..., **k: object) -> AsyncGenerator[Any]: '''Version of :meth:`notify` that doesn't attempt to trigger the observers in parallel.'''
-    async def wait_for_next(self, timeout: float|None=..., strict: bool=...) -> tuple[tuple[Any, ...], dict[str, Any]]: '''Wait for the next notification to occur by adding a temporary subscriber and return its parameters as a tuple `(args, kwargs)`. If `strict` is `True`, assert that another operation did not remove the subscriber prematurely.'''
+    async def wait_for_next(self, timeout: float|None=..., strict: bool=...) -> tuple[tuple[Any, ...], dict[str, Any]]: '''Wait for the next notification to occur by adding a temporary subscriber and return its parameters as a tuple `(args, kwargs)`. If `strict` is ``True``, assert that another operation did not remove the subscriber prematurely.'''
     async def wait_until_idle(self, timeout: float|None=...) -> None: '''Wait until the observable is idle, that is, until all notifications have completed.'''
     async def subscribe(self, observer: Observer[P]) -> SubscriptionRV: ''''Call :meth:`wait_until_idle`, then add an observer and return a subscription object that can be used to remove it.'''
-    async def unsubscribe(self, observer: Observer[P], strict: bool=...) -> None: '''Call :meth:`wait_until_idle`, then remove the observer. If `strict` is `True`, assert that the observer was indeed subscribed.'''
+    async def unsubscribe(self, observer: Observer[P], strict: bool=...) -> None: '''Call :meth:`wait_until_idle`, then remove the observer. If `strict` is ``True``, assert that the observer was indeed subscribed.'''
     async def handle_notifications(self) -> None: '''Execute the queued notifications one by one and wait for each to complete.'''
     async def handle_unsubscriptions(self) -> None: '''Perform the unsubscriptions as requested by :meth:`unsubscribe_eventually`.'''
     @overload
     def __init__(self, init_observers: Iterable[Observer[P]], maxsize: int|None=...): ...
     @overload
-    def __init__(self, *, maxsize: int|None=...): '''Instantiate the observable with the initial observers taken from the iterable `init_observers`. If `maxsize` is `None`, accumulation of notifications is disabled; otherwise, it is the maximum size of the queue of notifications (default is no maximum).'''
+    def __init__(self, *, maxsize: int|None=...): '''Instantiate the observable with the initial observers taken from the iterable `init_observers`. If `maxsize` is ``None``, accumulation of notifications is disabled; otherwise, it is the maximum size of the queue of notifications (default is no maximum).'''
     def __iter__(self) -> Iterator[Observer[P]]: '''Iterate over the current observers. When this iterator is active, no subscriptions or unsubscriptions can be done.'''
     def __aiter__(self) -> AsyncGenerator[Observer[P]]: '''Return an async generator over the observers.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
-    def start_accumulation(self) -> bool: '''Begin accumulation of notifications and return `True`, or return `False` if accumulation is already occurring.'''
-    def restart_accumulation(self, flush: bool=...) -> None: '''Immediately complete all notifications synchronously if `flush` is `True`, then restart notification accumulation.'''
+    def start_accumulation(self) -> bool: '''Begin accumulation of notifications and return ``True``, or return ``False`` if accumulation is already occurring.'''
+    def restart_accumulation(self, flush: bool=...) -> None: '''Immediately complete all notifications synchronously if `flush` is ``True``, then restart notification accumulation.'''
     def flush_notifications(self, timeout: float|None=...) -> None: '''A synchronous version of :meth:`handle_notifications`.'''
     def flush_unsubscriptions(self, timeout: float|None=...) -> None: '''A synchronous version of :meth:`handle_unsubscriptions`.'''
     def subscribe_nowait(self, observer: Observer[P]) -> SubscriptionRV: '''Add an observer without waiting for the observable to be idle.'''
-    def unsubscribe_eventually(self, observer: Observer[P], asap: bool=...) -> None: '''Note that the observer is to be removed at some point in the future. If `asap` is `True` and there is no notification running, the observer is removed immediately.'''
-    def unsubscribe_nowait(self, observer: Observer[P], strict: bool=...) -> None: '''Remove the observer immediately even if a notification is occurring. If `strict` is `True`, assert that the observer was indeed subscribed.'''
+    def unsubscribe_eventually(self, observer: Observer[P], asap: bool=...) -> None: '''Note that the observer is to be removed at some point in the future. If `asap` is ``True`` and there is no notification running, the observer is removed immediately.'''
+    def unsubscribe_nowait(self, observer: Observer[P], strict: bool=...) -> None: '''Remove the observer immediately even if a notification is occurring. If `strict` is ``True``, assert that the observer was indeed subscribed.'''
     def subscribe_syncf(self, observer: Observer[P]) -> SubscriptionRV: '''Subscribe a synchronous observer by converting it to async in an executor.'''
     def ntimes(self, observer: Observer[P], n: int=...) -> SubscriptionRV: '''Add an observer immediately and automatically have it removed after `n` notifications. `n` defaults to :const:`context.OBSERVABLE_DEFAULT_NTIMES_N`.'''
     def filter(self, pred: Callable[P, bool], ret_exc: bool=...) -> Self: '''Return a new observable emitting the notifications of this observable to its observers only when the parameters, starred and passed to `pred`, evaluate to a true value.'''
@@ -129,7 +129,7 @@ class EventBus(LoopContextMixin):
         | The output of the final middleware is broadcast to each subscriber concurrently. They cannot see the initial data.'''
     def remove_middleware(self, cookie: int, *, result: object=..., strict: bool=...) -> Any:
         '''| Remove a previously added middleware, via :meth:`add_middleware` or :meth:`add_middleware_once`, and return its result. Runs in O(1) time.
-        | If `strict` is `True` and the middleware was never added, throw :exc:`ValueError`.
+        | If `strict` is ``True`` and the middleware was never added, throw :exc:`ValueError`.
         | If the middleware has an associated future :meth:`add_middleware_once` and it is done, return its result. If an exception was set, reraise it.
         | Otherwise, set its result to `result` and return it.'''
     def add_temp_middleware(self, middleware: Middleware, until: Future[Any]) -> None: '''Add a middleware that should take effect until the future `until` is done, after which the result of the future will be treated as the result of the middleware on removal. No cookie is returned in this case.'''
@@ -139,7 +139,7 @@ class EventBus(LoopContextMixin):
     @overload
     def stop_tracking(self, ret_stats: Literal[False]=...) -> None: ...
     @overload
-    def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: '''Stop tracking event publication statistics. If `ret_stats` is `True`, return a dictionary of the stats up to that point, with keys corresponding to event types and values the number of publications.'''
+    def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: '''Stop tracking event publication statistics. If `ret_stats` is ``True``, return a dictionary of the stats up to that point, with keys corresponding to event types and values the number of publications.'''
     @overload
     async def subscribe[C: SpecificSubscriber](self, subscriber: C, /, event_type: str) -> C: ...
     @overload
@@ -156,8 +156,8 @@ class EventBus(LoopContextMixin):
     async def publish(self, event_type: str, data: object=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None:
         '''| Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout `timeout`.
         | Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
-        | If `wait` is `False` (default `True`), don't wait for the publication to complete.
-        | If `safe` is `False` (default `True`), don't wrap callbacks with proper error handling.
+        | If `wait` is ``False`` (default ``True``), don't wait for the publication to complete.
+        | If `safe` is ``False`` (default ``True``), don't wrap callbacks with proper error handling.
         | `chaperone`, if passed, should be a function processing non-severe exceptions (instances of :exc:`Exception` and :exc:`ExceptionGroup`) in the callbacks. Otherwise, these
         | exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and propagated; the caller should be prepared to handle that case.'''
     async def wait_for_event(self, event_type: str, *, timeout: bool|None=..., condition: Callable[[Any], object]=...) -> Task[Any]:
@@ -178,7 +178,7 @@ class EventBus(LoopContextMixin):
     @overload
     def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[Any]: ...
     @overload
-    def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[tuple[str, Any], None]:
+    def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[tuple[str, Any]]:
         '''| Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
         | If `event_type` is not passed, the stream will include the event type in the output.
         | `timeout`, `item_timeout` and `bufsize` default to :const:`context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :const:`context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :const:`context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.'''
@@ -186,8 +186,8 @@ class EventBus(LoopContextMixin):
         '''| Gracefully shut down the event bus.
         | After the shutdown, publications fail fast and middlewares are cleared.
         | This waits for as many subscriber callbacks to complete as possible, within `timeout` seconds if specified.
-        | If `immediate` is `True`, getters for the queue for the event stream will error immediately.
-        | If `preserve_stats` is `True`, the event publication statistics will be saved and accessible with :meth:`get_event_stats`.'''
+        | If `immediate` is ``True``, getters for the queue for the event stream will error immediately.
+        | If `preserve_stats` is ``True``, the event publication statistics will be saved and accessible with :meth:`get_event_stats`.'''
     async def handle_exception(self, e: BaseException) -> None: '''Asynchronously handle an exception according to the `handler` initialization parameter, which can be a sync or async function.'''
     @overload
     def clear(self, event_type: str) -> WeakSet[SpecificSubscriber]|None: ...
@@ -219,4 +219,4 @@ class Rendezvous[T]:
     def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, timeout: float|None=..., asap: bool=...) -> T:
         '''| Put in a value to the rendezvous and get and return a different value gotten from it.
-        | If `asap` is `True`, return once a value is available, without necessarily having completed the put.'''
+        | If `asap` is ``True``, return once a value is available, without necessarily having completed the put.'''

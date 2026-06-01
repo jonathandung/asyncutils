@@ -1,7 +1,7 @@
 '''Object-oriented (async) iteration helpers.'''
 from ._internal.types import SupportsIteration, ValidSlice
 from .mixins import LoopBoundMixin, LoopContextMixin
-from _collections_abc import AsyncGenerator, Callable
+from collections.abc import AsyncGenerator, Callable
 from typing import Self, SupportsIndex, overload
 __all__ = 'abucket', 'achain', 'apeekable'
 class achain[T]:
@@ -31,6 +31,6 @@ class apeekable[T](LoopBoundMixin):
 class abucket[T, R](LoopContextMixin):
     '''Async version of :class:`more_itertools.bucket`.'''
     def __init__(self, it: SupportsIteration[T], key: Callable[[T], R], validator: Callable[[R], bool]): '''Divide items from the (async) iterable `it` into child generators according to a `key` function.'''
-    def __contains__(self, key: R, /) -> bool: '''If `validator` returns `False` for `key`, return `False` immediately. Otherwise, advance the iterable and store items until an item mapping to `key` under the key function is seen.'''
+    def __contains__(self, key: R, /) -> bool: '''If `validator` returns ``False`` for `key`, return ``False`` immediately. Otherwise, advance the iterable and store items until an item mapping to `key` under the key function is seen.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Yield the keys of all buckets. When this async generator is exhausted, the original iterable is fully consumed.'''
     def __getitem__(self, key: R, /) -> AsyncGenerator[T]: '''Return an async generator of the items in the original iterable for which the key function gives this key.'''

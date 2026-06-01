@@ -1,10 +1,10 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
 from ._internal.types import AsyncLockLike, Exceptable, ExcType, SupportsIteration, Timer
 from .mixins import AsyncContextMixin, AwaitableMixin
-from _collections_abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 from collections import deque
 from types import CoroutineType, TracebackType
-from typing import Any, ClassVar, NoReturn, Self, final, overload
+from typing import Any, ClassVar, Literal, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
     '''Reimplementation of :class:`anyio.ResourceGuard`, as a sync- and async-compatible context manager.'''
@@ -15,11 +15,11 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
         | `rname` is used in error messages to describe the resource by calling its :meth:`__repr__`; if not passed, an index is automatically assigned to the resource.'''
     def __enter__(self) -> None:
         '''| Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception, if the resource is already being guarded.
-        | Otherwise, mark the resource as guarded, such that :attr:`guarded` gives `True`.'''
+        | Otherwise, mark the resource as guarded, such that :attr:`guarded` gives ``True``.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Unmark the resource as guarded.'''
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Mark the resource as no longer guarded.'''
     @classmethod
     def guard(cls, obj: object, /, *, action: str=...) -> Self: '''Alternate constructor which determines the name of the resource from the representation of the object.'''
 @final
@@ -53,11 +53,11 @@ class CircuitBreaker:
     '''| The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
     | Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.'''
     CLOSED: ClassVar[int]
-    '''The closed state of a circuit breaker.'''
+    '''The closed state.'''
     HALF_OPEN: ClassVar[int]
-    '''The half-open state of a circuit breaker.'''
+    '''The half-open state.'''
     OPEN: ClassVar[int]
-    '''The open state of a circuit breaker.'''
+    '''The open state.'''
     @overload
     def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
     @overload
@@ -84,7 +84,7 @@ class CircuitBreaker:
     @property
     def name(self) -> str: '''The name of the circuit breaker, to be shown in error messages.'''
     @property
-    def state(self) -> int: '''The state of the circuit breaker: 0 for closed, 1 for half-open, and 2 for open.'''
+    def state(self) -> Literal[0, 1, 2]: '''The state of the circuit breaker: 0 for closed, 1 for half-open, and 2 for open.'''
 class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     '''An async barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
     @overload
@@ -135,7 +135,7 @@ class DynamicThrottle:
     @property
     def fails(self) -> int: '''Current number of failed calls. Reset periodically.'''
     @property
-    def jitter(self) -> float: '''The current jitter.'''
+    def jitter(self) -> float: '''The current jitter in calculating the wait time.'''
     @jitter.setter
     def jitter(self, jitter: float, /) -> None: '''Set the jitter to `jitter`.'''
     @property

@@ -1,6 +1,6 @@
 '''Contextual configuration system, inspired by the :mod:`decimal` module.'''
 from ._internal.types import ExcType, HashAlgorithm, CanWriteAndFlush
-from _collections_abc import Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType

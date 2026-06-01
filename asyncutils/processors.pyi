@@ -1,7 +1,7 @@
 '''Processors for asynchronous tasks.'''
 from ._internal.types import Exceptable, SupportsIteration, Timer
 from .mixins import LoopContextMixin
-from _collections_abc import AsyncGenerator, Awaitable, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import Any, Literal
 __all__ = 'BatchProcessor', 'BoundedBatchProcessor', 'Bulkhead'
 class BoundedBatchProcessor[T, R]:

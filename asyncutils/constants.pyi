@@ -1,6 +1,6 @@
 '''Exports sentinels and public constants.'''
 from ._internal.types import Executor, RaiseType
-from _collections_abc import Callable
+from collections.abc import Callable
 from threading import Lock
 from typing import Final, Self
 __all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'sentinel_base'
@@ -21,9 +21,9 @@ class sentinel_base:
     @property
     def is_private(self) -> bool: '''Whether the sentinel is private; that is, the name begins with underscore.'''
     @property
-    def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, or `None` if there is none.'''
+    def bound_to(self) -> str|None: '''The name of the class the sentinel is bound to, or ``None`` if there is none.'''
     @property
-    def back(self) -> str|None: '''The unqualified name of the sentinel, or `None` if there is none.'''
+    def back(self) -> str|None: '''The unqualified name of the sentinel, or ``None`` if there is none.'''
     @property
     def module(self) -> str: '''The name of the module the sentinel is defined in.'''
     def is_(self, other: object, /) -> bool: ''':func:`operator.is_` for sentinels.'''

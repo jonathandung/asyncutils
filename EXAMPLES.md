@@ -103,5 +103,6 @@ python3 asyncutils/__main__.py
 # note: python3 asyncutils.__main__ doesn't work because python attempts to find a file called asyncutils.__main__ in the current working directory
 ```
 
-If you're in the integrated shell of VS Code, it is recommended that you unset the `PYTHON_BASIC_REPL` environment variable or turn off shell
-integration for a better experience in my opinion, since this console does not work well building on the pre-3.13 REPL at all.
+If you're on Python 3.13 or above and in the integrated shell of VS Code, it is recommended that you unset the `PYTHON_BASIC_REPL` environment
+variable or turn off shell integration for a better experience in my opinion, since this console does not work well building on the pre-3.13 REPL at
+all.

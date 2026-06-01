@@ -14,7 +14,7 @@ jobs:
   build:
     environment:
       name: github-pages
-      url: ${{steps.deployment.outputs.page_url}}
+      url: ${{steps.deploy.outputs.page_url}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
@@ -29,4 +29,4 @@ jobs:
         with:
           path: docs/build/html
       - uses: actions/deploy-pages@v5.0.0
-        id: deployment
+        id: deploy

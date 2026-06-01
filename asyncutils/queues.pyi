@@ -3,7 +3,7 @@
 from ._internal.types import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
 from .exceptions import IgnoreErrors
 from .mixins import LoopBoundMixin
-from _collections_abc import AsyncGenerator, Awaitable, Callable, Generator
+from collections.abc import AsyncGenerator, Awaitable, Callable, Generator
 from abc import ABC, abstractmethod
 from asyncio.futures import Future
 from asyncio.queues import Queue
@@ -80,9 +80,9 @@ def password_queue[V](*, maxsize: int=..., protect_get: Literal[True], protect_p
 def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., strict: bool=...) -> GetAndPutProtectedQProt[Any, Any, Any]:
     '''| Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with
     | maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    | If `protect_get` is `True`, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the
+    | If `protect_get` is ``True``, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the
     | caller's scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
-    | If `protect_put` is `True`, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the
+    | If `protect_put` is ``True``, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the
     | caller's scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
     | If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue eventually.
 
@@ -94,7 +94,7 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
       The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use
       default values in the type parameters here to cut this number in half.
     .. note::
-      The overloads do not cover the technically valid but useless case with both `protect_get` and `protect_put` being `False`.
+      The overloads do not cover the technically valid but useless case with both `protect_get` and `protect_put` being ``False``.
     .. note::
       Little type validation for the argument combinations is done at runtime; it is hoped that type checkers will catch most misuses.
 '''
@@ -124,11 +124,11 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def __bool__(self) -> bool: '''Whether there are items in the queue.'''
     def __iter__(self) -> Generator[T]: '''Equivalent to :meth:`drain_until_empty`.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Equivalent to :meth:`drain_persistent`.'''
-    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is `True`, pending gets raise immediately even if the queue is not empty.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is ``True``, pending gets raise immediately even if the queue is not empty.'''
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''
     @is_shutdown.setter
-    def is_shutdown(self, val: bool, /) -> None: '''If set to `True`, shut down the queue; if set to `False`, restart the queue.'''
+    def is_shutdown(self, val: bool, /) -> None: '''If set to ``True``, shut down the queue; if set to ``False``, restart the queue.'''
     @property
     def can_put_now(self) -> bool: '''Whether items can be put into the queue without blocking at this instant.'''
     @property
@@ -169,7 +169,7 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def map_nowait[R](self, f: Callable[[T], Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
     def starmap_nowait[R](self, f: Callable[..., Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
     def filter_nowait(self, pred: Callable[[T], bool]=..., /) -> tuple[list[T], int]: '''Filter items in the queue by a predicate and return a list of removed items and an integer; the items in the returned list after the index corresponding to that integer were items rejected from the queue due to the queue being full.'''
-    def enumerate_nowait(self, start: int=..., *, step: int=...) -> Generator[tuple[int, T], None, None]: '''Do the equivalent of zipping `itertools.count(start, step)` with the items of the queue. When the returned generator is advanced and the queue is empty at that moment, the generator stops entirely.'''
+    def enumerate_nowait(self, start: int=..., *, step: int=...) -> Generator[tuple[int, T]]: '''Do the equivalent of zipping `itertools.count(start, step)` with the items of the queue. When the returned generator is advanced and the queue is empty at that moment, the generator stops entirely.'''
 class SmartQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
