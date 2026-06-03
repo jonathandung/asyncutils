@@ -2,15 +2,15 @@
 from asyncutils._internal.helpers import verify_compat
 verify_compat('3.13')
 from itertools import repeat
-from _heapq import _heapify_max as heapify, _heappop_max as heappop, _heapreplace_max as heapreplace; from heapq import _siftdown_max, _siftup_max # ty: ignore[unresolved-import]
-def heappush(heap, item, /, _=_siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
-def heappushpop(heap, item, /, _=_siftup_max):
+import heapq as H
+heapify, heappop, heapreplace = H._heapify_max, H._heappop_max, H._heapreplace_max
+def heappush(heap, item, /, _=H._siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
+def heappushpop(heap, item, /, _=H._siftup_max):
     if heap and item < (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
     return item
-del _siftdown_max, _siftup_max
 __all__ = ('Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial')
 Placeholder = __all__[0]
-def _get_merger(A, _=__import__('_operator').itemgetter):
+def _get_merger(A, _=__import__('operator').itemgetter):
     if not A: return 0, None
     j = n = len(A)
     f = (O := []).append
@@ -49,4 +49,4 @@ class partial: # noqa: N801
         return self.func(*A, *a, **self.keywords, **k)
     def __get__(self, o, _=None): return self if o is None else type(self.__get__)(self, o)
     def __reduce__(self): return type(self)._new, (self.func, self.args, self.keywords or None)
-del verify_compat, _get_merger
+del verify_compat, _get_merger, H

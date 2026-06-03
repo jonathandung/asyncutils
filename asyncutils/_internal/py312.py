@@ -1,7 +1,7 @@
 import asyncutils._internal.helpers as h
 h.verify_compat('3.12')
 __lazy_modules__ = frozenset(('asyncio.locks',))
-import _heapq as H
+import heapq as H
 from _collections import deque
 from asyncio.locks import Event
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
@@ -17,15 +17,14 @@ class Queue(h.LoopMixinBase):
     def __init__(self, maxsize=0):
         self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown = maxsize, deque(), deque(), 0, False
         self._finished = e = Event(); e.set(); self._init(maxsize)
-    def __repr__(self): return f'<{h.fullname(self)} at {id(self):#x} {self._format()}>'
-    def __str__(self): return f'<{h.fullname(self)} {self._format()}>'
-    def _format(self):
-        f = (p := [f'maxsize={self.maxsize!r}']).append
+    def __repr__(self): return self.__str__('at', format(id(self), '#x'))
+    def __str__(self, *e):
+        f = (p := [h.fullname(self), *e, f'maxsize={self.maxsize!r}']).append
         if l := self._getters: f(f'_getters[{len(l)}]')
         if l := self._putters: f(f'_putters[{len(l)}]')
         if l := self._unfinished_tasks: f(f'tasks={l}')
         if self._is_shutdown: f('shutdown')
-        return ' '.join(p)
+        return f'<{" ".join(p)}>'
     def _init(self, maxsize): self._queue = deque(maxlen=maxsize)
     def _get(self): return self._queue.popleft()
     def _put(self, i, /): self._queue.append(i)

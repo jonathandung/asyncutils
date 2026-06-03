@@ -7,7 +7,7 @@ def l(p, e=None, /):
     with open(p) as F:
         match L := Z[e or p.rpartition('.')[-1]]: # pragma: no cover
             case 'yaml':
-                try: import yaml as Y; f = Y.load(F, Y.CSafeLoader)
+                try: import yaml as Y; f = Y.load(F, getattr(Y, 'CSafeLoader', None) or Y.SafeLoader) # noqa: S506
                 except ImportError as a: raise RuntimeError('asyncutils: PyYAML library is required to load YAML configuration file') from a
             case 'tomllib': f = __import__(L).loads(F.read())
             case 'xmltodict': f = __import__(L).parse(F.read())

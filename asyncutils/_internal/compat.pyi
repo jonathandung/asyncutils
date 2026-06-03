@@ -9,6 +9,7 @@ __all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty
 D: Final[dict[str, Any]]
 j: Final[dict[str, Any]]
 p: Final[PrettyPrinter]
+def f(n: int=...) -> str|None: ...
 if m.version_info >= (3, 14):
     from functools import Placeholder
     def heapify[C: SupportsRichComparison](heap: list[C], /) -> None: ...

@@ -13,7 +13,7 @@ requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE", "AUTHORS.md"]
 keywords = ["asynchronous", "asyncio", "convenient", "fast", "feature-rich", "helpers", "io", "library", "light", "utilities"]
-classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Python :: Implementation :: CPython", "Operating System :: OS Independent", "Development Status :: 4 - Beta", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Framework :: Pytest", "Framework :: Sphinx", "Natural Language :: English", "Typing :: Typed"]
+classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Unix Shell", "Programming Language :: Python :: Implementation :: CPython", "Programming Language :: Python :: Implementation :: GraalPy", "Programming Language :: Python :: Free Threading :: 2 - Beta", "Operating System :: OS Independent", "Development Status :: 4 - Beta", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Framework :: Pytest", "Framework :: Sphinx", "Natural Language :: English", "Typing :: Typed"]
 
 [project.urls]
 Homepage = "https://jonathandung.github.io/asyncutils"
@@ -46,9 +46,9 @@ packages = ["asyncutils", "asyncutils._internal"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = ["-v", "--tb", "short", "-W", "ignore::pytest.PytestConfigWarning"]
+addopts = ["-v", "--tb", "short", "-W", "ignore::pytest.PytestConfigWarning", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "58"]
 minversion = "9.0.3"
-required_plugins = ["pytest-local-badge>=1.1.1", "pytest-sugar>=1.1.1"]
+required_plugins = ["pytest-cov>=7.1.0", "pytest-local-badge>=1.1.1", "pytest-sugar>=1.1.1"]
 asyncio_default_fixture_loop_scope = "module"
 asyncio_default_test_loop_scope = "module"
 

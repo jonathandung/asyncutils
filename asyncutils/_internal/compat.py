@@ -1,5 +1,5 @@
 import sys as S, collections as C
-__all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'p', 'partial', 's'
+__all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'f', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'p', 'partial', 's'
 c, V, b = not (g := (E := __import__('os').environ).get)('NO_COLOR'), S.version_info, bool(g('PYTHON_BASIC_REPL')) if (r := not (F := S.flags).ignore_environment) else None
 if d := g('TERM') == 'dumb':
     if g('FORCE_COLOR'): __import__('_warnings').warn('possibly undesired conflict in environment variables: non-empty FORCE_COLOR overrides TERM=dumb', RuntimeWarning)
@@ -21,4 +21,8 @@ t += ([], (), b'', bytearray(), '', range(0), range(1<<31), __import__('array').
 del t[-4:]
 u(type(reversed(_)) for _ in t)
 s = frozenset(s)
+try: f = S._getframemodulename
+except AttributeError:
+    if (u := getattr(S, '_getframe', None)) is None: raise
+    def f(depth=0, _=u): return _(depth).f_globals.get('__name__')
 del V, E, F, g, c, S, r, d, b, t, u, C, x, y

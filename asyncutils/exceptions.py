@@ -168,7 +168,7 @@ ignore_stopiteration, ignore_stopaiteration, ignore_valerrs, ignore_typeerrs = m
 class WarningToError:
     __slots__ = '_cm', '_w'
     def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
-    def __enter__(self): self._cm = c = __import__('warnings').catch_warnings(action='error', category=self._w); c.__enter__(); return self # ty: ignore[invalid-argument-type]
+    def __enter__(self): self._cm = c = __import__('warnings').catch_warnings(action='error', category=self._w); c.__enter__(); return self
     def __exit__(self, t, /, *_):
         if (c := self._cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __aexit__ called without prior __aenter__ call')
         c.__exit__(t, *_)

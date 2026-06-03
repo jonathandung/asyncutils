@@ -1,10 +1,10 @@
-from asyncutils._internal import patch as P
+from asyncutils._internal import compat, patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import constants_all as __all__
 RECIP_E, EXECUTORS_FROZENSET = 0.36787944117144233, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool'))
 class sentinel_base:
     _can_instantiate = False; __slots__ = '__mod', '__name'
-    def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=__import__('sys')._getframemodulename):
+    def __new__(cls, name=None, _=__import__('keyword').iskeyword, g=compat.f):
         cls._assert_can_instantiate()
         if name is None: return super().__new__(cls)
         if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('asyncutils.constants.sentinel_base: invalid name')

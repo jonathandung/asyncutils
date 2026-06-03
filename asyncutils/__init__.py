@@ -1,8 +1,12 @@
 from sys import implementation as I, modules as M
-if I.version < (3, 12): raise ImportError('asyncutils: Python 3.12 or above required')
+match I.name:
+    case 'cpython':
+        if I.version < (3, 12): raise ImportError('asyncutils: CPython 3.12 or above required')
+    case 'graalpy':
+        if I.version[0] < 25: raise ImportError('asyncutils: GraalPy 25 (Python 3.12) or above required') # noqa: PLR2004
+    case s: raise ImportError(f'asyncutils is neither tested in {s} nor currently planned to be')
 from time import monotonic as T
 def time_since_boot(t=T(), T=T): return round(T()-t, 7)*1000 # noqa: B008
-if I.name != 'cpython': __import__('_warnings').warn('asyncutils is neither tested in this Python implementation nor currently planned to be', ImportWarning)
 M['asyncutils._internal.log'] = __import__('logging').getLogger('asyncutils') # ty: ignore[invalid-assignment]
 def __getattr__(n, /, _=globals()):
     from asyncutils._internal import initialize as I; _.update(__getattr__=I.Module, __all__=I.a, submodules_map=I.s, __dir__=lambda _=I.S: _)
