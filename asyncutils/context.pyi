@@ -114,8 +114,8 @@ class Context:
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
     def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter|None=..., incl_newline: bool=...) -> None: '''Pretty print the context to the provided file-like object ``file`` with the :class:`pprint.PrettyPrinter` instance ``pp``, without a trailing newline if `incl_newline=False` is specified.'''
     def replace(self, /, **k: object) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
-    def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
-    def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
+    def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of ``dct``.'''
+    def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with ``dct`` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
     def __eq__(self, other: object, /) -> bool: '''Two contexts are considered equal if they are of the same type and all of their fields are equal.'''
     def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.'''
@@ -124,7 +124,7 @@ class Context:
     '''Contexts are not hashable since they are mutable.'''
 class localcontext:
     '''Context manager that temporarily sets the context of the current thread to a modified version of the provided context. Non-reentrant, but reusable with the exact same :attr:`new_ctx`.'''
-    def __init__(self, ctx: Context=..., **k: object): '''Note that the context of the current thread is to be set to a shallow copy of `ctx`, defaulting to the current context, with replacements from the keyword arguments.'''
+    def __init__(self, ctx: Context=..., **k: object): '''Note that the context of the current thread is to be set to a shallow copy of ``ctx``, defaulting to the current context, with replacements from the keyword arguments.'''
     @property
     def new_ctx(self) -> Context: '''The new context to be set on context manager entry.'''
     @property
@@ -141,7 +141,7 @@ class localcontext:
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
 class nonreusablelocalcontext(localcontext): '''Version of :class:`localcontext` that is not reusable. Use this to avoid subtle bugs, especially since it's not that expensive to instantiate a :class:`Context`.'''
 def getcontext() -> Context: '''Return the current context for the active thread.'''
-def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to `ctx`.'''
+def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to ``ctx``.'''
 all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 

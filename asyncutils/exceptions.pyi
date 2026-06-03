@@ -44,7 +44,7 @@ def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|N
 def raise_exc(exc_typ: ExcType, /, *args: object, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: object) -> NoReturn: ...
 @overload
 def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. The variadic `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload, and the remaining arguments are as in :func:`potent_derive`.'''
-def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy `wrapper`, such that `exception_occurred(wrapper)` returns ``True``.'''
+def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy ``wrapper``, such that ``exception_occurred(wrapper)`` returns ``True``.'''
 def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
 def exception_occurred(instance: object, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
 class StateCorrupted(BaseException):
@@ -120,9 +120,9 @@ class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
     def __init__(self, bus: EventBus, mw: Middleware, /): ...
     @property
-    def bus(self) -> EventBus|None: '''May be None if the event bus was garbage-collected.'''
+    def bus(self) -> EventBus|None: '''May be ``None`` if the event bus was garbage-collected.'''
     @property
-    def middleware(self) -> Middleware|None: '''May be None if the middleware was garbage-collected.'''
+    def middleware(self) -> Middleware|None: '''May be ``None`` if the middleware was garbage-collected.'''
 class LockForceRequest[T, L: AsyncLockLike[Any], R: LocksmithBase](BaseException):
     '''Thrown to coroutines that acquire locks when a locksmith (inheriting from :class:`locksmiths.LocksmithBase`) necessitates the lock be released.'''
     def __init__(self, requester: R, fulfill: Callable[[Any], None], lock: L, info: T, /): ...
@@ -132,7 +132,7 @@ class LockForceRequest[T, L: AsyncLockLike[Any], R: LocksmithBase](BaseException
     def lock(self) -> L: '''The lock involved.'''
     @property
     def info(self) -> T: '''The info passed to the :meth:`~locksmiths.LocksmithBase.force` method, or as returned by :meth:`~locksmiths.LocksmithBase.get_info`. Coerced to :class:`str` as a note attached on this exception when :mod:`traceback` prints it.'''
-    def fulfill(self, answer: object, /) -> None: '''Answer the request with `answer`, after presumably releasing the lock and performing error handling.'''
+    def fulfill(self, answer: object, /) -> None: '''Answer the request with ``answer``, after presumably releasing the lock and performing error handling.'''
 class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by :func:`~queues.password_queue`.'''
 class PasswordRetrievalError(PasswordQueueError):
     '''Raised when :func:`~queues.password_queue` cannot find the password from the closure variables.'''
@@ -201,16 +201,16 @@ class WarningToError:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Async context support.'''
 ignore_all: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores all errors; that is, `IgnoreErrors(BaseException)`. Use with caution!'''
+'''Instance of :class:`IgnoreErrors` that ignores all errors; that is, ``IgnoreErrors(BaseException)``. Use with caution!'''
 ignore_noncritical: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to `ignore_all.excluding(CRITICAL)`.'''
+'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to ``ignore_all.excluding(CRITICAL)``.'''
 ignore_typical: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof. Equivalent to `IgnoreErrors()`.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof. Equivalent to ``IgnoreErrors()``.'''
 ignore_stopiteration: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopIteration`. Equivalent to `IgnoreErrors(StopIteration)`.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopIteration`. Equivalent to ``IgnoreErrors(StopIteration)``.'''
 ignore_stopaiteration: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopAsyncIteration`. Equivalent to `IgnoreErrors(StopAsyncIteration)`.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`StopAsyncIteration`. Equivalent to ``IgnoreErrors(StopAsyncIteration)``.'''
 ignore_valerrs: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`ValueError`. Equivalent to `IgnoreErrors(ValueError)`.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`ValueError`. Equivalent to ``IgnoreErrors(ValueError)``.'''
 ignore_typeerrs: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores :exc:`TypeError`. Equivalent to `IgnoreErrors(TypeError)`.'''
+'''Instance of :class:`IgnoreErrors` that ignores :exc:`TypeError`. Equivalent to ``IgnoreErrors(TypeError)``.'''
