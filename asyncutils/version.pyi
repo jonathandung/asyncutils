@@ -12,8 +12,8 @@ class VersionInfo(str): # noqa: FURB189
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
         '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
-        | Of course, since :func:`~builtins.hash` returns the output of :meth:`__hash__` modulo `0x1FFFFFFFFFFFFFFF` (largest Mersenne prime within 64
-        | bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around `VersionInfo(46340, 41707, 2147483645)`.'''
+        | Of course, since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the
+        | reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
     def __len__(self) -> Literal[3]: '''`len((major, minor, patch)) == 3`.'''
     @overload
@@ -56,20 +56,20 @@ class VersionInfo(str): # noqa: FURB189
     def __format__(self, format_spec: str, /) -> str:
         r'''Format specification and corresponding return value: (using version 123.4.0 as example):
 
-        * x, hex: `'0x7b0400'`
-        * o, oct: `'0o36602000'`
-        * b, bin: `'0b11110110000010000000000'`
-        * d, dec: `'8061952'`
-        * 0, major, maj: `'123'`
-        * 1, minor, min: `'4'`
-        * 2, patch: `'0'`
-        * s, short: `'123.4'`
-        * l, long: `'asyncutils version 123.4.0'`
-        * a, ascii: `'{\x04\x00'`
-        * c, chars: `'{\x04\x00'`
-        * t, tuple: `'(123, 4, 0)'`
-        * h, hash: `'116380397'`
-        * n, majmin: `'123.4'`'''
+        * x, hex: ``'0x7b0400'``
+        * o, oct: ``'0o36602000'``
+        * b, bin: ``'0b11110110000010000000000'``
+        * d, dec: ``'8061952'``
+        * 0, major, maj: ``'123'``
+        * 1, minor, min: ``'4'``
+        * 2, patch: ``'0'``
+        * s, short: ``'123.4'``
+        * l, long: ``'asyncutils version 123.4.0'``
+        * a, ascii: ``'{\x04\x00'``
+        * c, chars: ``'{\x04\x00'``
+        * t, tuple: ``'(123, 4, 0)'``
+        * h, hash: ``'116380397'``
+        * n, majmin: ``'123.4'`'''
     def __int__(self) -> int: '''Assuming :attr:`minor` and :attr:`patch` are less than 256, pack the parts into an integer, which can be larger than 24 bits to fit the major version. :exc:`OverflowError` is raised if not possible.'''
     def __index__(self) -> int: '''The same as :meth:`__int__`.'''
     def __floor__(self) -> int: '''Return the major version.'''

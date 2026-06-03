@@ -2,11 +2,9 @@
 from ._internal.helpers import LoopMixinBase
 from ._internal.types import ExcType
 from .locksmiths import LocksmithBase
-from collections.abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from abc import ABC, abstractmethod
-from asyncio.events import AbstractEventLoop
-from asyncio.futures import Future
-from asyncio.tasks import Task
+from asyncio import AbstractEventLoop, Future, Task
+from collections.abc import AsyncGenerator, Awaitable, Callable, Coroutine, Generator
 from functools import cached_property
 from types import TracebackType
 from typing import Any, Literal, Self, overload

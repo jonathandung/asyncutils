@@ -1,14 +1,10 @@
 '''Bridges between asynchronous consumers/subscribers and producers/publishers.'''
 from ._internal.types import DualContextManager, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
 from .mixins import LoopContextMixin
-from collections.abc import AsyncGenerator, Callable, Iterable, Iterator, Mapping
 from _weakrefset import WeakSet
-from asyncio.events import AbstractEventLoop
-from asyncio.futures import Future
-from asyncio.locks import Lock
-from asyncio.queues import Queue
-from asyncio.tasks import Task
+from asyncio import AbstractEventLoop, Future, Lock, Queue, Task
 from collections import defaultdict
+from collections.abc import AsyncGenerator, Callable, Iterable, Iterator, Mapping
 from typing import Any, Literal, Self, TypeGuard, overload
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
@@ -172,9 +168,9 @@ class EventBus(LoopContextMixin):
         | The subscriber is removed once `fut` completes, and its result returned through the returned task.
         | After `till_permanent` seconds elapse (if passed), the task errors and the subscriber is left under that event type.'''
     @overload
-    async def feed_event(self, data: object, *, timeout: float|None=...) -> None: ...
+    async def feed_event(self, data: object, /, *, timeout: float|None=...) -> None: ...
     @overload
-    async def feed_event(self, event_type: str, data: object, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
+    async def feed_event(self, event_type: str, data: object, /, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
     @overload
     def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[Any]: ...
     @overload
@@ -194,7 +190,7 @@ class EventBus(LoopContextMixin):
     @overload
     def clear(self, event_type: WildcardType) -> WeakSet[WildcardSubscriber]|None: ...
     @overload
-    def clear(self) -> None: '''Remove all subscribers for the event type, or all subscribers if not passed.'''
+    def clear(self) -> None: '''Remove all subscribers for the event type and return them. If not passed, clear all subscribers but persist statistics unlike :meth:`clear_all`.'''
     def clear_all(self) -> None: '''Remove all subscribers and clear statistics.'''
     def subscriber_count(self, event_type: str|WildcardType) -> int: '''The number of subscribers for that event type.'''
     def clear_wildcards(self) -> WeakSet[WildcardSubscriber]|None: '''Equivalent to `bus.clear(EventBus.WILDCARD)`.'''

@@ -3,9 +3,8 @@
 | :class:`MultiCountDownLatch`, since it uses :class:`KeyedCondition` internally and it is not desired for :mod:`altlocks` to import :mod:`locks` as well.'''
 from ._internal.types import AsyncLockLike
 from .mixins import LoopBoundMixin, LockMixin, LockWithOwnerMixin, LoopContextMixin
+from asyncio import BoundedSemaphore, Lock, Task
 from collections.abc import Callable, Hashable, Mapping
-from asyncio.locks import BoundedSemaphore, Lock
-from asyncio.tasks import Task
 from typing import Any, Literal
 __all__ = 'AdvancedRateLimit', 'DynamicBoundedSemaphore', 'KeyedCondition', 'MultiCountDownLatch', 'PriorityLock', 'PriorityRLock', 'PrioritySemaphore', 'RLock'
 class DynamicBoundedSemaphore(BoundedSemaphore):

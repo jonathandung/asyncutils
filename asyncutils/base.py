@@ -209,6 +209,5 @@ async def aenumerate(it, start=0, *, step=1):
     async for _ in iter_to_agen(it): yield start, _; start += step
 P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None, strict=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))
 yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)})), I.sleep.__get__(float('inf'))
-(dummy_task := type(_)(_.__code__.replace(co_flags=0x161), globals())(None)).close()
-_.__qualname__ = _.__name__ = 'dummy_task'
+(dummy_task := type(_)(_.__code__.replace(co_flags=0x161, co_name=(_ := 'dummy_task'), co_qualname=_), globals())(None)).close()
 del f, _, P, L, b, c, H

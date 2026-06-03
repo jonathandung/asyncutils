@@ -112,13 +112,13 @@ class Context:
     def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod
     def from_dct(cls, dct: dict[str, Any], /) -> Self: '''Build an instance from the keys of the dictionary.'''
-    def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter|None=..., incl_newline: bool=...) -> None: '''Pretty print the context to the provided file-like object `file` with the :class:`pprint.PrettyPrinter` instance `pp`, without a trailing newline if `incl_newline=False` is specified.'''
+    def pprint(self, file: CanWriteAndFlush[str]=..., *, pp: PrettyPrinter|None=..., incl_newline: bool=...) -> None: '''Pretty print the context to the provided file-like object ``file`` with the :class:`pprint.PrettyPrinter` instance ``pp``, without a trailing newline if `incl_newline=False` is specified.'''
     def replace(self, /, **k: object) -> Self: '''Return a new instance with the same values as this one besides the keyword arguments.'''
     def replace_from_dct(self, dct: dict[str, Any], /) -> Self: '''Return a new instance with the same values as this one besides the keys of `dct`.'''
     def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with `dct` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
     def __eq__(self, other: object, /) -> bool: '''Two contexts are considered equal if they are of the same type and all of their fields are equal.'''
-    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mutable mappings.'''
+    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.'''
     def __setitem__(self, name: str, value: object, /) -> None: '''Alias for :meth:`__setattr__`.'''
     __hash__: ClassVar[None]
     '''Contexts are not hashable since they are mutable.'''
@@ -146,9 +146,9 @@ all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
-  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (87 as of now!) and more may be added in the future,
-  and the recommended way to get their values is to query them on the actual context object anyway.
-  They are still provided below to facilitate type checking.'''
+  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (87 as of now!) and more may be added in
+  the future, and the recommended way to get their values is to query them on the actual context object anyway. However, they are still provided
+  below to facilitate type checking.'''
 CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: Final[int]
 CIRCUIT_BREAKER_DEFAULT_RESET: Final[float]

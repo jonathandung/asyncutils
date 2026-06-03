@@ -1,10 +1,8 @@
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
 from ._internal.types import DualContextManager
 from .mixins import LoopBoundMixin
+from asyncio import AbstractEventLoop, Protocol, Transport, WriteTransport
 from collections.abc import Iterable
-from asyncio.events import AbstractEventLoop
-from asyncio.protocols import Protocol
-from asyncio.transports import Transport, WriteTransport
 from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'

@@ -306,7 +306,7 @@ async def afilter(f, it):
 def amapif(f, p, it, /, await_=False): return amap(f, afilter(p, it), await_)
 def amultimapif(f, p, /, *its, await_=False): return astarmap(f, afilter(p, azip(*its)), await_)
 async def arange(a, b=None, c=1, /):
-    if not c: raise ValueError('asyncutils.iters.arange: step cannot be zero')
+    if c == 0: raise ValueError('asyncutils.iters.arange: step cannot be zero')
     if b is None: a, b = 0, a
     f = b.__lt__ if c < 0 else b.__gt__
     while f(a): yield a; a += c

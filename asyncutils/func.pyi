@@ -1,8 +1,7 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
 from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
+from asyncio import AbstractEventLoop, Future
 from collections.abc import Awaitable, Callable, Iterable, Mapping
-from asyncio.events import AbstractEventLoop
-from asyncio.futures import Future
 from types import CoroutineType
 from typing import Any, Literal, Self, overload
 __all__ = 'RateLimited', 'acompose', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'unstar'

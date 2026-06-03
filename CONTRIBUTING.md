@@ -15,7 +15,7 @@ the above cases. Do not add extraneous new sections without another issue.
 3. If this PR bumps the version, as previously discussed with an owner or maintainer, increase the version number in the relevant locations. Only
 maintainers are allowed to increment the minor version. The versioning scheme we use is [SemVer](https://semver.org/spec/v2.0.0.html), but we
 currently only have major, minor and patch parts for simplicity.
-4. Once you have the sign-off of one other developers, you may either merge the PR yourself if you have permission, or ask the reviewer to do
+4. Once you have the sign-off of one other developer, you may either merge the PR yourself if you have permission, or ask the reviewer to do
 so on your behalf otherwise.
 
 ## Notes

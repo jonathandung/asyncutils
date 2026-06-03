@@ -61,7 +61,7 @@ This section documents the symbols defined at the top level of this package, mos
 
   :note:
     For submodules that are not yet loaded, the value is an instance of an internal class with the same behaviour but not inserted into
-    :data:`sys.modules`. This class is not a subclass of :class:`types.ModuleType` and provides a :meth:`load` method that fetches the submodule and
+    :data:`sys.modules`. This class is not a subclass of :class:`types.ModuleType` and provides a ``load`` method that fetches the submodule and
     replaces the entry in both :data:`submodules_map` and :data:`sys.modules`, and returns the real submodule object. For attribute accesses, it acts
     as a proxy to the real submodule, loading it when strictly required; however, when modifying or deleting attributes, the submodule is gotten
     unconditionally and replaces the proxy.
@@ -75,7 +75,7 @@ This section documents the symbols defined at the top level of this package, mos
   Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.
   Useful for benchmarking the module's performance.
 
-The remarks below are inapplicable to the contextually configured constants in :mod:`context`:
+The remarks below are inapplicable to the contextually configured constants in :mod:`~asyncutils.context`:
 
 * One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
 * The submodule objects are also accessible as attributes of the library without triggering the loading immediately if not loaded.

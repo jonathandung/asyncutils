@@ -1,8 +1,8 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
 from ._internal.types import AsyncLockLike, Exceptable, ExcType, SupportsIteration, Timer
 from .mixins import AsyncContextMixin, AwaitableMixin
-from collections.abc import Awaitable, Callable
 from collections import deque
+from collections.abc import Awaitable, Callable
 from types import CoroutineType, TracebackType
 from typing import Any, ClassVar, Literal, NoReturn, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
@@ -43,7 +43,7 @@ class UniqueResourceGuard(ResourceGuard):
         .. attention:: The error will be seen by the user only when they actually try to acquire the guard if it is already held.'''
 class Releasing:
     '''An async context manager that releases the given lock on entry and re-acquires it on exit.'''
-    def __init__(self, lock: AsyncLockLike[Any], /) -> None: ...
+    def __init__(self, lock: AsyncLockLike[object], /) -> None: ...
     async def __aenter__(self) -> None: '''Call the release method of the lock, awaiting if it returns a coroutine.'''
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...

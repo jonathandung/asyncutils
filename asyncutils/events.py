@@ -57,14 +57,14 @@ class EventWithValue(A.EventMixin):
         x, I = monotonic()-duration, iter(self._hist)
         for t, _ in I:
             if t >= x: yield t, _; yield from I
-    async def wait_for_transition(self, old, new, timeout=None, *, force_transition=False):
+    async def wait_for_transition(self, old, new, timeout=None, *, force_transition=False, legacy=False):
         x = new
         try:
             async with I.timeout(timeout):
                 while True:
-                    if x is not old: await self.wait_for_value(old)
+                    if legacy or x is not old: await self.wait_for_value(old)
                     if new is (x := await self.wait_for_next()): return True
         except TimeoutError:
             if force_transition: o = self.get(None); (s := self.set)(old); s(new); s(o, strict=False)
             return False
-    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False): return await next(iter((await I.wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition), self.wait_for_transition(b, a, timeout))), return_when='FIRST_COMPLETED'))[0]))
+    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False, legacy=False): return await next(iter((await I.wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition, legacy=legacy), self.wait_for_transition(b, a, timeout, legacy=legacy))), return_when='FIRST_COMPLETED'))[0]))

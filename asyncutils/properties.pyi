@@ -1,7 +1,7 @@
 '''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
 from ._internal.types import AsyncLockLike
-from collections.abc import Awaitable, Callable, Hashable
 from asyncio.locks import Lock
+from collections.abc import Awaitable, Callable, Hashable
 from typing import Any, Concatenate, Self, final, overload
 __all__ = 'AsyncLockProperty', 'AsyncProperty', 'coercedmethod'
 class AsyncProperty[T, R]:

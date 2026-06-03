@@ -1,8 +1,8 @@
 '''Utilities that cannot be easily classified into any submodule.'''
 from ._internal.types import ExcType, SupportsIteration, Timer
 from .mixins import ExecutorRequiredAsyncContextMixin, LoopContextMixin
-from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping
 from collections import deque
+from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping
 from types import TracebackType
 from typing import Any, NoReturn, Self, Literal, overload
 __all__ = 'CacheWithBackgroundRefresh', 'CallbackAccumulator', 'StateMachine', 'gather_with_limited_concurrency'

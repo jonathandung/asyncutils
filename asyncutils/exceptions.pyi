@@ -1,5 +1,5 @@
 '''Exception handling utilties and exception classes used by this module.'''
-from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, Middleware, ExcType, QProt
+from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProt
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
@@ -19,19 +19,19 @@ def unnest_reverse(group: BaseException, /, *more: BaseException, raise_critical
 @overload
 def potent_derive(group: BaseExceptionGroup, /, *more: BaseException, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: BaseException, cause: None=..., suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
+def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
-def potent_derive(exc: BaseException, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
+def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
     '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening
     | when necessary.
-    | `ordered` defaults to ``False``, because that is more efficient.
-    | The intersection of `filter_out` and `keep`, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
-    | The acknowledgement parameters `ack1`, `ack2` and `ack3` are called on exceptions in the above intersection, exceptions that don't pass the
-    | predicate and exceptions that are not in `keep` respectively.
+    | ``ordered`` defaults to ``False``, because that is more efficient.
+    | The intersection of ``filter_out`` and ``keep``, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
+    | The acknowledgement parameters ``ack1``, ``ack2`` and ``ack3`` are called on exceptions in the above intersection, exceptions that don't pass the
+    | predicate and exceptions that are not in ``keep`` respectively.
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
-    | If `raise_critical` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
+    | If ``raise_critical`` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
     | propagate it.
     | `notes` is attached to the group using :meth:`~BaseException.add_note`.
     | The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see :func:`prepare_exception`.

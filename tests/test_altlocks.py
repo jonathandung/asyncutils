@@ -1,11 +1,9 @@
-from collections import deque
-from asyncio.locks import Lock
-from asyncio.tasks import sleep, gather
-from asyncio.timeouts import timeout
 import pytest
-from tests.conftest import mk
+from asyncio import Lock, gather, sleep, timeout
 from asyncutils.altlocks import *
 from asyncutils import CircuitOpen, timer
+from collections import deque
+from tests.conftest import mk
 @pytest.fixture
 def obj(): return object()
 def test_rguard(obj):

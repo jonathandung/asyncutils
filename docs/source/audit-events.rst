@@ -72,7 +72,7 @@ inspiration.
     - ``capacity``: :class:`float`, ``leak``: :class:`float`
     - Raised when :class:`buckets.LeakyBucket` is instantiated, with ``capacity`` being the maximum number of tokens and ``leak`` the leak rate.
   * - asyncutils.channels.Observable
-    - ``maxsize``: :type:`int|None`
+    - ``maxsize``: ``int|None``
     - Raised when :class:`channels.Observable` is instantiated, with ``maxsize`` being the maximum number of subscribers or ``None`` if there is no such limit.
   * - asyncutils.channels.EventBus
     - ``name``: :class:`str`, ``addr``: :class:`int`
@@ -84,7 +84,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~channels.EventBus.stop_audit` method of :class:`channels.EventBus` is called, with the memory address of the instance as argument.
   * - asyncutils.channels.EventBus.event_stream
-    - ``addr``: :class:`int`, ``event_type``: :type:`str|None`
+    - ``addr``: :class:`int`, ``event_type``: ``str|None``
     - Raised when the :meth:`~channels.EventBus.event_stream` method of :class:`channels.EventBus` is called. ``addr`` is the memory address of the instance, and ``event_type`` is the event type the stream was opened for or ``None`` for catch-all streams.
   * - asyncutils.cli.run
     - \
@@ -180,7 +180,7 @@ inspiration.
     - \
     - Raised when :class:`networking.SocketTransport` is instantiated.
   * - asyncutils.queues.password_queue
-    - ``get_from``: :type:`str|None`, ``put_from``: :type:`str|None`
+    - ``get_from``: ``str|None``, ``put_from``: ``str|None``
     - Raised when :func:`queues.password_queue` is called, with the names of the variables from which passwords for get and put operations will be retrieved in the caller scope if they are protected, or ``None`` if they are not protected. Of course, the audit hooks do not see the passwords themselves.
   * - asyncutils.queues.SmartQueue.push
     - ``addr``: :class:`int`, ``pushed``: ``T``, ``popped``: ``T``
@@ -267,7 +267,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~queues.PotentQueueBase.enumerate` method of an exact instance of :class:`queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.signals.wait_for_signal
-    - ``sigs``: :type:`set[int]`
+    - ``sigs``: ``set[int]``
     - Raised when :func:`signals.wait_for_signal` is called on signal numbers ``sigs``. Audit hooks can modify the set, and the changes will be reflected.
   * - asyncutils.util.sync_await
     - ``atname``: :class:`str`

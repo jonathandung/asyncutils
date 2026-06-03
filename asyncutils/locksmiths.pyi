@@ -2,9 +2,8 @@
 | limiting collateral damage and hindrance of the control flow of the program as much as possible and allowing customization of behaviour in
 | different steps regarding some locks.'''
 from ._internal.types import AsyncLockLike
+from asyncio import AbstractEventLoop, Task
 from collections.abc import Awaitable, Callable
-from asyncio.events import AbstractEventLoop
-from asyncio.tasks import Task
 from enum import IntEnum
 from typing import Any, ClassVar, Literal, TypeGuard, final
 __all__ = 'ForceResult', 'LocksmithBase', 'RecognitionResult', 'succeeded'

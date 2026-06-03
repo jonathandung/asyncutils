@@ -1,7 +1,7 @@
 '''Readers-writer locks with different fairness policies, applicable in different situations.'''
 from ._internal.types import RWLockCM, RWLockRV
-from collections.abc import Awaitable, Callable
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable, Callable
 from typing import Literal, Self, overload
 __all__ = 'AgingRWLock', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):

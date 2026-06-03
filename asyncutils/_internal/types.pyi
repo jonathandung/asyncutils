@@ -14,11 +14,11 @@ from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
-from asyncio.events import AbstractEventLoop
-from asyncio.futures import Future
+from asyncio import AbstractEventLoop, Future
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from io import _WrappedBuffer, TextIOWrapper
+from ty_extensions import Intersection, Not
 from types import CodeType, CoroutineType, FrameType, FunctionType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
 @type_check_only
@@ -150,6 +150,8 @@ type SigPatcherArg = tuple[Wrapper, str]
 '''The type of a positional argument passed to a signature-patching function in :mod:`_internal.patch`.'''
 type Middleware = Callable[[str, Any], Any]
 '''Represents a middleware accepted by :class:`~channels.EventBus`.'''
+type NonGroupExc = Intersection[BaseException, Not[BaseExceptionGroup]]
+'''Exceptions that are not exception groups.'''
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
@@ -169,7 +171,7 @@ class QProt[R, V, T](Protocol):
     def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
     def cancel_extend(self, msg: object=...) -> bool:
         '''| Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will
-        | be the argument for the :exc:`~asyncio.exceptions.CancelledError` seen by the extender if any.
+        | be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any.
         | Return ``False`` if the task is already done or cancelled, or there was no task to begin with.'''
     def empty(self) -> bool: '''Check if the queue is empty.'''
     def full(self) -> bool: '''Check if the queue is full.'''
@@ -193,8 +195,8 @@ class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQPro
 class RWLockRV[T, **P](Protocol):
     '''The return type of the :meth:`~rwlocks.RWLock.reader` and :meth:`~rwlocks.RWLock.writer` methods of :class:`~rwlocks.RWLock` and subclasses thereof.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> CoroutineType[Any, Any, T]: ...
-    def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a reader.'''
-    def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a writer.'''
+    def reader(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a reader and return an object with :meth:`reader` and :meth:`writer` methods.'''
+    def writer(self, f: Callable[P, Awaitable[T]], /) -> Self: '''Mark another function as a writer and return an object with :meth:`reader` and :meth:`writer` methods.'''
 @type_check_only
 class EveryMethodRVRV[T, R](Protocol):
     '''Return type of :class:`EveryMethodRV`.'''
@@ -205,7 +207,7 @@ class EveryMethodFT[T, R](Protocol):
     def __call__(self, self_: T, /, *a: object, **k: object) -> Awaitable[R]: ...
 @type_check_only
 class DecoratorFactoryRV(Protocol):
-    '''The return type of various decorator factories in :mod:`func`, including :func:`~func.debounce`, :func:`~func.throttle` and :func:`~func.debounce`.'''
+    '''The return type of various decorator factories in :mod:`asyncutils.func`, including :func:`~func.debounce`, :func:`~func.throttle` and :func:`~func.debounce`.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T]]: ...
 @type_check_only
 class EveryRV[T](Protocol):
@@ -213,20 +215,19 @@ class EveryRV[T](Protocol):
     def __call__[**P](self, f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T|None]]: ...
 @type_check_only
 class SubscriptionRV(Protocol):
-    '''Return type of the :meth:`channels.Observable.subscribe`, :meth:`channels.Observable.subscribe_nowait` and :meth:`channels.Observable.ntimes` methods of :class:`channels.Observable`.'''
+    '''Return type of the :meth:`~channels.Observable.subscribe`, :meth:`~channels.Observable.subscribe_nowait` and :meth:`~channels.Observable.ntimes` methods of :class:`channels.Observable`.'''
     def __call__(self, strict: bool=...) -> None: ...
 @type_check_only
 class StateSnapshot(NamedTuple):
-    '''Type of snapshots of the current state of a :class:`channels.Rendezvous` object as returned by its
-    :meth:`channels.Rendezvous.state_snapshot` method.'''
+    '''Type of snapshots of the current state of a :class:`channels.Rendezvous` object as returned by its :meth:`~channels.Rendezvous.state_snapshot` method.'''
     num_getters: int
     '''Current number of slots waiting for values.'''
     num_putters: int
     '''Current number of values waiting for slots.'''
     num_ops: int
-    '''`ss.num_ops == ss.num_getters+ss.num_putters`'''
+    '''``ss.num_ops == ss.num_getters+ss.num_putters``'''
     idle: bool
-    '''`ss.idle == (ss.num_getters == ss.num_putters == 0)`'''
+    '''``ss.idle == (ss.num_getters == ss.num_putters == 0)``'''
 @type_check_only
 class BenchmarkResult(NamedTuple):
     '''The return type of :func:`func.benchmark`.'''
@@ -237,38 +238,38 @@ class BenchmarkResult(NamedTuple):
     total: float
     '''The total execution time.'''
     avg: float
-    '''`br.avg == br.total/br.iterations`.'''
+    '''``br.avg == br.total/br.iterations``.'''
     iterations: int
-    '''The `times` constructor parameter.'''
+    '''The ``times`` constructor parameter.'''
 @type_check_only
 class MemoryMappedFile(LoopContextMixin):
-    '''The type of async memory-mapped files as opened and returned by :class:`io.MemoryMappedIOManager`.'''
+    '''The type of async memory-mapped files as opened and returned by :class:`~asyncutils.io.MemoryMappedIOManager`.'''
     if sys.platform != 'win32':
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: '''Advise the kernel about how to handle the memory map by making the ``madvise`` system call.'''
-    async def read(self, offset: int=..., size: int=...) -> bytes: '''Read `size` bytes from the file at `offset`. A negative `size` reads until the end of the file.'''
-    async def write(self, data: bytes, offset: int=...) -> None: '''Write `data` into the file at `offset`.'''
-    async def readline(self, offset: int=..., size: int|None=..., incl_newline: bool=...) -> bytes: '''Read a line from the file at `offset`, up to a maximum of `size` bytes if `size` is not ``None``, and return it, optionally including the newline character.'''
-    async def readlines(self, hint: int=...) -> list[bytes]: '''Read lines from the file until the total size of the lines read reaches or exceeds `hint` if `hint` is non-negative, and return a list of the lines read.'''
-    async def flush(self, offset: int=..., size: int|None=..., /) -> None: '''Flush the file, or a portion of it if `offset` and `size` are specified. If `size` is ``None``, flush until the end of the file.'''
-    async def move(self, dest: int, src: int, count: int) -> None: '''Move `count` bytes of data within the file starting from `src` to `dest`.'''
+    async def read(self, offset: int=..., size: int=...) -> bytes: '''Read ``size`` bytes from the file at ``offset``. A negative ``size`` reads until the end of the file.'''
+    async def write(self, data: bytes, offset: int=...) -> None: '''Write ``data`` into the file at ``offset``.'''
+    async def readline(self, offset: int=..., size: int|None=..., incl_newline: bool=...) -> bytes: '''Read a line from the file at ``offset``, up to a maximum of ``size`` bytes if ``size`` is not ``None``, and return it, optionally including the newline character.'''
+    async def readlines(self, hint: int=...) -> list[bytes]: '''Read lines from the file until the total size of the lines read reaches or exceeds ``hint`` if ``hint`` is non-negative, and return a list of the lines read.'''
+    async def flush(self, offset: int=..., size: int|None=..., /) -> None: '''Flush the file, or a portion of it if ``offset`` and ``size`` are specified. If ``size`` is ``None``, flush until the end of the file.'''
+    async def move(self, dest: int, src: int, count: int) -> None: '''Move ``count`` bytes of data within the file starting from ``src`` to ``dest``.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
-    async def seek(self, pos: int, whence: Seek=...) -> None: '''Move the file pointer to `pos` according to `whence`.'''
+    async def seek(self, pos: int, whence: Seek=...) -> None: '''Move the file pointer to ``pos`` according to ``whence``.'''
     def __iter__(self) -> Iterator[bytes]: '''Return an iterator over the lines of the file.'''
     def __aiter__(self) -> AsyncGenerator[bytes]: '''Return an asynchronous iterator over the lines of the file.'''
     @property
     def closed(self) -> bool: '''Whether the file and memory map have been closed.'''
     @property
-    def open_files(self) -> OpenFiles: '''Return a dictionary mapping tuples of the form `(file, mode)` to the file objects underlying this memory-mapped file.'''
+    def open_files(self) -> OpenFiles: '''Return a dictionary mapping tuples of the form ``(file, mode)`` to the file objects underlying this memory-mapped file.'''
     def fileno(self) -> int: '''The file descriptor of the underlying file.'''
     def sync(self) -> None: '''Force the file to be written to disk, in addition to flushing the memory map.'''
     def close(self) -> None: '''Close the memory-mapped file and the underlying file. It is safe to call this method multiple times, but no other methods should be called after closing.'''
     async def aclose(self) -> None: '''Close the memory-mapped file and the underlying file concurrently in async. It is safe to call this method multiple times, but no other methods should be called after closing.'''
     def read_byte(self) -> int: '''Read one byte from the file at the current file pointer, advance the pointer and return the byte as an integer >=0, <256.'''
     def write_byte(self, b: int, /) -> None: '''Write a byte to the file at the current file pointer and advance the pointer.'''
-    def resize(self, newsize: int) -> None: '''Resize the file to `newsize` bytes. If the file is extended, the added bytes are zero-filled.'''
-    def find(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the lowest index in the file where the bytes `sub` is found, such that `sub` is contained in the slice `file[start:end]`. Return -1 if `sub` is not found.'''
-    def rfind(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the highest index in the file where the bytes `sub` is found, such that `sub` is contained in the slice `file[start:end]`. Return -1 if `sub` is not found.'''
+    def resize(self, newsize: int) -> None: '''Resize the file to ``newsize`` bytes. If the file is extended, the added bytes are zero-filled.'''
+    def find(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the lowest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
+    def rfind(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the highest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
     def tell(self) -> int: '''Return the current file pointer position.'''
     def size(self) -> int: '''Return the size of the file in bytes.'''
     def isatty(self) -> bool: '''Return whether the file is connected to a TTY device.'''
@@ -276,8 +277,8 @@ class MemoryMappedFile(LoopContextMixin):
     def writable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
     def seekable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
     async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in ``lines``, followed by ``sep``, into the file. If ``minimize_writes`` is ``True`` (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
-    async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified `encoding` and `errors`.'''
-    async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified `encoding` and `errors`.'''
+    async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified ``encoding`` and ``errors``.'''
+    async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified ``encoding`` and ``errors``.'''
     @overload
     async def smart_write(self, data: str, offset: int=..., encoding: str=..., errors: str=...) -> None: ...
     @overload
@@ -293,7 +294,7 @@ class MemoryMappedFile(LoopContextMixin):
     async def replace(self, old: bytes, new: bytes, offset: int=..., count: int=...) -> int: '''Replace occurrences of a pattern in the file with a new pattern.'''
     def search_lazy(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''Search for a pattern in the file starting from the specified offset, yielding the offsets of each occurrence found as they are found.'''
     def search_lazy_nonoverlapping(self, pattern: bytes, offset: int=...) -> AsyncGenerator[int]: '''The above, but ensure the offsets returned do not overlap using a greedy approach.'''
-    async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Return a list of the offsets of the first `max_results` occurrences of `pattern` in the file starting from `offset`.'''
+    async def search(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Return a list of the offsets of the first ``max_results`` occurrences of ``pattern`` in the file starting from ``offset``.'''
     async def search_nonoverlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''The above, but ensure the offsets returned do not overlap. Greedy.'''
     async def compact(self) -> int: '''Reduce the size of the file by stripping all contiguous null bytes at the end, and return the number of bytes removed.'''
 @type_check_only
@@ -370,7 +371,7 @@ type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreus
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
 '''Names of algorithms used for calculating checksums. The default is :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The BLAKE2 family of algorithms, fast and somewhat secure with a low probability of collision, is the default choice.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
-'''The type of the return values of the :meth:`io.MemoryMappedIOManager.open`, :meth:`io.MemoryMappedIOManager.create` and :meth:`io.MemoryMappedIOManager.create_sparsef` methods of :class:`io.MemoryMappedIOManager`.'''
+'''The type of the return values of the :meth:`~asyncutils.io.MemoryMappedIOManager.open`, :meth:`~asyncutils.io.MemoryMappedIOManager.create` and :meth:`~asyncutils.io.MemoryMappedIOManager.create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`io.MemoryMappedIOManager.open_files` property of :class:`io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]

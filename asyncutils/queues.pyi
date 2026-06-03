@@ -3,10 +3,9 @@
 from ._internal.types import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
 from .exceptions import IgnoreErrors
 from .mixins import LoopBoundMixin
-from collections.abc import AsyncGenerator, Awaitable, Callable, Generator
 from abc import ABC, abstractmethod
-from asyncio.futures import Future
-from asyncio.queues import Queue
+from asyncio import Future, Queue
+from collections.abc import AsyncGenerator, Awaitable, Callable, Generator
 from contextlib import AbstractContextManager
 from typing import Any, Final, Literal, Self, overload
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'password_queue'
@@ -153,11 +152,11 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     @overload
     def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: ...
     @overload
-    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them, emptying this queue in the process (transformation analogous to `builtins.map`).'''
+    def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them, emptying this queue in the process (transformation analogous to :class:`map`).'''
     @overload
     def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: ...
     @overload
-    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process (transformation analogous to `itertools.starmap`).'''
+    def starmap[R, *Ts](self: PotentQueueBase[tuple[*Ts]], f: Callable[[*Ts], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[True]) -> SmartLifoQueue[R]: '''Return a queue that contains items from this queue with the function applied on each of them starred, emptying this queue in the process (transformation analogous to :class:`itertools.starmap`).'''
     @overload
     def filter(self, pred: Callable[[T], bool]=..., *, lifo: Literal[False]=...) -> SmartQueue[T]: ...
     @overload

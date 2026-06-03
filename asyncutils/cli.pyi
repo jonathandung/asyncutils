@@ -12,5 +12,5 @@ def run(argv: Iterable[str]|None=...) -> int|None:
     .. important::
       If you call this function manually, since a daemon thread was spun up to execute the code in the console, it may still be kept alive by some
       internal mechanisms. Worse still, if you run this function within another console, its standard input may completely cease to work. In a nutshell,
-      if you are calling this in a console, it is recommended that you enter no code afterwards.
+      if you are calling this in a console, it is recommended that you input no code afterwards.
 '''

@@ -26,7 +26,7 @@ class ConsoleBase(B):
         def close(p=None, /, _=loop.close):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={})
+        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__)
         if H > 0x30e00a0: d['__annotate__'] = g('__annotate__') # cover: off
         if H < 0x30f00a1:
             for k in _: d[k] = g(k)

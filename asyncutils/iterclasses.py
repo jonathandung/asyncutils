@@ -46,7 +46,7 @@ class apeekable(A.LoopBoundMixin):
         async for s in A.iter_to_agen(self._it) if (i := i.__index__()) < 0 else A.empty_agen() if i < (l := len(C)) else A.take(self._it, i-l+1): f(s)
         return C[i]
     P.patch_method_signatures((__getitem__, 'idx, /'))
-class await_later:
+class AwaitLater:
     __slots__ = 'aw',
     def __new__(cls, a, /, _=type(A.dummy_task)):
         if H.check_methods(a, '__await__') or isinstance(a, _) and a.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', a); return _ # noqa: RUF021
@@ -60,7 +60,7 @@ class await_later:
 class abucket(A.LoopContextMixin):
     __slots__ = '_cache', '_it', '_key', '_validator'
     def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
-    def __contains__(self, k, /, _=await_later):
+    def __contains__(self, k, /, _=AwaitLater):
         if not self._validator(k): return False
         try: self._cache[k].appendleft(_(anext(self[k]))); return True
         except StopIteration: return False
@@ -69,7 +69,7 @@ class abucket(A.LoopContextMixin):
         async for i in self._it:
             if V(v := K(i)): C[v].append(i)
         for k in C: yield k
-    async def __getitem__(self, v, /, _=await_later):
+    async def __getitem__(self, v, /, _=AwaitLater):
         if not (V := self._validator)(v): return
         C, I, K = self._cache, self._it, self._key
         while True:
@@ -81,4 +81,4 @@ class abucket(A.LoopContextMixin):
                     if (k := K(i)) == v: yield i; break
                     elif V(k): C[k].append(i)
     P.patch_method_signatures((__contains__, _ := 'key, /'), (__getitem__, _)); del _
-del P, await_later
+del P, AwaitLater

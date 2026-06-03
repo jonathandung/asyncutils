@@ -2,8 +2,8 @@
 from ._internal.types import SupportsIteration, ExcType
 from .config import Executor
 from .mixins import LoopBoundMixin, LoopContextMixin
+from asyncio import Future
 from collections.abc import Callable, Iterable, Mapping
-from asyncio.futures import Future
 from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'ConnectionPool'

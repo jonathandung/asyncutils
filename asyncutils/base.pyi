@@ -1,14 +1,13 @@
 '''The most useful and fundamental patterns and helpers core to this module and are therefore required by the :mod:`console` submodule, among many others.'''
 from ._internal.types import ExcType, GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft
+from asyncio import AbstractEventLoop, Future
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable
-from asyncio.events import AbstractEventLoop
-from asyncio.futures import Future
 from types import TracebackType
 from typing import Any, Final, Literal, Never, NoReturn, Self, final, overload
 __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class event_loop: # noqa: N801
-    '''A context manager to manage lifecycles of asyncio-native event loops.'''
+    '''A context manager to manage lifecycles of native event loops. Has specialized handling for :mod:`asyncio` implementation details.'''
     constructor_args: Final = 'dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error' # noqa: PYI015
     '''A tuple of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
     def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., dont_try_clear_tasks_on_reuse: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all are applied on top of :const:`context.EVENT_LOOP_BASE_FLAGS`.'''
@@ -21,6 +20,7 @@ class event_loop: # noqa: N801
     def factory_reset(self) -> None: '''Restore the default settings from the context (i.e., set the flags to :const:`context.EVENT_LOOP_BASE_FLAGS`).'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration of the manager to the equivalent of passing all keyword arguments as ``False``, except those covered by `mask_to_keep`.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
+    def __hash__(self) -> int: '''Return the flags of the manager as its hash, not considering its state.'''
     @overload
     def flags_eq(self, other: Self, /) -> bool: ...
     @overload
@@ -63,8 +63,9 @@ async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Ca
     '''| Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
     | The batch cancellation itself can be reliably cancelled.
     | Afterwards, if `disembowel` is ``True``, clear the iterable using its :meth:`pop` method repeatedly, falling back to :meth:`clear`.
-    | The callback is called on each result or exception of the futures after CancelledError was thrown into them concurrently.
-    | If `raising` is ``True``, all calls of the callback that themselves threw exceptions are collected into a BaseExceptionGroup, which is then raised.'''
+    | The callback is called on each result or exception of the futures after :exc:`~asyncio.CancelledError` was thrown into them concurrently.
+    | If `raising` is ``True``, all calls of the callback that themselves threw exceptions are collected into a :exc:`BaseExceptionGroup`,
+    | which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> list[T]:
     '''| Return a list of the first `n` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than `n` items to collect, throw :exc:`exceptions.ItemsExhausted` if default is :const:`constants.RAISE` and emit a warning
@@ -87,8 +88,8 @@ def take[T](it: SupportsIteration[T], n: int|None) -> AsyncGenerator[T]:
       :collapsible:
 
       To ensure there are exactly `n` items in the resultant async generator, pass a default value.
-      In particular, pass :const:`constants.RAISE` as `default` to cause :exc:`exceptions.ItemsExhausted` to be thrown in the case that there are
-      not enough items.
+      In particular, pass :const:`constants.RAISE` as `default` to cause :exc:`exceptions.ItemsExhausted` to be thrown in the case that there
+      aren't enough items.
       If `n` is None, take all items.'''
 def drop[T](it: SupportsIteration[T], n: int, *, raising: bool=...) -> AsyncGenerator[T]: '''Discard `n` items from the (async) iterable and yield the rest. If there are not enough items and raising is True, throw `exceptions.ItemsExhausted`.'''
 def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGenerator[tuple[int, T]]: '''The async version of enumerate, except it is not a class and additionally supports the `step` parameter.'''
