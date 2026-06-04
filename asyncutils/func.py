@@ -164,7 +164,7 @@ P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (
 class RateLimited:
     __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
     def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):
-        if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer)
+        if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer, lock_impl=lock_impl)
         audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (I.Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
         p, m, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func

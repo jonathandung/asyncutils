@@ -14,7 +14,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-58% coverage, 75 tests
+58% coverage, 72 tests
 
 ### Docs
 
@@ -24,7 +24,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 
-### [0.9.11] - 2026-06-03; newest
+### [0.9.11] - 2026-06-04; newest
 
 Upgraded to Python 3.15.0b2; added experimental GraalPy and free-threaded support.
 
@@ -411,9 +411,10 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
   - properties
 
     Classes:
-    - AsyncProperty
-    - AsyncLockProperty
-    - coercedmethod
+    - AsyncPropertyBase
+    - LazyAsyncProperty
+    - ConcurrentAsyncProperty
+    - RWLockedAsyncProperty
 
   - queues
 
@@ -445,8 +446,10 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     - PriorityRWLock
     - FairPriorityRWLock
     - WritePreferredPriorityRWLock
+    - AgingRWLock
+    - CoercedMethod
 
-    - signals
+  - signals
 
     Functions:
     - wait_for_signal
@@ -487,6 +490,7 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     - lockf
     - done_evt
     - done_fut
+    - locked_lock
     - dualcontextmanager
     - semaphore
     - aiter_from_f
@@ -494,6 +498,10 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     - transient_block
     - transient_block_from_loop
     - wrap_in_coro
+    - atruthify
+    - afalsify
+    - anullify
+    - avalify
 
   - version
 

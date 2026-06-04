@@ -2,8 +2,8 @@
 from ._internal.types import RWLockCM, RWLockRV
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
-from typing import Literal, Self, overload
-__all__ = 'AgingRWLock', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
+from typing import Any, Concatenate, Literal, Self, final, overload
+__all__ = 'AgingRWLock', 'CoercedMethod', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):
     '''Common base class for all readers-writer locks.'''
     @overload
@@ -73,3 +73,10 @@ class AgingRWLock(PriorityRWLock):
     def cur_unsuccessful_reads(self) -> int: '''The current number of unsuccessful attempts to acquire the reading lock, counted across all tasks.'''
     @property
     def cur_unsuccessful_writes(self) -> int: '''The current number of unsuccessful attempts to acquire the writing lock, counted across all tasks.'''
+@final
+class CoercedMethod[T, R, **P]:
+    '''Interpret any callable as a regular function in a class body so that access on instance returns something like a bound method.'''
+    def __init__(self, func: Callable[Concatenate[R, P], T], /): ...
+    def __getattr__(self, name: str, /) -> Any: ...
+    def __set_name__(self, owner: type[R], name: str, /) -> None: ...
+    def __get__(self, instance: R, owner: type[R]|None=..., /) -> Callable[P, T]: '''Return the 'bound method'. The descriptor itself is hidden and cannot be accessed on the class it is defined in, only instances of.'''
