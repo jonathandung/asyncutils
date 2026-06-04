@@ -3,7 +3,7 @@ from asyncutils.iterclasses import *
 from asyncutils.iters import *
 from asyncio import CancelledError, create_task, gather, sleep
 from _collections import deque
-from _operator import is_
+from operator import is_
 from pytest import fail, mark, raises
 from tests.conftest import mk
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10)))

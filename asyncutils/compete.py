@@ -18,7 +18,7 @@ async def race_with_callback(*C, winner=None, loser=None, timeout=None):
         if winner is not None and I.iscoroutine(r := winner(w)): await r
         return w
     finally: audit('asyncutils.compete.race_with_callback/end', L); await A.safe_cancel_batch(p, callback=loser)
-async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, _=__import__('_operator').methodcaller('result')): # noqa: B008
+async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, _=__import__('operator').methodcaller('result')): # noqa: B008
     if not C: raise TypeError('asyncutils.compete.multi_winner_race_with_callback: pass in at least one coroutine')
     audit('asyncutils.compete.multi_winner_race_with_callback/start', L := len(C)); d, p = await I.wait(A.new_eager_tasks(*C), timeout=timeout); d = map(_, d)
     try:

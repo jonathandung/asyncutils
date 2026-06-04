@@ -40,7 +40,7 @@ class Context: # noqa: PLW1641
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
     def __reduce__(self): return __class__.from_dct, (self.asdict(),)
     __copy__, __replace__, __setitem__ = copy, replace, __setattr__; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
-def getcontext(_=_, d=Context()):
+def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()
     except LookupError: _.set(d); return d
 def setcontext(c, /, _=_):

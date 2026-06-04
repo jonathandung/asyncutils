@@ -2,18 +2,19 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-      - id: trailing-whitespace
-      - id: check-yaml
-      - id: check-toml
       - id: check-added-large-files
         args: [--maxkb=100]
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
-      - id: check-illegal-windows-names
       - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
       - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
       - id: file-contents-sorter
         files: ^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py)$
+      - id: trailing-whitespace
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.25
     hooks:

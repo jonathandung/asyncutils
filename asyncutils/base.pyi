@@ -1,10 +1,10 @@
 '''The most useful and fundamental patterns and helpers core to this module and are therefore required by the :mod:`asyncutils.console` submodule, among many others.'''
 from ._internal.types import ExcType, GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft
 from asyncio import AbstractEventLoop, Future
-from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable
+from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable, MutableSequence
 from types import TracebackType
 from typing import Any, Final, Literal, Never, NoReturn, Self, final, overload
-__all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
+__all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'collect_into', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class event_loop: # noqa: N801
     '''A context manager to manage lifecycles of native event loops. Has specialized handling for :mod:`asyncio` implementation details.'''
@@ -68,8 +68,8 @@ async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Ca
     | which is then raised.'''
 async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> list[T]:
     '''| Return a list of the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
-    | If there are less than ``n`` items to collect, throw :exc:`exceptions.ItemsExhausted` if default is :const:`constants.RAISE` and emit a warning
-    | through the logger before padding the behind of the list with copies of the default if passed otherwise.
+    | If there are less than ``n`` items to collect, throw :exc:`exceptions.ItemsExhausted` if default is :const:`constants.RAISE` and emit a debug
+    | message through the logger before padding the behind of the list with copies of the default if passed otherwise.
 
     .. seealso::
 
@@ -78,6 +78,10 @@ async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|Ra
 
       :func:`iters.to_list`
         the most barebones variant equivalent to the case when ``n`` is not passed.'''
+async def collect_into[T](out: MutableSequence[T], it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> None:
+    '''| Extend a mutable sequence with the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
+    | If there are less than ``n`` items to collect, throw :exc:`exceptions.ItemsExhausted` if default is :const:`constants.RAISE` and emit a debug
+    | message through the logger before padding the behind of the list with copies of the default if passed otherwise.'''
 @overload
 def take[T](it: SupportsIteration[T], n: int, *, default: T|RaiseType) -> AsyncGenerator[T]: ...
 @overload

@@ -198,6 +198,9 @@ async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base
     else:
         for _ in repeat(default, n): yield _
 async def collect(it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
+async def collect_into(out, it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect_into: ran out of items'):
+    a = out.append
+    async for i in take(it, n, default=default, m=_): a(i)
 async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items'):
     async for i, j in aenumerate(it := iter_to_agen(it)):
         if i == n: yield j; break

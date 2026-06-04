@@ -78,12 +78,12 @@ def password_queue[V](*, maxsize: int=..., protect_get: Literal[True], protect_p
 @overload
 def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., strict: bool=...) -> GetAndPutProtectedQProt[Any, Any, Any]:
     '''| Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with
-    | maximum size `maxsize`. `priority` and `lifo` parameters determine if the queue is a priority queue and last-in-first-out.
-    | If `protect_get` is ``True``, get and get_nowait will require a password, specified by `password_get` or retrieved from a variable in the
-    | caller's scope with name `get_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
-    | If `protect_put` is ``True``, put and put_nowait will require a password, specified by `password_put` or retrieved from a variable in the
-    | caller's scope with name `put_from` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
-    | If `init_items` is specified, the items in that (async) iterable will be arranged to enter the queue eventually.
+    | maximum size ``maxsize``. ``priority`` and ``lifo`` parameters determine if the queue is a priority queue and last-in-first-out.
+    | If ``protect_get`` is ``True``, get and get_nowait will require a password, specified by ``password_get`` or retrieved from a variable in the
+    | caller's scope with name ``get_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
+    | If ``protect_put`` is ``True``, put and put_nowait will require a password, specified by ``password_put`` or retrieved from a variable in the
+    | caller's scope with name ``put_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
+    | If ``init_items`` is specified, the items in that (async) iterable will be arranged to enter the queue eventually.
 
     .. danger::
       This function is meant not for cryptographic purposes, because no hashing of the password is performed! Attackers may obtain sensitive
@@ -93,14 +93,14 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
       The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use
       default values in the type parameters here to cut this number in half.
     .. note::
-      The overloads do not cover the technically valid but useless case with both `protect_get` and `protect_put` being ``False``.
+      The overloads do not cover the technically valid but useless case with both ``protect_get`` and ``protect_put`` being ``False``.
     .. note::
       Little type validation for the argument combinations is done at runtime; it is hoped that type checkers will catch most misuses.
 '''
 class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
-    def _init(self, maxsize: int) -> None: '''Initialize the queue given `maxsize`; called in :meth:`__init__`.'''
+    def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``; called in :meth:`__init__`.'''
     @abstractmethod
     def _get(self) -> T: '''Get an item from the queue if not empty; called in :meth:`get` and :meth:`get_nowait`.'''
     @abstractmethod
@@ -110,11 +110,9 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     @abstractmethod
     def qsize(self) -> int: '''Return the size of the queue as an integer.'''
     def reset(self) -> None: '''Revert the queue to an empty state.'''
-    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call put_nowait if a slot is immediately available, waiting for a slot with `timeout` otherwise; if the timeout expires and `raising` is True, throw :exc:`TimeoutError`.'''
-    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call get_nowait if an item is immediately available, waiting for a item with `timeout` otherwise; if the timeout expires and `default` is provided, return it.'''
+    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call :meth:`put_nowait` if a slot is immediately available, waiting for a slot with `timeout` otherwise; if the timeout expires and `raising` is True, throw :exc:`TimeoutError`.'''
+    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call :meth:`get_nowait` if an item is immediately available, waiting for a item with `timeout` otherwise; if the timeout expires and `default` is provided, return it.'''
     async def extend(self, it: SupportsIteration[T], timeout: float|None=...) -> None: '''Add the items from `it` into the queue within `timeout`.'''
-    def sync_put(self, item: T, *, timeout: float|None=...) -> bool|None: '''Put an item into the queue synchronously. If this functionality is needed, you should likely be using a synchronous queue.'''
-    def sync_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Get an item from the queue synchronously. Above remark applies.'''
     def push(self, item: T) -> bool: '''Put an item into the queue immediately, popping if necessary; returns success.'''
     def drain_persistent(self, max_items: int|None=..., timeout: float|None=...) -> AsyncGenerator[T]: '''An async generator that gets items from the queue once available and yields them.'''
     def drain_until_empty(self, max_items: int|None=...) -> Generator[T]: '''A synchronous generator that gets items from the queue until it is emptied and returns.'''
@@ -133,11 +131,11 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     @property
     def can_get_now(self) -> bool: '''Whether items can be get from the queue without blocking at this instant.'''
     @property
-    def fully_functional(self) -> bool: '''`queue.fully_functional == queue.can_put_now and queue.can_get_now`.'''
+    def fully_functional(self) -> bool: '''``queue.fully_functional == queue.can_put_now and queue.can_get_now``.'''
     @property
-    def capacity(self) -> int|float: '''The capacity of the queue. Can be `float('inf')`.'''
+    def capacity(self) -> int|float: '''The capacity of the queue. Can be :const:`math.inf`.'''
     @property
-    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be `float('inf')`.'''
+    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be :const:`math.inf`.'''
     @property
     def utilization_rate(self) -> float: '''The number of items the queue divided by its capacity.'''
     def pushpop_nowait(self, item: T, raising: bool=...) -> T: '''Push an item into the queue and pop from the other end immediately.'''
@@ -147,8 +145,8 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def clear(self) -> None: '''Clear all the entries from the queue.'''
     def transaction(self) -> AbstractContextManager[Self, None]:
         '''| Return an async context manager which begins a transaction on entry.
-        | If an error occurs within the context, the original items in the queue are restored and the error reraised, unless the error is critical and
-        | deemed to require immediate exit; otherwise, the transaction completes successfully and changes are committed on exit.'''
+        | If an error occurs within the context, the original items in the queue are restored and the error reraised, unless the error is critical
+        | and deemed to require immediate exit. Otherwise, the transaction completes successfully and changes are committed on exit.'''
     @overload
     def map[R](self, f: Callable[[T], Awaitable[R]], stop_when: Future[None]|None=..., *, lifo: Literal[False]=...) -> SmartQueue[R]: ...
     @overload
@@ -165,23 +163,21 @@ class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
     def enumerate(self, *, lifo: Literal[False]=...) -> SmartQueue[tuple[int, T]]: ...
     @overload
     def enumerate(self, *, lifo: Literal[True]) -> SmartLifoQueue[tuple[int, T]]: '''Return a queue containing the items from enumerate applied on this queue and empty it in the process.'''
-    def map_nowait[R](self, f: Callable[[T], Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, emptying the queue.'''
-    def starmap_nowait[R](self, f: Callable[..., Awaitable[R]], /) -> list[R]: '''Return a list containing the return values of the function applied on the items in the queue, starred,, emptying the queue.'''
     def filter_nowait(self, pred: Callable[[T], bool]=..., /) -> tuple[list[T], int]: '''Filter items in the queue by a predicate and return a list of removed items and an integer; the items in the returned list after the index corresponding to that integer were items rejected from the queue due to the queue being full.'''
-    def enumerate_nowait(self, start: int=..., *, step: int=...) -> Generator[tuple[int, T]]: '''Do the equivalent of zipping `itertools.count(start, step)` with the items of the queue. When the returned generator is advanced and the queue is empty at that moment, the generator stops entirely.'''
+    def enumerate_nowait(self, start: int=..., *, step: int=...) -> Generator[tuple[int, T]]: '''Do the equivalent of zipping ``itertools.count(start, step)`` with the items of the queue. When the returned generator is advanced and the queue is empty at that moment, the generator stops entirely.'''
 class SmartQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
     def _put(self, item: T) -> None: ...
-    def peek(self) -> T: '''Look at the item that would be returned by :meth:`get` or :meth:`get_nowait` without actually getting it.'''
+    def peek(self) -> T: '''Look at the item that would be returned by :meth:`~PotentQueueBase.get` or :meth:`~PotentQueueBase.get_nowait` without actually removing it from the queue.'''
     def peek_all(self) -> list[T]: ...
     def qsize(self) -> int: ...
-    def rotate(self, n: int=..., /) -> None: '''Rotate the items in the queue by `n` indices synchronously, which can be negative.'''
+    def rotate(self, n: int=..., /) -> None: '''Rotate the items in the queue by ``n`` indices synchronously, which can be negative.'''
 class SmartLifoQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
     def _put(self, item: T) -> None: ...
-    def peek(self, i: int=..., /) -> T: '''Look at the item at index `i`, defaulting to the item most recently put in (that would be returned by :meth:`get` or :meth:`get_nowait`).'''
+    def peek(self, i: int=..., /) -> T: '''Look at the item at index ``i``, defaulting to the item most recently put in (that would be returned by :meth:`~PotentQueueBase.get` or :meth:`~PotentQueueBase.get_nowait`).'''
     def peek_all(self) -> list[T]: ...
     def qsize(self) -> int: ...
 class SmartPriorityQueue[T](PotentQueueBase[T]):
@@ -194,13 +190,13 @@ class SmartPriorityQueue[T](PotentQueueBase[T]):
     def _init(self, maxsize: int) -> None: ...
     def _get(self) -> T: ...
     def _put(self, item: T) -> None: ...
-    def peek(self) -> T: '''Look at the item that would be returned by :meth:`get` or :meth:`get_nowait` without actually getting it.'''
+    def peek(self) -> T: '''Look at the item that would be returned by :meth:`get` or :meth:`get_nowait` without actually removing it from the queue.'''
     def peek_all(self) -> list[T]: ...
     def qsize(self) -> int: ...
 class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
     '''| A priority queue, where you put in items with an integer priority and the items are retrieved in ascending order of priority, with earlier
     | items taking precedence in case of ties.
-    | The :meth:`put` and :meth:`put_nowait` methods of this class take an additional `priority` parameter, representing the priority of the item.'''
+    | The :meth:`put` and :meth:`put_nowait` methods of this class take an additional ``priority`` parameter, representing the priority of the item.'''
     @classmethod
     def from_iter_of_tuples(cls, items: SupportsIteration[tuple[int, int, T]], maxsize: int=...) -> Self: '''Build a queue from the (async) iterable of tuples (priority, tiebreak, item).'''
     @overload

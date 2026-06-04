@@ -312,6 +312,16 @@ class TransientBlockFromLoopRV(Protocol):
     '''The signature of the return value of :func:`util.transient_block_from_loop`.'''
     def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
+class ANCT:
+    '''Simple async-only version of :class:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
+
+    .. note:: This does not support the ``enter_result`` argument of the original.'''
+    async def __aenter__(self) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+@type_check_only
 class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :deco:`util.dualcontextmanager`. The initialization signature of this class is not documented intentionally.'''
 @type_check_only
 class RaiseType(sentinel_base):

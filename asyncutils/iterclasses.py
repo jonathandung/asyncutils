@@ -18,8 +18,8 @@ class apeekable(A.LoopBoundMixin):
     __slots__ = '_cache', '_it'
     def __init__(self, it=()): self._it, self._cache = A.iter_to_agen(it), deque(); super().__init__()
     def __aiter__(self): return self
-    def __bool__(self):
-        try: A.sync_await(self.peek(), loop=self.loop); return True
+    async def can_peek(self):
+        try: await self.peek(); return True
         except StopAsyncIteration: return False
     async def peek(self, default=_NO_DEFAULT):
         if not (c := self._cache):

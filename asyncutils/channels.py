@@ -55,11 +55,9 @@ class Observable(A.LoopContextMixin):
     async def __setup__(self): A.LoopContextMixin.__init__(self)
     async def __cleanup__(self): await I.gather(self.handle_notifications(), self.handle_unsubscriptions())
     def start_accumulation(self): return self.restart_accumulation() or True if self._queue is None else False
-    def restart_accumulation(self, flush=True):
-        if flush: self.flush_notifications()
+    async def restart_accumulation(self, flush=True):
+        if flush: await self.handle_notifications()
         self._queue = Queue()
-    def flush_notifications(self, timeout=None): A.sync_await(self.handle_notifications(), timeout=timeout, loop=self.loop)
-    def flush_unsubscriptions(self, timeout=None): A.sync_await(self.handle_unsubscriptions(), timeout=timeout, loop=self.loop)
     def subscribe_nowait(self, observer): self._data.add(observer); return partial(self.unsubscribe_nowait, observer)
     def unsubscribe_eventually(self, observer, asap=True):
         if asap and self._event.is_set(): self.unsubscribe_nowait(observer)
@@ -179,16 +177,12 @@ class EventBus(A.LoopContextMixin):
             if o: self.stop_tracking() if stats_receiver is None else stats_receiver.set_result(self.stop_tracking(True))
     def start_tracking(self): self._tracking = True
     def stop_tracking(self, ret_stats=False): self._tracking = False; return copy_and_clear(self._published) if ret_stats else self._published.clear()
-    async def subscribe(self, subscriber, /, event_type=None):
+    def subscribe(self, subscriber, /, event_type=None): self.raise_for_shutdown(); self._subscribers[event_type].add(subscriber); return subscriber
+    def unsubscribe(self, subscriber, /, event_type=None):
         self.raise_for_shutdown()
-        async with self._lock: self._subscribers[event_type].add(subscriber)
-        return subscriber
-    async def unsubscribe(self, subscriber, /, event_type=None):
-        self.raise_for_shutdown()
-        async with self._lock:
-            try: self._subscribers[event_type].remove(subscriber); return True
-            except KeyError: return False
-    def subscribe_to(self, event_type): return A.to_sync(partial(self.subscribe, event_type=event_type), loop=self.loop)
+        try: self._subscribers[event_type].remove(subscriber); return True
+        except KeyError: return False
+    def subscribe_to(self, event_type): return partial(self.subscribe, event_type=event_type)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
     async def _publish_helper(self, d, s, I, *_, f=I.gather): await f(*((self._safe_callback(i, d, *_) for i in I) if s else (i(d, *_) for i in I)))
     async def publish(self, event_type, data=None, *, wait=True, **k):
@@ -214,9 +208,8 @@ class EventBus(A.LoopContextMixin):
                 except (ExceptionGroup, Exception) as e: C(e) # noqa: BLE001
                 except BaseException as e: raise A.BusPublishingError(self, m) from e # ty: ignore[invalid-argument-type]
             U = self._subscribers
-            async with self._lock:
-                if self._tracking: self._published[event_type] += 1
-                s, w = (U[_].copy() for _ in (event_type, None))
+            if self._tracking: self._published[event_type] += 1
+            s, w = (U[_].copy() for _ in (event_type, None))
             await I.gather((f := partial(self._publish_helper, D, safe))(s), f(w, event_type))
         (P := self._publishers).add(p := self.make(I.wait_for(g(), timeout))); p.add_done_callback(lambda p, d=P.discard: d(p)); return p, f
     async def wait_for_event(self, event_type, *, timeout=None, condition=lambda _: True):
@@ -225,11 +218,11 @@ class EventBus(A.LoopContextMixin):
             if I.iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(I.wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    async def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=A.ignore_cancellation.combined(TimeoutError)): # noqa: B008
+    def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=A.ignore_cancellation.combined(TimeoutError)): # noqa: B008
         if fut.done(): raise RuntimeError('asyncutils.channels.EventBus.subscribe_until: fut is already done')
         async def f():
-            with _: r = await I.wait_for(fut, till_permanent); await self.unsubscribe(subscriber, event_type); return r
-        await self.subscribe(subscriber, event_type); return self.make(f())
+            with _: r = await I.wait_for(fut, till_permanent); self.unsubscribe(subscriber, event_type); return r
+        self.subscribe(subscriber, event_type); return self.make(f())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): L.warning('event stream buffer full')
         try: await I.wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
@@ -249,7 +242,7 @@ class EventBus(A.LoopContextMixin):
     async def shutdown(self, immediate=False, *, timeout=None, preserve_stats=False):
         if self._is_shutdown: return
         self._is_shutdown, f = True, self._sem.acquire; self.stop_audit(); self._middlewares.clear()
-        async with self._lock: self.clear()
+        self.clear()
         if not preserve_stats: self.clear_stats()
         try:
             async with I.timeout(timeout):

@@ -1,25 +1,25 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, DCRV, DualContextManager, EventProt, ExceptionWrapper, ExcType, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
+from ._internal.types import AsyncLockLike, ANCT, DCRV, DualContextManager, EventProt, ExceptionWrapper, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from asyncio import AbstractEventLoop, BoundedSemaphore, Event, Future, Lock, Semaphore, Task
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Generator, Iterable
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from ty_extensions import Not
-from types import CoroutineType, TracebackType
-from typing import Any, Concatenate, Literal, Never, overload
-__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afcopy', 'aiter_from_f', 'anullcontext', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'sync_lock', 'sync_lock_from_binder', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+from types import CoroutineType
+from typing import Any, Literal, Never, overload
+__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'afcopy', 'aiter_from_f', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable ``aw``, such that it can be passed to :func:`asyncio.create_task`.'''
-class anullcontext: # noqa: N801
-    '''Simple async-only version of :class:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
-
-    .. note:: This does not support the ``enter_result`` argument of the original.'''
-    async def __aenter__(self) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+anullcontext: ANCT
+def avalify[T](v: T, /) -> Callable[..., CoroutineType[Any, Any, T]]: ...
+async def anullify(*a: Any, **k: Any) -> None: ...
+async def atruthify(*a: Any, **k: Any) -> Literal[True]: ...
+async def afalsify(*a: Any, **k: Any) -> Literal[False]: ...
+@overload
+def locked_lock[L: AsyncLockLike[Any]](*, lcls: type[L]) -> L: ...
+@overload
+def locked_lock() -> Lock: '''Return an already acquired lock of type ``lcls`` if passed and :class:`asyncio.Lock` by default.'''
 @overload
 def done_evt[E: EventProt](*, evtcls: type[E]) -> E: ...
 @overload
@@ -42,16 +42,16 @@ def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[
     | Critical exceptions are wrapped in :exc:`~exceptions.Critical`.
     | This is as opposed to :meth:`~asyncio.loop.create_task`, which only takes coroutines.'''
 def new_eager_tasks[T](*aws: Awaitable[T]) -> Generator[Task[T]]: '''Yield eagerly started tasks wrapping the coroutines under the running loop (or a new one that is set as the current if required) in order.'''
-def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop ``loop`` when required or creating when necessary.'''
+def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, loop: AbstractEventLoop|None=..., *, timeout: float|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop ``loop`` when required or creating when necessary.'''
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''A version of :func:`to_sync` that is a decorator factory, returning its partial under ``loop=loop``.'''
-def sync_await[T](aw: Awaitable[T], *, timeout: float|None=..., loop: AbstractEventLoop|None=...) -> T: '''Synchronously await the awaitable object ``aw`` under the given event loop ``loop`` with timeout ``timeout``. It is preferred to use :func:`asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables.'''
+def sync_await[T](aw: Awaitable[T], loop: AbstractEventLoop|None=..., *, never_block: bool=..., timeout: float|None=...) -> T: '''Synchronously await the awaitable object ``aw`` under the given event loop ``loop`` with timeout ``timeout``. If ``never_block=False`` is passed and the loop is not running, its :meth:`~asyncio.loop.run_until_complete` method may be called; otherwise, a pair of futures is created to coordinate the execution of the awaitable. It is preferred to use :func:`asyncio.run` to synchronously run one single top-level async function that awaits the necessary awaitables. Calling this function with the event loop running in the current thread will cause :exc:`RuntimeError` to be thrown.'''
 @overload
 def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: ...
 @overload
+def semaphore(bounded: Literal[True], workers: Literal[1]) -> Lock: ...
+@overload
 def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Simple helper function returning a (bounded) semaphore of value ``workers``, defaulting to :const:`context.SEMAPHORE_DEFAULT_VALUE`.'''
 def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by ``lf``, to a function ``f`` that returns an awaitable, also converting it to an async function.'''
-def sync_lock[T, **P](l: Lock, /, timeout: float|None=...) -> Callable[[Callable[P, Awaitable[T]]], Callable[P, T]]: '''Decorator factory to ensure a function returning an awaitable only be called if a lock is acquired within ``timeout``, also converting it to a sync function.'''
-def sync_lock_from_binder[T, R, **P](f: Callable[[T], AsyncLockLike[Any]], /, timeout: float|None=...) -> Callable[[Callable[Concatenate[T, P], R]], Callable[Concatenate[T, P], R]]: '''Method version of :func:`sync_lock`, where ``binder`` is a function returning a suitable lock from the instance.'''
 def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
     '''| Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy
     | initialized and shared by all :func:`to_async`-transformed callables.

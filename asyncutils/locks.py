@@ -1,9 +1,9 @@
-__lazy_modules__ = frozenset(('_heapq', 'asyncio'))
+__lazy_modules__ = frozenset(('heapq', 'asyncio'))
 import asyncutils as A, asyncio as I
 from asyncutils._internal.helpers import fullname, subscriptable
 from asyncutils._internal.submodules import locks_all as __all__
 from _collections import defaultdict, deque
-from _heapq import heappop, heappush
+from heapq import heappop, heappush
 from time import monotonic
 class DynamicBoundedSemaphore(I.BoundedSemaphore):
     def __init__(self, value=None): super().__init__(A.getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque() # type: deque

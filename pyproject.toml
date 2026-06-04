@@ -107,7 +107,7 @@ typing-extensions = false
 "tests/test_signals.py" = ["RUF006"]
 
 [tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["__import__", "_functools.partial", "_operator.attrgetter", "_operator.itemgetter", "_operator.methodcaller", "asyncutils._internal.compat.partial", "asyncutils.exceptions.IgnoreErrors", "asyncutils.IgnoreErrors", "collections.namedtuple", "functools.partial", "globals", "itertools.count", "sys.intern", "type", "asyncutils.exceptions.StateCorrupted", "asyncutils.context.Context", "property", "classmethod"]
+extend-immutable-calls = ["globals", "_functools.partial", "__import__", "classmethod", "type", "collections.namedtuple", "asyncutils.exceptions.StateCorrupted", "sys.intern", "asyncutils.IgnoreErrors"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
@@ -135,7 +135,7 @@ max-statements-in-try = 8
 max-statements = 54
 
 [tool.ty.analysis]
-allowed-unresolved-imports = ["_collections.**", "_functools.**", "_heapq.**", "yaml.**", "asyncio.futures._chain_future", "asyncutils.config._randinst", "asyncutils.constants._NO_DEFAULT"]
+allowed-unresolved-imports = ["_collections.**", "_functools.**", "yaml.**", "asyncio.futures._chain_future", "asyncutils.config._randinst", "asyncutils.constants._NO_DEFAULT"]
 respect-type-ignore-comments = false
 
 [tool.ty.environment]

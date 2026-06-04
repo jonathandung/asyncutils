@@ -20,7 +20,7 @@ class apeekable[T](LoopBoundMixin):
     @overload
     def __init__(self, it: SupportsIteration[T]): '''Wraps an (async) iterable in an asynchronous iterator and sequence APIs, supporting lookahead and prependage.'''
     def __aiter__(self) -> Self: '''Return the instance itself.'''
-    def __bool__(self) -> bool: '''Check whether any items are left in the underlying iterable without advancing it.'''
+    async def can_peek(self) -> bool: '''Check whether any items are left in the underlying iterable without advancing it.'''
     async def peek(self, default: T=...) -> T: '''Return the next item of the underlying iterable without advancing it, or ``default`` if the items have run out.'''
     def prepend(self, /, *items: T) -> None: '''Yield the prepended items in the order passed in first instead of advancing the underlying iterable.'''
     async def __anext__(self) -> T: '''Return the next item, advancing the iterable.'''

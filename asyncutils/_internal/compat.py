@@ -10,7 +10,7 @@ x = {'sort_dicts': False, 'underscore_numbers': True, 'width': 88}
 if V < (3, 15): y = ()
 else: x.update(indent=4, expand=True); y = frozendict(),
 if V < (3, 14): j = {}; from asyncutils._internal.py313 import *
-else: j = {'suggest_on_error': not d, 'color': c}; from _functools import Placeholder, partial; from _heapq import heapify_max as heapify, heappop_max as heappop, heappush_max as heappush, heappushpop_max as heappushpop, heapreplace_max as heapreplace
+else: j = {'suggest_on_error': not d, 'color': c}; from _functools import Placeholder, partial; from heapq import heapify_max as heapify, heappop_max as heappop, heappush_max as heappush, heappushpop_max as heappushpop, heapreplace_max as heapreplace
 if V < (3, 13): from asyncutils._internal.py312 import *; d = True
 else: from asyncio.queues import *
 D = {'basic_repl': d or (r and b), 'quiet': F.quiet}

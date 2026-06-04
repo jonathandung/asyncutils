@@ -1,18 +1,19 @@
 # ty: ignore[unresolved-attribute]
+__lazy_modules__ = frozenset(('heapq',))
 from asyncutils import coercedmethod, getcontext, ignore_valerrs
 from asyncutils._internal.submodules import rwlocks_all as __all__
 from _collections import defaultdict, deque
 from asyncio import Condition, Lock, current_task
 from contextlib import asynccontextmanager
-from _heapq import heappush, heappop
+from heapq import heappush, heappop
 def _rwlock_sub_new(cls, /): (_ := object.__new__(cls)).setup(); return _
 class B:
     __slots__ = '__wrapped__', 'reader', 'reading', 'writer', 'writing'
     def __init__(self, l, f, /, _=__slots__[1:]):
         for s in _: setattr(self, s, getattr(l, s))
         self.__wrapped__ = f
-    def __init_subclass__(cls, f=__import__('_operator').methodcaller, /, *, m, **_):
-        if getattr(cls, '__slots__', True): raise TypeError('__slots__ must be an empty tuple')
+    def __init_subclass__(cls, f=__import__('operator').methodcaller, /, *, m, **_):
+        if cls.__dict__.get('__slots__', True): raise TypeError('__slots__ must be an empty tuple')
         c = f(m)
         async def g(self, *a, **k):
             async with c(self): return await self.__wrapped__(*a, **k)
@@ -21,7 +22,7 @@ class B:
 t = 'Locked', (B,), {'__slots__': ()}
 def n(c, /, prefer_writers=None): return _rwlock_sub_new(c.__subclasses__()[getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers])
 def s(c, n=n, /, **_):
-    if not isinstance(c.__dict__.get('__slots__'), tuple): raise TypeError('must define tuple as __slots__')
+    if not isinstance(c.__dict__.get('__slots__'), tuple): raise TypeError(f'subclass of {c.__name__} must define tuple as __slots__')
     if c.__new__ is n: c.__new__ = _rwlock_sub_new
     super(c).__init_subclass__(**_)
 def d(c, /, _=(n, classmethod(s))): c.__new__, c.__init_subclass__ = _; return c

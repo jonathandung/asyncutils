@@ -38,9 +38,7 @@ class Observable[**P](LoopContextMixin):
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
     def start_accumulation(self) -> bool: '''Begin accumulation of notifications and return ``True``, or return ``False`` if accumulation is already occurring.'''
-    def restart_accumulation(self, flush: bool=...) -> None: '''Immediately complete all notifications synchronously if ``flush`` is ``True``, then restart notification accumulation.'''
-    def flush_notifications(self, timeout: float|None=...) -> None: '''A synchronous version of :meth:`handle_notifications`.'''
-    def flush_unsubscriptions(self, timeout: float|None=...) -> None: '''A synchronous version of :meth:`handle_unsubscriptions`.'''
+    async def restart_accumulation(self, flush: bool=...) -> None: '''Complete all notifications if ``flush`` is ``True``, then restart notification accumulation.'''
     def subscribe_nowait(self, observer: Observer[P]) -> SubscriptionRV: '''Add an observer without waiting for the observable to be idle.'''
     def unsubscribe_eventually(self, observer: Observer[P], asap: bool=...) -> None: '''Note that the observer is to be removed at some point in the future. If ``asap`` is ``True`` and there is no notification running, the observer is removed immediately.'''
     def unsubscribe_nowait(self, observer: Observer[P], strict: bool=...) -> None: '''Remove the observer immediately even if a notification is occurring. If ``strict`` is ``True``, assert that the observer was indeed subscribed.'''
@@ -138,13 +136,13 @@ class EventBus(LoopContextMixin):
     @overload
     def stop_tracking(self, ret_stats: Literal[True]) -> defaultdict[str, int]: '''Stop tracking event publication statistics. If ``ret_stats`` is ``True``, return a dictionary of the stats up to that point, with keys corresponding to event types and values the number of publications.'''
     @overload
-    async def subscribe[C: SpecificSubscriber](self, subscriber: C, /, event_type: str) -> C: ...
+    def subscribe[C: SpecificSubscriber](self, subscriber: C, /, event_type: str) -> C: ...
     @overload
-    async def subscribe[C: WildcardSubscriber](self, subscriber: C, /, event_type: WildcardType=...) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
+    def subscribe[C: WildcardSubscriber](self, subscriber: C, /, event_type: WildcardType=...) -> C: '''Add a subscriber to the event bus under the specified event type (if unspecified, add as wildcard). Return the subscriber to allow usage as a decorator.'''
     @overload
-    async def unsubscribe(self, subscriber: SpecificSubscriber, /, event_type: str) -> bool: ...
+    def unsubscribe(self, subscriber: SpecificSubscriber, /, event_type: str) -> bool: ...
     @overload
-    async def unsubscribe(self, subscriber: WildcardSubscriber, /, event_type: WildcardType=...) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred.'''
+    def unsubscribe(self, subscriber: WildcardSubscriber, /, event_type: WildcardType=...) -> bool: '''Remove a subscriber from the event bus under the event type (if unspecified, remove from wildcards) and return whether the removal occurred (i.e. the subscriber was initially present).'''
     @overload
     def subscribe_to[C: SpecificSubscriber](self, event_type: str) -> Callable[[C], C]: ...
     @overload

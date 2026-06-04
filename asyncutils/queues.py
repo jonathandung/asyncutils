@@ -8,8 +8,8 @@ from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque
 from _functools import partial
 from abc import ABCMeta, abstractmethod
-from asyncio import Event, gather, timeout as _timeout, wait_for
-from itertools import count, starmap
+from asyncio import Event, timeout as _timeout, wait_for
+from itertools import count
 from sys import _getframe, audit
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := A.IgnoreErrors(D.QueueShutDown)).combined), _ := (D.QueueEmpty, D.QueueFull))
 ignore_qerrs, f = f(*_), object.__setattr__
@@ -62,7 +62,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not p: raise A.PutPasswordMissing
         p, = p; t(p)
     E, G, P, U, S, m, b = A.done_evt(), deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
-    if priority: g, p = partial((M := D if lifo else __import__('_heapq')).heappop, l := []), partial(M.heappush, l)
+    if priority: g, p = partial((M := D if lifo else __import__('heapq')).heappop, l := []), partial(M.heappush, l)
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     async def get(*p):
         u(p); _ = G.append
@@ -166,8 +166,6 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
         info(f'extending {fullname(self)} with iterable {it!r}'); f = self.smart_put
         async with _timeout(timeout):
             async for i in A.iter_to_agen(it): await f(i)
-    def sync_put(self, item, *, timeout=None): return A.sync_await(self.smart_put(item, timeout=timeout), loop=self.loop)
-    def sync_get(self, *, timeout=None, default=_NO_DEFAULT): return A.sync_await(self.smart_get(timeout=timeout, default=default), loop=self.loop)
     def push(self, item):
         try:
             if self.full(): audit(f'{fullname(self)}.push', id(self), item, self.get_nowait())
@@ -290,8 +288,6 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
             with ignore_qempty:
                 while True: await q.smart_put((i, await self.get())); i += 1
         self.make(feed()); return q
-    def map_nowait(self, f, /): return A.sync_await(gather(*map(f, self.peek_all())), loop=self.loop)
-    def starmap_nowait(self, f, /): return A.sync_await(gather(*starmap(f, self.peek_all())), loop=self.loop)
     def filter_nowait(self, pred=bool, /):
         f, g, a = (k := []).append, (r := []).append, self.get_nowait
         with ignore_qempty:
@@ -334,7 +330,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q = await A.collect(I := A.iter_to_agen(init_items), maxsize); import _heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # ty: ignore[unresolved-attribute]
+    async def start(self, maxsize, init_items): q = await A.collect(I := A.iter_to_agen(init_items), maxsize); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # ty: ignore[unresolved-attribute]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)

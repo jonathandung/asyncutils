@@ -171,7 +171,7 @@ class MemoryMappedIOManager(A.LoopContextMixin):
     def create(self, path, init_size=0, *, exclusive=True): return self._open(init_size, path, 'x+b' if exclusive else 'w+b')
     async def __cleanup__(self):
         async with self._lock: self.open_mmaps.clear(); await gather(*(f.close() for f in self.open_files.values())); del self.open_files
-    def __del__(self): A.sync_await(self.__cleanup__(), loop=self.loop)
+    def __del__(self): self.make(self.__cleanup__())
     async def copy_file(self, srcp, destp, *, flush=False):
         async with self.open(srcp) as src, self.create(destp) as dest:
             await dest.write(await src.read())

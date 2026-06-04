@@ -2,13 +2,9 @@ import asyncio, pytest
 from asyncutils.util import *
 from tests.conftest import mk
 import itertools
-def test_sync_await(): assert sync_await(asyncio.sleep(0.02, 1), timeout=0.04) == 1
-@to_sync
-async def g(x): return x<<1
-def test_to_sync(): assert g(4) == 8
 @mk
 async def test_basic():
-    async with anullcontext(): ...
+    async with anullcontext: ...
     c = wrap_in_coro(asyncio.sleep(0, 0))
     assert not c.cr_running
     assert await c == 0
@@ -22,9 +18,10 @@ async def test_basic():
     assert await t == 3
 @mk
 async def test_nontrivial():
-    s = semaphore(True)
-    assert s._value == 1
+    s = semaphore(True, 2)
+    assert s._value == 2
     with pytest.raises(ValueError): s.release()
+    assert isinstance(semaphore(True), asyncio.Lock)
     s = semaphore(workers=3)
     assert s._value == 3
     s.release()

@@ -1,6 +1,7 @@
 from pytest import mark, raises
 from asyncio import create_task, new_event_loop, sleep
-from asyncutils import _internal as mod, AsyncUtilsConsole
+from asyncutils import _internal as mod
+from asyncutils.console import AsyncUtilsConsole
 from io import StringIO
 from tests.conftest import mk
 import sys

@@ -1,3 +1,5 @@
+# Copyright © 2026 Jonathan Dung. All rights reserved.
+# SPDX-License-Identifier: MIT
 from sys import implementation as I, modules as M
 match I.name:
     case 'cpython':

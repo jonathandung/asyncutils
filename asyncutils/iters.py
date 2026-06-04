@@ -3,7 +3,7 @@ from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import compat as Z, helpers as H, patch as P
 from asyncutils._internal.submodules import iters_all as __all__
-import asyncutils as A, asyncio as B, _operator as O, math as M
+import asyncutils as A, asyncio as B, operator as O, math as M
 from collections import Counter, defaultdict, deque
 from functools import partial, lru_cache, wraps
 from itertools import repeat
@@ -175,7 +175,7 @@ async def amergesortedby(its, *, key=_identity, await_=False, reverse=False, _=A
             k = key(v := await anext(it))
             f(((await k) if await_ else k, i, v))
     if reverse: from asyncutils._internal.compat import heapify as a, heappop as b, heappush as c
-    else: from _heapq import heapify as a, heappop as b, heappush as c
+    else: from heapq import heapify as a, heappop as b, heappush as c
     a(h)
     while h:
         k, i, v = b(h); yield v
@@ -543,7 +543,7 @@ async def with_aiter(actxmgr):
     async with actxmgr as I:
         async for i in iter_to_agen(I): yield i
 async def asorted(it, *, key=_identity, reverse=False):
-    from _heapq import heappop as g, heapify as f
+    from heapq import heappop as g, heapify as f
     b, a = (m := []).append, (r := []).append
     async for i, j in aenumerate(it): b((key(j), i, j))
     f(m)
@@ -668,7 +668,7 @@ async def anthcombination(it, r, idx):
 @aawgenf2agenf
 async def asubslices(it): return astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2))))
 async def arepeatfunc(f, times=None, *a):
-    async def g(i=A.ignore_typeerrs, _=partial(f, *a)):
+    async def g(i=A.ignore_typeerrs, _=partial(f, *a)): # noqa: B008
         r = _()
         with i: r = await r
     async for _ in aloops(times): await g()
@@ -732,10 +732,10 @@ async def afactor(n, _=_littleprimes, F=_factor_pollard):
         else: e((f := await F(n), n//f))
 async def arunning_median(it, *, maxlen=None):
     if maxlen is None:
-        r, l, h = iter_to_agen(it).__aiter__().__anext__, [], []; from asyncutils._internal.compat import heappush as a, heappushpop as c; from _heapq import heappush as b
+        r, l, h = iter_to_agen(it).__anext__, [], []; from asyncutils._internal.compat import heappush as a, heappushpop as c; from heapq import heappush as b
         while True: a(l, await r()); yield l[0]; b(h, c(l, await r())); yield (l[0]+h[0])/2
     if (m := O.index(maxlen)) <= 0: raise ValueError('asyncutils.iters.arunning_median: window size should be positive')
-    w, o = deque(), []; from _bisect import bisect_left as b, insort_right as f
+    w, o = deque(), []; from bisect import bisect_left as b, insort_right as f
     async for i in iter_to_agen(it):
         w.append(i); f(o, i)
         if (n := len(o)) > m: del o[b(o, w.popleft())]; n -= 1
@@ -861,7 +861,7 @@ async def aserialize(it):
     while True:
         async with l: yield await n()
 async def aonline_sorter(it, *, key=_identity, reverse=False, slow=None):
-    audit('asyncutils.iters.aonline_sorter', id(it)); c = Z if reverse else __import__('_heapq')
+    audit('asyncutils.iters.aonline_sorter', id(it)); c = Z if reverse else __import__('heapq')
     if slow is None: slow = getcontext().AONLINESORTER_DEFAULT_SLOW
     if (e := getattr(aonline_sorter, 'executor', None)) is None: e = H.create_executor(aonline_sorter)
     q = partial(p := partial(H.get_loop_and_set().run_in_executor, e), key)

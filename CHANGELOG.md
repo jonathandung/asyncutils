@@ -484,8 +484,6 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     - to_async
     - to_sync_from_loop
     - sync_await
-    - sync_lock
-    - sync_lock_from_binder
     - lockf
     - done_evt
     - done_fut
@@ -622,7 +620,7 @@ Began reorganizing single file containing all functions into submodules.
 
 ### [0.1.0] - 2025-06-xx
 
-Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `base.sync_await`.
+Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `util.sync_await`.
 
 ### [0.0.0] - 2025-05-xx
 
