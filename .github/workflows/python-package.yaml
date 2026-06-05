@@ -9,7 +9,9 @@ jobs:
   lint-and-test-with-cov:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       code-quality: write
+      pull-requests: read
     steps:
     - uses: actions/checkout@v6.0.2
       with:
