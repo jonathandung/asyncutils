@@ -119,7 +119,7 @@ def aawcmf2dcmff(**d):
             c = f(*a, **k)
             with A.ignore_typeerrs: c = await c
             if check_methods(c, '__aenter__', '__aexit__'):
-                async with c as r: yield r; return
+                async with c as r: yield r; return # noqa: ASYNC119
             if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = create_executor(aawcmf2dcmff)
             r = await (h := partial(get_loop_and_set().run_in_executor, e))(c.__enter__())
             try: yield r

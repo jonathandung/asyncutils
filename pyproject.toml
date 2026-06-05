@@ -46,7 +46,7 @@ packages = ["asyncutils", "asyncutils._internal"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = ["-v", "--tb", "short", "-W", "ignore::pytest.PytestConfigWarning", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "58"]
+addopts = ["-v", "--tb", "short", "-W", "ignore::pytest.PytestConfigWarning", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "59"]
 minversion = "9.0.3"
 required_plugins = ["pytest-cov>=7.1.0", "pytest-local-badge>=1.1.1", "pytest-sugar>=1.1.1"]
 asyncio_default_fixture_loop_scope = "module"
@@ -65,7 +65,7 @@ exclude_also = ["if __name__ == '__main__':", "raise NotImplementedError", "^\\s
 target-version = "py312"
 include = ["*.py", "*.pyi", "**/pyproject.toml"]
 extend-exclude = ["docs/source/conf.py"]
-required-version = ">=0.15.14"
+required-version = ">=0.15.16"
 
 [tool.ruff.lint]
 ignore = ["ANN401", "ASYNC109", "B904", "B905", "B912", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "N803", "N806", "N812", "N818", "PLC0415", "PLC1901", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
@@ -106,7 +106,7 @@ typing-extensions = false
 "tests/test_signals.py" = ["RUF006"]
 
 [tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["globals", "_functools.partial", "__import__", "classmethod", "type", "collections.namedtuple", "asyncutils.exceptions.StateCorrupted", "sys.intern", "asyncutils.IgnoreErrors"]
+extend-immutable-calls = ["getattr", "globals", "_functools.partial", "__import__", "classmethod", "type", "collections.namedtuple", "asyncutils.exceptions.StateCorrupted", "sys.intern", "asyncutils.IgnoreErrors"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"

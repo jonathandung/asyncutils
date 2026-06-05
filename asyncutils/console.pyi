@@ -92,15 +92,12 @@ class ConsoleBase(InteractiveConsole, ABC):
     def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than :meth:`write`.'''
     def refresh(self) -> None: '''Callback in :meth:`interrupt` and :meth:`memoryerror`.'''
     @abstractmethod
-    def prehook(self, max_memerrs: int) -> None:
+    def prehook(self, max_memerrs: int|None) -> None:
         '''| Called by :meth:`run` before beginning the interaction logic. Can raise errors.
-        | When implementing, call ``super().prehook(max_memerrs)`` before everything. This allows subclasses to provide their own value of ``max_memerrs`` and change the signature of the `prehook`.
-        | Not really an abstract method, but implementing is highly recommended.'''
-    @abstractmethod
+        | When implementing, call ``super().prehook(max_memerrs)`` before everything. This allows subclasses to pass their own value of ``max_memerrs``.'''
     def posthook(self) -> None:
         '''| Called by :meth:`run` after the interaction has ended before writing the exit message. Should not raise errors.
-        | When implementing, call ``super().posthook()`` after everything.
-        | Not really an abstract method, but implementing is highly recommended.'''
+        | It is highly recommended that subclasses implement this and call ``super().posthook()`` within the implementation after the custom logic.'''
     @overload
     def set_return_code(self, exc: SystemExit, /) -> None: ...
     @overload
@@ -111,7 +108,7 @@ class AsyncUtilsConsole(ConsoleBase):
     '''A subclass of :class:`ConsoleBase`, used to implement the :mod:`asyncutils` REPL.'''
     @property
     def is_running(self) -> bool: '''Performs internal state consistency checks and returns whether the console is currently running. Only one :class:`AsyncUtilsConsole` can be running at a time.'''
-    def prehook(self, max_memerrs: int) -> None: '''Ensures the console will be the only one running.'''
+    def prehook(self, max_memerrs: int|None) -> None: '''Ensures the console will be the only one running.'''
     def posthook(self) -> None: '''Ensures that the console is not left running after unset.'''
     def _interact_hook(self, ps1: object, kcolor: str, reset: str, fcolor: str) -> None: ...
     def write_special(self, msg: str) -> None: '''Writes ``msg`` to stderr if and only if the quiet flag is not set.'''

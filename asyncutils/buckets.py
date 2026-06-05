@@ -1,6 +1,6 @@
 __lazy_modules__ = frozenset(('asyncio',))
-from asyncutils import AsyncContextMixin, LoopBoundMixin, getcontext
-from asyncutils._internal.helpers import fullname
+from asyncutils import AsyncContextMixin, getcontext
+from asyncutils._internal.helpers import LoopMixinBase, fullname
 from asyncutils._internal.submodules import buckets_all as __all__
 from asyncio import Lock, sleep
 from sys import audit
@@ -16,7 +16,7 @@ class TokenBucket:
             else: await sleep(-d/self._rate); self._tokens = 0
     @property
     def capacity(self): return self._capacity
-class LeakyBucket(AsyncContextMixin, LoopBoundMixin):
+class LeakyBucket(AsyncContextMixin, LoopMixinBase):
     __slots__ = '_capacity', '_drainer', '_efs', '_factor', '_last', '_leak', '_max_factor', '_min_factor', '_timer', '_tokens'
     def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit(fullname(self), capacity, leak); C = getcontext(); self._leak, self._last, self._drainer, self._factor, self._min_factor, self._max_factor, self._efs, self._timer = leak, timer(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self._capacity = self._tokens = capacity
     def _adjust_from_params(self, a, b, c, d, /):

@@ -1,9 +1,9 @@
 import asyncutils as A, asyncio as I
 from asyncutils._internal.compat import Queue
-from asyncutils._internal.helpers import audit_fullname, fullname
+from asyncutils._internal.helpers import LoopMixinBase, audit_fullname, fullname
 from asyncutils._internal.log import warning
 from asyncutils._internal.submodules import networking_all as __all__
-class LineProtocol(I.Protocol, A.LoopBoundMixin):
+class LineProtocol(I.Protocol, LoopMixinBase):
     NEWLINE, CARRIAGE_RETURN, _h = __import__('os').linesep.encode(), b'\r', A.ignore_cancellation.combined(I.InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
     def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property

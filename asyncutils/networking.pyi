@@ -1,12 +1,12 @@
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
+from ._internal.helpers import LoopMixinBase
 from ._internal.types import DualContextManager
-from .mixins import LoopBoundMixin
 from asyncio import AbstractEventLoop, Protocol, Transport, WriteTransport
 from collections.abc import Iterable
 from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
-class LineProtocol(Protocol, LoopBoundMixin):
+class LineProtocol(Protocol, LoopMixinBase):
     '''| An implementation of :class:`~asyncio.protocols.Protocol` providing line-based buffering and writing. Not thread-safe.
     | The idea was originally introduced in :pep:`3153`, but did not see eventual adaptation in the standard library.
     | This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.

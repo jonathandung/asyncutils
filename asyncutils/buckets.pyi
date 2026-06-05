@@ -1,5 +1,6 @@
+from ._internal.helpers import LoopMixinBase
 from ._internal.types import ExcType, Timer
-from .mixins import AsyncContextMixin, LoopBoundMixin
+from .mixins import AsyncContextMixin
 from types import TracebackType
 from typing import overload
 __all__ = 'LeakyBucket', 'TokenBucket'
@@ -14,7 +15,7 @@ class TokenBucket:
     async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if ``tokens`` is not passed can be set through :const:`context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS`.'''
     @property
     def capacity(self) -> float: '''The capacity of the bucket.'''
-class LeakyBucket(AsyncContextMixin[LeakyBucket], LoopBoundMixin):
+class LeakyBucket(AsyncContextMixin[LeakyBucket], LoopMixinBase):
     '''| A leaky bucket rate limiter with adaptive flow control. Use as a context manager.
     | In the context, tokens leak from the bucket at a constant rate. Operations can add tokens to the bucket.
     | The bucket includes an adaptive factor that adjusts based on current fill level to provide smoother rate limiting under varying loads, as dictated by

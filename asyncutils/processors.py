@@ -11,7 +11,8 @@ class BoundedBatchProcessor:
     async def process(self, items):
         f, p, s = partial(A.collect, A.iter_to_agen(items), self._batch), self._processor, self._sem
         while b := await f():
-            async with s: yield await p(b)
+            async with s: x = await p(b)
+            yield x # noqa: RUF070
 @subscriptable
 class BatchProcessor(A.LoopContextMixin):
     __slots__ = '_batch', '_flusher', '_last_process', '_lock', '_maxsize', '_processor', '_sleep', '_timer'

@@ -25,7 +25,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
             except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name)
             except RuntimeError: logger.exception('signals.wait_for_signal: error registering signal handler for signal %s', s.name)
             else: a(lambda _, s=s, o=o: loop.remove_signal_handler(s) and B.signal(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
-    try: # noqa: PLW0717
+    try:
         if x: logger.info('signals.wait_for_signal: signal handler registered successfully for total of %d signals', x); del x
         else: raise RuntimeError('asyncutils.signals.wait_for_signal: failed to register signal handler')
         try: s = await wait_for(F, timeout)

@@ -14,7 +14,6 @@ class LoopContextMixin(H.LoopMixinBase):
     async def __cleanup__(self): ...
     async def __aenter__(self): await self.__setup__(); return self
     async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(self.running_tasks)
-class LoopBoundMixin(H.LoopMixinBase): __slots__ = ()
 @H.subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
@@ -68,10 +67,10 @@ class LockWithOwnerMixin(LockMixin):
         if not self.is_owner: raise RuntimeError(f'{H.fullname(self)} is not acquired by current task')
         return self._release()
 @H.subscriptable
-class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
+class EventMixin(AwaitableMixin, H.LoopMixinBase, metaclass=ABCMeta):
     __slots__ = ()
     @abstractmethod
-    async def wait_for_next(self, timeout=None, **k): raise NotImplementedError
+    async def wait_for_next(self, timeout=None, **_): raise NotImplementedError
     @abstractmethod
     def is_set(self): raise NotImplementedError
     @abstractmethod
@@ -90,8 +89,3 @@ class EventMixin(AwaitableMixin, LoopBoundMixin, metaclass=ABCMeta):
     async def wait(self, timeout=None, **k):
         try: return self.get()
         except ValueError: return await self.wait_for_next(timeout, **k)
-    async def stream_values_for(self, duration=None):
-        try:
-            async with _timeout(duration):
-                while True: yield await self
-        except TimeoutError: return

@@ -10,18 +10,18 @@ class StateMachine:
     '''A simple asynchronous state machine accepting string states.'''
     def __init__(self, state: str): '''Initialize the state machine with the given initial state.'''
     def add(self, from_state: str, to_state: str, condition: Callable[[str, str], Awaitable[Any]]|None=...) -> None:
-        '''| Add a condition to the transition from `from_state` to `to_state`.
+        '''| Add a condition to the transition from ``from_state`` to ``to_state``.
         | If any condition is ``None`` or returns a truthy value taking the current and new states as positional arguments, the transition is allowed.'''
-    def on_enter[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when `state` is entered.'''
-    def on_exit[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when `state` is exited.'''
-    async def transition(self, state: str) -> bool: '''Transition from the current state to the new `state`.'''
+    def on_enter[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when ``state`` is entered.'''
+    def on_exit[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when ``state`` is exited.'''
+    async def transition(self, state: str) -> bool: '''Transition from the current state to the new ``state``.'''
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
-    '''| `n`, which defaults to :const:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently
-    | running awaitables.
-    | `ret_exc` is passed to :func:`asyncio.gather` as the `return_exceptions` argument.'''
+    '''| ``n``, which defaults to :const:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
+    | concurrently running awaitables.
+    | ``ret_exc`` is passed to :func:`asyncio.gather` as the ``return_exceptions`` argument.'''
 class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class to store synchronous callbacks and call them sequentially in an executor when the context manager exits.
 
@@ -36,11 +36,11 @@ class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncCo
     def __init__(self, name: str, *, maxlen: int|None=..., default: object=..., call_once: bool=..., default_getter: Callable[[], tuple[Iterable[object], Mapping[str, object]]]=...):
         '''Initialize the accumulator.
 
-        * `name` is the name of attribute gotten on the argument to :meth:`add`.
-        * `maxlen` is the maximum number of callbacks that can be stored.
-        * `default` is the default return value of the context manager if no callbacks are added or `call_once` is ``False``.
-        * If `call_once` is ``True``, the callbacks will be called only once when the context manager exits, and then cleared. If ``False``, they will be called every time the context manager exits until they are manually cleared.
-        * `default_getter` is a function that returns the default arguments to call the callbacks with when the context manager exits. By default, it returns the exception info if `name` is `'__exit__'` and empty arguments otherwise.'''
+        * ``name`` is the name of attribute gotten on the argument to :meth:`add`.
+        * ``maxlen`` is the maximum number of callbacks that can be stored.
+        * ``default`` is the default return value of the context manager if no callbacks are added or ``call_once`` is ``False``.
+        * If ``call_once`` is ``True``, the callbacks will be called only once when the context manager exits, and then cleared. If ``False``, they will be called every time the context manager exits until they are manually cleared.
+        * ``default_getter`` is a function that returns the default arguments to call the callbacks with when the context manager exits. By default, it returns the exception info if ``name`` is ``'__exit__'`` and empty arguments otherwise.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> None: ...
     def __enter__(self) -> Self: '''Enter the context manager.'''
     @overload
@@ -62,17 +62,17 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
         '''All arguments are optioanl:
 
-        * `ttl`: Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
-        * `refresh`: Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
-        * `processor`: Error handler that takes two arguments `(exc, was_batched)`, where `exc` is the exception occurred and
-        * `was_batched` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
-        * `default_loader`: The loader to load values from keys for which specific loaders have not been registered.'''
+        * ``ttl``: Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
+        * ``refresh``: Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
+        * ``processor``: Error handler that takes two arguments ``(exc, was_batched)``, where ``exc`` is the exception occurred and
+        * ``was_batched`` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
+        * ``default_loader``: The loader to load values from keys for which specific loaders have not been registered.'''
     def __contains__(self, key: T) -> bool: '''Check if a key exists in the cache.'''
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
     def should_refresh(self, key: T) -> bool: '''Whether the key should be refreshed at this instant.'''
     def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
-    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re)configure the cache with the given `ttl`, `refresh` and `processor`.'''
+    def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re-)configure the cache with the given ``ttl``, ``refresh`` and ``processor``.'''
     def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising :exc:`LookupError` if there is none.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...

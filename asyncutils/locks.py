@@ -1,6 +1,6 @@
 __lazy_modules__ = frozenset(('heapq', 'asyncio'))
 import asyncutils as A, asyncio as I
-from asyncutils._internal.helpers import fullname, subscriptable
+from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
 from asyncutils._internal.submodules import locks_all as __all__
 from _collections import defaultdict, deque
 from heapq import heappop, heappush
@@ -19,7 +19,7 @@ def d(m, /, _=__import__('functools').wraps):
     async def w(self, *a, **k):
         async with self._lock: self.update_tokens_lock_held(); m(self, *a, **k)
     return _(m)(w)
-class AdvancedRateLimit(A.LoopBoundMixin, A.LockMixin):
+class AdvancedRateLimit(LoopMixinBase, A.LockMixin):
     __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
     def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._lu = rate, I.Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
     async def acquire(self, tokens=None, timeout=None):
@@ -41,7 +41,7 @@ class AdvancedRateLimit(A.LoopBoundMixin, A.LockMixin):
             t, f = t; T -= t
             if not f.done(): f.set_result(None)
         self.tokens = T; w.appendleft(t)
-class PrioritySemaphore(A.LoopBoundMixin, A.LockMixin):
+class PrioritySemaphore(LoopMixinBase, A.LockMixin):
     __slots__ = '_tiebreak', '_value', '_waiters'
     def __init__(self, value=None): self._value, self._tiebreak, self._waiters = A.getcontext().PRIORITY_SEMAPHORE_DEFAULT_VALUE if value is None else value, 0, []
     async def acquire(self, priority=0):
@@ -57,7 +57,7 @@ class PrioritySemaphore(A.LoopBoundMixin, A.LockMixin):
         for *_, e in self._waiters: e.set_result(None)
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
 @subscriptable
-class KeyedCondition(A.LoopBoundMixin, A.LockMixin):
+class KeyedCondition(LoopMixinBase, A.LockMixin):
     __slots__ = '__lock', '_specific_waiters'
     def __init__(self, lock=None): super().__init__(); self.__lock, self._specific_waiters = lock or I.Lock(), defaultdict(set)
     async def acquire(self):
@@ -144,7 +144,7 @@ class RLock(A.LockWithOwnerMixin):
     def locked(self): return self._owner is not None
     @property
     def is_owner(self): return self._owner is I.current_task()
-class PriorityLock(A.LoopBoundMixin, A.LockWithOwnerMixin):
+class PriorityLock(LoopMixinBase, A.LockWithOwnerMixin):
     __slots__ = '_owner', '_tiebreak', '_waiters'
     def __init__(self): super().__init__(); self._waiters, self._tiebreak, self._owner = [], 0, None
     async def acquire(self, priority=0, timeout=None):

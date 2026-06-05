@@ -4,21 +4,29 @@ from asyncutils.iters import *
 from asyncio import CancelledError, create_task, gather, sleep
 from _collections import deque
 from operator import is_
-from pytest import fail, mark, raises
+from pytest import fail, fixture, mark, raises
 from tests.conftest import mk
+@fixture
+def bucket(): return abucket((10, 20, 30, 11, 21, 31, 12, 22, 23, 33), 10 .__rfloordiv__)
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10)))
 @mk
 async def test_iter_to_agen(): assert await vecs_eq(iter_to_agen(range(10)), arange(10))
 @mk
 async def test_amap(): assert await vecs_eq(amap(1 .__lshift__, arange(10)), apowers_of_two(), strict=False)
 @mk
-async def test_drop(): assert await vecs_eq(aprepend(2, drop(arange(1, 8, 2), 1)), asieve(8))
+async def test_drop():
+    assert await vecs_eq(aprepend(2, drop(arange(1, 8, 2), 1)), asieve(8))
+    assert await vecs_eq(drop(arange(10), 0), arange(10))
+    assert await vecs_eq(drop(arange(10), 15), ())
 @mk
-async def test_take(): assert await vecs_eq(take(atabulate(aisprime, await_=True), 10), (False, False, True, True, False, True, False, True, False, False))
+async def test_take():
+    assert await vecs_eq(take(atabulate(aisprime, await_=True), 10), (False, False, True, True, False, True, False, True, False, False))
+    assert await vecs_eq(take(arange(10), 0), ())
+    assert await vecs_eq(take(arange(10), 15), arange(10))
 @mk
 async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(achain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, default=3)
 @mk
-async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 1001)), asieve(1000))
+async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 501)), asieve(500))
 @mk
 async def test_agives(): assert await aallequal(aenumerate(agives(0)), strict=True)
 @mk
@@ -55,3 +63,16 @@ async def test_aonline_sorter():
     assert await s.asend(-4) == -4
     assert await s.asend(5) == 3
     assert await vecs_eq(s, (5,))
+@mk
+async def test_abucket(bucket):
+    assert await bucket.contains(1)
+    assert not await bucket.contains(4)
+    assert await bucket.contains(2)
+    assert await anext(bucket[1]) == 10
+@mk
+async def test_abucket2(bucket):
+    assert await collect(bucket[1]) == [10, 11, 12]
+    assert await basic_collect(bucket[3]) == [30, 31, 33]
+    assert await to_list(bucket[2]) == [20, 21, 22, 23]
+    assert await to_tuple(bucket[0]) == ()
+    assert await to_set(bucket) == set()

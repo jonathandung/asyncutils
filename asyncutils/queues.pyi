@@ -1,8 +1,8 @@
 # ty: ignore[invalid-method-override]
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
+from ._internal.helpers import LoopMixinBase
 from ._internal.types import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
 from .exceptions import IgnoreErrors
-from .mixins import LoopBoundMixin
 from abc import ABC, abstractmethod
 from asyncio import Future, Queue
 from collections.abc import AsyncGenerator, Awaitable, Callable, Generator
@@ -97,7 +97,7 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
     .. note::
       Little type validation for the argument combinations is done at runtime; it is hoped that type checkers will catch most misuses.
 '''
-class PotentQueueBase[T](Queue[T], LoopBoundMixin, ABC):
+class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
     def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``; called in :meth:`__init__`.'''

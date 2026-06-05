@@ -6,79 +6,70 @@ from _collections import defaultdict, deque
 from sys import maxsize as INF
 @H.subscriptable
 class achain:
-    __slots__ = '_its',
+    __slots__ = '__its',
     @classmethod
-    def from_iterable(cls, it_of_its): (self := super().__new__(cls))._its = A.amap(A.iter_to_agen, it_of_its); return self
+    def from_iterable(cls, it_of_its): (self := super().__new__(cls)).__its = A.amap(A.iter_to_agen, it_of_its); return self
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in self._its: # ty: ignore[unresolved-attribute]
+        async for i in self.__its: # ty: ignore[unresolved-attribute]
             async for _ in i: yield _
 @H.subscriptable
-class apeekable(A.LoopBoundMixin):
-    __slots__ = '_cache', '_it'
-    def __init__(self, it=()): self._it, self._cache = A.iter_to_agen(it), deque(); super().__init__()
+class apeekable(H.LoopMixinBase):
+    __slots__ = '__cache', '__it'
+    def __init__(self, it=()): self.__it, self.__cache = A.iter_to_agen(it), deque(); super().__init__()
     def __aiter__(self): return self
     async def can_peek(self):
         try: await self.peek(); return True
         except StopAsyncIteration: return False
     async def peek(self, default=_NO_DEFAULT):
-        if not (c := self._cache):
-            try: c.append(await anext(self._it))
+        if not (c := self.__cache):
+            try: c.append(await anext(self.__it))
             except StopAsyncIteration:
                 if default is _NO_DEFAULT: raise
                 return default
         return c[0]
-    def prepend(self, /, *i): self._cache.extendleft(reversed(i))
+    def prepend(self, /, *i): self.__cache.extendleft(reversed(i))
     async def __anext__(self):
-        if (c := self._cache): return c.popleft()
-        return await anext(self._it)
+        if (c := self.__cache): return c.popleft()
+        return await anext(self.__it)
     async def __getitem__(self, i, /, _=~INF):
-        f = (C := self._cache).append
+        f = (C := self.__cache).append
         if isinstance(i, slice):
             if (c := 1 if (s := i.step) is None else int(s)) > 0: a, b = 0 if (s := i.start) is None else int(s), INF if (s := i.stop) is None else int(s)
             elif c < 0: a, b = -1 if (s := i.start) is None else int(s), _ if (s := i.stop) is None else int(s)
             else: raise ValueError('asyncutils.iterclasses.apeekable: slice step cannot be zero')
             if a < 0 or b < 0:
-                async for s in A.iter_to_agen(self._it): f(s)
+                async for s in A.iter_to_agen(self.__it): f(s)
             elif (d := min(max(a, b)+1, INF)-len(C)) >= 0:
-                async for s in A.take(self._it, d): f(s)
+                async for s in A.take(self.__it, d): f(s)
             return tuple(C)[a:b:c]
-        async for s in A.iter_to_agen(self._it) if (i := i.__index__()) < 0 else A.empty_agen() if i < (l := len(C)) else A.take(self._it, i-l+1): f(s)
+        async for s in A.iter_to_agen(self.__it) if (i := i.__index__()) < 0 else A.empty_agen() if i < (l := len(C)) else A.take(self.__it, i-l+1): f(s)
         return C[i]
     P.patch_method_signatures((__getitem__, 'idx, /'))
-class AwaitLater:
-    __slots__ = 'aw',
-    def __new__(cls, a, /, _=type(A.dummy_task)):
-        if H.check_methods(a, '__await__') or isinstance(a, _) and a.gi_code.co_flags&0x100: object.__setattr__(_ := super().__new__(cls), 'aw', a); return _ # noqa: RUF021
-        raise TypeError(f'{H.fullname(a)} object at {id(a):#x} is not awaitable')
-    def __getattr__(self, n, /): return getattr(self.aw, n)
-    def __repr__(self): return f'<proxy at {id(self):#x} to awaitable at {id(self.aw):#x}>'
-    def __setattr__(self, n, _, /): raise AttributeError('attribute aw is read-only' if n == 'aw' else f'cannot set attribute {n!r} through proxy')
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of proxies to awaitables')
-    P.patch_classmethod_signatures((__new__, 'aw, /'))
 @H.subscriptable
-class abucket(A.LoopContextMixin):
-    __slots__ = '_cache', '_it', '_key', '_validator'
-    def __init__(self, it, key, validator): super().__init__(); self._it, self._key, self._cache, self._validator = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
-    def __contains__(self, k, /, _=AwaitLater):
-        if not self._validator(k): return False
-        try: self._cache[k].appendleft(_(anext(self[k]))); return True
-        except StopIteration: return False
+class abucket:
+    __slots__ = '__cache', '__it', '__key', '__validator'
+    def __init__(self, it, key, validator=None): super().__init__(); self.__it, self.__key, self.__cache, self.__validator = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
+    async def contains(self, k, /):
+        if not self.__validator(k): return False
+        try: i = await anext(self[k])
+        except StopAsyncIteration: return False
+        self.__cache[k].append(i); return True
     async def __aiter__(self):
-        K, V, C = self._key, self._validator, self._cache
-        async for i in self._it:
-            if V(v := K(i)): C[v].append(i)
+        K, V, C = self.__key, self.__validator, self.__cache
+        async for i in self.__it:
+            if V(k := K(i)): C[k].append(i)
         for k in C: yield k
-    async def __getitem__(self, v, /, _=AwaitLater):
-        if not (V := self._validator)(v): return
-        C, I, K = self._cache, self._it, self._key
+    async def __getitem__(self, k, /):
+        if not (V := self.__validator)(k): return
+        p, I, K = (a := (C := self.__cache)[k]).popleft, self.__it, self.__key
         while True:
-            if a := C[v]: yield (await a.aw) if isinstance(a := a.popleft(), _) else a
-            else:
-                while True:
-                    try: i = await anext(I)
-                    except StopAsyncIteration: return
-                    if (k := K(i)) == v: yield i; break
-                    elif V(k): C[k].append(i)
-    P.patch_method_signatures((__contains__, _ := 'key, /'), (__getitem__, _)); del _
-del P, AwaitLater
+            if a: yield p(); continue
+            while True:
+                try: i = await anext(I)
+                except StopAsyncIteration:
+                    if not a: del C[k]
+                    return
+                if (c := K(i)) == k: yield i; break
+                elif V(c): C[c].append(i)
+del P

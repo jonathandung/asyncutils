@@ -2,8 +2,9 @@
 | All classes strictly follow the asynchronous lock interface as defined by :class:`asyncio.Lock` and made explicit in the
 | :class:`~asyncutils._internal.types.AsyncLockLike` protocol, besides :class:`MultiCountDownLatch`, since it uses
 | :class:`KeyedCondition` internally and it is not desired for :mod:`asyncutils.altlocks` to import this submodule as well.'''
+from ._internal.helpers import LoopMixinBase
 from ._internal.types import AsyncContextManager
-from .mixins import LoopBoundMixin, LockMixin, LockWithOwnerMixin, LoopContextMixin
+from .mixins import LockMixin, LockWithOwnerMixin, LoopContextMixin
 from asyncio import BoundedSemaphore, Lock, Task
 from collections.abc import Callable, Hashable, Mapping
 from typing import Any, Literal
@@ -15,7 +16,7 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
     def bound(self) -> int: '''Return the bound of the semaphore.'''
     @bound.setter
     def bound(self, value: int, /) -> None: '''Set the bound of the semaphore to `value`, and coerce the internal value to the bound, waking up waiters in that case.'''
-class AdvancedRateLimit(LoopBoundMixin, LockMixin[None]):
+class AdvancedRateLimit(LoopMixinBase, LockMixin[None]):
     '''A rate limiter that supports a mode in which waiters can cut the queue.'''
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):
         '''| `rate` (required): The initial rate at which tokens refill.
@@ -32,7 +33,7 @@ class AdvancedRateLimit(LoopBoundMixin, LockMixin[None]):
     def tokens(self) -> float: '''Return the current number of tokens available.'''
     @property
     def capacity(self) -> float: '''Return the capacity of the limiter.'''
-class PrioritySemaphore(LoopBoundMixin, LockMixin[None]):
+class PrioritySemaphore(LoopMixinBase, LockMixin[None]):
     '''A semaphore that allows waiters with a lower priority value to enter first.'''
     def __init__(self, value: int=...): '''`value`, the initial value as an integer, defaults to :const:`context.PRIORITY_SEMAPHORE_DEFAULT_VALUE`.'''
     async def acquire(self, priority: int=...) -> Literal[True]: '''Acquire the semaphore with the specified priority (default :const:`context.PRIORITY_SEMAPHORE_DEFAULT_PRIORITY`).'''
@@ -68,7 +69,7 @@ class RLock(LockWithOwnerMixin[None]):
     def locked(self) -> bool: ...
     @property
     def is_owner(self) -> bool: ...
-class PriorityLock(LoopBoundMixin, LockWithOwnerMixin[None]):
+class PriorityLock(LoopMixinBase, LockWithOwnerMixin[None]):
     '''A lock allowing waiters with a lower priority value to enter first.'''
     async def acquire(self, priority: int=..., timeout: float|None=...) -> bool: ...
     def _release(self, raise_: bool=...) -> None: ...

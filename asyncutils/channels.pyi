@@ -204,7 +204,7 @@ class Rendezvous[T]:
         | running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''| Put in ``value`` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
-        | Also be prepared to intercept or reraise :exc:`~asyncio.exceptions.CancelledError` resulting from reset.'''
+        | Also be prepared to intercept or reraise :exc:`~asyncio.CancelledError` resulting from reset.'''
     async def put(self, value: T, /, *, timeout: float|None=...) -> bool: '''Like :meth:`raising_put`, but returns a boolean representing if the put succeeded. The recommended interface.'''
     async def get(self, default: T|None=..., *, timeout: float|None=...) -> T:
         '''| Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.

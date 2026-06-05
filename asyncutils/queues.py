@@ -2,7 +2,7 @@
 import asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import compat as D, patch as P
-from asyncutils._internal.helpers import check, get_loop_and_set, fullname
+from asyncutils._internal.helpers import LoopMixinBase, check, get_loop_and_set, fullname
 from asyncutils._internal.log import info
 from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque
@@ -132,7 +132,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             async for i in A.iter_to_agen(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel
     return q
-class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
+class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     @abstractmethod
     def _init(self, maxsize): raise NotImplementedError
     @abstractmethod
@@ -174,7 +174,7 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
     async def drain_persistent(self, max_items=None, timeout=None, _=ignore_qshutdown.combined(TimeoutError)):
         m, c = abs(max_items or float('inf')), 0; info(f'persistent draining of {fullname(self)} started')
         with _:
-            while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1
+            while c < m: yield await wait_for(self.get(), timeout); self.task_done(); c += 1 # noqa: ASYNC119
     def drain_until_empty(self, max_items=None):
         max_items, c = abs(max_items or float('inf')), 0; info(f'draining of {fullname(self)} started')
         with ignore_qempty:
@@ -246,7 +246,7 @@ class PotentQueueBase(D.Queue, A.LoopBoundMixin, metaclass=ABCMeta):
             E = (D.QueueShutDown,)
             async def get(g=self.get, /):
                 with ignore_qshutdown:
-                    while True: yield await g()
+                    while True: yield await g() # noqa: ASYNC119
         async def feed(q, s, g, /, f=f):
             try:
                 while True: await q.put(await f(await anext(g)))

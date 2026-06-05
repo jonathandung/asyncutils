@@ -14,7 +14,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-58% coverage, 72 tests
+59% coverage, 72 tests
 
 ### Docs
 
@@ -377,7 +377,6 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
   - mixins
 
     Interfaces/Mixins:
-    - LoopBoundMixin
     - LoopContextMixin
     - AwaitableMixin
     - AsyncContextMixin

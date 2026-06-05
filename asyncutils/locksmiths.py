@@ -41,20 +41,19 @@ class LocksmithBase:
         finally:
             if purge_waiters: await self.purge_waiters(l)
     async def _force_except(self, l, i, /):
-        if self.find_owner(l) is (o := I.current_task(self._loop)):
-            if o is None: return await self.throw_fallback(l)
-            if (c := o.get_coro()) is None: return await self.eager_fallback(l)
-            if r := await self._force_is_owner(l, i, c): return r
+        if self.find_owner(l) is (o := I.current_task(self._loop)) and (r := await self._force_is_owner(l, i, o)): return r
         try:
             if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
         except A.CRITICAL: raise A.Critical
         return ForceResult.SUCCESS
-    async def _force_is_owner(self, l, i, c, /):
+    async def _force_is_owner(self, l, i, o, /):
+        if o is None: return await self.throw_fallback(l)
+        if (c := o.get_coro()) is None: return await self.eager_fallback(l)
         E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
         try: c.throw(E)
         except A.CRITICAL as e: return self.task_raised_critical(l, e)
         except A.LockForceRequest as e:
-            if (r := e.requester) is not self: await I.gather(self.lock_busy(l, r), r.lock_busy(l, self))
+            if (r := e.requester) is not self: await self.lock_busy(l, r, {})
             elif e is E: await self.task_reraised_request(l)
             else: return await self.already_forcing(l)
         except BaseException as e: await self.task_raised_other(l, e) # noqa: BLE001
@@ -69,7 +68,7 @@ class LocksmithBase:
             except TimeoutError: raise TimeoutError(f'{fullname(self)}.host: failed to acquire lock {l!r} within {timeout2} seconds') from None
         self.patch_owner(t := self.wrap_task(t), l); return await I.wait_for(self._wait_on(t, l), T[2] if timeout3 is _NO_DEFAULT else timeout3)
     async def get_info(self, l, /): return f'potential deadlock situation involving {fullname(l)} at {id(l):#x}'
-    async def lock_busy(self, *a): await A.transient_block(self._loop, L.info, 'lock busy: %r; requester: %r', *a)
+    async def lock_busy(self, l, r, _, /): await A.transient_block(self._loop, L.info, 'lock busy: %r; requesters: %r, %r', l, self, r)
     async def task_reraised_request(self, l, /): await A.transient_block(self._loop, L.warning, '%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(l), id(l))
     async def answer_received(self, l, a, /): await A.transient_block(self._loop, L.info, '%r received answer %r from %r', self, a, l)
     async def throw_fallback(self, _, /): return ForceResult.NO_CURRENT_TASK

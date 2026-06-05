@@ -1,6 +1,6 @@
 import asyncutils as A, asyncio as I
 from asyncutils._internal.compat import PriorityQueue
-from asyncutils._internal.helpers import fullname, subscriptable
+from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
 from asyncutils._internal.submodules import pools_all as __all__
 from _functools import partial
 from itertools import count, repeat
@@ -98,7 +98,7 @@ class AdvancedPool(A.LoopContextMixin):
     @property
     def uptime(self): return monotonic()-self._start
 @subscriptable
-class ConnectionPool(A.LoopBoundMixin):
+class ConnectionPool(LoopMixinBase):
     __slots__ = '_available', '_cleaner', '_creation_times', '_factory', '_healthchecker', '_in_use', '_lock', '_maintainer', '_pool', 'maxlife', 'maxsize', 'minsize'
     def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = A.getcontext(); self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._maintainer = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, I.Lock(), I.Event(), None
     def _is_healthy(self, conn, /): return self._healthchecker(conn) and not ((t := self._creation_times.get(id(conn))) and monotonic()-t > self.maxlife)

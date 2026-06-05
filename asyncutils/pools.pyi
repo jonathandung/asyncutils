@@ -1,7 +1,8 @@
 '''This module provides various pool implementations for concurrent execution and resource management in asynchronous contexts.'''
+from ._internal.helpers import LoopMixinBase
 from ._internal.types import SupportsIteration, ExcType
 from .config import Executor
-from .mixins import LoopBoundMixin, LoopContextMixin
+from .mixins import LoopContextMixin
 from asyncio import Future
 from collections.abc import Callable, Iterable, Mapping
 from types import TracebackType
@@ -64,7 +65,7 @@ class AdvancedPool(LoopContextMixin):
     def uptime(self) -> float: '''Return the time in seconds since the pool started.'''
     @property
     def completed(self) -> int: '''Return the total number of tasks completed by the pool.'''
-class ConnectionPool[T, **P](LoopBoundMixin):
+class ConnectionPool[T, **P](LoopMixinBase):
     '''A pool managing resources in a simple and intuitive lock interface, with support for health checking, auto-recycling and dynamic rescaling.
 
     .. caution:: Use instances of this class as async context managers only.'''

@@ -8,6 +8,7 @@ from collections import Counter, defaultdict, deque
 from functools import partial, lru_cache, wraps
 from itertools import repeat
 from sys import audit
+from time import monotonic
 _rand, _randrange, _sample, _smallprimes, _perfect_test, _identity = _randinst.random, _randinst.randrange, _randinst.sample, frozenset(_littleprimes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _littleprimes[:5]), (0x32907381cdf, _littleprimes[:6]), (1<<64, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _littleprimes[:13]), (0x4c16c7697197146a6b8eb49518c5, _littleprimes[:18])), lambda _, /: _
 def fmap(fs, /, *a, **k): return agather(f(*a, **k) async for f in iter_to_agen(fs))
 async def fmap_sequential(fs, /, *a, **k):
@@ -226,14 +227,14 @@ def asliced(seq, n, strict=False):
             if len(s) != n: raise ValueError(f'asyncutils.iters.asliced: length of {seq!r} is not divisible by {n}')
             yield s
     return r()
-def buffer(it, maxsize=0, *, timeout_get=None, timeout_put=None, cooldown=0, loop=None):
+def buffer(it, maxsize=0, *, timeout_get=None, timeout_put=None, cooldown=0.0, loop=None):
     q = Z.Queue(maxsize)
-    async def con(g=q.get, d=q.task_done, f=B.sleep.__get__(cooldown), e=B.timeout.__get__(timeout_get)): # noqa: B008
+    if timeout_get is None: timeout_get = float('inf')
+    async def con(g=q.get, d=q.task_done, f=B.sleep.__get__(cooldown), e=True): # noqa: B008
         while True:
-            try:
-                async with e():
-                    while True: yield await g(); d()
-            except TimeoutError: await f()
+            if e: x = timeout_get+monotonic(); e = False
+            yield await g(); d()
+            if monotonic() > x: e = True; await f() # ty: ignore[possibly-unresolved-reference]
     async def cons():
         try: await con()
         finally: await A.safe_cancel(t)
@@ -288,7 +289,7 @@ def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key
 async def azip(*I, strict=False, _=A.ignore_stopaiteration.combined(RuntimeError)): # noqa: B008
     I = tuple(map(iter_to_agen, I))
     with _:
-        while True: yield tuple(await B.gather(*map(anext, I)))
+        while True: yield tuple(await B.gather(*map(anext, I))) # noqa: ASYNC119
     if strict:
         for x, y in enumerate(I):
             with _: await anext(y); raise ValueError(f'asyncutils.iters.azip: iterable {x} longer than shortest iterable')
@@ -455,7 +456,8 @@ async def amatprod(it, start):
     return start
 def atail(n, it, /): return aislice(it, max(0, len(it)-n), None)
 async def to_tuple(it, /): return tuple(await to_list(it))
-async def to_list(it, /, loop=None): return await A.transient_block(loop or H.get_loop_and_set(), list, it) if type(it) in Z.s else [_ async for _ in iter_to_agen(it)]
+async def to_set(it, /, frozen=False): r = await A.transient_block(H.get_loop_and_set(), set, it) if type(it) in Z.s else {_ async for _ in iter_to_agen(it)}; return frozenset(r) if frozen else r
+async def to_list(it, /): return await A.transient_block(H.get_loop_and_set(), list, it) if type(it) in Z.s else [_ async for _ in iter_to_agen(it)]
 async def aconsume(it, n=None, _=H.check_methods):
     if n == 0: return
     if n: it = A.take(it, n, default=A.RAISE)
@@ -530,18 +532,15 @@ def apartition(pred, it):
             except StopAsyncIteration: return
     return map(agen, (F := deque(), T := deque()))
 async def aiterexcept(f, exc, first=None):
+    if first is not None: yield await first()
     with A.IgnoreErrors(exc):
-        if first is not None: yield await first()
-        while True: yield await f()
+        while True: yield await f() # noqa: ASYNC119
 async def ailen(it):
     i = 0
     async for _ in iter_to_agen(it): i += 1
     return i
 async def aiterate(f, start):
     while True: yield start; start = await f(start)
-async def with_aiter(actxmgr):
-    async with actxmgr as I:
-        async for i in iter_to_agen(I): yield i
 async def asorted(it, *, key=_identity, reverse=False):
     from heapq import heappop as g, heapify as f
     b, a = (m := []).append, (r := []).append
@@ -757,7 +756,7 @@ async def vecs_eq(u, v, cmpeq=H.check, *, strict=True):
     try: return await aall(amap(cmpeq, u, v, strict=strict))
     except ValueError: return False
 async def afreivalds(A, B, C, k=None, _r=_randrange): n = len(A := await to_tuple(A)); return await aall(await vecs_eq(mat_vec_mul(A, mat_vec_mul(B, r := await to_tuple(arepeatfunc(_r, n, 2)))), mat_vec_mul(C, r), int.__eq__) async for _ in aloops(getcontext().AFRIEVALDS_DEFAULT_K if k is None else k))
-def basic_collect(*_): return to_list(aislice(*_))
+def basic_collect(*_): return to_list(aislice(*_) if len(_) > 1 else _[0])
 async def asubstrings(it):
     for i in (s := await to_tuple(it)): yield i,
     async for n in arange(2, c := len(s)+1):
@@ -859,7 +858,8 @@ async def apowersetofsets(it, *, frozen=True): S = tuple(dict.fromkeys(await to_
 async def aserialize(it):
     l, n = B.Lock(), iter_to_agen(it).__anext__
     while True:
-        async with l: yield await n()
+        async with l: x = await n()
+        yield x # noqa: RUF070
 async def aonline_sorter(it, *, key=_identity, reverse=False, slow=None):
     audit('asyncutils.iters.aonline_sorter', id(it)); c = Z if reverse else __import__('heapq')
     if slow is None: slow = getcontext().AONLINESORTER_DEFAULT_SLOW
