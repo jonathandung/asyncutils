@@ -25,6 +25,7 @@ jobs:
     - if: ${{github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository}}
       uses: actions/upload-code-coverage@v1.2.0
       with:
+        fail-on-error: false
         file: coverage.xml
         language: Python
         label: code-coverage/pytest
