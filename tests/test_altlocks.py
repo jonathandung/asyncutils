@@ -56,5 +56,5 @@ async def dtf(t):
 @mk
 async def test_dthrottle():
     t = DynamicThrottle(9, window=6)
-    assert 0.2 < (await dts(t))[1] < 0.4
+    assert 0.18 < (await dts(t))[1] < 0.38
     await dtf(t)
