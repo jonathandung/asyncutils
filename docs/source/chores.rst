@@ -82,7 +82,7 @@ complete the following:
 
   Be sure to update the contextual constant count:
 
-  - in the :data:`~asyncutils.context.all_contextual_constants` docstring,
+  - in the :const:`~asyncutils.context.all_contextual_constants` docstring,
   - within the :data:`~asyncutils.context.Context` fake dataclass body, and
   - at the top level.
 

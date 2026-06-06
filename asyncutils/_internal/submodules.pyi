@@ -1,6 +1,6 @@
 '''| Exports the :attr:`__all__` attributes of all of :mod:`asyncutils`'s public submodules.
 | This is the single source of truth that the name exposure system needs.'''
-from .types import All
+from .prots import All
 from typing import Final
 altlocks_all: Final[All]
 base_all: Final[All]

@@ -1,7 +1,7 @@
 # ty: ignore[invalid-method-override]
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
+from ._internal.prots import SupportsIteration, GetAndPutProtectedQProt, GetProtectedQProt, PutProtectedQProt
 from .exceptions import IgnoreErrors
 from abc import ABC, abstractmethod
 from asyncio import Future, Queue
@@ -77,8 +77,8 @@ def password_queue[R](*, maxsize: int=..., protect_get: Literal[True], protect_p
 def password_queue[V](*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., puttyp: type[V], strict: bool=...) -> GetAndPutProtectedQProt[Any, V, Any]: ...
 @overload
 def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., strict: bool=...) -> GetAndPutProtectedQProt[Any, Any, Any]:
-    '''| Return a password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface, with
-    | maximum size ``maxsize``. ``priority`` and ``lifo`` parameters determine if the queue is a priority queue and last-in-first-out.
+    '''| Return a thread-unsafe password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface.
+    | The queue has maximum size ``maxsize``. ``priority`` and ``lifo`` parameters determine if the queue is a priority queue and last-in-first-out.
     | If ``protect_get`` is ``True``, get and get_nowait will require a password, specified by ``password_get`` or retrieved from a variable in the
     | caller's scope with name ``get_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
     | If ``protect_put`` is ``True``, put and put_nowait will require a password, specified by ``password_put`` or retrieved from a variable in the
@@ -100,19 +100,19 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
 class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
-    def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``; called in :meth:`__init__`.'''
+    def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``; called by :meth:`__init__`.'''
     @abstractmethod
-    def _get(self) -> T: '''Get an item from the queue if not empty; called in :meth:`get` and :meth:`get_nowait`.'''
+    def _get(self) -> T: '''Get an item from the queue if not empty; called by :meth:`get` and :meth:`get_nowait`.'''
     @abstractmethod
-    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called in :meth:`put` and :meth:`put_nowait`.'''
+    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called by :meth:`put` and :meth:`put_nowait`.'''
     @abstractmethod
     def peek_all(self) -> list[T]: '''Return a list of all the items in the queue.'''
     @abstractmethod
     def qsize(self) -> int: '''Return the size of the queue as an integer.'''
     def reset(self) -> None: '''Revert the queue to an empty state.'''
-    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call :meth:`put_nowait` if a slot is immediately available, waiting for a slot with `timeout` otherwise; if the timeout expires and `raising` is True, throw :exc:`TimeoutError`.'''
-    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call :meth:`get_nowait` if an item is immediately available, waiting for a item with `timeout` otherwise; if the timeout expires and `default` is provided, return it.'''
-    async def extend(self, it: SupportsIteration[T], timeout: float|None=...) -> None: '''Add the items from `it` into the queue within `timeout`.'''
+    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call :meth:`put_nowait` if a slot is immediately available, waiting for a slot with ``timeout`` otherwise; if the timeout expires and ``raising`` is True, throw :exc:`TimeoutError`.'''
+    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call :meth:`get_nowait` if an item is immediately available, waiting for a item with ``timeout`` otherwise; if the timeout expires and ``default`` is provided, return it.'''
+    async def extend(self, it: SupportsIteration[T], timeout: float|None=...) -> None: '''Add the items from ``it`` into the queue within ``timeout``.'''
     def push(self, item: T) -> bool: '''Put an item into the queue immediately, popping if necessary; returns success.'''
     def drain_persistent(self, max_items: int|None=..., timeout: float|None=...) -> AsyncGenerator[T]: '''An async generator that gets items from the queue once available and yields them.'''
     def drain_until_empty(self, max_items: int|None=...) -> Generator[T]: '''A synchronous generator that gets items from the queue until it is emptied and returns.'''
@@ -121,7 +121,7 @@ class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     def __bool__(self) -> bool: '''Whether there are items in the queue.'''
     def __iter__(self) -> Generator[T]: '''Equivalent to :meth:`drain_until_empty`.'''
     def __aiter__(self) -> AsyncGenerator[T]: '''Equivalent to :meth:`drain_persistent`.'''
-    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If `immediate` is ``True``, pending gets raise immediately even if the queue is not empty.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If ``immediate`` is ``True``, pending gets raise immediately even if the queue is not empty.'''
     @property
     def is_shutdown(self) -> bool: '''Whether the queue is shutting down or has been shutdown.'''
     @is_shutdown.setter

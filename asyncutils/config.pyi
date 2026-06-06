@@ -1,5 +1,5 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.types import PartialInterface, ExcType
+from ._internal.prots import PartialInterface, ExcType
 from concurrent.futures._base import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload

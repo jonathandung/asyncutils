@@ -1,5 +1,5 @@
 '''Utilities that cannot be easily classified into any submodule.'''
-from ._internal.types import ExcType, SupportsIteration, Timer
+from ._internal.prots import ExcType, SupportsIteration, Timer
 from .mixins import ExecutorRequiredAsyncContextMixin, LoopContextMixin
 from collections import deque
 from collections.abc import Awaitable, Callable, Generator, Iterable, Mapping

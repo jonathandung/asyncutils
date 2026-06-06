@@ -1,5 +1,5 @@
 '''Implementation of an :class:`interactive async console base class <AsyncUtilsConsole>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
-from ._internal.types import ExcType
+from ._internal.prots import ExcType
 from _contextvars import Context
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Task

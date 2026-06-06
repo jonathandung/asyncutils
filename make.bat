@@ -9,7 +9,7 @@ pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail 
 goto :eof
 
 :test-with-badges
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 15 --local-badge-generate duration skipped status warnings xfailed
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 10 --local-badge-generate duration skipped status warnings xfailed
 pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir assets --local-badge-generate cov
 goto :eof
 

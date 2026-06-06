@@ -1,6 +1,6 @@
 '''This module provides various pool implementations for concurrent execution and resource management in asynchronous contexts.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import SupportsIteration, ExcType
+from ._internal.prots import SupportsIteration, ExcType
 from .config import Executor
 from .mixins import LoopContextMixin
 from asyncio import Future

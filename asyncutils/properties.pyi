@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from asyncio import Task
 from asyncutils import RWLock
-from ._internal.types import AsyncContextManager
+from ._internal.prots import AsyncContextManager
 from collections.abc import Awaitable, Callable
 from types import CoroutineType
 from typing import Any, Concatenate, Self, overload

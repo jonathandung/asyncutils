@@ -1,6 +1,6 @@
 '''Object-oriented (async) iteration helpers.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import SupportsIteration, ValidSlice
+from ._internal.prots import SupportsIteration, ValidSlice
 from .mixins import LoopContextMixin
 from collections.abc import AsyncGenerator, Callable
 from typing import Self, SupportsIndex, overload

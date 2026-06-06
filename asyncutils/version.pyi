@@ -1,6 +1,6 @@
 '''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer.'''
-from ._internal.types import IntCompatible, Openable, ValidSlice
+from ._internal.prots import IntCompatible, Openable, ValidSlice
 from collections.abc import Callable, Iterable, Iterator
 from typing import Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
@@ -69,7 +69,7 @@ class VersionInfo(str): # noqa: FURB189
         * c, chars: ``'{\x04\x00'``
         * t, tuple: ``'(123, 4, 0)'``
         * h, hash: ``'116380397'``
-        * n, majmin: ``'123.4'`'''
+        * n, majmin: ``'123.4'``'''
     def __int__(self) -> int: '''Assuming :attr:`minor` and :attr:`patch` are less than 256, pack the parts into an integer, which can be larger than 24 bits to fit the major version. :exc:`OverflowError` is raised if not possible.'''
     def __index__(self) -> int: '''The same as :meth:`__int__`.'''
     def __floor__(self) -> int: '''Return the major version.'''

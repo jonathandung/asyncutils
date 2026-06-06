@@ -1,5 +1,5 @@
 '''Various compatibility shims for older Python versions.'''
-from .types import SupportsRichComparison
+from .prots import SupportsRichComparison
 import sys as m
 from collections.abc import Iterable
 from pprint import PrettyPrinter

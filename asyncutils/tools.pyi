@@ -1,5 +1,5 @@
 '''Utilities related to the command-line interface and getting metadata for package configuration.'''
-from ._internal.types import CanWriteAndFlush, DumpType, Openable
+from ._internal.prots import CanWriteAndFlush, DumpType, Openable
 from collections.abc import Callable, Sequence
 from typing import Any
 __all__ = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'

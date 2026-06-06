@@ -1,6 +1,6 @@
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import DualContextManager
+from ._internal.prots import DualContextManager
 from asyncio import AbstractEventLoop, Protocol, Transport, WriteTransport
 from collections.abc import Iterable
 from socket import socket

@@ -5,7 +5,7 @@ import sys
 assert sys.version_info < (3, 14)
 from functools import partial
 from typing import Final
-from .types import SupportsRichComparison
+from .prots import SupportsRichComparison
 __all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial'
 Placeholder: Final[object]
 def heapify[C: SupportsRichComparison](heap: list[C], /) -> None: ...

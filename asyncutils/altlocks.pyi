@@ -1,5 +1,5 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
-from ._internal.types import AsyncLockLike, Exceptable, ExcType, SupportsIteration, Timer
+from ._internal.prots import AsyncLockLike, Exceptable, ExcType, SupportsIteration, Timer
 from .mixins import AsyncContextMixin, AwaitableMixin
 from collections import deque
 from collections.abc import Awaitable, Callable

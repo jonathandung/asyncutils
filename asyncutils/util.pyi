@@ -1,5 +1,5 @@
 '''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
-from ._internal.types import AsyncLockLike, ANCT, DCRV, DualContextManager, EventProt, ExceptionWrapper, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
+from ._internal.prots import AsyncLockLike, ANCT, DCRV, DualContextManager, EventProt, ExceptionWrapper, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from asyncio import AbstractEventLoop, BoundedSemaphore, Event, Future, Lock, Semaphore, Task
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Generator, Iterable

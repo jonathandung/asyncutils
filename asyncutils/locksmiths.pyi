@@ -1,7 +1,7 @@
 '''| Implementation of a base class for locksmiths, magical entities that can compel not intentionally uncooperative locks to be released while
 | limiting collateral damage and hindrance of the control flow of the program as much as possible and allowing customization of behaviour in
 | different steps regarding some locks.'''
-from ._internal.types import AsyncLockLike
+from ._internal.prots import AsyncLockLike
 from asyncio import AbstractEventLoop, Task
 from collections.abc import Awaitable, Callable
 from enum import IntEnum

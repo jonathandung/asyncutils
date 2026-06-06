@@ -1,5 +1,5 @@
 '''Exports sentinels and public constants.'''
-from ._internal.types import Executor, RaiseType
+from ._internal.prots import Executor, RaiseType
 from collections.abc import Callable
 from threading import Lock
 from typing import Final, Self

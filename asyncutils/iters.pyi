@@ -1,6 +1,6 @@
 '''| Functional and chainable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`.
 | However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.'''
-from ._internal.types import EventProt, Exceptable, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
+from ._internal.prots import EventProt, Exceptable, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Hashable, Iterable, Mapping, MutableSequence, Reversible
 from typing import Any, Literal, Never, SupportsIndex, overload

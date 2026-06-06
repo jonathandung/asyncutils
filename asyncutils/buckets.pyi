@@ -1,5 +1,5 @@
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import ExcType, Timer
+from ._internal.prots import ExcType, Timer
 from .mixins import AsyncContextMixin
 from types import TracebackType
 from typing import overload

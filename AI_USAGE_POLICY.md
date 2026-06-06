@@ -7,23 +7,29 @@ In short, please keep these [two principles](https://roe.dev/blog/using-ai-in-op
 > 1. Never let an LLM speak for you.
 > 2. Never let an LLM think for you.
 
-This project does not accept fully AI-generated pull requests. AI tools may be used only for assistance (e.g. understanding existing code, writing out well-known algorithms). You must understand and take responsibility for every change you submit.
-We reserve the right to reject pull requests that contain little or no genuine contribution from the contributor (with regards to code as well as the thought behind changes).
+This project does not accept fully AI-generated pull requests. AI tools may be used only for assistance (e.g. understanding existing code, writing
+out well-known algorithms). You must understand and take responsibility for every change you submit.
+We reserve the right to reject pull requests that contain little or no genuine contribution from the contributor (with regards to code as well as the
+thought behind changes).
 
 ## Our Rule
 
 **All contributions must come from humans who understand and can take full responsibility for their code.**
 
-Large language models (LLMs) make mistakes and cannot be held accountable for their outputs. This is why we require human understanding and ownership of all submitted work.
+Large language models (LLMs) make mistakes and cannot be held accountable for their outputs. This is why we require human understanding and ownership
+of all submitted work.
 
 > [!WARNING]
 > Maintainers may close PRs that appear to be fully or largely AI-generated.
 
 ## Getting Help
 
-**Asking questions can indeed feel intimidating.** You might worry about looking inexperienced or bothering maintainers with "basic" questions. AI tools can feel like a safer and less judgmental first step. However, LLMs often provide incorrect or incomplete answers, and they may create a false sense of understanding.
+**Asking questions can indeed feel intimidating.** You might worry about looking inexperienced or bothering maintainers with "basic" questions. AI
+tools can feel like a safer and less judgmental first step. However, LLMs often provide incorrect or incomplete answers, and they may create a false
+sense of understanding.
 
-If you do end up using AI tools, we ask that you only do so **assistively** (like a reference or tutor) and not **generatively** (having the tool write code for you).
+If you do end up using AI tools, we ask that you only do so **assistively** (like a reference or tutor) and not **generatively** (having the tool
+write code for you).
 
 ## Guidelines for Using AI Tools
 
@@ -62,7 +68,8 @@ If you do end up using AI tools, we ask that you only do so **assistively** (lik
 
 ## Why do we have this policy?
 
-AI-based coding assistants are increasingly enabled by default at every step of the contribution process, and new contributors are bound to encounter them and use them in good faith.
+AI-based coding assistants are increasingly enabled by default at every step of the contribution process, and new contributors are bound to encounter
+them and use them in good faith.
 
 While these tools can help newcomers navigate the codebase, they often generate well-meaning but unhelpful submissions.
 
@@ -72,7 +79,8 @@ We believe that learning to code and contributing to open source are deeply huma
 
 ## Questions?
 
-If you're unsure whether your use of AI tools complies with this policy, ask in the [discussions](https://github.com/jonathandung/asyncutils/discussions) or in the relevant issue or PR thread.
+If you're unsure whether your use of AI tools complies with this policy, ask in the
+[discussions](https://github.com/jonathandung/asyncutils/discussions) or in the relevant issue or PR thread.
 
 ## Disclosure
 

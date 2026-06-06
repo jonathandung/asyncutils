@@ -14,7 +14,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-59% coverage, 72 tests
+59% coverage, 76 tests
 
 ### Docs
 
@@ -23,6 +23,8 @@ This project uses [Semantic Versioning](https://semver.org).
 ## Versions
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
+
+### [0.9.12] - 2026-06-12; unreleased
 
 ### [0.9.11] - 2026-06-04; newest
 

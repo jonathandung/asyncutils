@@ -1,7 +1,7 @@
 '''A special module used to set up the :mod:`asyncutils` module namespace.
 
 .. danger:: Modifying the module's contents or reloading it at runtime may break the module.'''
-from .types import All, Submodule
+from .prots import All, Submodule
 from types import ModuleType
 from typing import Any, Final, Self, final, overload
 @final

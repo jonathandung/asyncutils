@@ -2,7 +2,7 @@
 | Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.
 | This library is not designed to do I/O operations, and the functionality in this submodule is far from comprehensive.
 | See `aiostream` or similar for that.'''
-from ._internal.types import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV, Reader, Writer
+from ._internal.prots import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV, Reader, Writer
 from .config import Executor
 from .mixins import LoopContextMixin
 from collections.abc import Buffer, Callable, Iterable, Mapping

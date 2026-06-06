@@ -1,5 +1,5 @@
 '''Readers-writer locks with different fairness policies, applicable in different situations.'''
-from ._internal.types import RWLockCM, RWLockRV
+from ._internal.prots import RWLockCM, RWLockRV
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from typing import Any, Concatenate, Literal, Self, final, overload

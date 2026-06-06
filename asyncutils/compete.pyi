@@ -1,4 +1,4 @@
-from ._internal.types import ExceptionWrapper, FutWrapType, SupportsIteration
+from ._internal.prots import ExceptionWrapper, FutWrapType, SupportsIteration
 from asyncio import AbstractEventLoop
 from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine, Generator, Iterable
 from typing import Any, Literal, TypeGuard, overload

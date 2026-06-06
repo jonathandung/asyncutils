@@ -1,6 +1,6 @@
 '''Mixins classes for some common or specialized patterns that provide methods based on some abstract methods.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import ExcType
+from ._internal.prots import ExcType
 from .locksmiths import LocksmithBase
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Future, Task

@@ -1,5 +1,5 @@
 '''Bridges between asynchronous consumers/subscribers and producers/publishers.'''
-from ._internal.types import DualContextManager, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
+from ._internal.prots import DualContextManager, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
 from .mixins import LoopContextMixin
 from _weakrefset import WeakSet
 from asyncio import AbstractEventLoop, Future, Lock, Queue, Task

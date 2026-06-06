@@ -199,8 +199,7 @@ One may find it useful to alter the context dynamically without creating a new c
 
 .. ifconfig:: py313
 
-  :meth:`Context.__copy__` and :meth:`Context.__replace__` are also implemented to help :func:`copy.copy`
-  and :func:`copy.replace` respectively.
+  :meth:`Context.__copy__` and :meth:`Context.__replace__` are also implemented to help :func:`copy.copy` and :func:`copy.replace` respectively.
 
 .. ifconfig:: not py313
 

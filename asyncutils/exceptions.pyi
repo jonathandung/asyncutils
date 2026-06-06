@@ -1,5 +1,5 @@
 '''Exception handling utilties and exception classes used by this module.'''
-from ._internal.types import AsyncLockLike, Exceptable, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProt
+from ._internal.prots import AsyncLockLike, Exceptable, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProt
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo

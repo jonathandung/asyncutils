@@ -1,9 +1,9 @@
 '''| Locking primitives, more advanced than or supplementing the functionality of those in :mod:`asyncio`.
 | All classes strictly follow the asynchronous lock interface as defined by :class:`asyncio.Lock` and made explicit in the
-| :class:`~asyncutils._internal.types.AsyncLockLike` protocol, besides :class:`MultiCountDownLatch`, since it uses
+| :class:`~asyncutils._internal.prots.AsyncLockLike` protocol, besides :class:`MultiCountDownLatch`, since it uses
 | :class:`KeyedCondition` internally and it is not desired for :mod:`asyncutils.altlocks` to import this submodule as well.'''
 from ._internal.helpers import LoopMixinBase
-from ._internal.types import AsyncContextManager
+from ._internal.prots import AsyncContextManager
 from .mixins import LockMixin, LockWithOwnerMixin, LoopContextMixin
 from asyncio import BoundedSemaphore, Lock, Task
 from collections.abc import Callable, Hashable, Mapping
