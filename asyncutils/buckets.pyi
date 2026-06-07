@@ -12,28 +12,28 @@ class TokenBucket:
         '''| ``rate``: The number of tokens the bucket gains per time interval as a float, as defined by the timer
         | ``capacity``: The maximum number of tokens the bucket can hold as a float
         | ``timer`` (optional): A function such as :func:`time.time` that returns the current time; default :func:`time.monotonic`'''
-    async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if ``tokens`` is not passed can be set through :const:`context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS`.'''
+    async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if ``tokens`` is not passed can be set through :data:`context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS`.'''
     @property
     def capacity(self) -> float: '''The capacity of the bucket.'''
 class LeakyBucket(AsyncContextMixin[LeakyBucket], LoopMixinBase):
     '''| A leaky bucket rate limiter with adaptive flow control. Use as a context manager.
     | In the context, tokens leak from the bucket at a constant rate. Operations can add tokens to the bucket.
     | The bucket includes an adaptive factor that adjusts based on current fill level to provide smoother rate limiting under varying loads, as dictated by
-    | :const:`context.LEAKY_BUCKET_ADJMAP`, a sequence of tuples ``(mincap, (lbound, lfactor, ubound, ufactor))`` monotonically descending in ``mincap``.'''
+    | :data:`context.LEAKY_BUCKET_ADJMAP`, a sequence of tuples ``(mincap, (lbound, lfactor, ubound, ufactor))`` monotonically descending in ``mincap``.'''
     def __init__(self, capacity: float, leak: float, min_factor: float=..., max_factor: float=..., external_factor_settable: bool=..., timer: Timer=...):
         '''| ``capacity`` (required): The maximum number of tokens the bucket can hold
         | ``leak`` (required): The rate at which tokens leak from the bucket
-        | ``min_factor``: Minimum adaptive factor; default :const:`context.LEAKY_BUCKET_DEFAULT_MIN_FACTOR`.
-        | ``max_factor``: Maximum adaptive factor; default :const:`context.LEAKY_BUCKET_DEFAULT_MAX_FACTOR`.
-        | ``external_factor_settable``: Whether the factor attribute can be modified; default :const:`context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
+        | ``min_factor``: Minimum adaptive factor; default :data:`context.LEAKY_BUCKET_DEFAULT_MIN_FACTOR`.
+        | ``max_factor``: Maximum adaptive factor; default :data:`context.LEAKY_BUCKET_DEFAULT_MAX_FACTOR`.
+        | ``external_factor_settable``: Whether the factor attribute can be modified; default :data:`context.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR`.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop draining the tokens in the bucket.'''
-    async def acquire(self, amount: float=...) -> bool: '''Attempt to add ``amount`` tokens to the bucket immediately (default :const:`context.LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS`); return success.'''
+    async def acquire(self, amount: float=...) -> bool: '''Attempt to add ``amount`` tokens to the bucket immediately (default :data:`context.LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS`); return success.'''
     async def wait_for_tokens(self, amount: float=...) -> float:
-        '''| Keep asynchronously sleeping, with a maximum interval of :const:`context.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK` each time, until ``amount``
-        | tokens can be added to the bucket *at once* (default :const:`context.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS`), and do so, returning
+        '''| Keep asynchronously sleeping, with a maximum interval of :data:`context.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK` each time, until ``amount``
+        | tokens can be added to the bucket *at once* (default :data:`context.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS`), and do so, returning
         | the total wait time.
 
         .. note::

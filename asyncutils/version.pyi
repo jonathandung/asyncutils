@@ -1,11 +1,11 @@
-'''| A versioning scheme for :mod:`asyncutils`. Inspired by :mod:`torch.torch_version`, but with quite some differences.
+'''| A versioning scheme for :mod:`asyncutils`. Inspired by `torch.torch_version <https://github.com/pytorch/pytorch/blob/main/torch/torch_version.py>`__, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer.'''
 from ._internal.prots import IntCompatible, Openable, ValidSlice
 from collections.abc import Callable, Iterable, Iterator
 from typing import Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
-class VersionInfo(str): # noqa: FURB189
+class VersionInfo(str):
     @overload
     def __new__(cls, from_: object, /) -> Self: ...
     @overload

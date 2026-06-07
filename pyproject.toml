@@ -13,7 +13,7 @@ requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE", "AUTHORS.md"]
 keywords = ["asynchronous", "asyncio", "convenient", "fast", "feature-rich", "helpers", "io", "library", "light", "utilities"]
-classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Unix Shell", "Programming Language :: Python :: Implementation :: CPython", "Programming Language :: Python :: Implementation :: GraalPy", "Programming Language :: Python :: Free Threading :: 2 - Beta", "Operating System :: OS Independent", "Development Status :: 4 - Beta", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Software Development :: Version Control :: Git", "Topic :: Utilities", "Framework :: AsyncIO", "Framework :: Pytest", "Framework :: Sphinx", "Natural Language :: English", "Typing :: Typed"]
+classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Unix Shell", "Programming Language :: Python :: Implementation :: CPython", "Programming Language :: Python :: Implementation :: GraalPy", "Programming Language :: Python :: Free Threading :: 2 - Beta", "Operating System :: OS Independent", "Development Status :: 4 - Beta", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Utilities", "Framework :: AsyncIO", "Framework :: Pytest", "Framework :: Sphinx", "Natural Language :: English", "Typing :: Typed"]
 
 [project.urls]
 Homepage = "https://jonathandung.github.io/asyncutils"
@@ -68,7 +68,7 @@ extend-exclude = ["docs/source/conf.py"]
 required-version = ">=0.15.16"
 
 [tool.ruff.lint]
-ignore = ["ANN401", "ASYNC109", "B904", "B905", "B912", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "N803", "N806", "N812", "N818", "PLC0415", "PLC1901", "PLC2701", "PLC2801", "PLW1514", "RET502", "RET503", "TRY003", "TRY300", "W292"]
+ignore = ["E501", "E252", "E701", "E702", "E227", "E301", "E302", "E226", "N806", "TRY003", "E261", "E741", "N812", "ASYNC109", "E306", "N803", "E305", "N818", "E228", "E401", "PLC2701", "B904", "PLC0415", "PLC2801", "B905", "TRY300", "RET503", "E743", "FURB189", "PLW1514"]
 select = ["A", "ARG", "ANN", "ASYNC", "B", "BLE001", "COM819", "C4", "C901", "E", "EM103", "ERA001", "EXE", "F", "FIX002", "FLY002", "FURB", "G", "ISC", "INP001", "LOG", "N", "PERF", "PIE", "PGH004", "PL", "PYI", "Q", "RET", "RSE102", "RUF", "S", "SIM", "SLOT", "T100", "T201", "TID252", "TRY", "UP", "W", "YTT"]
 logger-objects = ["asyncutils._internal.log"]
 preview = true

@@ -6,7 +6,7 @@ declare -a files=(
   "CODE_OF_CONDUCT.md:conduct.md"
   "COMPATIBILITY.rst:compat.rst"
   "CONTRIBUTING.md:contributing.md"
-  "EXAMPLES.md:examples.md"
+  "EXAMPLES.rst:examples.rst"
   "ROADMAP.md:roadmap.md"
   "SECURITY.md:security.md"
   "SUPPORT.md:support.md"
@@ -17,5 +17,3 @@ for mapping in "${files[@]}"; do
   dest_path="docs/source/$dst"
   cp "$src" "$dest_path"
 done
-scripts/genhelp.sh
-scripts/genmakefileusage.sh

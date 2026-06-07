@@ -576,7 +576,7 @@ async def _adpermpartial(A, _):
         t += h[:-(x := _-i):-1]; i += 1; h[i:], t[:] = t[:x], t[x:]
 async def empty_agen():
     if False: yield
-async def agives(x): yield x
+async def agives(x, /): yield x
 @aawgenf2agenf
 async def adistinct_permutations(it, r=None, f=(_adpermpartial, _adpermfull)):
     if (S := len(I := await to_list(it))) < (_ := S if r is None else r): return agives(())

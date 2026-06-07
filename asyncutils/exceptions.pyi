@@ -203,7 +203,7 @@ class WarningToError:
 ignore_all: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores all errors; that is, ``IgnoreErrors(BaseException)``. Use with caution!'''
 ignore_noncritical: Final[IgnoreErrors]
-'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to ``ignore_all.excluding(CRITICAL)``.'''
+'''Instance of :class:`IgnoreErrors` that ignores all errors besides :exc:`SystemExit`, :exc:`SystemError` and :exc:`KeyboardInterrupt`. Equivalent to ``ignore_all.excluding(*CRITICAL)``.'''
 ignore_typical: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`Exception` and subclasses thereof. Equivalent to ``IgnoreErrors()``.'''
 ignore_stopiteration: Final[IgnoreErrors]

@@ -74,7 +74,7 @@ class SocketTransport(I.Transport):
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self._sock_transport_read_ready, sock); (e := self._extra)['sockname'] = sock.getsockname() # ty: ignore[unresolved-attribute]
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
-        if (s := self._socket) is None: return
+        if (s := self._socket) is None: return s
         with self._h: s.close()
         self.loop.remove_reader(s.fileno()); self._socket = None; self._reset_extra(); return s
     @A.dualcontextmanager

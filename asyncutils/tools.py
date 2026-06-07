@@ -3,7 +3,7 @@ get_cmd_help, __all__ = I.parsed.p.format_help, I.submodules.tools_all
 def loadf(p, e=None, /, l=I.unparsed.l, _=I.helpers.fullname):
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'asyncutils.tools.loadf: __fspath__ method returned {_(p)} instead of str or bytes')
     if not (isinstance(p, int) or e is None): raise TypeError('asyncutils.tools.loadf: did not expect extension')
-    if e == '': raise ValueError('asyncutils.tools.loadf: empty extension')
+    if e == '': raise ValueError('asyncutils.tools.loadf: empty extension') # noqa: PLC1901
     return l(p.decode() if isinstance(p, bytes) else p, e)
 def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
     f = (R := []).append

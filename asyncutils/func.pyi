@@ -41,15 +41,15 @@ def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expect
     '''| Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
     | ``timer`` (default :func:`time.perf_counter`) is used to count ``elapsed``, the time required to execute the function.
     | ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~exceptions.wrap_exc`.
-    | ``precision`` (default :const:`context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and ``ns`` whether the return value of the timer indicates time in nanoseconds.
+    | ``precision`` (default :data:`context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and ``ns`` whether the return value of the timer indicates time in nanoseconds.
     | Any exception the wrapped function emits whose type is not in ``expected`` is propagated directly.'''
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
     '''| A decorator factory that retries the wrapped function with exponential backoff, returning once the function succeeds.
-    | If the function does not succeed within `tries` attempts (default :const:`context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
-    | ``backoff`` (default :const:`context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to
-    | :const:`context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed `max_delay` (default
-    | :const:`context.RETRY_DEFAULT_MAX_DELAY`).
-    | ``jitter`` (default :const:`context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
+    | If the function does not succeed within `tries` attempts (default :data:`context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
+    | ``backoff`` (default :data:`context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to
+    | :data:`context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed `max_delay` (default
+    | :data:`context.RETRY_DEFAULT_MAX_DELAY`).
+    | ``jitter`` (default :data:`context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
     | ``exc`` specifies which exceptions to catch and retry on; if an exception not in ``exc`` is raised, it is propagated immediately.
     | ``on_retry`` and ``on_success`` are callbacks called before each retry and after a successful call, with the attempt number (zero-based)
     | as the first argument and the exception caught or the time taken for the successful call respectively as the second. Thus, ``on_success`` is
@@ -61,9 +61,9 @@ async def measure[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> t
 async def measure2[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> float: '''Only return the time and discard the return value of the function.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=..., *, sequential: bool=...) -> BenchmarkResult:
     '''| ``f`` is the function to benchmark, which should take no arguments and return an awaitable.
-    | ``times`` is how many times the function should be run, which defaults to :const:`context.BENCHMARK_DEFAULT_TIMES`.
-    | ``warmup`` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`context.BENCHMARK_DEFAULT_WARMUP`.
-    | ``sequential`` (default :const:`context.BENCHMARK_DEFAULT_SEQUENTIAL`) determines whether the function calls are made sequentially or gathered at once. For
+    | ``times`` is how many times the function should be run, which defaults to :data:`context.BENCHMARK_DEFAULT_TIMES`.
+    | ``warmup`` is the number of warmup rounds to call the function for; not included in the benchmark results; default :data:`context.BENCHMARK_DEFAULT_WARMUP`.
+    | ``sequential`` (default :data:`context.BENCHMARK_DEFAULT_SEQUENTIAL`) determines whether the function calls are made sequentially or gathered at once. For
     | example, for functions requiring a mutex to be acquired or with other rate-limiting policies in place, you should explicitly pass ``sequential=True``.
     | This function should only be used in very simple cases, because we recognize the inherent difficulty and abundancy of noise in testing IO-bound code, and
     | this library alone is by no means designed to solve that issue.'''

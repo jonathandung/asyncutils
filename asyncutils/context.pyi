@@ -10,7 +10,7 @@ __all__ = 'Context', 'all_contextual_consts', 'getcontext', 'localcontext', 'non
 @dataclass(slots=True, kw_only=True, match_args=False)
 class Context:
     '''| An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading
-    | :mod:`dataclasses` for :deco:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
+    | :mod:`dataclasses` for :func:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
     | :func:`collections.namedtuple` is also unsuitable for this use case, since it behaves like a sequence.
     | The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
     | For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in,
@@ -107,7 +107,7 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_STRICT: bool = ...
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
-    def ascurctx(self, **k: Any) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. `ctx.ascurctx()` is syntactic sugar for `nonreusablelocalcontext(ctx)`'''
+    def ascurctx(self, **k: object) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. `ctx.ascurctx()` is syntactic sugar for `nonreusablelocalcontext(ctx)`'''
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the items within the context.'''
     def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod

@@ -11,13 +11,13 @@ class RWLock(ABC):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> ReadPreferredRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Return a :class:`WritePreferredRWLock` if ``prefer_writers`` is ``True``, otherwise a :class:`ReadPreferredRWLock`. :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS` becomes the value of ``prefer_writers`` when it is not passed.'''
+    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Return a :class:`WritePreferredRWLock` if ``prefer_writers`` is ``True``, otherwise a :class:`ReadPreferredRWLock`. :data:`context.RWLOCK_DEFAULT_PREFER_WRITERS` becomes the value of ``prefer_writers`` when it is not passed.'''
     def reader[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async reading context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     def writer[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async writing context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     @abstractmethod
-    def reading(self) -> RWLockCM: '''Return an async context manager for reading access. It is recommended to implement this by decorating an async generator function with :deco:`contextlib.asynccontextmanager`.'''
+    def reading(self) -> RWLockCM: '''Return an async context manager for reading access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
     @abstractmethod
-    def writing(self) -> RWLockCM: '''Return an async context manager for writing access. It is recommended to implement this by decorating an async generator function with :deco:`contextlib.asynccontextmanager`.'''
+    def writing(self) -> RWLockCM: '''Return an async context manager for writing access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
     def locked(self) -> bool: '''Whether the lock is currently held by a writer.'''
     @abstractmethod
     def setup(self) -> None: '''Set up the internal state of the lock.'''
@@ -50,7 +50,7 @@ class PriorityRWLock(RWLock):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> FairPriorityRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :const:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
+    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :data:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...
@@ -64,8 +64,8 @@ class AgingRWLock(PriorityRWLock):
     '''| A readers-writer lock with a priority policy multiplying the current number of attempts to acquire the reading or writing lock,
     | counted per corresponding task, by the respective factor given at construction, to obtain the priority.'''
     def __new__(cls, /, rf: float=..., wf: float=...) -> Self:
-        '''* `rf`, the read priority factor, defaults to :const:`context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
-        * `wf`, the write priority factor, defaults to :const:`context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.'''
+        '''* `rf`, the read priority factor, defaults to :data:`context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
+        * `wf`, the write priority factor, defaults to :data:`context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.'''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...

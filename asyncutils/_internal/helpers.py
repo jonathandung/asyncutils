@@ -39,7 +39,7 @@ class LoopMixinBase:
     def make_fut(self): return self.loop.create_future()
     def make_multiple(self, aws, /): yield from map(self.make, aws)
 @subscriptable
-class Bag(dict): # noqa: FURB189
+class Bag(dict):
     __slots__, __setattr__, __delattr__ = (), dict.__setitem__, dict.__delitem__
     def __getattr__(self, k, /):
         try: return self[k]

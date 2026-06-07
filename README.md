@@ -39,7 +39,7 @@ for more.
 ## Usage
 
 This package is very resourceful, containing everything from higher-order error handling functions to network protocols.
-See the [usage guide](https://asyncutils.readthedocs.io/en/stable/usage.html) for some basic examples.
+See the [usage guide](https://asyncutils.readthedocs.io/en/stable/examples.html) for some basic examples.
 
 ## Version
 

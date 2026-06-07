@@ -30,7 +30,7 @@ class LoopMixinBase:
     def make[T](self, aw: Awaitable[T], /) -> Task[T]: '''Create a :class:`~asyncio.tasks.Task` for the given awaitable that runs in the underlying loop.'''
     def make_fut(self) -> Future[Any]: '''Create a :class:`~asyncio.futures.Future` attached to the underlying loop.'''
     def make_multiple[T](self, aws: Iterable[Awaitable[T]], /) -> Generator[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.tasks.Task` created for each coroutine in C, in that order.'''
-class Bag(dict[str, Any]): # noqa: FURB189
+class Bag(dict[str, Any]):
     '''A thin dictionary subclass that supports attribute access.'''
     def __getattr__(self, key: str, /) -> Any: ...
     def __setattr__(self, key: str, value: object, /) -> None: ...

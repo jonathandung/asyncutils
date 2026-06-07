@@ -6,7 +6,7 @@ from collections.abc import AsyncGenerator, Callable
 from typing import Self, SupportsIndex, overload
 __all__ = 'abucket', 'achain', 'apeekable'
 class achain[T]:
-    '''Async version of :class:`itertools.chain` that takes async or sync iterables.'''
+    '''Async version of :func:`itertools.chain` that takes async or sync iterables.'''
     @classmethod
     def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self:
         '''Construct an :class:`achain` from `it_of_its`, an (async) iterable of (async) iterables to chain.

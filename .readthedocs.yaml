@@ -6,7 +6,7 @@ build:
   tools:
     python: latest
   jobs:
-    post_create_environment: [scripts/rtd.sh]
+    post_create_environment: [sh scripts/*.sh]
 formats: [htmlzip, pdf]
 python:
   install:

@@ -13,7 +13,7 @@ async def race_with_callback(*C, winner=None, loser=None, timeout=None):
     if not C: raise TypeError('asyncutils.compete.race_with_callback: pass in at least one coroutine')
     audit('asyncutils.compete.race_with_callback/start', L := len(C)); d, p = await I.wait(A.new_eager_tasks(*C), return_when='FIRST_COMPLETED', timeout=timeout)
     try:
-        if not d: return
+        if not d: return None
         w = d.pop().result()
         if winner is not None and I.iscoroutine(r := winner(w)): await r
         return w

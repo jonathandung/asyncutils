@@ -1,6 +1,8 @@
 Installation
 ============
 
+.. highlight:: bash
+
 .. version-added:: 0.8.20
 
 .. version-changed:: 0.9.10
@@ -28,7 +30,9 @@ No setup is required, besides ensuring that your package manager is updated to t
 .. version-added:: 0.8.13
   Achieved distribution on conda-forge and by extension, conda installation support.
 
-Next, install py-asyncutils::
+Next, install py-asyncutils:
+
+.. sub-code-block::
 
   # recommended: pip
   pip install py-asyncutils==|version|  # directly from source
@@ -43,7 +47,9 @@ Next, install py-asyncutils::
   # the last two options need GNU Make on *nix, but the Windows version points to a batch file.
   # uv is invoked under the hood and installed if absent; pip is not needed!
 
-other installation pathways::
+other installation pathways:
+
+.. sub-code-block::
 
   pipx install py-asyncutils==|version| # pipx
   conda install -c conda-forge py-asyncutils=|version| # conda

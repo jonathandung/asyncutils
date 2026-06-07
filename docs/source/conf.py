@@ -1,4 +1,5 @@
-def setup(app, f=__import__('_operator').methodcaller('replace', '|version|', release := '0.9.11')): app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs'); app.add_directive('sub-code-block', type('SubCodeBlock', (__import__('sphinx.directives.code', fromlist=('',)).CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
+from sphinx.directives.code import CodeBlock
+def setup(app, f=__import__('_operator').methodcaller('replace', '|version|', release := '0.9.11')): app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include Python 3.13-only features in the docs'); app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
 author = 'Jonathan Dung'
 version = '0.9'
@@ -19,7 +20,7 @@ else:
 html_short_title = f'{project} {release} docs'
 autoapi_dirs = [f'../../{project}']
 autoapi_file_patterns = ['*.pyi']
-autoapi_ignore = ['*/_internal/compat.pyi', '*/_internal/helpers.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']
+autoapi_ignore = ['*/_internal/compat.pyi', '*/_internal/initialize.pyi', '*/_internal/log.pyi', '*/_internal/py312.pyi', '*/_internal/py313.pyi', '*/_internal/running_console.pyi', '*/_internal/submodules.pyi']
 autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
 autoapi_options = ['members', 'undoc-members', 'private-members', 'show-inheritance', 'show-module-summary', 'special-members']
@@ -29,6 +30,5 @@ copybutton_exclude = '.linenos, .gp, .go'
 copybutton_prompt_text = '>>> '
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None), 'anyio': ('https://anyio.readthedocs.io/en/stable', None), 'more-itertools': ('https://more-itertools.readthedocs.io/en/stable', None)}
 viewcode_line_numbers = True
-maximum_signature_line_length = 125
-highlight_language = 'bash'
+maximum_signature_line_length = 120
 manpage_url = 'https://manpages.debian.org/{path}'

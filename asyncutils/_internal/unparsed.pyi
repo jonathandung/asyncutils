@@ -1,4 +1,4 @@
-'''This submodule automatically reads the config from the file whose path is specified by `AUTILSCFGPATH`.
+'''This submodule automatically reads the config from the file whose path is specified by :envvar:`AUTILSCFGPATH`.
 
 .. important:: Values will be overwritten by command-line arguments when this module runs as a script.'''
 from .helpers import Bag
@@ -8,7 +8,7 @@ N: Final[Bag]
 C: Final[dict[str, Any]]
 '''The contextual portion of the configuration as a flattened :class:`dict` mapping upper-case keys to values.'''
 Z: Final[dict[str, str]]
-'''A :class:`dict` mapping file extensions to module names for loading config files. Is queried by :func:`tools.loadf`. Stable.'''
+'''A :class:`dict` mapping file extensions to module names for loading config files. Is queried by :func:`~asyncutils.tools.loadf`. Stable.'''
 c: Final[str]
 '''The path to the config file used, or an empty string if no config file was read.'''
 @overload

@@ -3,7 +3,7 @@ from asyncutils._internal.helpers import check_methods, fullname, subscriptable
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
-def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit):
+def _unnest(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit):
     _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
@@ -13,8 +13,8 @@ def _unnest_helper(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter
             elif not predicate(group): ack2(group)
             elif (y := (yield group)) is not None: h(y)
         else: ack3(group)
-def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest_helper, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
-def unnest_reverse(g, /, *A, h=_unnest_helper, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
+def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
+def unnest_reverse(g, /, *A, h=_unnest, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
 def potent_derive(*groups, ordered=False, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
     if not isinstance(g := groups[0], BaseExceptionGroup): _ = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*groups, **k)))).__suppress_context__, g.__context__, g.__cause__, g.__traceback__ = _
@@ -124,7 +124,7 @@ class PasswordRetrievalError(PasswordQueueError):
 class GetPasswordRetrievalError(PasswordRetrievalError): ...
 class PutPasswordRetrievalError(PasswordRetrievalError): ...
 class ForbiddenOperation(PasswordQueueError, TypeError):
-    def __init__(self, op, *a): self.op = op = op%a; super().__init__(f'cannot {op} PasswordQueue')
+    def __init__(self, op, *a): self.op = op = op%a; super().__init__(f'cannot {op} the type of password-protected queue')
 @subscriptable
 class PasswordError(PasswordQueueError):
     @property
@@ -175,4 +175,4 @@ class WarningToError:
     async def __aenter__(self): return self.__enter__()
     async def __aexit__(self, /, *_): self.__exit__(*_)
     P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.xsig), (__aexit__, P.xsig))
-del P, s, _, A, B, stderr, ExceptionWrapper, _unnest_helper, audit, exception, subscriptable # ty: ignore[possibly-unresolved-reference]
+del P, s, _, A, B, stderr, ExceptionWrapper, _unnest, audit, exception, subscriptable # ty: ignore[possibly-unresolved-reference]

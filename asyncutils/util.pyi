@@ -1,4 +1,4 @@
-'''Functions of utility one tier below the :mod:`base` submodule, such that they are not worth preloading but still quite useful.'''
+'''Functions of utility one tier below the :mod:`~asyncutils.base` submodule, such that they are not worth preloading but still quite useful.'''
 from ._internal.prots import AsyncLockLike, ANCT, DCRV, DualContextManager, EventProt, ExceptionWrapper, FutProt, IncompleteFut, SupportsIteration, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from asyncio import AbstractEventLoop, BoundedSemaphore, Event, Future, Lock, Semaphore, Task
@@ -14,9 +14,9 @@ async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resol
 anullcontext: ANCT
 '''An instance of an async context manager that does nothing.'''
 def avalify[T](v: T, /) -> Callable[..., CoroutineType[Any, Any, T]]: '''Return an async function that takes any arguments, always returning the value ``v``.'''
-async def anullify(*a: Any, **k: Any) -> None: '''An async function that does nothing and returns ``None``.'''
-async def atruthify(*a: Any, **k: Any) -> Literal[True]: '''An async function that does nothing and returns ``True``.'''
-async def afalsify(*a: Any, **k: Any) -> Literal[False]: '''An async function that does nothing and returns ``False``.'''
+async def anullify(*a: object, **k: object) -> None: '''An async function that does nothing and returns ``None``.'''
+async def atruthify(*a: object, **k: object) -> Literal[True]: '''An async function that does nothing and returns ``True``.'''
+async def afalsify(*a: object, **k: object) -> Literal[False]: '''An async function that does nothing and returns ``False``.'''
 @overload
 def locked_lock[L: AsyncLockLike[Any]](*, lcls: type[L]) -> L: ...
 @overload
@@ -51,7 +51,7 @@ def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: ...
 @overload
 def semaphore(bounded: Literal[True], workers: Literal[1]) -> Lock: ...
 @overload
-def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Simple helper function returning a (bounded) semaphore of value ``workers``, defaulting to :const:`context.SEMAPHORE_DEFAULT_VALUE`.'''
+def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Simple helper function returning a (bounded) semaphore of value ``workers``, defaulting to :data:`context.SEMAPHORE_DEFAULT_VALUE`.'''
 def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by ``lf``, to a function ``f`` that returns an awaitable, also converting it to an async function.'''
 def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
     '''| Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy

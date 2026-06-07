@@ -9,13 +9,13 @@ RECIP_E: Final[float]
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 '''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity. Also the order in which the executor options appear in the CLI help.'''
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]
-'''Equivalent to `frozenset(POSSIBLE_EXECUTORS)`, so that there can be faster membership testing.'''
+'''Equivalent to ``frozenset(POSSIBLE_EXECUTORS)``, so that there can be faster membership testing.'''
 class sentinel_base:
     '''Base class for sentinel values. To support versions below Python 3.15, we cannot make use of the :pep:`661` built-in :class:`sentinel` type, and this class offers extra methods anyway.'''
     def __new__(cls, name: str=...) -> Self: ...
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''
-    def __init_subclass__(cls, *, lock_impl: Callable[[], Lock]=...) -> None: '''`lock_impl` is a callable that takes no arguments and returns a _synchronous_ lock (e.g. :func:`_thread.allocate_lock`).'''
+    def __init_subclass__(cls, *, lock_impl: Callable[[], Lock]=...) -> None: '''``lock_impl`` is a callable that takes no arguments and returns a _synchronous_ lock (e.g. :func:`_thread.allocate_lock`).'''
     @property
     def name(self) -> str: '''Fully qualified name of the sentinel, the only thing that identifies it uniquely. May not be present if impropertly instantiated.'''
     @property

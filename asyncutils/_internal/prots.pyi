@@ -18,7 +18,7 @@ from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Ca
 from asyncio import AbstractEventLoop, Future
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
-from io import _WrappedBuffer, TextIOWrapper
+from io import TextIOWrapper
 from ty_extensions import Intersection, Not
 from types import CodeType, CoroutineType, FrameType, FunctionType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
@@ -82,7 +82,7 @@ class PathLike[T](Protocol):
     def __fspath__(self) -> T: ...
 @type_check_only
 class SupportsPop[T](Protocol):
-    '''Types with a :meth:`~collections.abc.MutableSequence.pop` method.'''
+    '''Types with a :meth:`~list.pop` method.'''
     def pop(self) -> T: ...
 @type_check_only
 class SupportsPopLeft[T](Protocol):
@@ -90,7 +90,7 @@ class SupportsPopLeft[T](Protocol):
     def popleft(self) -> T: ...
 @type_check_only
 class GeneratorCoroutine[Y, S, R](Generator[Y, S, R], Coroutine[Y, S, R]):
-    '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
+    '''Objects such as those returned by :func:`types.coroutine`-decorated generator functions.'''
     def send(self, val: S, /) -> Y: ...
     @overload
     def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> Y: ...
@@ -127,7 +127,7 @@ class PartialInterface(metaclass=PartialInterfaceMeta):
 @type_check_only
 class DumpType(Protocol):
     '''Encapsulates the signature of simple json-dumping functions accepted by :func:`~asyncutils.tools.argv_to_json` and :func:`~asyncutils.tools.argstr_to_json`.'''
-    def __call__(self, dct: dict[str, Any], file: TextIOWrapper[_WrappedBuffer], /) -> None: ...
+    def __call__(self, dct: dict[str, Any], file: TextIOWrapper, /) -> None: '''``dict[str, Any]`` is used here because the callable needs only handle strict instances of :class:`dict`.'''
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
     '''A writable and flushable 'stream', supposedly used for I/O.'''
@@ -148,7 +148,7 @@ type Proxy[W] = FuncProxy[W]|FuncWrapper[W]
 type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
 '''A function or wrapper of any depth thereof.'''
 type SigPatcherArg = tuple[Wrapper, str]
-'''The type of a positional argument passed to a signature-patching function in :mod:`_internal.patch`.'''
+'''The type of a positional argument passed to a signature-patching function in :mod:`~asyncutils._internal.patch`.'''
 type Middleware = Callable[[str, Any], Any]
 '''Represents a middleware accepted by :class:`~asyncutils.channels.EventBus`.'''
 type NonGroupExc = Intersection[BaseException, Not[BaseExceptionGroup]]
@@ -183,15 +183,15 @@ class QProt[R, V, T](Protocol):
 @type_check_only
 class GetProtectedQProt[R, T](QProt[R, Any, T], Protocol):
     '''Queues for which :meth:`get` is protected by a password.'''
-    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
-    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
+    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
+    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
 @type_check_only
 class PutProtectedQProt[V, T](QProt[Any, V, T], Protocol):
     '''Queues for which :meth:`put` is protected by a password.'''
-    async def put(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
-    def put_nowait(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
+    async def put(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
+    def put_nowait(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQProt[V, T], QProt[R, V, T], Protocol): '''Queues for which both :meth:`get` and :meth:`put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
+class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQProt[V, T], QProt[R, V, T], Protocol): '''Queues for which both :meth:`~GetProtectedQProt.get` and :meth:`~PutProtectedQProt.put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
     '''The return type of the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
@@ -231,7 +231,7 @@ class StateSnapshot(NamedTuple):
     '''``ss.idle == (ss.num_getters == ss.num_putters == 0)``'''
 @type_check_only
 class BenchmarkResult(NamedTuple):
-    '''The return type of :func:`func.benchmark`.'''
+    '''The return type of :func:`~asyncutils.func.benchmark`.'''
     min: float
     '''The minimum execution time among all non-warmup calls.'''
     max: float
@@ -277,7 +277,7 @@ class MemoryMappedFile(LoopContextMixin):
     def readable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
     def writable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
     def seekable(self) -> Literal[True]: '''Implemented to always return ``True`` to satisfy the file interface.'''
-    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in ``lines``, followed by ``sep``, into the file. If ``minimize_writes`` is ``True`` (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
+    async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in ``lines``, followed by ``sep``, into the file. If ``minimize_writes`` is ``True`` (default :data:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
     async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified ``encoding`` and ``errors``.'''
     async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified ``encoding`` and ``errors``.'''
     @overload
@@ -300,21 +300,21 @@ class MemoryMappedFile(LoopContextMixin):
     async def compact(self) -> int: '''Reduce the size of the file by stripping all contiguous null bytes at the end, and return the number of bytes removed.'''
 @type_check_only
 class AUnzipConsumer[T]:
-    '''The type of each consumer in the tuple return value of :func:`iters.aunzip`.'''
+    '''The type of each consumer in the tuple return value of :func:`~asyncutils.iters.aunzip`.'''
     def __aiter__(self) -> Self: ...
     async def __anext__(self) -> T: ...
     def close(self) -> None: '''Shut down the underlying queue, such that this consumer no longer receives the values at its position.'''
 @type_check_only
 class ToSyncFromLoopRV(Protocol):
-    '''The signature of the return value of :func:`util.to_sync_from_loop`.'''
+    '''The signature of the return value of :func:`~asyncutils.util.to_sync_from_loop`.'''
     def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: ...
 @type_check_only
 class TransientBlockFromLoopRV(Protocol):
-    '''The signature of the return value of :func:`util.transient_block_from_loop`.'''
+    '''The signature of the return value of :func:`~asyncutils.util.transient_block_from_loop`.'''
     def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @type_check_only
 class ANCT:
-    '''Simple async-only version of :class:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
+    '''Simple async-only version of :function:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
 
     .. note:: This does not support the ``enter_result`` argument of the original.'''
     async def __aenter__(self) -> None: ...
@@ -323,12 +323,12 @@ class ANCT:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 @type_check_only
-class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :deco:`~asyncutils.util.dualcontextmanager`. The initialization signature of this class is not documented intentionally.'''
+class DualContextManager[T](AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool], Protocol): '''Return type of :func:`~asyncutils.util.dualcontextmanager`. The initialization signature of this class is not documented intentionally.'''
 @type_check_only
 class RaiseType(sentinel_base):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
     def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`~asyncutils.constants` namespace.'''
-    def is_(self, other: object, /) -> TypeGuard[Self]: '''Allows for effective type narrowing.'''
+    def is_(self, other: object, /) -> TypeGuard[Self]: '''Not actually redefined, but this allows for effective type narrowing.'''
 @final
 @type_check_only
 class WildcardType:
@@ -349,7 +349,7 @@ class FutProt[T](Protocol):
     def result(self) -> T: '''Return the result or raise the exception set on the future.'''
     def exception(self) -> BaseException|None: '''Return the exception set on the future if any.'''
 @type_check_only
-class IncompleteFut[T](FutProt[T], PartialInterface): '''Since the type system does not allow modelling a type variable to have an upper bound parametrized by another type variable, this is necessary to type the return type of :func:`util.done_fut` while losing much type information.'''
+class IncompleteFut[T](FutProt[T], PartialInterface): '''Since the type system does not allow modelling a type variable to have an upper bound parametrized by another type variable, this is necessary to type the return type of :func:`~asyncutils.util.done_fut` while losing much type information.'''
 @type_check_only
 class DCRV(Protocol):
     '''Protocol for the return type of the strict decorator factory overload of :func:`~asyncutils.util.dualcontextmanager`.'''
@@ -380,10 +380,10 @@ type Submodule = Literal['altlocks', 'base', 'buckets', 'channels', 'cli', 'comp
 type Executor = Literal['thread', 'process', 'interpreter', 'loky', 'loky_noreuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool']
 '''Type of strings representing executors that can be passed to -e/--executor.'''
 type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512', 'shake_128', 'shake_256']
-'''Names of algorithms used for calculating checksums. The default is :const:`~asyncutils.context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The BLAKE2 family of algorithms, fast and somewhat secure with a low probability of collision, is the default choice.'''
+'''Names of algorithms used for calculating checksums. The default is :data:`~asyncutils.context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The BLAKE2 family of algorithms, fast and somewhat secure with a low probability of collision, is the default choice.'''
 type OpenRV = AbstractContextManager[MemoryMappedFile, None]
 '''The type of the return values of the :meth:`~asyncutils.io.MemoryMappedIOManager.open`, :meth:`~asyncutils.io.MemoryMappedIOManager.create` and :meth:`~asyncutils.io.MemoryMappedIOManager.create_sparsef` methods of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
-type OpenFiles = dict[tuple[TextIOWrapper[_WrappedBuffer], Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
+type OpenFiles = dict[tuple[TextIOWrapper, Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`~asyncutils.io.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.io.MemoryMappedIOManager`.'''
 type SpecificSubscriber = Callable[[Any], Awaitable[object]]
 '''The type of subscribers for :class:`~asyncutils.channels.EventBus`.'''
@@ -391,20 +391,20 @@ type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]
 '''The type of wildcard subscribers for :class:`~asyncutils.channels.EventBus`.'''
 if sys.platform == 'win32':
     type Seek = Literal[0, 1, 2]
-    '''Possible values of the ``whence`` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
+    '''Possible values of the ``whence`` parameter for :meth:`MemoryMappedFile.seek`, as follows:
 
-    * 0: :const:`~os.SEEK_SET`
-    * 1: :const:`~os.SEEK_CUR`
-    * 2: :const:`~os.SEEK_END`'''
+    * 0: :data:`~os.SEEK_SET`
+    * 1: :data:`~os.SEEK_CUR`
+    * 2: :data:`~os.SEEK_END`'''
 else:
     type Seek = Literal[0, 1, 2, 3, 4]
-    '''Possible values of the ``whence`` parameter for :meth:`asyncutils.io.MemoryMappedIOManager.seek`, as follows:
+    '''Possible values of the ``whence`` parameter for :meth:`MemoryMappedFile.seek`, as follows:
 
-    * 0: :const:`~os.SEEK_SET`
-    * 1: :const:`~os.SEEK_CUR`
-    * 2: :const:`~os.SEEK_END`
-    * 3: :const:`~os.SEEK_DATA`
-    * 4: :const:`~os.SEEK_HOLE`'''
+    * 0: :data:`~os.SEEK_SET`
+    * 1: :data:`~os.SEEK_CUR`
+    * 2: :data:`~os.SEEK_END`
+    * 3: :data:`~os.SEEK_DATA`
+    * 4: :data:`~os.SEEK_HOLE`'''
 type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], EveryMethodRVRV[T, R]]
 '''Return type of :func:`~asyncutils.func.everymethod`.'''
 type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]

@@ -41,7 +41,7 @@ class CRProtocol(LineProtocol): '''Carriage Return protocol. For legacy systems 
 class SocketTransport(Transport):
     '''A thread-unsafe transport that connects :class:`LineProtocol`'s to sockets.'''
     @staticmethod
-    def make_protocol() -> LineProtocol: '''Return a new protocol compatible with this transport. The default implementation returns a :class:`LineProtocol`, so if overriding this in subclasses, remember to add `# type: ignore[override]` comments as appropriate.'''
+    def make_protocol() -> LineProtocol: '''Return a new protocol compatible with this transport. The default implementation returns a :class:`LineProtocol`, so if overriding this in subclasses, remember to add override suppression comments for your type checker as appropriate.'''
     @property
     def loop(self) -> AbstractEventLoop: '''Override this if the type of the protocols this transport accepts is altered in subclasses.'''
     def __init__(self, sock: socket|None=...): '''Initialize the transport, connecting the socket immediately if given.'''

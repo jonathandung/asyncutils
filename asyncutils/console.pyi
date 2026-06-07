@@ -1,8 +1,8 @@
 '''Implementation of an :class:`interactive async console base class <AsyncUtilsConsole>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.prots import ExcType
-from _contextvars import Context
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Task
+from contextvars import Context
 from code import InteractiveConsole
 from collections import ChainMap
 from collections.abc import Callable, Coroutine, Iterable
@@ -12,16 +12,16 @@ from typing import Any, ClassVar, Literal, Self, TypeGuard, final, overload
 import sys
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`~_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by :mod:`asyncio.__main__` and highly adaptable.'''
+    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or ``_pyrepl.console.InteractiveColoredConsole`` if available. It is inspired by :mod:`asyncio.__main__` and highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument ``name`` is not provided to the subclass constructor.'''
     if sys.version_info >= (3, 13):
         CAN_USE_PYREPL: ClassVar[bool]
-        '''Whether :mod:`_pyrepl` enhancements are available and allowed.'''
+        '''Whether ``_pyrepl`` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
-        '''This is present if and only if :class:`_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
+        '''This is present if and only if ```_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
     else:
         CAN_USE_PYREPL: ClassVar[Literal[False]]
         '''PyREPL is only available on Python 3.13 and above.'''

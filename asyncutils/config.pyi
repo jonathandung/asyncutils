@@ -36,7 +36,7 @@ debug: Final[debugging]
 silent: Final[bool]
 '''Whether the user requested to run the program with no banner and exit message in the REPL.'''
 basic_repl: Final[bool]
-'''Whether the user specified not to use the functions from :mod:`_pyrepl` to run the console.'''
+'''Whether the user specified not to use the functions from ``_pyrepl`` to run the console.'''
 max_memerrs: Final[int]
 '''Maximum number of memory errors that can occur before the console automatically exits. Negative if and only if there is no maximum.'''
 loaded_all: Final[bool]

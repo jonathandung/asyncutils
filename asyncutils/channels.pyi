@@ -43,7 +43,7 @@ class Observable[**P](LoopContextMixin):
     def unsubscribe_eventually(self, observer: Observer[P], asap: bool=...) -> None: '''Note that the observer is to be removed at some point in the future. If ``asap`` is ``True`` and there is no notification running, the observer is removed immediately.'''
     def unsubscribe_nowait(self, observer: Observer[P], strict: bool=...) -> None: '''Remove the observer immediately even if a notification is occurring. If ``strict`` is ``True``, assert that the observer was indeed subscribed.'''
     def subscribe_syncf(self, observer: Observer[P]) -> SubscriptionRV: '''Subscribe a synchronous observer by converting it to async in an executor.'''
-    def ntimes(self, observer: Observer[P], n: int=...) -> SubscriptionRV: '''Add an observer immediately and automatically have it removed after ``n`` notifications. ``n`` defaults to :const:`context.OBSERVABLE_DEFAULT_NTIMES_N`.'''
+    def ntimes(self, observer: Observer[P], n: int=...) -> SubscriptionRV: '''Add an observer immediately and automatically have it removed after ``n`` notifications. ``n`` defaults to :data:`context.OBSERVABLE_DEFAULT_NTIMES_N`.'''
     def filter(self, pred: Callable[P, bool], ret_exc: bool=...) -> Self: '''Return a new observable emitting the notifications of this observable to its observers only when the parameters, starred and passed to ``pred``, evaluate to a true value.'''
     def map(self, transform: Callable[P, tuple[Iterable[object], Mapping[str, object]]], ret_exc: bool=...) -> Observable[...]: '''Return a new observable transforming the parameters of notifications from this observable by ``transform``.'''
     def debounce(self, delay: float, ret_exc: bool=...) -> Self: '''Return a new observable that will only emit the latest notification after ``delay`` seconds have passed since the last notification.'''
@@ -68,7 +68,7 @@ class EventBus(LoopContextMixin):
 
         * ``name``: The name of this event bus, which will appear in error messages.
         * ``handler``: A function that takes an exception having occurred in a subscribers and handles it.
-        * ``max_concurrent``: The maximum number of concurrent callbacks; default :const:`context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
+        * ``max_concurrent``: The maximum number of concurrent callbacks; default :data:`context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
         * ``tracking_stats``: Whether to remember the amount of published data to subscribers of each event type.'''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''
@@ -176,7 +176,7 @@ class EventBus(LoopContextMixin):
     def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGenerator[tuple[str, Any]]:
         '''| Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
         | If ``event_type`` is not passed, the stream will include the event type in the output.
-        | ``timeout``, ``item_timeout`` and ``bufsize`` default to :const:`context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :const:`context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :const:`context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.'''
+        | ``timeout``, ``item_timeout`` and ``bufsize`` default to :data:`context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :data:`context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :data:`context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.'''
     async def shutdown(self, immediate: bool=..., *, timeout: float|None=..., preserve_stats: bool=...) -> None:
         '''| Gracefully shut down the event bus.
         | After the shutdown, publications fail fast and middlewares are cleared.
@@ -200,7 +200,7 @@ class Rendezvous[T]:
     '''A rendezvous object, emulating Golang's unbuffered channels.'''
     def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...):
         '''| Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically,
-        | according to :const:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`. If ``loop`` is not passed, the running event loop is used. If there is no
+        | according to :data:`context.RENDEZVOUS_MAINTENANCE_INTERVAL`. If ``loop`` is not passed, the running event loop is used. If there is no
         | running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''| Put in ``value`` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.

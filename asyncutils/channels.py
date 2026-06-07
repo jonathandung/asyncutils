@@ -21,7 +21,7 @@ class Observable(A.LoopContextMixin):
         async with self._lock:
             if self.notifying:
                 if (q := self._queue) is None: await self.wait_until_idle()
-                else: return await q.put((_ret_exc_, a, k))
+                else: await q.put((_ret_exc_, a, k)); return
             self._event.clear()
         try: await self._notify_helper(_ret_exc_, a, k); await self.handle_notifications()
         finally: self._event.set(); await self.handle_unsubscriptions()

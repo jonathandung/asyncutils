@@ -1,7 +1,7 @@
 '''| Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes, and memory maps.
-| Does not depend on :mod:`aiofiles` or any such library, using executors as determined by the module configuration.
+| Does not depend on `aiofiles <https://pypi.org/p/aiofiles>`__ or any such library, using executors as determined by the module configuration.
 | This library is not designed to do I/O operations, and the functionality in this submodule is far from comprehensive.
-| See `aiostream` or similar for that.'''
+| See `aiostream <https://aiostream.readthedocs.io/en/stable>`__ or similar for that.'''
 from ._internal.prots import HashAlgorithm, MemoryMappedFile, Openable, OpenFiles, OpenRV, Reader, Writer
 from .config import Executor
 from .mixins import LoopContextMixin
@@ -84,7 +84,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     def __del__(self) -> None: ...
     async def copy_file(self, srcp: Openable, destp: Openable, *, flush: bool=...) -> None: '''Copy the contents of the file at ``srcp`` into that at ``destp`` asynchronously and flush it if ``flush`` is ``True``. Uses :meth:`open` and :meth:`create` internally.'''
     async def checksum(self, path: Openable, alg: HashAlgorithm=...) -> str:
-        '''Compute a checksum from the file at ``path`` using the specified algorithm (default :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
+        '''Compute a checksum from the file at ``path`` using the specified algorithm (default :data:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
 
         .. version-changed:: 0.9.8
           Started passing `usedforsecurity=False` to the :func:`hashlib.new` constructor to bypass FIPS restrictions, such that broken algorithms like
@@ -109,7 +109,7 @@ class MemoryMappedIOManager(LoopContextMixin):
     async def approx_memory_usage(self) -> int: '''Compute the approximate memory used by the currently open memory maps in bytes.'''
     async def bulk_read[O: Openable](self, file_offsets: Mapping[O, Iterable[tuple[int, int]]]) -> dict[O, list[bytes]]: '''Read from each file at their corresponding offsets as specified by the value in the ``file_offsets`` mapping, which should be an iterable of tuples ``(offset, size)`` or ``None`` if the whole file is to be read.'''
     async def bulk_write(self, file_data: Mapping[Openable, Iterable[tuple[bytes, int]]]) -> None: '''Write into each file at their corresponding offsets as specified by the value in the ``file_data`` mapping, which should be an iterable of tuples ``(data, offset)``.'''
-    async def bulk_checksum[O: Openable](self, paths: Iterable[O], alg: HashAlgorithm=...) -> dict[O, str]: '''Compute checksums from the files at ``paths`` using the specified algorithm, defaulting to :const:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The same remarks from :meth:`checksum` apply here.'''
+    async def bulk_checksum[O: Openable](self, paths: Iterable[O], alg: HashAlgorithm=...) -> dict[O, str]: '''Compute checksums from the files at ``paths`` using the specified algorithm, defaulting to :data:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The same remarks from :meth:`checksum` apply here.'''
     async def bulk_copy(self, pairs: Iterable[tuple[Openable, Openable]]) -> None: '''Copy the contents of each file in the first position of the tuples in ``pairs`` into the file in the second position asynchronously. If you have a dictionary, pass in its items view.'''
     async def bulk_resize(self, sizes: Mapping[Openable, int]) -> None: '''Resize each file at the keys of ``sizes`` to the corresponding value asynchronously.'''
     async def compact_files(self, paths: Iterable[Openable]) -> None: '''Reduce the size of each file at ``paths`` by truncating the trailing null bytes asynchronously.'''

@@ -6,8 +6,8 @@ def run(argv: Iterable[str]|None=...) -> int|None:
     | executable name as the first item. Otherwise, :data:`sys.argv` is used.
     | An attempt will be made to parse all arguments and the program will exit entirely on an unrecognized option.
     | See :func:`tools.get_cmd_help()` for detailed usage.
-    | If an error somehow escapes the console and the `pdb` option is enabled, ``None`` will be returned after calling the post-mortem debugger
-    | on its traceback.
+    | If an error somehow escapes the console and the `pdb` option is enabled, ``None`` will be returned after calling the post-mortem
+    | debugger on its traceback.
 
     .. important::
       If you call this function manually, since a daemon thread was spun up to execute the code in the console, it may still be kept alive by

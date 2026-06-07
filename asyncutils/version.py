@@ -21,7 +21,7 @@ class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return cls._make((major, minor, patch))
     def __neg__(self): return __class__(*map(int.__neg__, self))
 @a
-class VersionInfo(str): # noqa: FURB189
+class VersionInfo(str):
     __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
@@ -92,6 +92,7 @@ class VersionInfo(str): # noqa: FURB189
     def compatible(self, o, /, majtol=0, mintol=None): return majtol is None or (abs(self[0]-o[0]) <= majtol and (mintol is None or abs(self[1]-o[1]) <= mintol))
     representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (_hash, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
 def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
+    # ruff: disable[RET502]
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
     elif T is complex: o = o.real, o.imag, 0
@@ -108,6 +109,7 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
             if not c(o): raise E.VersionNormalizerTypeError(f, o)
     elif not c(o): return
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
+    # ruff: enable[RET502]
 def normalize(o, /, _=E.VersionNormalizerMissing):
     if (r := normalize_allow_unimplemented(o)): return r
     raise _(o)

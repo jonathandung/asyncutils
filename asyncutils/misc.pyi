@@ -19,7 +19,7 @@ class StateMachine:
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
-    '''| ``n``, which defaults to :const:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
+    '''| ``n``, which defaults to :data:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
     | concurrently running awaitables.
     | ``ret_exc`` is passed to :func:`asyncio.gather` as the ``return_exceptions`` argument.'''
 class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncContextMixin[CallbackAccumulator[T, P]]):
@@ -62,8 +62,8 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
         '''All arguments are optioanl:
 
-        * ``ttl``: Time-to-live in seconds; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
-        * ``refresh``: Time before TTL expires to begin the refresh; default :const:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
+        * ``ttl``: Time-to-live in seconds; default :data:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
+        * ``refresh``: Time before TTL expires to begin the refresh; default :data:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         * ``processor``: Error handler that takes two arguments ``(exc, was_batched)``, where ``exc`` is the exception occurred and
         * ``was_batched`` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         * ``default_loader``: The loader to load values from keys for which specific loaders have not been registered.'''

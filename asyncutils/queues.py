@@ -200,9 +200,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     @property
     def utilization_rate(self): return self.qsize()/self.maxsize
     def pushpop_nowait(self, item, raising=True):
-        if self.is_shutdown:
-            if raising: raise D.QueueShutDown
-            return
+        if self.is_shutdown: raise D.QueueShutDown
         if self.empty():
             if raising: raise D.QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
@@ -211,9 +209,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
             r = self.get_nowait(); self.put_nowait(item); return r
         self.put_nowait(item); return self.get_nowait()
     def poppush_nowait(self, item, raising=True):
-        if self.is_shutdown:
-            if raising: raise D.QueueShutDown
-            return
+        if self.is_shutdown: raise D.QueueShutDown
         if self.empty():
             if raising: raise D.QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)

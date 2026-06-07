@@ -67,12 +67,12 @@ class CircuitBreaker:
         | If ``name`` is passed, use it as its name; return a function wrapping ``f`` otherwise, deriving the name of the circuit breaker from the function.
         | This derivation follows exactly one level of ``__wrapped__``-based wrapping after retrieving the :attr:`~method.__func__` attribute if present.
         | Pass exceptions that are expected to happen through the ``exc`` parameter.
-        | When the decorated function fails more than ``max_fails`` times (default :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker
+        | When the decorated function fails more than ``max_fails`` times (default :data:`context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker
         | triggers (opens the circuit, so to say) and disallows further calls of the wrapped functions by throwing an exception.
-        | This state persists until the ``reset`` timeout expires (default :const:`context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the
+        | This state persists until the ``reset`` timeout expires (default :data:`context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the
         | half-open state.
         | If the function completes successfully when the breaker is half-open under ``max_half_open_calls`` (default
-        | :const:`context.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS`) tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
+        | :data:`context.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS`) tries, the circuit closes automatically. Otherwise, the circuit reopens.'''
     def __call__[T, **P](self, f: Callable[P, Awaitable[T]], /, *, timer: Timer=..., default: T=...) -> Callable[P, CoroutineType[Any, Any, T]]:
         '''| Apply the circuit breaker to a function ``f`` returning an awaitable, and return a wrapper function with the same signature that
         | strictly returns coroutines.
@@ -117,12 +117,12 @@ class DynamicThrottle:
     '''An async context manager used to limit the rate of a function being called. See also: :class:`func.RateLimited`, :class:`locks.AdvancedRateLimit`'''
     def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):
         '''| ``init_rate`` (required): The initial rate in calls per second.
-        | ``min_rate``: The minimum rate; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE`.
-        | ``max_rate``: The maximum rate; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE`.
-        | ``window``: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_WINDOW`.
-        | ``ubound``: Lower bound of the ratio successes: total calls such that the rate is multiplied by ``ufactor`` (default :const:`context.DYNAMIC_THROTTLE_DEFAULT_UFACTOR`) and clamped to ``min_rate`` and ``max_rate``; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_UBOUND`.
-        | ``lbound``: Upper bound of the above ratio such that the rate is multiplied by ``lfactor`` (default :const:`context.DYNAMIC_THROTTLE_DEFAULT_LFACTOR`) and clamped similarly; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_LBOUND`.
-        | ``jitter``: The jitter in calculation of the wait time before the context can enter; default :const:`context.DYNAMIC_THROTTLE_DEFAULT_JITTER`.
+        | ``min_rate``: The minimum rate; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE`.
+        | ``max_rate``: The maximum rate; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE`.
+        | ``window``: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_WINDOW`.
+        | ``ubound``: Lower bound of the ratio successes: total calls such that the rate is multiplied by ``ufactor`` (default :data:`context.DYNAMIC_THROTTLE_DEFAULT_UFACTOR`) and clamped to ``min_rate`` and ``max_rate``; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_UBOUND`.
+        | ``lbound``: Upper bound of the above ratio such that the rate is multiplied by ``lfactor`` (default :data:`context.DYNAMIC_THROTTLE_DEFAULT_LFACTOR`) and clamped similarly; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_LBOUND`.
+        | ``jitter``: The jitter in calculation of the wait time before the context can enter; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_JITTER`.
         | ``timer``: Function to return current time as a float.
         | ``rand``: Function that takes a float (the jitter) and returns a random number within the interval ``jitter`` and ``-jitter``.'''
     async def __aenter__(self) -> None: '''Wait for the time as computed by the throttler, with some jitter applied, to pass, such that the rate is maintained.'''
