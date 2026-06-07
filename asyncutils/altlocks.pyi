@@ -114,7 +114,7 @@ class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     @property
     def n_waiting(self) -> int: '''Number of parties currently waiting.'''
 class DynamicThrottle:
-    '''An async context manager used to limit the rate of a function being called. See also: :class:`func.RateLimited`, :class:`locks.AdvancedRateLimit`'''
+    '''An async context manager used to limit the rate of a function being called. See also: :class:`~asyncutils.func.RateLimited`, :class:`~asyncutils.locks.AdvancedRateLimit`'''
     def __init__(self, init_rate: float, min_rate: float=..., max_rate: float=..., window: int|None=..., *, ubound: float|None=..., lbound: float|None=..., ufactor: float|None=..., lfactor: float|None=..., jitter: float|None=..., timer: Timer=..., rand: Callable[[float], float]=...):
         '''| ``init_rate`` (required): The initial rate in calls per second.
         | ``min_rate``: The minimum rate; default :data:`context.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE`.

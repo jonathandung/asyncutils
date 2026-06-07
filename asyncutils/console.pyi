@@ -12,7 +12,7 @@ from typing import Any, ClassVar, Literal, Self, TypeGuard, final, overload
 import sys
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or ``_pyrepl.console.InteractiveColoredConsole`` if available. It is inspired by :mod:`asyncio.__main__` and highly adaptable.'''
+    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or ``_pyrepl.console.InteractiveColoredConsole`` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representating the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
@@ -66,17 +66,17 @@ class ConsoleBase(InteractiveConsole, ABC):
         | ``description``: description of the module using the console
         | ``default_local_exit``, ``disallow_subclass_msg``, ``native_handler``, ``other_handlers``, ``additional_interrupt_hooks``, ``additional_memerr_hooks``: see above
         | ``template``: the console banner to use, with %-placeholders for name, version and description
-        | Additional keyword arguments are used to :meth:`substitute %-placeholders in template <str.__mod__>`.'''
+        | Additional keyword arguments are used to :doc:`substitute %-placeholders in template <python:old-string-formatting>`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None:
         '''| Run ``code``, an instance of :class:`types.CodeType`.
         | ``futimpl`` is a function that returns an instance of :class:`concurrent.futures.Future`.
         | ``dont_show_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
-        | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`call_soon_threadsafe` instead of :meth:`call_soon`.'''
+        | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`~asyncio.loop.call_soon_threadsafe` instead of :meth:`~asyncio.loop.call_soon`.'''
     def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # ty: ignore[invalid-method-override]
     def run(self, *, exitmsg: str=..., threadname: str=..., max_memerrs: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''| Run the console and return the integer return code.
-        | The strings ``exitmsg`` and ``threadname`` should support `%`-formatting, the placeholder being the module name.
+        | The strings ``exitmsg`` and ``threadname`` should support %-formatting, the placeholder being the module name.
         | Pass a negative value for ``max_memerrs`` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
         | If ``always_install_completer`` is True, set the completer on readline as long as readline is available.
         | Pass ``True`` for ``suppress_asyncio_warnings`` and ``suppress_unawaited_coroutine_warnings`` to silence asyncio logging and warnings for garbage-collected coroutines not being awaited respectively.

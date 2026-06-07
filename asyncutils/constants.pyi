@@ -11,7 +11,7 @@ POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]
 '''Equivalent to ``frozenset(POSSIBLE_EXECUTORS)``, so that there can be faster membership testing.'''
 class sentinel_base:
-    '''Base class for sentinel values. To support versions below Python 3.15, we cannot make use of the :pep:`661` built-in :class:`sentinel` type, and this class offers extra methods anyway.'''
+    '''Base class for sentinel values. To support versions below Python 3.15, we cannot make use of the :pep:`661` built-in ``sentinel`` type, and this class offers extra methods anyway.'''
     def __new__(cls, name: str=...) -> Self: ...
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: '''Support for pickling.'''
     def __set_name__(self, owner: type, name: str, /) -> None: '''Bind the sentinel to a class and assign its name, if no arguments were passed to the constructor.'''

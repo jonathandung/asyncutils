@@ -1,6 +1,6 @@
 '''Functions related to asynchronous signal handling.'''
 from ._internal.prots import ExcType
-from asyncio.events import AbstractEventLoop
+from asyncio import AbstractEventLoop
 from collections.abc import Awaitable, Callable, Iterable
 from logging import Logger
 from signal import Signals

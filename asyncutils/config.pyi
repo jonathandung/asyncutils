@@ -1,6 +1,6 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
 from ._internal.prots import PartialInterface, ExcType
-from concurrent.futures._base import Executor as _
+from concurrent.futures import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload
 __all__ = 'Executor', 'basic_repl', 'debug', 'debugging', 'get_past_logs', 'loaded_all', 'logging_to', 'max_memerrs', 'pdb', 'set_logger_level', 'silent'
@@ -13,7 +13,7 @@ class Executor(_, PartialInterface):
       or policy thereof, and using a custom class that does not follow the interface, but that may be too hacky and fragile.
     .. tip::
       If you know your application only uses a specific executor, import this symbol at runtime and import the actual class in the stub or in an
-      `if TYPE_CHECKING:` block where applicable to help type checkers.'''
+      ``if TYPE_CHECKING:`` block where applicable to help type checkers.'''
 class debugging:
     '''A context manager used to enter and exit debug mode, ensuring restoration of the original level if the level has not been modified externally within the context using :func:`set_logger_level`.'''
     @property
@@ -24,7 +24,7 @@ class debugging:
     def orig_name(self) -> str|None: '''The original logger level name as a string, before this context was entered, or ``None`` if it was not.'''
     @property
     def entered(self) -> bool: '''Whether the context is entered.'''
-    def __enter__(self) -> Self: '''Start debugging. More output is produced; where to depends on the user's own configuration, accessible via :data:`logging_to` and :attr:`debug.level`.'''
+    def __enter__(self) -> Self: '''Start debugging. More output is produced; where to depends on the user's own configuration, accessible via :data:`logging_to` and ``debug.level``.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
@@ -46,7 +46,7 @@ pdb: Final[bool]
 logging_to: Final[str]
 '''The name (path; possibly relative) of the log file currently used by this library as a string, with four exceptions:
 
-* `'NULL'`: no logging is taking place
-* `'MEMORY'`: the logs are not going to a physical file but can be retrieved by :func:`get_past_logs`
-* `'STDOUT'`: logging is going to :data:`sys.stdout`
-* `'STDERR'`: logging is going to :data:`sys.stderr` (following the default and fallback behaviour of :mod:`logging`)'''
+* ``'NULL'``: no logging is taking place
+* ``'MEMORY'``: the logs are not going to a physical file but can be retrieved by :func:`get_past_logs`
+* ``'STDOUT'``: logging is going to :data:`sys.stdout`
+* ``'STDERR'``: logging is going to :data:`sys.stderr` (following the default and fallback behaviour of :mod:`logging`)'''
