@@ -1,0 +1,147 @@
+'''| A versioning scheme for :mod:`asyncutils`. Inspired by `torch.torch_version <https://github.com/pytorch/pytorch/blob/main/torch/torch_version.py>`__, but with quite some differences.
+| :mod:`asyncutils` uses a subset of SemVer.'''
+from ._internal.prots import IntCompatible, Openable, ValidSlice
+from collections.abc import Callable, Iterable, Iterator
+from typing import Literal, NamedTuple, NoReturn, Self, final, overload
+__all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
+@final
+class VersionInfo(str):
+    @overload
+    def __new__(cls, from_: object, /) -> Self: ...
+    @overload
+    def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
+    def __hash__(self) -> int:
+        '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
+        | Of course, since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.'''
+    def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
+    def __len__(self) -> Literal[3]: '''``len((major, minor, patch)) == 3``.'''
+    @overload
+    def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
+    @overload
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: # ty: ignore[invalid-method-override]
+        '''Depending on the value of ``idx``, corresponds to the following properties:
+
+        * 0 -> :attr:`major`
+        * 1 -> :attr:`minor`
+        * 2 -> :attr:`patch`
+
+        Slicing works like the version object is a tuple of these three items, which is also accessible as :attr:`parts`.'''
+    def __lt__(self, other: object, /) -> bool: '''Whether this version precedes the other as a version.'''
+    def __le__(self, other: object, /) -> bool: '''Whether this version precedes or is equal to the other as a version.'''
+    def __gt__(self, other: object, /) -> bool: '''Whether this version succeeds the other as a version.'''
+    def __ge__(self, other: object, /) -> bool: '''Whether this version succeeds or is equal to the other as a version.'''
+    def __eq__(self, other: object, /) -> bool: '''Whether this version is the same as the other.'''
+    def __ne__(self, other: object, /) -> bool: '''Whether this version is different than the other.'''
+    def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
+    @overload
+    def __round__(self, ndigits: int, /) -> NoReturn: ...
+    @overload
+    def __round__(self, ndigits: Literal[1, 2, 3]|None=..., /) -> Self: '''Support for rounding.'''
+    @overload
+    def __add__(self, n: int, /) -> Self: ...
+    @overload
+    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by ``n`` patches or the delta ``delta``.''' # ty: ignore[invalid-method-override]
+    @overload
+    def __radd__(self, n: int, /) -> Self: ...
+    @overload
+    def __radd__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by ``n`` patches or the delta ``delta``.'''
+    @overload
+    def __sub__(self, n: int, /) -> Self: ...
+    @overload
+    def __sub__(self, delta: VersionDelta, /) -> Self: ...
+    @overload
+    def __sub__(self, other: Self, /) -> VersionDelta: '''Return this version decremented by ``n`` patches or the delta ``delta``, or the delta between ``self`` and ``other``.'''
+    def __setattr__(self, name: str, value: object, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
+    def __format__(self, format_spec: Literal['x', 'hex', 'o', 'oct', 'b', 'bin', 'd', 'dec', '0', 'major', 'maj', '1', 'minor', 'min', '2', 'patch', 's', 'short', 'l', 'long', 'a', 'ascii', 'c', 'chars', 't', 'tuple', 'h', 'hash', 'n', 'majmin'], /) -> str: # ty: ignore[invalid-method-override]
+        r'''Format specification and corresponding return value: (using version 123.4.0 as example):
+
+        * x, hex: ``'0x7b0400'``
+        * o, oct: ``'0o36602000'``
+        * b, bin: ``'0b11110110000010000000000'``
+        * d, dec: ``'8061952'``
+        * 0, major, maj: ``'123'``
+        * 1, minor, min: ``'4'``
+        * 2, patch: ``'0'``
+        * s, short: ``'123.4'``
+        * l, long: ``'asyncutils version 123.4.0'``
+        * a, ascii: ``'{\x04\x00'``
+        * c, chars: ``'{\x04\x00'``
+        * t, tuple: ``'(123, 4, 0)'``
+        * h, hash: ``'116380397'``
+        * n, majmin: ``'123.4'``'''
+    def __int__(self) -> int: '''Assuming :attr:`minor` and :attr:`patch` are less than 256, pack the parts into an integer, which can be larger than 24 bits to fit the major version. :exc:`OverflowError` is raised if not possible.'''
+    def __index__(self) -> int: '''The same as :meth:`__int__`.'''
+    def __floor__(self) -> int: '''Return the major version.'''
+    def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
+    def __ceil__(self) -> int: '''Return the major version, adding one if there is a minor or patch version.'''
+    def __float__(self) -> float: '''Assumes :attr:`minor` and :attr:`patch` are less than 100.'''
+    def __replace__(self, major: int=..., minor: int=..., patch: int=...) -> Self: ...
+    def _replace(self, major: int=..., minor: int=..., patch: int=...) -> Self: '''Implemented to satisfy the named tuple interface.'''
+    def to_complex(self) -> complex: '''Loses the patch version. Since this class is a :class:`str` subclass, an implementation of :meth:`~object.__complex__` will not be recognized.'''
+    def replace_parts(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Another instance of this class with the specified parts.'''
+    def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
+    def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: '''Whether this version is compatible with the other, given the major and minor tolerances.'''
+    def next_patch(self) -> Self: '''The patch version following this version.'''
+    def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
+    def next_major(self) -> Self: '''The major version following this version, with minor and patch 0.'''
+    def shelve(self, path: Openable, /, key: int=...) -> None: '''Store this version into the specified ``path``, non-cryptographically transforming the bytes with ``key``, which can be any integer.'''
+    def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
+    def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''
+    @classmethod
+    def from_hash(cls, hashed: int) -> Self: '''Reconstruct the version from its hash.'''
+    @classmethod
+    def from_rep(cls, rep: str) -> Self: '''Parse the string representation of a version to get the version back.'''
+    @classmethod
+    def unshelve(cls, path: Openable, /, key: int=...) -> Self: '''Recover a stored version from ``path``. A wrong key would usually raise an error, and even if it doesn't, the version would be wrong.'''
+    @classmethod
+    def get_current_version(cls) -> Self: '''Return the current version number of :mod:`asyncutils`; equivalent to :data:`asyncutils.__version__`.'''
+    @property
+    def representation(self) -> str: '''String representation of the version for pretty printing, in the form ``asyncutils --version`` displays.'''
+    @property
+    def is_api_unstable(self) -> bool: '''Return whether the version is before v1.0.'''
+    @property
+    def parts(self) -> tuple[int, int, int]: '''The tuple ``(major, minor, patch)``.'''
+    @property
+    def major(self) -> int: '''The major part of the version.'''
+    @property
+    def minor(self) -> int: '''The minor part of the version.'''
+    @property
+    def patch(self) -> int: '''The patch part of the version.'''
+@final
+class VersionDelta(NamedTuple):
+    '''| A named tuple-like class representing the difference between versions.
+    | Not actually created by :func:`collections.namedtuple`, but implements its methods.
+    | Can be taken by the + or - operators.'''
+    major: int = ...
+    '''The major part of the version.'''
+    minor: int = ...
+    '''The minor part of the version.'''
+    patch: int = ...
+    '''The patch part of the version.'''
+    def __replace__(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Alias for :meth:`~collections.somenamedtuple._replace`.'''
+    def __floor__(self) -> int: '''The major part of the delta.'''
+    def __trunc__(self) -> int: '''The same as :meth:`__floor__`.'''
+    def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
+def normalize(o: object, /) -> tuple[int, int, int]:
+    '''| Return a :class:`tuple` of three integers ``(major, minor, patch)`` from the information provided by the object as extracted by registered normalizers.
+    | A normalizer can return ``None`` for unnormalizable objects, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to that object.
+    | If there is fault in the normalizer (it raises an exception or returns a non-iterable), the normalizer is removed and the error propagated.
+
+    .. note::
+      Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
+      This takes precedence over any registered normalizers, but those can still be accessed with :func:`dispatch_normalizer`.
+    .. note:: For iterables, the default behaviour is to take the first three items and pad zeros behind if necessary.'''
+def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: '''Same as :func:`normalize`, but returns ``None`` if a normalizer is not found.'''
+@overload
+def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: ...
+@overload
+def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: '''Registers a custom normalizer for the object or type; returns success, with failure resulting from a normalizer having already been registered.'''
+@overload
+def unregister_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
+@overload
+def unregister_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''Unregister the normalizer for the object or type and return it if any.'''
+@overload
+def dispatch_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
+@overload
+def dispatch_normalizer[T](o: T, /) -> Callable[[T], Iterable[int]]|None: '''Return the normalizer to be used for the object or type.'''
+def autogenerate_normalizers() -> bool: '''Registers normalizers for :class:`decimal.Decimal` and :class:`fractions.Fraction`. Return whether both normalizers were successfully registered, including re-registration of the same normalizer.'''

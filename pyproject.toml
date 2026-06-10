@@ -1,0 +1,161 @@
+[build-system]
+requires = ["uv_build>=0.11.19,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "py-asyncutils"
+version = "0.9.12"
+authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
+maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
+description = "A library containing versatile tools to well complement the asyncio framework."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE", "AUTHORS.md"]
+keywords = ["asynchronous", "asyncio", "convenient", "fast", "feature-rich", "helpers", "io", "library", "light", "utilities"]
+classifiers = ["Environment :: Console", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Unix Shell", "Programming Language :: Python :: Implementation :: CPython", "Programming Language :: Python :: Implementation :: GraalPy", "Programming Language :: Python :: Free Threading :: 2 - Beta", "Operating System :: OS Independent", "Development Status :: 4 - Beta", "Intended Audience :: Developers", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Utilities", "Framework :: AsyncIO", "Framework :: Pytest", "Framework :: Sphinx", "Natural Language :: English", "Typing :: Typed"]
+
+[project.urls]
+Homepage = "https://jonathandung.github.io/asyncutils"
+Documentation = "https://asyncutils.readthedocs.io/en/stable/index.html"
+Repository = "https://github.com/jonathandung/asyncutils.git"
+Issues = "https://github.com/jonathandung/asyncutils/issues"
+Changelog = "https://asyncutils.readthedocs.io/en/stable/changelog.html"
+Download = "https://pypi.org/project/py-asyncutils/#files"
+"Release Notes" = "https://github.com/jonathandung/asyncutils/releases/tag/0.9.12"
+
+[project.scripts]
+asyncutils = "asyncutils.cli:run"
+autils = "asyncutils.cli:run"
+
+[project.optional-dependencies]
+all = ["py-asyncutils[dev,executors,pconf,themes,ptw]==0.9.12"]
+dev = ["pre-commit>=4.6.0", "py-asyncutils[themes,test]==0.9.12"]
+docs = ["Sphinx>=9.1.0", "sphinx-autoapi>=3.8.0", "sphinx-copybutton>=0.5.2", "sphinx-notfound-page>=1.1.0", "sphinx-lint>=1.0.2", "sphinxext-opengraph[social-cards]>=0.13.0", "myst-parser>=5.1.0"]
+themes = ["furo>=2025.12.19", "sphinx-book-theme>=1.2.0", "py-asyncutils[docs]==0.9.12"]
+executors = ["deadpool-executor>=2026.4.1", "executorlib>=1.9.3", "ipyparallel>=9.2.0", "loky>=3.5.6", "Pebble>=5.2.0"]
+json5 = ["json5>=0.14.0"]
+pconf = ["hjson>=3.1.0", "json-with-comments>=1.2.10", "PyYAML>=6.0.3", "xmltodict>=1.0.4", "py-asyncutils[json5]==0.9.12"]
+ptw = ["pytest-watch>=4.2.0"]
+test = ["pytest>=9.0.3", "pytest-asyncio>=1.4.0", "pytest-asyncio-cooperative>=0.40.0", "pytest-cov>=7.1.0", "pytest-local-badge>=1.1.1", "pytest-sugar>=1.1.1", "py-asyncutils[json5]==0.9.12"]
+
+[tool.setuptools]
+packages = ["asyncutils", "asyncutils._internal"]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = ["-v", "--tb", "short", "-W", "ignore::pytest.PytestConfigWarning", "--cov", "asyncutils", "--cov-report", "term-missing", "--cov-fail-under", "59"]
+minversion = "9.0.3"
+required_plugins = ["pytest-cov>=7.1.0", "pytest-local-badge>=1.1.1", "pytest-sugar>=1.1.1"]
+asyncio_default_fixture_loop_scope = "module"
+asyncio_default_test_loop_scope = "module"
+
+[tool.coverage.run]
+source = ["asyncutils"]
+omit = ["*/__main__.py", "*/_internal/compat.py", "*/_internal/py312.py", "*/_internal/py313.py", "*/cli.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_also = ["if __name__ == '__main__':", "raise NotImplementedError", "^\\s*raise$", "def __repr__\\(self.*\\):", "cover: off(?s:.)*?cover: on", "def __init_subclass__\\(cls, /, \\*\\*_\\):"]
+
+[tool.ruff]
+target-version = "py312"
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+extend-exclude = ["docs/source/conf.py"]
+required-version = ">=0.15.16"
+
+[tool.ruff.lint]
+ignore = ["ASYNC109", "B904", "B905", "E226", "E227", "E228", "E252", "E261", "E301", "E302", "E305", "E306", "E401", "E501", "E701", "E702", "E741", "E743", "FURB189", "N803", "N806", "N812", "N818", "PLC0415", "PLC2701", "PLC2801", "PLW1514", "RET503", "RUF067", "TRY003", "TRY300"]
+select = ["A", "ARG", "ANN", "ASYNC", "B", "BLE001", "COM819", "C4", "C901", "E", "EM103", "ERA001", "EXE", "F", "FIX002", "FLY002", "FURB", "G", "ISC", "INP001", "LOG", "N", "PERF", "PIE", "PGH004", "PL", "PYI", "Q", "RET", "RSE102", "RUF", "S", "SIM", "SLOT", "T100", "T201", "TID252", "TRY", "UP", "W", "YTT"]
+logger-objects = ["asyncutils._internal.log"]
+preview = true
+typing-extensions = false
+
+[tool.ruff.lint.per-file-ignores]
+"**/*.py" = ["ANN", "FURB180", "PYI"]
+"**/*.pyi" = ["PYI021", "PYI036", "TID252"]
+"**/__init__.pyi" = ["F403", "F405"]
+"asyncutils/con*" = ["N801"]
+"asyncutils/iterclasses.py*" = ["N801"]
+"asyncutils/_internal/compat.py*" = ["F403", "F405"]
+"asyncutils/_internal/py31*" = ["E402"]
+"asyncutils/_internal/py31*.pyi" = ["S101"]
+"tests/**" = ["ARG001", "B018", "F401", "F403", "F405", "N", "PLC2701", "PLR2004", "RUF018", "RUF029", "RUF043", "S"]
+"asyncutils/__init__.py" = ["E402"]
+"asyncutils/_internal/compat.py" = ["F821", "PLC3002", "PLR2004"]
+"asyncutils/_internal/unparsed.py" = ["B020"]
+"asyncutils/_internal/py312.py" = ["ARG002", "SIM105"]
+"asyncutils/base.py" = ["B008", "E722", "RUF029"]
+"asyncutils/config.py" = ["BLE001", "F821", "SIM115"]
+"asyncutils/console.py" = ["BLE001", "PLR2004"]
+"asyncutils/exceptions.py" = ["PLW0603"]
+"asyncutils/func.py" = ["E722", "PLR0913"]
+"asyncutils/iotools.py" = ["PLR6301", "PLW0603", "PLW2901"]
+"asyncutils/iters.py" = ["N801", "PLR2004", "RUF029"]
+"asyncutils/locksmiths.py" = ["E722", "PLR6301"]
+"asyncutils/properties.py" = ["PLW3201"]
+"asyncutils/queues.py" = ["A001", "ARG002", "B008", "E722", "PLR6301"]
+"asyncutils/version.py" = ["B008", "FURB101", "FURB103", "PLR2004"]
+"asyncutils/_internal/log.pyi" = ["A001", "A002", "N802"]
+"asyncutils/func.pyi" = ["N801"]
+"asyncutils/queues.pyi" = ["A001", "PYI011"]
+"tests/test_signals.py" = ["RUF006"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["getattr", "globals", "_functools.partial", "__import__", "classmethod", "type", "collections.namedtuple", "asyncutils.exceptions.StateCorrupted", "sys.intern", "asyncutils.IgnoreErrors"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+docstring-quotes = "single"
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+
+[tool.ruff.lint.mccabe]
+max-complexity = 22
+
+[tool.ruff.lint.pyflakes]
+allowed-unused-imports = ["asyncutils._internal.submodules"]
+
+[tool.ruff.lint.pylint]
+allow-dunder-method-names = ["__replace__", "__setup__", "__cleanup__"]
+max-returns = 6
+max-args = 11
+max-positional-args = 6
+max-public-methods = 41
+max-branches = 16
+max-nested-blocks = 5
+max-statements-in-try = 8
+max-statements = 54
+
+[tool.ty.analysis]
+allowed-unresolved-imports = ["_collections.**", "_functools.**", "yaml.**", "asyncio.futures._chain_future", "asyncutils.config._randinst", "asyncutils.constants._NO_DEFAULT"]
+respect-type-ignore-comments = false
+
+[tool.ty.environment]
+python-version = "3.12"
+python-platform = "all"
+
+[tool.ty.rules]
+all = "error"
+missing-override-decorator = "ignore"
+
+[tool.ty.src]
+include = ["asyncutils"]
+
+[[tool.ty.overrides]]
+include = ["**/*.py"]
+
+[tool.ty.overrides.rules]
+missing-type-argument = "ignore"
+
+[tool.uv]
+required-version = ">=0.11.19,<0.12"
+
+[tool.uv.build-backend]
+module-name = "asyncutils"
+module-root = ""

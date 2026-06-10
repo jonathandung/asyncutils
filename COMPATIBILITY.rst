@@ -1,0 +1,32 @@
+Compatibility
+=============
+
+.. version-added:: 0.9.1
+
+Python versions
+---------------
+
+We strive to have released versions support all Python versions actively maintained at the time of release, but due to logistical constraints and
+major syntactical reworks in 3.12, it would be very difficult to support Python 3.11 or below. This codebase is, however, future-proof, integrating
+modern features such as lazy imports non-intrusively and using the newest compatible syntax. Like most libraries with multiple submodules, we have a
+compatibility layer, which currently backports the :meth:`~asyncio.Queue.shutdown` method of :class:`asyncio.Queue` and the
+:data:`~functools.Placeholder` support in :func:`functools.partial`, albeit slower than the C version. We also can't port this package to PyPy
+because it is stuck on 3.11 and some internals crucial to how some utilities are written differ. However, the weaker promise to support all actively
+maintained versions of Python will be upheld; that is, users need not worry about support for the newest version and the one before it, along with
+the version the main branch corresponds to, which is the one in the development (alpha, beta, rc) phase. See :pep:`602` for a detailed explanation,
+and the `status of Python versions <https://devguide.python.org/versions>`__.
+
+Support matrix
+--------------
+
+===================== ===============
+asyncutils version    CPython version
+===================== ===============
+7.0 - 7.11            3.15+
+6.0 - 6.11            3.14+
+5.0 - 5.11            3.13+
+1.0 - 4.11            3.12+
+0.9.0 - 0.9.1x (beta) 3.12+
+0.8.18 - 0.8.28 (EOL) 3.12+
+0.8.0 - 0.8.17 (EOL)  3.14+
+===================== ===============

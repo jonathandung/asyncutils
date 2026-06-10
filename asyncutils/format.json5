@@ -1,0 +1,213 @@
+/* This file describes the intended format of the json files whose paths can be set as AUTILSCFGPATH to configure the behaviour of this module.
+The values associated with the keys are their defaults.
+Some keys can have various types, as detailed by the comments attached. */
+{
+  logging_to: "STDERR",
+  // string file path or integer file descriptor, to which the logging is dumped
+  // corresponds to -l/--log-to
+  no_log: false,
+  // disable logging; conflicts with logging_to if true
+  // corresponds to -n/--no-log
+  V: 0, // increase logging verbosity; corresponds to -V
+  Q: 0, // decrease logging verbosity; corresponds to -Q
+  // V and Q are not respected when running the console
+  executor: "thread",
+  /* choose the PEP 3148 executor class to use when required
+  refer to `tools.get_cmd_help` for possible values
+  corresponds to -e/--executor/-c/--custom-executor */
+  quiet: false,
+  // ask the console not to show introductory and closing text
+  // corresponds to -q/--quiet
+  basic_repl: false,
+  // run the console without any _pyrepl wrapping; not recommended
+  // corresponds to -b/--basic-repl
+  max_memerrs: 3,
+  // protect resource integrity by exiting the console on the MemoryError at the index after this
+  // corresponds to -m/--max-memerrs
+  debug: false,
+  // turn on debug mode by entering the global debug context manager
+  // incurs performance penalty due to excessive logging, so do not use outside testing
+  // corresponds to -d/--debug
+  load_all: false,
+  // load all submodules when the console starts; corresponds to -p/--load-all
+  seed: null,
+  // string, integer, float or bytestring literal to seed the module-global random device
+  // corresponds to -s/--seed
+  pdb: false,
+  // whether to bring the user into the pdb debugger on SystemExit with non-zero status from the console; corresponds to -P/--pdb
+  next_config: null,
+  /* string file path to the json to be used for the next time this module is to be configured
+  This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.
+  If null, the environment variable is unset entirely after reading this config.
+  Cycles can be created to switch between flags periodically.
+  Ensure AUTILSCFGPATH is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
+  in a previous config. By that logic, you should also remember to update this correctly when the config file is moved. */
+  context: { // configures individual submodules (contextual constants)
+    /* Essentially maps submodule names to objects like {utility1: {key1: value1, key2: value2, ...}}, utility2: {...}};
+    or if the utility has only one configurable parameter, there will be a key at the top level of a mapping above,
+    with the keys being sorted alphabetically. */
+    altlocks: {
+      circuit_breaker: {
+        default_max_fails: 3,
+        default_max_half_open_calls: 5,
+        default_reset: 30.0,
+      },
+      dynamic_throttle: {
+        default_jitter: 0.2,
+        default_lbound: 0.25,
+        default_lfactor: 0.75,
+        default_max_rate: 100.0,
+        default_min_rate: 1e-2,
+        default_ubound: 0.75,
+        default_ufactor: 1.25,
+        default_window: 100,
+      }
+    },
+    base: {
+      event_loop_base_flags: 0,
+      aiter_to_gen: {
+        default_allow_futures: true,
+        default_strict: false
+      },
+      iter_to_agen: {
+        default_may_create_executor: false,
+        default_strict: false,
+        default_use_existing_executor: false
+      }
+    },
+    buckets: {
+      token_bucket_default_consume_tokens: 1.0,
+      leaky_bucket: {
+        adjmap: [
+          [256, [0.15, 1.1, 0.85, 0.9]],
+          [128, [0.23, 1.2, 0.77, 0.81]],
+          [0, [0.3, 1.4, 0.7, 0.73]]
+        ],
+        default_acquire_tokens: 1.0,
+        default_ext_can_set_factor: true,
+        default_max_factor: 10.0,
+        default_min_factor: 0.1,
+        default_wait_for_tokens_tokens: 1.0,
+        wait_for_tokens_tick: 0.1
+      }
+    },
+    channels: {
+      event_bus: {
+        default_max_concurrent: 64,
+        publish_default_safe: true,
+        stream_default_buffer_size: 100,
+        stream_default_item_timeout: 3.0,
+        stream_default_timeout: 5.0
+      },
+      observable_default_ntimes_n: 1,
+      rendezvous_maintenance_interval: 30.0
+    },
+    compete: {convert_to_coro_iter_default_skip_invalid: true},
+    events: {
+      event_with_value: {
+        default_max_hist: 128,
+        default_recent: 5.0
+      }
+    },
+    func: {
+      benchmark: {
+        default_times: 3,
+        default_warmup: 0
+      },
+      retry: {
+        default_backoff: 2.0,
+        default_delay: 0.5,
+        default_jitter: 0.2,
+        default_max_delay: 30.0,
+        default_tries: 3
+      },
+      timer_default_precision: 7
+    },
+    io: {
+      memory_mapped_io_manager: {
+        default_checksum_alg: null, // a string
+        default_minimize_writes: true
+      }
+    },
+    iters: {
+      afrievalds_default_k: 2,
+      aonline_sorter_default_slow: false,
+      aunzip: {
+        default_max_qsize: 64,
+        default_put_batch: 16
+      },
+      merge_default_max_qsize: 0,
+      tee: {
+        default_put_exc: true,
+        default_max_qsize: 32
+      }
+    },
+    locks: {
+      advanced_rate_limit_default_tokens: 1.0,
+      dynamic_bounded_semaphore_default_value: 1,
+      priority_semaphore_default_value: 1
+    },
+    locksmiths: {locksmith_base_default_timeouts: [1.0, 0.1, null]},
+    misc: {
+      gather_with_limited_concurrency_default_max_concurrent: 8,
+      background_refresh_cache: {
+        default_refresh: 15.0,
+        default_ttl: 60.0
+      }
+    },
+    networking: {
+      line_protocol_default_buffer_size: 4096,
+      socket_transport_limits: [2048, 8192]
+    },
+    pools: {
+      advanced_pool: {
+        default_max_workers: 5,
+        default_min_workers: 1,
+        threshold_hi: 1.5,
+        threshold_lo: 0.5
+      },
+      connection_pool: {
+        default_max_life: 3600.0,
+        default_max_size: 10,
+        default_min_size: 1,
+        maintenance_interval: 30.0
+      }
+    },
+    processors: {
+      batch_processor: {
+        default_max_size: 128,
+        default_max_time: 1.0
+      },
+      bounded_batch_processor: {
+        default_batch_size: 10,
+        default_max_concurrent: 5
+      },
+      bulkhead: {
+        default_max_queue: 32,
+        default_max_rej: -1
+      }
+    },
+    queues: {
+      password_queue: {
+        default_get_from: "password",
+        default_put_from: "password"
+      }
+    },
+    rwlocks: {
+      aging_rwlock: {
+        default_read_priority_factor: -1.0,
+        default_write_priority_factor: -1.0
+      },
+      rwlock_default_prefer_writers: true
+    },
+    signals: {wait_for_signals_default_signals: [2, 15]},
+    util: {
+      dual_context_manager: {
+        default_may_create_executor: false,
+        default_strict: false,
+        default_use_existing_executor: true
+      },
+      semaphore_default_value: 1
+    }
+  }
+}

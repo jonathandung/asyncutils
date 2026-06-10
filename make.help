@@ -1,0 +1,19 @@
+Available targets:
+ help             - Show this help message
+ test             - Run tests, allowing up to TEST_MAXFAIL failures (default 3) since any more would likely mean an obvious error
+ test-with-badges - Run tests more strictly, once with pytest-asyncio-cooperative and once with pytest-asyncio, generating badges and coverage
+                    respectively; use as pre-push step only to update static SVGs
+ clean            - Clean build artifacts and caches
+ install          - Install the package in editable mode with development dependencies; assumes a virtual environment is present
+ install-system   - Install the package in editable mode without a virtual environment
+ install-silent   - The above without output
+ venv             - Create a virtual environment using uv
+ ruff             - Run the ruff linter
+ watch            - Watch for changes and run tests automatically; requires pytest-watch
+ type-check       - Run ty for type checking
+ rmclog           - Remove existing changelog file
+ clog             - Generate changelog from git history to file named ChangeLog
+ publish          - Publish the package to PyPI, assuming version is already bumped, regenerating help files as well
+ pre-commit       - Run pre-commit hooks on all files
+Note: Some targets require additional tools to be installed, and some other targets will automatically install the uv package manager.
+More targets may be added in the future on popular demand, so do keep updated.
