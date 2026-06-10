@@ -2,8 +2,7 @@
 '''| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
 | To avoid confusion with builtin modules, this module is named ``prots``, which may be less than descriptive, but it is what it is.
 | Neither this module nor any of its symbols exist at runtime.
-| Thus, export nothing intentionally and prompt type checkers to emit errors when symbols here are used with
-| ``from asyncutils._internal.prots import *``.
+| Thus, we export nothing intentionally and prompt type checkers to emit errors when symbols here are used with ``from asyncutils._internal.prots import *``.
 
 .. tip:: For inline type annotations, wrap the imports in ``if TYPE_CHECKING:`` blocks.
 .. tip::
@@ -13,7 +12,7 @@
 from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
-import sys, ty_extensions
+import sys, ty_extensions as tyx
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
 from asyncio import AbstractEventLoop, Future
 from concurrent.futures import Future as SyncFuture
@@ -118,8 +117,7 @@ class PartialInterfaceMeta(type):
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
     '''| Base class for partial interfaces.
-    | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes
-    | that may actually exist on the object or class.
+    | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may actually exist on the object or class.
     | This is a simplistic fix that asks type checkers to assume those attributes always exist and make no attempt to infer their '''
     def __init__(self, *a: object, **k: object): ...
     def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
@@ -150,8 +148,9 @@ type SigPatcherArg = tuple[Wrapper, str]
 '''The type of a positional argument passed to a signature-patching function in :mod:`~asyncutils._internal.patch`.'''
 type Middleware = Callable[[str, Any], Any]
 '''Represents a middleware accepted by :class:`~asyncutils.channels.EventBus`.'''
-type NonGroupExc = ty_extensions.Intersection[BaseException, ty_extensions.Not[BaseExceptionGroup]]
+type NonGroupExc = tyx.Intersection[BaseException, tyx.Not[BaseExceptionGroup]]
 '''Exceptions that are not exception groups.'''
+type NotNone = tyx.Not[None]
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
@@ -380,7 +379,7 @@ type HashAlgorithm = Literal['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha51
 '''Names of algorithms used for calculating checksums. The default is :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The BLAKE2 family of algorithms, fast and somewhat secure with a low probability of collision, is the default choice.'''
 type OpenRV = AbstractAsyncContextManager[MemoryMappedFile, None]
 '''The type of the return values of the :meth:`~asyncutils.iotools.MemoryMappedIOManager.open`, :meth:`~asyncutils.iotools.MemoryMappedIOManager.create` and :meth:`~asyncutils.iotools.MemoryMappedIOManager.create_sparsef` methods of :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
-type DualContextManager[T] = ty_extensions.Intersection[AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool]]
+type DualContextManager[T] = tyx.Intersection[AbstractContextManager[T, bool], AbstractAsyncContextManager[T, bool]]
 '''Return type of :func:`~asyncutils.util.dualcontextmanager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper, Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`~asyncutils.iotools.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''

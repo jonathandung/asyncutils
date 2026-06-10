@@ -34,4 +34,4 @@ viewcode_line_numbers = True
 maximum_signature_line_length = 120
 manpage_url = 'https://manpages.debian.org/{path}'
 nitpicky = True
-nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:class', r'P\.(kw)?args|ty_extensions\..*|Abstract(Async)?ContextManager|(types\.)?(Coroutine|Frame|Function)Type|Ellipsis|Buffer|TextIOWrapper|collections\.abc\.Callable\[\[\]'), ('py:meth', '__ae(nter|xit)__|acquire|release|wait')]
+nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:class', r'P\.(kw)?args|tyx\..*|Abstract(Async)?ContextManager|(types\.)?(Coroutine|Frame|Function)Type|Ellipsis|Buffer|TextIOWrapper|collections\.abc\.Callable\[\[\]'), ('py:meth', '__ae(nter|xit)__|acquire|release|wait')]

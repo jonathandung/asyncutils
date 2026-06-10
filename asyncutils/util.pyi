@@ -54,8 +54,7 @@ def semaphore(bounded: Literal[True], workers: Literal[1]) -> Lock: ...
 def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Simple helper function returning a (bounded) semaphore of value ``workers``, defaulting to :const:`~asyncutils.context.Context.SEMAPHORE_DEFAULT_VALUE`.'''
 def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by ``lf``, to a function ``f`` that returns an awaitable, also converting it to an async function.'''
 def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
-    '''| Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy
-    | initialized and shared by all :func:`to_async`-transformed callables.
+    '''| Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy initialized and shared by all :func:`to_async`-transformed callables.
     | If the argument was returned by :func:`to_sync`, a copy of the original async function is returned.
 
     .. warning:: This function may create reference cycles. If memory is a concern, call :func:`gc.collect` regularly.
@@ -66,18 +65,17 @@ def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any
 def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /) -> AsyncGenerator[T]: '''Emulate the second form of the builtin :func:`iter` function in async, which the :func:`aiter` function does not have.'''
 async def safe_cancel(fut: Future[Any], /) -> None:
     '''| Cancel a single future and wait for the cancellation to complete asynchronously.
-    | Advertises itself as safe, because the cancellation itself can be reliably cancelled.
+    | The cancellation itself can be reliably cancelled, thus the name.
 
     .. seealso::
 
       :func:`~asyncutils.base.safe_cancel_batch`
-        a much more efficient way to cancel multiple futures at once without compromising cancellability.'''
+        a much more efficient, equally safe way to cancel multiple futures at once.'''
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload
 def transient_block[T](loop: AbstractEventLoop, f: Callable[..., T], /, *a: object, _threadsafe_: Literal[True], **k: object) -> Future[T]:
-    '''| Run a sync function ``f``, with the provided parameters passed straight through, in the event loop ``loop``, and return an async future
-    | resolving to its result or exception.
+    '''| Run a sync function ``f``, with the provided parameters passed straight through, in the event loop ``loop``, and return an async future resolving to its result or exception.
     | This function avoids incurring the overhead of calling :meth:`~asyncio.loop.run_in_executor` by instead scheduling the function to run at the
     | next iteration of the loop. To avoid overhead, the function should return fast.
     | If ``_threadsafe_`` is ``True``, then the function is scheduled in a thread-safe way, so that this can be called from threads not owning the loop.'''

@@ -44,7 +44,7 @@ loaded_all: Final[bool]
 pdb: Final[bool]
 '''Whether the user specified to drop into the debugger on an unhandled exception in the REPL console.'''
 logging_to: Final[str]
-'''The name (path; possibly relative) of the log file currently used by this library as a string, with four exceptions:
+'''The name of (i.e. possibly relative path to) the log file currently used by this library as a string, with four exceptions:
 
 * ``'NULL'``: no logging is taking place
 * ``'MEMORY'``: the logs are not going to a physical file but can be retrieved by :func:`get_past_logs`

@@ -8,7 +8,7 @@ assignees: jonathandung
 
 ## Type
 
-If the issue is a minor typo or tiny grammar fault, open a PR directly. Otherwise, do not open a PR until your issue has been triaged.
+If the issue is a minor typo or tiny grammar fault, open a PR directly. Otherwise, wait until your issue has been triaged.
 
 This template applies to inconsistencies with runtime behaviour that are likely not programmatic bugs.
 

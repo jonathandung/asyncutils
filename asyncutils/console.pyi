@@ -1,4 +1,4 @@
-'''Implementation of an :class:`interactive async console base class <AsyncUtilsConsole>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
+'''Implementation of an :class:`interactive async console base class <ConsoleBase>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.prots import ExcType
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Task
@@ -21,12 +21,12 @@ class ConsoleBase(InteractiveConsole, ABC):
         CAN_USE_PYREPL: ClassVar[bool]
         '''Whether ``_pyrepl`` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
-        '''This is present if and only if ```_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
+        '''This is present if and only if ``_pyrepl.console.InteractiveColoredConsole`` is used as the parent of this class.'''
     else:
         CAN_USE_PYREPL: ClassVar[Literal[False]]
         '''PyREPL is only available on Python 3.13 and above.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
-    '''| module name -> (locals of console of corresponding type -> Any)
+    '''| Maps module names to a function taking locals of a console of the corresponding type. The return value is discarded.
     | Add handlers for the module of your own console with ``native_handler`` and other modules with ``other_handlers``.'''
     interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
     '''Functions called when :exc:`KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
@@ -55,18 +55,20 @@ class ConsoleBase(InteractiveConsole, ABC):
     @property
     def is_running(self) -> bool: '''Whether the console is running. The default implementation simply returns :attr:`_internal_is_running`.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
-        '''| ``loop`` (required): Event loop used by console interaction.
-        | ``mod``: The module to import within the console, determined by the subclass name by default.
-        | ``modname``: The name of the above module.
-        | ``context_factory``: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.'''
+        '''* ``loop`` (required): Event loop used by console interaction.
+        * ``mod``: The module to import within the console, determined by the subclass name by default.
+        * ``modname``: The name of the above module.
+        * ``context_factory``: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.'''
     def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], object]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], object]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], object]]=..., additional_memerr_hooks: Iterable[Callable[[Self], object]]=..., template: str=..., **k: object) -> None:
-        '''| All of the arguments below are optional.
-        | ``name``: name of the module using the console
-        | ``version``: version of the module using the console
-        | ``description``: description of the module using the console
-        | ``default_local_exit``, ``disallow_subclass_msg``, ``native_handler``, ``other_handlers``, ``additional_interrupt_hooks``, ``additional_memerr_hooks``: see above
-        | ``template``: the console banner to use, with %-placeholders for name, version and description
-        | Additional keyword arguments are used to :ref:`substitute %-placeholders in template <python:old-string-formatting>`.'''
+        '''All of the arguments below are optional:
+
+        * ``name``: name of the module using the console
+        * ``version``: version of the module using the console
+        * ``description``: description of the module using the console
+        * ``default_local_exit``, ``disallow_subclass_msg``, ``native_handler``, ``other_handlers``, ``additional_interrupt_hooks``, ``additional_memerr_hooks``: see above
+        * ``template``: the console banner to use, with %-placeholders for name, version and description
+
+        Additional keyword arguments are used to :ref:`substitute %-placeholders in template <python:old-string-formatting>`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
         '''| Run ``code``, an instance of :class:`types.CodeType`.

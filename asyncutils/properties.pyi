@@ -15,14 +15,10 @@ class AsyncPropertyBase[T, R](ABC):
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=...) -> Self:
         '''| Create a new async property with getter ``fget``, setter ``fset`` and deleter ``fdel``.
         | If the getter is not provided, return a partial decorator instead. In that overload, none of the accessors are to be passed.
-        | ``doc``, if passed, will be the docstring of the property in the form of the :attr:`__doc__` attribute. Otherwise, an attempt is made to
-        | find it on the getter.
-        | ``strict`` defaults to ``True``, and controls whether performing an operation that invokes an unset accessor is allowed. If it is
-        | ``False``, setters and deleters are also allowed to return something other than ``None``.
-        | If the property has no getter (only possible with explicit ``fget=None`` and at least one of ``fset`` and ``fdel`` passed, which is rare),
-        | accessing the attribute on instances would return the property itself if ``strict=False`` and raise an :exc:`AttributeError` otherwise.
-        | If ``hide`` is ``True`` (default ``False``), accessing the attribute on the class it is defined in would raise :exc:`AttributeError` as if
-        | the property didn't exist.
+        | ``doc``, if passed, will be the docstring of the property in the form of the :attr:`__doc__` attribute. Otherwise, an attempt is made to find it on the getter.
+        | ``strict`` defaults to ``True``, and controls whether performing an operation that invokes an unset accessor is allowed. If it is ``False``, setters and deleters are also allowed to return something other than ``None``.
+        | If the property has no getter (only possible with explicit ``fget=None`` and at least one of ``fset`` and ``fdel`` passed, which is rare), accessing the attribute on instances would return the property itself if ``strict=False`` and raise an :exc:`AttributeError` otherwise.
+        | If ``hide`` is ``True`` (default ``False``), accessing the attribute on the class it is defined in would raise :exc:`AttributeError` as if the property didn't exist.
         | Subclasses must define :meth:`wrap_aw`, and are allowed to override :meth:`_initialize` and :meth:`_repr_accessor`. Nothing else is customizable.'''
     @overload
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Self|CoroutineType[Any, Any, T]: ...

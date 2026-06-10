@@ -5,12 +5,9 @@ def patch_aio_logs() -> None: '''Equivalent to ``logging.getLogger('asyncio').di
 def patch_unawaited_coroutine_warnings() -> None: '''Silence instances of :exc:`RuntimeWarning` emitted when an unawaited coroutine is garbage collected.'''
 def patch_function_signatures(*to_patch: SigPatcherArg, follow_wrapped: bool=...) -> None:
     '''| Hide the original signature of functions defined in the top level of a (sub-)module with new signatures.
-    | Each positional argument is a tuple of the form ``(target_func, signature)``, where ``signature`` looks like the portion of a function
-    | declaration within the parentheses opening to the right of the function name.
-    | If ``follow_wrapped`` is ``True``, the original signature is taken from the first wrapped function with a ``__text_signature__``
-    | attribute or the innermost function instead of the wrapper, if applicable. Wrapped functions are found using :attr:`~method.__func__`
-    | and ``__wrapped__``, and it is assumed in the implementation that every level only has one of those, otherwise unpredictable
-    | behaviour may arise.
+    | Each positional argument is a tuple of the form ``(target_func, signature)``, where ``signature`` looks like the portion of a function declaration within the parentheses opening to the right of the function name.
+    | If ``follow_wrapped`` is ``True``, the original signature is taken from the first wrapped function with a ``__text_signature__`` attribute or the innermost function instead of the wrapper, if applicable.
+    | Wrapped functions are found using :attr:`~method.__func__` and ``__wrapped__``, and it is assumed in the implementation that every level only has one of these, otherwise unpredictable behaviour may arise.
     | Useful when, for example, dependency injection, unrepresentable sentinels, mutable defaults and other arity shenanigans are used.'''
 def patch_method_signatures(*to_patch: SigPatcherArg, follow_wrapped: bool=...) -> None:
     '''| :func:`patch_function_signatures`, but for instance methods.

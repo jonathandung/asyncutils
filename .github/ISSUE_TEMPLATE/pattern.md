@@ -12,7 +12,7 @@ An approximate picture of how the pattern would be used.
 
 ## Pitch the pattern
 
-Why include it in this library? Where? Is a new submodule required?
+Why include it in this library? Where? If a new submodule required, is there a prior discussion in the links?
 
 ## Draft
 

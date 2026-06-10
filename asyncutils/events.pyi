@@ -1,8 +1,8 @@
 '''| Classes that extend the functionality of :class:`~asyncio.Event` with the interface it specifies, without inheriting from it.
 | Not at all related to the ``asyncio.events`` submodule, which manages the event loop, despite the common name.'''
+from ._internal.prots import NotNone
 from .mixins import EventMixin
 from collections.abc import Generator
-from ty_extensions import Not
 from typing import Literal, overload
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
@@ -13,7 +13,7 @@ class SingleWaiterEventWithValue[T](EventMixin[T]):
     async def wait(self, timeout: float|None=..., *, strict: bool=...) -> T: ...
     async def wait_for_next(self, timeout: float|None=..., *, strict: bool=...) -> T: '''Wait for the next result of the event to be set.'''
     def get(self, default: T=...) -> T: '''Get the result of the event immediately if set, otherwise returning ``default`` if passed or throw :exc:`RuntimeError`.'''
-class EventWithValue[T: Not[None]](EventMixin[T]):
+class EventWithValue[T: NotNone](EventMixin[T]):
     '''An event class that can store a value and maintains a history of past values.'''
     def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of ``maxhist`` entries, which defaults to :const:`~asyncutils.context.Context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results, are stored.'''
     @overload
