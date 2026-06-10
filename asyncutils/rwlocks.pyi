@@ -11,7 +11,7 @@ class RWLock(ABC):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> ReadPreferredRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Return a :class:`WritePreferredRWLock` if ``prefer_writers`` is ``True``, otherwise a :class:`ReadPreferredRWLock`. :data:`context.RWLOCK_DEFAULT_PREFER_WRITERS` becomes the value of ``prefer_writers`` when it is not passed.'''
+    def __new__(cls, /, prefer_writers: bool=...) -> ReadPreferredRWLock|WritePreferredRWLock: '''Return a :class:`WritePreferredRWLock` if ``prefer_writers`` is ``True``, otherwise a :class:`ReadPreferredRWLock`. :const:`~asyncutils.context.Context.RWLOCK_DEFAULT_PREFER_WRITERS` becomes the value of ``prefer_writers`` when it is not passed.'''
     def reader[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async reading context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     def writer[T, **P](self, f: Callable[P, Awaitable[T]], /) -> RWLockRV[T, P]: '''A decorator wrapping a function returning an awaitable in an async writing context. :meth:`reader` and :meth:`writer` methods are attached to the returned async callable.'''
     @abstractmethod
@@ -50,7 +50,7 @@ class PriorityRWLock(RWLock):
     @overload
     def __new__(cls, /, prefer_writers: Literal[False]) -> FairPriorityRWLock: ...
     @overload
-    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :data:`context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
+    def __new__(cls, /, prefer_writers: bool=...) -> FairPriorityRWLock|WritePreferredPriorityRWLock: '''Whether instantiating this class gives a :class:`PriorityRWLock` unfair to readers by default depends on :const:`~asyncutils.context.Context.RWLOCK_DEFAULT_PREFER_WRITERS`.'''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...
@@ -64,8 +64,8 @@ class AgingRWLock(PriorityRWLock):
     '''| A readers-writer lock with a priority policy multiplying the current number of attempts to acquire the reading or writing lock,
     | counted per corresponding task, by the respective factor given at construction, to obtain the priority.'''
     def __new__(cls, /, rf: float=..., wf: float=...) -> Self:
-        '''* `rf`, the read priority factor, defaults to :data:`context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
-        * `wf`, the write priority factor, defaults to :data:`context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.'''
+        '''* ``rf``, the read priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
+        * ``wf``, the write priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.'''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...
@@ -77,6 +77,6 @@ class AgingRWLock(PriorityRWLock):
 class CoercedMethod[T, R, **P]:
     '''Interpret any callable as a regular function in a class body so that access on instance returns something like a bound method.'''
     def __init__(self, func: Callable[Concatenate[R, P], T], /): ...
-    def __getattr__(self, name: str, /) -> Any: ...
+    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
     def __set_name__(self, owner: type[R], name: str, /) -> None: ...
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Callable[P, T]: '''Return the 'bound method'. The descriptor itself is hidden and cannot be accessed on the class it is defined in, only instances of.'''

@@ -1,6 +1,7 @@
 .PHONY: test test-with-badges clean ruff install install-system install-silent watch type-check rmclog clog publish pre-commit venv help
+TEST_MAXFAIL ?= 3
 test:
-	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail 5
+	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail $(TEST_MAXFAIL)
 test-with-badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 10 --local-badge-generate duration skipped status warnings xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir assets --local-badge-generate cov

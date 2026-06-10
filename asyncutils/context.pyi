@@ -107,7 +107,7 @@ class Context:
     DUAL_CONTEXT_MANAGER_DEFAULT_STRICT: bool = ...
     DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR: bool = ...
     SEMAPHORE_DEFAULT_VALUE: int = ...
-    def ascurctx(self, **k: object) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. ``ctx.ascurctx()`` is syntactic sugar for ``nonreusablelocalcontext(ctx)``.'''
+    def ascurctx(self, **k: object) -> nonreusablelocalcontext: '''Return a non-reusable context manager that sets the context to this context on entry. For some :class:`Context` ``ctx``, ``ctx.ascurctx()`` is syntactic sugar for ``nonreusablelocalcontext(ctx)``.'''
     def asdict(self) -> dict[str, Any]: '''Return a dictionary representing the items within the context.'''
     def copy(self) -> Self: '''Return a shallow copy of the context.'''
     @classmethod
@@ -118,7 +118,7 @@ class Context:
     def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with ``dct`` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
     def __eq__(self, other: object, /) -> bool: '''Two contexts are considered equal if they are of the same type and all of their fields are equal.'''
-    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.'''
+    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.''' # noqa: ANN401
     def __setitem__(self, name: str, value: object, /) -> None: '''Alias for :meth:`~object.__setattr__`.'''
     __hash__: ClassVar[None]
     '''Contexts are not hashable since they are mutable.'''

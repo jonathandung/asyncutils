@@ -34,7 +34,7 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     @property
     def executor(self) -> Executor: '''The underlying executor.'''
     def __init__(self, reader: Reader[T], writer: Writer[R], /, executor: Executor|None=..., *, find_attr_on_writer_first: bool=...): '''Initialize the couple with the given reader, writer and optionally a :pep:`3148` executor to call the file methods in, after checking that the reader is readable and the writer is writable.'''
-    def __getattr__(self, name: str, /) -> Any: '''Search for the attribute on the writer first if ``find_attr_on_writer_first=True`` was passed and the reader otherwise.'''
+    def __getattr__(self, name: str, /) -> Any: '''Search for the attribute on the writer first if ``find_attr_on_writer_first=True`` was passed and the reader otherwise.''' # noqa: ANN401
     async def __cleanup__(self) -> None: ...
     async def aclose(self) -> None: '''Close the reader and writer asynchronously and shut down the underlying executor. It is safe to close a file multiple times, but no other methods should be called after closing.'''
     async def flush(self) -> None: '''Asynchronously flush the writer.'''
@@ -51,12 +51,12 @@ class AsyncReadWriteCouple[T: (str, bytes), R: (str, bytes)](LoopContextMixin):
     async def truncate(self, size: int|None=..., /) -> int: '''Truncate the file at ``size`` (or the current position if not passed), and return the new file size.'''
     async def write(self, s: R, /) -> int: '''Write ``s`` into the writer, returning the number of characters written.'''
     async def writelines(self, lines: Iterable[R], /) -> None: '''Write the lines from the iterable into the writer without adding newline as separators.'''
-    def fileno(self) -> NoReturn: '''Raise :exc:`OSError` with errno :const:`~errno.EBADF`.'''
-    def isatty(self) -> NoReturn: '''Raise :exc:`OSError` with errno :const:`~errno.ENOTSUP`.'''
+    def fileno(self) -> NoReturn: '''Raise :exc:`OSError` with errno :data:`~errno.EBADF`.'''
+    def isatty(self) -> NoReturn: '''Raise :exc:`OSError` with errno :data:`~errno.ENOTSUP`.'''
     def readable(self) -> Literal[True]: '''Return ``True``, because prior verification has been done that the reader is readable, and that is assumed not to be invalidated.'''
-    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise :exc:`OSError` with errno :const:`~errno.ESPIPE`.'''
+    def seek(self, offset: int, whence: int=..., /) -> NoReturn: '''Raise :exc:`OSError` with errno :data:`~errno.ESPIPE`.'''
     def seekable(self) -> Literal[False]: '''The couple itself is not seekable, but the reader and writer may be..'''
-    def tell(self) -> NoReturn: '''Raise :exc:`OSError` with errno :const:`~errno.ESPIPE`.'''
+    def tell(self) -> NoReturn: '''Raise :exc:`OSError` with errno :data:`~errno.ESPIPE`.'''
     def writable(self) -> Literal[True]: '''Return ``True``, because prior verification has been done that the writer is writable, and that is assumed not to be invalidated.'''
     @property
     def closed(self) -> bool: '''Whether both the reader and writer have been closed.'''
@@ -84,17 +84,17 @@ class MemoryMappedIOManager(LoopContextMixin):
     def __del__(self) -> None: ...
     async def copy_file(self, srcp: Openable, destp: Openable, *, flush: bool=...) -> None: '''Copy the contents of the file at ``srcp`` into that at ``destp`` asynchronously and flush it if ``flush`` is ``True``. Uses :meth:`open` and :meth:`create` internally.'''
     async def checksum(self, path: Openable, alg: HashAlgorithm=...) -> str:
-        '''Compute a checksum from the file at ``path`` using the specified algorithm (default :data:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
+        '''Compute a checksum from the file at ``path`` using the specified algorithm (default :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
 
         .. version-changed:: 0.9.8
-          Started passing `usedforsecurity=False` to the :func:`hashlib.new` constructor to bypass FIPS restrictions, such that broken algorithms like
+          Started passing ``usedforsecurity=False`` to the :func:`hashlib.new` constructor to bypass FIPS restrictions, such that broken algorithms like
           MD5 are always allowed if explicitly requested, seeing as though it is fast and enough to prevent accidental file corruption in simple cases.
 
         .. version-changed:: 0.9.8
           Offloaded checksum computation to the executor as well.
 
         .. caution:: If executing cryptographic checksums, use the factory default BLAKE2s (32-bit) or BLAKE2b (64-bit), SHA256, or similar.
-        .. danger:: Calling without the `alg` parameter may cause a faulty algorithm to be chosen if the value in the current context dictates so.
+        .. danger:: Calling without the ``alg`` parameter may cause a faulty algorithm to be chosen if the value in the current context dictates so.
         .. seealso::
 
           :data:`hashlib.algorithms_available`
@@ -107,10 +107,10 @@ class MemoryMappedIOManager(LoopContextMixin):
             For basic information pertaining to checksums and their use cases.
 '''
     async def approx_memory_usage(self) -> int: '''Compute the approximate memory used by the currently open memory maps in bytes.'''
-    async def bulk_read[O: Openable](self, file_offsets: Mapping[O, Iterable[tuple[int, int]]]) -> dict[O, list[bytes]]: '''Read from each file at their corresponding offsets as specified by the value in the ``file_offsets`` mapping, which should be an iterable of tuples ``(offset, size)`` or ``None`` if the whole file is to be read.'''
+    async def bulk_read[T: Openable](self, file_offsets: Mapping[T, Iterable[tuple[int, int]]]) -> dict[T, list[bytes]]: '''Read from each file at their corresponding offsets as specified by the value in the ``file_offsets`` mapping, which should be an iterable of tuples ``(offset, size)`` or ``None`` if the whole file is to be read.'''
     async def bulk_write(self, file_data: Mapping[Openable, Iterable[tuple[bytes, int]]]) -> None: '''Write into each file at their corresponding offsets as specified by the value in the ``file_data`` mapping, which should be an iterable of tuples ``(data, offset)``.'''
-    async def bulk_checksum[O: Openable](self, paths: Iterable[O], alg: HashAlgorithm=...) -> dict[O, str]: '''Compute checksums from the files at ``paths`` using the specified algorithm, defaulting to :data:`context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The same remarks from :meth:`checksum` apply here.'''
+    async def bulk_checksum[T: Openable](self, paths: Iterable[T], alg: HashAlgorithm=...) -> dict[T, str]: '''Compute checksums from the files at ``paths`` using the specified algorithm, defaulting to :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`. The same remarks from :meth:`checksum` apply here.'''
     async def bulk_copy(self, pairs: Iterable[tuple[Openable, Openable]]) -> None: '''Copy the contents of each file in the first position of the tuples in ``pairs`` into the file in the second position asynchronously. If you have a dictionary, pass in its items view.'''
     async def bulk_resize(self, sizes: Mapping[Openable, int]) -> None: '''Resize each file at the keys of ``sizes`` to the corresponding value asynchronously.'''
     async def compact_files(self, paths: Iterable[Openable]) -> None: '''Reduce the size of each file at ``paths`` by truncating the trailing null bytes asynchronously.'''
-    async def find_in_files[O: Openable](self, pattern: bytes, paths: Mapping[O, int], max_per_file: int=..., *, allow_overlapping: bool=...) -> dict[O, list[int]]: '''Find all occurrences of ``pattern`` in the files at ``paths``, returning a mapping from each file to a list of offsets where the pattern was found.'''
+    async def find_in_files[T: Openable](self, pattern: bytes, paths: Mapping[T, int], max_per_file: int=..., *, allow_overlapping: bool=...) -> dict[T, list[int]]: '''Find all occurrences of ``pattern`` in the files at ``paths``, returning a mapping from each file to a list of offsets where the pattern was found.'''

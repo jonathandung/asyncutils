@@ -1,1 +1,1 @@
-from asyncutils.io import MemoryMappedIOManager
+from asyncutils.iotools import MemoryMappedIOManager

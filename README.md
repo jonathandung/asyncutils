@@ -43,7 +43,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/examples.html)
 
 ## Version
 
-This is asyncutils v0.9.11.
+This is asyncutils v0.9.12.
 
 This library is currently in the beta stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. See [the compatibility page](https://asyncutils.readthedocs.io/en/stable/compat.html).

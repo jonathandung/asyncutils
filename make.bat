@@ -1,11 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
+if "%TEST_MAXFAIL%" == "" set TEST_MAXFAIL=3
+
 if "%1"=="" goto help
 goto %1
 
 :test
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail 5
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %TEST_MAXFAIL%
 goto :eof
 
 :test-with-badges

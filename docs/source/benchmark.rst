@@ -26,11 +26,13 @@ the first run because it is treated as a warmup:
 Environment
 -----------
 
-* ``python -VV`` gives: Python 3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]
-* ``python -m platform`` gives: Windows-11-10.0.26200-SP0
+* ``python -VV`` gives: ``Python 3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]``
+* ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
 
 It would be very nice if somebody could do the benchmarks on ubuntu or other platforms and add a new section with the same structure detailing the
 results, since asyncio works drastically different on Windows than other systems.
+
+.. note:: The user and sys measurements below have a granularity of 15 ms.
 
 Baseline: asyncio
 -----------------
@@ -52,8 +54,8 @@ Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49
 Time taken to start and immediately exit the asyncio console:
 
 * real: 500.7 ± 14.5 ms; max 520 ms, min 474 ms
-* user: 42.0 ± 28.1 ms; max 105 ms, min 15 ms, granularity 15 ms
-* sys: 67.5 ± 19.1 ms; max 90 ms, min 30 ms, granularity 15 ms
+* user: 42.0 ± 28.1 ms; max 105 ms, min 15 ms
+* sys: 67.5 ± 19.1 ms; max 90 ms, min 30 ms
 
 n = 10
 
@@ -100,8 +102,8 @@ Time taken to import :mod:`asyncio` along with all 31 ordinary submodules: 196.9
 Time taken to start and immediately exit the asyncutils console, timed like the asyncio console:
 
 * real: 380.8 ± 22.7 ms; max 412 ms, min 350 ms
-* user: 25.5 ± 17.4 ms; max 45 ms, min 0 ms, granularity 15 ms
-* sys: 37.5 ± 17.7 ms; max 60 ms, min 0 ms, granularity 15 ms
+* user: 25.5 ± 17.4 ms; max 45 ms, min 0 ms
+* sys: 37.5 ± 17.7 ms; max 60 ms, min 0 ms
 
 n = 10
 
@@ -112,8 +114,8 @@ n = 10
 The above including all submodules:
 
 * real: 485.3 ± 12.2 ms; max 506 ms, min 459 ms
-* user: 19.5 ± 10.1 ms; max 30 ms, min 0 ms, granularity 15 ms
-* sys: 55.5 ± 17.4 ms; max 90 ms, min 30 ms, granularity 15 ms
+* user: 19.5 ± 10.1 ms; max 30 ms, min 0 ms
+* sys: 55.5 ± 17.4 ms; max 90 ms, min 30 ms
 
 n = 10
 

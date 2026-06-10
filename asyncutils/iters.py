@@ -125,12 +125,12 @@ async def asattolo(it, /, _=_randrange):
         i -= 1
         a[j], a[i] = a[i], a[j := _(i)]
     return a
-async def abrent(f, start, /):
-    p = l = 1; t, h, m = start, await f(start), 0
+async def abrent(f, s, /):
+    p = l = 1; t, h, m = s, await f(s), 0
     while t is not h:
         if p == l: t, l, p = h, 0, p<<1
         h, l = await f(h), l+1
-    a = start, await A.iterf(l)(f)(start)
+    a = s, await A.iterf(l)(f)(s)
     while a[0] is not a[1]: a, m = await B.gather(*map(f, a)), m+1
     return a[0], l, m
 async def asamplel(it, k, *, rrange=_randrange, rand=_rand):

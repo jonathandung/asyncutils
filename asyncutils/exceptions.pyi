@@ -7,7 +7,7 @@ from collections.abc import Callable, Generator, Iterable
 from types import TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stopaiteration', 'ignore_stopiteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> Generator[BaseException, BaseException]:
@@ -33,38 +33,40 @@ def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, order
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
     | If ``raise_critical`` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
     | propagate it.
-    | `notes` is attached to the group using :meth:`~BaseException.add_note`.
-    | The `suppress`, `context`, `cause` and `traceback` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
+    | ``notes`` is attached to the group using :meth:`~BaseException.add_note`.
+    | The ``suppress``, ``context``, ``cause`` and ``traceback`` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
     | They only have an effect when the first argument is not a group.'''
-def prepare_exception[E: BaseException](exc: E, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> E:
-    '''| Attach some info to the exception `exc` and return it.
-    | `notes` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
-    | The parameter `traceback` corresponds to the attribute :attr:`~BaseException.__traceback__`, `cause` to :attr:`~BaseException.__cause__`, `context` to :attr:`~BaseException.__context__` and `suppress` to :attr:`~BaseException.__suppress_context__`.'''
+def prepare_exception[T: BaseException](exc: T, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> T:
+    '''| Attach some info to the exception ``exc`` and return it.
+    | ``notes`` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is
+    | treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
+    | ``traceback`` corresponds to the attribute :attr:`~BaseException.__traceback__`, ``cause`` to :attr:`~BaseException.__cause__`,
+    | ``context`` to :attr:`~BaseException.__context__` and ``suppress`` to :attr:`~BaseException.__suppress_context__`.'''
 @overload
 def raise_exc(exc_typ: ExcType, /, *args: object, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=..., **kwargs: object) -> NoReturn: ...
 @overload
-def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. The variadic `args` and `kwargs` are passed to the constructor of `exc_typ` in the first overload, and the remaining arguments are as in :func:`potent_derive`.'''
+def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> NoReturn: '''Programmatically raise an exception. The variadic ``args`` and ``kwargs`` are passed to the constructor of ``exc_typ`` in the first overload, and the remaining arguments are as in :func:`potent_derive`.'''
 def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy ``wrapper``, such that ``exception_occurred(wrapper)`` returns ``True``.'''
-def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`.'''
-def exception_occurred(instance: object, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a sentinel for an exception, described above.'''
+def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`. This function does not raise the exception because it may sometimes be useful to have the exception object itself, for example when setting it on a :class:`~asyncio.Future`.'''
+def exception_occurred(instance: object, /) -> TypeGuard[ExceptionWrapper]: '''Whether the object is actually a special proxy to an exception.'''
 class StateCorrupted(BaseException):
-    '''Raised when the module-internal state is corrupted, usually by a slip-up of some abstraction layer outside of this library, and an exception can be thrown. Should not be caught by users.'''
+    '''Raised when the module-internal state is corrupted. Should not be caught by users.'''
     def __init__(self, adjective: str, details: str, /): ...
     @property
     def adjective(self) -> str: ...
     @property
     def details(self) -> str: ...
-class Critical[E: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
+class Critical[T: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     '''Raised when a critical error is encountered by exception-handling middleware.'''
     @overload
-    def __init__(self, exc: E): ...
+    def __init__(self, exc: T): ...
     @overload
     def __init__(self, exc: None=...): '''Initialize the critical exception with the exception being wrapped, or the currently handled exception if not passed.'''
     @property
-    def exc(self) -> E: '''The exception that occurred, determined by the raising scope by default.'''
+    def exc(self) -> T: '''The exception that occurred, determined by the raising scope by default.'''
 class VersionError(Exception): '''Base class for all version-related errors.'''
 class VersionConversionError(VersionError): '''Base class for errors thrown when attempting to normalize an object to a version.'''
-class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the :class:`~version.VersionInfo` constructor is negative, for instance.'''
+class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the :class:`~asyncutils.version.VersionInfo` constructor is negative, for instance.'''
 class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     '''Raised when no normalizer is registered for an unrecognized object.'''
     def __init__(self, obj: T, /): ...
@@ -89,22 +91,23 @@ class VersionNormalizerFault[T](VersionConversionError):
 class VersionCorrupted(VersionError, RuntimeError):
     '''Raised when internal state consistency checks of a version fail, indicating modifications by the user affected private state.'''
     def __init__(self, obj: VersionInfo, /): ...
-    def __getattr__(self, name: str, /) -> Any: ...
+    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
     @property
-    def obj(self) -> VersionInfo|None: '''The instance of :class:`~version.VersionInfo` having been corrupted. ``None`` if garbage collected.'''
+    def obj(self) -> VersionInfo|None: '''The instance of :class:`~asyncutils.version.VersionInfo` having been corrupted. ``None`` if garbage collected.'''
+class Deadlock(BaseException): '''Raised when a deadlock is detected. Should not be caught by users.'''
 class BulkheadError(RuntimeError): '''Raised when there is an error in bulkhead processing.'''
 class BulkheadFull(BulkheadError): '''Raised when a bulkhead is full and a party requests it to execute a coroutine.'''
 class BulkheadShutDown(BulkheadError): '''Raised when a bulkhead is being shut down and a party requests it to execute a coroutine.'''
 class PoolError(RuntimeError): '''Raised when a task pool encounters a miscellaneous error.'''
 class PoolFull(PoolError): '''Raised when the task queue in a task pool is filled.'''
 class PoolShutDown(PoolError): '''Raised when submissions are sent to a shutting down pool.'''
-class BusError(RuntimeError): '''Raised when an operation on an :class:`~channels.EventBus` fails.'''
-class BusTimeout(BusError): '''Raised when an :class:`~channels.EventBus` takes too long to publish an event.'''
-class BusShutDown(BusError): '''Raised when subscription or publishing operations are called on an :class:`~channels.EventBus` that is closing down.'''
-class BusStatsError(BusError): '''Raised when attempting to access publishing statistics on an :class:`~channels.EventBus` whose statistics are not tracked.'''
+class BusError(RuntimeError): '''Raised when an operation on an :class:`~asyncutils.channels.EventBus` fails.'''
+class BusTimeout(BusError): '''Raised when an :class:`~asyncutils.channels.EventBus` takes too long to publish an event.'''
+class BusShutDown(BusError): '''Raised when subscription or publishing operations are called on an :class:`~asyncutils.channels.EventBus` that is closing down.'''
+class BusStatsError(BusError): '''Raised when attempting to access publishing statistics on an :class:`~asyncutils.channels.EventBus` whose statistics are not tracked.'''
 class CircuitBreakerError(RuntimeError): '''Base class for circuit breaker errors.'''
 class CircuitHalfOpen(CircuitBreakerError): '''Raised when a circuit exceeds its maximum calls in the half-open state.'''
-class CircuitOpen(CircuitBreakerError): '''Raised when a circuit is open in a :class:`~altlocks.CircuitBreaker` (but shouldn't be).'''
+class CircuitOpen(CircuitBreakerError): '''Raised when a circuit is open in a :class:`~asyncutils.altlocks.CircuitBreaker` (but shouldn't be).'''
 class EventValueError(ValueError): '''Raised when a party attempts to get the value an event of which the value is not set.'''
 class FutureCorrupted(RuntimeError): '''Raised after an internal party discovers an external party has set the result of a future whose result is for it to set only.'''
 class MaxIterationsError(RuntimeError): '''Raised when a function has reached the specified maximum iterations.'''
@@ -115,7 +118,7 @@ class RateLimitExceeded(RuntimeError):
     .. admonition:: Implementation detail
 
       The initialization signature may change without notice, and is therefore not documented here.'''
-    async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.'''
+    async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.''' # noqa: ANN401
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
     def __init__(self, bus: EventBus, mw: Middleware, /): ...
@@ -123,24 +126,24 @@ class BusPublishingError(BusError):
     def bus(self) -> EventBus|None: '''May be ``None`` if the event bus was garbage-collected.'''
     @property
     def middleware(self) -> Middleware|None: '''May be ``None`` if the middleware was garbage-collected.'''
-class LockForceRequest[T, L: AsyncLockLike[Any], R: LocksmithBase](BaseException):
-    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from :class:`locksmiths.LocksmithBase`) necessitates the lock be released.'''
-    def __init__(self, requester: R, fulfill: Callable[[Any], None], lock: L, info: T, /): ...
+class LockForceRequest[T, S: AsyncLockLike[Any], R: LocksmithBase](BaseException):
+    '''Thrown to coroutines that acquire locks when a locksmith (inheriting from :class:`~asyncutils.locksmiths.LocksmithBase`) necessitates the lock be released.'''
+    def __init__(self, requester: R, fulfill: Callable[[Any], None], lock: S, info: T, /): ...
     @property
     def requester(self) -> R: '''The locksmith that sent this error.'''
     @property
-    def lock(self) -> L: '''The lock involved.'''
+    def lock(self) -> S: '''The lock involved.'''
     @property
-    def info(self) -> T: '''The info passed to the :meth:`~locksmiths.LocksmithBase.force` method, or as returned by :meth:`~locksmiths.LocksmithBase.get_info`. Coerced to :class:`str` as a note attached on this exception when :mod:`traceback` prints it.'''
+    def info(self) -> T: '''The info passed to the :meth:`~asyncutils.locksmiths.LocksmithBase.force` method, or as returned by :meth:`~asyncutils.locksmiths.LocksmithBase.get_info`. Coerced to :class:`str` as a note attached on this exception when :mod:`traceback` prints it.'''
     def fulfill(self, answer: object, /) -> None: '''Answer the request with ``answer``, after presumably releasing the lock and performing error handling.'''
-class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by :func:`~queues.password_queue`.'''
+class PasswordQueueError(Exception): '''Base class for all errors related to password-protected queues, as returned by :func:`~asyncutils.queues.password_queue`.'''
 class PasswordRetrievalError(PasswordQueueError):
-    '''Raised when :func:`~queues.password_queue` cannot find the password from the closure variables.'''
+    '''Raised when :func:`~asyncutils.queues.password_queue` cannot find the password from the closure variables.'''
     @property
     def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...
-class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~queues.password_queue` cannot find the get password from the closure variables.'''
-class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~queues.password_queue` cannot find the put password from the closure variables.'''
+class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~asyncutils.queues.password_queue` cannot find the get password from the closure variables.'''
+class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~asyncutils.queues.password_queue` cannot find the put password from the closure variables.'''
 class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
     @property
@@ -169,12 +172,12 @@ class PasswordMissing(PasswordQueueError, TypeError):
 class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
 class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:
-    '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async. More customizable than :class:`contextlib.suppress`, because some exception classes can be excluded from the suppression.'''
+    '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async. More customizable than :func:`contextlib.suppress`, because some exception classes can be excluded from the suppression.'''
     @property
     def exc(self) -> tuple[ExcType, ...]: '''The exception types that are ignored.'''
     @property
     def but(self) -> tuple[ExcType, ...]: '''The subclasses of exception types in :attr:`exc` that are not ignored.'''
-    def __init__(self, /, *exc: ExcType, exclude: Iterable[ExcType]=...): '''The positional arguments are the exception classes to suppress within the context, and the iterable `exclude` will be consumed to build up :attr:`but`. All overlap is discarded.'''
+    def __init__(self, /, *exc: ExcType, exclude: Iterable[ExcType]=...): '''The positional arguments are the exception classes to suppress within the context, and the iterable ``exclude`` will be consumed to build up :attr:`but`. All overlap is discarded.'''
     def __enter__(self) -> Self: '''Start suppressing the exceptions with types in `exc`, except those in :attr:`but`, and return the context manager instance.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: ...

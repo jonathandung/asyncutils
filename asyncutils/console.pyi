@@ -68,7 +68,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         | ``template``: the console banner to use, with %-placeholders for name, version and description
         | Additional keyword arguments are used to :doc:`substitute %-placeholders in template <python:old-string-formatting>`.'''
     def __callback(self, fut: Future[Any], code: CodeType, /, *, makef: Callable[[CodeType, dict[str, Any]], Callable[[], Any]]=..., corocheck: Callable[[object], TypeGuard[Coroutine[Any, Any, Any]]]=..., futchain: Callable[[Task[Any], Future[Any]], object]=...) -> None: '''Called by runcode internally. To change its behaviour, override the entire method in a subclass with different default parameters.'''
-    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None:
+    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., dont_show_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
         '''| Run ``code``, an instance of :class:`types.CodeType`.
         | ``futimpl`` is a function that returns an instance of :class:`concurrent.futures.Future`.
         | ``dont_show_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
@@ -89,7 +89,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     def interrupt(self) -> None: '''Pass ``additional_interrupt_hooks`` to the subclass constructor to change the behaviour when encountering a :exc:`KeyboardInterrupt`, instead of touching this method.'''
     @final
     def memoryerror(self) -> None: '''Pass ``additional_memerr_hooks`` to the subclass constructor to change the behaviour when encountering a :exc:`MemoryError`, instead of touching this method.'''
-    def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than :meth:`write`.'''
+    def write_special(self, msg: str) -> None: '''Called to write the banner and exit messages. Can have a different implementation than :meth:`~code.InteractiveInterpreter.write`.'''
     def refresh(self) -> None: '''Callback in :meth:`interrupt` and :meth:`memoryerror`.'''
     @abstractmethod
     def prehook(self, max_memerrs: int|None) -> None:

@@ -1,6 +1,6 @@
 # ty: ignore[unresolved-attribute]
 from asyncutils._internal import helpers as H, patch as P
-from asyncutils._internal.submodules import io_all as __all__
+from asyncutils._internal.submodules import iotools_all as __all__
 import asyncutils as A, errno as E, os as O, sys as S
 from _functools import partial
 from asyncio import Lock, gather
@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from itertools import count, starmap
 from mmap import mmap
 def f(a, b, f=S.audit, _=O.pipe, /):
-    def double_ended_pipe(*, pipe_impl=_, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.io.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
+    def double_ended_pipe(*, pipe_impl=_, x=partial(open, mode=a), y=partial(open, mode=b), _=f): r, W, R, w = *pipe_impl(), *pipe_impl(); _(f'asyncutils.iotools.double_ended_{"text" if a == "r" else "binary"}_pipe', r, w, R, W); return tuple(map(AsyncReadWriteCouple, map(x, (r, R)), map(y, (w, W))))
     return double_ended_pipe
 _, s = lambda s=None, /, **d: {k: v for k, v in d.items() if v is not s}, '*, pipe_impl={}'
 double_ended_text_pipe, double_ended_binary_pipe = t = tuple(map(f, ('r', 'rb'), ('w', 'wb')))
@@ -17,8 +17,8 @@ P.patch_function_signatures(*((_, s) for _ in t))
 class AsyncReadWriteCouple(A.LoopContextMixin):
     __slots__ = '_aso', '_executor', 'reader', 'writer'; executor, AMBIGUOUS_CALL_TIP = None, 'tip: delegate to reader or writer as appropriate'
     def __init__(self, r, w, /, executor=None, _=H.create_executor, *, find_attr_on_writer_first=False):
-        if not r.readable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: reader {r!r} is not readable')
-        if not w.writable(): raise TypeError(f'asyncutils.io.AsyncReadWriteCouple: writer {w!r} is not writable')
+        if not r.readable(): raise TypeError(f'asyncutils.iotools.AsyncReadWriteCouple: reader {r!r} is not readable')
+        if not w.writable(): raise TypeError(f'asyncutils.iotools.AsyncReadWriteCouple: writer {w!r} is not writable')
         super().__init__(); self._executor, self.reader, self.writer, self._aso = _(t) if executor is None is (executor := (t := type(self)).executor) else executor, r, w, (w, r) if find_attr_on_writer_first else (r, w)
     async def _run(self, f, *a): return await self.loop.run_in_executor(self._executor, f, *a)
     def read(self, n=-1, /): return self._run(self.reader.read, n)
@@ -26,7 +26,7 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
     def readall(self): return self._run(r.read if (f := getattr(r := self.reader, 'readall', None)) is None else f)
     async def readinto(self, b, /):
         if (f := getattr(r := self.reader, 'readinto', None)) is not None: return await self._run(f, b)
-        if (m := memoryview(b)).readonly: raise TypeError('asyncutils.io.AsyncReadWriteCouple: cannot read into a read-only buffer')
+        if (m := memoryview(b)).readonly: raise TypeError('asyncutils.iotools.AsyncReadWriteCouple: cannot read into a read-only buffer')
         if l := len(d := await self._run(r.read, m.nbytes)): m[:l] = d
         return l
     def readinto1(self, b, /): return self._run(self.reader.readinto1, b)
@@ -34,13 +34,13 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
     def readlines(self, hint=-1, /): return self._run(self.reader.readlines, hint)
     def write(self, s, /): return self._run(self.writer.write, s)
     def writelines(self, lines, /): return self._run(self.writer.writelines, lines)
-    def fileno(self): A.raise_exc(OSError, E.EBADF, 'asyncutils.io.AsyncReadWriteCouple: ambiguous file descriptor query', notes=self.AMBIGUOUS_CALL_TIP)
-    def isatty(self): A.raise_exc(OSError, E.ENOTSUP, 'asyncutils.io.AsyncReadWriteCouple: ambiguous isatty query', notes=self.AMBIGUOUS_CALL_TIP)
+    def fileno(self): A.raise_exc(OSError, E.EBADF, 'asyncutils.iotools.AsyncReadWriteCouple: ambiguous file descriptor query', notes=self.AMBIGUOUS_CALL_TIP)
+    def isatty(self): A.raise_exc(OSError, E.ENOTSUP, 'asyncutils.iotools.AsyncReadWriteCouple: ambiguous isatty query', notes=self.AMBIGUOUS_CALL_TIP)
     readable = writable = lambda _, /: True
     def flush(self): return self._run(self.writer.flush)
     def seekable(self): return False
-    def seek(self, offset, whence=0, /): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: cannot use seek on read-write couple', notes=self.AMBIGUOUS_CALL_TIP) # noqa: ARG002
-    def tell(self): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.io.AsyncReadWriteCouple: tell is not supported', notes=self.AMBIGUOUS_CALL_TIP)
+    def seek(self, offset, whence=0, /): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.iotools.AsyncReadWriteCouple: cannot use seek on read-write couple', notes=self.AMBIGUOUS_CALL_TIP) # noqa: ARG002
+    def tell(self): A.raise_exc(OSError, E.ESPIPE, 'asyncutils.iotools.AsyncReadWriteCouple: tell is not supported', notes=self.AMBIGUOUS_CALL_TIP)
     def truncate(self, size=None, /): return self._run(self.writer.truncate, size)
     async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self._executor.shutdown()
     __cleanup__ = aclose
@@ -51,7 +51,7 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
         for _ in self._aso:
             try: return getattr(_, n)
             except AttributeError as e: f(e)
-        raise ExceptionGroup(f'asyncutils.io.AsyncReadWriteCouple: did not find attribute {n!r}', a) from None
+        raise ExceptionGroup(f'asyncutils.iotools.AsyncReadWriteCouple: did not find attribute {n!r}', a) from None
 class File(A.LoopContextMixin): # noqa: PLR0904
     __slots__ = '_f', '_fn', '_mmap'
     if S.platform != 'win32':
@@ -227,7 +227,7 @@ def __getattr__(n, /, _=S, a=frozenset(('ainput', 'stdcoup')), g=globals()):
     global ainput, stdcoup; stdcoup = AsyncReadWriteCouple(_.stdin, _.stdout) # ty: ignore[unresolved-global]
     async def ainput(prompt='', assert_tty=False):
         if prompt: await stdcoup.write(prompt); await stdcoup.flush()
-        if assert_tty and not stdcoup.reader.isatty(): raise OSError(E.ENOTTY, 'asyncutils.io.ainput: standard input is not a TTY')
+        if assert_tty and not stdcoup.reader.isatty(): raise OSError(E.ENOTTY, 'asyncutils.iotools.ainput: standard input is not a TTY')
         if (d := await stdcoup.readline()).endswith('\n'): return d[:-1]
         raise EOFError
     return g[n]

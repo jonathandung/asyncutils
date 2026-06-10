@@ -1,8 +1,8 @@
 '''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
+from ._internal.prots import AsyncContextManager
+from .rwlocks import RWLock
 from abc import ABC, abstractmethod
 from asyncio import Task
-from asyncutils import RWLock
-from ._internal.prots import AsyncContextManager
 from collections.abc import Awaitable, Callable
 from types import CoroutineType
 from typing import Any, Concatenate, Self, overload
@@ -23,7 +23,7 @@ class AsyncPropertyBase[T, R](ABC):
         | accessing the attribute on instances would return the property itself if ``strict=False`` and raise an :exc:`AttributeError` otherwise.
         | If ``hide`` is ``True`` (default ``False``), accessing the attribute on the class it is defined in would raise :exc:`AttributeError` as if
         | the property didn't exist.
-        | Subclasses must define :meth:`_wrap_aw`, and are allowed to override :meth:`_setup` and :meth:`_repr_helper`. Nothing else is customizable.'''
+        | Subclasses must define :meth:`wrap_aw`, and are allowed to override :meth:`_initialize` and :meth:`_repr_accessor`. Nothing else is customizable.'''
     @overload
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Self|CoroutineType[Any, Any, T]: ...
     @overload
@@ -31,16 +31,16 @@ class AsyncPropertyBase[T, R](ABC):
     def __set__(self, instance: R, value: T, /) -> None: ...
     def __delete__(self, instance: R, /) -> None: ...
     def __set_name__(self, typ: type[R], name: str, /) -> None: ...
-    def __getattr__(self, name: str, /) -> Any: '''Find the attribute on the getter if it exists.'''
+    def __getattr__(self, name: str, /) -> Any: '''Find the attribute on the getter if it exists.''' # noqa: ANN401
     def __reduce__(self) -> str: '''Return the qualified name of this property for pickling. Hidden properties cannot be pickled.'''
     def getter(self, fget: Callable[[R], Awaitable[T]], /) -> Self: '''Return another async property with the given function as the getter.'''
     def setter(self, fset: Callable[[R, T], Awaitable[None]], /) -> Self: '''Return another async property with the given function as the setter.'''
     def deleter(self, fdel: Callable[[R], Awaitable[None]], /) -> Self: '''Return another async property with the given function as the deleter.'''
     @staticmethod
-    def _repr_helper(accessor: Callable[Concatenate[R, ...], Awaitable[T|None]]|None, /) -> str: '''Called by the implementation of ``__repr__`` sequentially with each accessor as argument.'''
-    def _setup(self, fget: Callable[[R], Awaitable[T]], /, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=...) -> None: '''Set the necessary attributes on the property; called by :meth:`__new__`.'''
+    def _repr_accessor(accessor: Callable[Concatenate[R, ...], Awaitable[T|None]]|None, /) -> str: '''Called by the implementation of :meth:`~object.__repr__` sequentially with each accessor as argument.'''
+    def _initialize(self, fget: Callable[[R], Awaitable[T]], /, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=...) -> None: '''Set the necessary attributes on the property; called at construction.'''
     @abstractmethod
-    def _wrap_aw[X](self, aw: Awaitable[X], /) -> Awaitable[X]: '''Return an awaitable resolving to the result of an awaitable, limited to those returned by the setter or deleter. This can be a coroutine, a future, a task or anything else, and affects the strategy used to handle assignments and deletions which must return synchronously but run in the background.'''
+    def wrap_aw[S](self, aw: Awaitable[S], /) -> Awaitable[S]: '''Return an awaitable resolving to the result of an awaitable, limited to those returned by the setter or deleter. This can be a coroutine, a future, a task or anything else, and affects the strategy used to handle assignments and deletions which must return synchronously but run in the background.'''
     @property
     def fget(self) -> Callable[[R], Awaitable[T]]|None: '''The getter function for this property, or ``None`` if it doesn't exist.'''
     @property
@@ -55,8 +55,12 @@ class AsyncPropertyBase[T, R](ABC):
     __module__: str|None
     '''The module this property is defined in, determined by the function it decorates.'''
 class LazyAsyncProperty[T, R](AsyncPropertyBase[T, R]):
-    '''Queue set and delete operations, and complete them in order only when a get is called.'''
-    def _wrap_aw[X](self, aw: Awaitable[X], /) -> CoroutineType[Any, Any, X]: '''Wrap the awaitable in a coroutine, run lazily.'''
+    '''A property that queues set and delete operations.'''
+    @overload
+    def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
+    @overload
+    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=...) -> Self: '''Operations are completed only when a get is called, strictly in order.'''
+    def wrap_aw[S](self, aw: Awaitable[S], /) -> CoroutineType[Any, Any, S]: '''Wrap the awaitable in a coroutine, run lazily.'''
     __doc__: str|None
     '''The docstring for this property, or ``None`` if it doesn't exist.'''
     __name__: str
@@ -64,12 +68,14 @@ class LazyAsyncProperty[T, R](AsyncPropertyBase[T, R]):
     __module__: str|None
     '''The module this property is defined in, determined by the function it decorates.'''
 class ConcurrentAsyncProperty[T, R](AsyncPropertyBase[T, R]):
-    '''| Allow set and delete operations to run concurrently once the operations are called, without any guarantee on the order of
-    | execution.
-    | The setters and deleters can be implemented acquire a writer lock and the getter the corresponding reader lock from
-    | :mod:`~asyncutils.rwlocks` with its lock policies that provide fluent decorator interfaces. Note, however, that the accessor
-    | decorators must be outermost because they turn callables into properties.'''
-    def _wrap_aw[X](self, aw: Awaitable[X], /) -> Task[X]: '''Return a task for the awaitable returned by the setter or deleter.'''
+    '''Allows set and delete operations to run concurrently once the operations are called, without any guarantee on the order of execution.'''
+    @overload
+    def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
+    @overload
+    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, doc: str|None=..., strict: bool=..., hide: bool=...) -> Self:
+        '''| The setters and deleters can be implemented acquire a writer lock and the getter the corresponding reader lock from :mod:`~asyncutils.rwlocks` with its lock policies that provide fluent decorator interfaces.
+        | Note, however, that the accessor decorators must be outermost because they turn callables into properties.'''
+    def wrap_aw[S](self, aw: Awaitable[S], /) -> Task[S]: '''Return a task for the awaitable returned by the setter or deleter.'''
     __doc__: str|None
     '''The docstring for this property, or ``None`` if it doesn't exist.'''
     __name__: str
@@ -77,6 +83,7 @@ class ConcurrentAsyncProperty[T, R](AsyncPropertyBase[T, R]):
     __module__: str|None
     '''The module this property is defined in, determined by the function it decorates.'''
 class RWLockedAsyncProperty[T, R](ConcurrentAsyncProperty[T, R]):
+    '''Apply a reader-writer lock to the property. Naturally, setters and deleters are writers and getters are readers.'''
     __doc__: str|None
     '''The docstring for this property, or ``None`` if it doesn't exist.'''
     __name__: str
@@ -86,7 +93,7 @@ class RWLockedAsyncProperty[T, R](ConcurrentAsyncProperty[T, R]):
     @overload
     def __new__(cls, *, policy: type[RWLock]=..., doc: str|None=..., strict: bool=..., hide: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
     @overload
-    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, policy: type[RWLock]=..., doc: str|None=..., strict: bool=..., hide: bool=...) -> Self: ...
-    def _setup(self, f: Callable[[R], Awaitable[T]], /, fset: Callable[[R, T], Awaitable[None]]|None=None, fdel: Callable[[R], Awaitable[None]]|None=None, *, policy: type[RWLock]=..., **k: object) -> None: ...
+    def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]]|None=..., fdel: Callable[[R], Awaitable[None]]|None=..., *, policy: type[RWLock]=..., doc: str|None=..., strict: bool=..., hide: bool=...) -> Self: '''``policy`` is the class used to create the readers-writer lock for the property. It must subclass :class:`~asyncutils.rwlocks.RWLock`.'''
+    def _initialize(self, f: Callable[[R], Awaitable[T]], /, fset: Callable[[R, T], Awaitable[None]]|None=None, fdel: Callable[[R], Awaitable[None]]|None=None, *, policy: type[RWLock]=..., **k: object) -> None: ...
     @staticmethod
-    def _repr_helper(v: Callable[..., Awaitable[Any]]|None, /) -> str: ...
+    def _repr_accessor(v: Callable[..., Awaitable[Any]]|None, /) -> str: ...

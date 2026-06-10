@@ -5,7 +5,7 @@ from threading import Lock
 from typing import Final, Self
 __all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIP_E', 'sentinel_base'
 RECIP_E: Final[float]
-'''The reciprocal of Euler's number, used by :func:`~iters.aguessmin` and :func:`~iters.aguessmax`.'''
+'''The reciprocal of Euler's number, used by :func:`~asyncutils.iters.aguessmin` and :func:`~asyncutils.iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
 '''A tuple of all possible executor names that can be passed to -e, in rough order of preference and popularity. Also the order in which the executor options appear in the CLI help.'''
 EXECUTORS_FROZENSET: Final[frozenset[Executor]]

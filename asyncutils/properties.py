@@ -19,11 +19,11 @@ class D(W):
 @subscriptable
 class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (abc.ABCMeta,), {'__prepare__': classmethod(lambda c, n, b, _=D, /, **k: (p := c.__base__.__prepare__(n, b, **k)).update(__doc__=_(None), __name__=_(n)) or p), '__new__': lambda m, n, b, d, _=D, /, **k: d.__setitem__('__module__', _('asyncutils.properties')) or m.__base__.__new__(m, n, b, d, **k)})):
     __slots__ = '__cls', '__deleted', '__hide', '__lock', '__queue', '__strict', '__weakref__', 'fdel', 'fget', 'fset'
-    def __new__(cls, fget=None, *a, **k): # ty: ignore[invalid-assignment]
+    def __new__(cls, fget=None, *a, **k):
         if fget is None: return partial(cls, Placeholder, *a, **k) if a else partial(cls, **k)
-        (_ := object.__new__(cls))._setup(fget, *a, **k); return _
-    _repr_helper = staticmethod(repr)
-    def _setup(self, f, /, fset=None, fdel=None, *, _='<unknown>', doc=None, strict=True, hide=False): self.fget, self.fset, self.fdel, self.__doc__, self.__module__, self.__deleted, self.__strict, self.__hide, self.__queue, self.__lock = f, fset, fdel, getattr(f, '__doc__', None) if doc is None else doc, getattr(f, '__module__', _), set(), strict, hide, deque(), self._lock_factory()
+        (_ := object.__new__(cls))._initialize(fget, *a, **k); return _
+    _repr_accessor = staticmethod(repr)
+    def _initialize(self, f, /, fset=None, fdel=None, *, _='<unknown>', doc=None, strict=True, hide=False): self.fget, self.fset, self.fdel, self.__doc__, self.__module__, self.__deleted, self.__strict, self.__hide, self.__queue, self.__lock = f, fset, fdel, getattr(f, '__doc__', None) if doc is None else doc, getattr(f, '__module__', _), set(), strict, hide, deque(), self._lock_factory()
     def __get__(self, o, _=None, /):
         if o is None: self.__check_hidden(); return self
         self.__check_unbound()
@@ -44,7 +44,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (abc.
             return self.__deleted.add(o)
         self.__queue.append(self.__helper(f, 'delete', o))
     def __set_name__(self, /, *_): self.__cls, self.__name__ = _
-    def __repr__(self): return f'asyncutils.properties.{type(self).__name__}({", ".join(map(self._repr_helper, (self.fget, self.fset, self.fdel)))}, doc={self.__doc__!r}, strict={self.__strict}, hide={self.__hide})'
+    def __repr__(self): return f'asyncutils.properties.{type(self).__name__}({", ".join(map(self._repr_accessor, (self.fget, self.fset, self.fdel)))}, doc={self.__doc__!r}, strict={self.__strict}, hide={self.__hide})'
     def __reduce__(self):
         if self.__hide: raise TypeError('asyncutils.properties.AsyncPropertyBase: cannot pickle hidden property')
         return f'{self.__cls.__name__}.{self.__name__}'
@@ -56,7 +56,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (abc.
         if self.__strict or self.__hide: raise AttributeError(m, name=self.__name__)
         return self
     @abc.abstractmethod
-    def _wrap_aw(self, _, /): raise NotImplementedError
+    def wrap_aw(self, _, /): raise NotImplementedError
     async def __get(self, o, /):
         p = (q := self.__queue).popleft
         async with self.__lock:
@@ -64,7 +64,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (abc.
                 if await p() is not None and self.__strict: raise TypeError('setter or deleter returned non-None value')
         return await self.fget(o)
     def __helper(self, f, c, /, *a):
-        try: return self._wrap_aw(f(*a))
+        try: return self.wrap_aw(f(*a))
         except A.CRITICAL: raise A.Critical
         except BaseException as e: raise AttributeError(f'failed to {c} attribute {self.__name__}') from e
     def __set_helper(self, m, v, /):
@@ -81,9 +81,11 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (abc.
         if lock_factory is not None: cls._lock_factory = lock_factory
         elif getattr(cls, '_lock_factory', None) is None: raise TypeError('asyncutils.properties.AsyncPropertyBase subclasses must specify lock_factory')
         super().__init_subclass__(**_)
-class LazyAsyncProperty(AsyncPropertyBase, lock_factory=__import__('asyncio').Lock): __slots__, _wrap_aw = (), staticmethod(A.wrap_in_coro)
-class ConcurrentAsyncProperty(AsyncPropertyBase, lock_factory=staticmethod(lambda _=A.anullcontext, /: _)): __slots__, _wrap_aw = (), LoopMixinBase.make
+class LazyAsyncProperty(AsyncPropertyBase, lock_factory=__import__('asyncio').Lock): __slots__, wrap_aw = (), staticmethod(A.wrap_in_coro)
+class ConcurrentAsyncProperty(AsyncPropertyBase, lock_factory=staticmethod(lambda _=A.anullcontext, /: _)): __slots__, wrap_aw = (), LoopMixinBase.make
 class RWLockedAsyncProperty(ConcurrentAsyncProperty):
-    __slots__, _repr_helper = (), staticmethod(lambda v, _=n, /: _ if v is None else repr(v.__wrapped__))
-    def _setup(self, f, /, fset=None, fdel=None, *, policy=A.RWLock, **k): w = (f := policy.lock(f)).writer; super()._setup(f, None if fset is None else w(fset), None if fdel is None else w(fdel), **k)
+    __slots__, _repr_accessor = (), staticmethod(lambda v, _=n, /: _ if v is None else repr(v.__wrapped__))
+    def _initialize(self, f, /, fset=None, fdel=None, *, policy=A.RWLock, **k):
+        if not issubclass(policy, A.RWLock): raise TypeError('policy must be a subclass of asyncutils.rwlocks.RWLock')
+        w = (f := policy.lock(f)).writer; super()._initialize(f, None if fset is None else w(fset), None if fdel is None else w(fdel), **k)
 del abc, n, W, D

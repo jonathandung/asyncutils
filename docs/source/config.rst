@@ -94,10 +94,10 @@ Some arguments consumed by the Python interpreter are also taken into account by
 Basic Customization
 -------------------
 
-An extensible, two-part configuration system is in place. The first part is static/frozen, detailed below.
+An extensible, two-part configuration system is in place.
 
-It includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random number generation
-using :envvar:`AUTILSCFGPATH`.
+The first, frozen part includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random
+number generation using :envvar:`AUTILSCFGPATH`.
 
 :envvar:`AUTILSCFGPATH` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown
 as appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types, but you may
@@ -120,17 +120,17 @@ to see detailed CLI usage.
 
 The config file can be written in the below formats, listed with the third-party libraries they require if any:
 
-====== ============== ================== ===========
-Format File extension PyPI package name  Module name
-====== ============== ================== ===========
-JSON   .json                             json
-TOML   .toml                             tomllib
-YAML   .yaml, .yml    PyYAML             yaml
-JSON5  .json5         json5              json5
-JSONC  .jsonc         json-with-comments jsonc
-Hjson  .hjson         hjson              hjson
-XML    .xml           xmltodict          xmltodict
-====== ============== ================== ===========
+====== ============== =========== ==================
+Format File extension Module name PyPI package name
+====== ============== =========== ==================
+JSON   .json          json
+TOML   .toml          tomllib
+YAML   .yaml, .yml    yaml        PyYAML
+JSONC  .jsonc         jsonc       json-with-comments
+JSON5  .json5         json5       json5
+Hjson  .hjson         hjson       hjson
+XML    .xml           xmltodict   xmltodict
+====== ============== =========== ==================
 
 .. version-added:: 0.9.3
   Support for the XML (Extensible Markup Language) format.
@@ -145,7 +145,7 @@ XML    .xml           xmltodict          xmltodict
 
   `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
     a vulnerability of the :class:`~xml.sax.saxutils.XMLGenerator` class from the standard library used by
-    `xmltodict <https://pypi.org/project/xmltodict/>`__ without input sanitization
+    `xmltodict <https://pypi.org/project/xmltodict>`__ without input sanitization
 
     .. note:: This exploit is disputed by the maintainers of the project.
 

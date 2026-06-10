@@ -4,7 +4,8 @@ asyncutils: makes async straightforward and enjoyable
 **PyPI package name**: `asyncutils <https://pypi.org/p/py-asyncutils>`__
 
 :mod:`asyncutils` is a Python library which, as the name suggests, contains helpful routines and types for asynchronous programming applications,
-organized under various submodules. It offers a simple and intuitive API and a colorful command line interface.
+organized under various submodules. It offers a simple and intuitive API that abstracts away headaches stemming from Python's async quirks, and a
+colorful command line interface.
 
 .. toctree::
   :caption: Contents
@@ -44,8 +45,8 @@ organized under various submodules. It offers a simple and intuitive API and a c
   :caption: Links
   :hidden:
 
-  asyncutils @ PyPI <https://pypi.org/p/py-asyncutils/>
-  asyncutils @ GitHub <https://github.com/jonathandung/asyncutils/>
+  asyncutils @ PyPI <https://pypi.org/p/py-asyncutils>
+  asyncutils @ GitHub <https://github.com/jonathandung/asyncutils>
   Issue tracker <https://github.com/jonathandung/asyncutils/issues>
   PDF documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
   .zip archive of pages <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip>

@@ -137,9 +137,9 @@ inspiration.
   * - asyncutils.futures.EagerAsyncCallbacksTask/schedule_callbacks
     - ``addr``: :class:`int`
     - The above, but for exact instances of :class:`futures.EagerAsyncCallbacksTask`.
-  * - asyncutils.io.double_ended_pipe
+  * - asyncutils.iotools.double_ended_pipe
     - ``reader1``: :class:`int`, ``writer1``: :class:`int`, ``reader2``: :class:`int`, ``writer2``: :class:`int`
-    - Raised when :func:`io.double_ended_text_pipe` or :func:`io.double_ended_binary_pipe` is called, with the file descriptors of the reader and writer ends of both pipes as arguments.
+    - Raised when :func:`iotools.double_ended_text_pipe` or :func:`iotools.double_ended_binary_pipe` is called, with the file descriptors of the reader and writer ends of both pipes as arguments.
   * - asyncutils.iters.aonline_sorter
     - ``iaddr``: :class:`int`
     - Raised when :class:`iters.aonline_sorter` is called on an (async) iterable with memory address ``iaddr``.

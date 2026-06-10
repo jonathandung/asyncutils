@@ -10,13 +10,13 @@ from contextlib import AbstractContextManager
 from typing import Any, Final, Literal, Self, overload
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
-'''Instance of :class:`~exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown`.'''
+'''Instance of :class:`~asyncutils.exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown`.'''
 ignore_qempty: Final[IgnoreErrors]
-'''Instance of :class:`~exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueEmpty`.'''
+'''Instance of :class:`~asyncutils.exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueEmpty`.'''
 ignore_qfull: Final[IgnoreErrors]
-'''Instance of :class:`~exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueFull`.'''
+'''Instance of :class:`~asyncutils.exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown` and :exc:`~asyncio.QueueFull`.'''
 ignore_qerrs: Final[IgnoreErrors]
-'''Instance of :class:`~exceptions.IgnoreErrors` that suppresses all asyncio queue-related errors.'''
+'''Instance of :class:`~asyncutils.exceptions.IgnoreErrors` that suppresses all asyncio queue-related errors.'''
 @overload
 def password_queue[T, R](password_put: R, *, maxsize: int=..., protect_get: Literal[False]=..., protect_put: Literal[True]=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., puttyp: type[R]=..., init_items: SupportsIteration[T], strict: bool=...) -> PutProtectedQProt[R, T]: ...
 @overload
@@ -100,18 +100,18 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
 class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''
     @abstractmethod
-    def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``; called by :meth:`__init__`.'''
+    def _init(self, maxsize: int) -> None: '''Initialize the queue given ``maxsize``.'''
     @abstractmethod
-    def _get(self) -> T: '''Get an item from the queue if not empty; called by :meth:`get` and :meth:`get_nowait`.'''
+    def _get(self) -> T: '''Get an item from the queue if not empty; called by :meth:`~asyncio.Queue.get` and :meth:`~asyncio.Queue.get_nowait`.'''
     @abstractmethod
-    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called by :meth:`put` and :meth:`put_nowait`.'''
+    def _put(self, item: T) -> None: '''Put an item into the queue if not empty; called by :meth:`~asyncio.Queue.put` and :meth:`~asyncio.Queue.put_nowait`.'''
     @abstractmethod
     def peek_all(self) -> list[T]: '''Return a list of all the items in the queue.'''
     @abstractmethod
     def qsize(self) -> int: '''Return the size of the queue as an integer.'''
     def reset(self) -> None: '''Revert the queue to an empty state.'''
-    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call :meth:`put_nowait` if a slot is immediately available, waiting for a slot with ``timeout`` otherwise; if the timeout expires and ``raising`` is True, throw :exc:`TimeoutError`.'''
-    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call :meth:`get_nowait` if an item is immediately available, waiting for a item with ``timeout`` otherwise; if the timeout expires and ``default`` is provided, return it.'''
+    async def smart_put(self, item: T, *, timeout: float|None=..., raising: bool=...) -> bool|None: '''Call :meth:`~asyncio.Queue.put_nowait` if a slot is immediately available, waiting for a slot with ``timeout`` otherwise; if the timeout expires and ``raising`` is True, throw :exc:`TimeoutError`.'''
+    async def smart_get(self, *, timeout: float|None=..., default: T=...) -> T: '''Call :meth:`~asyncio.Queue.get_nowait` if an item is immediately available, waiting for a item with ``timeout`` otherwise; if the timeout expires and ``default`` is provided, return it.'''
     async def extend(self, it: SupportsIteration[T], timeout: float|None=...) -> None: '''Add the items from ``it`` into the queue within ``timeout``.'''
     def push(self, item: T) -> bool: '''Put an item into the queue immediately, popping if necessary; returns success.'''
     def drain_persistent(self, max_items: int|None=..., timeout: float|None=...) -> AsyncGenerator[T]: '''An async generator that gets items from the queue once available and yields them.'''
@@ -133,9 +133,9 @@ class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     @property
     def fully_functional(self) -> bool: '''``queue.fully_functional == queue.can_put_now and queue.can_get_now``.'''
     @property
-    def capacity(self) -> int|float: '''The capacity of the queue. Can be :const:`math.inf`.'''
+    def capacity(self) -> int|float: '''The capacity of the queue. Can be :data:`math.inf`.'''
     @property
-    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be :const:`math.inf`.'''
+    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be :data:`math.inf`.'''
     @property
     def utilization_rate(self) -> float: '''The number of items the queue divided by its capacity.'''
     def pushpop_nowait(self, item: T, raising: bool=...) -> T: '''Push an item into the queue and pop from the other end immediately.'''

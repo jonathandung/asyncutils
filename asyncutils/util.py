@@ -33,7 +33,7 @@ def transient_block_from_loop(loop, *, threadsafe=False): return partial(transie
 def sync_await(aw, loop=None, *, never_block=True, timeout=None):
     audit('asyncutils.util.sync_await', fullname(aw))
     if loop is None: loop = get_loop_and_set()
-    return (A.raise_exc(RuntimeError, 'asyncutils.util.sync_await: cannot await on the current loop without blocking') if loop is A._get_running_loop() else I.run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)) if never_block or loop.is_running() else loop.run_until_complete(I.wait_for(I.ensure_future(aw, loop=loop), timeout))
+    return (A.raise_exc(A.Deadlock, 'asyncutils.util.sync_await: cannot await on the current loop without blocking') if loop is A._get_running_loop() else I.run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)) if never_block or loop.is_running() else loop.run_until_complete(I.wait_for(I.ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None):
     if workers is None: workers = A.getcontext().SEMAPHORE_DEFAULT_VALUE
     return (I.Lock() if workers == 1 else I.BoundedSemaphore(workers)) if bounded else I.Semaphore(workers)

@@ -13,7 +13,7 @@ Some keys can have various types, as detailed by the comments attached. */
   // V and Q are not respected when running the console
   executor: "thread",
   /* choose the PEP 3148 executor class to use when required
-  refer to `tools.get_cmd_help()` for possible values
+  refer to `tools.get_cmd_help` for possible values
   corresponds to -e/--executor/-c/--custom-executor */
   quiet: false,
   // ask the console not to show introductory and closing text

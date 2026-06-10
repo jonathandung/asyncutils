@@ -1,5 +1,5 @@
 '''A feature-rich asynchronous utilities library with CLI and REPL support.'''
-__all__ = 'altlocks', 'base', 'buckets', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'io', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version'
+__all__ = 'altlocks', 'base', 'buckets', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'iotools', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version'
 from ._internal.prots import Submodule
 from .altlocks import *
 from .base import *
@@ -15,7 +15,7 @@ from .events import *
 from .exceptions import *
 from .func import *
 from .futures import *
-from .io import *
+from .iotools import *
 from .iterclasses import *
 from .iters import *
 from .locks import *

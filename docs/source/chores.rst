@@ -83,7 +83,7 @@ complete the following:
   Be sure to update the contextual constant count:
 
   - in the :const:`~asyncutils.context.all_contextual_consts` docstring,
-  - within the :data:`~asyncutils.context.Context` fake dataclass body, and
+  - within the :class:`~asyncutils.context.Context` fake dataclass body, and
   - at the top level.
 
   Keep alphabetical order within the submodule concerned, with submodules ordered alphabetically as well.
@@ -112,7 +112,9 @@ Adding a documentation page
 5. If copying from the root to the Read the Docs page is required during build, so that users can see it in both places, add an entry to the mapping
    representing sources and respective targets for copy statements in scripts/rtd.sh, maintaining alphabetical order.
 
-.. note:: ``autoapi_keep_files`` is set to ``True`` in conf.py only to allow local incremental builds. Do not commit the docs/source/api directory!
+.. note::
+  ``autoapi_keep_files`` is set to ``True`` in conf.py only to allow local incremental builds. This is why the docs/source/api directory is in
+  .gitignore, and you should not commit it.
 
 Changing help messages for command-line arguments
 -------------------------------------------------
@@ -150,9 +152,7 @@ verify the test is written correctly and your implementation is resilient agains
     includes assert statement usage and other fundamental guidelines, for those more used to other frameworks like :mod:`unittest`.
 
 Before committing, run the whole test suite by entering the following command at the project root to check for regressions and update the relevant
-static badges in the README:
-
-::
+static badges in the README::
 
   make test-with-badges
 

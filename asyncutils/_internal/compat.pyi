@@ -20,4 +20,4 @@ if m.version_info >= (3, 14):
 else: from .py313 import *
 if m.version_info >= (3, 13): from asyncio.queues import *
 else: from .py312 import *
-s: Final[frozenset[type[Iterable]]]
+s: Final[frozenset[type[Iterable[Any]]]]

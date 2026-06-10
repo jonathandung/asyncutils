@@ -8,7 +8,7 @@ is being done under the hood and view the timestamps of significant events, with
 tracer, profiler or debugger.
 
 This module employs logging as provided by the standard library, which may contribute to a significant chunk of the boot time of this module but is
-much too widely used for us to find alternatives such as `loguru <https://loguru.readthedocs.io/en/stable/>`__, especially due to concerns in adding
+much too widely used for us to find alternatives such as `loguru <https://loguru.readthedocs.io/en/stable>`__, especially due to concerns in adding
 a dependency and compatibility issues.
 
 The logger is named 'asyncutils' and retrievable by a :func:`logging.getLogger` call as expected. No submodule-specific logger is used for fear that

@@ -15,7 +15,7 @@ class SingleWaiterEventWithValue[T](EventMixin[T]):
     def get(self, default: T=...) -> T: '''Get the result of the event immediately if set, otherwise returning ``default`` if passed or throw :exc:`RuntimeError`.'''
 class EventWithValue[T: Not[None]](EventMixin[T]):
     '''An event class that can store a value and maintains a history of past values.'''
-    def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of ``maxhist`` entries, which defaults to :data:`context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results, are stored.'''
+    def __init__(self, *, maxhist: int|None=...) -> None: '''A maximum of ``maxhist`` entries, which defaults to :const:`~asyncutils.context.Context.EVENT_WITH_VALUE_DEFAULT_MAX_HIST`, of past results, are stored.'''
     @overload
     def set(self, value: None, *, strict: Literal[False]) -> None: ...
     @overload
@@ -30,10 +30,9 @@ class EventWithValue[T: Not[None]](EventMixin[T]):
     def history(self) -> list[tuple[float, T]]: '''The past results of the event as a list of tuples ``(timestamp, value)``.'''
     @property
     def history_asdict(self) -> dict[float, T]: '''Above, but as a dictionary.'''
-    def recent_history(self, duration: float|None=...) -> Generator[tuple[float, T]]: '''Yield recent history entries in order; what qualifies as recent depends on ``duration``, defaulting to :data:`context.EVENT_WITH_VALUE_DEFAULT_RECENT`.'''
+    def recent_history(self, duration: float|None=...) -> Generator[tuple[float, T]]: '''Yield recent history entries in order; what qualifies as recent depends on ``duration``, defaulting to :const:`~asyncutils.context.Context.EVENT_WITH_VALUE_DEFAULT_RECENT`.'''
     async def wait_for_transition(self, old: T, new: T, timeout: float|None=..., *, force_transition: bool=..., legacy: bool=...) -> bool:
         '''| Wait until the value is set to ``old``, and then ``new``, in that order.
-        | ``timeout`` defaults to :data:`context.EVENT_WITH_VALUE_DEFAULT_TIMEOUT`
         | On timeout, if ``force_transition`` is ``True``, cause the transition to happen manually.
         | Return whether the transition occurred naturally.
 

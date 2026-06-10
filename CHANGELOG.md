@@ -26,6 +26,8 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### [0.9.12] - 2026-06-12; unreleased
 
+Fixed all warnings in Sphinx nitpicky builds.
+
 ### [0.9.11] - 2026-06-04; newest
 
 Upgraded to Python 3.15.0b2; added experimental GraalPy and free-threaded support.

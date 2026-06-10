@@ -28,7 +28,7 @@ def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbos
     | Once the result of ``stop_when`` is set, the function returns that result, which should be None or the same type as the return type of the decorated function after awaiting.
     | However, the task is guaranteed to be run at least once.
     | When using the ``supplied_args`` and ``supplied_kwargs`` parameters, maintain a reference to them so that you can edit the parameters fed to the function on the fly.
-    | Finally, the function returns ``default`` or None if it was not passed, unless ``stop_on_exc`` is True or ``default`` is :const:`~constants.RAISE`, in which case :exc:`~exceptions.MaxIterationsError` is thrown.'''
+    | Finally, the function returns ``default`` or None if it was not passed, unless ``stop_on_exc`` is True or ``default`` is :const:`~asyncutils.constants.RAISE`, in which case :exc:`~asyncutils.exceptions.MaxIterationsError` is thrown.'''
 @overload
 def everymethod(intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> EveryMethodRV[Any, Any]: ...
 @overload
@@ -36,20 +36,20 @@ def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future
 @overload
 def everymethod[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryMethodRV[T, Any]: ...
 @overload
-def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: '''The method version of :func:`every`. `stop_when_getter`, if passed, should take `self` and returns a suitable future `stop_when`. Other parameters are as in :func:`every`.'''
+def everymethod[T, R](intvl: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: '''The method version of :func:`every`. ``stop_when_getter``, if passed, should take ``self`` and returns a suitable future ``stop_when``. Other parameters are as in :func:`every`.'''
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, CoroutineType[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''| Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
     | ``timer`` (default :func:`time.perf_counter`) is used to count ``elapsed``, the time required to execute the function.
-    | ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~exceptions.wrap_exc`.
-    | ``precision`` (default :data:`context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and ``ns`` whether the return value of the timer indicates time in nanoseconds.
+    | ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~asyncutils.exceptions.wrap_exc`.
+    | ``precision`` (default :const:`~asyncutils.context.Context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and ``ns`` whether the return value of the timer indicates time in nanoseconds.
     | Any exception the wrapped function emits whose type is not in ``expected`` is propagated directly.'''
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
     '''| A decorator factory that retries the wrapped function with exponential backoff, returning once the function succeeds.
-    | If the function does not succeed within `tries` attempts (default :data:`context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
-    | ``backoff`` (default :data:`context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to
-    | :data:`context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed `max_delay` (default
-    | :data:`context.RETRY_DEFAULT_MAX_DELAY`).
-    | ``jitter`` (default :data:`context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
+    | If the function does not succeed within ``tries`` attempts (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
+    | ``backoff`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to
+    | :const:`~asyncutils.context.Context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed ``max_delay`` (default
+    | :const:`~asyncutils.context.Context.RETRY_DEFAULT_MAX_DELAY`).
+    | ``jitter`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
     | ``exc`` specifies which exceptions to catch and retry on; if an exception not in ``exc`` is raised, it is propagated immediately.
     | ``on_retry`` and ``on_success`` are callbacks called before each retry and after a successful call, with the attempt number (zero-based)
     | as the first argument and the exception caught or the time taken for the successful call respectively as the second. Thus, ``on_success`` is
@@ -61,14 +61,14 @@ async def measure[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> t
 async def measure2[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> float: '''Only return the time and discard the return value of the function.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=..., *, sequential: bool=...) -> BenchmarkResult:
     '''| ``f`` is the function to benchmark, which should take no arguments and return an awaitable.
-    | ``times`` is how many times the function should be run, which defaults to :data:`context.BENCHMARK_DEFAULT_TIMES`.
-    | ``warmup`` is the number of warmup rounds to call the function for; not included in the benchmark results; default :data:`context.BENCHMARK_DEFAULT_WARMUP`.
-    | ``sequential`` (default :data:`context.BENCHMARK_DEFAULT_SEQUENTIAL`) determines whether the function calls are made sequentially or gathered at once. For
+    | ``times`` is how many times the function should be run, which defaults to :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_TIMES`.
+    | ``warmup`` is the number of warmup rounds to call the function for; not included in the benchmark results; default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_WARMUP`.
+    | ``sequential`` (default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_SEQUENTIAL`) determines whether the function calls are made sequentially or gathered at once. For
     | example, for functions requiring a mutex to be acquired or with other rate-limiting policies in place, you should explicitly pass ``sequential=True``.
     | This function should only be used in very simple cases, because we recognize the inherent difficulty and abundancy of noise in testing IO-bound code, and
     | this library alone is by no means designed to solve that issue.'''
 class RateLimited[T, **P]:
-    '''The rate limiter pattern as a decorator (factory). See :class:`~locks.AdvancedRateLimit` for the async context manager version.'''
+    '''The rate limiter pattern as a decorator (factory). See :class:`~asyncutils.locks.AdvancedRateLimit` for the async context manager version.'''
     @overload
     def __new__(cls, calls: int, /, period: float, *, raise_: bool=..., timer: Timer=..., lock_impl: Callable[[], AsyncContextManager[Any]]=...) -> Callable[[Callable[P, Awaitable[T]]], Self]: ...
     @overload

@@ -23,7 +23,7 @@ class LoopContextMixin(LoopMixinBase):
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Call :meth:`__cleanup__` and cancel all running tasks in the loop.'''
 class AwaitableMixin[T](ABC):
-    '''A subclass that implements the async :meth:`wait` method automatically becomes awaitable, resolving to the return value of that method.'''
+    '''A subclass that implements :meth:`wait` automatically becomes awaitable, resolving to the return value of that method.'''
     def __await__(self) -> Generator[Any, None, T]: '''Await statement support.'''
     @abstractmethod
     def wait(self) -> Awaitable[T]: ...
@@ -90,7 +90,7 @@ class EventMixin[T](AwaitableMixin[T], LoopMixinBase, ABC):
     @abstractmethod
     def is_set(self) -> bool: '''Return whether the event currently holds a value.'''
     @abstractmethod
-    def get(self) -> T: '''Return the value currently held by the event, or raise an exception if there is no value set. The implementations in this library have a dedicated exception type, :exc:`~exceptions.EventValueError`, for this.'''
+    def get(self) -> T: '''Return the value currently held by the event, or raise an exception if there is no value set. The implementations in this library have a dedicated exception type, :exc:`~asyncutils.exceptions.EventValueError`, for this.'''
     @abstractmethod
     def set(self, value: T) -> None: '''Set the value of the event and wake up all waiters. Implementations may not choose to clear the value within this method.'''
     @abstractmethod

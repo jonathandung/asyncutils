@@ -12,14 +12,14 @@ class StateMachine:
     def add(self, from_state: str, to_state: str, condition: Callable[[str, str], Awaitable[Any]]|None=...) -> None:
         '''| Add a condition to the transition from ``from_state`` to ``to_state``.
         | If any condition is ``None`` or returns a truthy value taking the current and new states as positional arguments, the transition is allowed.'''
-    def on_enter[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when ``state`` is entered.'''
-    def on_exit[F: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[F], F]: '''Register an asynchronous handler to be called when ``state`` is exited.'''
+    def on_enter[T: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[T], T]: '''Register an asynchronous handler to be called when ``state`` is entered.'''
+    def on_exit[T: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[T], T]: '''Register an asynchronous handler to be called when ``state`` is exited.'''
     async def transition(self, state: str) -> bool: '''Transition from the current state to the new ``state``.'''
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
-    '''| ``n``, which defaults to :data:`context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
+    '''| ``n``, which defaults to :const:`~asyncutils.context.Context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
     | concurrently running awaitables.
     | ``ret_exc`` is passed to :func:`asyncio.gather` as the ``return_exceptions`` argument.'''
 class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncContextMixin[CallbackAccumulator[T, P]]):
@@ -62,8 +62,8 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def __init__(self, ttl: float|None=..., refresh: float|None=..., *, processor: Callable[[BaseException, bool], object]=..., timer: Timer=...):
         '''All arguments are optioanl:
 
-        * ``ttl``: Time-to-live in seconds; default :data:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
-        * ``refresh``: Time before TTL expires to begin the refresh; default :data:`context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
+        * ``ttl``: Time-to-live in seconds; default :const:`~asyncutils.context.Context.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL`.
+        * ``refresh``: Time before TTL expires to begin the refresh; default :const:`~asyncutils.context.Context.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH`.
         * ``processor``: Error handler that takes two arguments ``(exc, was_batched)``, where ``exc`` is the exception occurred and
         * ``was_batched`` whether the exception was thrown during a batch refresh, in contrast to a single-item refresh.
         * ``default_loader``: The loader to load values from keys for which specific loaders have not been registered.'''
