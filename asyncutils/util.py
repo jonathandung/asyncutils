@@ -22,6 +22,9 @@ def get_future(aw, loop=None): return (get_loop_and_set() if loop is None else l
 def new_eager_tasks(*aws): (l := get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)
 def _fcopy(f, /): return wraps(f)(lambda *a, **k: f(*a, **k)) # noqa: PLW0108
 def afcopy(f, /): return wraps(f)(lambda *a, **k: wrap_in_coro(f(*a, **k)))
+def discard_retval(f, /):
+    async def g(*a, **k): await f(*a, **k)
+    return wraps(f)(g)
 def to_sync(f, /, loop=None, *, timeout=None):
     audit('asyncutils.util.to_sync', fullname(f))
     if (f := getattr(f, '__sync__', f)) is not f: return f

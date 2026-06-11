@@ -484,6 +484,7 @@ Added `__lazy_modules__` attribute to submodules where appropriate; added some i
     - aawcmf2dcmff
     - afcopy
     - dcm
+    - discard_retval
     - get_future
     - new_eager_tasks
     - to_sync

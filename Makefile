@@ -4,7 +4,7 @@ test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail $(TEST_MAXFAIL)
 test-with-badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 10 --local-badge-generate duration skipped status warnings xfailed
-	pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir assets --local-badge-generate cov
+	pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir assets --local-badge-generate cov last-run
 clean:
 	rm -rf build dist py_asyncutils.egg-info .ruff_cache .pytest_cache .coverage .uv-stamp docs/build docs/source/api docs/source/help.rst docs/source/makefile-usage.rst
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

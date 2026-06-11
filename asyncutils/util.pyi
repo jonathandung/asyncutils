@@ -7,7 +7,7 @@ from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from ty_extensions import Not
 from types import CoroutineType
 from typing import Any, Literal, Never, overload
-__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'afcopy', 'aiter_from_f', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'afcopy', 'aiter_from_f', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'discard_retval', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'to_async', 'to_sync', 'to_sync_from_loop', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable ``aw``, such that it can be passed to :func:`asyncio.create_task`.'''
@@ -17,6 +17,7 @@ def avalify[T](v: T, /) -> Callable[..., CoroutineType[Any, Any, T]]: '''Return 
 async def anullify(*a: object, **k: object) -> None: '''An async function that does nothing and returns ``None``.'''
 async def atruthify(*a: object, **k: object) -> Literal[True]: '''An async function that does nothing and returns ``True``.'''
 async def afalsify(*a: object, **k: object) -> Literal[False]: '''An async function that does nothing and returns ``False``.'''
+def discard_retval[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, None]]: '''Return an async function with the same signature as ``f`` that awaits the result of ``f`` and discards it.'''
 @overload
 async def locked_lock[T: AsyncLockLike[Any]](*, lcls: type[T]) -> T: ...
 @overload

@@ -1,8 +1,8 @@
 Available targets:
  help             - Show this help message
  test             - Run tests, allowing up to TEST_MAXFAIL failures (default 3) since any more would likely mean an obvious error
- test-with-badges - Run tests more strictly, once with pytest-asyncio-cooperative and once with pytest-asyncio, generating badges and coverage
-                    respectively; use as pre-push step only to update static SVGs
+ test-with-badges - Run tests more strictly, once with pytest-asyncio-cooperative and once with pytest-asyncio, and generating badges;
+                    use as pre-push step only to update static SVGs
  clean            - Clean build artifacts and caches
  install          - Install the package in editable mode with development dependencies; assumes a virtual environment is present
  install-system   - Install the package in editable mode without a virtual environment

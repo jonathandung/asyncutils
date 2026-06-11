@@ -20,11 +20,11 @@ def _wakeup_next(W):
 class Q:
     exc = A.ForbiddenOperation; __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
-    def __new__(cls, /, *A, _=f):
-        s = super().__new__(cls)
-        for a in zip(cls.__slots__, A): _(s, *a)
+    def __new__(cls, /, *a, _=f.__get__, x='pwdq.'):
+        (f := _(s := super().__new__(cls)))(*next(i := zip(cls.__slots__, a)))
+        for n, v in i: v.__qualname__ = x+n; f(n, v)
         return s
-    def __setattr__(self, name, value, /, _='cancel_extend', f=f, s=frozenset(__slots__)):
+    def __setattr__(self, name, value, /, _=__slots__[-1], f=f, s=frozenset(__slots__)):
         if name not in s: raise AttributeError(f'password-protected queue has no attribute {name!r}')
         if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
         f(self, name, value)
@@ -126,7 +126,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             f = d.popleft
             while d:
                 if not (F := f()).done(): F.set_result(None)
-    q = _(maxsize, lambda: not l, lambda: len(l), full := lambda: 0 < maxsize <= len(l), get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, E.wait, shutdown, lambda msg=None: False) # noqa: ARG005
+    q = _(maxsize, lambda: not l, lambda: len(l), full := lambda: 0 < maxsize <= len(l), get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, A.discard_retval(E.wait), shutdown, lambda msg=None: False) # noqa: ARG005
     if init_items:
         async def extend(f=D.partial(put, D.Placeholder, password_put)):
             async for i in A.iter_to_agen(init_items): await f(i)

@@ -2,7 +2,7 @@
 <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="95.99000000000001"
+    width="95.99"
     height="20"
     role="img"
     aria-label="coverage: 59%"
@@ -17,12 +17,12 @@
             dominant-baseline: middle;
             text-anchor: middle;
             font-family: Verdana,Geneva,DejaVu Sans,sans-serif;
-            font-size: 11.4px;
+            font-size: 110px;
             fill: #fff;
         }
 
         .shadow {
-            transform: translate(1px, 1px);
+            transform: translate(10px, 10px);
             fill: #010101;
         }
     </style>
@@ -37,13 +37,17 @@
     <g clip-path="url(#r)" >
         <g>
             <rect width="60.17" fill="#555"/>
-            <text x="30.085" y="10.0" class="shadow">coverage</text>
-            <text x="30.085" y="10.0">coverage</text>
+            <g transform="scale(.1)">
+                <text x="300.85" y="100" textLength="501.7" class="shadow">coverage</text>
+                <text x="300.85" y="100" textLength="501.7">coverage</text>
+            </g>
         </g>
         <g transform="translate(60.17 0)">
             <rect width="35.82" fill="#dfb317"/>
-            <text x="17.91" y="10.0" class="shadow">59%</text>
-            <text x="17.91" y="10.0">59%</text>
+            <g transform="scale(.1)">
+                <text x="179.1" y="100" textLength="258.2" class="shadow">59%</text>
+                <text x="179.1" y="100" textLength="258.2">59%</text>
+            </g>
         </g>
         <rect width="100%" height="100%" fill="url(#s)"/>
     </g>

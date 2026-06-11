@@ -86,7 +86,7 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
     .. danger::
       This function is meant not for cryptographic purposes, because no hashing of the password is performed! Attackers may obtain sensitive
       information, namely the passwords used by the queue, from the memory address of the returned object alone, or worse still, access and
-      modify the internal stack/queue storing the items directly.
+      modify the internal stack/queue storing the items directly. Put more bluntly, the password protection offered is purely cosmetic.
     .. note::
       The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use
       default values in the type parameters here to cut this number in half.
