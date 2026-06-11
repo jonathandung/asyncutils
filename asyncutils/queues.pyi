@@ -79,10 +79,8 @@ def password_queue[V](*, maxsize: int=..., protect_get: Literal[True], protect_p
 def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put: Literal[True]=..., can_change_get: bool=..., can_change_put: bool=..., priority: bool=..., lifo: bool=..., get_from: str=..., put_from: str=..., strict: bool=...) -> GetAndPutProtectedQProt[Any, Any, Any]:
     '''| Return a thread-unsafe password-protected queue, the type of which does not inherit from :class:`asyncio.Queue` but has the same interface.
     | The queue has maximum size ``maxsize``. ``priority`` and ``lifo`` parameters determine if the queue is a priority queue and last-in-first-out.
-    | If ``protect_get`` is ``True``, get and get_nowait will require a password, specified by ``password_get`` or retrieved from a variable in the
-    | caller's scope with name ``get_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
-    | If ``protect_put`` is ``True``, put and put_nowait will require a password, specified by ``password_put`` or retrieved from a variable in the
-    | caller's scope with name ``put_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
+    | If ``protect_get`` is ``True``, get and get_nowait will require a password, specified by ``password_get`` or retrieved from a variable in the caller's scope with name ``get_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_GET_FROM`).
+    | If ``protect_put`` is ``True``, put and put_nowait will require a password, specified by ``password_put`` or retrieved from a variable in the caller's scope with name ``put_from`` (default :const`context.PASSWORD_QUEUE_DEFAULT_PUT_FROM`).
     | If ``init_items`` is specified, the items in that (async) iterable will be arranged to enter the queue eventually.
 
     .. danger::
@@ -92,10 +90,8 @@ def password_queue(*, maxsize: int=..., protect_get: Literal[True], protect_put:
     .. note::
       The excessive amount of overloads here cannot be helped due to accurate typing needs. When we drop support for Python 3.12, we will use
       default values in the type parameters here to cut this number in half.
-    .. note::
-      The overloads do not cover the technically valid but useless case with both ``protect_get`` and ``protect_put`` being ``False``.
-    .. note::
-      Little type validation for the argument combinations is done at runtime; it is hoped that type checkers will catch most misuses.
+    .. note:: The overloads do not cover the technically valid but useless case with both ``protect_get`` and ``protect_put`` being ``False``.
+    .. note:: Little type validation for the argument combinations is done at runtime; it is hoped that type checkers will catch most misuses.
 '''
 class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     '''A base class for queues with much more methods, async- and sync-compatible.'''

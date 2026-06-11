@@ -8,8 +8,7 @@ async def first_completed[T](*C: Awaitable[T], ret_exc: Literal[True], timeout: 
 @overload
 async def first_completed[T](*C: Awaitable[T], ret_exc: Literal[False]=..., timeout: float|None=...) -> T|None:
     '''| Return the result of the first coroutine that completes among those passed in.
-    | If ``ret_exc`` is ``True``, the coroutine might have errored, in which case the exception it throws is returned in a wrapped form
-    | unpackable using :func:`~asyncutils.exceptions.unwrap_exc` after checking with :func:`~asyncutils.exceptions.exception_occurred`.
+    | If ``ret_exc`` is ``True``, the coroutine might have errored, in which case the exception it throws is returned in a wrapped form unpackable using :func:`~asyncutils.exceptions.unwrap_exc` after checking with :func:`~asyncutils.exceptions.exception_occurred`.
     | In any case, the losing coroutines are cancelled together and the function returns when the cancellations finish.'''
 async def race_with_callback[T](*C: Awaitable[T], winner: Callable[[T], object]=..., loser: Callable[[Any|BaseException], object]=..., timeout: float|None=...) -> T|None:
     '''| Return the result of the first coroutine to complete, which will have ``winner`` called on it.

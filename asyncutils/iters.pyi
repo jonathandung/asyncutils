@@ -1,6 +1,6 @@
 '''| Functional and chainable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`.
 | However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.'''
-from ._internal.prots import EventProt, Exceptable, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
+from ._internal.prots import EventProt, Exceptable, NotNone, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Hashable, Iterable, Mapping, MutableSequence, Reversible
 from typing import Any, Literal, Never, SupportsIndex, overload
@@ -210,7 +210,7 @@ def aaccumulate[T](it: SupportsIteration[T], func: Callable[[T, T], T]=..., *, i
 def acompress[T](data: SupportsIteration[T], selectors: SupportsIteration[object]) -> AsyncGenerator[T]: '''Async version of :func:`itertools.compress` that is not a class.'''
 def adropwhile[T](pred: Callable[[T], object], it: SupportsIteration[T], *, skip_first: bool=...) -> AsyncGenerator[T]:
     '''| Async version of :func:`itertools.dropwhile` that is not a class.
-    | If ``skip_first`` is ``True``, drop also the first item that fails the predicate.'''
+    | If ``skip_first`` is ``True``, drop the first item that fails the predicate as well.'''
 def afilterfalse[T](f: Callable[[T], object]|None, it: SupportsIteration[T]) -> AsyncGenerator[T]: '''Async version of :func:`itertools.filterfalse` that is not a class.'''
 async def asattolo[T](it: SupportsIteration[T], /) -> list[T]: '''Return a list representing a random full-length permutation of the items in ``it``.'''
 @overload
@@ -486,12 +486,13 @@ def apowersetofsets[T: Hashable](it: SupportsIteration[T], *, frozen: Literal[Tr
 def apowersetofsets[T: Hashable](it: SupportsIteration[T], *, frozen: Literal[False]) -> AsyncGenerator[set[T]]: '''Yield all the subsets of the items in the (async) iterable of hashable objects after consuming it at once and removing duplicates, as :class:`frozenset`'s if ``frozen`` is ``True`` (the default) and :class:`set`'s otherwise.'''
 def aserialize[T](it: SupportsIteration[T]) -> AsyncGenerator[T]: '''Protect an (async) iterable from being consumed by many parties concurrently by applying an async lock.'''
 @overload
-def aonline_sorter[T](it: SupportsIteration[T], *, key: Callable[[T], SupportsRichComparison], reverse: bool=..., slow: bool=...) -> AsyncGenerator[T, T|None]: ...
+def aonline_sorter[T: NotNone](it: SupportsIteration[T], *, key: Callable[[T], SupportsRichComparison], reverse: bool=..., slow: Any=...) -> AsyncGenerator[T, T|None]: ... # noqa: ANN401
 @overload
-def aonline_sorter[T: SupportsRichComparison](it: SupportsIteration[T], *, reverse: bool=..., slow: bool=...) -> AsyncGenerator[T, T|None]:
+def aonline_sorter[T: SupportsRichComparison](it: SupportsIteration[T], *, reverse: bool=..., slow: Any=...) -> AsyncGenerator[T, T|None]: # noqa: ANN401
     '''| Sort items from an (async) iterable and those sent in on the fly in the async generator interface (i.e. by awaiting the return value of ``asend``), according to ``key`` and ``reverse``.
     | Does not work well with items that are ``None``, because for an async generator ``agen``, ``agen.asend(None)`` and ``anext(agen)`` are indistinguishable.
     | Evaluates the truthiness of the ``slow`` parameter every time a new item is received, and if it is ``True``, offloads the evaluation of the ``key`` for that item to an executor, such that the :meth:`~object.__bool__` method on ``slow`` may reflect the state of the program but can also be a plain boolean.
+    | In the second overload in the stub, since ``None`` is not assignable to :class:`~asyncutils._internal.prots.SupportsRichComparison`, there is no need to intersect the upper bound with :class:`~asyncutils._internal.prots.NotNone`.
 
     .. note:: Uses a stable variant of heap sort internally, which is O(n log n) time and O(n) space.
 

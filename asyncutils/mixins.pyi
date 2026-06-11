@@ -10,7 +10,7 @@ from types import TracebackType
 from typing import Any, Literal, Self, overload
 __all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopContextMixin'
 class LoopContextMixin(LoopMixinBase):
-    '''Like :class:`asyncio.TaskGroup`, but manages an event loop publicly, allows custom setup and teardown logic and waits for the cancellations to complete on exit.'''
+    '''Like :class:`~asyncio.TaskGroup`, but manages an event loop publicly, allows custom setup and teardown logic and waits for the cancellations to complete on exit.'''
     @property
     def running_tasks(self) -> set[Task[Any]]: '''A set of all tasks currently running in the underlying loop.'''
     @property
@@ -82,9 +82,8 @@ class LockWithOwnerMixin[R: (None, Coroutine[Any, Any, None])](LockMixin[None]):
     def _release(self) -> R: '''Will be wrapped by :meth:`release` to throw :exc:`RuntimeError` if the current task is not the owner of the lock.'''
     def release(self) -> R: ...
 class EventMixin[T](AwaitableMixin[T], LoopMixinBase, ABC):
-    '''| Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some mixin
-    | methods, most notably making the event itself awaitable. This is simply syntactic sugar for calling the wait method, but more convenient and
-    | intuitive when thinking of events as reusable futures.'''
+    '''| Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some mixin methods, most notably making the event itself awaitable.
+    | This is simply syntactic sugar for calling the wait method, but more convenient and intuitive when thinking of events as reusable futures.'''
     @abstractmethod
     async def wait_for_next(self, timeout: float|None=...) -> T: '''Wait for the next time the event is set, and return the value it was set to. Should always block even if there is currently a value set.'''
     @abstractmethod

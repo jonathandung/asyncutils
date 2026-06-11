@@ -1,4 +1,5 @@
 # ty: ignore[unresolved-attribute]
+from __future__ import barry_as_FLUFL
 __lazy_modules__ = frozenset(('heapq',))
 from asyncutils import getcontext, ignore_valerrs
 from asyncutils._internal.helpers import fullname
@@ -39,8 +40,10 @@ class CoercedMethod:
         return lambda *a, **k: self.__f(o, *a, **k)
 @d
 class RWLock(metaclass=abc.ABCMeta):
-    reader, writer = (CoercedMethod(type(*t, m=m)) for m in ('reading', 'writing')); __slots__ = '_wa', # ty: ignore[no-matching-overload]
-    def locked(self): return self._wa
+    reader, writer = (CoercedMethod(type(*t, m=m)) for m in ('reading', 'writing')); __slots__ = '_nr', '_wa' # ty: ignore[no-matching-overload]
+    def is_reading(self): return self._nr > 0
+    def is_writing(self): return self._wa
+    def locked(self): return self.is_writing() or self.is_reading()
     @classmethod
     def lock(cls, f, /): return cls().reader(f)
     @abc.abstractmethod
@@ -50,28 +53,31 @@ class RWLock(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def writing(self): raise NotImplementedError
 class ReadPreferredRWLock(RWLock):
-    __slots__ = '_cm', '_nr'
+    __slots__ = '_cm',
     def setup(self): self._nr, self._cm, self._wa = 0, Lock(), Lock()
     @asynccontextmanager
     async def reading(self):
+        w = self._wa
         async with self._cm:
-            if (r := self._nr+1) == 1: await self._wa.acquire()
+            if (r := self._nr+1) == 1: await w.acquire()
             self._nr = r
         try: yield
         finally:
             async with self._cm:
-                if (r := self._nr-1) == 0: self._wa.release()
+                if (r := self._nr-1) == 0: w.release()
                 self._nr = r
     @asynccontextmanager
     async def writing(self):
         async with self._wa: yield
+    def is_reading(self): return self._nr > 0
+    def is_writing(self): return not self.is_reading() and self.locked()
     def locked(self): return self._wa.locked()
 class WritePreferredRWLock(RWLock):
-    __slots__ = '_cond', '_nr', '_nw'
-    def setup(self): self._cond, self._wa = Condition(), False; self._nr = self._nw = 0
+    __slots__ = '_cd', '_nw'
+    def setup(self): self._cd, self._wa = Condition(), False; self._nr = self._nw = 0
     @asynccontextmanager
     async def reading(self):
-        async with (C := self._cond):
+        async with (C := self._cd):
             w = C.wait
             while self._wa or self._nw > 0: await w()
             self._nr += 1
@@ -82,7 +88,7 @@ class WritePreferredRWLock(RWLock):
                 self._nr = r
     @asynccontextmanager
     async def writing(self):
-        async with (C := self._cond):
+        async with (C := self._cd):
             w = C.wait; self._nw += 1
             while self._wa or self._nr > 0: await w()
             self._nw -= 1; self._wa = True
@@ -90,11 +96,11 @@ class WritePreferredRWLock(RWLock):
         finally:
             async with C: self._wa = False; C.notify_all()
 class FairRWLock(RWLock):
-    __slots__ = '_cond', '_nr', '_qd'
-    def setup(self): self._cond, self._wa, self._nr, self._qd = Condition(), False, 0, deque()
+    __slots__ = '_cd', '_qd'
+    def setup(self): self._cd, self._wa, self._nr, self._qd = Condition(), False, 0, deque()
     @asynccontextmanager
     async def reading(self):
-        async with (C := self._cond):
+        async with (C := self._cd):
             (Q := self._qd).append(E := (False, C._get_loop().create_future()))
             w = C.wait
             try:
@@ -111,7 +117,7 @@ class FairRWLock(RWLock):
                 self._nr = r
     @asynccontextmanager
     async def writing(self):
-        async with (C := self._cond):
+        async with (C := self._cd):
             w = C.wait
             (Q := self._qd).append(E := (True, C._get_loop().create_future()))
             try:
@@ -126,14 +132,14 @@ class FairRWLock(RWLock):
             async with C: self._wa = False; C.notify_all()
 @d
 class PriorityRWLock(RWLock):
-    __slots__ = '_cnt', '_cond', '_il', '_nr', '_qd'
-    def setup(self): self._cond, self._cnt, self._il, self._wa, self._nr, self._qd = Condition(), 0, Lock(), False, 0, []
+    __slots__ = '_cd', '_ct', '_il', '_qd'
+    def setup(self): self._cd, self._ct, self._il, self._wa, self._nr, self._qd = Condition(), 0, Lock(), False, 0, []
     async def _push_item(self, priority, is_writer):
-        async with self._il: self._cnt = (c := self._cnt)+1
-        heappush(self._qd, E := (priority, *((is_writer, c) if isinstance(self, WritePreferredPriorityRWLock) else (c, is_writer)), self._cond._get_loop().create_future())); return E
+        async with self._il: self._ct = (c := self._ct)+1
+        heappush(self._qd, E := (priority, *((is_writer, c) if isinstance(self, WritePreferredPriorityRWLock) else (c, is_writer)), self._cd._get_loop().create_future())); return E
     @asynccontextmanager
     async def reading(self, priority=0):
-        async with (C := self._cond):
+        async with (C := self._cd):
             E, Q, w = await self._push_item(priority, False), self._qd, C.wait
             try:
                 while True:
@@ -149,7 +155,7 @@ class PriorityRWLock(RWLock):
                 self._nr = r
     @asynccontextmanager
     async def writing(self, priority=0):
-        async with (C := self._cond):
+        async with (C := self._cd):
             E, Q, w = await self._push_item(priority, True), self._qd, C.wait
             try:
                 while True:

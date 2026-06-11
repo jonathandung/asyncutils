@@ -4,6 +4,7 @@
 | Neither this module nor any of its symbols exist at runtime.
 | Thus, we export nothing intentionally and prompt type checkers to emit errors when symbols here are used with ``from asyncutils._internal.prots import *``.
 
+.. note:: In the generated documentation, the instances of ``tyx`` represent `the ty_extensions module <https://github.com/astral-sh/ruff/blob/main/crates/ty_python_semantic/resources/mdtest/ty_extensions.md>`__. It is only available when ty is type checking the library.
 .. tip:: For inline type annotations, wrap the imports in ``if TYPE_CHECKING:`` blocks.
 .. tip::
 
@@ -13,7 +14,7 @@ from ..constants import sentinel_base
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys, ty_extensions as tyx
-from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Iterable, Iterator
+from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator
 from asyncio import AbstractEventLoop, Future
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
@@ -151,6 +152,7 @@ type Middleware = Callable[[str, Any], Any]
 type NonGroupExc = tyx.Intersection[BaseException, tyx.Not[BaseExceptionGroup]]
 '''Exceptions that are not exception groups.'''
 type NotNone = tyx.Not[None]
+'''The complement of ``None``.'''
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
@@ -176,20 +178,25 @@ class QProt[R, V, T](Protocol):
     def full(self) -> bool: '''Check if the queue is full.'''
     async def join(self) -> None: '''Wait until :meth:`task_done` has been called for each item put into the queue.'''
     def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue. If ``immediate`` is ``True``, pending gets raise immediately even if the queue is not empty.'''
-    def change_get_password(self, old_pwd: R, new_pwd: R) -> bool: '''Attempt to change the get password of the password-protected queue to ``new_pwd`` given ``old_pwd`` and return success. Always fails if the queue does not protect gets or is empty and has been shut down.'''
-    def change_put_password(self, old_pwd: V, new_pwd: V) -> bool: '''Attempt to change the put password of the password-protected queue to ``new_pwd`` given ``old_pwd`` and return success. Always fails if the queue does not protect puts or has been shut down.'''
+    def change_get_password(self, opw: R, npw: R) -> bool: '''Attempt to change the get password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect gets or is empty and has been shut down.'''
+    def change_put_password(self, opw: V, npw: V) -> bool: '''Attempt to change the put password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect puts or has been shut down.'''
 @type_check_only
 class GetProtectedQProt[R, T](QProt[R, Any, T], Protocol):
     '''Queues for which :meth:`~QProt.get` is protected by a password.'''
-    async def get(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
-    def get_nowait(self, pwd: R) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
+    async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
+    def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
 @type_check_only
 class PutProtectedQProt[V, T](QProt[Any, V, T], Protocol):
     '''Queues for which :meth:`~QProt.put` is protected by a password.'''
-    async def put(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
-    def put_nowait(self, item: T, pwd: V) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
+    async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
+    def put_nowait(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class GetAndPutProtectedQProt[R, V, T](GetProtectedQProt[R, T], PutProtectedQProt[V, T], QProt[R, V, T], Protocol): '''Queues for which both :meth:`~GetProtectedQProt.get` and :meth:`~PutProtectedQProt.put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
+class GetAndPutProtectedQProt[R, V, T](QProt[R, V, T], Protocol):
+    '''Queues for which both :meth:`~QProt.get` and :meth:`~QProt.put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
+    async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
+    def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
+    async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
+    def put_nowait(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
 class RWLockRV[T, **P](Protocol):
     '''The return type of the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
@@ -383,9 +390,13 @@ type DualContextManager[T] = tyx.Intersection[AbstractContextManager[T, bool], A
 '''Return type of :func:`~asyncutils.util.dualcontextmanager`.'''
 type OpenFiles = dict[tuple[TextIOWrapper, Literal['r+b', 'w+b', 'x+b']], MemoryMappedFile]
 '''The type of the :attr:`~asyncutils.iotools.MemoryMappedIOManager.open_files` property of :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
-type SpecificSubscriber = Callable[[Any], Awaitable[object]]
+type AndHashable[T] = tyx.Intersection[T, Hashable]
+'''Most useful on duck-typed classes when specific functions require hashability.'''
+type CanCallAndHash[**P] = AndHashable[Callable[P, Awaitable[object]]]
+'''A hashable callable returning an awaitable.'''
+type SpecificSubscriber = CanCallAndHash[[Any]]
 '''The type of subscribers for :class:`~asyncutils.channels.EventBus`.'''
-type WildcardSubscriber = Callable[[str, Any], Awaitable[object]]
+type WildcardSubscriber = CanCallAndHash[[str, Any]]
 '''The type of wildcard subscribers for :class:`~asyncutils.channels.EventBus`.'''
 if sys.platform == 'win32':
     type Seek = Literal[0, 1, 2]

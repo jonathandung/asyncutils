@@ -21,7 +21,8 @@ def every[T](intvl: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_e
 @overload
 def every[T](intvl: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., loop: AbstractEventLoop|None=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryRV[T]:
     '''| A decorator factory that repeats a function regularly, useful for periodic monitoring tasks.
-    | The resultant function will run every ``intvl`` seconds, as determined by ``timer``, at most ``max_iterations`` times. If ``count_f`` is True, this time includes the execution time of the function.
+    | The resultant function will run every ``intvl`` seconds, as determined by ``timer``, at most ``max_iterations`` times.
+    | If ``count_f`` is True, this time includes the execution time of the function.
     | If ``wait_first`` is ``True``, sleep for ``intvl`` seconds before the first execution.
     | If ``stop_on_exc`` is ``True``, the function returns once the decorated function throws any exception or ``stop_when`` is cancelled.
     | ``verbose`` makes the function treat exceptions more severely output-wise.
@@ -46,14 +47,10 @@ def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expect
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
     '''| A decorator factory that retries the wrapped function with exponential backoff, returning once the function succeeds.
     | If the function does not succeed within ``tries`` attempts (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
-    | ``backoff`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to
-    | :const:`~asyncutils.context.Context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed ``max_delay`` (default
-    | :const:`~asyncutils.context.Context.RETRY_DEFAULT_MAX_DELAY`).
+    | ``backoff`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to :const:`~asyncutils.context.Context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed ``max_delay`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_MAX_DELAY`).
     | ``jitter`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_JITTER`) is the maximum random jitter added to the delay.
     | ``exc`` specifies which exceptions to catch and retry on; if an exception not in ``exc`` is raised, it is propagated immediately.
-    | ``on_retry`` and ``on_success`` are callbacks called before each retry and after a successful call, with the attempt number (zero-based)
-    | as the first argument and the exception caught or the time taken for the successful call respectively as the second. Thus, ``on_success`` is
-    | only called once.'''
+    | ``on_retry`` and ``on_success`` are callbacks called before each retry and after a successful call, with the attempt number (zero-based) as the first argument and the exception caught or the time taken for the successful call respectively as the second. Thus, ``on_success`` is only called once.'''
 def throttle(lim: float, timer: Timer=...) -> DecoratorFactoryRV: '''A decorator factory that throttles the wrapped function, such that it can only be called once every ``lim`` seconds, as determined by ``timer``.'''
 def debounce(wait: float) -> DecoratorFactoryRV: '''A decorator factory that debounces the wrapped function, such that it is only called after it has not been called for ``wait`` seconds.'''
 def iterf[T](n: int, /) -> Callable[[Callable[[T], Awaitable[T]]], Callable[[T], CoroutineType[Any, Any, T]]]: '''A decorator factory that applies the decorated function ``n`` times to its argument.'''

@@ -19,8 +19,7 @@ class StateMachine:
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
 async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
-    '''| ``n``, which defaults to :const:`~asyncutils.context.Context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of
-    | concurrently running awaitables.
+    '''| ``n``, which defaults to :const:`~asyncutils.context.Context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently running awaitables.
     | ``ret_exc`` is passed to :func:`asyncio.gather` as the ``return_exceptions`` argument.'''
 class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class to store synchronous callbacks and call them sequentially in an executor when the context manager exits.
@@ -39,7 +38,7 @@ class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncCo
         * ``name`` is the name of attribute gotten on the argument to :meth:`add`.
         * ``maxlen`` is the maximum number of callbacks that can be stored.
         * ``default`` is the default return value of the context manager if no callbacks are added or ``call_once`` is ``False``.
-        * If ``call_once`` is ``True``, the callbacks will be called only once when the context manager exits, and then cleared. If ``False``, they will be called every time the context manager exits until they are manually cleared.
+        * ``call_once`` dictates whether the callbacks will be called only once when the context manager exits, and then cleared.
         * ``default_getter`` is a function that returns the default arguments to call the callbacks with when the context manager exits. By default, it returns the exception info if ``name`` is ``'__exit__'`` and empty arguments otherwise.'''
     def __call__(self, *a: P.args, **k: P.kwargs) -> None: ...
     def __enter__(self) -> Self: '''Enter the context manager.'''

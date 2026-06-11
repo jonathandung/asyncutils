@@ -80,7 +80,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if not l: raise D.QueueShutDown if S else D.QueueEmpty
         if _ is not b: u(p)
         i = g(); _wakeup_next(P); return i
-    async def put(item, *p):
+    async def put(i, /, *p):
         v(p); _ = P.append
         while full():
             if S: raise D.QueueShutDown
@@ -91,26 +91,26 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 with A.ignore_valerrs: P.remove(F)
                 if not (full() or F.cancelled()): _wakeup_next(P)
                 raise
-        return put_nowait(item, _=b)
-    def put_nowait(item, *P, _=None):
+        return put_nowait(i, _=b)
+    def put_nowait(i, /, *P, _=None):
         if S: raise D.QueueShutDown
         if full(): raise D.QueueFull
         if _ is not b: v(P)
-        p(item); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
-    def change_get_password(old_pwd, new_pwd):
+        p(i); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
+    def change_get_password(opw, npw):
         if (S and not l) or not can_change_get: return False
-        if not isinstance(new_pwd, gettyp): return False
-        try: s(old_pwd)
+        if not isinstance(npw, gettyp): return False
+        try: s(opw)
         except A.CRITICAL: raise A.Critical
         except: return False
-        nonlocal password_get; password_get = new_pwd; return True
-    def change_put_password(old_pwd, new_pwd):
+        nonlocal password_get; password_get = npw; return True
+    def change_put_password(opw, npw):
         if S or not can_change_put: return False
-        if not isinstance(new_pwd, puttyp): return False
-        try: t(old_pwd)
+        if not isinstance(npw, puttyp): return False
+        try: t(opw)
         except A.CRITICAL: raise A.Critical
         except: return False
-        nonlocal password_put; password_put = new_pwd; return True
+        nonlocal password_put; password_put = npw; return True
     def task_done():
         nonlocal U
         if U == 0: raise ValueError('task_done() called too many times')

@@ -95,7 +95,7 @@ class EventBus(LoopContextMixin):
     @property
     def active_tasks(self) -> int: '''The number of callbacks occurring at this moment.'''
     @property
-    def stream_queue(self) -> Queue[tuple[str, Any]]|Queue[Any]:
+    def stream_queue(self) -> Queue[Any]:
         '''| The asynchronous queue to which events are output by :meth:`event_stream`.
         | The items in the queue are tuples ``(event_type, data)`` if the event type was not specified in the creation of the event stream,
         | otherwise just the data attached to each event of that type.'''
@@ -200,9 +200,8 @@ class EventBus(LoopContextMixin):
 class Rendezvous[T]:
     '''A rendezvous object, emulating Golang's unbuffered channels.'''
     def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...):
-        '''| Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically,
-        | according to :const:`~asyncutils.context.Context.RENDEZVOUS_MAINTENANCE_INTERVAL`. If ``loop`` is not passed, the running event loop is used. If there is no
-        | running event loop, one is created and set.'''
+        '''| Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically, according to :const:`~asyncutils.context.Context.RENDEZVOUS_MAINTENANCE_INTERVAL`.
+        | If ``loop`` is not passed, the running event loop is used. If there is no running event loop, one is created and set.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
         '''| Put in ``value`` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
         | Also be prepared to intercept or reraise :exc:`~asyncio.CancelledError` resulting from reset.'''

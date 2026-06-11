@@ -11,7 +11,7 @@ class TokenBucket:
     def __init__(self, rate: float, capacity: float, timer: Timer=...):
         '''* ``rate``: The number of tokens the bucket gains per time interval as a float, as defined by the timer
         * ``capacity``: The maximum number of tokens the bucket can hold as a float
-        * ``timer`` (optional): A function such as :func:`time.time` that returns the current time; default :func:`time.monotonic`'''
+        * ``timer`` (optional): A function such as :func:`time.time` that returns the current time; default :func:`~time.monotonic`'''
     async def consume(self, tokens: float=...) -> None: '''Consume tokens from the bucket as described. The default amount to consume if ``tokens`` is not passed can be set through :const:`~asyncutils.context.Context.TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS`.'''
     @property
     def capacity(self) -> float: '''The capacity of the bucket.'''

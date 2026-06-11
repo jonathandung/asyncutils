@@ -24,22 +24,18 @@ def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, order
 def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
 def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: Exceptable=..., filter_out: Exceptable=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
-    '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening
-    | when necessary.
+    '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
     | ``ordered`` defaults to ``False``, because that is more efficient.
     | The intersection of ``filter_out`` and ``keep``, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
-    | The acknowledgement parameters ``ack1``, ``ack2`` and ``ack3`` are called on exceptions in the above intersection, exceptions that don't pass the
-    | predicate and exceptions that are not in ``keep`` respectively.
+    | The acknowledgement parameters ``ack1``, ``ack2`` and ``ack3`` are called on exceptions in the above intersection, exceptions that don't pass the predicate and exceptions that are not in ``keep`` respectively.
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
-    | If ``raise_critical`` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and
-    | propagate it.
+    | If ``raise_critical`` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and propagate it.
     | ``notes`` is attached to the group using :meth:`~BaseException.add_note`.
     | The ``suppress``, ``context``, ``cause`` and ``traceback`` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
     | They only have an effect when the first argument is not a group.'''
 def prepare_exception[T: BaseException](exc: T, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> T:
     '''| Attach some info to the exception ``exc`` and return it.
-    | ``notes`` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is
-    | treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
+    | ``notes`` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
     | ``traceback`` corresponds to the attribute :attr:`~BaseException.__traceback__`, ``cause`` to :attr:`~BaseException.__cause__`,
     | ``context`` to :attr:`~BaseException.__context__` and ``suppress`` to :attr:`~BaseException.__suppress_context__`.'''
 @overload

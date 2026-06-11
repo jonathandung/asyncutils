@@ -5,7 +5,8 @@ from collections.abc import Awaitable, Callable
 from typing import Any, Concatenate, Literal, Self, final, overload
 __all__ = 'AgingRWLock', 'CoercedMethod', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):
-    '''Common base class for all readers-writer locks.'''
+    '''| Common base class for all readers-writer locks.
+    | If you would like to subclass this, you must implement :meth:`reading`, :meth:`writing` and :meth:`setup`.'''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredRWLock: ...
     @overload
@@ -18,7 +19,9 @@ class RWLock(ABC):
     def reading(self) -> RWLockCM: '''Return an async context manager for reading access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
     @abstractmethod
     def writing(self) -> RWLockCM: '''Return an async context manager for writing access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
-    def locked(self) -> bool: '''Whether the lock is currently held by a writer.'''
+    def is_reading(self) -> bool: '''Whether the lock is currently held by a reader. Default implementation returns whether the ``_nr`` attribute is greater than ``0``, assuming that slot holds the number of readers.'''
+    def is_writing(self) -> bool: '''Whether the lock is currently held by a writer. Default implementation returns value of the ``_wa`` attribute.'''
+    def locked(self) -> bool: '''A writer can enter at this moment only if ``False`` is returned.'''
     @abstractmethod
     def setup(self) -> None: '''Set up the internal state of the lock.'''
     @classmethod
@@ -26,6 +29,8 @@ class RWLock(ABC):
 class ReadPreferredRWLock(RWLock):
     '''Readers-writer lock preferring readers, which risks writer starvation.'''
     def __new__(cls, /) -> Self: ...
+    def is_reading(self) -> bool: ...
+    def is_writing(self) -> bool: ...
     def locked(self) -> bool: ...
     def setup(self) -> None: ...
     def reading(self) -> RWLockCM: ...
@@ -44,7 +49,7 @@ class FairRWLock(RWLock):
     def writing(self) -> RWLockCM: ...
 class PriorityRWLock(RWLock):
     '''| Common base class of :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
-    | Lower priority levels are preferred, and the default priority is 0, as in other patterns in this module related to priority.'''
+    | Lower priority levels are preferred, and the default priority is ``0``, as in other patterns in this module related to priority.'''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredPriorityRWLock: ...
     @overload
@@ -61,8 +66,7 @@ class WritePreferredPriorityRWLock(PriorityRWLock):
     '''Writers at any priority level are preferred over readers at any priority level.'''
     def __new__(cls, /) -> Self: ...
 class AgingRWLock(PriorityRWLock):
-    '''| A readers-writer lock with a priority policy multiplying the current number of attempts to acquire the reading or writing lock,
-    | counted per corresponding task, by the respective factor given at construction, to obtain the priority.'''
+    '''A readers-writer lock with a priority policy multiplying the current number of attempts to acquire the reading or writing lock, counted per corresponding task, by the respective factor given at construction, to obtain the priority.'''
     def __new__(cls, /, rf: float=..., wf: float=...) -> Self:
         '''* ``rf``, the read priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
         * ``wf``, the write priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.'''
