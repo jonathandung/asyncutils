@@ -5,7 +5,7 @@ match I.name:
     case 'cpython':
         if I.version < (3, 12): raise ImportError('asyncutils: CPython 3.12 or above required')
     case 'graalpy':
-        if I.version[0] < 25: raise ImportError('asyncutils: GraalPy 25 (Python 3.12) or above required') # noqa: PLR2004
+        if I.version[0] < 25: raise ImportError('asyncutils: GraalPy 25 (Python 3.12) or above required')
     case s: raise ImportError(f'asyncutils is neither tested in {s} nor currently planned to be')
 from time import monotonic as T
 def time_since_boot(t=T(), T=T): return round(T()-t, 7)*1000 # noqa: B008
