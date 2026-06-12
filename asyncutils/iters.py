@@ -67,10 +67,10 @@ async def astarmap_with_kwds(f, it, /, await_=False):
         async for a, k in it: yield await f(*a, **k)
     else:
         async for a, k in it: yield f(*a, **k)
-async def aloops(n):
-    m, n = divmod(n, 1024)
+async def aloops(n, i=1024):
+    m, n = divmod(n, i)
     for _ in repeat(None, m):
-        for _ in repeat(None, 1024): yield
+        for _ in repeat(None, i): yield
         await A.yield_to_event_loop
     for _ in repeat(None, n): yield
 async def _aunzip_put(*_):
@@ -628,6 +628,7 @@ async def acollapse(it, base_typ=(str, bytes), levels=None):
                 try: t = iter_to_agen(_); g((l+1, t)); g(N); break
                 except TypeError: yield _
 def afirsttrue(it, default=_NO_DEFAULT, pred=None): return anext(afilter(pred, it), *H.filter_out(default, s=_NO_DEFAULT))
+def afirstfalse(it, default=_NO_DEFAULT, pred=None): return anext(afilterfalse(pred, it), *H.filter_out(default, s=_NO_DEFAULT))
 def aprepend(val, it, _=A.achain): return _((val,), it).__aiter__()
 def aappend(val, it, _=A.achain): return _(it, (val,)).__aiter__()
 async def arandomproduct(*a, n=1, _=_randinst.choice):

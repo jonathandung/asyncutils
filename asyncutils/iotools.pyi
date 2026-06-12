@@ -84,14 +84,8 @@ class MemoryMappedIOManager(LoopContextMixin):
     def __del__(self) -> None: ...
     async def copy_file(self, srcp: Openable, destp: Openable, *, flush: bool=...) -> None: '''Copy the contents of the file at ``srcp`` into that at ``destp`` asynchronously and flush it if ``flush`` is ``True``. Uses :meth:`open` and :meth:`create` internally.'''
     async def checksum(self, path: Openable, alg: HashAlgorithm=...) -> str:
-        '''Compute a checksum from the file at ``path`` using the specified algorithm (default :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
-
-        .. version-changed:: 0.9.8
-          Started passing ``usedforsecurity=False`` to the :func:`hashlib.new` constructor to bypass FIPS restrictions, such that broken algorithms like
-          MD5 are always allowed if explicitly requested, seeing as though it is fast and enough to prevent accidental file corruption in simple cases.
-
-        .. version-changed:: 0.9.8
-          Offloaded checksum computation to the executor as well.
+        '''| Compute a checksum from the file at ``path`` using the specified algorithm (default :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG`).
+        | ``usedforsecurity=False`` is passed to the :func:`hashlib.new` constructor to bypass FIPS restrictions, such that broken algorithms like MD5 are always allowed if explicitly requested, seeing as though they are fast and enough to prevent accidental file corruption in simple cases.
 
         .. caution:: If executing cryptographic checksums, use the factory default BLAKE2s (32-bit) or BLAKE2b (64-bit), SHA256, or similar.
         .. danger:: Calling without the ``alg`` parameter may cause a faulty algorithm to be chosen if the value in the current context dictates so.

@@ -34,8 +34,6 @@ class EventWithValue[T: NotNone](EventMixin[T]):
     async def wait_for_transition(self, old: T, new: T, timeout: float|None=..., *, force_transition: bool=..., legacy: bool=...) -> bool:
         '''| Wait until the value is set to ``old``, and then ``new``, in that order.
         | On timeout, if ``force_transition`` is ``True``, cause the transition to happen manually.
-        | Return whether the transition occurred naturally.
-
-        .. version-changed:: 0.9.6
-          Fixed a bug where overlapping potential transitions are not considered. The old behaviour can be achieved by passing ``legacy=True``.'''
+        | If ``legacy=True`` is passed, overlapping potential transitions resulting :meth:`wait_for_next` returning the same value twice in a row, are not considered.
+        | Return whether the transition occurred naturally.'''
     async def wait_for_transition_unordered(self, a: T, b: T, timeout: float|None=..., *, force_transition: bool=..., legacy: bool=...) -> bool: '''Wait until either ``a`` transitions to ``b`` or ``b`` transitions to ``a``, with the preference being for the former.'''

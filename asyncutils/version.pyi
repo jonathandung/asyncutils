@@ -12,7 +12,7 @@ class VersionInfo(str):
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''Constructor. With one argument, attempts to normalize it and return the corresponding instance. Otherwise, treats the arguments as `(major, minor, patch)`, zero-padding if required. Throws an appropriate exception if not possible.'''
     def __hash__(self) -> int:
         '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
-        | Of course, since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.'''
+        | Since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.'''
     def __iter__(self) -> Iterator[int]: '''An iterator yielding :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
     def __len__(self) -> Literal[3]: '''``len((major, minor, patch)) == 3``.'''
     @overload
@@ -82,8 +82,8 @@ class VersionInfo(str):
     def change_sep(self, sep: str) -> str: '''This version as a string with the specified separator instead of a dot between parts.'''
     def compatible(self, other: Self, /, majtol: int|None=..., mintol: int|None=...) -> bool: '''Whether this version is compatible with the other, given the major and minor tolerances.'''
     def next_patch(self) -> Self: '''The patch version following this version.'''
-    def next_minor(self) -> Self: '''The minor version following this version, with a patch of 0.'''
-    def next_major(self) -> Self: '''The major version following this version, with minor and patch 0.'''
+    def next_minor(self) -> Self: '''The minor version following this version, with a patch of ``0``.'''
+    def next_major(self) -> Self: '''The major version following this version, with minor and patch ``0``.'''
     def shelve(self, path: Openable, /, key: int=...) -> None: '''Store this version into the specified ``path``, non-cryptographically transforming the bytes with ``key``, which can be any integer.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''

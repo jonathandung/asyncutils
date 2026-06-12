@@ -20,7 +20,7 @@ class RWLock(ABC):
     @abstractmethod
     def writing(self) -> RWLockCM: '''Return an async context manager for writing access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
     def is_reading(self) -> bool: '''Whether the lock is currently held by a reader. Default implementation returns whether the ``_nr`` attribute is greater than ``0``, assuming that slot holds the number of readers.'''
-    def is_writing(self) -> bool: '''Whether the lock is currently held by a writer. Default implementation returns value of the ``_wa`` attribute.'''
+    def is_writing(self) -> bool: '''Whether the lock is currently held by a writer. Default implementation returns the value of the ``_wa`` attribute.'''
     def locked(self) -> bool: '''A writer can enter at this moment only if ``False`` is returned.'''
     @abstractmethod
     def setup(self) -> None: '''Set up the internal state of the lock.'''
@@ -48,7 +48,7 @@ class FairRWLock(RWLock):
     def reading(self) -> RWLockCM: ...
     def writing(self) -> RWLockCM: ...
 class PriorityRWLock(RWLock):
-    '''| Common base class of :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
+    '''| Common base class of :class:`AgingRWLock`, :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
     | Lower priority levels are preferred, and the default priority is ``0``, as in other patterns in this module related to priority.'''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredPriorityRWLock: ...

@@ -2,14 +2,16 @@
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
 [![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/p/py-asyncutils)
-[![Coverage](https://github.com/jonathandung/asyncutils/blob/main/assets/coverage.svg)](https://github.com/jonathandung/asyncutils/blob/main/tests)
+[![Coverage](badges/coverage.svg)](https://github.com/jonathandung/asyncutils/tree/main/tests)
 [![Build](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml)
 [![CodeQL](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql)
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
 [![GitHub Pages](https://github.com/jonathandung/asyncutils/actions/workflows/deploy.yaml/badge.svg)](https://jonathandung.github.io/asyncutils)
+[![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows)
 [![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13018/badge)](https://www.bestpractices.dev/projects/13018)
-[![Docs](https://app.readthedocs.org/projects/asyncutils/badge/?version=stable)](https://asyncutils.readthedocs.io/en/stable)
+[![Read the docs stable build](https://app.readthedocs.org/projects/asyncutils/badge/?version=stable)](https://asyncutils.readthedocs.io/en/stable)
+[![Read the Docs latest build](https://app.readthedocs.org/projects/asyncutils/badge)](https://asyncutils.readthedocs.io/en)
 [![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview)
 [![conda-forge feedstock](https://img.shields.io/conda/v/conda-forge/py-asyncutils?logo=condaforge)](https://github.com/conda-forge/py-asyncutils-feedstock)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor_Covenant-v3.0-ff69b4.svg?logo=contributor-covenant&logoColor=purple)](https://asyncutils.readthedocs.io/en/stable/conduct.html)
@@ -43,7 +45,7 @@ See the [usage guide](https://asyncutils.readthedocs.io/en/stable/examples.html)
 
 ## Version
 
-This is asyncutils v0.9.12.
+This is asyncutils v0.9.13.
 
 This library is currently in the beta stage, meaning the public API is subject to change even between patch versions, and changes made may be
 backward-incompatible. See [the compatibility page](https://asyncutils.readthedocs.io/en/stable/compat.html).
@@ -59,7 +61,8 @@ See the [configuration guide](https://asyncutils.readthedocs.io/en/stable/config
 ## Remarks
 
 Regarding .markdownlint.json, even though there is no longer a pre-commit or workflow step requiring it, it contains the most basic ignores suitable
-for this project's files and should be respected. It will be auto-detected by relevant IDE extensions and allows running the linter locally.
+for this project's files and should be respected. Relevant IDE extensions will automatically take it into consideration. This allows running the
+linter locally.
 
 It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop and async
 generator related features, since their behaviours are central points of confusion and have troubled me greatly in the development of this library.
@@ -69,7 +72,7 @@ generator related features, since their behaviours are central points of confusi
 Here are some resources if you're new to the world of async. They were of great assistance on my async journey:
 
 - [asyncio HOWTO](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html)
-- [Basic tutorial](https://realpython.com/async-io-python)
+- [Basic walkthrough](https://realpython.com/async-io-python)
 - [Basic video guide](https://www.youtube.com/watch?v=t5Bo1Je9EmE)
 - [asyncio, threading, multiprocessing](https://www.youtube.com/watch?v=0vFgKr5bjWI)
 - [Event loop](https://www.youtube.com/watch?v=RIVcqT2OGPA)
@@ -82,17 +85,17 @@ For more, check out the [contributing guide](https://asyncutils.readthedocs.io/e
 
 ## License
 
-[MIT](https://github.com/jonathandung/asyncutils/blob/main/LICENSE) © 2026 Jonathan Dung
+[MIT](LICENSE) © 2026 Jonathan Dung
 
 ## Badges
 
-| GitHub | Repo | Package | Uses | | Status | Tests |
-| --- | --- | --- | --- | --- | --- | --- |
-| ![GitHub release](https://img.shields.io/github/v/release/jonathandung/asyncutils?include_prereleases) | ![Project stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social) | ![PyPI - Implementation](https://img.shields.io/pypi/implementation/py-asyncutils) | ![Build backend](https://img.shields.io/badge/build_backend-uv-261230?logo=uv) | ![Pytest](https://img.shields.io/badge/tests-Pytest-yellow?logo=pytest) | ![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg) | ![Tests](https://github.com/jonathandung/asyncutils/blob/main/assets/tests.svg) |
-| ![GitHub release date](https://img.shields.io/github/release-date-pre/jonathandung/asyncutils) | ![GitHub forks](https://img.shields.io/github/forks/jonathandung/asyncutils?style=social) | ![Noarch](https://anaconda.org/conda-forge/py-asyncutils/badges/platforms.svg) | ![ruff](https://img.shields.io/badge/linter-ruff-261230?logo=ruff) | ![Sphinx-lint](https://img.shields.io/badge/sphinx-sphinx--lint-darkblue?logo=sphinx) | ![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen) | ![Warnings](https://github.com/jonathandung/asyncutils/blob/main/assets/warnings.svg) |
-| ![Commits since last release](https://img.shields.io/github/commits-since/jonathandung/asyncutils/latest.svg?include_prereleases) | ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | ![ty](https://img.shields.io/badge/type_checker-ty-261230?logo=ty) | ![Read the Docs latest build](https://app.readthedocs.org/projects/asyncutils/badge) | ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) | ![Expected failures](https://github.com/jonathandung/asyncutils/blob/main/assets/xfailed.svg) |
-| ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils) | ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social) | ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils) | ![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver) | ![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg) | ![Beta](https://img.shields.io/badge/stage-beta-yellow.svg) | ![Duration](https://github.com/jonathandung/asyncutils/blob/main/assets/duration.svg) |
-| ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![GitHub Downloads](https://img.shields.io/github/downloads/jonathandung/asyncutils/total) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils?logo=opensourceinitiative) | ![Sphinx](https://img.shields.io/badge/docs-sphinx-265094?logo=sphinx) | | [![Blazingly fast](https://www.blazingly.fast/api/badge.svg?repo=jonathandung%2Fasyncutils)](https://www.blazingly.fast) | ![Skipped](https://github.com/jonathandung/asyncutils/blob/main/assets/skipped.svg) |
-| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![Language count](https://img.shields.io/github/languages/count/jonathandung/asyncutils) | ![GitHub Pages](https://img.shields.io/badge/github_pages-jonathandung.github.io-blue) | | ![Free-threaded support](https://img.shields.io/badge/free_threading-supported-blue) | |
-| ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Top language](https://img.shields.io/github/languages/top/jonathandung/asyncutils) | ![detect-secrets](https://img.shields.io/badge/detect--secrets-checked-blue?logo=yelp) | | | |
-| ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![Code size](https://img.shields.io/github/languages/code-size/jonathandung/asyncutils) | | ![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit) | | | |
+| GitHub | Repo | Package | Uses | Status | Tests |
+| --- | --- | --- | --- | --- | --- |
+| ![GitHub release](https://img.shields.io/github/v/release/jonathandung/asyncutils?include_prereleases) | ![Project stars](https://img.shields.io/github/stars/jonathandung/asyncutils?style=social) | ![PyPI - Implementation](https://img.shields.io/pypi/implementation/py-asyncutils) | ![Build backend](https://img.shields.io/badge/build_backend-uv-261230?logo=uv) | ![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg) | ![Tests](badges/tests.svg) |
+| ![GitHub release date](https://img.shields.io/github/release-date-pre/jonathandung/asyncutils) | ![GitHub forks](https://img.shields.io/github/forks/jonathandung/asyncutils?style=social) | ![Noarch](https://anaconda.org/conda-forge/py-asyncutils/badges/platforms.svg) | ![ruff](https://img.shields.io/badge/linter-ruff-261230?logo=ruff) | ![Contributions Welcome](https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=brightgreen) | ![Warnings](badges/warnings.svg) |
+| ![Commits since last release](https://img.shields.io/github/commits-since/jonathandung/asyncutils/latest?include_prereleases) | ![GitHub watchers](https://img.shields.io/github/watchers/jonathandung/asyncutils?style=social) | ![PyPI - Downloads](https://img.shields.io/pypi/dm/py-asyncutils) | ![ty](https://img.shields.io/badge/type_checker-ty-261230?logo=ty) | ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) | ![Expected failures](badges/xfailed.svg) |
+| ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/jonathandung/asyncutils) | ![GitHub](https://img.shields.io/github/followers/jonathandung?style=social) | ![PyPI - Format](https://img.shields.io/pypi/format/py-asyncutils) | ![SemVer](https://img.shields.io/badge/semver-2.0.0-green?logo=semver) | ![Beta](https://img.shields.io/badge/stage-beta-yellow.svg) | ![Duration](badges/duration.svg) |
+| ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![GitHub Downloads](https://img.shields.io/github/downloads/jonathandung/asyncutils/total) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils?logo=opensourceinitiative) | ![Sphinx](https://img.shields.io/badge/docs-sphinx-265094?logo=sphinx) | [![Blazingly fast](https://www.blazingly.fast/api/badge.svg?repo=jonathandung%2Fasyncutils)](https://www.blazingly.fast) | ![Skipped](badges/skipped.svg) |
+| ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![Language count](https://img.shields.io/github/languages/count/jonathandung/asyncutils) | ![Sphinx-lint](https://img.shields.io/badge/sphinx--lint-darkblue?logo=sphinx) | ![Free-threaded support](https://img.shields.io/badge/free_threading-supported-blue) | ![Last test run](badges/last-run.svg) |
+| ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Top language](https://img.shields.io/github/languages/top/jonathandung/asyncutils) | ![detect-secrets](https://img.shields.io/badge/detect--secrets-checked-blue?logo=yelp) | | |
+| ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![Code size](https://img.shields.io/github/languages/code-size/jonathandung/asyncutils) | | ![Pytest](https://img.shields.io/badge/tests-Pytest-yellow?logo=pytest) | | |

@@ -3,11 +3,6 @@ Installation
 
 .. highlight:: bash
 
-.. version-added:: 0.8.20
-
-.. version-changed:: 0.9.10
-  Use uv as the build backend in pyproject.toml.
-
 No setup is required, besides ensuring that your package manager is updated to the latest version as follows::
 
   # pip:
@@ -27,9 +22,6 @@ No setup is required, besides ensuring that your package manager is updated to t
   # pipenv:
   pip install -U pipenv
 
-.. version-added:: 0.8.13
-  Achieved distribution on conda-forge and by extension, conda installation support.
-
 Next, install py-asyncutils:
 
 .. sub-code-block::
@@ -44,7 +36,7 @@ Next, install py-asyncutils:
   pip install -e .
   make install
   make install-silent # no clutter
-  # the last two options need GNU Make on *nix, but the Windows version points to a batch file.
+  # the last two options need GNU Make on \*nix, but the Windows version points to a batch file.
   # uv is invoked under the hood and installed if absent; pip is not needed!
 
 other installation pathways:
@@ -92,34 +84,3 @@ The extras are listed below for reference:
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
 * test: Test dependencies, including pytest and related plugins
 * themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.
-
-.. version-changed:: 0.9.9
-  Added pytest-asyncio-cooperative to the test extra.
-
-.. version-added:: 0.9.7
-  The themes extra, to make CI/CD steps involving documentation deployment more convenient.
-
-.. version-removed:: 0.9.5
-  The pub extra, because uv already provides that functionality.
-
-.. version-removed:: 0.9.5
-  mypy is no longer in any extra, since ty provides type checking.
-
-.. version-changed:: 0.9.3
-  Removed the pytest-local-badge dependency from pytest's required plugins. However, it is still present in the tests group for convenience of
-  development.
-
-.. version-removed:: 0.9.2
-  The tools extra. Install uv yourself if you wish.
-
-.. version-added:: 0.9.2
-  The executors extra.
-
-.. version-added:: 0.9.1
-  The ptw extra.
-
-.. version-removed:: 0.9.1
-  The dlint extra, since doc8 no longer appears to be maintained.
-
-.. version-changed:: 0.9.0
-  Completely reorganized optional dependencies, moving them around among groups.

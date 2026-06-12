@@ -1,5 +1,5 @@
 # ty: ignore[unresolved-attribute]
-__lazy_modules__ = frozenset(('asyncio', 'functools'))
+__lazy_modules__ = frozenset(('functools',))
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import log, patch as P

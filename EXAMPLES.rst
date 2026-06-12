@@ -77,7 +77,7 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   >>> find_help_url('CRLFProtocol.connection_lost')
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/networking/index.html#asyncutils.networking.LineProtocol.connection_lost'
   >>> open_help(open_help) # Opens the https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#asyncutils.tools.open_help\
-  ... page # in the system default browser using the standard webbrowser library and returns success
+  ... # page in the system default browser using the standard webbrowser library and returns success
   True
   >>> # example 5: context
   >>> asyncutils.getcontext().update( # call the update method of the current context to modify in-place

@@ -41,4 +41,4 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         except BaseException as e: raise RuntimeError(f'asyncutils.signals.wait_for_signal: unexpected {H.fullname(e)} in processor {p!r} for signal {s.name}') from e
         return r
     finally: await A.safe_cancel(F)
-wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors={0}, default_on_processor_failure=None, logger={0})' # ty: ignore[unresolved-attribute]
+wait_for_signal.__text_signature__ = '(processor, /, *signals, sigs=None, timeout=None, raise_on_timeout=False, loop=None, possible_errors=<unrepresentable>, default_on_processor_failure=None, logger=<unrepresentable>)' # ty: ignore[unresolved-attribute]

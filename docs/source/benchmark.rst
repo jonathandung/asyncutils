@@ -5,8 +5,6 @@ Benchmarks
 
   -- Aaron Levenstein, 1951
 
-.. version-added:: 0.9.0
-
 .. note::
   :collapsible: closed
 
@@ -26,7 +24,7 @@ the first run because it is treated as a warmup:
 Environment
 -----------
 
-* ``python -VV`` gives: ``Python 3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]``
+* ``python -VV`` gives: ``Python 3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]``
 * ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
 
 It would be very nice if somebody could do the benchmarks on ubuntu or other platforms and add a new section with the same structure detailing the
@@ -37,15 +35,11 @@ results, since asyncio works drastically different on Windows than other systems
 Baseline: asyncio
 -----------------
 
-.. version-added:: 0.9.1
-
 ::
 
   python -IqX importtime -c "import asyncio"
 
 Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49 ms; n = 10
-
-.. version-added:: 0.9.10
 
 ::
 
@@ -93,8 +87,6 @@ Time taken to import :mod:`asyncio` along with all 31 ordinary submodules: 196.9
 
 .. note:: Up to 10 required internal submodules are also fetched.
 
-.. version-added:: 0.9.10
-
 ::
 
   time printf "raise SystemExit\n" | asyncutils 2>/dev/null
@@ -118,12 +110,6 @@ The above including all submodules:
 * sys: 55.5 ± 17.4 ms; max 90 ms, min 30 ms
 
 n = 10
-
-.. version-changed:: 0.9.6
-  Redid the benchmarks accurate to 0.01 ms.
-
-.. version-changed:: 0.9.5
-  Added the ``-l`` argument, such that variable console rendition speeds are not counted, only raw I/O operations, which are faster.
 
 .. note::
   :collapsible:

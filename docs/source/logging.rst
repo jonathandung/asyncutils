@@ -1,8 +1,6 @@
 Logging
 =======
 
-.. version-added:: 0.9.2
-
 Since code is bound to contain bugs, and this library is no exception, logging is an important aspect of :mod:`asyncutils`. Users can also see what
 is being done under the hood and view the timestamps of significant events, without exercising advanced reflection or metaprogramming or attaching a
 tracer, profiler or debugger.

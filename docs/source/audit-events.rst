@@ -1,8 +1,6 @@
 Audit events table
 ==================
 
-.. version-added:: 0.8.22
-
 .. currentmodule:: asyncutils
 
 This page details all events raised by this library through :func:`sys.audit` and the corresponding arguments.

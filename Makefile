@@ -45,4 +45,4 @@ publish: .uv-stamp
 pre-commit: .uv-stamp
 	pre-commit run --all-files
 help:
-	@cat make.help
+	@cat assets/mkhelp.txt

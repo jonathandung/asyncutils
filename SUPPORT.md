@@ -9,7 +9,7 @@ Before jumping to seek support, do skim through [the readme](https://github.com/
 If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
-2. Create a new issue if not
+2. If so, participate meaningfully there; create a new issue otherwise
 3. Refer and adhere to the issue template chosen, or risk your issue being closed without going through actual review
 
 ## Feature Requests

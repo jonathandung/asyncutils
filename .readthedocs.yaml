@@ -7,8 +7,8 @@ build:
     python: latest
   jobs:
     post_create_environment:
-      - scripts/genhelp.sh
-      - scripts/genmakefileusage.sh
+      - scripts/unix/genhelp.sh
+      - scripts/unix/genmakefileusage.sh
       - scripts/rtd.sh
 formats:
   - htmlzip

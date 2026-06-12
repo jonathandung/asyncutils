@@ -51,22 +51,7 @@ colorful command line interface.
   PDF documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
   .zip archive of pages <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip>
 
-.. note:: This project is being actively developed and maintained. It currently only supports CPython 3.12 or above.
-
-.. version-changed:: 0.9.3
-  Added the documentation downloads to the links section in the sidebar.
-
-.. version-changed:: 0.9.3
-  Copied more pages from the root to the sidebar for easier navigation.
-
-.. version-changed:: 0.9.2
-  Started releasing documentation in PDF and zipped HTML formats.
-
-.. version-removed:: 0.9.0
-  0.8.x versions reached end-of-life.
-
-.. version-changed:: 0.8.18
-  Completed the backport of the project to Python 3.12 and Python 3.13.
+.. note:: This project is being actively developed and maintained. It currently only fully supports CPython 3.12 or above.
 
 .. note::
   :collapsible: closed

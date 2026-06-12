@@ -1,8 +1,6 @@
 Configuration
 =============
 
-.. version-added:: 0.8.21
-
 .. currentmodule:: asyncutils.context
 
 Environment Variables
@@ -52,13 +50,8 @@ The below environment variables directly affect what this library does, mostly i
   :ref:`Colour control <python:using-on-controlling-color>`
     detailing how Python itself handles the colour-related environment variables above
 
-.. version-changed:: 0.9.10
-  Made consideration of environment variables coonsistent with specifications, no longer incorrectly requiring them to be set to "1".
-
 Arguments to Python that are considered
 ---------------------------------------
-
-.. version-added:: 0.9.4
 
 Some arguments consumed by the Python interpreter are also taken into account by the library:
 
@@ -132,14 +125,7 @@ Hjson  .hjson         hjson       hjson
 XML    .xml           xmltodict   xmltodict
 ====== ============== =========== ==================
 
-.. version-added:: 0.9.3
-  Support for the XML (Extensible Markup Language) format.
-  Be especially careful with using XML, because it is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
-
-.. version-added:: 0.9.2
-  Support for the TOML (Tom's Obvious Minimal Language) and YAML (YAML Ain't Markup Language) formats.
-
-.. danger:: Many implementations used are subject to certain attacks related to crafting of input leading to quadratic complexity or worse.
+Be especially careful with using XML, because it is verbose, overkill and not recommeneded for use, especially with many simpler alternatives.
 
 .. seealso::
 
@@ -207,9 +193,6 @@ One may find it useful to alter the context dynamically without creating a new c
 
 It is even better to use :class:`nonreusablelocalcontext`, which returns a one-time context manager, or the convenience method
 :meth:`Context.ascurctx` on context objects that wraps it.
-
-.. version-changed:: 0.8.27
-  Started to recommend the use of :class:`nonreusablelocalcontext` rather than its parent class, :class:`localcontext`.
 
 For more detailed documentation on context usage, see the :mod:`~asyncutils.context` page.
 

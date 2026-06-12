@@ -23,10 +23,10 @@ class B:
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 t = 'Locked', (B,), {'__slots__': ()}
 def n(c, /, prefer_writers=None): return _rwlock_sub_new(c.__subclasses__()[getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers])
-def s(c, n=n, /, **_):
+def s(c, _=n, /, **k):
     if not isinstance(c.__dict__.get('__slots__'), tuple): raise TypeError(f'subclass of {c.__name__} must define tuple as __slots__')
-    if c.__new__ is n: c.__new__ = _rwlock_sub_new
-    super(c).__init_subclass__(**_)
+    if c.__new__ is _: c.__new__ = _rwlock_sub_new
+    super(c).__init_subclass__(**k)
 def d(c, /, _=(n, classmethod(s))): c.__new__, c.__init_subclass__ = _; return c
 class CoercedMethod:
     __slots__ = '__f', '__n', '__o'

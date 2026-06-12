@@ -98,5 +98,5 @@ pre-commit run --all-files
 goto :eof
 
 :help
-type make.help
+type assets\mkhelp.txt
 goto :eof

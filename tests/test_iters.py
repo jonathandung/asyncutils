@@ -1,13 +1,21 @@
 from asyncutils.base import *
 from asyncutils.iterclasses import *
 from asyncutils.iters import *
+from asyncutils import iterf
 from asyncio import CancelledError, create_task, gather, sleep
 from _collections import deque
 from operator import is_
 from pytest import fail, fixture, mark, raises
 from tests.conftest import mk
+from enum import IntEnum
+from random import choice, shuffle
 @fixture
 def bucket(): return abucket((10, 20, 30, 11, 21, 31, 12, 22, 23, 33), 10 .__rfloordiv__)
+Set = IntEnum('Set', 'A B C D E F G H I J')
+l = list(Set)
+shuffle(l)
+d = dict(zip(Set, l))
+async def next_node(x): return d[x]
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10)))
 @mk
 async def test_iter_to_agen(): assert await vecs_eq(iter_to_agen(range(10)), arange(10))
@@ -76,3 +84,14 @@ async def test_abucket2(bucket):
     assert await to_list(bucket[2]) == [20, 21, 22, 23]
     assert await to_tuple(bucket[0]) == ()
     assert await to_set(bucket) == set()
+@mk
+async def test_abrent():
+    init = choice(l)
+    node, la, mu = await abrent(next_node, init)
+    assert type(node) is Set and await iterf(mu)(next_node)(init) is node
+    cur, s = init, {init}
+    for _ in range(la-1):
+        cur = d[cur]
+        assert cur not in s
+        s.add(cur)
+    assert d[cur] is node

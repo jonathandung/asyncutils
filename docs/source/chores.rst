@@ -1,8 +1,6 @@
 Development Chores
 ==================
 
-.. version-added:: 0.9.6
-
 This file aims to detail guidelines for some monotonous tasks contributors to this library may need to complete in different recurring scenarios.
 
 Bumping the version
@@ -58,7 +56,7 @@ For collaborators and those interested, this is the general procedure:
 5. Edit the definition of :func:`~asyncutils.tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as
    promised.
 6. Update the literalincludes in logging.rst with the line numbers marked down from steps 2 and 4.
-7. Execute the platform-suitable genhelp batch file as a sanity check, but do not commit the outputs.
+7. Execute the platform-suitable genhelp script as a sanity check, but do not commit the outputs.
 
 Adding a new contextual constant
 --------------------------------
@@ -121,7 +119,7 @@ Changing help messages for command-line arguments
 
 Remember not to indent the help strings when using multiline strings; keep them at the left margin such that they display correctly.
 
-If you want to preview the changes to the argument parser help in the form of an HTML page, run ``scripts/genhelp.sh`` on Unix or
+If you want to preview the changes to the argument parser help in the form of an HTML page, run ``./scripts/unix/genhelp.sh`` on Unix or
 ``.\scripts\win\genhelp.ps1`` on Windows before running the sphinx-build command. Do not, however, commit the resultant file.
 
 Modifying the Makefile
@@ -130,8 +128,8 @@ Modifying the Makefile
 Remember to sync up the Makefile with ``make.bat`` in the same directory, and vice versa. If you wish to remove a target, it must have exceeded a
 previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output.
 
-If you want to preview the changes to the help message in the form of the eventually created page, run ``scripts/genmakefileusage.sh`` on Unix or
-``.\scripts\win\genmakefileusage.ps1`` on Windows before running ``sphinx-build``. Do not, however, commit the resultant file.
+If you want to preview the changes to the help message in the form of the eventually created page, run ``./scripts/unix/genmakefileusage.sh`` on
+Unix or ``.\scripts\win\genmakefileusage.ps1`` on Windows before running ``sphinx-build``. Do not, however, commit the resultant file.
 
 Adding tests
 ------------
@@ -158,20 +156,6 @@ static badges in the README::
 
 If the tests are failing, do not commit the badges, since reviewers would assume your PR is ready for merging when you do so, and may close the PR
 just because they don't appear with a passing status.
-
-.. version-changed:: 0.9.9
-  A bare ``pytest`` can no longer cover all the necessary options. Use the above command only.
-
-.. version-changed:: 0.9.9
-  Use pytest-asyncio-cooperative instead of the less idiomatic pytest-asyncio wherever possible. However, a complication arises because the former
-  does not mix well with coverage, and a separate run must be employed in the test-with-badges target to account for this.
-
-.. version-added:: 0.9.9
-  The test-with-badges target.
-
-.. version-changed:: 0.9.9
-  In light of massive pytest-local-badge updates with the 1.1.1 release making four more badges available to choose from, the command has been
-  changed. Update your workflow and the plugin accordingly.
 
 .. note:: The above snippet requires the pytest-local-badge plugin, which should come packaged with the tests dependency group.
 

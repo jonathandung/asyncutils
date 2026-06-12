@@ -1,8 +1,6 @@
 Glossary
 ========
 
-.. version-added:: 0.8.21
-
 .. glossary::
 
   extra
