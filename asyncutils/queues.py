@@ -1,4 +1,3 @@
-# ty: ignore[invalid-argument-type]
 import asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import compat as D, patch as P
@@ -39,20 +38,20 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     except ValueError: F = None
     if protect_get:
         if password_get is _NO_DEFAULT:
-            if F is None or (password_get := F.f_locals.get(get_from := (C.PASSWORD_QUEUE_DEFAULT_GET_FROM if get_from is None else get_from).strip())) is None is (password_get := F.f_globals.get(get_from)): raise A.GetPasswordRetrievalError(get_from)
+            if F is None or (password_get := F.f_locals.get(get_from := (C.PASSWORD_QUEUE_DEFAULT_GET_FROM if get_from is None else get_from).strip())) is None is (password_get := F.f_globals.get(get_from)): raise A.GetPasswordRetrievalError(get_from) # ty: ignore[invalid-argument-type]
         elif get_from is not None: raise ValueError('asyncutils.queues.password_queue: only pass one of get_from or password_get')
         if not isinstance(password_get, gettyp): raise A.WrongPasswordType(None, password_get, type(password_get), gettyp)
     if protect_put:
         if password_put is _NO_DEFAULT:
-            if F is None or (password_put := F.f_locals.get(put_from := (C.PASSWORD_QUEUE_DEFAULT_PUT_FROM if put_from is None else put_from).strip())) is None is (password_put := F.f_globals.get(put_from)): raise A.PutPasswordRetrievalError(put_from)
+            if F is None or (password_put := F.f_locals.get(put_from := (C.PASSWORD_QUEUE_DEFAULT_PUT_FROM if put_from is None else put_from).strip())) is None is (password_put := F.f_globals.get(put_from)): raise A.PutPasswordRetrievalError(put_from) # ty: ignore[invalid-argument-type]
         elif put_from is not None: raise ValueError('asyncutils.queues.password_queue: only pass one of put_from or password_put')
         if not isinstance(password_put, puttyp): raise A.WrongPasswordType(None, password_put, type(password_put), puttyp)
     def s(p):
-        if not isinstance(p, gettyp): raise A.WrongPasswordType(q, p, type(p), gettyp)
-        if p is not password_get and (strict or not check(p, password_get)): raise A.WrongPassword(q, p)
+        if not isinstance(p, gettyp): raise A.WrongPasswordType(q, p, type(p), gettyp) # ty: ignore[invalid-argument-type]
+        if p is not password_get and (strict or not check(p, password_get)): raise A.WrongPassword(q, p) # ty: ignore[invalid-argument-type]
     def t(p):
-        if not isinstance(p, puttyp): raise A.WrongPasswordType(q, p, type(p), puttyp)
-        if p is not password_put and (strict or not check(p, password_put)): raise A.WrongPassword(q, p)
+        if not isinstance(p, puttyp): raise A.WrongPasswordType(q, p, type(p), puttyp) # ty: ignore[invalid-argument-type]
+        if p is not password_put and (strict or not check(p, password_put)): raise A.WrongPassword(q, p) # ty: ignore[invalid-argument-type]
     def u(p):
         if not protect_get: return
         if not p: raise A.GetPasswordMissing

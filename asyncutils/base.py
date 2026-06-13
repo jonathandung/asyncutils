@@ -1,4 +1,3 @@
-# ty: ignore[unresolved-attribute]
 from asyncutils._internal import compat as Z, helpers as H, log as L, patch as P
 from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
@@ -47,15 +46,15 @@ class event_loop: # noqa: N801
             try: g(); s |= 4
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
-                if not q: raise RuntimeError(f'{self._istr}: exception occurred while calling __enter__ of associated event loop: {e}') from e
+                if not q: raise RuntimeError(f'{self._istr}: exception occurred while calling __enter__ of associated event loop: {e}') from e # ty: ignore[unresolved-attribute]
         if f&c.ATTEMPT_AENTER and callable(g := getattr(l, '__aenter__', None)):
             try: l.run_until_complete(g()); s |= 8
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
-                if not q: raise RuntimeError(f'{self._istr}: exception occurred while calling __aenter__ of associated event loop: {e}') from e
+                if not q: raise RuntimeError(f'{self._istr}: exception occurred while calling __aenter__ of associated event loop: {e}') from e # ty: ignore[unresolved-attribute]
         self._loop, self._state = l, s+1; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=A.IgnoreErrors(RuntimeError), _l=L): # noqa: C901,PLR0912
-        n, l, a, z = self._istr, self._loop, not (f := self._flags)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS
+        n, l, a, z = self._istr, self._loop, not (f := self._flags)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS # ty: ignore[unresolved-attribute]
         if not (s := self._state)&1:
             if a: raise RuntimeError(_m%n) if v is None else BaseExceptionGroup(_n%n, tuple(A.unnest_reverse(v))).with_traceback(b)
             return False
@@ -89,7 +88,7 @@ class event_loop: # noqa: N801
         if not f&d.KEEP_LOOP: del self._loop
         return r or (q and (f>>8)&1)
     def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'): # pragma: no cover
-        b, n = not (f := self._flags)&(c := self.Flags).SILENT_ON_FINALIZE, self._istr
+        b, n = not (f := self._flags)&(c := self.Flags).SILENT_ON_FINALIZE, self._istr # ty: ignore[unresolved-attribute]
         if not self._state&1:
             if b: _f(_d, n)
             return
@@ -166,7 +165,7 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
                     yield l
     # ruff: enable[ASYNC119]
 def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set):
-    audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = A.getcontext(), I.futures._chain_future
+    audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = A.getcontext(), I.futures._chain_future # ty: ignore[unresolved-attribute]
     if b(ait, '__iter__') and not (C.AITER_TO_GEN_DEFAULT_STRICT if strict is None else strict): yield from ait; return
     if not b(ait, '__aiter__'): raise TypeError(f'asyncutils.base.aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')
     d = b(ait := aiter(ait), 'asend', 'athrow', 'aclose')

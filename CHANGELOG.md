@@ -462,7 +462,11 @@ Breaking changes:
     - dispatch_normalizer
     - autogenerate_normalizers
 
-#### [0.9.13] - 2026-06-12; newest
+#### [0.9.14] - 2026-06-13; newest
+
+Refactored `base.event_loop`; improved submodule logging and `__dir__` method handling.
+
+#### [0.9.13] - 2026-06-12
 
 Reorganized the project structure; added a test; clarified documentation.
 

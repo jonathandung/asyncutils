@@ -1,4 +1,3 @@
-# ty: ignore[unresolved-reference]
 from asyncutils._internal import patch as P
 from asyncutils._internal.compat import p
 from asyncutils._internal.submodules import context_all as __all__
@@ -28,7 +27,7 @@ class Context: # noqa: PLW1641
                 if (n := n.upper()) in _: setattr(self, n, v)
     def ascurctx(self, **k): return nonreusablelocalcontext(self, **k)
     def __eq__(self, o, /):
-        if type(o) is not __class__: return False
+        if type(o) is not __class__: return False # ty: ignore[unresolved-reference]
         f, g = map(object.__getattribute__.__get__, (self, o)); return all(f(k) == g(k) for k in self.__slots__)
     @classmethod
     def from_dct(cls, d, /): return cls(**{k.upper(): v for k, v in d.items()})
@@ -38,7 +37,7 @@ class Context: # noqa: PLW1641
     def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=None, incl_newline=True): file.write('Context.from_dct(\n'); (pp or p)._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*incl_newline, file=file, flush=flush)
     def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _(), incl_newline=False); return s.getvalue()
     def __repr__(self): return f'Context({", ".join(f"{k}={getattr(self, k)!r}" for k in self.__slots__)})'
-    def __reduce__(self): return __class__.from_dct, (self.asdict(),)
+    def __reduce__(self): return __class__.from_dct, (self.asdict(),) # ty: ignore[unresolved-reference]
     __copy__, __replace__, __setitem__ = copy, replace, __setattr__; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, incl_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
 def getcontext(_=_, d=Context()): # noqa: B008
     try: return _.get()

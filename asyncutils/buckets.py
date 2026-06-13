@@ -51,5 +51,5 @@ class LeakyBucket(AsyncContextMixin, LoopMixinBase):
     def __enter__(self):
         if self._drainer is None: self._drainer = self.make(self._drain())
         return self
-    def __exit__(self, /, *_):
-        if d := self._drainer: d.cancel(); self._drainer = None
+    def __exit__(self, /, *a):
+        if d := self._drainer: self._drainer = None; d.cancel(a[1])

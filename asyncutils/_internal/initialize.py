@@ -1,4 +1,3 @@
-# ty: ignore[possibly-unresolved-reference]
 from asyncutils import cli as L, constants as D, context as F, exceptions as E, time_since_boot as T, version as V
 from asyncutils._internal import patch as P, running_console as R
 from asyncutils._internal.submodules import __dict__ as d
@@ -29,7 +28,7 @@ class Module:
         if (m := _m.get(_n := _n+n)) is None: l(_b, n); m = __import__(_n, fromlist=_f)
         else: l(_c, n)
         if d := getattr(_g(), 'locals', None): d[n] = m
-        _s[n] = m; return m
+        _s[n], m.__dir__ = m, self.__dir__; return m # ty: ignore[invalid-assignment]
     def __dir__(self): return (*self.dunders, *self.__all__)
     P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__repr__, ''), (__getattr__, _)); del _
 f, b, _a, n = object.__new__, object.__setattr__, *Module.__slots__[:2]
@@ -38,4 +37,4 @@ def l(*a, _=A.append): _(a)
 for _k, _v in (('version', V), ('exceptions', E), ('context', F), ('constants', D), ('cli', L)): l('preloading: %s', _k); s[_k] = _v
 l('all submodules initialized in %.2f milliseconds', T())
 U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del P, R, E, V, F, L, D, T, U, d, f, t, n, _d, _k, _v, _f, _s, _u, _a, b
+del P, R, E, V, F, L, D, T, U, d, f, t, n, _d, _k, _v, _f, _s, _u, _a, b # ty: ignore[possibly-unresolved-reference]

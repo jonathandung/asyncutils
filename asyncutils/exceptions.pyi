@@ -1,5 +1,5 @@
 '''Exception handling utilties and exception classes used by this module.'''
-from ._internal.prots import AsyncLockLike, Exceptable, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProt
+from ._internal.prots import AsyncLockLike, Exceptable, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProtBase
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
@@ -153,10 +153,10 @@ class PasswordError[T](PasswordQueueError):
     def qid(self) -> int: '''The memory address of the queue associated with the exception. Invalid if the queue has been garbage collected.'''
 class WrongPassword[T](PasswordError[T], ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
-    def __init__(self, queue: QProt[Any, Any, Any], pwd: T, /): ...
+    def __init__(self, queue: QProtBase[Any, Any], pwd: T, /): ...
 class WrongPasswordType[T, R: type](PasswordError[T], TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, queue: QProt[Any, Any, Any]|None, pwd: T, wrongtyp: type[T], correcttyp: R, /): ...
+    def __init__(self, queue: QProtBase[Any, Any]|None, pwd: T, wrongtyp: type[T], correcttyp: R, /): ...
     @property
     def wrongtype(self) -> type[T]|None: '''The wrong password type associated with the exception. May be ``None`` if the wrong password type has been garbage collected.'''
     @property

@@ -1,4 +1,3 @@
-# ty: ignore[unsupported-operator]
 import sys as S, collections as C
 __all__ = 'D', 'LifoQueue', 'Placeholder', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown', 'f', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'p', 'partial', 's'
 c, V, b = not (g := (E := __import__('os').environ).get)('NO_COLOR'), S.version_info, bool(g('PYTHON_BASIC_REPL')) if (r := not (F := S.flags).ignore_environment) else None
@@ -17,9 +16,9 @@ else: from asyncio.queues import *
 D = {'basic_repl': d or (r and b), 'quiet': F.quiet}
 p = __import__('pprint').PrettyPrinter(**x) # ty: ignore[invalid-argument-type]
 t = [[], (), b'', bytearray(), '', range(0), range(1<<31), __import__('array').array('b'), C.deque(), C.defaultdict(), C.Counter(), type.__dict__, (lambda: S._getframe().f_locals)()]
-t += (o for e in ({}, C.OrderedDict(), *y) for o in (e, e.keys(), e.values(), e.items()))
+t += (o for e in ({}, C.OrderedDict(), *y) for o in (e, e.keys(), e.values(), e.items())) # ty: ignore[unsupported-operator]
 (u := (s := set(map(type, t))).update)(type(reversed(_)) for _ in t)
-t += (C.ChainMap(), __import__('itertools').repeat(None), set(), frozenset())
+t += (C.ChainMap(), __import__('itertools').repeat(None), set(), frozenset()) # ty: ignore[unsupported-operator]
 u(type(iter(_)) for _ in t)
 s = frozenset(s)
 try: f = S._getframemodulename

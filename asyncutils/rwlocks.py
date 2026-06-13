@@ -1,5 +1,4 @@
 # ty: ignore[unresolved-attribute]
-from __future__ import barry_as_FLUFL
 __lazy_modules__ = frozenset(('heapq',))
 from asyncutils import getcontext, ignore_valerrs
 from asyncutils._internal.helpers import fullname

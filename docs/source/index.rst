@@ -18,7 +18,7 @@ colorful command line interface.
   help
   examples
   top-level
-  api/asyncutils/index
+  api/index
   glossary
 
 .. toctree::

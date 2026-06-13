@@ -1,4 +1,4 @@
-# ty: ignore[unresolved-attribute,unresolved-reference]
+# ty: ignore[unresolved-reference]
 from asyncutils import exceptions as E
 from asyncutils._internal import patch as P
 from asyncutils._internal.submodules import version_all as __all__
@@ -48,19 +48,19 @@ class VersionInfo(str):
         from asyncutils import __version__ as V
         if isinstance(V, cls): V.assert_valid(); return V
         raise _
-    def is_current_version(self): return __class__.get_current_version().parts == self.parts
+    def is_current_version(self): return __class__.get_current_version().parts == self.parts # ty: ignore[unresolved-attribute]
     def __round__(self, n=None, /): return __class__(self[:n])
     def __repr__(self): return f'VersionInfo{self:t}'
     def __ceil__(self): return self[0]+any(self[1:])
     def __len__(self): return 3
     def to_complex(self): return complex(*self[:2])
     def __float__(self, _=.01): return sum((j*_**i for i, j in enumerate(self)), start=.0)
-    def __reduce__(self): return __class__, self.parts
-    def __iter__(self): return self.parts.__iter__()
-    def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
+    def __reduce__(self): return __class__, self.parts # ty: ignore[unresolved-attribute]
+    def __iter__(self): return self.parts.__iter__() # ty: ignore[unresolved-attribute]
+    def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i) # ty: ignore[unresolved-attribute]
     def assert_valid(self, _=E.VersionCorrupted):
         try:
-            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unsupported-operator]
+            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unsupported-operator,unresolved-attribute]
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
@@ -70,7 +70,7 @@ class VersionInfo(str):
             case 's': return 'v'+'.'.join(map(str, self if self[2] else self[:2 if self[1] else 1]))
             case 'l': return f'asyncutils version {self}'
             case 'a'|'c': return bytes(self).decode('ascii' if s == 'a' else 'latin-1')
-            case 't': return str(self.parts)
+            case 't': return str(self.parts) # ty: ignore[unresolved-attribute]
             case 'd': return repr(int(self))
             case 'h': return repr(hash(self))
             case 'n': return self.rpartition('.')[0]

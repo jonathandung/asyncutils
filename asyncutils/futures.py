@@ -1,10 +1,9 @@
-# ty: ignore[unresolved-import]
 __lazy_modules__ = frozenset(('_contextvars',))
 from asyncutils._internal.helpers import copy_and_clear, fullname
 from asyncutils._internal.submodules import futures_all as __all__
 from _contextvars import copy_context
-from asyncio.futures import Future, _PyFuture
-from asyncio.tasks import Task, _PyTask, eager_task_factory
+from asyncio.futures import Future, _PyFuture # ty: ignore[unresolved-import]
+from asyncio.tasks import Task, _PyTask, eager_task_factory # ty: ignore[unresolved-import]
 from sys import audit
 class FB:
     def __init__(self): self._creation_time = self.get_loop().time() # ty: ignore[unresolved-attribute]

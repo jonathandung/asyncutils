@@ -1,4 +1,3 @@
-# ty: ignore[unresolved-attribute]
 __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools'))
 import asyncio as I, asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
@@ -28,7 +27,7 @@ def discard_retval(f, /):
 def to_sync(f, /, loop=None, *, timeout=None):
     audit('asyncutils.util.to_sync', fullname(f))
     if (f := getattr(f, '__sync__', f)) is not f: return f
-    (g := afcopy(f)).__sync__ = r = wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop)); r.__async__ = g; return r
+    (g := afcopy(f)).__sync__ = r = wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop)); r.__async__ = g; return r # ty: ignore[unresolved-attribute]
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
 def _set_call(F, f, /): F.set_result(f())
 def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_set_call, F := l.create_future(), partial(f, *a, **k)); return F
@@ -36,7 +35,7 @@ def transient_block_from_loop(loop, *, threadsafe=False): return partial(transie
 def sync_await(aw, loop=None, *, never_block=True, timeout=None):
     audit('asyncutils.util.sync_await', fullname(aw))
     if loop is None: loop = get_loop_and_set()
-    return (A.raise_exc(A.Deadlock, 'asyncutils.util.sync_await: cannot await on the current loop without blocking') if loop is A._get_running_loop() else I.run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)) if never_block or loop.is_running() else loop.run_until_complete(I.wait_for(I.ensure_future(aw, loop=loop), timeout))
+    return (A.raise_exc(A.Deadlock, 'asyncutils.util.sync_await: cannot await on the current loop without blocking') if loop is I._get_running_loop() else I.run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)) if never_block or loop.is_running() else loop.run_until_complete(I.wait_for(I.ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None):
     if workers is None: workers = A.getcontext().SEMAPHORE_DEFAULT_VALUE
     return (I.Lock() if workers == 1 else I.BoundedSemaphore(workers)) if bounded else I.Semaphore(workers)
@@ -51,7 +50,7 @@ def to_async(f, /):
     if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
     r = partial(get_loop_and_set().run_in_executor, e)
     async def h(*a, **k): return await r(partial(f, *a, **k))
-    g.__async__, h.__sync__ = wraps(f)(h), (g := _fcopy(f)); return h
+    g.__async__, h.__sync__ = wraps(f)(h), (g := _fcopy(f)); return h # ty: ignore[unresolved-attribute]
 async def aiter_from_f(f, s=_NO_DEFAULT, /):
     while True:
         if (r := await f()) is s or r == s: break
@@ -128,7 +127,7 @@ def aawcmf2dcmff(**d):
             try: yield r
             finally: await h(c.__exit__, *exc_info())
         return _(g)
-    f.__text_signature__ = '(f, /)'; return f
+    f.__text_signature__ = '(f, /)'; return f # ty: ignore[unresolved-attribute]
 dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], A.IgnoreErrors(I.CancelledError)
 patch_function_signatures((lockf, 'f, /, lf={}'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

@@ -177,21 +177,21 @@ class QProtBase[R, V](Protocol):
     def change_put_password(self, opw: V, npw: V) -> bool: '''Attempt to change the put password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect puts or has been shut down.'''
 @type_check_only
 class GetProtectedQProt[R, T](QProtBase[R, Any], Protocol):
-    '''Queues for which :meth:`~QProt.get` is protected by a password.'''
+    '''Queues for which :meth:`~asyncio.Queue.get` and :meth:`~asyncio.Queue.get_nowait` are protected by a password.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Put ``item`` into the queue; if the queue is full, asynchronously wait until a free slot is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
     def put_nowait(self, item: T) -> None: '''Put ``item`` into the queue immediately; raise :exc:`~asyncio.QueueFull` if impossible.'''
 @type_check_only
 class PutProtectedQProt[V, T](QProtBase[Any, V], Protocol):
-    '''Queues for which :meth:`~QProt.put` is protected by a password.'''
+    '''Queues for which :meth:`~asyncio.Queue.put` and :meth:`~asyncio.Queue.put_nowait` are protected by a password.'''
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`~asyncio.QueueEmpty` if impossible.'''
     async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
     def put_nowait(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
 class GetAndPutProtectedQProt[R, V, T](QProtBase[R, V], Protocol):
-    '''Queues for which both :meth:`~QProt.get` and :meth:`~QProt.put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
+    '''Queues for which all mutating operations are protected by passwords. There is no requirement as to whether they are the same or different.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
     async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
