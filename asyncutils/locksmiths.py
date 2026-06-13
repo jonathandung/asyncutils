@@ -2,9 +2,9 @@ import asyncio as I, asyncutils as A, asyncutils._internal.log as L
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
 from asyncutils._internal.submodules import locksmiths_all as __all__
-from enum import IntEnum
+from enum import IntEnum as E
 from sys import audit
-ForceResult, RecognitionResult = IntEnum('ForceResult', 'UNFORCABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), IntEnum('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
+ForceResult, RecognitionResult = E('ForceResult', 'UNFORCABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # noqa: RUF012
@@ -88,3 +88,4 @@ class LocksmithBase:
     def preliminary_check_lock(self, l, /): return check_methods(l, 'acquire', 'release', 'locked')
     def task_raised_critical(self, _, e, /): raise A.Critical(e) from None
     def can_force_lock_held(self, l, /): return l in self._recognized and l.locked()
+del E

@@ -3,9 +3,10 @@
 .. danger:: Modifying the module's contents or reloading it at runtime may break the module.'''
 from .prots import All, Submodule
 from types import ModuleType
-from typing import Any, Final, Self, final, overload
+from typing import Any, ClassVar, Final, Self, final, overload
 @final
 class Module:
+    dunders: ClassVar[list[str]]
     @overload
     def __new__(cls, name: Submodule, /) -> Self|ModuleType: ...
     @overload

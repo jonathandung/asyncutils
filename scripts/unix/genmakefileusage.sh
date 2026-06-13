@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 exec > docs/source/makefile-usage.rst
-cat assets/mkpream.txt
+cat assets/mkpream.rst
 echo "
 Below is the Makefile help as of $(python3 -m asyncutils -v)::
 "

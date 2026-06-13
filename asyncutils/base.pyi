@@ -2,21 +2,43 @@
 from ._internal.prots import ExcType, GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft
 from asyncio import AbstractEventLoop, Future
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable, MutableSequence
+from enum import IntFlag
 from types import TracebackType
-from typing import Any, Final, Literal, Never, NoReturn, Self, final, overload
+from typing import Any, Literal, Never, NoReturn, Self, final, overload
 __all__ = 'adisembowel', 'adisembowelleft', 'aenumerate', 'aiter_to_gen', 'collect', 'collect_into', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class event_loop: # noqa: N801
     '''A context manager controlling lifecycles of native event loops. Has specialized handling for :mod:`asyncio` implementation details.'''
-    constructor_args: Final = 'dont_release_loop_on_finalization', 'silent_on_finalize', 'dont_try_clear_tasks_on_reuse', 'close_existing_on_exit', 'dont_always_stop_on_exit', 'dont_close_created_on_exit', 'cancel_all_tasks', 'keep_loop', 'suppress_runtime_errors', 'fail_silent', 'dont_allow_reuse', 'dont_reuse', 'dont_attempt_enter', 'attempt_aenter', 'suppress_inner_exit_on_runtime_error', 'suppress_inner_aexit_on_runtime_error' # noqa: PYI015
-    '''A tuple of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
-    def __new__(cls, *, dont_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., dont_try_clear_tasks_on_reuse: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all are applied on top of :const:`~asyncutils.context.Context.EVENT_LOOP_BASE_FLAGS`.'''
+    class Flags(IntFlag):
+        '''An enumeration of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
+        FLIP_RELEASE_LOOP_ON_FINALIZATION = 1
+        SILENT_ON_FINALIZE = 2
+        DONT_TRY_CLEAR_TASKS_ON_REUSE = 4
+        CLOSE_EXISTING_ON_EXIT = 8
+        DONT_ALWAYS_STOP_ON_EXIT = 16
+        DONT_CLOSE_CREATED_ON_EXIT = 32
+        CANCEL_ALL_TASKS = 64
+        KEEP_LOOP = 128
+        SUPPRESS_RUNTIME_ERRORS = 256
+        FAIL_SILENT = 512
+        DONT_ALLOW_REUSE = 1024
+        DONT_REUSE = 2048
+        DONT_ATTEMPT_ENTER = 4096
+        ATTEMPT_AENTER = 8192
+        SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR = 16384
+        SUPPRESS_INNER_AEXIT_ON_RUNTIME_ERROR = 32768
+    def __new__(cls, *, flip_release_loop_on_finalization: bool=..., silent_on_finalize: bool=..., dont_try_clear_tasks_on_reuse: bool=..., close_existing_on_exit: bool=..., dont_always_stop_on_exit: bool=..., dont_close_created_on_exit: bool=..., cancel_all_tasks: bool=..., keep_loop: bool=..., suppress_runtime_errors: bool=..., fail_silent: bool=..., dont_allow_reuse: bool=..., dont_reuse: bool=..., dont_attempt_enter: bool=..., attempt_aenter: bool=..., suppress_inner_exit_on_runtime_error: bool=..., suppress_inner_aexit_on_runtime_error: bool=...) -> Self: '''Constructor arguments are self-explanatory. Pass as appropriate; all are applied on top of :const:`~asyncutils.context.Context.EVENT_LOOP_BASE_FLAGS`.'''
     def __enter__(self) -> AbstractEventLoop: '''Enter the context, returning the underlying :mod:`asyncio` event loop, which is fetched on demand.'''
+    @overload
+    def __contains__(self, flagname: str, /) -> bool: ...
+    @overload
+    def __contains__(self, flag: int, /) -> bool: '''Return whether the manager has the flag specified by ``name`` or ``flag``.'''
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> Literal[False]: ...
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> bool: '''Exit the context. This stops and closes the event loop if the flags say so.'''
     def __reduce__(self) -> tuple[Callable[[int], Self], tuple[int]]: '''Support for pickling.'''
+    def __del__(self) -> None: '''Finalize the manager by calling :meth:`__exit__` if necessary.'''
     def factory_reset(self) -> None: '''Restore the default settings from the context (i.e., set the flags to :const:`~asyncutils.context.Context.EVENT_LOOP_BASE_FLAGS`).'''
     def clear_flags(self, mask_to_keep: int=...) -> None: '''Reset the configuration of the manager to the equivalent of passing all keyword arguments as ``False``, except those covered by ``mask_to_keep``.'''
     def copy_flags(self) -> Self: '''Return an unentered instance with the same configuration as this that manages a different event loop.'''
@@ -58,7 +80,7 @@ async def safe_cancel_batch[T](batch: SupportsIteration[Future[T]], /, *, callba
 @overload
 async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Callable[[T|BaseException], object]|None=..., disembowel: Literal[True], raising: bool=...) -> None:
     '''| Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
-    | The batch cancellation itself can be reliably cancelled.
+    | The batch cancellation itself can be cancelled, but less reliably and granularly than :func:`~asyncutils.util.safe_cancel`.
     | Afterwards, if ``disembowel`` is ``True``, clear the iterable using its :meth:`~list.pop` method repeatedly, falling back to :meth:`~list.clear`.
     | The callback is called on each result or exception of the futures after :exc:`~asyncio.CancelledError` was thrown into them concurrently.
     | If ``raising`` is ``True``, all calls of the callback that themselves threw exceptions are collected into a :exc:`BaseExceptionGroup`, which is then raised.'''

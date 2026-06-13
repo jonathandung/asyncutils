@@ -11,6 +11,11 @@ The below environment variables directly affect what this library does, mostly i
 .. envvar:: AUTILSCFGPATH
 
   Absolute path to a configuration file
+
+.. envvar:: AUTILSTESTMAXFAIL
+
+  Maximum number of failed tests before pytest exits early; default 3
+
 .. envvar:: FORCE_COLOR
 
   Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant

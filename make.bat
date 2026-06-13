@@ -1,18 +1,18 @@
 @echo off
 setlocal enabledelayedexpansion
 
-if "%TEST_MAXFAIL%" == "" set TEST_MAXFAIL=3
+if "%AUTILSTESTMAXFAIL%" == "" set AUTILSTESTMAXFAIL=3
 
 if "%1"=="" goto help
 goto %1
 
 :test
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %TEST_MAXFAIL%
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
 goto :eof
 
-:test-with-badges
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir assets --local-badge-duration-max 10 --local-badge-generate duration skipped status warnings xfailed
-pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir assets --local-badge-generate cov last-run
+:gen-badges
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --maxfail 0 --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status warnings xfailed
+pytest -p asyncio -p no:asyncio-cooperative --maxfail 0 --local-badge-output-dir badges --local-badge-generate cov last-run
 goto :eof
 
 :clean
@@ -87,14 +87,14 @@ call :rmclog
 git log --pretty --numstat --summary > ChangeLog
 goto :eof
 
-:publish
-call :.uv-stamp
-uv build && uv publish
-goto :eof
-
 :pre-commit
 call :.uv-stamp
 pre-commit run --all-files
+goto :eof
+
+:preview-docs
+pwsh .\scripts\win\genhelp.ps1
+pwsh .\scripts\win\genmakefileusage.ps1
 goto :eof
 
 :help

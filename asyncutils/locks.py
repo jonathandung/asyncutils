@@ -20,12 +20,12 @@ def d(m, /, _=__import__('functools').wraps):
         async with self._lock: self.update_tokens_lock_held(); m(self, *a, **k)
     return _(m)(w)
 class AdvancedRateLimit(LoopMixinBase, A.LockMixin):
-    __slots__ = '_lock', '_lu', '_unfair', '_waiters', 'capacity', 'rate', 'tokens'
-    def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._unfair, self._lu = rate, I.Lock(), deque(), not fair, monotonic(); self.tokens = self.capacity = capacity or rate
+    __slots__ = '_fair', '_lock', '_lu', '_waiters', 'capacity', 'rate', 'tokens'
+    def __init__(self, rate, capacity=None, fair=True): super().__init__(); self.rate, self._lock, self._waiters, self._fair, self._lu = rate, I.Lock(), deque(), fair, monotonic(); self.tokens = self.capacity = capacity or rate
     async def acquire(self, tokens=None, timeout=None):
         async with self._lock:
             self.update_tokens_lock_held()
-            if tokens > self.tokens: w = self._waiters; (w.appendleft if self._unfair else w.append)((A.getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens, F := self.loop.create_future()))
+            if tokens > self.tokens: w = self._waiters; (w.append if self._fair else w.appendleft)((A.getcontext().ADVANCED_RATE_LIMIT_DEFAULT_TOKENS if tokens is None else tokens, F := self.loop.create_future()))
             else: self.tokens -= tokens; return True
         try: await I.wait_for(F, timeout); return True
         except TimeoutError: return False

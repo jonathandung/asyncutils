@@ -71,7 +71,7 @@ async def safe_cancel(fut: Future[Any], /) -> None:
     .. seealso::
 
       :func:`~asyncutils.base.safe_cancel_batch`
-        a much more efficient, equally safe way to cancel multiple futures at once.'''
+        a more efficient way to cancel multiple futures at once, utilizing somewhat structured concurrency.'''
 @overload
 def transient_block[T, **P](loop: AbstractEventLoop, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
 @overload

@@ -104,7 +104,7 @@ class StatefulBarrier(A.AwaitableMixin):
     def n_waiting(self): return self._count
 class DynamicThrottle:
     __slots__ = '_fails', '_jitter', '_lb', '_lc', '_lf', '_lock', '_max', '_min', '_randf', '_rate', '_successes', '_timer', '_ub', '_uf', '_window'
-    def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)):
+    def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)): # noqa: PLR0913
         C = A.getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE

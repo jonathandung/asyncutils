@@ -1,4 +1,4 @@
-def __dir__(_=(__all__ := ('run',))): return _
+__all__ = 'run',
 def run(argv=None):
     if isinstance(argv, str): raise TypeError('asyncutils.cli.run: parameter argv must be a non-string iterable')
     import asyncutils as A, asyncutils._internal as I, sys as S; I.parsed.p.parse_args(argv, I.unparsed.N); I.initialize; S.audit('asyncutils.cli.run') # noqa: B018

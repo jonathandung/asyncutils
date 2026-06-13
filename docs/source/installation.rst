@@ -59,8 +59,9 @@ other installation pathways:
 
 .. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 
-After this, as long as you have the python Scripts (Windows) or bin (otherwise) directory on ``PATH``, ``asyncutils`` and ``autils`` will be made
-available as entry points to the asyncutils CLI, which can also be called with a typical and perhaps more familiar ``python -m asyncutils``.
+After this, as long as you have the python Scripts (Windows) or bin (otherwise) directory on
+`PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__, ``asyncutils`` and ``autils`` will be made available as entry points to the asyncutils CLI,
+which can also be called with a typical and perhaps more familiar ``python -m asyncutils``.
 
 Refer to :doc:`support` for steps to check the installation.
 

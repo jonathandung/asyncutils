@@ -152,7 +152,7 @@ verify the test is written correctly and your implementation is resilient agains
 Before committing, run the whole test suite by entering the following command at the project root to check for regressions and update the relevant
 static badges in the README::
 
-  make test-with-badges
+  make gen-badges
 
 If the tests are failing, do not commit the badges, since reviewers would assume your PR is ready for merging when you do so, and may close the PR
 just because they don't appear with a passing status.

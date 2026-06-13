@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-declare -a files=(
+declare -a f=(
   "AI_USAGE_POLICY.md:ai-use.md"
   "CHANGELOG.md:changelog.md"
   "CODE_OF_CONDUCT.md:conduct.md"
@@ -11,9 +11,6 @@ declare -a files=(
   "SECURITY.md:security.md"
   "SUPPORT.md:support.md"
 )
-for mapping in "${files[@]}"; do
-  src="${mapping%:*}"
-  dst="${mapping#*:}"
-  dest_path="docs/source/$dst"
-  cp "$src" "$dest_path"
+for m in "${f[@]}"; do
+  cp "${m%:*}" "docs/source/${m#*:}"
 done

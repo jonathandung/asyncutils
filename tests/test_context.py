@@ -15,10 +15,10 @@ def test_mod():
     assert 'EVENT_LOOP_BASE_FLAGS' in d
     d['TIMER_DEFAULT_PRECISION'] = 4
     assert ctx.TIMER_DEFAULT_precision == 7 and ctx['SOCKET_TRANSPORT_limits'] == (2048, 8192)
-    assert len(event_loop.constructor_args) == 16
+    assert len(event_loop.Flags) == 16
     with ctx.ascurctx(event_loop_base_flags=5) as c:
         assert c is not ctx
-        evl = event_loop(**{event_loop.constructor_args[0]: False})
+        evl = event_loop(**{event_loop.Flags(1)._name_.lower(): False})
         assert evl._flags == 4
         evl.clear_flags(3)
         assert hash(evl) == 0

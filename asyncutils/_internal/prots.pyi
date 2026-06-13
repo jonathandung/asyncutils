@@ -1,4 +1,3 @@
-# ty: ignore[invalid-method-override]
 '''| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
 | To avoid confusion with builtin modules, this module is named ``prots``, which may be less than descriptive, but it is what it is.
 | Neither this module nor any of its symbols exist at runtime.
@@ -95,7 +94,7 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
     @overload
     def throw(self, exc: BaseException, val: None=..., tb: TracebackType|None=..., /) -> T: ...
-    def close(self) -> R|None: ...
+    def close(self) -> R|None: ... # ty: ignore[invalid-method-override]
     @property
     def gi_code(self) -> CodeType: ...
     @property
@@ -158,14 +157,10 @@ class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
     def __matmul__(self, other: Self, /) -> Self: ...
 @type_check_only
-class QProt[R, V, T](Protocol):
+class QProtBase[R, V](Protocol):
     '''A base protocol representing password-protected queues.'''
     exc: type[ForbiddenOperation]
     '''Convenience alias for :exc:`~asyncutils.exceptions.ForbiddenOperation`.'''
-    async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
-    async def put(self, item: T) -> None: '''Put ``item`` into the queue; if the queue is full, asynchronously wait until a free slot is available.'''
-    def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`~asyncio.QueueEmpty` if impossible.'''
-    def put_nowait(self, item: T) -> None: '''Put ``item`` into the queue immediately; raise :exc:`~asyncio.QueueFull` if impossible.'''
     def qsize(self) -> int: '''Number of items in the queue.'''
     def task_done(self) -> None: '''Mark the completion of a task gotten from the queue to :meth:`join`.'''
     @property
@@ -181,17 +176,21 @@ class QProt[R, V, T](Protocol):
     def change_get_password(self, opw: R, npw: R) -> bool: '''Attempt to change the get password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect gets or is empty and has been shut down.'''
     def change_put_password(self, opw: V, npw: V) -> bool: '''Attempt to change the put password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect puts or has been shut down.'''
 @type_check_only
-class GetProtectedQProt[R, T](QProt[R, Any, T], Protocol):
+class GetProtectedQProt[R, T](QProtBase[R, Any], Protocol):
     '''Queues for which :meth:`~QProt.get` is protected by a password.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
+    async def put(self, item: T) -> None: '''Put ``item`` into the queue; if the queue is full, asynchronously wait until a free slot is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
+    def put_nowait(self, item: T) -> None: '''Put ``item`` into the queue immediately; raise :exc:`~asyncio.QueueFull` if impossible.'''
 @type_check_only
-class PutProtectedQProt[V, T](QProt[Any, V, T], Protocol):
+class PutProtectedQProt[V, T](QProtBase[Any, V], Protocol):
     '''Queues for which :meth:`~QProt.put` is protected by a password.'''
+    async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
+    def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`~asyncio.QueueEmpty` if impossible.'''
     async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
     def put_nowait(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class GetAndPutProtectedQProt[R, V, T](QProt[R, V, T], Protocol):
+class GetAndPutProtectedQProt[R, V, T](QProtBase[R, V], Protocol):
     '''Queues for which both :meth:`~QProt.get` and :meth:`~QProt.put` are protected by passwords. There is no requirement as to whether they are the same or different.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
@@ -330,7 +329,7 @@ class NullContextType:
 @type_check_only
 class RaiseType(sentinel_base):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
-    def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`~asyncutils.constants` namespace.'''
+    def __reduce__(self) -> str: '''It is accessible in the top level of the :mod:`~asyncutils.constants` namespace.''' # ty: ignore[invalid-method-override]
     def is_(self, other: object, /) -> TypeGuard[Self]: '''Not actually redefined, but this allows for effective type narrowing.'''
 @final
 @type_check_only

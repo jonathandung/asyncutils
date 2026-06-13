@@ -55,7 +55,7 @@ This section documents the symbols defined at the top level of this package, mos
   Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.
   Useful for benchmarking the module's performance.
 
-The remarks below are inapplicable to the contextually configured constants in :mod:`~asyncutils.context`:
+Some remarks below, inapplicable to the contextually configured constants in :mod:`~asyncutils.context`:
 
 * One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.
 * The submodule objects are also accessible as attributes of the library without triggering the loading immediately if not loaded.

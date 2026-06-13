@@ -124,7 +124,7 @@ allowed-unused-imports = ["asyncutils._internal.submodules"]
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = ["__replace__", "__setup__", "__cleanup__"]
 max-returns = 6
-max-args = 11
+max-args = 8
 max-positional-args = 6
 max-public-methods = 41
 max-branches = 16

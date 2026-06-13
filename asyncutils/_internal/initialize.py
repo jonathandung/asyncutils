@@ -5,7 +5,7 @@ from asyncutils._internal.submodules import __dict__ as d
 if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (BaseException,), {})('asyncutils: cannot reload internal initialization module')
 _u, _f, _s, s, t, U, A = (_d := {}).update, ('',), 'asyncutils.', {}, '_all', (S := list(a)).extend, []
 class Module:
-    __slots__ = '__all__', '_n', '_s'
+    __slots__ = '__all__', '_n', '_s'; del (dunders := dir(L))[-1]
     def __new__(cls, name, /, _d=_d, _a=frozenset(a), _=s):
         if name in _a: return _[name]
         try: return getattr(_[_d[name]], name)
@@ -23,13 +23,14 @@ class Module:
         delattr(self.load(), n) # cover: on
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
-    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s):
+    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s, _a='retrieved loaded submodule: %s', _b='now loading: %s', _c='found cached submodule: %s'):
         if (t := type(self)) is not __class__: return self # ty: ignore[unresolved-reference]
-        if type(m := _s.get(n := self._n)) is not t: return m
-        if (m := _m.get(_n := _n+n)) is None: l(f'now loading: {n}'); m = __import__(_n, fromlist=_f)
+        if type(m := _s.get(n := self._n)) is not t: l(_a, n); return m
+        if (m := _m.get(_n := _n+n)) is None: l(_b, n); m = __import__(_n, fromlist=_f)
+        else: l(_c, n)
         if d := getattr(_g(), 'locals', None): d[n] = m
         _s[n] = m; return m
-    def __dir__(self): return self.__all__
+    def __dir__(self): return (*self.dunders, *self.__all__)
     P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__repr__, ''), (__getattr__, _)); del _
 f, b, _a, n = object.__new__, object.__setattr__, *Module.__slots__[:2]
 for _k in a: U(_v := d[_k+t]); _u(dict.fromkeys(_v, _k)); s[_k] = a = f(Module); b(a, n, _k); b(a, _a, _v)
