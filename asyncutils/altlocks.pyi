@@ -15,7 +15,7 @@ class ResourceGuard(RuntimeError, AsyncContextMixin[None]):
         | ``rname`` is used in error messages to describe the resource by calling its :meth:`~object.__repr__`; if not passed, an index is automatically assigned to the resource.'''
     def __enter__(self) -> None:
         '''| Throw the resource guard instance, which inherits from :exc:`RuntimeError` itself as an exception, if the resource is already being guarded.
-        | Otherwise, mark the resource as guarded, such that :attr:`guarded` gives ``True``.'''
+        | Otherwise, mark the resource as guarded, such that :attr:`guarded` evaluates to ``True``.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload

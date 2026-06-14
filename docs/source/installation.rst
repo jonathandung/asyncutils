@@ -3,7 +3,7 @@ Installation
 
 .. highlight:: bash
 
-No setup is required, besides ensuring that your package manager is updated to the latest version as follows::
+You are advised to ensure that your package manager is updated to the latest version as follows::
 
   # pip:
   pip install -U pip
@@ -26,30 +26,31 @@ Next, install py-asyncutils:
 
 .. sub-code-block::
 
-  # recommended: pip
-  pip install py-asyncutils==|version|  # directly from source
-  pip install git+https://github.com/jonathandung/asyncutils.git
+  # recommended: uv
+  uv pip install py-asyncutils==|version|
+  uv pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
   # for development, after:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
   # you have the three options below:
-  pip install -e .
+  uv pip install -e .
   make install
   make install-silent # no clutter
-  # the last two options need GNU Make on \*nix, but the Windows version points to a batch file.
+  # the last two options need GNU Make on *nix, but the Windows version points to a batch file.
   # uv is invoked under the hood and installed if absent; pip is not needed!
 
 other installation pathways:
 
 .. sub-code-block::
 
-  pipx install py-asyncutils==|version| # pipx
+  pip install py-asyncutils==|version| # pip
+  pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
   conda install -c conda-forge py-asyncutils=|version| # conda
   # alternatively:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
   conda install py-asyncutils==|version|
-  # uv essentially supports the same interface as pip with uv pip
+  pipx install py-asyncutils==|version| # pipx
   poetry add py-asyncutils@|version| # poetry
   pdm add py-asyncutils==|version| # pdm
   pipenv install py-asyncutils==|version| # pipenv

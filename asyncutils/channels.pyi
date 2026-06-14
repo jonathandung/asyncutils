@@ -152,8 +152,8 @@ class EventBus(LoopContextMixin):
         | Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
         | If ``wait`` is ``False`` (default ``True``), don't wait for the publication to complete.
         | If ``safe`` is ``False`` (default ``True``), don't wrap callbacks with proper error handling.
-        | ``chaperone``, if passed, should be a function processing non-severe exceptions (instances of :exc:`Exception` and :exc:`ExceptionGroup`) in the callbacks. Otherwise, these
-        | exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and propagated; the caller should be prepared to handle that case.'''
+        | ``chaperone``, if passed, should be a function processing non-severe exceptions (instances of :exc:`Exception` and :exc:`ExceptionGroup`) in the callbacks.
+        | Otherwise, these exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and propagated; the caller should be prepared to handle that case.'''
     async def wait_for_event(self, event_type: str, *, timeout: bool|None=..., condition: Callable[[Any], object]=...) -> Task[Any]:
         '''Wait for an event of the specified event type that satisfies the condition to occur.
 
