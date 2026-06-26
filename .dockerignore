@@ -13,6 +13,7 @@
 *.so
 *.sw[op]
 *.txt
+*.whl
 *~
 .DS_Store
 .Python
@@ -38,6 +39,7 @@
 .venv/
 .vscode/
 Dockerfile
+ENV/
 Makefile
 __pycache__/
 __pypackages__/

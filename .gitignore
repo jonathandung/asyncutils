@@ -22,7 +22,7 @@
 .python-version
 .ruff_cache/
 .uv-stamp
-.venv
+.venv/
 ENV/
 __pycache__/
 __pypackages__/

@@ -75,6 +75,7 @@ Adding a new contextual constant
 --------------------------------
 ..
   cspell:disable-next-line
+
 The name of the constant should be of the form ``UTILITYNAME_OPTIONALMETHODNAME_DEFAULT_ARGNAMEINCAPS`` if it acts as a dynamic default value, the
 most common case by far. Note the uppercase, underscores and rigid format.
 

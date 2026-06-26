@@ -1,7 +1,7 @@
 <!--markdownlint-disable-next-line MD041-->
 ## Checklist
 
-<!--Please delete all comments and inapplicable sections but leave checkbox descriptions unedited.-->
+<!--Please delete all comments and inapplicable sections, but leave checkbox descriptions unedited.-->
 
 ### All PRs
 

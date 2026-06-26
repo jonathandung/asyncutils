@@ -15,4 +15,4 @@ Available targets:
  type-check     - Run ty for type checking
  venv           - Create a virtual environment using uv
  watch          - Watch for changes and run tests automatically using pytest-watch, assuming it is installed
-Note: Some targets will automatically install or update the uv package manager. More targets may be added in the future on popular demand.
+Note: Some targets will automatically install or update the uv package manager. Targets may be added on popular demand.

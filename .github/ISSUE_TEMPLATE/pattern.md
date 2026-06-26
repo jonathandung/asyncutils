@@ -9,7 +9,6 @@ assignees: jonathandung
 ## Describe the pattern
 
 <!--An approximate picture of how the pattern would be used.
-
 If you are not adding a pattern, switch to [the feature request template](https://github.com/jonathandung/asyncutils/issues/new?template=pattern.md).
 -->
 ## Pitch the pattern

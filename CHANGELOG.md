@@ -30,7 +30,7 @@ Breaking changes:
 #### [1.0.0] - 2026-06-26; first stable version; newest
 
 Added some tests; enabled some pydocstyle lint rules; refactored internal modules to avoid importing asyncio to show the help message and library
-version; moved warnings badge generation to slower test run; switched back to codecov due to pricing.
+version; moved warnings badge generation to slower test run; switched back to codecov due to pricing; integrated spelling checker.
 
 ## Below versions are [unstable](https://semver.org/#spec-item-4)
 

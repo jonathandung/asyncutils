@@ -33,8 +33,8 @@ If applicable, add screenshots to help explain your problem.
 - Operating system (`python3 -m platform`):
 - Package version (something like `uv pip show py-asyncutils | grep Version:` or `conda list py-asyncutils --fields version`):
 
-### Full error traceback
-
+### Traceback
+<!--Paste the full error traceback below.-->
 ```text
 ```
 
