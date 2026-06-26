@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://asyncutils.readthedocs.io
+    about: Guides and API reference for asyncutils.
+  - name: Stable documentation
+    url: https://asyncutils.readthedocs.io/en/stable/
+    about: The stable version of the above, built every patch version.
+  - name: Discussions
+    url: https://github.com/jonathandung/asyncutils/discussions
+    about: Ask questions and share your ideas about asyncutils.
+  - name: Creator's profile
+    url: https://github.com/jonathandung
+    about: More of my work, mainly Python projects, can be found here.

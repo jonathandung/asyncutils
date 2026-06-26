@@ -1,0 +1,15 @@
+version: 2
+sphinx:
+  configuration: docs/source/conf.py
+  fail_on_warning: true
+build:
+  os: ubuntu-26.04
+  tools:
+    python: latest
+  jobs:
+    post_create_environment:
+      - scripts/unix/genhelp.sh
+      - scripts/unix/genmakefileusage.sh
+      - for p in AI_USAGE_POLICY.md:ai-use.md CHANGELOG.md:changelog.md CODE_OF_CONDUCT.md:conduct.md COMPATIBILITY.rst:compat.rst CONTRIBUTING.md:contributing.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md; do cp "${p%:*}" "docs/source/${p#*:}"; done
+formats: [htmlzip, pdf]
+python: {install: [{path: ., extra_requirements: [themes]}]}

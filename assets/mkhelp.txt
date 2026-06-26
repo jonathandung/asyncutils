@@ -1,0 +1,18 @@
+Available targets:
+ build-docs     - Build a preview of the documentation in docs/build, exiting with a non-zero status on any warning
+ changelog      - Generate a compact changelog from Git history and print it in the terminal with colour
+ clean          - Clean development artifacts and caches, including the __pycache__, build and dist directories, generated files, and coverage results
+ gen-badges     - Run the test suite twice, exiting on any failure; generate static badges on success
+ help           - Show this help message
+ install        - Install the package in editable mode with development dependencies; assumes a virtual environment is present
+ install-silent - Install without output
+ install-system - Install the package in editable mode without a virtual environment
+ pre-commit     - Run pre-commit hooks on all files, assuming the executable pre-commit on PATH points to pre-commit
+ regen-trie     - Regenerate the trie from an updated ``assets/words.txt`` for spell-checking speed
+ ruff           - Run the ruff linter
+ spellcheck     - Run CSpell
+ test           - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
+ type-check     - Run ty for type checking
+ venv           - Create a virtual environment using uv
+ watch          - Watch for changes and run tests automatically using pytest-watch, assuming it is installed
+Note: Some targets will automatically install or update the uv package manager. More targets may be added in the future on popular demand.

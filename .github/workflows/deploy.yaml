@@ -1,0 +1,30 @@
+name: GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: pages
+jobs:
+  build:
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{steps.deploy.outputs.page_url}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          python-version: "3.14"
+          cache-python: true
+          activate-environment: true
+      - run: uv pip install ".[themes]"
+      - run: make -C docs html
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: docs/build/html
+      - uses: actions/deploy-pages@v5.0.0
+        id: deploy

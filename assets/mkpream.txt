@@ -1,0 +1,14 @@
+Using the Makefile
+==================
+
+.. highlight:: none
+
+make.bat on Windows, or the Makefile otherwise, is often a handy companion in development. It makes development less dry, repetitive and error-prone,
+and the process as a whole more smooth-sailing.
+
+This is partly also to compensate for the lack of a setup.py after adaptation of the standardized pyproject.toml; see :pep:`621` and `the official
+PyPA guide <https://packaging.python.org/en/latest/guides/writing-pyproject-toml>`__ for more. Note that the Makefile is not intended to be used by
+end users, but rather by developers, and it obviously requires GNU Make.
+
+If you are in powershell, ``make`` will not work directly and you must use ``.\make.bat`` instead, which is more verbose; thus, you are strongly
+advised to develop in cmd.exe, the traditional command prompt.

@@ -1,0 +1,1 @@
+{"files.associations":{"**/assets/mkpream.txt":"restructuredtext"},"python.languageServer":"None","ruff.nativeServer":"on","search.exclude":{".secrets.baseline":true,"SECURITY.md":true,"uv.lock":true},"ty.showSyntaxErrors":false}

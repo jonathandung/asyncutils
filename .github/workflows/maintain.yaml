@@ -1,0 +1,42 @@
+name: Manage stale issues and pull requests
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v10.3.0
+      with:
+        days-before-issue-close: 14
+        days-before-issue-stale: 28
+        days-before-pr-close: 7
+        days-before-pr-stale: 21
+        exempt-all-milestones: true
+        exempt-draft-pr: true
+        exempt-issue-labels: need-help,pinned
+        exempt-pr-labels: need-help
+        stale-issue-label: stale-issue
+        stale-issue-message: This issue has been marked as stale due to inactivity.
+        stale-pr-label: stale-pr
+        stale-pr-message: This pull request has been marked as stale due to inactivity.
+  lock:
+    runs-on: ubuntu-latest
+    permissions:
+      discussions: write
+    concurrency:
+      group: lock
+    steps:
+      - uses: dessant/lock-threads@v6.0.2 # cspell:disable-line
+        with:
+          discussion-inactive-days: 180
+          discussion-comment: This discussion thread has been automatically locked due to inactivity. For a related topic, please start a new discussion and refer to relevant comments here.
+          issue-inactive-days: 180
+          issue-comment: This issue thread has been automatically locked due to inactivity. For a related bug, please file a new issue and link to relevant comments here.
+          log-output: true
+          pr-inactive-days: 180
+          pr-comment: This pull request thread has been automatically locked due to inactivity. For a related enhancement, please file a new issue or open another PR and link to relevant comments here.
