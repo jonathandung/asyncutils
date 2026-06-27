@@ -215,6 +215,7 @@ unstar
 unsubclassable
 unsubscriptions
 valerrs
+vecs
 viewcode
 wasi
 weakrefset

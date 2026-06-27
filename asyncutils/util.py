@@ -1,7 +1,7 @@
 __lazy_modules__ = frozenset(('asyncutils._internal.running_console', 'functools'))
 import asyncio as I, asyncutils as A
 from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.helpers import check_methods, create_executor, get_loop_and_set, fullname
+from asyncutils._internal import helpers as H
 from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.submodules import util_all as __all__
 from functools import partial, wraps
@@ -17,14 +17,15 @@ async def wrap_in_coro(aw, /):
 def done_evt(*, evtcls=I.Event): (E := evtcls()).set(); return E
 def done_fut(res=None, *, futcls=I.Future): F = futcls(); F.set_exception(A.unwrap_exc(res)) if A.exception_occurred(res) else F.set_result(res); return F
 async def locked_lock(*, lcls=I.Lock): await (l := lcls()).acquire(); return l
-def get_future(aw, loop=None): return (get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
-def new_eager_tasks(*aws): (l := get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)
+def get_future(aw, loop=None): return (H.get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
+def new_eager_tasks(*aws): (l := H.get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)
 def afcopy(f, /): return wraps(f)(lambda *a, **k: wrap_in_coro(f(*a, **k)))
-def discard_retval(f, /):
-    async def g(*a, **k): await f(*a, **k)
+def discard_retval(f, /): return evaluate_and_return(f, None)
+def evaluate_and_return(f, r, /):
+    async def g(*a, **k): await f(*a, **k); return r
     return wraps(f)(g)
 def to_sync(f, /, loop=None, *, timeout=None):
-    audit('asyncutils.util.to_sync', fullname(f))
+    audit('asyncutils.util.to_sync', H.fullname(f))
     if (f := getattr(f, '__sync__', f)) is not f: return f
     (g := afcopy(f)).__sync__ = r = wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop)); r.__async__ = g; return r # ty: ignore[unresolved-attribute]
 def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
@@ -32,8 +33,8 @@ def _set_call(F, f, /): F.set_result(f())
 def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_set_call, F := l.create_future(), partial(f, *a, **k)); return F
 def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, loop=None, *, never_block=True, timeout=None):
-    audit('asyncutils.util.sync_await', fullname(aw))
-    if loop is None: loop = get_loop_and_set()
+    audit('asyncutils.util.sync_await', H.fullname(aw))
+    if loop is None: loop = H.get_loop_and_set()
     return (A.raise_exc(A.Deadlock, 'asyncutils.util.sync_await: cannot await on the current loop without blocking') if loop is I._get_running_loop() else I.run_coroutine_threadsafe(wrap_in_coro(aw), loop).result(timeout)) if never_block or loop.is_running() else loop.run_until_complete(I.wait_for(I.ensure_future(aw, loop=loop), timeout))
 def semaphore(bounded=False, workers=None):
     if workers is None: workers = A.getcontext().SEMAPHORE_DEFAULT_VALUE
@@ -44,15 +45,17 @@ def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # noq
         async with l: return await f(*a, **k)
     return wraps(f)(r)
 def to_async(f, /):
-    audit('asyncutils.util.to_async', fullname(f))
+    audit('asyncutils.util.to_async', H.fullname(f))
     if (f := getattr(f, '__async__', f)) is not f: return f
-    if (e := getattr(to_async, 'executor', None)) is None: e = create_executor(to_async)
-    r = partial(get_loop_and_set().run_in_executor, e)
+    if (e := getattr(to_async, 'executor', None)) is None: e = H.create_executor(to_async)
+    r = partial(H.get_loop_and_set().run_in_executor, e)
     async def h(*a, **k): return await r(partial(f, *a, **k))
     g.__async__, h.__sync__ = wraps(f)(h), (g := wraps(f)(lambda *a, **k: f(*a, **k))); return h # noqa: PLW0108 # ty: ignore[unresolved-attribute]
-async def aiter_from_f(f, s=_NO_DEFAULT, /):
+async def aiter_from_f(f, s=_NO_DEFAULT, /, *, yield_sentinel=False):
     while True:
-        if (r := await f()) is s or r == s: break
+        if H.check(r := await f(), s):
+            if yield_sentinel: yield r
+            break
         yield r
 async def safe_cancel(t, /):
     F = t.get_loop().create_future()
@@ -119,10 +122,10 @@ def aawcmf2dcmff(**d):
         async def g(*a, **k):
             c = f(*a, **k)
             with A.ignore_typeerrs: c = await c
-            if check_methods(c, '__aenter__', '__aexit__'):
+            if H.check_methods(c, '__aenter__', '__aexit__'):
                 async with c as r: yield r; return # noqa: ASYNC119
-            if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = create_executor(aawcmf2dcmff)
-            r = await (h := partial(get_loop_and_set().run_in_executor, e))(c.__enter__)
+            if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = H.create_executor(aawcmf2dcmff)
+            r = await (h := partial(H.get_loop_and_set().run_in_executor, e))(c.__enter__)
             try: yield r
             finally: await h(c.__exit__, *exc_info())
         return _(g)

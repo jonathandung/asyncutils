@@ -55,7 +55,6 @@ class LockMixin(metaclass=ABCMeta):
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a
     def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
-@H.subscriptable
 class LockWithOwnerMixin(LockMixin):
     __slots__ = ()
     @property
@@ -66,7 +65,6 @@ class LockWithOwnerMixin(LockMixin):
     def release(self):
         if not self.is_owner: raise RuntimeError(f'{H.fullname(self)} is not acquired by current task')
         return self._release()
-@H.subscriptable
 class EventMixin(AwaitableMixin, H.LoopMixinBase, metaclass=ABCMeta):
     __slots__ = ()
     @abstractmethod

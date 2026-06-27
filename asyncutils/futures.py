@@ -30,7 +30,7 @@ class A:
         for g, _ in e: a(g(), context=_)
         for g, _ in f: b(g, context=_)
 class B:
-    def __init__(self, *a, **k): super().__init__(*a, **k); self._creation_time = monotonic_ns()
+    def __init__(self, *a, **k): self._creation_time = monotonic_ns(); super().__init__(*a, **k)
     def __lt__(self, o, /): return self._creation_time < o._creation_time
 class C(A):
     _icb, _mcb = staticmethod(copy_and_clear), list; remove_done_callback, remove_async_callback, remove_noargs_callback, remove_noargs_async_callback = map(f, t)

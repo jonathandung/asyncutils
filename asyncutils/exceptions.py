@@ -1,5 +1,4 @@
-from asyncutils._internal import patch as P
-from asyncutils._internal.helpers import check_methods, fullname, subscriptable
+from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception, stderr
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
@@ -45,7 +44,7 @@ class ExceptionWrapper:
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
 exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # ty: ignore[unresolved-attribute]
-@subscriptable
+@H.subscriptable
 class ref: # noqa: N801
     __slots__ = '__obj',
     def __new__(cls, obj, r=__import__('_weakref').ref):
@@ -54,7 +53,7 @@ class ref: # noqa: N801
         except TypeError: (_ := object.__new__(cls)).__obj = obj; return _
     def __call__(self): return self.__obj # ty: ignore[unresolved-attribute]
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
-@subscriptable
+@H.subscriptable
 class Critical(BaseException):
     def __init__(self, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception): super().__init__(_m); self.__context__ = e.__context__ if isinstance(e, __class__) else _e() if e is None else e
     @property
@@ -65,22 +64,22 @@ class StateCorrupted(BaseException):
     def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
 class VersionError(Exception): ...
 for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
-    def _(self, a=A, b=B):
-        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {fullname(self)!r} has no attribute {a!r}')
+    def _(self, a=A, b=B, f=H.fullname):
+        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {f(self)!r} has no attribute {a!r}')
         if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
         return r
     _.__name__, _.__qualname__ = A, f'VersionError.{A}'; setattr(VersionError, A, property(_))
 class VersionConversionError(VersionError): ...
 class VersionValueError(VersionConversionError, ValueError): ...
-@subscriptable
+@H.subscriptable
 class VersionNormalizerMissing(VersionConversionError, TypeError):
     def __init__(self, o, /, _='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._refo = ref(o); super().__init__(_(o))
     P.patch_method_signatures((__init__, 'obj, /'))
-@subscriptable
+@H.subscriptable
 class VersionNormalizerTypeError(VersionConversionError, TypeError):
     def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._refn, self._refo = map(ref, a); super().__init__(_(*a))
     P.patch_method_signatures((__init__, 'normalizer, obj, /'))
-@subscriptable
+@H.subscriptable
 class VersionNormalizerFault(VersionConversionError):
     def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(_(*a))
     P.patch_method_signatures((__init__, 'normalizer, obj, exc, /'))
@@ -126,13 +125,12 @@ class GetPasswordRetrievalError(PasswordRetrievalError): ...
 class PutPasswordRetrievalError(PasswordRetrievalError): ...
 class ForbiddenOperation(PasswordQueueError, TypeError):
     def __init__(self, op, *a): self.op = op = op%a; super().__init__(f'cannot {op} the type of password-protected queue')
-@subscriptable
+@H.subscriptable
 class PasswordError(PasswordQueueError):
     @property
     def wrong_pwd(self): return self._refp() # ty: ignore[unresolved-attribute]
 class WrongPassword(PasswordError, ValueError):
     def __init__(self, q, p, /, _='failure to modify queue because %r received incorrect password: %r'): self.qid, self._refp = id(q), ref(p); super().__init__(_%(q, p))
-@subscriptable
 class WrongPasswordType(PasswordError, TypeError):
     def __init__(self, q, *a, _='{!r} received password {!r} of wrong type {.__qualname__!r}; should be {!r}'.format): self.qid, self._refp, self._reft, self._refc = id(q), *map(ref, a); super().__init__(_(q, *a))
     @property
@@ -153,7 +151,7 @@ class IgnoreErrors:
     async def __aenter__(self): return self
     async def __aexit__(self, /, *_): return self.__exit__(*_)
     def excluding(self, *O, _=__import__('itertools').chain): return type(self)(*self.exc, exclude=_(self.but, O))
-    def combined(self, *O, _=check_methods):
+    def combined(self, *O, _=H.check_methods):
         f, g, h, j, p = (S := set(self.exc)).update, (P := set(self.but)).update, S.add, (d := []).extend, d.pop
         for o in O:
             if isinstance(o, IgnoreErrors): f(o.exc); g(o.but)
@@ -176,4 +174,4 @@ class WarningToError:
     async def __aenter__(self): return self.__enter__()
     async def __aexit__(self, /, *_): self.__exit__(*_)
     P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.exit_sig), (__aexit__, P.exit_sig))
-del P, s, _, A, B, stderr, ExceptionWrapper, _unnest, audit, exception, subscriptable # ty: ignore[possibly-unresolved-reference]
+del P, s, _, A, B, H, stderr, ExceptionWrapper, _unnest, audit, exception

@@ -56,7 +56,6 @@ class PrioritySemaphore(LoopMixinBase, A.LockMixin):
     def reset(self):
         for *_, e in self._waiters: e.set_result(None)
         self._value, self._tiebreak = 1, 0; self._waiters.clear()
-@subscriptable
 class KeyedCondition(LoopMixinBase, A.LockMixin):
     __slots__ = '__lock', '_specific_waiters'
     def __init__(self, lock=None): super().__init__(); self.__lock, self._specific_waiters = lock or I.Lock(), defaultdict(set)

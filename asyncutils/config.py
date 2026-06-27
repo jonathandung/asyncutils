@@ -1,4 +1,4 @@
-# ruff: noqa: BLE001,F821,SIM115
+# ruff: noqa: BLE001,SIM115
 from asyncutils._internal import log as l, patch as P, initialize as I
 from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
@@ -42,14 +42,14 @@ def k(e, a=False, N=N):
     if isinstance(x := N[e], str):
         try: return int(x, 0)
         except ValueError:
-            if a: raise FaultyConfig(e, str, int)
+            if a: raise FaultyConfig(e, x, int)
     return x
 def g(e, a=False, t=(str, int, bytes), _=k):
     if isinstance(x := _(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
         try: x = x.encode()[2:-1] # noqa: SIM105
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
-    raise FaultyConfig(e, type(x), t)
+    raise FaultyConfig(e, x, t)
 max_memory_errors, e, Executor, get_past_logs, m, M, o, s, _ = k('max_memory_errors'), g('seed', True), f(N.executor), str, 'a', False, __import__('os').name == 'posix', S.stderr, L.StreamHandler()
 silent, basic_repl, loaded_all, pdb = map(N.__getitem__, ('quiet', 'basic_repl', 'load_all', 'pdb'))
 match logging_to := g('log_to'):
@@ -121,4 +121,4 @@ if loaded_all:
     i = I.Module.load
     for _ in I.s.values(): i(_) # ty: ignore[invalid-argument-type]
     l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
-del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d, FaultyConfig, I
+del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d, I

@@ -3,7 +3,7 @@ __lazy_modules__ = frozenset(('functools',))
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
-from asyncutils._internal.helpers import fullname, subscriptable
+from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import altlocks_all as __all__
 from _collections import deque
 import asyncio as I, asyncutils as A
@@ -23,7 +23,6 @@ class Resource:
     _inc_cnt = staticmethod(count(1).__next__); __slots__ = '_',
     def __init__(self): self._ = f'anonymous resource #{self._inc_cnt()}'
     def __repr__(self): return self._
-@subscriptable
 class ResourceGuard(RuntimeError, A.AsyncContextMixin):
     __slots__ = '__', '_t', '_u', 'action', 'guarded'
     def __new__(cls, rsrc=_NO_DEFAULT, *, action='using', t=Resource):

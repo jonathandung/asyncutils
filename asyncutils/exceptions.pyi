@@ -5,7 +5,7 @@ from .locksmiths import LocksmithBase
 from .version import VersionInfo
 from collections.abc import Callable, Iterable
 from types import GeneratorType, TracebackType
-from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, overload
+from typing import Any, Final, Literal, NoReturn, Self, TypeGuard, final, overload
 from weakref import ref
 __all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
@@ -65,12 +65,15 @@ class Critical[T: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
     def exc(self) -> T: '''The exception that occurred, determined by the raising scope by default.'''
 class VersionError(Exception): '''Base class for all version-related errors.'''
 class VersionConversionError(VersionError): '''Base class for errors thrown when attempting to normalize an object to a version.'''
+@final
 class VersionValueError(VersionConversionError, ValueError): '''Raised when an argument passed to the :class:`~asyncutils.version.VersionInfo` constructor is negative, for instance.'''
+@final
 class VersionNormalizerMissing[T](VersionConversionError, TypeError):
     '''Raised when no normalizer is registered for an unrecognized object.'''
     def __init__(self, obj: T, /): ...
     @property
     def obj(self) -> T|None: '''The unrecognized object. ``None`` if garbage collected.'''
+@final
 class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     '''Raised when a custom normalizer returns anything but an iterable of integers.'''
     def __init__(self, normalizer: Callable[[T], object], obj: T, /): ...
@@ -78,6 +81,7 @@ class VersionNormalizerTypeError[T](VersionConversionError, TypeError):
     def normalizer(self) -> Callable[[T], Any]|None: '''The normalizer at fault. ``None`` if garbage collected.'''
     @property
     def obj(self) -> T|None: '''The object being normalized by the normalizer, for which a value of incorrect type was returned. ``None`` if garbage collected.'''
+@final
 class VersionNormalizerFault[T](VersionConversionError):
     '''Wraps any errors thrown by a custom normalizer, intentionally or otherwise.'''
     def __init__(self, normalizer: Callable[[T], Iterable[int]], obj: T, exc: BaseException, /): ...
@@ -143,7 +147,9 @@ class PasswordRetrievalError(PasswordQueueError):
     @property
     def from_(self) -> str: '''The specified name of the closure variable.'''
     def __init__(self, from_: str): ...
+@final
 class GetPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~asyncutils.queues.password_queue` cannot find the get password from the closure variables.'''
+@final
 class PutPasswordRetrievalError(PasswordRetrievalError): '''Raised when :func:`~asyncutils.queues.password_queue` cannot find the put password from the closure variables.'''
 class ForbiddenOperation(PasswordQueueError, TypeError):
     '''A forbidden operation was attempted on a password-protected queue.'''
@@ -169,8 +175,9 @@ class WrongPasswordType[T, R: type](PasswordError[T], TypeError):
 class PasswordMissing(PasswordQueueError, TypeError):
     '''Base class of :exc:`GetPasswordMissing` and :exc:`PutPasswordMissing`.'''
     def __init__(self) -> None: ...
-    def __init_subclass__(cls, *, m: str=...) -> None: ...
+@final
 class GetPasswordMissing(PasswordMissing): '''The get password was not passed to the get methods of a get-protected queue.'''
+@final
 class PutPasswordMissing(PasswordMissing): '''The put password was not passed to the put methods of a put-protected queue.'''
 class IgnoreErrors:
     '''Context manager to suppress errors of the specified types and exit once they occur; works in both sync and async. More customizable than :func:`contextlib.suppress`, because some exception classes can be excluded from the suppression.'''

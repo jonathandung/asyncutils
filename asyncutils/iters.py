@@ -198,30 +198,23 @@ async def batch(it, n, *, item_timeout=None, strict=False):
             if strict and _ < n-1: raise ValueError('asyncutils.iters.batch: incomplete batch')
             yield H.copy_and_clear(b)
 def batch2(it, n, strict=False): return A.aiter_from_f(partial(A.collect, it, n, default=A.RAISE if strict else _NO_DEFAULT), [])
-async def _asideeffect(f, it, size):
+async def aside_effect(f, it, size=None, *, await_=True):
     if size is None:
-        if B.iscoroutine(r := f(i := await anext(it))):
-            await r; yield i
+        it = iter_to_agen(it)
+        if await_:
             async for i in it: await f(i); yield i
         else:
-            yield i
             async for i in it: f(i); yield i
-    elif B.iscoroutine(r := f(i := await anext(it := batch(it, size)))):
-        await r
-        for _ in i: yield _
-        async for i in it:
-            await f(i)
-            for _ in i: yield _
     else:
-        for _ in i: yield _
-        async for i in it:
-            f(i)
-            for _ in i: yield _
-async def aside_effect(f, it, /, _=_asideeffect, *, size=None, before=None, after=None):
-    if before is not None: before()
-    try: await _(f, iter_to_agen(it), size)
-    finally:
-        if after is not None: after()
+        it = batch(it, size)
+        if await_:
+            async for i in it:
+                await f(i)
+                for _ in i: yield _
+        else:
+            async for i in it:
+                f(i)
+                for _ in i: yield _
 def asliced(seq, n, strict=False):
     I = atakewhile(None, (seq[i:i+n] async for i in acount(step=n)))
     if not strict: return I
@@ -278,7 +271,7 @@ async def aany(it):
 async def aisempty(it):
     async for _ in iter_to_agen(it): return False
     return True
-async def _aextreme(I, K, d, c, /):
+async def _aextreme(I, K, c, d=_NO_DEFAULT, /):
     if (r := await anext(I := iter_to_agen(I[0] if len(I) == 1 else I), _NO_DEFAULT)) is _NO_DEFAULT:
         if d is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to asyncutils.iters.amax or asyncutils.iters.amin with no default value')
         return d
@@ -286,8 +279,8 @@ async def _aextreme(I, K, d, c, /):
     async for i in I:
         if c(x := K(i), k): k, r = x, i
     return r
-def amax(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.gt)
-def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, default, O.lt)
+def amax(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, O.gt, default)
+def amin(*it, key=_identity, default=_NO_DEFAULT, _=_aextreme): return _(it, key, O.lt, default)
 async def azip(*I, strict=False, _=A.ignore_stop_async_iteration.combined(RuntimeError)): # noqa: B008
     I = tuple(map(iter_to_agen, I))
     with _:
@@ -677,6 +670,17 @@ async def alast(it, default=_NO_DEFAULT, _=H.check_methods):
         if default is _NO_DEFAULT: raise ValueError('asyncutils.iters.alast called on empty iterable without default value') from None
         return default
 def anth_or_last(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)
+async def awrapf(it, before=None, after=None):
+    if before is not None:
+        r = before()
+        with A.ignore_typeerrs: await r
+    it = iter_to_agen(it)
+    try:
+        async for i in it: yield i
+    finally:
+        if after is not None:
+            r = after()
+            with A.ignore_typeerrs: await r
 def abefore_and_after(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
 async def anth_combination(it, r, idx):
     if not 0 <= r <= (n := len(p := await to_tuple(it))): raise IndexError(f'asyncutils.iters.anth_combination: r={r} is out of range')
@@ -840,19 +844,30 @@ async def acat(first=None):
 async def aforever():
     audit('asyncutils.iters.aforever')
     while True: yield
-async def _aguess(it, estlen, key, default, finish_event, cmp, _=_aextreme):
-    if (r := await _(A.take(I := iter_to_agen(it), M.ceil(estlen*A.RECIPROCAL_E)), key, _NO_DEFAULT, cmp)) is _NO_DEFAULT:
-        if default is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to asyncutils.iters.aguessmax or asyncutils.iters.aguessmin with no default value')
-        return default
-    k = key(r)
+async def _aguess(I, l, K, d, e, C, c, a, _=_aextreme, /): # noqa: PLR0917
+    if l is None and (l := O.length_hint(I, -1)) < 0: raise ValueError('asyncutils.iters.aguessmax or asyncutils.iters.aguessmin called with no estlen argument on iterable not implementing length (hint)')
+    I = iter_to_agen(I)
+    if (r := await _(A.take(I if c is None else aside_effect(c, I, await_=a), M.ceil(l*A.RECIPROCAL_E)), K, C)) is _NO_DEFAULT:
+        if d is _NO_DEFAULT: raise ValueError('empty (async) iterable passed to asyncutils.iters.aguessmax or asyncutils.iters.aguessmin with no default value')
+        return d
+    k = K(r)
     try:
-        async for i in I:
-            if cmp(key(i), k): return i
+        if c is None:
+            async for i in I:
+                if C(K(i), k): return i
+        elif a:
+            async for i in I:
+                if C(K(i), k): return i
+                await c(i)
+        else:
+            async for i in I:
+                if C(K(i), k): return i
+                c(i)
         return r
     finally:
-        if not (finish_event is None or finish_event.is_set()): (t := (_ := H.get_loop_and_set().create_task)(aconsume(I))).add_done_callback(lambda _: finish_event.set()); _(finish_event.wait()).add_done_callback(t.cancel)
-def aguessmax(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.gt)
-def aguessmin(it, estlen, *, key=_identity, default=_NO_DEFAULT, finish_event=None, _=_aguess): return _(it, estlen, key, default, finish_event, O.lt)
+        if not (e is None or e.is_set()): (t := (_ := H.get_loop_and_set().create_task)(aconsume(I))).add_done_callback(lambda _: e.set()); _(e.wait()).add_done_callback(t.cancel)
+def aguessmax(it, estlen=None, *, key=_identity, default=_NO_DEFAULT, finish_event=None, reject_cb=None, await_cb=False, _=_aguess): return _(it, estlen, key, default, finish_event, O.gt, reject_cb, await_cb)
+def aguessmin(it, estlen=None, *, key=_identity, default=_NO_DEFAULT, finish_event=None, reject_cb=None, await_cb=False, _=_aguess): return _(it, estlen, key, default, finish_event, O.lt, reject_cb, await_cb)
 async def apowers_of_two(*, init=1, init_shift=0, shift=1):
     init <<= init_shift
     while True: yield init; init <<= shift
@@ -894,13 +909,19 @@ async def aonline_sorter(it, *, key=_identity, reverse=False, slow=None):
     while it:
         if (j := (yield a()[2])) is not None: b(((await q(j)) if slow else key(j), i, j)); i += 1
 async def acount_cycle(it, n=None):
+    if n is None: c = acount(1)
+    else:
+        if n == 0: return
+        if n < 0: raise ValueError('asyncutils.iters.acount_cycle: n must be non-negative')
+        c = arange(1, n)
     a = (s := []).append
     async for i in iter_to_agen(it): yield 0, i; a(i)
-    async for i in azip(arepeat_each(acount() if n is None else arange(n), len(s := tuple(s))), acycle(s)): yield i
+    async for i in azip(arepeat_each(c, len(s := tuple(s))), acycle(s)): yield i
 def arepeat_each(it, n=2): return aflatten(amap(arepeat, it, arepeat(n)))
 async def arepeat_last(it, default=_NO_DEFAULT):
     async for default in iter_to_agen(it): yield default # noqa: PLR1704
     if default is _NO_DEFAULT: return
+    if default is A.RAISE: raise A.ItemsExhausted('asyncutils.iters.arepeat_last: (async) iterable exhausted and ``default`` was :const:`~asyncutils.constants.RAISE`')
     while True: yield default
 def aadjacent(pred, it, dist=1, *, await_pred=False):
     if dist < 0: raise ValueError('asyncutils.iters.aadjacent: dist must be non-negative')
@@ -956,4 +977,4 @@ async def aminmax_keyed(*I, key, default=_NO_DEFAULT):
 @aawgenf2agenf
 async def aouter_product(f, X, Y, /, *a, **k): return batch(astarmap(C.partial(f, C.Placeholder, C.Placeholder, *a, **k), aproduct(X, Y := await to_tuple(Y)), True), len(Y))
 P.patch_function_signatures((adifference, 'it, func={}, *, yield_initial=True, await_func=False'), (agroupby_transform, 'it, kf={}, vf=None, rf=None, *, await_kf=False, await_vf=False, await_rf=False'), (tee, 'it, n=2, *, maxqsize=None, put_exc=None, loop=None'), (aonline_sorter, 'it, *, key={}, reverse=False, slow=None'), (aside_effect, 'f, it, /, *, size=None, before=None, after=None'), (apolynomial_from_roots, 'roots'), (adistinct_permutations, 'it, r=None'), (abfs, _ := 'start, neighbours, *, include_start=True'), (adfs, _), (aaccumulate, 'it, func={}, *, initial=None'), (aconvolve, 'signal, kernel'), (aislice, 'it, /, *a'), (ainterleave_randomly, 'its'), (ahamming_dist, 'i1, i2, /, cmpeq={}'), (aiter_idx, 'it, value, start=0, stop=None'), (amerge_sorted_by, 'its, *, key={}, await_=False, reverse=False'), (amax, _ := '*it, key={}, default=_NO_DEFAULT'), (amin, _), (asample_weighted, _ := 'it, k, *, rrange={0}, rand={0}'), (asamplel, _), (arandom_combination, _ := 'it, r'), (arandom_combination_with_replacement, _), (asorted, 'it, *, key={}, reverse=False'), (aunique_justseen, _ := 'it, key={}'), (aunique_everseen, _), (agroupby, _), (vecs_eq, 'u, v, cmpeq={}, *, strict=True'), (adft, 'xarr, /'), (aidft, 'Xarr, /'), (aconsume, 'it, n=None'), (aallequal, 'it, key={}, strict=False'), (aprepend, 'val, it'), (arandom_product, '*a, n=1'), (asattolo, 'it, /'), (aargmin, _ := 'it, key={}, default=-1'), (aargmax, _), (afactor, _ := 'n'), (agetitems_from_indices, 'it, indices, setatend=None, finish=False'), (alast, 'it, default=_NO_DEFAULT'), (aisprime, _), (aguessmax, _ := 'it, estlen, *, key={}, default=_NO_DEFAULT, finish_event=None'), (aguessmin, _), (aflatten, _ := 'it'), (arandom_derangement, _), (afreivalds, 'A, B, C, k=None'), (basic_collect, 'it, n'), (iter_task, 'it, summaryf={}'), (apadnone, 'it'), (aunzip, 'ait, put_batch=None, fillvalue={}'), (aflatten_tensor, 'tensor, base_typ={}'), (arandom_permutation, 'it, r=None'))
-del P, _tee_helper, _asideeffect, _adpermpartial, _adpermfull, _atraverse, _aunzip_put, _aguess, _aargminmax, _aextreme, _buffer_consume, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _rand, _randinst, _identity, _
+del P, _tee_helper, _adpermpartial, _adpermfull, _atraverse, _aunzip_put, _aguess, _aargminmax, _aextreme, _buffer_consume, _factor_pollard, _shift_to_odd, _probable_prime, _dfthelper, _littleprimes, _randrange, _sample, _smallprimes, _perfect_test, _rand, _randinst, _identity, _

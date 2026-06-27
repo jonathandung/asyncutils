@@ -16,7 +16,9 @@ def check_methods(obj, /, *meth):
     return True
 def copy_and_clear(l): r = l.copy(); l.clear(); return r
 def ismodule(o, /, _=frozenset(('asyncutils._internal.initialize.Module', 'builtins.module'))): return fullname(type(o)) in _
-def subscriptable(cls, /, _=classmethod(type(list[int]))): cls.__class_getitem__ = _; return cls
+def subscriptable(cls, /, _=classmethod(type(list[int]))):
+    if hasattr(cls, '__class_getitem__'): raise TypeError('class is already subscriptable')
+    cls.__class_getitem__ = _; return cls
 def check(a, b, /): return a is b or (False if (e := b.__eq__(a)) is NotImplemented else e) # noqa: PLC2801
 def coerce_callable(o, /): return o if callable(o) else type(o)
 def create_executor(f, /, save=True): # pragma: no cover
@@ -36,7 +38,6 @@ class LoopMixinBase:
     def make(self, a, /): return self.loop.create_task(simple_wrap(a))
     def make_fut(self): return self.loop.create_future()
     def make_multiple(self, a, /): yield from map(self.make, a)
-@subscriptable
 class Bag(dict): # noqa: FURB189
     __slots__, __setattr__, __delattr__ = (), dict.__setitem__, dict.__delitem__
     def __getattr__(self, k, /):

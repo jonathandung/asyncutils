@@ -10,6 +10,7 @@
   Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
   even prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.
 '''
+from ..config import FaultyConfig
 from ..constants import SentinelBase
 from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
@@ -424,3 +425,7 @@ type RWLockCM = AbstractAsyncContextManager[None, None]
 '''The type of the context managers returned by the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''The return type of :func:`~asyncutils.exceptions.wrap_exc`.'''
+Mark1 = NewType('Mark1', FaultyConfig)
+'''For better type checking. Unstable.'''
+Mark2 = NewType('Mark2', FaultyConfig)
+'''For better type checking. Unstable.'''

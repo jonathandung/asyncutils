@@ -12,7 +12,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-59% coverage, 80 tests
+59% coverage, 82 tests
 
 ### Docs
 
@@ -26,6 +26,11 @@ Breaking changes:
 
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
+
+### [1.0.1] - 2026-06-30; unreleased
+<!--cspell:disable-next-line-->
+Implemented `util.evaluate_and_return` and `iters.awrapf`; added `reject_cb` and `await_cb` parameters to `iters.aguessmax` and `iters.aguessmin`;
+added `yield_sentinel` keyword argument to `util.aiter_from_f`.
 
 #### [1.0.0] - 2026-06-26; first stable version; newest
 
@@ -446,6 +451,7 @@ Breaking changes:
     - dcm
     - discard_retval
     - get_future
+    - make_task_factory
     - new_eager_tasks
     - to_sync
     - to_async

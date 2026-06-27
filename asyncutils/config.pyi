@@ -1,9 +1,29 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.prots import PartialInterface, ExcType
+from ._internal.prots import PartialInterface, Mark1, Mark2, ExcType
 from concurrent.futures import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload
 __all__ = 'Debugging', 'Executor', 'basic_repl', 'debug', 'get_past_logs', 'loaded_all', 'logging_to', 'max_memory_errors', 'pdb', 'set_logger_level', 'silent'
+class FaultyConfig(BaseException):
+    '''Raised when the user specifies a configuration value that is of the wrong type or otherwise invalid. This is basically impossible to catch, since it is only raised during the import of this module.'''
+    @overload
+    def __init__(self: Mark1, key: str, wrong: str, correct: tuple[str, ...], /) -> None: ...
+    @overload
+    def __init__(self: Mark2, key: str, wrong: object, correct: type|tuple[type, ...], /) -> None: ...
+    @property
+    def key(self) -> str: ...
+    @property
+    @overload
+    def wrong(self: Mark1) -> str: ...
+    @property
+    @overload
+    def wrong(self: Mark2) -> object: ...
+    @property
+    @overload
+    def correct(self: Mark1) -> tuple[str, ...]: ...
+    @property
+    @overload
+    def correct(self: Mark2) -> type|tuple[type, ...]: ...
 class Executor(_, PartialInterface):
     '''A class that implements the :pep:`3148` executor interface.
 

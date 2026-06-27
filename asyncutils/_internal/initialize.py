@@ -37,4 +37,4 @@ def p(*a, _=A.append): _(a)
 for _k, _v in (('version', V), ('exceptions', E), ('context', F), ('constants', D), ('cli', L)): p('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__
 p('all submodules initialized in %.2f milliseconds', T())
 U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del P, R, E, V, F, L, D, T, U, d, f, t, n, z, _d, _k, _v, _f, _s, _u, _a, b # ty: ignore[possibly-unresolved-reference]
+del P, R, E, V, F, L, D, T, U, d, f, t, n, z, _d, _k, _v, _f, _s, _u, _a, b

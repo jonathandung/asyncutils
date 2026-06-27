@@ -10,7 +10,7 @@ class AChain[T]:
     '''Async version of :func:`~itertools.chain` that takes async or sync iterables.'''
     @classmethod
     def from_iterable(cls, it_of_its: SupportsIteration[SupportsIteration[T]]) -> Self:
-        '''Construct an :class:`AChain` from ``it_of_its``, an (async) iterable of (async) iterables to chain.
+        '''Construct an :class:`AChain` from ``it_of_its``, an (async) iterable of (async) iterables to chain. If some iterables are chains themselves, their internal iterable of iterables are flattened into that of the returned :class:`AChain`, which may cause unexpected behaviour when iterating through these sources themselves.
 
         .. tip:: Since the outer iterable is advanced on demand, a possible use case would be to combine chunks of items from different sources as they arrive.
         '''

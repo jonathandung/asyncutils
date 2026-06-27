@@ -4,10 +4,6 @@ This file provides an overview of the direction towards which this project is he
 
 Current version: 1.0.0
 
-## [1.0] - 2026-06
-
-- Finalize the API
-
 ## [1.x]
 
 - Enhance the test suite

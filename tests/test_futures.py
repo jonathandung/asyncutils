@@ -16,8 +16,7 @@ async def test_time_aware():
     t1 = TimeAwareAsyncCallbacksTask(dummy())
     t2 = TimeAwareAsyncCallbacksTask(dummy())
     assert t1 < t2
-    assert await t1 == 42
-    assert await t2 == 42
+    assert await asyncio.gather(t1, t2) == [42, 42]
 @mk
 async def test_task_usage():
     fut = AsyncCallbacksFuture()
