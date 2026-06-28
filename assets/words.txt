@@ -100,7 +100,6 @@ getframemodulename
 gettyp
 gfunc
 github
-graal
 graalpy
 groupwise
 hashability

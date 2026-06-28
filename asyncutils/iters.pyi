@@ -425,7 +425,7 @@ def awrapf[T](it: SupportsIteration[T], before: None, after: Callable[[], object
 @overload
 def awrapf[T](it: SupportsIteration[T], *, after: Callable[[], object]) -> AsyncGeneratorType[T]: ...
 @overload
-def awrapf[T](it: SupportsIteration[T], before: Callable[[], object], after: Callable[[], object]) -> AsyncGeneratorType[T]: '''Call ``before`` when the iterable starts, then yield the items in ``it``, then call ``after`` as long as ``before`` did not raise and the iterable was converted to an async generator successfully.'''
+def awrapf[T](it: SupportsIteration[T], before: Callable[[], object], after: Callable[[], object]) -> AsyncGeneratorType[T]: '''Call ``before`` when the iterable starts, then yield the items in ``it``, then call ``after`` as long as ``before`` did not raise and the iterable was converted to an async generator successfully. The return value of each function is awaited if it doesn't raise :exc:`TypeError`.'''
 def arandom_product[T](*its: SupportsIteration[T], n: int=...) -> AsyncGeneratorType[T]: '''Draw ``n`` items from each of the input iterables ``its`` at random.'''
 def arandom_combination[T](it: SupportsIteration[T], r: int) -> AsyncGeneratorType[T]: '''Draw ``r`` items at random from the input iterable ``it``, without replacement.'''
 def arandom_combination_with_replacement[T](it: SupportsIteration[T], r: int) -> AsyncGeneratorType[T]: '''Draw ``r`` items at random from the input iterable ``it``, with replacement.'''
@@ -533,7 +533,7 @@ def aonline_sorter[T: SupportsRichComparison](it: SupportsIteration[T], *, rever
 @overload
 def aadjacent[T](pred: Callable[[T], object]|None, it: SupportsIteration[T], dist: int=..., *, await_pred: Literal[False]=...) -> AsyncGeneratorType[tuple[bool, T]]: ...
 @overload
-def aadjacent[T](pred: Callable[[T], Awaitable[object]], it: SupportsIteration[T], dist: int=..., *, await_pred: Literal[True]) -> AsyncGeneratorType[tuple[bool, T]]: ...
+def aadjacent[T](pred: Callable[[T], Awaitable[object]], it: SupportsIteration[T], dist: int=..., *, await_pred: Literal[True]) -> AsyncGeneratorType[tuple[bool, T]]: '''For each ``item`` in the (async) iterable ``it``, yield tuples of the form ``(is_within_dist, item)``, where ``is_within_dist`` is ``True`` iff the closest distance to an item satisfying ``pred`` is at most ``dist``, and the call to ``pred`` is awaited iff ``await_pred=True`` is passed.'''
 def acount_cycle[T](it: SupportsIteration[T], n: int|None=...) -> AsyncGeneratorType[tuple[int, T]]: '''Yield tuples of the form ``(n, item)``, where ``item`` cycles through the iterable, caching its items during the first cycle, and ``n`` is the number of times the iterable has been completely cycled prior to yielding ``item``.'''
 @overload
 def agroupby_transform[T](it: SupportsIteration[T], *, vf: None=..., rf: None=..., await_kf: Literal[False]=..., await_vf: Literal[False]=..., await_rf: Literal[False]=...) -> AsyncGeneratorType[tuple[T, AsyncGeneratorType[T]]]: ...

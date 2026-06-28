@@ -35,6 +35,7 @@ docs/source/makefile-usage.rst
 eggs/
 env/
 htmlcov/
+pip-delete-this-directory.txt
 sdist/
 venv/
 wheels/

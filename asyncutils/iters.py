@@ -301,11 +301,7 @@ async def afilter(f, it):
         if r: yield _
 def amapif(f, p, it, /, await_=False): return amap(f, afilter(p, it), await_)
 def amultimapif(f, p, /, *its, await_=False): return astarmap(f, afilter(p, azip(*its)), await_)
-async def arange(a, b=None, c=1, /):
-    if c == 0: raise ValueError('asyncutils.iters.arange: step cannot be zero')
-    if b is None: a, b = 0, a
-    f = b.__lt__ if c < 0 else b.__gt__
-    while f(a): yield a; a += c
+def arange(*a): return iter_to_agen(range(*a))
 async def acount(start=0, step=1):
     if isinstance(step, float):
         if step.is_integer(): step = int(step)
@@ -561,14 +557,14 @@ def acanonical(it): return asorted(it, key=id, reverse=True)
 async def _adpermfull(A, _):
     while True:
         yield tuple(A)
-        for i in range(_-2, -1, -1):
+        async for i in arange(_-2, -1, -1):
             if A[i] < A[i+1]: break
         else: return
-        for j in range(j := _-1, i, -1): # noqa: B020
+        async for j in arange(j := _-1, i, -1): # noqa: B020
             if A[i] < A[j]: break
         A[i], A[j] = A[j], A[i]; A[i+1:] = A[:i-_:-1]
-async def _adpermpartial(A, _):
-    h, R, l = A[:_], range(_-1, -1, -1), range(len(t := A[_:]))
+async def _adpermpartial(a, _):
+    h, R, l = a[:_], range(_-1, -1, -1), range(len(t := a[_:]))
     while True:
         yield tuple(h); p = t[-1]
         for i in R:
@@ -581,7 +577,7 @@ async def _adpermpartial(A, _):
         else:
             for j in R:
                 if (c := h[j]) > p: h[i], h[j] = c, p; break
-        t += h[:-(x := _-i):-1]; i += 1; h[i:], t[:] = t[:x], t[x:]
+        t += h[:-(x := _-i):-1]; i += 1; h[i:], t[:] = t[:x], t[x:]; await A.yield_to_event_loop
 async def empty_agen():
     if False: yield
 async def agives(x, /): yield x
@@ -624,8 +620,8 @@ async def ainterleave_randomly(its, _=_randrange):
         except StopAsyncIteration: I[i] = I[-1]; del I[-1]; x -= 1
 async def acollapse(it, base_typ=(str, bytes), levels=None):
     if levels is None: levels = float('inf')
-    (g := (S := deque()).appendleft)((0, arepeat(iter_to_agen(it), 1))); f = S.popleft
-    while S:
+    (g := (s := deque()).appendleft)((0, arepeat(iter_to_agen(it), 1))); f = s.popleft
+    while s:
         l, n = N = f()
         if l > levels:
             async for i in n: yield i
@@ -683,11 +679,11 @@ async def awrapf(it, before=None, after=None):
             with A.ignore_typeerrs: await r
 def abefore_and_after(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
 async def anth_combination(it, r, idx):
-    if not 0 <= r <= (n := len(p := await to_tuple(it))): raise IndexError(f'asyncutils.iters.anth_combination: r={r} is out of range')
+    if not 0 <= r <= (n := len(p := await to_tuple(it))): raise IndexError(f'asyncutils.iters.anth_combination: {r=} is out of range')
     c, k = 1, min(r, n-r)
     for i in range(1, k+1): c = c*(n-k+i)//i
     if idx < 0: idx += c
-    if idx < 0 or idx >= c: raise IndexError(f'asyncutils.iters.anth_combination: idx={idx} is out of range')
+    if idx < 0 or idx >= c: raise IndexError(f'asyncutils.iters.anth_combination: {idx=} is out of range')
     while r:
         c, n, r = c*r//n, n-1, r-1
         while idx >= c: idx -= c; c, n = c*(n-r)//n, n-1
