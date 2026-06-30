@@ -47,15 +47,15 @@ class Debugging:
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop debugging, restoring the output to its previous level if appropriate.'''
 def set_logger_level(level: int) -> None: '''Set the level of the module-global logger to ``level``.'''
-def get_past_logs() -> str: '''Return all stored logs as a string. Logs are only stored if asyncutils was started with ``-l MEMORY``, otherwise an empty string is returned.'''
+def get_past_logs() -> str: '''Return all stored logs as a string. Logs are stored iff :mod:`asyncutils` was started with ``-l MEMORY``, otherwise an empty string is returned.'''
 debug: Final[Debugging]
-'''A global instance of the :class:`Debugging` context manager. Initially entered if and only if the user specified ``-d`` or ``--debug`` when starting the program.'''
+'''A global instance of the :class:`Debugging` context manager. Initially entered iff the user specified ``-d`` or ``--debug`` when starting the program.'''
 silent: Final[bool]
 '''Whether the user requested to run the program with no banner and exit message in the REPL.'''
 basic_repl: Final[bool]
 '''Whether the user specified not to use the functions from ``_pyrepl`` to run the console.'''
 max_memory_errors: Final[int]
-'''Maximum number of memory errors that can occur before the console automatically exits. Negative if and only if there is no maximum.'''
+'''Maximum number of memory errors that can occur before the console automatically exits. Negative iff there is no maximum.'''
 loaded_all: Final[bool]
 '''Whether all submodules of this module have been loaded.'''
 pdb: Final[bool]

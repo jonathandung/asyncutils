@@ -7,13 +7,13 @@ async def test_cond():
     cond = KeyedCondition[str]()
     async with cond:
         task = create_task(cond.wait('a'))
-        await sleep(0.02)
+        await sleep(0.01)
         assert not task.done()
         cond.notify('a', 2)
-        await sleep(0.02)
+        await sleep(0.01)
         assert task.done()
         task = gather(cond.wait('b'), cond.wait('b'))
-        await sleep(0.02)
+        await sleep(0.01)
         cond.notify('b', 3)
         assert await task == [None, None]
         cond.notify('c')

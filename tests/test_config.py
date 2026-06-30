@@ -7,7 +7,11 @@ def test_mod():
         assert debug.level == 10
         assert debug.orig_level == 30
         assert debug.orig_name == 'WARNING'
-        assert logging_to == 'STDERR'
         assert not get_past_logs()
         set_logger_level(20)
         assert debug.level == 20
+    assert not silent
+    assert not basic_repl
+    assert not loaded_all
+    assert not pdb
+    assert logging_to == 'STDERR'

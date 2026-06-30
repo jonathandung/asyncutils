@@ -1,12 +1,11 @@
 # ty: ignore[unresolved-attribute]
-from itertools import repeat
 import heapq as H
 heapify, heappop, heapreplace = H._heapify_max, H._heappop_max, H._heapreplace_max
 def heappush(heap, item, /, _=H._siftdown_max): heap.append(item); _(heap, 0, len(heap)-1)
 def heappushpop(heap, item, /, _=H._siftup_max):
     if heap and item < (m := heap[0]): item, heap[0] = m, item; _(heap, 0)
     return item
-__all__ = ('Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial')
+__all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial'
 Placeholder = __all__[0]
 def _get_merger(A, _=__import__('operator').itemgetter):
     if not A: return 0, None
@@ -21,7 +20,7 @@ class partial: # noqa: N801
     def __repr__(self): (f := (A := [repr(self.func)]).extend)(map(repr, self.args)); f(f'{k}={v!r}' for k, v in self.keywords.items()); return f'asyncutils._internal.py313.partial({', '.join(A)})'
     def __new__(cls, f, /, *a, **k): return cls._new(f, a, k)
     @classmethod
-    def _new(cls, f, a, k, /, _=_get_merger):
+    def _new(cls, f, a, k, /, g=_get_merger, r=__import__('itertools').repeat):
         if a and a[-1] is Placeholder: raise TypeError('trailing Placeholders are not allowed')
         if k is None: k = {}
         if any(v is Placeholder for v in k.values()): raise TypeError('Placeholder cannot be passed as a keyword argument')
@@ -30,14 +29,14 @@ class partial: # noqa: N801
             if a:
                 e(a)
                 if P:
-                    if (N := len(a)) < P: e(Placeholder for _ in repeat(None, P-N))
+                    if (N := len(a)) < P: e(Placeholder for _ in r(None, P-N))
                     A = list(f._mg(A))
                     if N > P: A.extend(a[P:])
-                C, M = _(A)
+                C, M = g(A)
             else: C, M = P, f._mg
             k, f = f.keywords|k, f.func
-        else: C, M = _(A := a)
-        (_ := object.__new__(cls)).func, _.args, _.keywords, _._phs, _._mg = f, tuple(A), k, C, M; return _
+        else: C, M = g(A := a)
+        (s := object.__new__(cls)).func, s.args, s.keywords, s._phs, s._mg = f, tuple(A), k, C, M; return g
     def __call__(self, /, *a, **k):
         if (c := self._phs):
             try: A, a = self._mg(self.args+a), a[c:]

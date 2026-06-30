@@ -26,8 +26,8 @@ certain locations, some of which are to be left untouched. Instead, follow these
 1. Do a per-file find-and-replace in your preferred IDE after inspecting each instance to avoid unintended changes. :data:`~asyncutils.__version__`
    is already instantiated from a string to streamline this step.
 2. In pyproject.toml, there may be optional dependencies whose version coincides with the project's, so take care not to modify those as well.
-3. Also exclude the changelog file (CHANGELOG.md, at the project root) from the replace operation.
-4. A core developer of this project will help you create a GitHub release with the default release notes.
+3. Also exclude the ``CHANGELOG.md`` at the project root from the replace operation.
+4. A core developer of this project will help you create a GitHub release with the default release notes. (Core devs, this is ``make release``.)
 5. This will automatically trigger a stable Read the Docs build, a push to PyPI and cause a conda-forge bot automerge.
 6. If you include your desired remarks in the PR under a "Release Notes" section, those will be used as the release notes instead after the developer
    tries their best to correct grammatical or spelling mistakes.

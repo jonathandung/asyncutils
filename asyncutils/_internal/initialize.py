@@ -15,13 +15,13 @@ class Module:
         if n[:2] == u == n[-2:] or n in self._s: return getattr(self.load(), n)
         raise AttributeError(f"module 'asyncutils.{self._n}' has no attribute {n!r}") from None
     def __setattr__(self, n, v, /):
-        if n in self.slots: raise AttributeError('immutable attribute', name=n, obj=self)
+        if n in self.slots: raise AttributeError('asyncutils: immutable attribute', name=n, obj=self)
         setattr(self.load(), n, v)
     def __delattr__(self, n, /):
-        if n in self.slots: raise AttributeError('cannot delete attribute', name=n, obj=self)
+        if n in self.slots: raise AttributeError('asyncutils: cannot delete attribute', name=n, obj=self)
         delattr(self.load(), n) # cover: on
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
-    def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils submodule objects')
+    def __init_subclass__(cls, /, **_): raise TypeError('asyncutils: cannot subclass the type of submodule objects')
     def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s, _a='retrieved loaded submodule: %s', _b='now loading: %s', _c='found cached submodule: %s'):
         if (t := type(self)) is not __class__: return self
         if type(m := _s.get(n := self._n)) is not t: p(_a, n); return m

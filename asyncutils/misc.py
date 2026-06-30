@@ -22,10 +22,10 @@ class StateMachine:
     async def _helper(self, i, /, _=A.IgnoreErrors(KeyError), s=__slots__):
         async with _: await getattr(self, s[i])[self._state]()
     P.patch_method_signatures((_helper, 'attr'))
-async def gather_with_limited_concurrency(n=None, /, *coros, ret_exc=False):
+async def gather_with_limited_concurrency(n=None, *a, ret_exc=False):
     async def wrapped(c, s=I.Semaphore(A.getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # noqa: B008
         async with s: return await c
-    return await I.gather(*map(wrapped, coros), return_exceptions=ret_exc)
+    return await I.gather(*map(wrapped, a), return_exceptions=ret_exc)
 class CallbackAccumulator(c.deque, A.ExecutorRequiredAsyncContextMixin):
     __slots__ = 'call_once', 'default_getter', 't'
     def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(A.aiter_to_gen(it, use_futures=True), maxlen); self.t, self.call_once, self.default_getter = tuple(H.filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter

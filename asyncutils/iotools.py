@@ -27,7 +27,7 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
     async def readinto(self, b, /):
         if (f := getattr(r := self.reader, 'readinto', None)) is not None: return await self._run(f, b)
         if (m := memoryview(b)).readonly: raise TypeError('asyncutils.iotools.AsyncReadWriteCouple: cannot read into a read-only buffer')
-        if l := len(d := await self._run(r.read, m.nbytes)): m[:l] = d
+        if l := len(d := await self._run(r.read, m.nbytes)): m[:l] = d # cspell:disable-line
         return l
     def readinto1(self, b, /): return self._run(self.reader.readinto1, b)
     def readline(self, limit=-1, /): return self._run(self.reader.readline, limit)

@@ -42,7 +42,7 @@ async def test_semaphore():
     s = semaphore(True, 2)
     assert s._value == 2
     with pytest.raises(ValueError, match='BoundedSemaphore released too many times'): s.release()
-    assert isinstance(semaphore(True), asyncio.Lock)
+    assert type(semaphore(True)) is asyncio.Lock
     s = semaphore(workers=3)
     assert s._value == 3
     s.release()

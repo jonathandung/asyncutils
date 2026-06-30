@@ -1,4 +1,4 @@
-from asyncutils.constants import POSSIBLE_EXECUTORS as C
+from asyncutils.constants import POSSIBLE_EXECUTORS as c
 from asyncutils._internal.compat import j
 import argparse as A
 i, b, d, e, f, g, J, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''Copyright (c) 2026 Jonathan Dung. All rights reserved.
@@ -26,7 +26,7 @@ If FILE is 'STDERR', log to standard error. This is also the default behaviour a
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
 A disabled logger is still created to make subsequent logging.getLogger calls return it.
 Thus, this option cannot avoid the cost of importing logging and instantiating the logger early on.''')
-(a := h())('-e', '--executor', choices=C, metavar=J, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
+(a := h())('-e', '--executor', choices=c, metavar=J, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
 The below options are experimental.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
@@ -50,7 +50,7 @@ they either require prior configuration to be useful (as is the case with adapti
 backends seldom used for this purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified
 name to -c and bear the potential consequences.''')
 a('-c', '--custom-executor', dest='executor', metavar=J, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
-for _ in C: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
+for _ in c: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')
 a('-V', action=g, default=0, help='Produce more logging output. Additive.')
 (a := h('repl', 'Configure the behaviour of the Read-Eval-Print Loop of this module.'))('-q', '--quiet', action=f, help='Do not display the banner and exit message in the REPL; the -q flag can be passed to the python command directly to achieve the same effect.')
@@ -64,4 +64,4 @@ a('-d', '--debug', action=f, help='Enable debug mode to produce more logging out
 a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero,\nor an uncaught error occurs in the console execution logic itself.')
 (a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit.\nUseful for checking if the installation succeeded.')
 a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
-del a, b, C, d, e, f, g, h, i, j, J, A
+del a, b, c, d, e, f, g, h, i, j, J, A

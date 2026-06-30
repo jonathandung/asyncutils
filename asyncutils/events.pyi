@@ -1,5 +1,5 @@
 '''| Classes that extend the functionality of :class:`~asyncio.Event` with the interface it specifies, without inheriting from it.
-| Not at all related to the ``asyncio.events`` submodule, which manages the event loop, despite the common name.
+| Not at all related to ``asyncio.events``, which manages the event loop, despite the common name.
 '''
 from ._internal.prots import NotNone
 from .mixins import EventMixin

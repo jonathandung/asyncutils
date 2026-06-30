@@ -1,4 +1,4 @@
-'''Functions of utility one tier below the :mod:`~asyncutils.base` submodule, such that they are not worth preloading but still quite useful.'''
+'''Functions of utility one tier below :mod:`~asyncutils.base`, such that they are not worth preloading but still quite useful.'''
 from ._internal.prots import AsyncLockLike, NullContextType, StrictDualContextFactory, DualContextManager, EventProtocol, ExceptionWrapper, FutProtocol, IncompleteFut, SupportsIteration, TaskFactory, ToSyncFromLoopRV, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
 from asyncio import AbstractEventLoop, BoundedSemaphore, Event, Future, Lock, Semaphore, Task

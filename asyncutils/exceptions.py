@@ -1,6 +1,6 @@
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import exceptions_all as __all__
-from sys import audit, exception, stderr
+from sys import audit, exception
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 def _unnest(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit): # noqa: PLR0913
     _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))
@@ -30,9 +30,9 @@ def prepare_exception(e, /, *, traceback=None, cause=None, context=None, suppres
     if cause is None is e.__context__: e.__context__ = context or _()
     else: e.__cause__ = cause
     e.__suppress_context__, e.__traceback__ = suppress, traceback; return e
-def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, _s_=stderr, **k):
+def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False, notes=(), _a_=audit, **k):
     if isinstance(e, type): e = e(*a, **k)
-    elif a or k: _s_.write('exceptions.raise_exc: no additional arguments were expected\n')
+    elif a or k: raise TypeError('asyncutils.exceptions.raise_exc: no additional arguments were expected\n')
     _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=False, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
@@ -63,7 +63,7 @@ class Critical(BaseException):
 class StateCorrupted(BaseException):
     def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
 class VersionError(Exception): ...
-for A, B in (('obj', '_refo'), ('normalizer', '_refn'), ('exc', '_refe')):
+for A, B in (('obj', '_ro'), ('normalizer', '_rn'), ('exc', '_re')):
     def _(self, a=A, b=B, f=H.fullname):
         if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {f(self)!r} has no attribute {a!r}')
         if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
@@ -73,18 +73,18 @@ class VersionConversionError(VersionError): ...
 class VersionValueError(VersionConversionError, ValueError): ...
 @H.subscriptable
 class VersionNormalizerMissing(VersionConversionError, TypeError):
-    def __init__(self, o, /, _='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._refo = ref(o); super().__init__(_(o))
+    def __init__(self, o, /, _='attempt to normalize object {0!r} of type {0.__class__.__qualname__!r} failed since a normalizer has not been registered'.format): self._ro = ref(o); super().__init__(_(o))
     P.patch_method_signatures((__init__, 'obj, /'))
 @H.subscriptable
 class VersionNormalizerTypeError(VersionConversionError, TypeError):
-    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._refn, self._refo = map(ref, a); super().__init__(_(*a))
+    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} did not return an iterable of ints as expected when handling {1!r}'.format): self._rn, self._ro = map(ref, a); super().__init__(_(*a))
     P.patch_method_signatures((__init__, 'normalizer, obj, /'))
 @H.subscriptable
 class VersionNormalizerFault(VersionConversionError):
-    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._refn, self._refo, self._refe = map(ref, a); super().__init__(_(*a))
+    def __init__(self, /, *a, _='custom normalizer {0!r} for type {1.__class__.__qualname__!r} threw {2.__class__.__qualname__} when passed {1!r}'.format): self._rn, self._ro, self._re = map(ref, a); super().__init__(_(*a))
     P.patch_method_signatures((__init__, 'normalizer, obj, exc, /'))
 class VersionCorrupted(VersionError, RuntimeError):
-    def __init__(self, o, /, _='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._refo = ref(o); super().__init__(_%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
+    def __init__(self, o, /, _='instance of %s at %#x was tampered with by the user (parts: %r; should be a tuple of 3 positive integers)'): self._ro = ref(o); super().__init__(_%(type(o).__qualname__, id(o), getattr(o, 'parts', '<not present>')))
     def __getattr__(self, n, /): return getattr(self.obj, n)
     P.patch_method_signatures((__init__, 'obj, /'))
 class Deadlock(BaseException): ...
@@ -128,15 +128,15 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
 @H.subscriptable
 class PasswordError(PasswordQueueError):
     @property
-    def wrong_pwd(self): return self._refp() # ty: ignore[unresolved-attribute]
+    def wrong_pwd(self): return self._rp() # ty: ignore[unresolved-attribute]
 class WrongPassword(PasswordError, ValueError):
-    def __init__(self, q, p, /, _='failure to modify queue because %r received incorrect password: %r'): self.qid, self._refp = id(q), ref(p); super().__init__(_%(q, p))
+    def __init__(self, q, p, /, _='failure to modify queue because %r received incorrect password: %r'): self.qid, self._rp = id(q), ref(p); super().__init__(_%(q, p))
 class WrongPasswordType(PasswordError, TypeError):
-    def __init__(self, q, *a, _='{!r} received password {!r} of wrong type {.__qualname__!r}; should be {!r}'.format): self.qid, self._refp, self._reft, self._refc = id(q), *map(ref, a); super().__init__(_(q, *a))
+    def __init__(self, q, *a, _='{!r} received password {!r} of wrong type {.__qualname__!r}; should be {!r}'.format): self.qid, self._rp, self._rt, self._rc = id(q), *map(ref, a); super().__init__(_(q, *a))
     @property
-    def wrong_type(self): return self._reft()
+    def wrong_type(self): return self._rt()
     @property
-    def correct_type(self): return self._refc()
+    def correct_type(self): return self._rc()
 class PasswordMissing(PasswordQueueError, TypeError):
     def __init__(self): raise TypeError('asyncutils.exceptions.PasswordMissing: use GetPasswordMissing or PutPasswordMissing instead')
     def __init_subclass__(cls, *, m): cls.__init__ = lambda self, _=m: BaseException.__init__(self, _) # ty: ignore[invalid-assignment]
@@ -163,15 +163,15 @@ class IgnoreErrors:
         return type(self)(*S, exclude=P)
     P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.exit_sig), (__aexit__, P.exit_sig)); del r
 ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
-ignore_stop_iteration, ignore_stop_async_iteration, ignore_valerrs, ignore_typeerrs = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError))
+ignore_stop_iteration, ignore_stop_async_iteration, ignore_valerrs, ignore_typeerrs, ignore_warnings = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError, Warning))
 class WarningToError:
-    __slots__ = '_cm', '_w'
-    def __init__(self, /, *_): self._w, self._cm = _ or (Warning,), None
-    def __enter__(self): self._cm = c = __import__('warnings').catch_warnings(action='error', category=self._w); c.__enter__(); return self
+    __slots__ = '__cm', '__w'
+    def __init__(self, /, *_): self.__w, self.__cm = _ or (Warning,), None
+    def __enter__(self): self.__cm = c = __import__('warnings').catch_warnings(action='error', category=self.__w); c.__enter__(); return self
     def __exit__(self, t, /, *_):
-        if (c := self._cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __aexit__ called without prior __aenter__ call')
+        if (c := self.__cm) is None: raise RuntimeError('asyncutils.exceptions.WarningToError: __exit__ called without prior __enter__ call')
         c.__exit__(t, *_)
     async def __aenter__(self): return self.__enter__()
     async def __aexit__(self, /, *_): self.__exit__(*_)
     P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.exit_sig), (__aexit__, P.exit_sig))
-del P, s, _, A, B, H, stderr, ExceptionWrapper, _unnest, audit, exception
+del P, s, _, A, B, H, ExceptionWrapper, _unnest, audit, exception

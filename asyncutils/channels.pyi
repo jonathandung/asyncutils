@@ -5,7 +5,8 @@ from asyncio import AbstractEventLoop, Future, Lock, Queue, Task
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from types import AsyncGeneratorType, GeneratorType
-from typing import Any, Literal, Self, TypeGuard, overload
+from typing import Any, Literal, Self, overload
+from typing_extensions import TypeIs
 from weakref import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
@@ -81,7 +82,7 @@ class EventBus(LoopContextMixin):
     def events(self) -> set[str]: '''Return a set of the names of the current event types.'''
     def has_subscribers(self, event_type: str|WildcardType) -> bool: '''Whether the event type has any subscribers.'''
     @staticmethod
-    def is_valid_event_type(event_type: object) -> TypeGuard[str|WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
+    def is_valid_event_type(event_type: object) -> TypeIs[str|WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
     @overload
     def is_subscribed(self, subscriber: SpecificSubscriber, event_type: str=...) -> bool: ...
     @overload

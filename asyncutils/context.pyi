@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType
 from typing import Any, ClassVar, Self, final, overload
+from _typeshed import Incomplete
 __all__ = 'Context', 'LocalContext', 'NonReusableLocalContext', 'all_contextual_consts', 'getcontext', 'setcontext'
 @final
 @dataclass(slots=True, kw_only=True, match_args=False)
@@ -139,6 +140,7 @@ class LocalContext:
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
+@final
 class NonReusableLocalContext(LocalContext): '''Version of :class:`LocalContext` that is not reusable. Use this to avoid subtle bugs, especially since it's not that expensive to instantiate a :class:`Context`.'''
 def getcontext() -> Context: '''Return the current context for the active thread.'''
 def setcontext(ctx: Context, /) -> None: '''Set the current context to for the active thread to ``ctx``.'''
@@ -149,4 +151,4 @@ all_contextual_consts: frozenset[str]
   These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (87 as of now!) and more may be added in
   the future, and the recommended way to get their values is to query them on the actual context object anyway. However, they are still provided
   below to facilitate type checking.'''
-def __getattr__(name: str, /) -> Any: '''Return the value of the contextual constant with the name ``name``.''' # noqa: ANN401
+def __getattr__(name: str, /) -> Incomplete: '''Return the value of the contextual constant with the name ``name``.'''

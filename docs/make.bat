@@ -1,11 +1,13 @@
 @echo off
+rem cspell:disable
 pushd %~dp0
 if "%SPHINXBUILD%" == "" set SPHINXBUILD=sphinx-build
 if "%1" == "" %SPHINXBUILD% -M help source build %SPHINXOPTS% %O%
 %SPHINXBUILD% >nul 2>nul
 if errorlevel 9009 (
-	echo.
+  rem cspell:enable
 	echo.Command 'sphinx-build' not found. Make sure you have Sphinx installed,
+  rem cspell:disable-next-line
 	echo.then set the SPHINXBUILD environment variable to point to the full path
 	echo.of the 'sphinx-build' executable. Alternatively you may add the Sphinx
 	echo.directory to PATH.

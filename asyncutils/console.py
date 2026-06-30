@@ -114,9 +114,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
             if suppress_asyncio_warnings: P.patch_aio_logs()
             if suppress_unawaited_coroutine_warnings: P.patch_unawaited_coroutine_warnings()
             self.write_special(exit_message%n)
-        return self.retcode
-    @property
-    def retcode(self): return 0 if (e := self.exc) is None else e.code
+        return 0 if (e := self.exc) is None else e.code
     P.patch_method_signatures((run, '*, exit_message=None, thread_name=None, max_memory_errors=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (interact, "banner=None, *, ps1='>>> '")); P.patch_classmethod_signatures((__init_subclass__, '*, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memory_error_hooks=(), template={}, version=None, description=None, **k'))
 def _(d, /):
     def load_all(_=d):
@@ -152,7 +150,7 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
         if b is None: return
         for _ in repeat(None, s):
             if (b := b.tb_next) is None: return
-        if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_firstlineno == f and c.co_name == m and (b := b.tb_next) is None: return
+        if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_firstlineno == f and c.co_name == m and (b := b.tb_next) is None: return # cspell:disable-line
         self._showtraceback(t, v, b, '')
     P.patch_method_signatures((showtraceback, ''), (after_run, ''), (before_run, 'max_memory_errors'), (write_special, 'msg'))
 del _f, _s, g, C, V, B, _, iscoroutine, E, log

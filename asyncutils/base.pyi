@@ -1,4 +1,4 @@
-'''The most useful and fundamental patterns and helpers core to this module and are therefore required by the :mod:`asyncutils.console` submodule, among many others.'''
+'''The most useful and fundamental patterns and helpers core to this module and are therefore required by :mod:`asyncutils.console`, among many other submodules.'''
 from ._internal.prots import ExcType, GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft
 from asyncio import AbstractEventLoop, Future
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable, MutableSequence
@@ -64,7 +64,7 @@ def iter_to_agen[T](it: AsyncIterable[T], sentinel: T=..., *, use_existing_execu
 def iter_to_agen[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGeneratorType[T]: ...
 @overload
 def iter_to_agen[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGeneratorType[T]:
-    '''| Convert the (async) iterable ``it`` to an async generator as non-blockingly as possible.
+    '''| Convert the (async) iterable ``it`` to an async generator, blocking as little as possible.
     | If ``it`` is an async generator and ``sentinel`` is not passed, it is returned as is.
     | Values sent to the return async generator will be passed through to the original.
     | The async generator will stop when it encounters an item identical to ``sentinel``.

@@ -43,7 +43,7 @@ class Observable(A.LoopContextMixin):
     async def handle_notifications(self):
         while (q := self._queue) is not None:
             try: await self._notify_helper(*q.get_nowait())
-            except C.QueueEmpty: break
+            except I.QueueEmpty: break
     async def handle_unsubscriptions(self):
         async with self._lock: self._data -= (s := self._to_remove); s.clear()
     async def _notify_helper(self, r, a, k): await I.gather(*self.make_multiple(obs(*a, **k) for obs in self._data.copy()), return_exceptions=r)

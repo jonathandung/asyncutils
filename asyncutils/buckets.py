@@ -17,7 +17,7 @@ class TokenBucket:
     @property
     def capacity(self): return self.__cap
 class LeakyBucket(AsyncContextMixin, LoopMixinBase):
-    __slots__ = '__cap', '__dr', '__efs', '__factor', '__hf', '__last', '__leak', '__lf', '__timer', '_tokens'
+    __slots__ = '__cap', '__dr', '__efs', '__factor', '__hf', '__last', '__leak', '__lf', '__timer', '__tokens'
     def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit(fullname(self), capacity, leak); C = getcontext(); self.__leak, self.__last, self.__dr, self.__factor, self.__lf, self.__hf, self.__efs, self.__timer = leak, timer(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self.__cap = self.__tokens = capacity
     def _adjust_from_params(self, a, b, c, d, /):
         if (f := self.__factor) < abs((n := min(f*b, self.__hf) if (r := self.__tokens/self.__cap) <= a else max(f*d, self.__lf) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self.__factor = n
@@ -41,9 +41,9 @@ class LeakyBucket(AsyncContextMixin, LoopMixinBase):
     @property
     def factor(self): return self.__factor
     @factor.setter
-    def factor(self, value, /):
-        if self.__efs: self.__factor = max(self.__lf, min(self.__hf, value))
-        else: raise ValueError(f'{fullname(self)}: external_factor_settable=True not passed; cannot set factor')
+    def factor(self, v, /):
+        if self.__efs: self.__factor = max(self.__lf, min(self.__hf, v))
+        else: raise AttributeError(f'{fullname(self)}: cannot set factor because external_factor_settable=True not passed')
     @factor.deleter
     def factor(self): self.__factor = 1
     def _adjust(self):

@@ -17,7 +17,7 @@ colourful command line interface.
   logging
   help
   examples
-  top-level
+  submodules
   api/index
   glossary
 

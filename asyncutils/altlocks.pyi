@@ -1,5 +1,5 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
-from ._internal.prots import AsyncLockLike, DualContextManager, Exceptable, ExcType, SupportsIteration, Timer
+from ._internal.prots import AsyncLockLike, DualContextManager, CanExcept, ExcType, SupportsIteration, Timer
 from .mixins import AsyncContextMixin, AwaitableMixin
 from collections import deque
 from collections.abc import Awaitable, Callable, Hashable
@@ -72,9 +72,9 @@ class CircuitBreaker:
         OPEN = 2
         '''The open state.'''
     @overload
-    def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Self: ...
+    def __new__(cls, name: str, /, max_fails: int=..., reset: float|None=..., *, exc: CanExcept=..., max_half_open_calls: int|None=...) -> Self: ...
     @overload
-    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: Exceptable=..., max_half_open_calls: int|None=...) -> Callable[P, CoroutineType[Any, Any, T]]:
+    def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: CanExcept=..., max_half_open_calls: int|None=...) -> Callable[P, CoroutineType[Any, Any, T]]:
         '''| Construct a circuit breaker, whose circuit is initially closed.
         | If ``name`` is passed, use it as its name; return a function wrapping ``f`` otherwise, deriving the name of the circuit breaker from the function. This derivation follows exactly one level of ``__wrapped__``-based wrapping after retrieving the :attr:`~method.__func__` attribute if present.
         | Pass exceptions that are expected to happen through the ``exc`` parameter.

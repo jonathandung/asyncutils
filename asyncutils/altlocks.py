@@ -125,7 +125,7 @@ class DynamicThrottle:
     @property
     def rate(self): return self._rate
     @rate.setter
-    def rate(self, rate, /, _=0.02):
+    def rate(self, rate, /, _=0.01):
         if abs(1-self._rate/(rate := max(self._min, min(self._max, rate)))) > _: self._rate = rate
     @property
     def jitter(self): return self._jitter

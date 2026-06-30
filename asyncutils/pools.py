@@ -37,7 +37,7 @@ class AdvancedPool(A.LoopContextMixin):
             f = self.__q.put_nowait
             for _ in repeat(None, -d): f((0, self.__tiebreak, None))
         self.__cur = new
-    def __set_adjuster(self):
+    def __set_adj(self):
         if not self.__scaling: return
         C = A.getcontext()
         if (l := self.__pending/((c := self.__cur) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self.__max): self.__scale_to(min(M, c+max(1, c>>1)))
@@ -49,7 +49,7 @@ class AdvancedPool(A.LoopContextMixin):
         self.raise_for_shutdown()
         if self.full: raise A.PoolFull('asyncutils.pool.AdvancedPool.submit_nowait: task queue full')
         with self.__tl: self.__pending += 1
-        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adjuster(); return F
+        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adj(); return F
     async def _kill_helper(self):
         f, g = (q := self.__q).get_nowait, q.task_done
         with self.__tl, A.ignore_qempty:
@@ -60,7 +60,7 @@ class AdvancedPool(A.LoopContextMixin):
     async def submit(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         with self.__tl: self.__pending += 1
-        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adjuster(); return F
+        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adj(); return F
     async def shutdown(self, cancel_pending=False, idle_timeout=None):
         if self.__shutdown: return await self.wait_for_shutdown()
         if cancel_pending: await self._kill_helper()

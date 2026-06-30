@@ -69,8 +69,6 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/signals/index.html#asyncutils.signals.wait_for_signal'
   >>> find_help_url('asyncutils.event_loop')
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/base/index.html#asyncutils.base.event_loop'
-  >>> find_help_url('__hexversion__')
-  'https://asyncutils.readthedocs.io/en/stable/top-level.html'
   >>> find_help_url(asyncutils.context.Context)
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/context/index.html#asyncutils.context.Context'
   >>> find_help_url(asyncutils.channels.EventBus.audit_context)

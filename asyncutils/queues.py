@@ -8,10 +8,10 @@ from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque
 from _functools import partial
 from abc import ABCMeta, abstractmethod
-from asyncio import Event, wait_for
+from asyncio import Event, QueueEmpty, QueueFull, wait_for
 from itertools import count
 from sys import _getframe, audit
-ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := A.IgnoreErrors(D.QueueShutDown)).combined), _ := (D.QueueEmpty, D.QueueFull))
+ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := A.IgnoreErrors(D.QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
 ignore_qerrs, f = f(*_), object.__setattr__
 def _wakeup_next(W):
     P = W.popleft
@@ -40,12 +40,12 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     if protect_get:
         if password_get is _NO_DEFAULT:
             if F is None or (password_get := F.f_locals.get(get_from := (C.PASSWORD_QUEUE_DEFAULT_GET_FROM if get_from is None else get_from).strip())) is None is (password_get := F.f_globals.get(get_from)): raise A.GetPasswordRetrievalError(get_from)
-        elif get_from is not None: raise ValueError('asyncutils.queues.password_queue: only pass one of get_from or password_get')
+        elif get_from is not None: raise TypeError('asyncutils.queues.password_queue: got both get_from and password_get')
         if not isinstance(password_get, gettyp): raise A.WrongPasswordType(None, password_get, type(password_get), gettyp)
     if protect_put:
         if password_put is _NO_DEFAULT:
             if F is None or (password_put := F.f_locals.get(put_from := (C.PASSWORD_QUEUE_DEFAULT_PUT_FROM if put_from is None else put_from).strip())) is None is (password_put := F.f_globals.get(put_from)): raise A.PutPasswordRetrievalError(put_from)
-        elif put_from is not None: raise ValueError('asyncutils.queues.password_queue: only pass one of put_from or password_put')
+        elif put_from is not None: raise TypeError('asyncutils.queues.password_queue: got both put_from and password_put')
         if not isinstance(password_put, puttyp): raise A.WrongPasswordType(None, password_put, type(password_put), puttyp)
     def s(p):
         if not isinstance(p, gettyp): raise A.WrongPasswordType(q, p, type(p), gettyp)
@@ -76,7 +76,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
                 raise
         return get_nowait(_=b)
     def get_nowait(*p, _=None):
-        if not l: raise D.QueueShutDown if S else D.QueueEmpty
+        if not l: raise D.QueueShutDown if S else QueueEmpty
         if _ is not b: u(p)
         i = g(); _wakeup_next(P); return i
     async def put(i, /, *p):
@@ -93,7 +93,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         return put_nowait(i, _=b)
     def put_nowait(i, /, *P, _=None):
         if S: raise D.QueueShutDown
-        if full(): raise D.QueueFull
+        if full(): raise QueueFull
         if _ is not b: v(P)
         p(i); nonlocal U; U += 1; E.clear(); _wakeup_next(G)
     def change_get_password(opw, npw):
@@ -146,7 +146,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def reset(self): super().__init__(self.maxsize); self._event.clear()
     async def smart_put(self, item, *, timeout=None, raising=True):
         try: self.put_nowait(item); return True
-        except D.QueueFull: ...
+        except QueueFull: ...
         try: await wait_for(self.put(item), timeout)
         except TimeoutError:
             if raising: raise
@@ -157,7 +157,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
         except D.QueueShutDown:
             if f: raise
             return default
-        except D.QueueEmpty: ...
+        except QueueEmpty: ...
         try: return await wait_for(self.get(), timeout)
         except TimeoutError as e:
             if f: raise e from None
@@ -202,16 +202,16 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def pushpop_nowait(self, item, raising=True):
         if self.is_shutdown: raise D.QueueShutDown
         if self.empty():
-            if raising: raise D.QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
+            if raising: raise QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         if self.full():
-            if raising: raise D.QueueFull(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-full queue with raising=True')
+            if raising: raise QueueFull(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-full queue with raising=True')
             r = self.get_nowait(); self.put_nowait(item); return r
         self.put_nowait(item); return self.get_nowait()
     def poppush_nowait(self, item, raising=True):
         if self.is_shutdown: raise D.QueueShutDown
         if self.empty():
-            if raising: raise D.QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
+            if raising: raise QueueEmpty(f'{fullname(self)}.pushpop_nowait on {item!r} expected non-empty queue with raising=True')
             return self.put_nowait(item)
         r = self.get_nowait(); self.put_nowait(item); return r
     async def pushpop(self, item): await self.put(item); return await self.get()
@@ -233,7 +233,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def map(self, f, stop_when=None, *, lifo=False):
         audit(f'{fullname(self)}.map', id(self), fullname(f))
         if stop_when is None:
-            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, D.QueueEmpty)
+            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i
@@ -253,7 +253,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def starmap(self, f, stop_when=None, *, lifo=False):
         audit(f'{fullname(self)}.starmap', id(self), fullname(f))
         if stop_when is None:
-            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, D.QueueEmpty)
+            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i
@@ -291,7 +291,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
         h, j = self.put_nowait, len(r)
         for i in k:
             try: h(i)
-            except D.QueueFull: g(i)
+            except QueueFull: g(i)
         return r, j
     def enumerate_nowait(self, start=0, *, step=1):
         with ignore_qempty:
@@ -303,7 +303,7 @@ class SmartQueue(PotentQueueBase):
     def _put(self, item): self.__queue.append(item)
     def peek(self):
         if q := self.__queue: return q[0]
-        raise D.QueueEmpty
+        raise QueueEmpty
     def peek_all(self): return list(self.__queue)
     def qsize(self): return len(self.__queue)
     def rotate(self, n=1, /): self.__queue.rotate(n)

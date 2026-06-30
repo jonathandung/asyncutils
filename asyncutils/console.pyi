@@ -21,7 +21,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         CAN_USE_PYREPL: ClassVar[bool]
         '''Whether ``_pyrepl`` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
-        '''This is present if and only if ``_pyrepl.console.InteractiveColoredConsole`` is used as the parent of this class.'''
+        '''This is present iff ``_pyrepl.console.InteractiveColoredConsole`` is used as the parent of this class.'''
     else:
         CAN_USE_PYREPL: ClassVar[Literal[False]]
         '''PyREPL is only supported on Python 3.13 and above.'''
@@ -42,8 +42,6 @@ class ConsoleBase(InteractiveConsole, ABC):
     '''The error message when attempts are made to subclass subclasses of this class. Specified through the ``disallow_subclass_msg`` argument, which any unsubclassable console should pass.'''
     @property
     def context(self) -> Context: '''The :class:`contextvars.Context` instance passed to methods of the underlying :mod:`asyncio` event loop.'''
-    @property
-    def retcode(self) -> int: '''The integer return code of the console, or 0 if the console has not exited.'''
     @property
     def exc(self) -> SystemExit|None: '''The :exc:`SystemExit` instance that caused the console to exit, or ``None`` if the console has not exited.'''
     @final
@@ -119,5 +117,5 @@ class AsyncUtilsConsole(ConsoleBase):
     def before_run(self, max_memory_errors: int|None) -> None: '''Ensure the console will be the only one running.'''
     def after_run(self) -> None: '''Ensure the console is not left running after unset.'''
     def _interact_hook(self, ps1: object, kcolour: str, reset: str, fcolour: str) -> None: ...
-    def write_special(self, msg: str) -> None: '''Write ``msg`` to stderr if and only if the quiet flag is not set.'''
+    def write_special(self, msg: str) -> None: '''Write ``msg`` to stderr iff the quiet flag is not set.'''
     def showtraceback(self) -> None: ...

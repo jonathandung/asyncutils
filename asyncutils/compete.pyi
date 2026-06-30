@@ -2,7 +2,8 @@ from ._internal.prots import ExceptionWrapper, FutWrapType, SupportsIteration
 from asyncio import AbstractEventLoop
 from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine, Iterable
 from types import CoroutineType, GeneratorType
-from typing import Any, Literal, TypeGuard, overload
+from typing import Any, Literal, overload
+from typing_extensions import TypeIs
 __all__ = 'convert_to_coro_iter', 'enhanced_gather', 'enhanced_staggered_race', 'first_completed', 'multi_winner_race_with_callback', 'race_with_callback'
 @overload
 async def first_completed[T](*C: Awaitable[T], ret_exc: Literal[True], timeout: float|None=...) -> ExceptionWrapper|T|None: ...
@@ -19,9 +20,9 @@ async def race_with_callback[T](*C: Awaitable[T], winner: Callable[[T], object]=
     '''
 async def multi_winner_race_with_callback[T](*C: Awaitable[T], timeout: float, winner: Callable[[T], object]=..., loser: Callable[[Any|BaseException], object]=...) -> list[T]: '''Return a list of all the coroutines that completed within ``timeout``, and cancel the rest, triggering callbacks similarly to :func:`race_with_callback`.'''
 @overload
-def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., loop: AbstractEventLoop|None=..., corocheck: Callable[[Any], TypeGuard[CoroutineType[Any, Any, Any]]]=..., futwrap: FutWrapType=..., handle_aiter: Callable[[AsyncIterable[Any]], CoroutineType[Any, Any, Any]]=..., handle_iter: Callable[[Iterable[Any]], CoroutineType[Any, Any, Any]]=...) -> GeneratorType[CoroutineType[Any, Any, Any], Any]: ...
+def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., loop: AbstractEventLoop|None=..., corocheck: Callable[[Any], TypeIs[CoroutineType[Any, Any, Any]]], futwrap: FutWrapType=..., handle_aiter: Callable[[AsyncIterable[Any]], CoroutineType[Any, Any, Any]]=..., handle_iter: Callable[[Iterable[Any]], CoroutineType[Any, Any, Any]]=...) -> GeneratorType[CoroutineType[Any, Any, Any], Any]: ...
 @overload
-def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., loop: AbstractEventLoop|None=..., corocheck: Callable[[Any], TypeGuard[Coroutine[Any, Any, Any]]]=..., futwrap: FutWrapType=..., handle_aiter: Callable[[AsyncIterable[Any]], Coroutine[Any, Any, Any]]=..., handle_iter: Callable[[Iterable[Any]], Coroutine[Any, Any, Any]]=...) -> GeneratorType[Coroutine[Any, Any, Any], Any]:
+def convert_to_coro_iter(cfs: SupportsIteration[Any], *, skip_invalid: bool=..., loop: AbstractEventLoop|None=..., corocheck: Callable[[Any], TypeIs[Coroutine[Any, Any, Any]]]=..., futwrap: FutWrapType=..., handle_aiter: Callable[[AsyncIterable[Any]], Coroutine[Any, Any, Any]]=..., handle_iter: Callable[[Iterable[Any]], Coroutine[Any, Any, Any]]=...) -> GeneratorType[Coroutine[Any, Any, Any], Any]:
     '''| A helper function to convert a possibly async iterable of futures, coroutines and even (async) iterables ``cfs`` to a plain generator of coroutines, such that it may be starred and passed into the functions in this module.
     | Originally designed to complement ``asyncio.staggered.staggered_race``.
     | Due to the possibility of ``cfs`` being async and this function being designed to operate in a sync context, it is somewhat inefficient.

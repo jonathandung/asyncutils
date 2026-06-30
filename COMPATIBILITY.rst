@@ -9,8 +9,8 @@ major syntactical reworks in 3.12, we will not support Python 3.11 or below. How
 of Python will be upheld; that is, users need never worry about support for the newest version and the one before it. Also, this codebase is quite
 future-proof, integrating modern features such as lazy imports non-intrusively and using the newest compatible syntax.
 
-Like most libraries with multiple submodules, we have a compatibility layer, which currently backports the :meth:`~asyncio.Queue.shutdown` method of
-:class:`asyncio.Queue` and the :data:`~functools.Placeholder` support in :func:`functools.partial`. The latter performs slower than the C version.
+Our compatibility layer, currently backports the :meth:`~asyncio.Queue.shutdown` method of :class:`asyncio.Queue` and the
+:data:`~functools.Placeholder` support in :func:`functools.partial`. The latter performs slower than its C-accelerated counterpart.
 
 See :pep:`602` for a detailed explanation of the Python release cycle, and the `status of Python versions <https://devguide.python.org/versions>`__.
 

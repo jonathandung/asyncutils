@@ -1,7 +1,7 @@
 Logging
 =======
 
-Since code is bound to contain bugs, and this library is no exception, logging is an important aspect of :mod:`asyncutils`. Users can also see what
+Code is bound to contain bugs, and this library is no exception. Logging is thus an important aspect of :mod:`asyncutils`. Users can also see what
 is being done under the hood and view the timestamps of significant events, without exercising advanced reflection or metaprogramming or attaching a
 tracer, profiler or debugger.
 
@@ -15,15 +15,15 @@ repeat yourself) philosophy, meaning most audit events and logs are mutually exc
 .. tip::
   :collapsible:
 
-  If logging is still desired then, an audit hook that calls the logger if and only if the name of the event begins with 'asyncutils' should be added
+  If logging is still desired then, an audit hook that calls the logger iff the name of the event begins with 'asyncutils' should be added
   using :func:`sys.addaudithook`, but performance may take a hit.
 
-As to how the loquacity and output whereabouts of the logger can be altered, refer to the following snippets:
+As to how the loquacity and output location of the logger can be altered, refer to the following snippets:
 
 .. literalinclude:: ../../asyncutils/config.pyi
   :language: python
   :caption: relevant portion of the stub of the :mod:`~asyncutils.config` submodule
-  :lines: 13-33,42-
+  :lines: 34-54,63-
   :force:
 
 .. literalinclude:: ../../asyncutils/format.json5
@@ -32,8 +32,8 @@ As to how the loquacity and output whereabouts of the logger can be altered, ref
   :lines: 4-13,18-20,27-30,213
   :force:
 
-The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>", where ``levelname`` is one of ``DEBUG``, ``INFO``,
-``WARNING``, ``ERROR``, and ``CRITICAL``.
+The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>", where ``levelname`` is one of
+:data:`~logging.DEBUG`, :data:`~logging.INFO`, :data:`~logging.WARNING`, :data:`~logging.ERROR`, and :data:`~logging.CRITICAL`.
 
 .. note::
   :collapsible: closed

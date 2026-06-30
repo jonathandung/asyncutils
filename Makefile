@@ -1,4 +1,4 @@
-.PHONY: build-docs changelog clean gen-badges help install install-silent install-system pre-commit regen-trie ruff spellcheck test type-check venv watch
+.PHONY: build-docs changelog clean gen-badges gen-baseline help install install-silent install-system pre-commit regen-trie release ruff spellcheck test type-check venv watch
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 .uv-stamp:
@@ -28,6 +28,8 @@ clean:
 gen-badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate cov last-run warnings
+gen-baseline:
+	detect-secrets scan > .secrets.baseline
 help:
 	@cat assets/mkhelp.txt
 install: .uv-stamp
@@ -40,6 +42,8 @@ pre-commit:
 	pre-commit run --all-files
 regen-trie:
 	cspell-tools compile-trie ./assets/words.txt -o ./assets
+release:
+	gh release create
 ruff: .uv-stamp
 	ruff check
 spellcheck:

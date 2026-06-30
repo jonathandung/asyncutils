@@ -3,6 +3,8 @@ Benchmarks
 
   "Statistics are like bikinis. What they reveal is suggestive, but what they conceal is vital."
 
+  .. cspell:disable-next-line
+
   -- Aaron Levenstein, 1951
 
 .. note::

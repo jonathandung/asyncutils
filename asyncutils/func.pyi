@@ -1,5 +1,5 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.prots import AsyncContextManager, Exceptable, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
+from ._internal.prots import AsyncContextManager, CanExcept, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
 from asyncio import AbstractEventLoop, Future
 from collections.abc import Awaitable, Callable, Iterable, Mapping
 from types import CoroutineType
@@ -39,14 +39,14 @@ def everymethod[T, R](interval: float, /, *, stop_when_getter: Callable[[T], Fut
 def everymethod[T](interval: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryMethodRV[T, Any]: ...
 @overload
 def everymethod[T, R](interval: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: ''':func:`every`, but applying to methods. ``stop_when_getter``, if passed, should take ``self`` and returns a suitable future ``stop_when``. Other parameters are as in :func:`every`.'''
-def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: Exceptable=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, CoroutineType[Any, Any, tuple[T|ExceptionWrapper, float]]]:
+def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: CanExcept=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, CoroutineType[Any, Any, tuple[T|ExceptionWrapper, float]]]:
     '''| Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
     | ``timer`` (default :func:`time.perf_counter`) is used to count ``elapsed``, the time required to execute the function.
     | ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~asyncutils.exceptions.wrap_exc`.
     | ``precision`` (default :const:`~asyncutils.context.Context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging, and ``ns`` whether the return value of the timer indicates time in nanoseconds.
     | Any exception the wrapped function emits whose type is not in ``expected`` is propagated directly.
     '''
-def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: Exceptable=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
+def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: CanExcept=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
     '''| Return a decorator that retries the wrapped function with exponential backoff, returning once the function succeeds.
     | If the function does not succeed within ``tries`` attempts (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
     | ``backoff`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to :const:`~asyncutils.context.Context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed ``max_delay`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_MAX_DELAY`).

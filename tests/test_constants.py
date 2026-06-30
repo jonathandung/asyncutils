@@ -11,16 +11,15 @@ def test_misc():
     assert pickle.loads(pickle.dumps(RAISE)) is RAISE
     assert not RAISE.is_private
     assert _NO_DEFAULT.is_private
-@pytest.fixture
-def ctxmgr(): return pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
 @pytest.mark.parametrize('cls', (SentinelBase, type(RAISE)))
-def test_sentinels(cls, ctxmgr):
-    with ctxmgr: cls()
-    with ctxmgr: cls('foo')
-    with ctxmgr: cls('spam.bar')
-    with ctxmgr:
+def test_sentinels(cls):
+    ctx = pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
+    with ctx: cls()
+    with ctx: cls('foo')
+    with ctx: cls('spam.bar')
+    with ctx:
         class Foo: __slots__, baz = (), cls()
-    with ctxmgr:
+    with ctx:
         class Bar: __slots__, quux = (), cls('Bar.quux')
     assert not SentinelBase._can_instantiate
     assert not type(RAISE)._can_instantiate

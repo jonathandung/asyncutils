@@ -32,7 +32,7 @@ async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, 
 def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=I.iscoroutine, futwrap=I.wrap_future, handle_aiter=None, handle_iter=None, _c=H.check_methods):
     if handle_iter is None: from asyncutils import to_list as handle_iter
     if handle_aiter is None: from asyncutils import to_list as handle_aiter
-    if skip_invalid is None: from asyncutils.context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid # noqa: N811
+    if skip_invalid is None: from asyncutils.context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid
     for i in A.aiter_to_gen(cfs, loop=loop):
         if corocheck(i): yield i; continue
         try: i = futwrap(i, loop=loop) # noqa: PLW2901

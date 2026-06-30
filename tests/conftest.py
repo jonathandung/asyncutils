@@ -14,5 +14,5 @@ def config_json(config_json_file, contents):
 def contents(): return '{"load_all": true, "V": 2, "max_memory_errors": 5}'
 def pytest_configure(config):
     global mk # noqa: PLW0603
-    mk = pytest.mark.asyncio_cooperative if config.pluginmanager.hasplugin('asyncio-cooperative') else pytest.mark.asyncio
+    mk = pytest.mark.asyncio_cooperative if config.pluginmanager.hasplugin('asyncio-cooperative') else pytest.mark.asyncio # cspell:disable-line
     asyncutils._internal.patch.patch_aio_logs()

@@ -28,7 +28,7 @@ def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initializ
     if o in _: return 'https://asyncutils.readthedocs.io/en/stable/index.html'
     s = None
     if isinstance(o, str):
-        if (o := o.removeprefix('asyncutils.')) == '__init__': return 'https://asyncutils.readthedocs.io/en/stable/top-level.html'
+        if (o := o.removeprefix('asyncutils.')) == '__init__': return 'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/index.html#module-asyncutils'
         s, _, o = o.partition('.')
         if s in m: s, o = 'asyncutils', s
         elif _: o = getattr(g(s), o)
@@ -38,10 +38,10 @@ def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initializ
     if h.ismodule(o): s, o = o.__name__, None # ty: ignore[unresolved-attribute]
     elif callable(o): s, o = o.__module__, o.__qualname__
     elif s is None: raise TypeError(f'asyncutils.tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
-    s = s.removeprefix('asyncutils.'); return (f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{o}/index.html' if o in M else 'https://asyncutils.readthedocs.io/en/stable/top-level.html') if s == 'asyncutils' else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{s}/index.html#{f'module-asyncutils.{s}' if o is None else f'asyncutils.{s}.{o}'}'
+    s = s.removeprefix('asyncutils.'); return (f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{o}/index.html' if o in M else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/index.html#asyncutils.{o}') if s == 'asyncutils' else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{s}/index.html#{f'module-asyncutils.{s}' if o is None else f'asyncutils.{s}.{o}'}'
 def open_help(o=None, /): return __import__('webbrowser').open(find_help_url(o))
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
-def print_cfg_json_format(file=None, *, flush=True): print(get_cfg_json_format(), file=file, flush=flush)
-def print_cmd_help(file=None, *, flush=True): print(get_cmd_help(), file=file, flush=flush)
+def print_cfg_json_format(file=None, *, flush=True): print(get_cfg_json_format(), file=file, flush=flush, end='')
+def print_cmd_help(file=None, *, flush=True): print(get_cmd_help(), file=file, flush=flush, end='')
 I.patch.patch_function_signatures((find_help_url, 'o=None, /'), (loadf, "path, ext='json', /"), (json_to_argv, 'path, /'), (json_to_argstr, 'path, /, *, join={}'), (argv_to_json, 'argv, path, /, *, dump={}'), (argstr_to_json, 'argstr, path, /, *, dump={0}, split={0}'), (get_cfg_json_format, ''))
 del A, I, s

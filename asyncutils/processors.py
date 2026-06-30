@@ -1,5 +1,5 @@
 import asyncio as I, asyncutils as A
-from asyncutils._internal.py312 import Queue, QueueEmpty, QueueFull, QueueShutDown
+from asyncutils._internal.py312 import Queue, QueueShutDown
 from asyncutils._internal.helpers import copy_and_clear, fullname, subscriptable
 from asyncutils._internal.submodules import processors_all as __all__
 from _functools import partial
@@ -21,8 +21,8 @@ class BatchProcessor(A.LoopContextMixin):
         async with self._lock:
             (b := self._batch).append(item)
             if len(b) >= self._maxsize: return await self._process()
-            if self._flusher is None: self._flusher = self.make(self._schedule_flush())
-    async def _schedule_flush(self): await self._sleep(); await self.flush(); self._flusher = None
+    async def _flush_periodic(self):
+        while True: await self._sleep(); await self.flush()
     async def _process(self):
         if not (b := self._batch): return
         b, self._last_process = copy_and_clear(b), self._timer()
@@ -32,9 +32,7 @@ class BatchProcessor(A.LoopContextMixin):
             if self._batch: await self._process()
     @property
     def time_since_last_process(self): return self._timer()-self._last_process
-    async def __setup__(self): super().__init__()
-    async def __cleanup__(self):
-        if (f := self._flusher) is not None: await A.safe_cancel(f)
+    async def __setup__(self): super().__init__(); self.make(self._flush_periodic())
 class Bulkhead(A.LoopContextMixin):
     __slots__ = '_exc', '_init_val', '_max_rej', '_mt', '_processor', '_queue', '_rejected', '_sd', '_sem'
     def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
@@ -46,13 +44,13 @@ class Bulkhead(A.LoopContextMixin):
         super().__init__(); self._sem, self._queue, self._rejected, self._init_val, self._exc, self._processor, self._sd, self._mt, self._max_rej = I.Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), I.Event(), max_rej
     async def execute(self, coro):
         try: self._queue.put_nowait(coro)
-        except QueueFull as e:
+        except I.QueueFull as e:
             if (x := self._rejected) == self._max_rej: await self.shutdown(); raise A.BulkheadShutDown(f'{fullname(self)} has been shutdown because too many tasks were rejected') from e
             self._rejected = x+1; raise A.BulkheadFull(f'{fullname(self)} queue full') from None
         if self.is_shutdown: raise A.BulkheadShutDown(f'{fullname(self)} is shutting down')
         async with self._sem:
             try: await (await self._queue.get())
-            except (QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{fullname(self)} is shutting down') from None
+            except (I.QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{fullname(self)} is shutting down') from None
             except self._exc as e:
                 if p := self._processor: await p(e)
         getattr(self._mt, 'clear' if self.active_tasks else 'set')()

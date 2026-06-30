@@ -55,7 +55,7 @@ class LocksmithBase:
         except A.CRITICAL as e: return self.task_raised_critical(l, e)
         except A.LockForceRequest as e:
             if (r := e.requester) is not self: await self.lock_busy(l, r, {})
-            elif e is E: await self.task_reraised_request(l)
+            elif e is E: await self.task_propagated_request(l)
             else: return await self.already_forcing(l)
         except BaseException as e: await self.task_raised_other(l, e) # noqa: BLE001
         else: await self.answer_received(l, await F)
@@ -70,7 +70,7 @@ class LocksmithBase:
         self.patch_owner(t := self.wrap_task(t), l); return await I.wait_for(self._wait_on(t, l), T[2] if timeout3 is _NO_DEFAULT else timeout3)
     async def get_info(self, l, /): return f'potential deadlock situation involving {fullname(l)} at {id(l):#x}'
     async def lock_busy(self, l, r, _, /): await A.transient_block(self._loop, L.info, 'lock busy: %r; requesters: %r, %r', l, self, r)
-    async def task_reraised_request(self, l, /): await A.transient_block(self._loop, L.warning, '%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(l), id(l))
+    async def task_propagated_request(self, l, /): await A.transient_block(self._loop, L.warning, '%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(l), id(l))
     async def answer_received(self, l, a, /): await A.transient_block(self._loop, L.info, '%r received answer %r from %r', self, a, l)
     async def throw_fallback(self, _, /): return ForceResult.NO_CURRENT_TASK
     async def eager_fallback(self, _, /): return ForceResult.OWNER_COMPLETED

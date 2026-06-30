@@ -1,4 +1,4 @@
-import sys as S, collections as C
+import collections as C, sys as S
 __all__ = 'D', 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial', 's'
 c, V, b = not (g := (E := __import__('os').environ).get)('NO_COLOR'), S.version_info, bool(g('PYTHON_BASIC_REPL')) if (r := not (F := S.flags).ignore_environment) else None
 if d := g('TERM') == 'dumb':

@@ -13,7 +13,7 @@ If you are not adding a pattern, switch to [the feature request template](https:
 -->
 ## Pitch the pattern
 
-<!--Why include it in this library? Where is it to be added? If a new submodule required, is there a prior discussion in the links?-->
+<!--Why include it in this library? Where is it to be added? If a new submodule is required, is there a prior discussion in the links?-->
 
 ## Draft
 

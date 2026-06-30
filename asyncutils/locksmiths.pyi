@@ -4,9 +4,10 @@ from ._internal.prots import AsyncLockLike
 from asyncio import AbstractEventLoop, Task
 from collections.abc import Awaitable, Callable
 from enum import IntEnum
-from typing import Any, ClassVar, Literal, TypeGuard, final
+from typing import Any, ClassVar, Literal, final
+from typing_extensions import TypeIs
 __all__ = 'ForceResult', 'LocksmithBase', 'RecognitionResult', 'succeeded'
-def succeeded(result: object, /) -> TypeGuard[Literal[ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS]]: '''Return whether the given result is a successful one.'''
+def succeeded(result: object, /) -> TypeIs[Literal[ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS]]: '''Return whether the given result is a successful one.'''
 class ForceResult(IntEnum):
     '''The possible results of a force attempt.'''
     UNFORCEABLE = 1
@@ -45,7 +46,7 @@ class LocksmithBase:
     async def get_info(self, lock: AsyncLockLike[Any], /) -> Any: '''Return information about the lock that will be passed to the forcing request.''' # noqa: ANN401
     async def lock_busy(self, lock: AsyncLockLike[Any], requester: LocksmithBase, context: dict[str, Any], /) -> None: '''Called when a :class:`~asyncutils.exceptions.LockForceRequest` by a different locksmith propagates, meaning that another locksmith is trying to do the same thing. The ``context`` parameter is a dictionary that can be passed to ``extra`` of a log record, for example. The implementation is allowed to call :meth:`lock_busy` on the requester in this method with a modified ``context``, but care should be taken to avoid infinite recursion.'''
     async def purge_waiters(self, lock: AsyncLockLike[Any], /) -> None: '''Clear all waiters on the lock after a force attempt, if necessary. The default implementation assumes this data is attached to the lock as its ``_waiters`` attribute, which is a data structure that evaluates to whether it still has any items in a boolean context, with a :meth:`~list.pop` method.'''
-    async def task_reraised_request(self, lock: AsyncLockLike[Any], /) -> None: '''Called when a task that was forced to release the lock does not handle or re-raises the exception.'''
+    async def task_propagated_request(self, lock: AsyncLockLike[Any], /) -> None: '''Called when a task that was forced to release the lock does not handle or re-raises the exception.'''
     async def throw_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but there is no current task that owns it or it could not be found, and no task appears to be running. Its return value is returned by :meth:`force`.'''
     async def eager_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but the owner task appears to have completed, since it has no coroutine. Its return value is returned by :meth:`force`.'''
     async def release_returned_false(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock and its release method returns ``False``, which is a common convention for indicating that the lock was not actually released. Its return value is returned by :meth:`force`.'''

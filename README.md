@@ -18,8 +18,6 @@
 
 A Python library abstracting all the common patterns I can think of that somehow always pop up in async code.
 
-Includes a wide range of submodules tailored for specific usages, though concrete low-level implementations are lacking.
-
 Takes pride in:
 
 - being as fast as can be in terms of import time

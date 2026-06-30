@@ -8,7 +8,7 @@ from asyncio import Condition, Lock, current_task
 from contextlib import asynccontextmanager
 from heapq import heappush, heappop
 import abc
-def _rwlock_sub_new(cls, /): (_ := object.__new__(cls)).setup(); return _
+def _rn(cls, /): (_ := object.__new__(cls)).setup(); return _
 class B:
     __slots__ = '__wrapped__', 'reader', 'reading', 'writer', 'writing'
     def __init__(self, l, f, /, _=__slots__[1:]):
@@ -21,10 +21,10 @@ class B:
         cls.__call__, c = g, f(m); super().__init_subclass__(**_) # ty: ignore[invalid-assignment]
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 t = 'Locked', (B,), {'__slots__': ()}
-def n(c, /, prefer_writers=None): return _rwlock_sub_new(c.__subclasses__()[getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers])
+def n(c, /, prefer_writers=None): return _rn(c.__subclasses__()[getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers])
 def s(c, _=n, /, **k):
     if not isinstance(c.__dict__.get('__slots__'), tuple): raise TypeError(f'subclass of {c.__name__} must define tuple as __slots__')
-    if c.__new__ is _: c.__new__ = _rwlock_sub_new
+    if c.__new__ is _: c.__new__ = _rn
     super(c).__init_subclass__(**k)
 def d(c, /, _=(n, classmethod(s))): c.__new__, c.__init_subclass__ = _; return c
 class CoercedMethod:
@@ -170,7 +170,7 @@ class FairPriorityRWLock(PriorityRWLock): __slots__ = ()
 class WritePreferredPriorityRWLock(PriorityRWLock): __slots__ = ()
 class AgingRWLock(PriorityRWLock):
     __slots__ = '_rf', '_rt', '_wf', '_wt'
-    def __new__(cls, /, rf=None, wf=None): C, _ = getcontext(), _rwlock_sub_new(cls); _._rf, _._wf = C.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR if rf is None else rf, C.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR if wf is None else wf; return _
+    def __new__(cls, /, rf=None, wf=None): C, _ = getcontext(), _rn(cls); _._rf, _._wf = C.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR if rf is None else rf, C.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR if wf is None else wf; return _
     def setup(self): super().setup(); self._rt, self._wt = defaultdict(int), defaultdict(int)
     @asynccontextmanager
     async def reading(self, priority=None):

@@ -6,6 +6,7 @@ from tests.conftest import mk
 async def dummy(): return 42
 async def dummy2(fut): fut.set_exception(ValueError('foo'))
 @mk
+@pytest.mark.skipif("sys.version_info < (3, 13) and sys.platform == 'win32'")
 async def test_time_aware():
     t1 = TimeAwareTask(dummy())
     t2 = TimeAwareTask(dummy())

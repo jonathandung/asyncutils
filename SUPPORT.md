@@ -48,35 +48,24 @@ See [the security policy](https://asyncutils.readthedocs.io/en/stable/security.h
 Update your package installer, then try the following fixes:
 
 ```bash
-# Upgrade
-uv pip install -U py-asyncutils
-
-# Check for dependency shenanigans
-uv pip check # Exit code should be zero
-
-# Pretty print the pip packages dependency tree
-uv pip tree
-
-# Show only the dependents and dependencies of this package
-uv pip tree --package py-asyncutils
-
-# Clean install
-uv pip uninstall py-asyncutils
-uv pip install py-asyncutils
-
-# If you are limited to pip (slower):
-pip install -U pipdeptree
-pipdeptree # Quite a bit more clutter, showing a single package repeatedly
-pipdeptree --packages py-asyncutils # Only this package as above
-
-# If using pipx, likely installed with pip
-pip install -U pipx
-pipx ensurepath
-
-# If using conda
-conda update py-asyncutils
+uv pip install -U py-asyncutils # Upgrade
+uv pip check # Check for dependency shenanigans
+uv pip tree # Pretty print the pip packages dependency tree
+uv pip tree --package py-asyncutils # Show only the dependents and dependencies of this package
+uv pip uninstall py-asyncutils && uv pip install py-asyncutils # Clean install
 ```
 
+Other (slower) package managers:
+<!-- cspell:disable -->
+```bash
+# pip
+pip install -U pipdeptree && pipdeptree # Quite a bit more clutter than uv pip tree, showing a single package repeatedly
+pipdeptree --packages py-asyncutils # Only this package as above
+
+pip install -U pipx && pipx ensurepath # pipx, installed with pip
+conda update py-asyncutils # conda
+```
+<!-- cspell:enable -->
 ### Import Errors
 
 Check if asyncutils is installed:
@@ -85,7 +74,7 @@ Check if asyncutils is installed:
 pip list | grep py-asyncutils
 # or
 pip show py-asyncutils
-# uv:
+# uv
 uv pip show py-asyncutils
 ```
 

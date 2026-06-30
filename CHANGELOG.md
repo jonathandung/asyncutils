@@ -12,7 +12,7 @@ This project uses [Semantic Versioning](https://semver.org).
 
 ### Tests
 
-59% coverage, 82 tests
+59% coverage, 85 tests
 
 ### Docs
 
@@ -27,12 +27,12 @@ Breaking changes:
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
 
-### [1.0.1] - 2026-06-30; unreleased
+### [1.0.1] - 2026-06-30; newest
 <!--cspell:disable-next-line-->
-Implemented `util.evaluate_and_return` and `iters.awrapf`; added `reject_cb` and `await_cb` parameters to `iters.aguessmax` and `iters.aguessmin`;
-added `yield_sentinel` keyword argument to `util.aiter_from_f`.
+Implemented `util.evaluate_and_return`, `iters.awrapf`, and `exceptions.ignore_warnings`; added `reject_cb` and `await_cb` parameters to
+`iters.aguessmax` and `iters.aguessmin`; added `yield_sentinel` keyword argument to `util.aiter_from_f`.
 
-#### [1.0.0] - 2026-06-26; first stable version; newest
+#### [1.0.0] - 2026-06-26; first stable version
 
 Added some tests; enabled some pydocstyle lint rules; refactored internal modules to avoid importing asyncio to show the help message and library
 version; moved warnings badge generation to slower test run; switched back to codecov due to pricing; integrated spelling checker.
@@ -62,12 +62,12 @@ Breaking changes:
   - altlocks
 
     Classes:
-    - ResourceGuard
-    - UniqueResourceGuard
     - CircuitBreaker
-    - StatefulBarrier
     - DynamicThrottle
     - Releasing
+    - ResourceGuard
+    - StatefulBarrier
+    - UniqueResourceGuard
 
   - base
 
@@ -75,16 +75,17 @@ Breaking changes:
     - event_loop (context manager)
 
     Functions:
-    - adisembowel_left
     - adisembowel
-    - safe_cancel_batch
-    - iter_to_agen
+    - adisembowel_left
+    - aenumerate
     - aiter_to_gen
     - collect
-    - take
+    - collect_into
     - drop
-    - aenumerate
+    - iter_to_agen
+    - safe_cancel_batch
     - sleep_forever
+    - take
 
     Awaitables:
     - dummy_task
@@ -93,14 +94,14 @@ Breaking changes:
   - buckets
 
     Classes:
-    - TokenBucket
     - LeakyBucket
+    - TokenBucket
 
   - channels
 
     Classes:
-    - Observable
     - EventBus
+    - Observable
     - Rendezvous
 
   - cli
@@ -111,12 +112,12 @@ Breaking changes:
   - compete
 
     Functions:
-    - first_completed
-    - race_with_callback
-    - multi_winner_race_with_callback
     - convert_to_coro_iter
     - enhanced_gather
     - enhanced_staggered_race
+    - first_completed
+    - multi_winner_race_with_callback
+    - race_with_callback
 
   - config
 
@@ -125,22 +126,23 @@ Breaking changes:
     - Executor
 
     Functions:
-    - set_logger_level
     - get_past_logs
+    - set_logger_level
 
-    Constants:
-    - debug
-    - silent
+    Configuration values:
     - basic_repl
-    - max_memory_errors
+    - debug
     - loaded_all
     - logging_to
+    - max_memory_errors
+    - pdb
+    - silent
 
   - console
 
     Classes:
-    - ConsoleBase
     - AsyncUtilsConsole
+    - ConsoleBase
 
   - constants
 
@@ -148,9 +150,9 @@ Breaking changes:
     - SentinelBase
 
     Constants:
-    - RECIPROCAL_E
     - EXECUTORS_FROZENSET
     - POSSIBLE_EXECUTORS
+    - RECIPROCAL_E
 
     Sentinels:
     - RAISE

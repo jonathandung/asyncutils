@@ -1,11 +1,12 @@
 import asyncutils as A, asyncio as I
+from sys import audit
 from asyncutils._internal.py312 import Queue
-from asyncutils._internal.helpers import LoopMixinBase, audit_fullname, fullname
+from asyncutils._internal.helpers import LoopMixinBase, fullname
 from asyncutils._internal.log import warning
 from asyncutils._internal.submodules import networking_all as __all__
 class LineProtocol(I.Protocol, LoopMixinBase):
     NEWLINE, CARRIAGE_RETURN, _h = __import__('os').linesep.encode(), b'\r', A.ignore_cancellation.combined(I.InvalidStateError); __slots__ = '_buffer', '_closed', '_drain_waiter', '_eof_received', '_lines', '_paused', 'transport'
-    def __init__(self): audit_fullname(self); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
+    def __init__(self): audit(fullname(self)); self._buffer, self._lines = bytearray(), Queue(); self._closed = self._paused = self._eof_received = False; self.transport = self._drain_waiter = None
     @property
     def connected_transport(self):
         if (t := self.transport) is None: raise ConnectionError('asyncutils.networking.LineProtocol: no transport connected')
@@ -63,7 +64,7 @@ class SocketTransport(I.Transport):
     @property
     def loop(self): return p.loop if isinstance(p := self._protocol, LineProtocol) else NotImplemented
     def __init__(self, sock=None):
-        audit_fullname(self); self.__rx(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
+        audit(fullname(self)); self.__rx(); (p := self.make_protocol()).connection_made(self); self._socket, self._closing, self._buffer, self._limits, self._protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
         if sock is not None: self.connect_sock(sock)
     def __rx(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def __rr(self, sock, size=None):

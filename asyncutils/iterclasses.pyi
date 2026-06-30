@@ -17,7 +17,7 @@ class AChain[T]:
     def __new__(cls, *its: SupportsIteration[T]) -> Self: '''Construct an :class:`AChain` from the (async) iterables.'''
     def __aiter__(self) -> AsyncGeneratorType[T]: '''Yield items from the first iterable until exhausted, then start on the second, etc.'''
 class APeekable[T](LoopMixinBase):
-    '''Async version of :class:`more_itertools.peekable`.'''
+    '''Async version of :class:`more_itertools.peekable`.''' # cspell:disable-line
     @overload
     def __init__(self) -> None: ...
     @overload

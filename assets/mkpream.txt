@@ -10,5 +10,5 @@ This is partly also to compensate for the lack of a setup.py after adaptation of
 PyPA guide <https://packaging.python.org/en/latest/guides/writing-pyproject-toml>`__ for more. Note that the Makefile is not intended to be used by
 end users, but rather by developers, and it obviously requires GNU Make.
 
-If you are in powershell, ``make`` will not work directly and you must use ``.\make.bat`` instead, which is more verbose; thus, you are strongly
-advised to develop in cmd.exe, the traditional command prompt.
+If you are in powershell, ``make`` will not work directly and you must use ``.\make`` or ``.\make.bat`` instead, which is more verbose; thus, you are
+strongly advised to develop in cmd.exe, the traditional command prompt.

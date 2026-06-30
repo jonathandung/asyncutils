@@ -554,15 +554,15 @@ async def asorted(it, *, key=_identity, reverse=False):
     if reverse: r.reverse()
     return r
 def acanonical(it): return asorted(it, key=id, reverse=True)
-async def _adpermfull(A, _):
+async def _adpermfull(a, _):
     while True:
-        yield tuple(A)
+        yield tuple(a)
         async for i in arange(_-2, -1, -1):
-            if A[i] < A[i+1]: break
+            if a[i] < a[i+1]: break
         else: return
         async for j in arange(j := _-1, i, -1): # noqa: B020
-            if A[i] < A[j]: break
-        A[i], A[j] = A[j], A[i]; A[i+1:] = A[:i-_:-1]
+            if a[i] < a[j]: break
+        a[i], a[j] = a[j], a[i]; a[i+1:] = a[:i-_:-1]
 async def _adpermpartial(a, _):
     h, R, l = a[:_], range(_-1, -1, -1), range(len(t := a[_:]))
     while True:

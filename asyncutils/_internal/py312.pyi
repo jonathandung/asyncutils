@@ -1,8 +1,8 @@
 '''Backport of ``asyncio.Queue`` with a ``shutdown`` method to python 3.12 or under. Error messages are kept in line with those in the standard library for consistency.'''
-__all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueEmpty', 'QueueFull', 'QueueShutDown'
-from asyncio import QueueEmpty, QueueFull, Queue as _
+__all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueShutDown'
+from asyncio import Queue as _
 class QueueShutDown(Exception): ...
 class Queue[T](_[T]):
-    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue, disallowing items from being added. If ``immediate`` is ``True``, all pending :meth:`~asyncio.Queue.get` calls will be cancelled immediately and future calls will fail, even if there were items in the queue.'''
+    def shutdown(self, immediate: bool=...) -> None: '''Shut down the queue, disallowing items from being added using :meth:`~asyncio.Queue.put` or :meth:`~asyncio.Queue.put_nowait`. If ``immediate`` is ``True``, all pending :meth:`~asyncio.Queue.get` calls will be cancelled immediately and future :meth:`~asyncio.Queue.get` and :meth:`~asyncio.Queue.get_nowait` calls will fail, even if there were items in the queue.'''
 class LifoQueue[T](Queue[T]): ...
 class PriorityQueue[T](Queue[T]): ...

@@ -1,5 +1,5 @@
 '''Processors for asynchronous tasks.'''
-from ._internal.prots import Exceptable, SupportsIteration, Timer
+from ._internal.prots import CanExcept, SupportsIteration, Timer
 from .mixins import LoopContextMixin
 from collections.abc import Awaitable, Callable
 from types import AsyncGeneratorType
@@ -26,7 +26,7 @@ class Bulkhead(LoopContextMixin):
 
     .. caution:: Use instances of this class as async context managers to ensure proper cleanup.
     '''
-    def __init__(self, max_concurrent: int, *, max_queue: int=..., max_rej: int=..., exc: Exceptable=..., processor: Callable[[BaseException], Awaitable[None]]=...) -> None:
+    def __init__(self, max_concurrent: int, *, max_queue: int=..., max_rej: int=..., exc: CanExcept=..., processor: Callable[[BaseException], Awaitable[None]]=...) -> None:
         '''* ``max_concurrent`` (required): maximum number of concurrent executions allowed
         * ``max_queue``: maximum number of pending executions allowed in the queue; if the queue is full, new executions will be rejected until there is space in the queue. Non-positive value means no limit (there is currently no way to get a zero-capacity queue). Default :const:`~asyncutils.context.Context.BULKHEAD_DEFAULT_MAX_QUEUE`.
         * ``max_rej``: maximum number of rejections allowed before the bulkhead shuts down and rejects all new executions. Negative value means no limit. Default :const:`~asyncutils.context.Context.BULKHEAD_DEFAULT_MAX_REJ`.

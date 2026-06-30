@@ -22,7 +22,8 @@ from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from contextvars import Context
 from io import TextIOWrapper
 from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, TracebackType
-from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, TypeGuard, final, overload, type_check_only
+from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+from typing_extensions import TypeIs
 @type_check_only
 class Reader[T](Protocol):
     ''':class:`io.Reader` is not used due to version compatibility issues.'''
@@ -331,7 +332,7 @@ class NullContextType:
 class RaiseType(SentinelBase):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
     def __reduce__(self) -> Literal['RAISE']: ... # ty: ignore[invalid-method-override]
-    def is_(self, other: object, /) -> TypeGuard[Self]: '''Not actually redefined, but this allows for effective type narrowing.'''
+    def is_(self, other: object, /) -> TypeIs[Self]: '''Not actually redefined, but this allows for effective type narrowing.'''
 @final
 @type_check_only
 class WildcardType:
@@ -371,7 +372,7 @@ type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing one of the operators < and >.'''
 type ExcType = type[BaseException]
 '''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__` methods.'''
-type Exceptable = ExcType|tuple[ExcType, ...]
+type CanExcept = ExcType|tuple[ExcType, ...]
 '''The type of objects that may follow an except statement.'''
 type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to :func:`open`.'''

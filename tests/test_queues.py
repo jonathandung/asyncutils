@@ -1,17 +1,16 @@
-from asyncio.tasks import create_task, sleep
+from asyncio import QueueEmpty, QueueFull, create_task, sleep
 from pytest import fixture, mark, raises
-from asyncutils._internal.py312 import QueueEmpty, QueueFull, QueueShutDown
+from asyncutils._internal.py312 import QueueShutDown
 from asyncutils.config import _randinst
 from asyncutils.exceptions import *
 from asyncutils.queues import *
-from asyncutils import exceptions
 from tests.conftest import mk
 @fixture
 def pwd(): return _randinst.randbytes(8)
 @mk
 async def test_pwd_q(pwd):
     Q = password_queue(pwd, maxsize=2, init_items=[0, 1], can_change_put=True, puttyp=bytes)
-    await sleep(0.02)
+    await sleep(0.01)
     assert Q.full()
     assert not Q.cancel_extend(41)
     with raises(QueueFull): Q.put_nowait(-1, pwd)

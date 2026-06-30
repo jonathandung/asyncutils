@@ -43,6 +43,10 @@ pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir ba
 pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate cov last-run warnings
 goto :eof
 
+:gen-baseline
+detect-secrets scan > .secrets.baseline
+goto :eof
+
 :help
 type assets\mkhelp.txt
 goto :eof
@@ -67,6 +71,10 @@ goto :eof
 
 :regen-trie
 cspell-tools compile-trie ./assets/words.txt -o ./assets
+goto :eof
+
+:release
+gh release create
 goto :eof
 
 :ruff

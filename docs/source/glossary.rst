@@ -8,9 +8,7 @@ Glossary
     runtime dependencies outside of the standard library save for the config file parsers, and all the extras are for development only.
 
   submodule
-    A module that is part of a library or package that is not the main module/entry point. For this project, :mod:`asyncutils` is the main module and
-    its submodules include :mod:`asyncutils.context`, :mod:`asyncutils.locks`, :mod:`asyncutils.queues` and more. A lazy loading system is in place
-    to avoid the overhead of gathering all submodules on import and make them accessible using attribute access syntax.
+    A module that is part of a library or package that is not the main module/entry point. See :doc:`submodules`.
 
   subpackage
     A directory within a package containing submodules, along with an ``__init__.py`` file.

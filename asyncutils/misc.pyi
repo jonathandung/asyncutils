@@ -17,17 +17,17 @@ class StateMachine:
     def on_exit[T: Callable[[], Awaitable[Any]]](self, state: str) -> Callable[[T], T]: '''Register an asynchronous handler to be called when ``state`` is exited.'''
     async def transition(self, state: str) -> bool: '''Transition from the current state to the new ``state``.'''
 @overload
-async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
+async def gather_with_limited_concurrency[T](n: int=..., *coros: Awaitable[T], ret_exc: Literal[False]=...) -> list[T]: ...
 @overload
-async def gather_with_limited_concurrency[T](n: int=..., /, *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
-    '''| ``n``, which defaults to :const:`~asyncutils.context.Context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently running awaitables.
+async def gather_with_limited_concurrency[T](n: int=..., *coros: Awaitable[T], ret_exc: Literal[True]) -> list[T|BaseException]:
+    '''| Gather the given awaitables, but only allow ``n`` of them to run at any given moment.
+    | ``n``, which defaults to :const:`~asyncutils.context.Context.GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT`, is used to restrict the number of concurrently running awaitables.
     | ``ret_exc`` is passed to :func:`asyncio.gather` as the ``return_exceptions`` argument.
     '''
 class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncContextMixin[CallbackAccumulator[T, P]]):
     '''A utility class to store synchronous callbacks and call them sequentially in an executor when the context manager exits.
 
     .. tip:: To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
-    .. note:: This class is no longer used by the pools after a massive rewrite, and only remains here for backwards compatibility.
     .. admonition:: Implementation detail
 
       The fact that this class currently subclasses :class:`~collections.deque` is subject to change.

@@ -12,13 +12,13 @@ class SingleWaiterEventWithValue(A.EventMixin):
     def is_set(self): return False if (w := self._waiter) is None else w.done()
     async def wait_for_next(self, timeout=None, *, strict=False):
         if w := self._waiter:
-            if strict: raise RuntimeError('asyncutils.events.SingleWaiterEventWithValue: another waiter is waiting')
+            if strict: raise RuntimeError('asyncutils.events.SingleWaiterEventWithValue: another waiter is already waiting and strict=True was passed')
         else: self._waiter = w = self.make_fut()
         try: return await I.wait_for(w, timeout)
         finally: self._waiter = None
     def get(self, default=_NO_DEFAULT):
         if (w := self._waiter) is None or not w.done():
-            if default is _NO_DEFAULT: raise A.EventValueError('asyncutils.events.SingleWaiterEventWithValue: no value is set')
+            if default is _NO_DEFAULT: raise A.EventValueError('asyncutils.events.SingleWaiterEventWithValue: no value is set and no default was provided')
             return default
         return w.result()
     def clear(self): self._waiter = None
@@ -40,7 +40,7 @@ class EventWithValue(A.EventMixin):
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):
         if (v := self._value) is None:
-            if _NO_DEFAULT is default: raise A.EventValueError('asyncutils.events.EventWithValue: no value is set')
+            if _NO_DEFAULT is default: raise A.EventValueError('asyncutils.events.EventWithValue: no value is set and no default was provided')
             return default
         return v
     async def wait_for_next(self, timeout=None):

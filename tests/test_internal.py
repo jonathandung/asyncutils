@@ -1,5 +1,5 @@
 from pytest import mark, raises
-from asyncio import create_task, new_event_loop, sleep
+from asyncio import QueueEmpty, QueueFull, create_task, new_event_loop, sleep
 from asyncutils import _internal as mod
 from asyncutils.console import AsyncUtilsConsole
 from io import StringIO
@@ -23,7 +23,7 @@ def test_submodules_lazy_loading():
     with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo
     module = mod.initialize.Module
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
-    with raises(TypeError, match='cannot subclass the type of asyncutils submodule objects'): type('', (module,), {})
+    with raises(TypeError, match='asyncutils: cannot subclass the type of submodule objects'): type('', (module,), {})
     assert (t := type(module('constants'))) is type(module('context'))
     assert t.__module__ == 'builtins'
     assert t.__name__ == t.__qualname__ == 'module'
@@ -39,10 +39,10 @@ def test_others(config_json, monkeypatch):
     loop.close, loop.stop = t
     cons.refresh()
     exec(cons.compile.compiler('assert 1+1 == 2', '<test>', 'exec'))
-    assert cons.retcode == 0
+    assert cons.exc is None
     loop.close()
     assert mod.submodules.cli_all == ('run',)
-    monkeypatch.setenv('AUTILSCFGPATH', config_json)
+    monkeypatch.setenv('AUTILSCFGPATH', config_json) # cspell:disable-line
     N = __import__('importlib').reload(mod.unparsed).N
     assert N.load_all
     assert N.V == 2
@@ -62,7 +62,7 @@ async def test_py312():
     await Q.put(0)
     await Q.put(1)
     assert Q.full()
-    with raises(m.QueueFull): Q.put_nowait(-1)
+    with raises(QueueFull): Q.put_nowait(-1)
     t = create_task(Q.put(2))
     assert await Q.get() == 0
     assert Q.get_nowait() == 1
@@ -76,7 +76,7 @@ async def test_py312():
     assert t.done()
     assert t.result() == 3
     assert Q.empty()
-    with raises(m.QueueEmpty): Q.get_nowait()
+    with raises(QueueEmpty): Q.get_nowait()
     Q.shutdown()
     with raises(m.QueueShutDown): Q.put_nowait(-2)
     with raises(m.QueueShutDown): await Q.put(-3)

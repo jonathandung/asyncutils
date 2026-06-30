@@ -26,14 +26,13 @@ def create_executor(f, /, save=True): # pragma: no cover
     if save: f.executor = e
     return e
 def fullname(f, /, remove_prefix=False, _=('__module__', '__qualname__')): f = coerce_callable(f); n = '.'.join(filter_out(*(getattr(f, a, None) for a in _))); return n.removeprefix('asyncutils.') if remove_prefix else n
-def audit_fullname(f, /, remove_prefix=False): S.audit(fullname(f, remove_prefix))
 async def simple_wrap(aw, /): return await aw
 class LoopMixinBase:
     __slots__ = '_loop',
     @property
     def loop(self):
         if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
-        elif l is not __import__('asyncio.events', fromlist=('',))._get_running_loop(): raise RuntimeError('asyncutils: could not bind loop')
+        elif l is not __import__('asyncio.events', fromlist=('',))._get_running_loop(): raise RuntimeError('asyncutils: could not bind asyncio event loop')
         return l
     def make(self, a, /): return self.loop.create_task(simple_wrap(a))
     def make_fut(self): return self.loop.create_future()

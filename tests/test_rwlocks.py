@@ -9,15 +9,15 @@ async def test_rwlocks(lt):
     async with lock.reading():
         async with lock.reading():
             task = create_task((c := lock.writing()).__aenter__()) # noqa: PLC2801
-            await sleep(0.02)
+            await sleep(0.01)
             assert not task.done()
             assert lock.is_reading()
-        await sleep(0.02)
+        await sleep(0.01)
         assert lock.is_reading()
         assert not task.done()
         assert lock.locked()
         assert not lock.is_writing()
-    await sleep(0.02)
+    await sleep(0.01)
     assert task.done()
     assert lock.is_writing()
     assert lock.locked()

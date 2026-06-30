@@ -1,8 +1,8 @@
 # ruff: noqa: ARG002,SIM105
 __lazy_modules__ = frozenset(('asyncio',))
-import asyncutils._internal.helpers as h, heapq as H
+import asyncutils._internal.helpers as h, asyncio as A, heapq as H
 from _collections import deque
-from asyncio import QueueEmpty, QueueFull
+__all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueShutDown'
 class QueueShutDown(Exception): ...
 def _wakeup_next(W, /, w=None):
     while W and (w := W.popleft()).done(): ...
@@ -40,7 +40,7 @@ class Queue(h.LoopMixinBase):
         return self.put_nowait(item)
     def put_nowait(self, item):
         if self._is_shutdown: raise QueueShutDown
-        if self.full(): raise QueueFull
+        if self.full(): raise A.QueueFull
         self._put(item); self._unfinished_tasks += 1; self._finished.clear(); _wakeup_next(self._getters)
     async def get(self):
         A, e = (G := self._getters).append, self.empty
@@ -56,7 +56,7 @@ class Queue(h.LoopMixinBase):
                 raise
         return self.get_nowait()
     def get_nowait(self):
-        if self.empty(): raise QueueShutDown if self._is_shutdown else QueueEmpty
+        if self.empty(): raise QueueShutDown if self._is_shutdown else A.QueueEmpty
         r = self._get(); _wakeup_next(self._putters); return r
     def task_done(self):
         if (U := self._unfinished_tasks) <= 0: raise ValueError('task_done() called too many times')

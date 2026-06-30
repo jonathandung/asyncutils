@@ -1,7 +1,7 @@
 '''| Functional and composable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`, but some are unique to async.
 | However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.
 '''
-from ._internal.prots import EventProtocol, Exceptable, NotNone, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
+from ._internal.prots import EventProtocol, CanExcept, NotNone, RaiseType, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Hashable, Iterable, Mapping, MutableSequence, Reversible
 from types import AsyncGeneratorType
@@ -389,7 +389,7 @@ def aunique_justseen[T](it: SupportsIteration[T], key: Callable[[T], object]=...
 def aunique[T](it: SupportsIteration[T], key: Callable[[T], SupportsRichComparison]|None=..., reverse: bool=...) -> AsyncGeneratorType[T]: '''Yield unique elements from ``it`` in sorted order, according to ``key``, which should not be too expensive. If ``reverse`` is ``True``, yield in descending order.'''
 def ancycles[T](it: SupportsIteration[T], n: int) -> AsyncGeneratorType[T]: '''Yield the items in the (async) iterable ``it`` over and over for a total of ``n`` cycles.'''
 def apartition[T](pred: Callable[[T], object]|None, it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T]]: '''Return a tuple ``(fgen, tgen)``. ``tgen`` is an async generator yielding the items in ``it`` passing the predicate, and ``fgen`` the others.'''
-def aiterexcept[T](f: Callable[[], Awaitable[T]], exc: Exceptable, first: Callable[[], Awaitable[T]]=...) -> AsyncGeneratorType[T]: '''Yield the awaited output of ``first``, then ``f`` called with no arguments repeatedly until an exception present in ``exc`` occurs.'''
+def aiterexcept[T](f: Callable[[], Awaitable[T]], exc: CanExcept, first: Callable[[], Awaitable[T]]=...) -> AsyncGeneratorType[T]: '''Yield the awaited output of ``first``, then ``f`` called with no arguments repeatedly until an exception present in ``exc`` occurs.'''
 async def ailen(it: SupportsIteration[object]) -> int: '''Return the length of the (async) iterable ``it``, consuming it entirely.'''
 def aiterate[T](f: Callable[[T], Awaitable[T]], start: T) -> AsyncGeneratorType[T]: '''Yield ``start``, then the awaited output of ``f`` called on the previous output repeatedly.'''
 @overload

@@ -22,7 +22,7 @@ class RWLock(ABC):
     def writing(self) -> RWLockCM: '''Return an async context manager for writing access. It is recommended to implement this by decorating an async generator function with :func:`contextlib.asynccontextmanager`.'''
     def is_reading(self) -> bool: '''Whether the lock is currently held by a reader. Default implementation returns whether the ``_nr`` attribute is greater than ``0``, assuming that slot holds the number of readers.'''
     def is_writing(self) -> bool: '''Whether the lock is currently held by a writer. Default implementation returns the value of the ``_wa`` attribute.'''
-    def locked(self) -> bool: '''Return ``False`` if and only if a writer can enter at this moment.'''
+    def locked(self) -> bool: '''Return ``False`` iff a writer can enter at this moment.'''
     @abstractmethod
     def setup(self) -> None: '''Set up the internal state of the lock.'''
     @classmethod
