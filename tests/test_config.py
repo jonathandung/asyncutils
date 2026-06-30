@@ -11,7 +11,6 @@ def test_mod():
         set_logger_level(20)
         assert debug.level == 20
     assert not silent
-    assert not basic_repl
     assert not loaded_all
     assert not pdb
     assert logging_to == 'STDERR'

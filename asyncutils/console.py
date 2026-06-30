@@ -8,13 +8,15 @@ from asyncio import iscoroutine
 from asyncio.futures import _chain_future
 from itertools import repeat
 from os import getenv as g
-try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import]
-except ImportError: from code import InteractiveConsole as B; C.basic_repl = True
+from code import InteractiveConsole as B
+if not C.basic_repl:
+    try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import]
+    except ImportError: C.basic_repl = True
 _s = object()
 _f = '',
 class ConsoleBase(B, metaclass=abc.ABCMeta):
     LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_internal_caches' if S.version_info >= (3, 13) else '_clear_type_cache', None), g=__import__('gc').collect, d=log.debug: (f and f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
-    if C.basic_repl: CAN_USE_PYREPL = False # pragma: no cover
+    if C.basic_repl: CAN_USE_PYREPL, STATEMENT_FAILED = False, None # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
     def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # noqa: B006
         S.audit(fullname(type(self)), loop)
@@ -54,7 +56,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         except SystemExit as e: self.set_return_code(e)
         except BaseException as e:
             if not isinstance(e, no_traceback): self.showtraceback()
-            return getattr(self, 'STATEMENT_FAILED', None)
+            return self.STATEMENT_FAILED
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # noqa: B008
         x = False; self.write_special(self.BANNER if banner is None else banner)
         if p and not S.flags.ignore_environment: # pragma: no cover

@@ -99,40 +99,40 @@ class AdvancedPool(A.LoopContextMixin):
     def uptime(self): return monotonic()-self.__start
 @subscriptable
 class ConnectionPool(LoopMixinBase):
-    __slots__ = '_available', '_cleaner', '_creation_times', '_factory', '_healthchecker', '_in_use', '_lock', '_maintainer', '_pool', 'maxlife', 'maxsize', 'minsize'
-    def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = A.getcontext(); self._factory, self.maxsize, self.minsize, self.maxlife, self._healthchecker, self._cleaner, self._pool, self._in_use, self._creation_times, self._lock, self._available, self._maintainer = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, I.Lock(), I.Event(), None
-    def _is_healthy(self, conn, /): return self._healthchecker(conn) and not ((t := self._creation_times.get(id(conn))) and monotonic()-t > self.maxlife)
-    async def create_connection(self, *a, _executor_=None, **k): self._creation_times[id(c := await self.loop.run_in_executor(_executor_, partial(self._factory, *a, **k)))] = monotonic(); return c
+    __slots__ = '__av', '__clean', '__cts', '__factory', '__hc', '__in_use', '__lock', '__mtr', '__pool', 'maxlife', 'maxsize', 'minsize'
+    def __init__(self, factory, maxsize=None, minsize=None, maxlife=None, healthchecker=None, cleaner=None): C = A.getcontext(); self.__factory, self.maxsize, self.minsize, self.maxlife, self.__hc, self.__clean, self.__pool, self.__in_use, self.__cts, self.__lock, self.__av, self.__mtr = factory, C.CONNECTION_POOL_DEFAULT_MAX_SIZE if maxsize is None else maxsize, C.CONNECTION_POOL_DEFAULT_MIN_SIZE if minsize is None else minsize, C.CONNECTION_POOL_DEFAULT_MAX_LIFE if maxlife is None else maxlife, healthchecker or (lambda _: True), cleaner or (lambda _: None), [], set(), {}, I.Lock(), I.Event(), None
+    def _is_healthy(self, conn, /): return self.__hc(conn) and not ((t := self.__cts.get(id(conn))) and monotonic()-t > self.maxlife)
+    async def create_connection(self, *a, _executor_=None, **k): self.__cts[id(c := await self.loop.run_in_executor(_executor_, partial(self.__factory, *a, **k)))] = monotonic(); return c
     async def acquire(self, *a, **k):
-        p = self._pool
-        async with self._lock:
+        p = self.__pool
+        async with self.__lock:
             while p:
-                if self._is_healthy(c := p.pop()): self._in_use.add(c); return c
-                self._cleaner(c)
-            if self.cursize < self.maxsize: self._in_use.add(c := await self.create_connection(*a, **k)); return c
-        await self._available.wait(); return await self.acquire(*a, **k)
+                if self._is_healthy(c := p.pop()): self.__in_use.add(c); return c
+                self.__clean(c)
+            if self.cursize < self.maxsize: self.__in_use.add(c := await self.create_connection(*a, **k)); return c
+        await self.__av.wait(); return await self.acquire(*a, **k)
     def release(self, c, /, *a, **k):
-        self._in_use.discard(c)
-        if self._is_healthy(c) and len(self._pool) < self.maxsize: self._pool.append(c); self._available.set(); self._available.clear()
+        self.__in_use.discard(c)
+        if self._is_healthy(c) and len(self.__pool) < self.maxsize: self.__pool.append(c); self.__av.set(); self.__av.clear()
         else:
-            self._cleaner(c)
+            self.__clean(c)
             if self.cursize < self.minsize: self.make(self.create_connection(*a, **k))
     async def _maintain(self):
         f = I.sleep.__get__(A.getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:
             await f(); n, g = [], self.create_connection
-            for c in self._pool: (n.append if self._healthchecker(c) else self._cleaner)(c)
-            async with self._lock: n.extend(await I.gather(*(g() for _ in repeat(None, self.minsize-self.cursize)))); self._pool = n
+            for c in self.__pool: (n.append if self.__hc(c) else self.__clean)(c)
+            async with self.__lock: n.extend(await I.gather(*(g() for _ in repeat(None, self.minsize-self.cursize)))); self.__pool = n
     async def start(self, akgen=None, executor=None):
         f = self.create_connection
         if akgen is None:
             for _ in repeat(None, self.minsize): await f(_executor_=executor)
         else:
             async for a, k in A.take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
-        self._maintainer = self.make(self._maintain())
+        self.__mtr = self.make(self._maintain())
     async def stop(self):
-        if m := self._maintainer: await A.safe_cancel(m)
-        p, c, f = (P := self._pool).pop, self._cleaner, (u := self._in_use).pop
+        if m := self.__mtr: await A.safe_cancel(m)
+        p, c, f = (P := self.__pool).pop, self.__clean, (u := self.__in_use).pop
         while P: c(p())
         while u: c(f())
     async def __aenter__(self): await self.start(); return self
@@ -140,6 +140,6 @@ class ConnectionPool(LoopMixinBase):
     @property
     def cursize(self): return self.available+self.in_use
     @property
-    def available(self): return len(self._pool)
+    def available(self): return len(self.__pool)
     @property
-    def in_use(self): return len(self._in_use)
+    def in_use(self): return len(self.__in_use)

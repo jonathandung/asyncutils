@@ -1,5 +1,5 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.prots import PartialInterface, Mark1, Mark2, ExcType
+from ._internal.prots import PartialInterface, FaultyConfigA, FaultyConfigB, ExcType
 from concurrent.futures import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload
@@ -7,23 +7,23 @@ __all__ = 'Debugging', 'Executor', 'basic_repl', 'debug', 'get_past_logs', 'load
 class FaultyConfig(BaseException):
     '''Raised when the user specifies a configuration value that is of the wrong type or otherwise invalid. This is basically impossible to catch, since it is only raised during the import of this module.'''
     @overload
-    def __init__(self: Mark1, key: str, wrong: str, correct: tuple[str, ...], /) -> None: ...
+    def __init__(self: FaultyConfigA, key: str, wrong: str, correct: tuple[str, ...], /) -> None: ...
     @overload
-    def __init__(self: Mark2, key: str, wrong: object, correct: type|tuple[type, ...], /) -> None: ...
+    def __init__(self: FaultyConfigB, key: str, wrong: object, correct: type|tuple[type, ...], /) -> None: ...
     @property
     def key(self) -> str: ...
     @property
     @overload
-    def wrong(self: Mark1) -> str: ...
+    def wrong(self: FaultyConfigA) -> str: ...
     @property
     @overload
-    def wrong(self: Mark2) -> object: ...
+    def wrong(self: FaultyConfigB) -> object: ...
     @property
     @overload
-    def correct(self: Mark1) -> tuple[str, ...]: ...
+    def correct(self: FaultyConfigA) -> tuple[str, ...]: ...
     @property
     @overload
-    def correct(self: Mark2) -> type|tuple[type, ...]: ...
+    def correct(self: FaultyConfigB) -> type|tuple[type, ...]: ...
 class Executor(_, PartialInterface):
     '''A class that implements the :pep:`3148` executor interface.
 
@@ -53,7 +53,7 @@ debug: Final[Debugging]
 silent: Final[bool]
 '''Whether the user requested to run the program with no banner and exit message in the REPL.'''
 basic_repl: Final[bool]
-'''Whether the user specified not to use the functions from ``_pyrepl`` to run the console.'''
+'''Whether the user specified not to use the functions from ``_pyrepl`` to run the console, or they are on a Python version such that ``_pyrepl`` is not present or cannot be found such that the basic REPL must be used.'''
 max_memory_errors: Final[int]
 '''Maximum number of memory errors that can occur before the console automatically exits. Negative iff there is no maximum.'''
 loaded_all: Final[bool]

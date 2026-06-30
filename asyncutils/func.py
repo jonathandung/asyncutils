@@ -162,21 +162,21 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
     audit('asyncutils.func.benchmark', fullname(f), T := times+warmup); return _f(min(t := [await g() for _ in repeat(None, times)] if sequential else await I.gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
 P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
-    __slots__ = '_call_times', '_calls', '_func', '_lock', '_period', '_raise', '_timer'
+    __slots__ = '__calls', '__ct', '__func', '__lock', '__period', '__raise', '__timer'
     def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):
         if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer, lock_impl=lock_impl)
-        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls))._func, _._period, _._call_times, _._lock, _._calls, _._raise, _._timer = f, float(period), deque(), (I.Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
+        audit('asyncutils.func.RateLimited', fullname(f), calls, period); (_ := super().__new__(cls)).__func, _.__period, _.__ct, _.__lock, _.__calls, _.__raise, _.__timer = f, float(period), deque(), (I.Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
-        p, m, P, C, f = (T := self._call_times).popleft, T.appendleft, self._period, self._calls, self._func
-        async with self._lock:
-            d = (n := self._timer())-P
+        p, m, P, C, f = (T := self.__ct).popleft, T.appendleft, self.__period, self.__calls, self.__func
+        async with self.__lock:
+            d = (n := self.__timer())-P
             while T:
                 if (x := p()) > d: m(x); break
-            if (l := len(T)-self._calls+1) > 0:
-                if self._raise: raise A.RateLimitExceeded(f, a, k, C, P, l)
+            if (l := len(T)-self.__calls+1) > 0:
+                if self.__raise: raise A.RateLimitExceeded(f, a, k, C, P, l)
                 await I.sleep(p()-d)
             T.append(n)
         return await f(*a, **k)
-    def __repr__(self): return f'{fullname(self)}({self._func!r}, {self._calls}, {self._period:.6f}, raise_={self._raise}, timer={self._timer!r}, lock_impl={fullname(self._lock)})'
+    def __repr__(self): return f'{fullname(self)}({self.__func!r}, {self.__calls}, {self.__period:.6f}, raise_={self.__raise}, timer={self.__timer!r}, lock_impl={fullname(self.__lock)})'
     P.patch_classmethod_signatures((__new__, 'f, /, calls, period=None, *, raise_=False, timer={}, lock_impl=None'))
 del _, perf_counter, P

@@ -18,21 +18,19 @@ def _wakeup_next(W):
     while W:
         if not (w := P()).done(): w.set_result(None); break
 class Q:
-    exc = A.ForbiddenOperation; __slots__ = 'maxsize', 'empty', 'qsize', 'full', 'get', 'get_nowait', 'put', 'put_nowait', 'change_get_password', 'change_put_password', 'task_done', 'join', 'shutdown', 'cancel_extend' # noqa: RUF023
+    exc = A.ForbiddenOperation; __slots__ = '_ms', 'cancel_extend', 'change_get_password', 'change_put_password', 'empty', 'full', 'get', 'get_nowait', 'join', 'put', 'put_nowait', 'qsize', 'shutdown', 'task_done'
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
     def __new__(cls, /, *a, _=f.__get__, x='pwd_q.'):
         (f := _(s := super().__new__(cls)))(*next(i := zip(cls.__slots__, a, strict=True)))
         for n, v in i: v.__qualname__ = x+n; f(n, v)
         return s
-    def __setattr__(self, name, value, /, _=__slots__[-1], f=f, s=frozenset(__slots__)):
-        if name not in s: raise AttributeError(f'password-protected queue has no attribute {name!r}')
-        if name != _: raise AttributeError(f'attribute/method {name!r} on password-protected queue is read-only')
-        f(self, name, value)
-    def __init_subclass__(cls, /, _=exc('subclass'), **k): raise _
+    def __init_subclass__(cls, e=exc('subclass'), /, **_): raise e
     def _get(self, _=exc('call _get() on')): raise _
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _ # noqa: ARG002
-    P.patch_method_signatures((__setattr__, 'name, value, /'), (_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__init_subclass__, '**k'), (__new__, 'maxsize, empty, qsize, full, get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, join, shutdown, cancel_extend, /'))
+    @property
+    def maxsize(self): return self._ms # ty: ignore[unresolved-attribute]
+    P.patch_method_signatures((_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__init_subclass__, '**k'), (__new__, 'maxsize, cancel_extend, change_get_password, change_put_password, empty, full, get, get_nowait, join, put, put_nowait, qsize, shutdown, task_done, /'))
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=Q): # noqa: C901,PLR0913,PLR0915
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C, E, G, P, U, S, m, b = A.getcontext(), A.done_evt(), deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
     try: F = _getframe(1)
@@ -125,11 +123,11 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             f = d.popleft
             while d:
                 if not (F := f()).done(): F.set_result(None)
-    q = _(maxsize, lambda: not l, lambda: len(l), full := lambda: 0 < maxsize <= len(l), get, get_nowait, put, put_nowait, change_get_password, change_put_password, task_done, A.discard_retval(E.wait), shutdown, lambda msg=None: False) # noqa: ARG005
+    q = _(maxsize, lambda msg=None: False, change_get_password, change_put_password, lambda: not l, full := lambda: 0 < maxsize <= len(l), get, get_nowait, A.discard_retval(E.wait), put, put_nowait, lambda: len(l), shutdown, task_done) # noqa: ARG005
     if init_items:
         async def extend(f=Z.partial(put, Z.Placeholder, password_put)):
             async for i in A.iter_to_agen(init_items): await f(i)
-        q.cancel_extend = L.create_task(extend()).cancel
+        q.cancel_extend = L.create_task(extend()).cancel # ty: ignore[invalid-assignment]
     return q
 class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     @abstractmethod

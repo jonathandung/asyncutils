@@ -129,17 +129,15 @@ noarch
 noncritical
 notfound
 ntimes
-numstat
 onfail
 opengraph
 pconf
 peername
-popd
+phcount
 popleft
 poppush
 pred
 prots
-pushd
 pushpop
 puttyp
 pycon
@@ -159,7 +157,6 @@ setc
 setcontext
 siftdown
 siftup
-sinfo
 skipif
 sockname
 sphinxext

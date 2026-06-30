@@ -1,5 +1,5 @@
 from sphinx.directives.code import CodeBlock
-def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.0.0')):
+def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.0.1')):
     app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include parts of documentation that only apply to Python >=3.13')
     app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'

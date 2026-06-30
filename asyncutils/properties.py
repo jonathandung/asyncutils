@@ -24,7 +24,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.AB
     @a.abstractmethod
     def wrap_aw(self, _, /): raise NotImplementedError
     def __new__(cls, fget=None, *a, **k):
-        if fget is None: return partial(cls, Placeholder, *a, **k) if a else partial(cls, **k)
+        if fget is None: return partial(cls, *((Placeholder, *a) if a else ()), **k)
         (_ := object.__new__(cls))._init(fget, *a, **k); return _
     def __default_deleter(self, o, f, /):
         if f&Deleters.NO_DELETER: self.__raise('asyncutils.properties.AsyncPropertyBase: undeletable attribute', o, not f&Deleters.SILENT)
@@ -87,6 +87,6 @@ class ConcurrentAsyncProperty(AsyncPropertyBase, lock_factory=staticmethod(lambd
 class RWLockedAsyncProperty(ConcurrentAsyncProperty):
     __slots__, _repr_accessor = (), staticmethod(lambda v, _=n, /: _ if v is None else repr(v) if type(v) is Deleters else repr(v.__wrapped__))
     def _init(self, f, /, fset=None, fdel=d, *, policy=A.RWLock, **k):
-        if not issubclass(policy, A.RWLock): raise TypeError('policy must be a subclass of asyncutils.rwlocks.RWLock')
+        if not issubclass(policy, A.RWLock): raise TypeError('asyncutils.properties.RWLockedAsyncProperty: policy must be a subclass of asyncutils.rwlocks.RWLock')
         w = (f := policy.lock(f)).writer; super()._init(f, None if fset is None else w(fset), fdel if fdel is Deleters.DEFAULT else w(fdel), **k)
 del a, d, n, W, D

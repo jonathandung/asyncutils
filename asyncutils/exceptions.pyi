@@ -27,14 +27,13 @@ def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, order
 @overload
 def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
     '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
-    | ``ordered`` defaults to ``False``, because that is more efficient.
+    | ``ordered``, whether to emit the exceptions in original order, defaults to ``False``, because that is more efficient.
     | The intersection of ``filter_out`` and ``keep``, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
     | The acknowledgement parameters ``ack1``, ``ack2`` and ``ack3`` are called on exceptions in the above intersection, exceptions that don't pass the predicate and exceptions that are not in ``keep`` respectively.
     | They must be callables that return fast (e.g. collecting into a list) to avoid slowing down the function.
     | If ``raise_critical`` is ``True``, exit early once a critical exception (type of which is a member of :const:`CRITICAL`) is encountered and propagate it.
     | ``notes`` is attached to the group using :meth:`~BaseException.add_note`.
-    | The ``suppress``, ``context``, ``cause`` and ``traceback`` parameters are used to add metadata to the result group; see :func:`prepare_exception`.
-    | They only have an effect when the first argument is not a group.
+    | ``suppress``, ``context``, ``cause`` and ``traceback`` are used to add metadata to the result group; see :func:`prepare_exception`. They only take effect, however, when the first argument is not a group.
     '''
 def prepare_exception[T: BaseException](exc: T, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> T:
     '''| Attach some info to the exception ``exc`` and return it.

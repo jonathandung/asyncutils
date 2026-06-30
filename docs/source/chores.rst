@@ -15,7 +15,7 @@ comfortable with having uv installed on your system.
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and recompile the compressed trie using ``make regen-trie``.
+Edit ``assets/words.txt`` and recompile the compressed trie using ``make regen-trie``, checking for regressions using ``make spellcheck``.
 
 Bumping the version
 -------------------
@@ -27,9 +27,10 @@ certain locations, some of which are to be left untouched. Instead, follow these
    is already instantiated from a string to streamline this step.
 2. In pyproject.toml, there may be optional dependencies whose version coincides with the project's, so take care not to modify those as well.
 3. Also exclude the ``CHANGELOG.md`` at the project root from the replace operation.
-4. A core developer of this project will help you create a GitHub release with the default release notes. (Core devs, this is ``make release``.)
-5. This will automatically trigger a stable Read the Docs build, a push to PyPI and cause a conda-forge bot automerge.
-6. If you include your desired remarks in the PR under a "Release Notes" section, those will be used as the release notes instead after the developer
+4. A core developer of this project will help you create a GitHub release with default release notes, since you are not allowed to do so yourself.
+   (Core devs, this is ``make release``.) This will automatically trigger a stable Read the Docs build, a push to PyPI and cause a conda-forge bot
+   automerge.
+5. If you include your desired remarks in the PR under a "Release Notes" section, those will be used as the release notes instead after the developer
    tries their best to correct grammatical or spelling mistakes.
 
 .. note::
@@ -74,10 +75,13 @@ For collaborators and those interested, this is the general procedure:
 Adding a new contextual constant
 --------------------------------
 ..
-  cspell:disable-next-line
+  cspell:disable
 
 The name of the constant should be of the form ``UTILITYNAME_OPTIONALMETHODNAME_DEFAULT_ARGNAMEINCAPS`` if it acts as a dynamic default value, the
 most common case by far. Note the uppercase, underscores and rigid format.
+
+..
+  cspell:enable
 
 After verifying the integrity of the field name according to this metric, navigate to the following locations relative to the project root and
 complete the following:

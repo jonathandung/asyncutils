@@ -13,16 +13,16 @@ from sys import audit
 from time import monotonic
 from _warnings import warn
 class Releasing:
-    __slots__ = '_lock',
-    def __init__(self, l, /): self._lock = l
+    __slots__ = '__lock',
+    def __init__(self, l, /): self.__lock = l
     async def __aenter__(self):
-        if not (l := self._lock).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
+        if not (l := self.__lock).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
         if I.iscoroutine(r := l.release()): await r
-    async def __aexit__(self, *_): await self._lock.acquire()
+    async def __aexit__(self, *_): await self.__lock.acquire()
 class Resource:
-    _inc_cnt = staticmethod(count(1).__next__); __slots__ = '_',
-    def __init__(self): self._ = f'anonymous resource #{self._inc_cnt()}'
-    def __repr__(self): return self._
+    _inc_cnt = staticmethod(count(1).__next__); __slots__ = '__',
+    def __init__(self): self.__ = f'anonymous resource #{self._inc_cnt()}'
+    def __repr__(self): return self.__
 class ResourceGuard(RuntimeError, A.AsyncContextMixin):
     __slots__ = '__', '_t', '_u', 'action', 'guarded'
     def __new__(cls, rsrc=_NO_DEFAULT, *, action='using', t=Resource):
@@ -53,29 +53,29 @@ class UniqueResourceGuard(ResourceGuard):
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
 class CircuitBreaker:
     State = __import__('enum').IntEnum('State', ('CLOSED', 'HALF_OPEN', 'OPEN'), module=__name__)
-    __slots__ = '__exc', '_half_open_calls', '_lock', '_max_fails', '_max_half_open_calls', '_opened', '_reset', '_unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
+    __slots__ = '__exc', '__hoc', '__lock', '__max_hoc', '__mf', '__opened', '__reset', '__unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
     def __new__(cls, n, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
         if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls._inc_cnt()
-        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s._max_fails, s._reset, s.__exc, s._opened, s._max_half_open_calls, s._unlock, s._lock, s.state = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l, cls.State.CLOSED; s.fails = s._half_open_calls = 0; return s if f is None else s(f)
+        audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s.__mf, s.__reset, s.__exc, s.__opened, s.__max_hoc, s.__unlock, s.__lock, s.state = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l, cls.State.CLOSED; s.fails = s.__hoc = 0; return s if f is None else s(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def g(*a, **k):
             C = self.State
-            async with self._lock:
+            async with self.__lock:
                 if (s := self.state) == C.OPEN:
-                    if timer()-self._opened > self._reset: self.state, self._half_open_calls = C.HALF_OPEN, 0
+                    if timer()-self.__opened > self.__reset: self.state, self.__hoc = C.HALF_OPEN, 0
                     else: raise A.CircuitOpen(f'asyncutils.altlocks.CircuitBreaker: circuit {self.name} is open')
                 elif s == C.HALF_OPEN:
-                    if (c := self._half_open_calls) == (m := self._max_half_open_calls): raise A.CircuitHalfOpen(f'asyncutils.altlocks.CircuitBreaker: breaker {self.name} exceeded the maximum of {m} calls in the half-open state')
-                    self._half_open_calls = c+1
+                    if (c := self.__hoc) == (m := self.__max_hoc): raise A.CircuitHalfOpen(f'asyncutils.altlocks.CircuitBreaker: breaker {self.name} exceeded the maximum of {m} calls in the half-open state')
+                    self.__hoc = c+1
                 try:
-                    async with self._unlock: r = await f(*a, **k)
-                    if s == C.HALF_OPEN: self._half_open_calls = self.fails = 0; self.state = C.CLOSED
+                    async with self.__unlock: r = await f(*a, **k)
+                    if s == C.HALF_OPEN: self.__hoc = self.fails = 0; self.state = C.CLOSED
                     return r
                 except self.__exc:
-                    if (x := self.fails+1) < self._max_fails: self.fails = x
-                    else: self._opened, self.state, self.fails = timer(), C.OPEN, 0
+                    if (x := self.fails+1) < self.__mf: self.fails = x
+                    else: self.__opened, self.state, self.fails = timer(), C.OPEN, 0
                     if default is _NO_DEFAULT: raise
                     return default
                 except A.CRITICAL: raise A.Critical
@@ -115,34 +115,34 @@ class StatefulBarrier(A.AwaitableMixin):
     @property
     def n_waiting(self): return self.__cn
 class DynamicThrottle:
-    __slots__ = '_fails', '_jitter', '_lb', '_lc', '_lf', '_lock', '_max', '_min', '_rate', '_rf', '_successes', '_timer', '_ub', '_uf', '_window'
+    __slots__ = '__fails', '__jitter', '__lb', '__lc', '__lf', '__lock', '__max', '__min', '__rate', '__rf', '__successes', '__timer', '__ub', '__uf', '__window'
     def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)): # noqa: PLR0913
         C = A.getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
         if not 0 < min_rate <= init_rate <= max_rate: raise ValueError('asyncutils.altlocks.DynamicThrottle: inconsistent rates after applying bounds')
-        self._min, self._max, self._window, self._lock, self._timer, self._ub, self._lb, self._uf, self._lf, self.jitter, self._rf, self._rate, self._lc = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, I.Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate, timer()-1.0/init_rate; self.reset()
+        self.__min, self.__max, self.__window, self.__lock, self.__timer, self.__ub, self.__lb, self.__uf, self.__lf, self.jitter, self.__rf, self.__rate, self.__lc = min_rate, max_rate, C.DYNAMIC_THROTTLE_DEFAULT_WINDOW if window is None else window, I.Lock(), timer, C.DYNAMIC_THROTTLE_DEFAULT_UBOUND if ubound is None else ubound, C.DYNAMIC_THROTTLE_DEFAULT_LBOUND if lbound is None else lbound, C.DYNAMIC_THROTTLE_DEFAULT_UFACTOR if ufactor is None else ufactor, C.DYNAMIC_THROTTLE_DEFAULT_LFACTOR if lfactor is None else lfactor, C.DYNAMIC_THROTTLE_DEFAULT_JITTER if jitter is None else jitter, rand, init_rate, timer()-1.0/init_rate; self.reset()
     @property
-    def rate(self): return self._rate
+    def rate(self): return self.__rate
     @rate.setter
     def rate(self, rate, /, _=0.01):
-        if abs(1-self._rate/(rate := max(self._min, min(self._max, rate)))) > _: self._rate = rate
+        if abs(1-self.__rate/(rate := max(self.__min, min(self.__max, rate)))) > _: self.__rate = rate
     @property
-    def jitter(self): return self._jitter
+    def jitter(self): return self.__jitter
     @jitter.setter
-    def jitter(self, jitter, /): self._jitter = max(0.0, float(jitter))
+    def jitter(self, jitter, /): self.__jitter = max(0.0, float(jitter))
     @property
-    def ctime(self): return self._timer()
+    def ctime(self): return self.__timer()
     @property
-    def successes(self): return self._successes
+    def successes(self): return self.__successes
     @property
-    def fails(self): return self._fails
-    async def __aenter__(self): await I.sleep((1.0/self._rate-self.ctime+self._lc)*(1.0+self._rf(self._jitter))); self._lc = self.ctime
+    def fails(self): return self.__fails
+    async def __aenter__(self): await I.sleep((1.0/self.__rate-self.ctime+self.__lc)*(1.0+self.__rf(self.__jitter))); self.__lc = self.ctime
     async def __aexit__(self, e, /, *_):
-        async with self._lock:
-            if (t := (s := self._successes)+self._fails) >= self._window: self.rate *= self._uf if (r := s/t) > self._ub else self._lf if r < self._lb else 1.0; self.reset()
-            if e is None: self._successes += 1
-            else: self._fails += 1
-    def reset(self): self._successes = self._fails = 0
+        async with self.__lock:
+            if (t := (s := self.__successes)+self.__fails) >= self.__window: self.rate *= self.__uf if (r := s/t) > self.__ub else self.__lf if r < self.__lb else 1.0; self.reset()
+            if e is None: self.__successes += 1
+            else: self.__fails += 1
+    def reset(self): self.__successes = self.__fails = 0
     P.patch_method_signatures((__aexit__, P.exit_sig))
 del Resource, _randinst, count, P

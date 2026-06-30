@@ -70,7 +70,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         Additional keyword arguments are used to :ref:`substitute %-placeholders in template <python:old-string-formatting>`.
         '''
     def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., no_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
-        '''| Run ``code``, an instance of :class:`types.CodeType`.
+        '''| Run ``code``, an instance of :class:`types.CodeType`, as a callback managed by the event loop, and return its result, or :const:`!STATEMENT_FAILED` if the statement fails.
         | ``futimpl`` is a function that returns an instance of :class:`concurrent.futures.Future`.
         | ``no_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`~asyncio.loop.call_soon_threadsafe` instead of :meth:`~asyncio.loop.call_soon`.

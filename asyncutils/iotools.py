@@ -55,46 +55,46 @@ class AsyncReadWriteCouple(A.LoopContextMixin):
             except AttributeError as e: f(e)
         raise ExceptionGroup(f'asyncutils.iotools.AsyncReadWriteCouple: did not find attribute {n!r}', a) from None
 class File(A.LoopContextMixin): # noqa: PLR0904
-    __slots__ = '_f', '_m', '_n'
+    __slots__ = '__f', '__m', '__n'
     if S.platform != 'win32':
-        def madvise(self, option, start=0, length=None, _=H.filter_out): return self._m.madvise(option, start, *_(length)) # ty: ignore[possibly-missing-attribute]
+        def madvise(self, option, start=0, length=None, _=H.filter_out): return self.__m.madvise(option, start, *_(length)) # ty: ignore[possibly-missing-attribute]
     def read(self, offset=0, size=-1): return self.run(self._read, offset, size)
     def write(self, data, offset=0): return self.run(self._write, data, offset)
     async def readline(self, offset=0, size=None, include_newline=False): return (await self.run(self._readline, offset, size, include_newline))[0]
     async def readlines(self, hint=-1): return list(await self.run(self._readlines, hint))
     async def flush(self, offset=0, size=None, /): return await self.run(self._flush, offset, size)
-    def move(self, dest, src, count): return self.run(self._m.move, dest, src, count)
-    async def __setup__(self): self._m = m = mmap(self._n, 0, access=2).__enter__(); self.mgr.add(m)
-    async def __cleanup__(self): await self.aclose(); self.mgr.discard(self._m)
-    def seek(self, pos, whence=0): return self.run(self._m.seek, pos, whence)
+    def move(self, dest, src, count): return self.run(self.__m.move, dest, src, count)
+    async def __setup__(self): self.__m = m = mmap(self.__n, 0, access=2).__enter__(); self.mgr.add(m)
+    async def __cleanup__(self): await self.aclose(); self.mgr.discard(self.__m)
+    def seek(self, pos, whence=0): return self.run(self.__m.seek, pos, whence)
     def __new__(cls, file, /):
-        if (r := (f := cls.open_files.get)((file, 'r+b'))) is None is (r := f((file, 'w+b'))) is (r := f((file, 'x+b'))): (r := super().__new__(cls))._f, r._n = file, file.fileno()
+        if (r := (f := cls.open_files.get)((file, 'r+b'))) is None is (r := f((file, 'w+b'))) is (r := f((file, 'x+b'))): (r := super().__new__(cls)).__f, r.__n = file, file.fileno()
         return r
-    def __iter__(self): return self._f.__iter__()
-    def __aiter__(self): return A.iter_to_agen(self._f)
+    def __iter__(self): return self.__f.__iter__()
+    def __aiter__(self): return A.iter_to_agen(self.__f)
     def __del__(self): self.make(self.aclose())
     @property
-    def closed(self): return self._f.closed
-    def fileno(self): return self._n
-    def sync(self, _=O.fsync): self._flush(0, None); _(self._n)
-    async def aclose(self): await gather(*map(self.run, (self._m.close, self._f.close)))
-    def close(self): self._m.close(); self._f.close()
-    def read_byte(self): return self._m.read_byte()
-    def write_byte(self, b, /): self._m.write_byte(b)
-    def resize(self, new_size): self._m.resize(new_size)
-    def find(self, sub, start=None, end=None, _=z): return self._m.find(sub, **_(start=start, end=end))
-    def rfind(self, sub, start=None, end=None, _=z): return self._m.rfind(sub, **_(start=start, end=end))
-    def tell(self): return self._m.tell()
-    def size(self): return self._m.size()
-    def isatty(self): return self._f.isatty()
+    def closed(self): return self.__f.closed
+    def fileno(self): return self.__n
+    def sync(self, _=O.fsync): self._flush(0, None); _(self.__n)
+    async def aclose(self): await gather(*map(self.run, (self.__m.close, self.__f.close)))
+    def close(self): self.__m.close(); self.__f.close()
+    def read_byte(self): return self.__m.read_byte()
+    def write_byte(self, b, /): self.__m.write_byte(b)
+    def resize(self, new_size): self.__m.resize(new_size)
+    def find(self, sub, start=None, end=None, _=z): return self.__m.find(sub, **_(start=start, end=end))
+    def rfind(self, sub, start=None, end=None, _=z): return self.__m.rfind(sub, **_(start=start, end=end))
+    def tell(self): return self.__m.tell()
+    def size(self): return self.__m.size()
+    def isatty(self): return self.__f.isatty()
     readable = writable = seekable = AsyncReadWriteCouple.readable
-    def _flush(self, offset, size, _=H.filter_out): self._f.flush(); self._m.flush(offset, *_(size))
-    def _trunc_from(self, data, offset): c = (m := self._m).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
-    def _read(self, offset, size): return self._m[offset:None if size < 0 else offset+size]
-    def _write(self, data, offset): (m := self._m)[offset:self._trunc_from(data, offset)] = data; m.flush()
-    def _readline(self, offset, size, include_newline): return (b'', 0) if offset >= (l := len(m := self._m)) else (m[offset:(q := p if (e := m.find(b'\n', offset, p := (l if size is None else min(offset+size, l)))) == -1 else e+include_newline)], q)
+    def _flush(self, offset, size, _=H.filter_out): self.__f.flush(); self.__m.flush(offset, *_(size))
+    def _trunc_from(self, data, offset): c = (m := self.__m).tell(); m.seek(0, 2); m.resize(max(m.tell(), x := offset+len(data))); m.seek(c); return x
+    def _read(self, offset, size): return self.__m[offset:None if size < 0 else offset+size]
+    def _write(self, data, offset): (m := self.__m)[offset:self._trunc_from(data, offset)] = data; m.flush()
+    def _readline(self, offset, size, include_newline): return (b'', 0) if offset >= (l := len(m := self.__m)) else (m[offset:(q := p if (e := m.find(b'\n', offset, p := (l if size is None else min(offset+size, l)))) == -1 else e+include_newline)], q)
     def _readlines(self, hint, /):
-        if hint < 0: yield from map(bytes, self._m); return
+        if hint < 0: yield from map(bytes, self.__m); return
         f = self._readline
         while hint > 0: b, n = f(0, None, False); yield b; hint -= n
     async def writelines(self, lines, /, *, sep=b'', minimize_writes=None):
@@ -117,7 +117,7 @@ class File(A.LoopContextMixin): # noqa: PLR0904
     async def read_until(self, delim, offset=0, maxsize=-1): return (d, offset+len(d)) if (p := (d := await self.read(offset, maxsize)).find(delim)) == -1 else (d[:p+(l := len(delim))], offset+p+l)
     async def insert(self, data, offset): await self.write(data if offset > await self.run(self.size) else data+await self.read(offset), offset)
     async def delete(self, offset, size):
-        if size <= 0 or offset >= (s := await self.run(self._m.size)): return
+        if size <= 0 or offset >= (s := await self.run(self.__m.size)): return
         if (t := offset+size) < s: await self.write(await self.read(t), offset)
         await self.run(self.resize, max(0, s-size))
     async def replace(self, old, new, offset=0, count=None):
@@ -147,17 +147,17 @@ class File(A.LoopContextMixin): # noqa: PLR0904
         async def run(f, /, *a, r=r): return await r(f, *a)
         cls.mgr, cls.run, cls.open_files = m, run, {}
 class MemoryMappedIOManager(A.LoopContextMixin):
-    __slots__ = '_factory', '_lock'
-    def __init__(self, executor=None, _f=(File,), _=H.create_executor): super().__init__(); self._factory, self._lock = type('_factory', _f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, _(self, False) if executor is None else executor)), Lock()
+    __slots__ = '__factory', '__lock'
+    def __init__(self, executor=None, _f=(File,), _=H.create_executor): super().__init__(); self.__factory, self.__lock = type('__factory', _f, {}, m=__import__('_weakrefset').WeakSet(), r=partial(self.loop.run_in_executor, _(self, False) if executor is None else executor)), Lock()
     @property
-    def open_maps(self): return self._factory.mgr
-    def _run(self, f, /, *a): return self._factory.run(f, *a)
+    def open_maps(self): return self.__factory.mgr
+    def _run(self, f, /, *a): return self.__factory.run(f, *a)
     @property
     def currently_open(self): return len(self.open_maps)
     @property
     def open_paths(self): return dict(self.open_files.keys())
     @property
-    def open_files(self): return self._factory.open_files
+    def open_files(self): return self.__factory.open_files
     @open_files.deleter
     def open_files(self): self.open_files.clear()
     @asynccontextmanager
@@ -165,14 +165,14 @@ class MemoryMappedIOManager(A.LoopContextMixin):
         if (x := (F := self.open_files).get(a)): yield x; return
         with await (r := self._run)(open, *a) as f:
             if s > 0: await r(f.truncate, s)
-            async with self._factory(f) as x:
+            async with self.__factory(f) as x:
                 F[a] = x
                 try: yield x
                 finally: F.pop(a, None)
     def open(self, path, init_size=0): return self._open(init_size, path, 'r+b')
     def create(self, path, init_size=0, *, exclusive=True): return self._open(init_size, path, 'x+b' if exclusive else 'w+b')
     async def __cleanup__(self):
-        async with self._lock: self.open_maps.clear(); await gather(*(f.close() for f in self.open_files.values())); del self.open_files
+        async with self.__lock: self.open_maps.clear(); await gather(*(f.close() for f in self.open_files.values())); del self.open_files
     def __del__(self): self.make(self.__cleanup__())
     async def copy_file(self, src, dest, *, exclusive=True, flush=False):
         async with self.open(src) as s, self.create(dest, exclusive=exclusive) as d:
@@ -181,8 +181,8 @@ class MemoryMappedIOManager(A.LoopContextMixin):
     async def checksum(self, path, alg=None, _=partial(__import__('hashlib').new, usedforsecurity=False)):
         async with self.open(path) as f: return await self._run(_, A.getcontext().MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG if alg is None else alg, await f.read()).hexdigest()
     async def approx_memory_usage(self):
-        async with self._lock: return await self._run(self._memory_usage_helper)
-    def _memory_usage_helper(self): return sum(m.size() for m in self.open_maps)
+        async with self.__lock: return await self._run(self.__muh)
+    def __muh(self): return sum(m.size() for m in self.open_maps)
     @asynccontextmanager
     async def prefetch_files(self, *P, init_size=0, _=S.exc_info):
         l = tuple(map(partial(self.open, init_size=init_size), P))

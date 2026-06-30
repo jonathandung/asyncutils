@@ -98,10 +98,7 @@ class EventBus(LoopContextMixin):
     @property
     def active_tasks(self) -> int: '''The number of callbacks occurring at this moment.'''
     @property
-    def stream_queue(self) -> Queue[Any]:
-        '''| The asynchronous queue to which events are output by :meth:`event_stream`.
-        | The items in the queue are tuples ``(event_type, data)`` if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type.
-        '''
+    def stream_queue(self) -> Queue[Any]: '''An asynchronous queue of tuples ``(event_type, data)`` if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type, to which :meth:`event_stream` outputs events.'''
     @stream_queue.setter
     def stream_queue(self, val: Queue[tuple[str, Any]|Any], /) -> None: ...
     def is_auditing(self) -> bool: '''Whether the event bus is connected to :func:`sys.audit`.'''
@@ -114,7 +111,7 @@ class EventBus(LoopContextMixin):
         | Not an instance method at runtime, just a function as an attribute of the instance.
         '''
     def start_audit(self) -> None: '''Connect the audit hook of the bus to :func:`sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
-    def stop_audit(self) -> None: '''Disconnect the audit hook of the bus. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
+    def stop_audit(self) -> None: '''Disconnect the audit hook of the bus from :func:`sys.audit`. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
     def add_middleware(self, middleware: Middleware) -> int:
         '''| Append a middleware to the back of the pipe of middlewares, and return a permanent cookie that can be passed to :meth:`remove_middleware` to invalidate it. O(1) time.
         | The middleware must take the event type as the first argument and the associated data as the second.
@@ -224,10 +221,7 @@ class Rendezvous[T]:
         | If ``default`` is not passed and ``timeout`` is reached, the :exc:`TimeoutError` is propagated. In any case, the get is cancelled at timeout.
         '''
     def cleanup(self) -> None: '''Clean up the internal getter and putter stacks.'''
-    async def reset(self) -> None:
-        '''| Hard reset the rendezvous. Call from a monitoring task when a deadlock appears to have occurred.
-        | This cancels all pending gets, puts and exchanges; their callers will see :exc:`~asyncio.CancelledError`.
-        '''
+    async def reset(self) -> None: '''Hard reset the rendezvous, cancelling all pending gets, puts and exchanges; their callers will see :exc:`~asyncio.CancelledError`. Call from a monitoring task when, for example, a deadlock appears to have occurred.'''
     def __length_hint__(self) -> int: '''Approximate number of operations pending. Implemented for :func:`operator.length_hint`.'''
     def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, asap: bool=...) -> T:

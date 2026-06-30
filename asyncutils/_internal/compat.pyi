@@ -1,4 +1,4 @@
-'''Various compatibility shims for older Python versions.'''
+'''Compatibility shims for Python 3.12, 3.13 and 3.15.'''
 from .prots import SupportsRichComparison
 from sys import version_info as v
 from collections.abc import Iterable

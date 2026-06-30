@@ -454,7 +454,12 @@ def mat_vec_mul(M: SupportsIteration[SupportsIteration[int]], V: SupportsIterati
 async def vecs_eq[T](u: SupportsIteration[T], v: SupportsIteration[T], cmpeq: Callable[[T, T], object]=..., *, strict: bool=...) -> bool: '''Whether the vectors ``u`` and ``v`` are equal according to ``cmpeq`` called on each pair of items from iterating through them in parallel. If ``strict`` is ``False`` (default ``True``), may return ``True`` even for differently-sized vectors.'''
 async def afreivalds(A: SupportsIteration[SupportsIteration[int]], B: SupportsIteration[SupportsIteration[int]], C: SupportsIteration[SupportsIteration[int]], k: int=...) -> bool: '''Determine if the matrix product of ``A`` and ``B`` equals ``C``. This is the probabilistic Freivalds algorithm. O(kn^2) time, with a false positive rate of at most 2^(-k) and no false negatives.'''
 async def basic_collect[T](it: SupportsIteration[T], n: int) -> list[T]: '''Return a list of the first ``n`` items in the (async) iterable ``it``, signalling no error if there are not enough items.'''
-def asubstrings[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[T, ...]]: '''Yield all the contiguous subsequences of the (async) iterable ``it`` as tuples, in increasing order of length.'''
+def asubstrings[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[T, ...]]:
+    '''Yield all contiguous subsequences of the (async) iterable ``it`` as tuples, in increasing order of length.
+
+    .. seealso:: :func:`asubslices`
+      does the same in a different order.
+    '''
 @overload
 def asubstr_indices[S: (str, bytes, bytearray)](seq: S, reverse: bool=...) -> AsyncGeneratorType[tuple[S, int, int]]: ...
 @overload
@@ -484,7 +489,7 @@ async def aguessmax[T](it: SupportsIteration[T], estlen: int, *, key: Callable[[
 @overload
 async def aguessmax[T](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]=..., default: T=..., finish_event: EventProtocol|None=..., reject_cb: Callable[[T], object], await_cb: Literal[False]=...) -> T: ...
 @overload
-async def aguessmax[T](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]=..., default: T=..., finish_event: EventProtocol|None=..., reject_cb: Callable[[T], Awaitable[object]], await_cb: Literal[True]) -> T: '''Optimal solution to the secretary problem, using ``key`` to guess the maximum item, which is the candidate chosen, with 36.8% accuracy, by finding the maximum among the first 36.8% of the (async) iterable and then returning the first item greater than that afterwards, in O(1) space. ``reject_cb`` is called on every rejected candidate once rejected, its return value awaited if ``await_cb=True`` is passed, and no more than one candidate is ever stored. `This video <https://www.youtube.com/watch?v=XIOoCKO-ybQ>`__ proves that the approach used is best.'''
+async def aguessmax[T](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]=..., default: T=..., finish_event: EventProtocol|None=..., reject_cb: Callable[[T], Awaitable[object]], await_cb: Literal[True]) -> T: '''Optimal solution to the secretary problem, using ``key`` to guess the maximum item, which is the candidate chosen, with 36.8% accuracy, by finding the maximum among the first 36.8% of the (async) iterable and then returning the first item greater than that afterwards, in O(1) space. ``reject_cb`` is called on every rejected candidate once rejected, its return value awaited if ``await_cb=True`` is passed, and no more than one candidate is ever stored. `This Numberphile video <https://www.youtube.com/watch?v=XIOoCKO-ybQ>`__ proves that the approach used is best.'''
 @overload
 async def aguessmin[T](it: SupportsIteration[T], estlen: int, *, key: Callable[[T], SupportsRichComparison]=..., default: T=..., finish_event: EventProtocol|None=..., reject_cb: None=...) -> T: ...
 @overload

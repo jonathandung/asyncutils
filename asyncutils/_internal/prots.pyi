@@ -170,8 +170,7 @@ class QProtBase[R, V](Protocol):
     @property
     def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
     def cancel_extend(self, msg: object=...) -> bool:
-        '''| Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will
-        | be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any.
+        '''| Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any.
         | Return ``False`` if the task is already done or cancelled, or there was no task to begin with.
         '''
     def empty(self) -> bool: '''Check if the queue is empty.'''
@@ -426,7 +425,7 @@ type RWLockCM = AbstractAsyncContextManager[None, None]
 '''The type of the context managers returned by the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''The return type of :func:`~asyncutils.exceptions.wrap_exc`.'''
-Mark1 = NewType('Mark1', FaultyConfig)
+FaultyConfigA = NewType('FaultyConfigA', FaultyConfig)
 '''For better type checking. Unstable.'''
-Mark2 = NewType('Mark2', FaultyConfig)
+FaultyConfigB = NewType('FaultyConfigB', FaultyConfig)
 '''For better type checking. Unstable.'''

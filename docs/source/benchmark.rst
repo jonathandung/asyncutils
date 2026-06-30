@@ -3,9 +3,11 @@ Benchmarks
 
   "Statistics are like bikinis. What they reveal is suggestive, but what they conceal is vital."
 
-  .. cspell:disable-next-line
+  .. cspell:disable
 
   -- Aaron Levenstein, 1951
+
+  .. cspell:enable
 
 .. note::
   :collapsible: closed
@@ -28,7 +30,7 @@ Environment
 
 * ``python -VV`` gives: ``Python 3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]``
 * ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
-* With ``__pycache__`` directories persisted across runs
+* ``__pycache__`` directories are persisted across runs
 
 It would be very nice if somebody could do the benchmarks on Ubuntu or other platforms and add a new section with the same structure detailing the
 results, since asyncio works drastically different on Windows than other systems.
