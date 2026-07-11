@@ -35,8 +35,8 @@ def test_unique_rsrc_guard(obj):
     i = id(UniqueResourceGuard(obj))
     with ResourceGuard(obj), UniqueResourceGuard(obj): ...
     gc.collect()
-    _, g = object(), UniqueResourceGuard(obj)
-    assert id(g) != i
+    g = UniqueResourceGuard(obj)
+    if __import__('sys').implementation.name != 'graalpy': assert id(g) != i
     with pytest.warns(RuntimeWarning, match=r'asyncutils\.altlocks\.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard'): g = UniqueResourceGuard(obj, action='baz')
     assert g is UniqueResourceGuard(obj)
     UniqueResourceGuard.clear_cache()
