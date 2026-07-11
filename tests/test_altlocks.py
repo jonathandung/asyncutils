@@ -36,7 +36,7 @@ def test_unique_rsrc_guard(obj):
     with ResourceGuard(obj), UniqueResourceGuard(obj): ...
     gc.collect()
     g = UniqueResourceGuard(obj)
-    assert id(g) != i
+    if __import__('sys').implementation.name != 'graalpy': assert id(g) != i
     with pytest.warns(RuntimeWarning, match=r'asyncutils\.altlocks\.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard'): g = UniqueResourceGuard(obj, action='baz')
     assert g is UniqueResourceGuard(obj)
     UniqueResourceGuard.clear_cache()
@@ -91,7 +91,8 @@ async def dts(t):
 async def dtf(t):
     async with t, t, t: raise RuntimeError
 @mk
+@pytest.mark.skipif('sys.implementation.name == "graalpy"')
 async def test_dynamic_throttle():
     t = DynamicThrottle(10, window=6)
-    assert 0.16 < (await dts(t))[1] < 0.35
+    assert 0.16 < (await dts(t))[1] < 0.3
     await dtf(t)

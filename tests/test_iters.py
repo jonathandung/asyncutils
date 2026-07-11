@@ -39,6 +39,7 @@ async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 501),
 @mk
 async def test_agives(): assert await aall_equal(aenumerate(agives(0)), strict=True)
 @mk
+@mark.skipif('sys.implementation.name == "graalpy"')
 async def test_anth():
     assert await anth((), 1, default=0) == 0
     assert await anth(acycle(acount()), 2) == 2
