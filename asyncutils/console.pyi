@@ -12,16 +12,16 @@ from typing import Any, ClassVar, Literal, Self, final, overload
 import sys
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or ``_pyrepl.console.InteractiveColoredConsole`` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.'''
+    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`!_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.'''
     BANNER: ClassVar[str]
     '''A %-formattable string representing the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument ``name`` is not provided to the subclass constructor.'''
     if sys.version_info >= (3, 13):
         CAN_USE_PYREPL: ClassVar[bool]
-        '''Whether ``_pyrepl`` enhancements are available and allowed.'''
+        '''Whether :mod:`!_pyrepl` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
-        '''This is present iff ``_pyrepl.console.InteractiveColoredConsole`` is used as the parent of this class.'''
+        '''This is present iff :class`!_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
     else:
         CAN_USE_PYREPL: ClassVar[Literal[False]]
         '''PyREPL is only supported on Python 3.13 and above.'''
@@ -54,12 +54,12 @@ class ConsoleBase(InteractiveConsole, ABC):
     def is_running(self) -> bool: '''Whether the console is running. The default implementation simply returns :attr:`_internal_is_running`.'''
     def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
         '''* ``loop`` (required): Event loop used by console interaction.
-        * ``mod``: The module to import within the console, determined by the subclass name by default.
-        * ``modname``: The name of the above module.
+        * ``mod``: The module to import within the console.
+        * ``modname``: The name of the above module, determined by the subclass name by default.
         * ``context_factory``: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.
         '''
     def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], object]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], object]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], object]]=..., additional_memory_error_hooks: Iterable[Callable[[Self], object]]=..., template: str=..., **k: object) -> None:
-        '''All of the arguments below are optional.
+        r'''All of the arguments below are optional.
 
         * ``name``: name of the module using the console
         * ``version``: version of the module using the console
@@ -67,11 +67,11 @@ class ConsoleBase(InteractiveConsole, ABC):
         * ``default_local_exit``, ``disallow_subclass_msg``, ``native_handler``, ``other_handlers``, ``additional_interrupt_hooks``, ``additional_memory_error_hooks``: see above
         * ``template``: the console banner to use, with %-placeholders for name, version and description
 
-        Additional keyword arguments are used to :ref:`substitute %-placeholders in template <python:old-string-formatting>`.
+        Additional keyword arguments are used to :ref:`substitute %-placeholders in \`\`template\`\` <python:old-string-formatting>`.
         '''
-    def runcode(self, code: CodeType, *, futimpl: Callable[[], Future[Any]]=..., no_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
+    def runcode(self, code: CodeType, *, fimp: Callable[[], Future[Any]]=..., no_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
         '''| Run ``code``, an instance of :class:`types.CodeType`, as a callback managed by the event loop, and return its result, or :const:`!STATEMENT_FAILED` if the statement fails.
-        | ``futimpl`` is a function that returns an instance of :class:`concurrent.futures.Future`.
+        | ``fimp`` is a function that returns an instance of :class:`concurrent.futures.Future`.
         | ``no_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`~asyncio.loop.call_soon_threadsafe` instead of :meth:`~asyncio.loop.call_soon`.
         '''

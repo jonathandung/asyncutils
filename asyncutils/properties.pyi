@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from asyncio import Task
 from collections.abc import Awaitable, Callable
 from enum import IntFlag
+from types import CoroutineType
 from typing import Any, Concatenate, Self, overload
 __all__ = 'AsyncPropertyBase', 'ConcurrentAsyncProperty', 'Deleters', 'LazyAsyncProperty', 'RWLockedAsyncProperty'
 class Deleters(IntFlag):
@@ -22,23 +23,25 @@ class Deleters(IntFlag):
 class AsyncPropertyBase[T, R](ABC):
     '''A property with asynchronous getters, setters and deleters.'''
     @overload
-    def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
+    def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], AsyncPropertyBase[T, R]]: ...
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]|None]|None=..., fdel: Callable[[R], Awaitable[None]|None]|Deleters=..., *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Self:
         '''| Create a new async property with getter ``fget``, setter ``fset`` and deleter ``fdel``.
         | ``fget`` must return an awaitable resolving to the value of the property and take only the instance as argument.
-        | ``fset`` must return either ``None`` or an awaitable resolving to ``None``, and take the instance and value as arguments.
-        | ``fdel`` can be a callable taking the instance as an argument and resolving to ``None`` or an awaitable thereof, or a member of :class:`Deleters` to configure a basic deleter that disallows gets after deletion on the instance in question.
+        | ``fset`` should take the instance and value as arguments.
+        | ``fdel`` can be a callable taking the instance as an argument, or a member of :class:`Deleters` to configure a basic deleter that disallows gets after deletion on the instance in question.
         | If the getter is not provided, return a partial decorator instead. In that overload, none of the accessors are to be passed.
         | ``doc``, if passed, will be the docstring of the property in the form of the :attr:`__doc__` attribute. Otherwise, an attempt is made to find it on the getter.
-        | ``strict`` defaults to ``True``, and controls whether performing an operation that invokes an unset accessor is allowed. If it is ``False``, setters and deleters are also allowed to return something other than ``None``, and accessing the attribute on instances would return the property itself for getter-less properties where normally an :exc:`AttributeError` would have been raised.
+        | ``strict``, which defaults to ``True``, controls whether performing an operation that invokes an unset accessor is allowed.
+        | If ``mutable`` is ``True`` (default ``False``), the property can be reassigned and deleted on the class.
+        | If ``assert_modifiers_return_none=False`` is not passed, the setter and deleter must both return ``None`` or an awaitable resolving to ``None``, which will be awaited.
         | If ``hide`` is ``True`` (default ``False``), accessing the attribute on the class it is defined in would raise :exc:`AttributeError` as if the property didn't exist.
         | Subclasses must define :meth:`wrap_aw`, and are allowed to override :meth:`_init` and :meth:`_repr_accessor`. Nothing else is customizable.
         '''
     @overload
-    async def __get__(self, instance: R, owner: type[R]|None=..., /) -> T: ...
+    def __get__(self, instance: R, owner: type[R]|None=..., /) -> CoroutineType[Any, Any, T]: ...
     @overload
-    async def __get__(self, instance: None, owner: type, /) -> Self: '''Call the getter and return a coroutine resolving to its result.'''
+    def __get__(self, instance: None, owner: type[R], /) -> CoroutineType[Any, Any, Self]: '''Call the getter and return a coroutine resolving to its result.'''
     def __set__(self, instance: R, value: T, /) -> None: '''Note that the setter is to be called with the instance and value as arguments.'''
     def __delete__(self, instance: R, /) -> None: '''Note that the deleter is to be called with the instance as the only argument.'''
     def __set_name__(self, owner: type[R], name: str, /) -> None: '''Bind the property to the class.'''
@@ -107,5 +110,3 @@ class RWLockedAsyncProperty[T, R](ConcurrentAsyncProperty[T, R]):
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]|None]|None=..., fdel: Callable[[R], Awaitable[None]|None]|Deleters=..., *, policy: type[RWLock]=..., doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Self: '''``policy`` is the class used to create the readers-writer lock for the property. It must subclass :class:`~asyncutils.rwlocks.RWLock`.'''
     def _init(self, f: Callable[[R], Awaitable[T]], /, fset: Callable[[R, T], Awaitable[None]|None]|None=..., fdel: Callable[[R], Awaitable[None]|None]|Deleters=..., *, policy: type[RWLock]=..., doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> None: ...
-    @staticmethod
-    def _repr_accessor(v: Callable[..., Awaitable[T|None]|None]|Deleters|None, /) -> str: ...

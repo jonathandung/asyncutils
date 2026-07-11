@@ -1,6 +1,4 @@
-__lazy_modules__ = frozenset(('asyncio.events',))
-from asyncutils._internal import patch as P
-import sys as S
+import asyncutils._internal.patch as P, sys as S
 def filter_out(*a, s=None): yield from filter(lambda x, s=s: s is not x, a)
 def get_loop_and_set(_=(lambda l: l.stop() or l.close()).__get__, f=__import__('atexit').register):
     import asyncio.events as E

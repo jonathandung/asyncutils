@@ -4,7 +4,7 @@
 '''
 from .helpers import Bag
 from typing import Any, Final, overload
-N: Final[Bag]
+N: Final[Bag[Any]]
 '''The frozen part of the configuration as a light namespace-like object.'''
 C: Final[dict[str, Any]]
 '''The contextual portion of the configuration as a flattened :class:`dict` mapping upper-case keys to values.'''

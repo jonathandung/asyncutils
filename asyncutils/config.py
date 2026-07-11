@@ -79,9 +79,9 @@ match logging_to := g('log_to'):
         except OSError as b: s.write(f'ERROR: {b}\n')
         except Exception as b: s.write(f'ERROR: unexpected error opening log file: {b}\n')
 if M: s.write('ERROR: Failed to create log file; falling back to stderr\n')
-l.addHandler(_)
 _.setStream(s)
 _.setFormatter(L.Formatter('%(asctime)s - asyncutils - %(levelname)s - %(message)s'))
+l.addHandler(_)
 (set_logger_level := lambda level, h=_, l=l: l.setLevel(level) or h.setLevel(level))(10*min(max(3-N.V+N.Q, 1), 5))
 class Debugging:
     __slots__ = 'orig_level', 'orig_name'
@@ -103,15 +103,14 @@ class Debugging:
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'
     P.patch_method_signatures((__enter__, ''), (__exit__, P.exit_sig))
-debug = Debugging()
+debug, p = Debugging(), (A := I.A).pop
 I.p = d = l.debug # ty: ignore[invalid-assignment]
 if N.debug:
     debug.__enter__(); d('python %s', S.version) # noqa: PLC2801
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
     if c: d('config file path: %s', c)
-__import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
-p = (A := I.A).pop
 while A: d(*p())
+__import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
 def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
@@ -120,5 +119,5 @@ P.patch_function_signatures((__getattr__, 'name, /'), (set_logger_level, 'level'
 if loaded_all:
     i = I.Module.load
     for _ in I.s.values(): i(_) # ty: ignore[invalid-argument-type]
-    l.debug('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
+    d('all submodules loaded in %.2f milliseconds', __import__('asyncutils').time_since_boot())
 del _, e, L, M, N, S, f, m, r, s, o, P, g, k, l, c, d, I

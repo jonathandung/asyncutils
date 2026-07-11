@@ -1,1 +1,1 @@
-'''The `tests` directory holds tests for the asyncutils package.'''
+'''Holds tests for :mod:`asyncutils`.'''

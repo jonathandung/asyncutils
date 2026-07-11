@@ -6,17 +6,17 @@ hide-toc: true
 
 All notable changes to this project are and will be documented in this file.
 
-This project uses [Semantic Versioning](https://semver.org).
+This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ## Summary
 
 ### Tests
 
-59% coverage, 85 tests
+58% coverage, 87 tests
 
 ### Docs
 
-95% complete
+96% complete
 
 ## Versions
 
@@ -27,7 +27,16 @@ Breaking changes:
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
 
-### [1.0.1] - 2026-06-30; newest
+### [1.1.0] - 2026-07-11; newest
+
+Semantic versioning be damned! No one uses this project anyway.
+
+### [1.0.2] - skipped
+
+Added more tests; mangled private attributes in multiple classes; made some refactors; implemented `iters.group_from`, `iters.awindowed_complete`,
+`iters.aall_unique`, `iters.anth_product`, `iters.anth_permutation`, `iters.anth_combination_with_replacement`.
+
+### [1.0.1] - 2026-06-30
 <!--cspell:disable-next-line-->
 Implemented `util.evaluate_and_return`, `iters.awrapf`, and `exceptions.ignore_warnings`; added `reject_cb` and `await_cb` parameters to
 `iters.aguessmax` and `iters.aguessmin`; added `yield_sentinel` keyword argument to `util.aiter_from_f`.

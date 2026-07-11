@@ -10,7 +10,7 @@ Benchmarks
   .. cspell:enable
 
 .. note::
-  :collapsible: closed
+  :collapsible:
 
   The above quote is not to downplay the importance of this document, but the performance of async code depends heavily on the event loop
   implementation, which is not well captured by this data because only import time is counted.
@@ -22,8 +22,8 @@ not at all heavy in terms of import time. In addition, you only pay for what you
 you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast and light
 because of its design goals and philosophy.
 
-The figures below are obtained by running each of the following sequentially with no warmup elevenfold in a fresh console session, then discarding
-the first run because it is treated as a warmup:
+The figures below are obtained by running each of the following sequentially with no warmup elevenfold in a fresh console session and discarding
+the first run (warmup):
 
 Environment
 -----------

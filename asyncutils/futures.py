@@ -13,18 +13,18 @@ def f(a, /):
         return r
     return remove_callback
 class A:
-    def __init__(self, *a, **k): super().__init__(*a, **k); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = (c := self._mcb)(), c(), c()
+    def __init__(self, *a, **k): super().__init__(*a, **k); self._async_callbacks, self._noargs_callbacks, self._noargs_async_callbacks = (c := type(self)._mcb)(), c(), c()
     def add_async_callback(self, f, /, *, context=None):
-        if self._state == 'PENDING': self._acb(self._async_callbacks, f, context)
+        if self._state == 'PENDING': type(self)._acb(self._async_callbacks, f, context)
         else: self._loop.create_task(simple_wrap(f(self)), context=context)
     def add_noargs_callback(self, f, /, *, context=None):
-        if self._state == 'PENDING': self._acb(self._noargs_callbacks, f, context)
+        if self._state == 'PENDING': type(self)._acb(self._noargs_callbacks, f, context)
         else: self._loop.call_soon(f, context=context)
     def add_noargs_async_callback(self, f, /, *, context=None):
-        if self._state == 'PENDING': self._acb(self._noargs_async_callbacks, f, context)
+        if self._state == 'PENDING': type(self)._acb(self._noargs_async_callbacks, f, context)
         else: self._loop.create_task(simple_wrap(f()), context=context)
     def _Future__schedule_callbacks(self): # noqa: N802
-        audit(f'{fullname(self)}/schedule_callbacks', id(self)); a, b = (l := self._loop).create_task, l.call_soon; c, d, e, f = map(self._icb, (self._async_callbacks, self._callbacks, self._noargs_async_callbacks, self._noargs_callbacks))
+        audit(f'{fullname(self)}/schedule_callbacks', id(self)); a, b = (l := self._loop).create_task, l.call_soon; c, d, e, f = map(type(self)._icb, (self._async_callbacks, self._callbacks, self._noargs_async_callbacks, self._noargs_callbacks))
         for g, _ in c: a(g(self), context=_)
         for g, _ in d: b(g, self, context=_)
         for g, _ in e: a(g(), context=_)
@@ -32,19 +32,12 @@ class A:
 class B:
     def __init__(self, *a, **k): self._creation_time = monotonic_ns(); super().__init__(*a, **k)
     def __lt__(self, o, /): return self._creation_time < o._creation_time
-class C(A):
-    _icb, _mcb = staticmethod(copy_and_clear), list; remove_done_callback, remove_async_callback, remove_noargs_callback, remove_noargs_async_callback = map(f, t)
-    @staticmethod
-    def _acb(a, f, c, /): a.append((f, c or copy_context()))
+class C(A): _acb, _icb, _mcb = lambda a, f, c, /: a.append((f, c or copy_context())), copy_and_clear, list; remove_done_callback, remove_async_callback, remove_noargs_callback, remove_noargs_async_callback = map(f, t)
 class D(A):
-    _mcb = dict; remove_done_callback, remove_async_callback, remove_noargs_callback, remove_noargs_async_callback = map(lambda a, /: lambda self, f, a=a, /: 0 if getattr(self, a).pop(f, None) is None else 1, t)
-    @staticmethod
-    def _acb(a, f, c, /): a[f] = c or copy_context()
-    @staticmethod
-    def _icb(d, /): return tuple(d.items())
+    _acb, _icb, _mcb = lambda a, f, c, /: a.__setitem__(f, c or copy_context()), lambda d, /: tuple(d.items()), dict; remove_done_callback, remove_async_callback, remove_noargs_callback, remove_noargs_async_callback = map(lambda a, /: lambda self, f, a=a, /: 0 if getattr(self, a).pop(f, None) is None else 1, t)
     def __init__(self, *a, **k): super().__init__(*a, **k); self._callbacks = {}
     def add_done_callback(self, f, /, *, context=None):
-        if self._state == 'PENDING': self._acb(self._callbacks, f, context)
+        if self._state == 'PENDING': type(self)._acb(self._callbacks, f, context)
         else: self._loop.call_soon(f, self, context=context)
 class TimeAwareFuture(B, Future): ...
 class TimeAwareTask(B, Task): ...

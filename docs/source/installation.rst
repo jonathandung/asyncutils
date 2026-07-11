@@ -5,22 +5,36 @@ Installation
 
 You are advised to ensure that your package manager is updated to the latest version as follows::
 
-  # pip:
-  pip install -U pip
-  # pipx:
-  pip install -U pipx
-  # conda:
-  conda update conda anaconda
-  conda update --all # optional
-  # uv (preferred for modernity, speed and compatibility with this project):
+  # uv (preferred for modernity, speed and compatibility with this project)
   uv self update # may not work if uv was installed with pip
   pip install -U uv # in that case
-  # poetry:
-  poetry self update
-  # pdm:
-  pip install -U pdm
-  # pipenv:
-  pip install -U pipenv
+  pip install -U pip # pip
+  pip install -U pipx # pipx
+  # conda
+  conda update conda anaconda
+  conda update --all # optional
+  poetry self update # poetry
+  pip install -U pdm # pdm
+  pip install -U pipenv # pipenv
+
+Optionally make and activate a virtual environment::
+
+  uv venv # uv
+  pipenv shell # pipenv
+  poetry shell # poetry
+  hatch shell # hatch
+  python -m venv .venv # standard library
+  virtualenv venv # virtualenv
+  # conda
+  conda create --name asyncutils
+  conda activate asyncutils
+  # pyenv-virtualenv
+  pyenv virtualenv 3.14.6 asyncutils
+  pyenv activate asyncutils
+  # manual activation (venv, virtualenv):
+  . .venv/bin/activate # bash/zsh
+  . .venv/bin/activate.fish # fish
+  . .venv/bin/activate.csh # (t)csh
 
 Next, install py-asyncutils:
 
@@ -36,7 +50,7 @@ Next, install py-asyncutils:
   uv pip install -e .
   make install
   make install-silent # no clutter
-  # the last two options need GNU Make on *nix, but the Windows version points to a batch file.
+  # the last two options need GNU Make on Unix-like systems, but the Windows version points to a batch file.
   # uv is invoked under the hood and installed if absent; pip is not needed!
 
 other installation pathways:
@@ -54,7 +68,7 @@ other installation pathways:
   poetry add py-asyncutils@|version| # poetry
   pdm add py-asyncutils==|version| # pdm
   pipenv install py-asyncutils==|version| # pipenv
-  # no package manager (needs the build and installer packages)
+  # no package manager (needs Python and the build and installer packages)
   python -m build # generate sdist and wheel in dist/
   python -m installer dist/*.whl # install from the wheel
 

@@ -46,12 +46,12 @@ class ExceptionWrapper:
 exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # ty: ignore[unresolved-attribute]
 @H.subscriptable
 class ref: # noqa: N801
-    __slots__ = '__obj',
+    __slots__ = '__o',
     def __new__(cls, obj, r=__import__('_weakref').ref):
         if isinstance(obj, (cls, r)): return obj
         try: return r(obj)
-        except TypeError: (_ := object.__new__(cls)).__obj = obj; return _
-    def __call__(self): return self.__obj # ty: ignore[unresolved-attribute]
+        except TypeError: (_ := object.__new__(cls)).__o = obj; return _
+    def __call__(self): return self.__o # ty: ignore[unresolved-attribute]
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @H.subscriptable
 class Critical(BaseException):
@@ -95,6 +95,8 @@ class PoolError(RuntimeError): ...
 class PoolFull(PoolError): ...
 class PoolShutDown(PoolError): ...
 class ResourceBusy(RuntimeError): ...
+class MoreThanOne(ValueError):
+    def __init__(self, i, m, /): self.it = i; super().__init__(m)
 class BusError(Exception): ...
 class BusTimeout(BusError, TimeoutError): ...
 class BusShutDown(BusError): ...

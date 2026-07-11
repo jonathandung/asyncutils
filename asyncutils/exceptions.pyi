@@ -4,11 +4,11 @@ from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
 from collections.abc import Callable, Iterable
-from types import GeneratorType, TracebackType
+from types import AsyncGeneratorType, GeneratorType, TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, final, overload
 from typing_extensions import TypeIs
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'MoreThanOne', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> GeneratorType[BaseException, BaseException]:
@@ -116,6 +116,11 @@ class EventValueError(ValueError): '''Raised when a party attempts to get the va
 class FutureCorrupted(RuntimeError): '''Raised after an internal party discovers an external party has set the result of a future whose result is for it to set only.'''
 class MaxIterationsError(RuntimeError): '''Raised when a function has reached the specified maximum iterations.'''
 class ItemsExhausted(ValueError): '''Raised when an asynchronous iterable runs out of items to take or collect.'''
+class MoreThanOne[T](ValueError):
+    '''Raised when :func:`~asyncutils.iters.at_most_one` finds more than one item in the iterable it was passed.'''
+    def __init__(self, it: AsyncGeneratorType[T], msg: str, /): ...
+    @property
+    def it(self) -> AsyncGeneratorType[T]: '''An async iterator over the original iterable. The second item is the offending item.'''
 class RateLimitExceeded(RuntimeError):
     '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
 

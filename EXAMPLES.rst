@@ -105,5 +105,5 @@ behavioural differences, and the same arguments that the :mod:`asyncutils` shell
 .. ifconfig:: py313
 
   If you're on Python 3.13 or above and in the integrated shell of VS Code, it is recommended that you unset the :envvar:`PYTHON_BASIC_REPL`
-  environment variable or turn off shell integration for a better experience in my opinion, since this console does not work well building on the
-  pre-3.13 REPL at all.
+  environment variable or turn off shell integration for a better experience in my opinion, since this console does not work well with the pre-3.13
+  REPL at all.

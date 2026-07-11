@@ -6,7 +6,6 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from types import AsyncGeneratorType, GeneratorType
 from typing import Any, Literal, Self, overload
-from typing_extensions import TypeIs
 from weakref import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopContextMixin):
@@ -81,8 +80,6 @@ class EventBus(LoopContextMixin):
     def subscribers_for(self, event_type: WildcardType) -> WeakSet[WildcardSubscriber]: '''Return a :class:`weakref.WeakSet` of subscribers for the event type.'''
     def events(self) -> set[str]: '''Return a set of the names of the current event types.'''
     def has_subscribers(self, event_type: str|WildcardType) -> bool: '''Whether the event type has any subscribers.'''
-    @staticmethod
-    def is_valid_event_type(event_type: object) -> TypeIs[str|WildcardType]: '''Whether the object is a valid event type (i.e. a string or wildcard).'''
     @overload
     def is_subscribed(self, subscriber: SpecificSubscriber, event_type: str=...) -> bool: ...
     @overload
@@ -155,8 +152,8 @@ class EventBus(LoopContextMixin):
     async def publish(self, event_type: str, data: object=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None:
         '''| Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout ``timeout``.
         | Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
-        | If ``wait`` is ``False`` (default ``True``), don't wait for the publication to complete.
-        | If ``safe`` is ``False`` (default ``True``), don't wrap callbacks with proper error handling.
+        | If ``wait`` is ``False`` (default ``True``), possibly return before the publication completes.
+        | If ``safe`` is ``False`` (default ``True``), drop error handling logic in callback execution.
         | ``chaperone``, if passed, should be a function processing non-severe exceptions (instances of :exc:`Exception` and :exc:`ExceptionGroup`) in the callbacks.
         | Otherwise, these exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and propagated; the caller should be prepared to handle that case.
         '''

@@ -29,7 +29,6 @@ class LineProtocol(Protocol, LoopMixinBase):
     def signal_eof(self) -> None: '''Signal that the stream is at EOF.'''
     def pause_writing(self) -> None: '''Called when the transport's buffer goes over the high watermark.'''
     def resume_writing(self) -> None: '''Called when the transport's buffer drains below the low watermark.'''
-    def _put_line(self, data: bytes) -> None: '''Put the given ``data`` into the buffer as a single line.'''
     def write_line(self, line: str) -> None: '''Write the string ``line`` to the transport, followed by the newline sequence.'''
     def write_literal(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline.'''
     def eof_received(self) -> None: '''Receive the signal from the other end that it won't send any more data, for example when :meth:`~asyncio.WriteTransport.write_eof` is called, which closes the transport.'''
@@ -42,12 +41,11 @@ class CRLFProtocol(LineProtocol): '''Carriage Return + Line Feed (CRLF) protocol
 class CRProtocol(LineProtocol): '''Carriage Return (CR) protocol. For legacy systems no longer officially supported by Python, such as Mac OS 9, such that this will never be chosen as the default.'''
 class SocketTransport(Transport):
     '''A thread-unsafe transport designed to connect :class:`LineProtocol`'s to sockets. Subclasses may choose to support more protocols.'''
-    @staticmethod
-    def make_protocol() -> LineProtocol: '''Return a new protocol compatible with this transport. The default implementation returns a :class:`LineProtocol`, so if overriding this in subclasses, remember to add override suppression comments for your type checker as appropriate.'''
+    ptc: type[Protocol]
+    '''The protocol class this transport should use.'''
     @property
     def loop(self) -> AbstractEventLoop: '''Override this if the type of the protocols this transport accepts is altered in subclasses.'''
     def __init__(self, sock: socket|None=...): '''Initialize the transport, connecting the socket immediately if given.'''
-    def _reset_extra(self) -> None: ...
     def connect_sock(self, sock: socket=...) -> None: '''Connect the transport to the given socket.'''
     def disconnect_sock(self) -> socket|None: '''Disconnect the transport from its socket and return it, or ``None`` if not connected.'''
     def sock_context(self, sock: socket) -> DualContextManager[None]: '''Return a context manager, that works in both sync and async, that connects the transport to the given socket on entry and disconnects it on exit.'''

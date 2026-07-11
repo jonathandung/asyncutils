@@ -15,7 +15,7 @@ comfortable with having uv installed on your system.
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and recompile the compressed trie using ``make regen-trie``, checking for regressions using ``make spellcheck``.
+Edit ``assets/words.txt`` and check for regressions with ``make spellcheck``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
 
 Bumping the version
 -------------------
@@ -39,6 +39,12 @@ certain locations, some of which are to be left untouched. Instead, follow these
   There is no lower bound on the number of patches per minor, though because support for packing versions into integers in a specific format must
   be supported, and there is concern of code churn or low-quality changes, the upper bound is 256, i.e. the numbers from 0 to 255.
   The same applies for minor releases per major, but we aim to drop majors every year and minors per month, so this should be a non-issue.
+
+Implementing a new utility
+--------------------------
+
+Add proper stubs for it in the .pyi file and include it in the appropriate ``<submodule>_all`` declaration in ``asyncutils/_internal/submodules.py``.
+Also add tests such that the coverage does not dip past a certain extent.
 
 Adding a new submodule
 ----------------------

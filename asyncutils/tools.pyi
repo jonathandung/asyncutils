@@ -21,7 +21,7 @@ def get_cfg_json_format() -> str:
     | :func:`print_cfg_json_format` is perhaps more useful.
     | If you would like a format schema for other languages, a programmatic approach would likely be unnecessary; you can just use an online tool implementing a browser-based converter.
     '''
-def print_cfg_json_format(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the above format into the specified file and flush it (default :data:`~sys.stdout`).'''
+def print_cfg_json_format(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the format, as gotten by :func:`get_cfg_json_format`, into the specified file and flush it (default :data:`~sys.stdout`).'''
 def get_cmd_help() -> str:
     '''Return the command line help as a string containing ANSI colour escape sequences.
 
@@ -34,7 +34,7 @@ def get_cmd_help() -> str:
 
       This is actually a bound method of the library's argument parser at runtime.
     '''
-def print_cmd_help(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the above help into the specified file (default :data:`~sys.stdout`) and flush it.'''
+def print_cmd_help(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the help, as returned by :func:`get_cmd_help`, into the specified file (default :data:`~sys.stdout`) and flush it.'''
 def find_help_url(obj: object=..., /) -> str:
     '''Get the URL of the :mod:`asyncutils` documentation page for ``obj``. See the supported calling patterns `here <https://asyncutils.readthedocs.io/en/stable/examples.html>`__.
 

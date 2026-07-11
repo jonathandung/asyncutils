@@ -1,9 +1,9 @@
 '''Exports sentinels and public constants.'''
-from ._internal.prots import Executor, RaiseType
+from ._internal.prots import Executor, NoCoalesce, Raise
 from collections.abc import Callable
 from threading import Lock
 from typing import Final, Self
-__all__ = 'EXECUTORS_FROZENSET', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIPROCAL_E', 'SentinelBase'
+__all__ = 'EXECUTORS_FROZENSET', 'NO_COALESCE', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIPROCAL_E', 'SentinelBase'
 RECIPROCAL_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`~asyncutils.iters.aguessmin` and :func:`~asyncutils.iters.aguessmax`.'''
 POSSIBLE_EXECUTORS: Final[tuple[Executor, ...]]
@@ -26,6 +26,7 @@ class SentinelBase:
     def back(self) -> str|None: '''The unqualified name of the sentinel, or ``None`` if there is none.'''
     @property
     def module(self) -> str: '''The name of the module the sentinel is defined in.'''
-    def is_(self, other: object, /) -> bool: '''Whether the sentinel is identical to the other.'''
-RAISE: Final[RaiseType]
-'''Can be passed to some functions that are documented to support it, so that errors will be raised in the specified cases.'''
+RAISE: Final[Raise]
+'''Sentinel requesting an error be raised in some cases. Can only be passed to functions that are documented to support it.'''
+NO_COALESCE: Final[NoCoalesce]
+'''Sentinel requesting :func:`~asyncutils.iters.coalesce` not to combine two adjacent values.'''

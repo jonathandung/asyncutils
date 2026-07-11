@@ -44,7 +44,7 @@ class TestProp:
     @mk
     async def test_rp(self):
         self.rp = 40
-        assert await self.rp == 40
+        assert await self.rp == 40 # ty: ignore[invalid-await]
         del self.rp
         with raises(AttributeError): await self.rp
         assert not hasattr(self, '_rp')

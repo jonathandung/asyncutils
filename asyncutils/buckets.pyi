@@ -1,6 +1,7 @@
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import ExcType, Timer
 from .mixins import AsyncContextMixin
+from ty_extensions import JustFloat
 from types import TracebackType
 from typing import overload
 __all__ = 'LeakyBucket', 'TokenBucket'
@@ -34,7 +35,7 @@ class LeakyBucket(AsyncContextMixin[LeakyBucket], LoopMixinBase):
     @overload
     def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Stop draining the tokens in the bucket.'''
     async def acquire(self, amount: float=...) -> bool: '''Attempt to add ``amount`` tokens to the bucket immediately (default :const:`~asyncutils.context.Context.LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS`); return success.'''
-    async def wait_for_tokens(self, amount: float=...) -> float:
+    async def wait_for_tokens(self, amount: float=...) -> JustFloat:
         '''Keep asynchronously sleeping, with a maximum interval of :const:`~asyncutils.context.Context.LEAKY_BUCKET_WAIT_FOR_TOKENS_TICK` each time, until ``amount`` tokens can be added to the bucket *at once* (default :const:`~asyncutils.context.Context.LEAKY_BUCKET_DEFAULT_WAIT_FOR_TOKENS_TOKENS`), and do so, returning the total wait time.
 
         .. note::

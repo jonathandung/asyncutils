@@ -29,7 +29,7 @@ async def test_pwd_q(pwd):
     assert t.done()
     assert t.result() == 3
     assert Q.empty()
-    with raises(PutPasswordMissing): await Q.put(-4)
+    with raises(PutPasswordMissing): await Q.put(-4) # ty: ignore[missing-argument]
     with raises(WrongPassword): Q.put_nowait(-5, b'')
     with raises(WrongPasswordType): await Q.put(-6, 123)
     with raises(QueueEmpty): Q.get_nowait()

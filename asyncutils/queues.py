@@ -22,7 +22,7 @@ class Q:
     def __repr__(self): return f'<password-protected queue at {id(self):#x}>'
     def __new__(cls, /, *a, _=f.__get__, x='pwd_q.'):
         (f := _(s := super().__new__(cls)))(*next(i := zip(cls.__slots__, a, strict=True)))
-        for n, v in i: v.__qualname__ = x+n; f(n, v)
+        for n, v in i: v.__qualname__, v.__name__ = x+n, n; f(n, v)
         return s
     def __init_subclass__(cls, e=exc('subclass'), /, **_): raise e
     def _get(self, _=exc('call _get() on')): raise _
@@ -32,7 +32,7 @@ class Q:
     def maxsize(self): return self._ms # ty: ignore[unresolved-attribute]
     P.patch_method_signatures((_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__init_subclass__, '**k'), (__new__, 'maxsize, cancel_extend, change_get_password, change_put_password, empty, full, get, get_nowait, join, put, put_nowait, qsize, shutdown, task_done, /'))
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=Q): # noqa: C901,PLR0913,PLR0915
-    audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C, E, G, P, U, S, m, b = A.getcontext(), A.done_evt(), deque(), deque(), 0, False, (L := get_loop_and_set()).create_future, object()
+    audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C, E, y, z, U, S, m, b = A.getcontext(), A.done_evt(), (G := deque()).append, (P := deque()).append, 0, False, (L := get_loop_and_set()).create_future, object()
     try: F = _getframe(1)
     except ValueError: F = None
     if protect_get:
@@ -62,11 +62,11 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     if priority: g, p = partial((M := Z if lifo else __import__('heapq')).heappop, l := []), partial(M.heappush, l)
     else: g, p = (l := []).pop if lifo else (l := deque()).popleft, l.append
     async def get(*p):
-        u(p); _ = G.append
+        u(p)
         while not l:
             if S: raise D.QueueShutDown
             F = m()
-            try: _(F); await F
+            try: y(F); await F
             except:
                 F.cancel()
                 with A.ignore_valerrs: G.remove(F)
@@ -78,10 +78,10 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
         if _ is not b: u(p)
         i = g(); _wakeup_next(P); return i
     async def put(i, /, *p):
-        v(p); _ = P.append
+        v(p)
         while full():
             if S: raise D.QueueShutDown
-            _(F := m())
+            z(F := m())
             try: await F
             except:
                 F.cancel()
@@ -231,7 +231,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def map(self, f, stop_when=None, *, lifo=False):
         audit(f'{fullname(self)}.map', id(self), fullname(f))
         if stop_when is None:
-            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, QueueEmpty)
+            stop_when, E = A.AsyncCallbacksFuture(loop=self.loop), (D.QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i
@@ -251,7 +251,7 @@ class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta):
     def starmap(self, f, stop_when=None, *, lifo=False):
         audit(f'{fullname(self)}.starmap', id(self), fullname(f))
         if stop_when is None:
-            stop_when, E = A.AsyncCallbacksFuture(), (D.QueueShutDown, QueueEmpty)
+            stop_when, E = A.AsyncCallbacksFuture(loop=self.loop), (D.QueueShutDown, QueueEmpty)
             async def get(g=self.drain_until_empty, /): # noqa: RUF029
                 try:
                     for i in g(): yield i

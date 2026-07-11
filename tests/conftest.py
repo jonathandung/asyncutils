@@ -10,9 +10,9 @@ def config_json(config_json_file, contents):
         yield n; import json as J
         with open(n, encoding='utf-8') as f: assert J.load(f).items() >= J.loads(contents).items()
     finally: __import__('os').unlink(n)
+mk = pytest.mark.asyncio
 @dec
 def contents(): return '{"load_all": true, "V": 2, "max_memory_errors": 5}'
 def pytest_configure(config):
-    global mk # noqa: PLW0603
-    mk = pytest.mark.asyncio_cooperative if config.pluginmanager.hasplugin('asyncio-cooperative') else pytest.mark.asyncio # cspell:disable-line
+    if config.pluginmanager.hasplugin('asyncio-cooperative'): global mk; mk = pytest.mark.asyncio_cooperative # noqa: PLW0603 # cspell:disable-line
     asyncutils._internal.patch.patch_aio_logs()

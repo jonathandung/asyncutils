@@ -114,11 +114,11 @@ async def safe_cancel_batch(t, /, *, callback=None, disembowel=False, raising=Fa
     async for F in (adisembowel if disembowel else iter_to_agen)(t):
         if not F.done(): F.cancel(); a(F)
     r = await I.gather(*l, return_exceptions=True)
-    if callback is not None:
-        async def f(a, /, _=callback): return (await r) if I.iscoroutine(r := _(a)) else r
-        L = len(r := await I.gather(*map(f, r), return_exceptions=True))
-        if raising and (E := tuple(A.unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'asyncutils.base.safe_cancel_batch: {f'flattened {L} exception (groups)' if len(E) < L else f'collected {L} exceptions'} thrown by callback function {callback!r}', E)
-async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, d=0x400, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, b, /, _=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in _ if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t is StopAsyncIteration else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,C901,PLR0912,PLR0913
+    if callback is None: return
+    async def f(a, /, _=callback): return (await x) if I.iscoroutine(x := _(a)) else x
+    L = len(r := await I.gather(*map(f, r), return_exceptions=True))
+    if raising and (E := tuple(A.unnest_reverse(*filter(BaseException.__instancecheck__, r)))): raise BaseExceptionGroup(f'asyncutils.base.safe_cancel_batch: {f'flattened {L} exception (groups)' if len(E) < L else f'collected {L} exceptions'} thrown by callback function {callback!r}', E)
+async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, create_executor=None, strict=None, a=c, b=b, c=H.check, s=H.create_executor, h=H.get_loop_and_set, w=L.debug, d=0x400, _=type('', (), {'__slots__': ('it',), '__init__': lambda self, it: setattr(self, 'it', it), '__bool__': lambda self, _=b: _(self.it, 'send', 'throw', 'close'), '__enter__': lambda self: None, '__exit__': lambda self, t, v, _, /, e=frozenset((StopAsyncIteration, StopIteration)), f=frozenset(('StopIteration interacts badly with generators and cannot be raised into a Future', 'async generator raised StopIteration')): False if t is None else str(v) in f if t is RuntimeError else (((True if (C := getattr(self.it, 'close', None)) is None else C()) if t in e else (True if (T := getattr(self.it, 'throw', None)) is None else T(v))) or True)})): # noqa: ARG005,C901,PLR0912,PLR0913
     # ruff: disable[ASYNC119]
     audit('asyncutils.base.iter_to_agen', a(it))
     if type(it) in Z.s:
@@ -190,24 +190,24 @@ def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H
             else:
                 p = ait.__anext__
                 while True: yield a(p())
-async def take(it, n=None, *, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base.take: ran out of items'):
+async def take(it, n=None, default=_NO_DEFAULT, _=L.debug, m='asyncutils.base.take: ran out of items to take'):
     if n is None:
         async for i in iter_to_agen(it): yield i
         if default is _NO_DEFAULT: return
         while True: yield default
     if n == 0: return
-    async for n, i in aenumerate(it, n-1, step=-1): # noqa: B020,PLR1704
+    async for n, i in aenumerate(it, n-1, -1): # noqa: B020,PLR1704
         yield i
         if n == 0: return
     if default is RAISE: raise A.ItemsExhausted(m)
     if default is _NO_DEFAULT: _(m)
     else:
         for _ in repeat(default, n): yield _
-async def collect(it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items'): return [i async for i in take(it, n, default=default, m=_)]
-async def collect_into(out, it, n=None, *, default=_NO_DEFAULT, _='asyncutils.base.collect_into: ran out of items'):
+async def collect(it, n=None, default=_NO_DEFAULT, _='asyncutils.base.collect: ran out of items to collect'): return [i async for i in take(it, n, default, m=_)]
+async def collect_into(out, it, n=None, default=_NO_DEFAULT, _='asyncutils.base.collect_into: ran out of items to collect'):
     a = out.append
-    async for i in take(it, n, default=default, m=_): a(i)
-async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items'):
+    async for i in take(it, n, default, m=_): a(i)
+async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran out of items to drop'):
     it = iter_to_agen(it)
     if n == 0:
         async for i in it: yield i
@@ -218,9 +218,9 @@ async def drop(it, n, *, raising=False, _=L.debug, m='asyncutils.base.drop: ran 
         if raising: raise A.ItemsExhausted(m)
         _(m); return
     async for j in it: yield j
-async def aenumerate(it, start=0, *, step=1):
+async def aenumerate(it, start=0, step=1):
     async for _ in iter_to_agen(it): yield start, _; start += step
-P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None, strict=None'), (collect, 'it, n=None, *, default={}'), (take, 'it, n, *, default={}'), (drop, 'it, n, *, raising=False'))
+P.patch_function_signatures((safe_cancel_batch, 'batch, /, *, callback=None, disembowel=False, raising=False'), (iter_to_agen, 'it, sentinel={}, *, use_existing_executor=None, create_executor=None, strict=None'), (aiter_to_gen, 'ait, *, use_futures=None, loop=None, strict=None'), (collect, 'it, n=None, default={}'), (collect_into, 'out, it, n=None, default={}'), (take, 'it, n, default={}'), (drop, 'it, n, *, raising=False'))
 yield_to_event_loop, sleep_forever = object.__new__(type('', (), {'__new__': lambda _: yield_to_event_loop, '__await__': (_ := lambda _: (yield)), **dict.fromkeys(('__repr__', '__str__', '__reduce__'), lambda _, r='asyncutils.base.yield_to_event_loop': r)})), I.sleep.__get__(float('inf'))
 (dummy_task := type(_)(_.__code__.replace(co_flags=0x161, co_name=(_ := 'dummy_task'), co_qualname=_), globals())(None)).close()
 del f, _, P, L, b, c, H

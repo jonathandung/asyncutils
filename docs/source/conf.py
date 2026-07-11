@@ -1,10 +1,10 @@
 from sphinx.directives.code import CodeBlock
-def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.0.1')):
+def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.1.0')):
     app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include parts of documentation that only apply to Python >=3.13')
     app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
 author = 'Jonathan Dung'
-version = '1.0'
+version = '1.1'
 copyright = '2026 Jonathan Dung'
 need_sphinx = '9.1.0'
 extensions = ['autoapi.extension', 'notfound.extension', 'sphinx_copybutton', 'sphinx.ext.ifconfig', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
@@ -35,4 +35,4 @@ viewcode_line_numbers = True
 maximum_signature_line_length = 120
 manpage_url = 'https://manpages.debian.org/{path}'
 nitpicky = True
-nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:class', r'P\.(kw)?args|tyx\..*|Abstract(Async)?ContextManager|(types\.)?(Coroutine|Frame|Function|(Async)?Generator)Type|Ellipsis|Buffer|TextIOWrapper|collections\.abc\.Callable\[\[\]'), ('py:meth', '__ae(nter|xit)__|acquire|release|wait')] # cSpell:disable-line
+nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:class', r'TypeForm|tuple\[\]|P\.(kw)?args|tyx\..*|Abstract(Async)?ContextManager|(types\.)?(Coroutine|Frame|Function|(Async)?Generator)Type|Ellipsis|Buffer|TextIOWrapper|collections\.abc\.Callable\[\[\]'), ('py:meth', '__ae(nter|xit)__|acquire|release|wait'), ('py:class', 'ty_extensions.JustFloat')] # cSpell:disable-line

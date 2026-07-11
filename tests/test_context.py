@@ -1,3 +1,4 @@
+# ty: ignore[unresolved-attribute]
 import pytest
 from asyncutils import event_loop
 from asyncutils.context import *
@@ -5,7 +6,7 @@ from asyncutils.context import *
 def ctx(): return getcontext()
 def test_essential(ctx):
     with pytest.raises(AttributeError): Context().foo = None
-    with pytest.raises(TypeError): setcontext(None)
+    with pytest.raises(TypeError): setcontext(None) # ty: ignore[invalid-argument-type]
     assert isinstance(ctx, Context)
     assert ctx is getcontext()
     assert ctx.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR

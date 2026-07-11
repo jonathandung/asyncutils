@@ -9,7 +9,7 @@ class Log(BaseException): ...
 def raise_(msg, *a, exc_info=False): raise Log(msg%a)
 def ignore(*_): ...
 @fixture(scope='module')
-def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore))
+def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore)) # ty: ignore[unknown-argument]
 @mk
 @mark.skipif(win := sys.platform == 'win32', reason='difficult to test signal handling on Windows')
 async def test_signal_log(wait_partial):

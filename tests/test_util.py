@@ -4,9 +4,9 @@ from asyncutils.util import *
 from tests.conftest import mk
 import itertools
 @pytest.fixture
-def args(): return b'', '', None
+def args(): return b'', set(), '', None, {}
 @pytest.fixture
-def kwargs(): return {'a': (), 'Z': NotImplemented, 'r': False}
+def kwargs(): return {'a': (), 'Z': NotImplemented, 'r': False, '_': 0.0, 'q1': []}
 @mk
 async def test_basic():
     m = asyncio.get_running_loop().set_task_factory

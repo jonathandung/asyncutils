@@ -3,6 +3,7 @@ from ._internal.prots import ExcType, SupportsIteration, Timer
 from .mixins import ExecutorRequiredAsyncContextMixin, LoopContextMixin
 from collections import deque
 from collections.abc import Awaitable, Callable, Iterable, Mapping
+from ty_extensions import JustFloat
 from types import GeneratorType, TracebackType
 from typing import Any, NoReturn, Self, Literal, overload
 __all__ = 'CacheWithBackgroundRefresh', 'CallbackAccumulator', 'StateMachine', 'gather_with_limited_concurrency'
@@ -76,7 +77,7 @@ class CacheWithBackgroundRefresh[T, R](LoopContextMixin):
     def register_loader(self, key: T, loader: Callable[[T], R]) -> None: '''Register a specific loader for the key, that will take precedence over the default (if any).'''
     def expired(self, key: T) -> bool: '''Whether the key has overstayed its TTL.'''
     def should_refresh(self, key: T) -> bool: '''Whether the key should be refreshed at this instant.'''
-    def time_past(self, key: T) -> float: '''Time having elapsed (in seconds) after the key was last reloaded.'''
+    def time_past(self, key: T) -> JustFloat: '''Time having elapsed (in seconds) after the key was last reloaded.'''
     def configure(self, ttl: float, refresh: float, processor: Callable[[BaseException, bool], object]=...) -> None: '''(Re-)configure the cache with the given ``ttl``, ``refresh`` and ``processor``.'''
     def get_loader(self, key: T) -> Callable[[T], R]: '''Get the loader registered for the key, raising :exc:`LookupError` if there is none.'''
     async def __setup__(self) -> None: ...

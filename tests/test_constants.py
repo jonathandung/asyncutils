@@ -6,11 +6,12 @@ def test_misc():
     assert math.e == 1/RECIPROCAL_E # noqa: RUF069
     assert EXECUTORS_FROZENSET.issuperset(POSSIBLE_EXECUTORS)
     assert EXECUTORS_FROZENSET.issubset(POSSIBLE_EXECUTORS)
-    assert RAISE.is_(RAISE)
-    assert RAISE.name == str(RAISE) == 'asyncutils.constants.RAISE'
-    assert pickle.loads(pickle.dumps(RAISE)) is RAISE
-    assert not RAISE.is_private
     assert _NO_DEFAULT.is_private
+@pytest.mark.parametrize('s', (RAISE, NO_COALESCE))
+def test_public(s):
+    assert s.name == str(s) == f'asyncutils.constants.{s.back}'
+    assert pickle.loads(pickle.dumps(s)) is s
+    assert not s.is_private
 @pytest.mark.parametrize('cls', (SentinelBase, type(RAISE)))
 def test_sentinels(cls):
     ctx = pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
@@ -21,12 +22,11 @@ def test_sentinels(cls):
         class Foo: __slots__, baz = (), cls()
     with ctx:
         class Bar: __slots__, quux = (), cls('Bar.quux')
-    assert not SentinelBase._can_instantiate
-    assert not type(RAISE)._can_instantiate
+    assert not SentinelBase._can_instantiate # ty: ignore[unresolved-attribute]
+    assert not type(RAISE)._can_instantiate # ty: ignore[unresolved-attribute]
 def test_custom_sentinel():
     class TestSentinel(SentinelBase): __slots__ = ()
     a = TestSentinel()
-    assert a.is_(a)
     assert a.bound_to is None
     class qux: __slots__, ham = (), TestSentinel()
     assert f'{qux.ham.bound_to}.{qux.ham.back}'.endswith('qux.ham')

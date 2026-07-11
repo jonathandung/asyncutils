@@ -153,9 +153,9 @@ inspiration.
   * - asyncutils.iters.aonline_sorter
     - ``addr``: :class:`int`
     - Raised when :class:`iters.aonline_sorter` is called on an (async) iterable with memory address ``addr``.
-  * - asyncutils.iters.agetitems_from_indices
+  * - asyncutils.iters.extract
     - ``tname``: :class:`str`
-    - Raised when :func:`iters.agetitems_from_indices` is called on an iterable, the type of which has full name ``tname``.
+    - Raised when :func:`iters.extract` is called on an iterable, the type of which has full name ``tname``.
   * - asyncutils.iters.aintersend
     - ``tname1``: :class:`str`, ``tname2``: :class:`str`
     - Raised when :func:`iters.aintersend` is called on two async generators, the types of which have full names ``tname1`` and ``tname2`` respectively.

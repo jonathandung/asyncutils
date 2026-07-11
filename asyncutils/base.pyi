@@ -1,5 +1,5 @@
 '''The most useful and fundamental patterns and helpers core to this module and are therefore required by :mod:`asyncutils.console`, among many other submodules.'''
-from ._internal.prots import ExcType, GeneratorCoroutine, RaiseType, SupportsIteration, SupportsPop, SupportsPopLeft
+from ._internal.prots import ExcType, GeneratorCoroutine, Raise, SupportsIteration, SupportsPop, SupportsPopLeft
 from asyncio import AbstractEventLoop, Future
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable, MutableSequence
 from enum import IntFlag
@@ -95,7 +95,7 @@ async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Ca
     | The callback is called on each result or exception of the futures after :exc:`~asyncio.CancelledError` was thrown into them concurrently.
     | If ``raising`` is ``True``, all calls of the callback that themselves threw exceptions are collected into a :exc:`BaseExceptionGroup`, which is then raised.
     '''
-async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> list[T]:
+async def collect[T](it: SupportsIteration[T], n: int|None=..., default: T|Raise=...) -> list[T]:
     '''| Return a list of the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than ``n`` items to collect, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if default is :const:`~asyncutils.constants.RAISE` and emit a debug message through the logger before padding the behind of the list with copies of the default if passed otherwise.
 
@@ -107,20 +107,20 @@ async def collect[T](it: SupportsIteration[T], n: int|None=..., *, default: T|Ra
       :func:`~asyncutils.iters.to_list`
         the most bare-bones variant equivalent to the case when ``n`` is not passed.
     '''
-async def collect_into[T](out: MutableSequence[T], it: SupportsIteration[T], n: int|None=..., *, default: T|RaiseType=...) -> None:
+async def collect_into[T](out: MutableSequence[T], it: SupportsIteration[T], n: int|None=..., default: T|Raise=...) -> None:
     '''| Extend a mutable sequence with the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than ``n`` items to collect, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if default is :const:`~asyncutils.constants.RAISE` and emit a debug message through the logger before padding the behind of the list with copies of the default if passed otherwise.
     '''
 @overload
-def take[T](it: SupportsIteration[T], n: int|None, *, default: T=...) -> AsyncGeneratorType[T]: ...
+def take[T](it: SupportsIteration[T], n: None, default: T=...) -> AsyncGeneratorType[T]: ...
 @overload
-def take[T](it: SupportsIteration[T], n: int, *, default: T|RaiseType=...) -> AsyncGeneratorType[T]:
+def take[T](it: SupportsIteration[T], n: int, default: T|Raise=...) -> AsyncGeneratorType[T]:
     '''| Yield ``n`` items from the (async) iterable. If ``default`` is :const:`~asyncutils.constants.RAISE`, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if there are less than ``n`` items to take.
     | Otherwise, pad the behind of the async generator with the default until there are exactly ``n`` items if it was passed.
     | If ``n`` is ``None``, yield all items, then yield ``default`` indefinitely if passed.
     '''
 def drop[T](it: SupportsIteration[T], n: int, *, raising: bool=...) -> AsyncGeneratorType[T]: '''Discard ``n`` items from the (async) iterable and yield the rest. If there are not enough items and ``raising`` is ``True``, throw :exc:`~asyncutils.exceptions.ItemsExhausted`.'''
-def aenumerate[T](it: SupportsIteration[T], start: int=..., *, step: int=...) -> AsyncGeneratorType[tuple[int, T]]: '''Async version of :class:`enumerate`, except it is not a class and additionally supports the ``step`` parameter.'''
+def aenumerate[T](it: SupportsIteration[T], start: int=..., step: int=...) -> AsyncGeneratorType[tuple[int, T]]: '''Async version of :class:`enumerate`, except it is not a class and additionally supports the ``step`` parameter.'''
 async def sleep_forever() -> NoReturn: '''Return a coroutine that only completes when an exception is thrown in. The exception is propagated.'''
 dummy_task: GeneratorCoroutine[Never, Any, Any]
 '''An awaitable object that completes immediately. Also an exhausted generator.

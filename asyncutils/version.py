@@ -22,15 +22,15 @@ class VersionDelta(tuple):
     def __neg__(self): return __class__(*map(int.__neg__, self))
 @a
 class VersionInfo(str): # noqa: FURB189
-    __slots__ = 'parts',
+    DEFAULT_KEY = 0x659db; __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
     def __hash__(self): return (x := self._hash())+(x > -2)
-    def shelve(self, path, /, key=0x659db, _=_, g=c):
+    def shelve(self, path, /, key=DEFAULT_KEY, _=_, g=c):
         x, h, y, l = g(key); y ^= self._hash()
         with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
-    def unshelve(cls, path, /, key=0x659db, _=_, g=c):
+    def unshelve(cls, path, /, key=DEFAULT_KEY, _=_, g=c):
         x, h, y, l = g(key)
         with open(path, 'rb') as f:
             if (r := f.read)(1)[0] != h: raise ValueError('asyncutils.version.VersionInfo.unshelve: bad key')

@@ -16,14 +16,14 @@ from ..exceptions import ForbiddenOperation
 from ..mixins import LoopContextMixin
 import sys, ty_extensions as tyx
 from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator
-from asyncio import AbstractEventLoop, Future
+from asyncio import AbstractEventLoop, Future, Task
 from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from contextvars import Context
 from io import TextIOWrapper
-from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, TracebackType
+from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
-from typing_extensions import TypeIs
+from typing_extensions import TypeForm
 @type_check_only
 class Reader[T](Protocol):
     ''':class:`io.Reader` is not used due to version compatibility issues.'''
@@ -72,9 +72,12 @@ class SupportsSlicing[T](GenericSized[T], Protocol):
     def __getitem__(self, idx: SupportsIndex, /) -> T: ...
     def __len__(self) -> int: ...
 @type_check_only
-class CanClearAndCopy[T](Protocol):
-    '''An iterable that supports clearing and shallow copying.'''
+class SupportsCopy(Protocol):
+    '''An object that supports shallow copying.'''
     def copy(self) -> Self: ...
+@type_check_only
+class CanClearAndCopy[T](SupportsCopy, Protocol):
+    '''An iterable that supports clearing and shallow copying.'''
     def clear(self) -> None: ...
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
@@ -105,7 +108,7 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     @property
     def gi_running(self) -> bool: ...
     @property
-    def gi_yieldfrom(self) -> Iterator[T] | None: ... # cspell:disable-line
+    def gi_yieldfrom(self) -> Iterator[T]|None: ... # cspell:disable-line
     @property
     def gi_suspended(self) -> bool: ...
     @property
@@ -144,6 +147,9 @@ class FuncProxy[T](Protocol):
     '''Same as above.'''
     @property
     def __func__(self) -> T: ...
+@type_check_only
+class HasClassGetItem(Protocol):
+    def __class_getitem__(cls, item: TypeForm, /) -> GenericAlias: ...
 type Proxy[T] = FuncProxy[T]|FuncWrapper[T]
 '''A supposed callable object having a :attr:`FuncWrapper.__wrapped__` or :attr:`~method.__func__` attribute pointing to the callable it wraps.'''
 type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
@@ -156,6 +162,8 @@ type NonGroupExc = tyx.Intersection[BaseException, tyx.Not[BaseExceptionGroup]]
 '''Exceptions that are not exception groups.'''
 type NotNone = tyx.Not[None]
 '''The complement of ``None``.'''
+type Subscriptable[T] = type[tyx.Intersection[T, HasClassGetItem]]
+'''Returned by :func:`~asyncutils._internal.helpers.subscriptable`.'''
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
@@ -247,6 +255,15 @@ class BenchmarkResult(NamedTuple):
     iterations: int
     '''The ``times`` constructor parameter.'''
 @type_check_only
+class CountItem[T, R](NamedTuple):
+    '''The type of items in the async generator returned by :func:`~asyncutils.iters.counts`.'''
+    count: int
+    '''The number of items mapping to the key up to this point, including :attr:`item`.'''
+    key: R
+    '''The key of the item, as returned by the ``key`` function.'''
+    item: T
+    '''The item itself.'''
+@type_check_only
 class MemoryMappedFile(LoopContextMixin):
     '''The type of async memory-mapped files as opened and returned by :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
     if sys.platform != 'win32':
@@ -328,10 +345,13 @@ class NullContextType:
     @overload
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
 @type_check_only
-class RaiseType(SentinelBase):
+class Raise(SentinelBase):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
     def __reduce__(self) -> Literal['RAISE']: ... # ty: ignore[invalid-method-override]
-    def is_(self, other: object, /) -> TypeIs[Self]: '''Not actually redefined, but this allows for effective type narrowing.'''
+@type_check_only
+class NoCoalesce(SentinelBase):
+    '''The type of :const:`~asyncutils.constants.NO_COALESCE`.'''
+    def __reduce__(self) -> Literal['NO_COALESCE']: ... # ty: ignore[invalid-method-override]
 @final
 @type_check_only
 class WildcardType:
@@ -357,12 +377,12 @@ class IncompleteFut[T](FutProtocol[T], PartialInterface): '''Since the type syst
 class StrictDualContextFactory(Protocol):
     '''Protocol for the return type of the strict decorator factory overload of :func:`~asyncutils.util.dualcontextmanager`.'''
     @overload
-    def __call__[T, **P](self, gfunc: Callable[P, Iterable[T]], /) -> Callable[P, AbstractContextManager[T]]: ...
+    def __call__[T, **P](self, genf: Callable[P, Iterable[T]], /) -> Callable[P, AbstractContextManager[T]]: ...
     @overload
-    def __call__[T, **P](self, agfunc: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
+    def __call__[T, **P](self, agenf: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
 @type_check_only
-class TaskFactory[T](Protocol):
-    def __call__(self, loop: AbstractEventLoop, coro: Coroutine[Any, Any, T], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
+class TaskFactory[T: Task[Any]](Protocol):
+    def __call__(self, loop: AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the :class:`int` constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
@@ -377,7 +397,7 @@ type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
 '''Anything that can normally be passed to :func:`open`.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
 '''A slice with start, stop and step being integers or ``None``, representing a slice that typical sequences supporting slicing should accept.'''
-type Timer = Callable[[], tyx.JustFloat]
+type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''
 type All = tuple[str, ...]
 '''Type of the :attr:`~module.__all__` attributes of the submodules of :mod:`asyncutils`.'''
@@ -425,7 +445,17 @@ type RWLockCM = AbstractAsyncContextManager[None, None]
 '''The type of the context managers returned by the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''The return type of :func:`~asyncutils.exceptions.wrap_exc`.'''
-FaultyConfigA = NewType('FaultyConfigA', FaultyConfig)
-'''For better type checking. Unstable.'''
-FaultyConfigB = NewType('FaultyConfigB', FaultyConfig)
-'''For better type checking. Unstable.'''
+@type_check_only
+class FaultyConfigA(FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> str: ...
+    @property
+    def correct(self) -> tuple[str, ...]: ...
+@type_check_only
+class FaultyConfigB[T, R: type|tuple[type, ...]](FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> T: ...
+    @property
+    def correct(self) -> R: ...

@@ -31,12 +31,13 @@ async def test_take():
     assert await vecs_eq(take(atabulate(aisprime, await_=True), 10), (False, False, True, True, False, True, False, True, False, False))
     assert await vecs_eq(take(arange(10), 0), ())
     assert await vecs_eq(take(arange(10), 15), arange(10))
+    assert await vecs_eq(take(arange(3), 5, 0), (0, 1, 2, 0, 0))
 @mk
-async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(AChain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, default=3)
+async def test_collect(): assert [*range(10), 3, 3, 3, 3, 3] == await to_list(AChain(arange(10), arepeat(3, 5))) == await collect(arange(10), 15, 3)
 @mk
-async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 501)), asieve(500))
+async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 501), await_=True), asieve(500))
 @mk
-async def test_agives(): assert await aallequal(aenumerate(agives(0)), strict=True)
+async def test_agives(): assert await aall_equal(aenumerate(agives(0)), strict=True)
 @mk
 async def test_anth():
     assert await anth((), 1, default=0) == 0
@@ -76,13 +77,13 @@ async def test_aonline_sorter():
     assert await s.asend(5) == 3
     assert await vecs_eq(s, (5,))
 @mk
-async def test_ABucket(bucket):
+async def test_bucket(bucket):
     assert await bucket.contains(1)
     assert not await bucket.contains(4)
     assert await bucket.contains(2)
     assert await anext(bucket[1]) == 10
 @mk
-async def test_ABucket2(bucket):
+async def test_bucket2(bucket):
     assert await collect(bucket[1]) == [10, 11, 12]
     assert await basic_collect(bucket[3]) == [30, 31, 33]
     assert await to_list(bucket[2]) == [20, 21, 22, 23]
@@ -90,11 +91,11 @@ async def test_ABucket2(bucket):
     assert await to_set(bucket) == set()
 @mk
 async def test_abrent():
-    init = choice(l)
-    node, la, mu = await abrent(next_node, init)
+    cur = choice(l)
+    node, la, mu = await abrent(next_node, cur)
     assert type(node) is Set
-    assert await iterf(mu)(next_node)(init) is node
-    cur, s = init, {init}
+    assert await iterf(mu)(next_node)(cur) is node
+    s = {cur}
     for _ in range(la-1):
         cur = d[cur]
         assert cur not in s

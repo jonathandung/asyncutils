@@ -6,17 +6,17 @@ from _functools import partial
 from time import monotonic
 @subscriptable
 class BoundedBatchProcessor:
-    __slots__ = '__batch', '__processor', '__sem'
-    def __init__(self, processor, batch=None, max_concurrent=None): C = A.getcontext(); self.__processor, self.__batch, self.__sem = processor, C.BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE if batch is None else batch, I.Semaphore(C.BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT if max_concurrent is None else max_concurrent)
+    __slots__ = '__b', '__p', '__s'
+    def __init__(self, processor, batch=None, max_concurrent=None): C = A.getcontext(); self.__p, self.__b, self.__s = processor, C.BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE if batch is None else batch, I.Semaphore(C.BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT if max_concurrent is None else max_concurrent)
     async def process(self, items):
-        f, p, s = partial(A.collect, A.iter_to_agen(items), self.__batch), self.__processor, self.__sem
+        f, p, s = partial(A.collect, A.iter_to_agen(items), self.__b), self.__p, self.__s
         while b := await f():
             async with s: x = await p(b)
             yield x # noqa: RUF070
 @subscriptable
 class BatchProcessor(A.LoopContextMixin):
-    __slots__ = '__batch', '__lock', '__lp', '__ms', '__processor', '__sleep', '__timer'
-    def __init__(self, processor, *, maxsize=None, maxtime=None, timer=monotonic): C = A.getcontext(); self.__processor, self.__ms, self.__sleep, self.__batch, self.__lp, self.__lock, self.__timer = processor, C.BATCH_PROCESSOR_DEFAULT_MAX_SIZE if maxsize is None else maxsize, I.sleep.__get__(C.BATCH_PROCESSOR_DEFAULT_MAX_TIME if maxtime is None else maxtime), [], timer(), I.Lock(), timer
+    __slots__ = '__batch', '__lock', '__lp', '__ms', '__p', '__sleep', '__timer'
+    def __init__(self, processor, *, maxsize=None, maxtime=None, timer=monotonic): C = A.getcontext(); self.__p, self.__ms, self.__sleep, self.__batch, self.__lp, self.__lock, self.__timer = processor, C.BATCH_PROCESSOR_DEFAULT_MAX_SIZE if maxsize is None else maxsize, I.sleep.__get__(C.BATCH_PROCESSOR_DEFAULT_MAX_TIME if maxtime is None else maxtime), [], timer(), I.Lock(), timer
     async def add(self, item):
         async with self.__lock:
             (b := self.__batch).append(item)
@@ -26,7 +26,7 @@ class BatchProcessor(A.LoopContextMixin):
     async def _process(self):
         if not (b := self.__batch): return
         b, self.__lp = copy_and_clear(b), self.__timer()
-        await self.__processor(b)
+        await self.__p(b)
     async def flush(self):
         async with self.__lock:
             if self.__batch: await self._process()
@@ -34,14 +34,14 @@ class BatchProcessor(A.LoopContextMixin):
     def time_since_last_process(self): return self.__timer()-self.__lp
     async def __setup__(self): super().__init__(); self.make(self._flush_periodic())
 class Bulkhead(A.LoopContextMixin):
-    __slots__ = '__exc', '__init_val', '__mr', '__mt', '__processor', '__queue', '__rej', '__sd', '__sem'
+    __slots__ = '__exc', '__iv', '__mr', '__mt', '__p', '__queue', '__rej', '__sd', '__sem'
     def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
         if max_concurrent <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_concurrent must be positive')
         C = A.getcontext()
         if max_queue is None: max_queue = C.BULKHEAD_DEFAULT_MAX_QUEUE
         if max_queue <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_queue must be positive')
         if max_rej is None: max_rej = C.BULKHEAD_DEFAULT_MAX_REJ
-        super().__init__(); self.__sem, self.__queue, self.__rej, self.__init_val, self.__exc, self.__processor, self.__sd, self.__mt, self.__mr = I.Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), I.Event(), max_rej
+        super().__init__(); self.__sem, self.__queue, self.__rej, self.__iv, self.__exc, self.__p, self.__sd, self.__mt, self.__mr = I.Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), I.Event(), max_rej
     async def execute(self, coro):
         try: self.__queue.put_nowait(coro)
         except I.QueueFull as e:
@@ -52,13 +52,13 @@ class Bulkhead(A.LoopContextMixin):
             try: await (await self.__queue.get())
             except (I.QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{fullname(self)} is shutting down') from None
             except self.__exc as e:
-                if p := self.__processor: await p(e)
+                if p := self.__p: await p(e)
         getattr(self.__mt, 'clear' if self.active_tasks else 'set')()
     async def __cleanup__(self): await self.shutdown()
     @property
     def available_slots(self): return self.__sem._value
     @property
-    def active_tasks(self): return self.__init_val-self.available_slots
+    def active_tasks(self): return self.__iv-self.available_slots
     @property
     def curr_qsize(self): return self.__queue.qsize()
     @property

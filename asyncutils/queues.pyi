@@ -129,9 +129,9 @@ class PotentQueueBase[T](Queue[T], LoopMixinBase, ABC):
     @property
     def fully_functional(self) -> bool: '''``queue.fully_functional == queue.can_put_now and queue.can_get_now``.'''
     @property
-    def capacity(self) -> int|float: '''The capacity of the queue. Can be :data:`math.inf`.'''
+    def capacity(self) -> int: '''The capacity of the queue. Can be :data:`math.inf`.'''
     @property
-    def remaining_capacity(self) -> int|float: '''The remaining number of slots in the queue. Can be :data:`math.inf`.'''
+    def remaining_capacity(self) -> int: '''The remaining number of slots in the queue. Can be :data:`math.inf`.'''
     @property
     def utilization_rate(self) -> float: '''The number of items the queue divided by its capacity.'''
     def pushpop_nowait(self, item: T, raising: bool=...) -> T: '''Push an item into the queue and pop from the other end immediately.'''

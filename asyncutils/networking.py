@@ -27,10 +27,10 @@ class LineProtocol(I.Protocol, LoopMixinBase):
         if bufsize is None: bufsize = A.getcontext().LINE_PROTOCOL_DEFAULT_BUFFER_SIZE
         (b := self.__buf).extend(data); n = self.NEWLINE
         if len(b) > bufsize: self.flush()
-        while not self.__cl and n in b: l, b = b.split(n, 1); self._put_line(l)
+        while not self.__cl and n in b: l, b = b.split(n, 1); self.__pl(l)
         self.__buf = b
         if self.__er: self.flush(); self.signal_eof()
-    def flush(self): self._put_line(b := self.__buf); b.clear()
+    def flush(self): self.__pl(b := self.__buf); b.clear()
     def signal_eof(self): self.__lines.put_nowait(None)
     def pause_writing(self):
         self.__paused = True
@@ -40,7 +40,7 @@ class LineProtocol(I.Protocol, LoopMixinBase):
         if w := self.__dw:
             if not w.done(): w.set_result(None)
             self.__dw = None
-    def _put_line(self, data): self.__lines.put_nowait(data.rstrip(self.CARRIAGE_RETURN).decode('utf-8'))
+    def __pl(self, data): self.__lines.put_nowait(data.rstrip(self.CARRIAGE_RETURN).decode('utf-8'))
     def write_line(self, line):
         with self._h:
             if not self.connected_transport.is_closing(): self.write_literal(line.encode('utf-8', 'ignore')+self.NEWLINE)
@@ -58,13 +58,11 @@ class LFProtocol(LineProtocol): NEWLINE, __slots__ = b'\n', ()
 class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
 class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(I.Transport):
-    __slots__ = '__buf', '__cl', '__lim', '__protocol', '__sock'; _h = A.IgnoreErrors(OSError)
-    @staticmethod
-    def make_protocol(): return LineProtocol()
+    __slots__ = '__buf', '__cl', '__lim', '__protocol', '__sock'; _h, ptc = A.IgnoreErrors(OSError), LineProtocol
     @property
-    def loop(self): return p.loop if isinstance(p := self.__protocol, LineProtocol) else NotImplemented
+    def loop(self): return self.__protocol.loop
     def __init__(self, sock=None):
-        audit(fullname(self)); self.__rx(); (p := self.make_protocol()).connection_made(self); self.__sock, self.__cl, self.__buf, self.__lim, self.__protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
+        audit(fullname(self)); self.__rx(); (p := self.ptc()).connection_made(self); self.__sock, self.__cl, self.__buf, self.__lim, self.__protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
         if sock is not None: self.connect_sock(sock)
     def __rx(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def __rr(self, sock, size=None):

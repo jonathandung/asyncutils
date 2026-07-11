@@ -1,8 +1,6 @@
 <!--markdownlint-disable-next-line MD041-->
 ## Checklist
-
 <!--Please delete all comments and inapplicable sections, but leave checkbox descriptions unedited.-->
-
 ### All PRs
 
 - [] I have skimmed through the [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html) and followed relevant links.
@@ -35,22 +33,16 @@
 - [] I have read through [the chores page](https://asyncutils.readthedocs.io/en/latest/chores.html) and followed through with the relevant processes.
 
 ## Summary
-
 <!--Briefly describe the feature being introduced, the bug being rectified or the tool being implemented, whichever applies.-->
-
 ## Changes
-
 <!--List where all changes were applied. Preferably, explain the rationale of each change in sub-sections.-->
-
 ## Issue reference
 
 Closes #<!--Replace this comment with the issue number or delete this section if there is no corresponding issue.-->.
 
 ## Additional context
-
 <!--Enter helpful context here. Include shell commands in a tripe-backtick-fenced code block with language "bash", or "console" if their output is
 included, Python code with language "python", and Python REPL content with language "pycon".-->
-
 ### Screenshots
 
 ### Relevant Links

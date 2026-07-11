@@ -29,16 +29,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest, macos-latest]
         python-version: ["3.12", "3.15"]
         include:
-          - os: ubuntu-latest
+          - os: macos-latest
             python-version: gp312
           - os: ubuntu-latest
             python-version: 3.14t
-        exclude:
-          - os: ubuntu-latest
-            python-version: "3.15"
     steps:
     - uses: actions/checkout@v7.0.0
     - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b

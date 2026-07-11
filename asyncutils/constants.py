@@ -47,12 +47,11 @@ class SentinelBase:
     def bound_to(self): return getattr(self, '_SentinelBase__name', '').rpartition('.')[0] or None
     @property
     def back(self): return getattr(self, '_SentinelBase__name', '').rpartition('.')[2] or None
-    def is_(self, o, /): return self is o
     P.patch_classmethod_signatures((__new__, 'name=None'), (__init_subclass__, 'lock_impl={}')); P.patch_method_signatures((__set_name__, 'owner, name, /'))
 class _Sentinel(SentinelBase):
     __slots__ = ()
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass the type of asyncutils-internal sentinels')
     def __reduce__(self): return self.back
-_NO_DEFAULT, RAISE = map(_Sentinel, ('_NO_DEFAULT', 'RAISE'))
+_NO_DEFAULT, RAISE, NO_COALESCE = map(_Sentinel, ('_NO_DEFAULT', 'RAISE', 'NO_COALESCE'))
 _Sentinel._can_instantiate = False
 del _Sentinel, P

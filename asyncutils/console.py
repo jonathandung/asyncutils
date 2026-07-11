@@ -38,7 +38,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         elif h is not None: raise TypeError(f'asyncutils.console.ConsoleBase: locals handler for module {modname!r} should be callable, not {fullname(h)!r}')
     def refresh(self):
         if not ((F := self._fut) is None or F.done()): F.cancel()
-    def __callback(self, F, C, /, *, c=type(refresh), v=iscoroutine, l=_chain_future):
+    def __runcode_callback(self, F, C, /, c=type(refresh), v=iscoroutine, l=_chain_future):
         try: r = c(C, self.locals)()
         except SystemExit as e: return self.set_return_code(e)
         except BaseException as e:
@@ -50,8 +50,8 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         except BaseException as e: F.set_exception(e)
     def showtraceback(self):
         if (t := S.exc_info())[2] is not None: self._showtraceback(*t, '')
-    def runcode(self, code, *, futimpl=__import__('concurrent.futures', fromlist=_f).Future, no_traceback=(KeyboardInterrupt, MemoryError, SyntaxError), threadsafe=True):
-        getattr(self._loop, 'call_soon_threadsafe' if threadsafe else 'call_soon')(self.__callback, F := futimpl(), code, context=self.context)
+    def runcode(self, code, *, fimp=__import__('concurrent.futures', fromlist=_f).Future, no_traceback=(KeyboardInterrupt, MemoryError, SyntaxError), threadsafe=True):
+        getattr(self._loop, 'call_soon_threadsafe' if threadsafe else 'call_soon')(self.__runcode_callback, F := fimp(), code, context=self.context)
         try: return F.result()
         except SystemExit as e: self.set_return_code(e)
         except BaseException as e:
@@ -147,12 +147,12 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if (t := e.__traceback__) is None: raise e
             __import__('pdb').post_mortem(t)
         super().after_run()
-    def showtraceback(self, s=3, a=('asyncutils\\console.py', 'asyncutils/console.py'), f=39, m=S.intern('__callback')):
+    def showtraceback(self, s=3, a=('asyncutils\\console.py', 'asyncutils/console.py'), m=S.intern('__runcode_callback')):
         t, v, b = S.exc_info()
         if b is None: return
         for _ in repeat(None, s):
             if (b := b.tb_next) is None: return
-        if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_firstlineno == f and c.co_name == m and (b := b.tb_next) is None: return # cspell:disable-line
+        if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_name == m and (b := b.tb_next) is None: return # cspell:disable-line
         self._showtraceback(t, v, b, '')
     P.patch_method_signatures((showtraceback, ''), (after_run, ''), (before_run, 'max_memory_errors'), (write_special, 'msg'))
 del _f, _s, g, C, V, B, _, iscoroutine, E, log

@@ -18,7 +18,7 @@ def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all
         if R: R[0] = r+R[0][1:]
         else: f(r)
     for k in a: p(k, None)
-    if strict and m: g(ValueError, 'unknown keys in config file', notes=m)
+    if strict and m: g(ValueError, 'asyncutils.tools.json_to_argv: unknown keys in config file', notes=m)
     return R
 def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(p, strict=strict))
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):

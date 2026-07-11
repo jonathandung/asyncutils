@@ -2,7 +2,7 @@
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
 [![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/p/py-asyncutils)
-[![Coverage](https://raw.githubusercontent.com/jonathandung/asyncutils/main/badges/coverage.svg)](https://github.com/jonathandung/asyncutils/tree/main/tests)
+[![Coverage](https://codecov.io/gh/jonathandung/asyncutils/graph/badge.svg?token=PTRNW1RGXA)](https://codecov.io/gh/jonathandung/asyncutils)
 [![Build](https://github.com/jonathandung/asyncutils/actions/workflows/push.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-package.yaml)
 [![CodeQL](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql)
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/release.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/python-publish.yaml)
@@ -10,8 +10,8 @@
 [![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows)
 [![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13018/badge)](https://www.bestpractices.dev/projects/13018)
-[![Read the Docs: stable build](https://img.shields.io/readthedocs/asyncutils/stable?logo=readthedocs&label=docs%20(stable))](https://asyncutils.readthedocs.io/en/stable)
-[![Read the Docs: latest build](https://img.shields.io/readthedocs/asyncutils/latest?logo=readthedocs)](https://asyncutils.readthedocs.io/en)
+[![Read the Docs: stable](https://img.shields.io/readthedocs/asyncutils/stable?logo=readthedocs&label=docs%20(stable))](https://asyncutils.readthedocs.io/en/stable)
+[![Read the Docs: latest](https://img.shields.io/readthedocs/asyncutils/latest?logo=readthedocs)](https://asyncutils.readthedocs.io/en)
 [![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview)
 [![conda-forge feedstock](https://img.shields.io/conda/v/conda-forge/py-asyncutils?logo=condaforge)](https://github.com/conda-forge/py-asyncutils-feedstock)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor_Covenant-v3.0-ff69b4.svg?logo=contributor-covenant&logoColor=purple)](https://asyncutils.readthedocs.io/en/stable/conduct.html)
@@ -43,7 +43,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.0.1. For your reference, here are [all version tags up to now](https://github.com/jonathandung/asyncutils/tags).
+This is asyncutils v1.1.0. For your reference, here are [all version tags up to now](https://github.com/jonathandung/asyncutils/tags).
 
 ## Configuration
 
@@ -86,4 +86,4 @@ For more, check out the [contributing guide](https://asyncutils.readthedocs.io/e
 | ![GitHub issues](https://img.shields.io/github/issues/jonathandung/asyncutils) | ![GitHub Downloads](https://img.shields.io/github/downloads/jonathandung/asyncutils/total) | ![PyPI - License](https://img.shields.io/pypi/l/py-asyncutils?logo=opensourceinitiative) | ![Sphinx](https://img.shields.io/badge/docs-sphinx-265094?logo=sphinx) | [![Blazingly fast](https://www.blazingly.fast/api/badge.svg?repo=jonathandung%2Fasyncutils)](https://www.blazingly.fast) | ![Skipped](https://raw.githubusercontent.com/jonathandung/asyncutils/main/badges/skipped.svg) |
 | ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![Language count](https://img.shields.io/github/languages/count/jonathandung/asyncutils) | ![Sphinx-lint](https://img.shields.io/badge/sphinx--lint-darkblue?logo=sphinx) | ![Free-threaded support](https://img.shields.io/badge/free_threading-supported-blue) | ![Last test run](https://raw.githubusercontent.com/jonathandung/asyncutils/main/badges/last-run.svg) |
 | ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Top language](https://img.shields.io/github/languages/top/jonathandung/asyncutils) | ![CSpell](https://img.shields.io/badge/spelling-cspell-green) | | |
-| ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![Code size](https://img.shields.io/github/languages/code-size/jonathandung/asyncutils) | | ![Pytest](https://img.shields.io/badge/tests-Pytest-yellow?logo=pytest) | | |
+| ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![Code size](https://img.shields.io/github/languages/code-size/jonathandung/asyncutils) | ![Visits](https://badges.pufler.dev/visits/jonathandung/asyncutils) | ![Pytest](https://img.shields.io/badge/tests-Pytest-yellow?logo=pytest) | | |

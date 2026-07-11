@@ -2,6 +2,7 @@
 from ._internal.prots import CanExcept, SupportsIteration, Timer
 from .mixins import LoopContextMixin
 from collections.abc import Awaitable, Callable
+from ty_extensions import JustFloat
 from types import AsyncGeneratorType
 from typing import Any, Literal
 __all__ = 'BatchProcessor', 'BoundedBatchProcessor', 'Bulkhead'
@@ -18,7 +19,7 @@ class BatchProcessor[T](LoopContextMixin):
     async def add(self, item: T) -> None: '''Add an item to the current batch. If the batch is full, process it asynchronously before returning.'''
     async def flush(self) -> None: '''Process the items in the buffer, even if the batch size is not reached.'''
     @property
-    def time_since_last_process(self) -> float: '''The time in seconds since the last batch was processed.'''
+    def time_since_last_process(self) -> JustFloat: '''The time in seconds since the last batch was processed.'''
     async def __setup__(self) -> None: ...
     async def __cleanup__(self) -> None: ...
 class Bulkhead(LoopContextMixin):

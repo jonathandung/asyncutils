@@ -21,7 +21,8 @@ The below environment variables directly affect what this library does, mostly i
   Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
 
   .. attention::
-    `FORCE_COLOR <force-color.org>`__, `NO_COLOR <no-color.org>`__ and :manpage:`TERM <term(7)>` control both the argument parser and the PyREPL console.
+    `FORCE_COLOR <https://force-color.org>`__, `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control both the argument parser and
+    the PyREPL console.
 
 .. envvar:: NO_COLOR
 
@@ -47,7 +48,7 @@ The below environment variables directly affect what this library does, mostly i
 
 .. note::
 
-  The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses ``_colorize`` under the hood,
+  The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses :mod:`!_colorize` under the hood,
   may. To avoid this inconsistency, do not use it to customize :mod:`asyncutils`'s colouring.
 
 .. note:: Below Python 3.13, the output of the REPL does not highlight language keywords, only the prompt.

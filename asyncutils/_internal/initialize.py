@@ -5,9 +5,9 @@ if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationErr
 _u, _f, _s, s, t, U, A = (_d := {}).update, ('',), 'asyncutils.', {}, '_all', (S := list(a)).extend, []
 class Module:
     slots = frozenset(__slots__ := ('__all__', '_n', '_s')); (dunders := dir(L))[-1] = '__dir__'
-    def __new__(cls, name, /, _d=_d, _a=frozenset(a), _=s):
-        if name in _a: return _[name]
-        try: return getattr(_[_d[name]], name)
+    def __new__(cls, name, /, d=_d, a=frozenset(a), _=s):
+        if name in a: return _[name]
+        try: return getattr(_[d[name]], name)
         except (AttributeError, KeyError): raise AttributeError(f"module 'asyncutils' has no attribute {name!r}") from None
     def __reduce__(self): return type(self), (self._n,)
     def __getattr__(self, n, /, u='__', _=F.all_contextual_consts): # cover: off

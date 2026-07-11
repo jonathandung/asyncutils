@@ -4,8 +4,9 @@ from .mixins import AsyncContextMixin, AwaitableMixin
 from collections import deque
 from collections.abc import Awaitable, Callable, Hashable
 from enum import IntEnum
+from ty_extensions import JustFloat
 from types import CoroutineType, TracebackType
-from typing import Any, Literal, Never, Self, final, overload
+from typing import Any, Never, Self, final, overload
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard[T](AsyncContextMixin[None]):
     '''A sync- and async-compatible context manager, inspired by :class:`anyio.ResourceGuard`, which causes contention of a shared resource to fail fast.
@@ -14,11 +15,11 @@ class ResourceGuard[T](AsyncContextMixin[None]):
     .. note:: The guard is not held upon creation.
     '''
     @property
-    def action(self) -> str: '''The action being attempted on the resource, as passed to the constructor.'''
+    def action(self) -> str: '''The action being attempted on the resource, as passed to the constructor. Should be a gerund.'''
     @property
     def guarded(self) -> bool: '''Whether the resource is currently being guarded.'''
     @property
-    def success_ratio(self) -> float: '''The current ratio of successful acquisitions to total acquisition attempts, or 0 if there have been no attempts.'''
+    def success_ratio(self) -> float: '''The current ratio of successful acquisitions to total acquisition attempts, or ``0.0`` if there have been no attempts.'''
     @overload
     def __new__(cls: type[ResourceGuard[Never]], rsrc: Never=..., *, action: str=...) -> ResourceGuard[Never]: ...
     @overload
@@ -39,6 +40,7 @@ class ResourceGuard[T](AsyncContextMixin[None]):
 class UniqueResourceGuard[T: Hashable](ResourceGuard[T]):
     '''A subclass of :class:`ResourceGuard` that only allows one guard per object. Cannot be further subclassed.
 
+    .. note:: You must keep the guard alive for as long as you want the resource to be guarded.
     .. caution:: This class does not stop the object from having an instance of :class:`ResourceGuard` (or subclass thereof) from guarding it simultaneously.
     .. admonition:: Implementation detail
 
@@ -76,7 +78,7 @@ class CircuitBreaker:
     @overload
     def __new__[T, **P](cls, f: Callable[P, Awaitable[T]], /, max_fails: int=..., reset: float|None=..., *, exc: CanExcept=..., max_half_open_calls: int|None=...) -> Callable[P, CoroutineType[Any, Any, T]]:
         '''| Construct a circuit breaker, whose circuit is initially closed.
-        | If ``name`` is passed, use it as its name; return a function wrapping ``f`` otherwise, deriving the name of the circuit breaker from the function. This derivation follows exactly one level of ``__wrapped__``-based wrapping after retrieving the :attr:`~method.__func__` attribute if present.
+        | If ``name`` is passed, use it as its name; return a function wrapping ``f`` otherwise, deriving the name of the circuit breaker from the function. This derivation follows exactly one level of :attr:`!__wrapped__`-based wrapping after retrieving the :attr:`~method.__func__` attribute if present.
         | Pass exceptions that are expected to happen through the ``exc`` parameter.
         | When the decorated function fails more than ``max_fails`` times (default :const:`~asyncutils.context.Context.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS`), the breaker triggers (opens the circuit, so to say) and disallows further calls of the wrapped functions by throwing an exception.
         | This state persists until the ``reset`` timeout expires (default :const:`~asyncutils.context.Context.CIRCUIT_BREAKER_DEFAULT_RESET`). Then, the breaker enters the half-open state.
@@ -94,7 +96,7 @@ class CircuitBreaker:
     @property
     def name(self) -> str: '''The name of the circuit breaker, to be shown in error messages.'''
     @property
-    def state(self) -> Literal[0, 1, 2]: '''The state of the circuit breaker: 0 for closed, 1 for half-open, and 2 for open.'''
+    def state(self) -> State: '''The current state of the circuit breaker.'''
 class StatefulBarrier[T](AwaitableMixin[tuple[int, deque[T]]]):
     '''An async barrier, that unlike traditional barriers, accumulates state from parties in a deque and makes it available once the barrier is tripped.'''
     @overload
@@ -139,7 +141,7 @@ class DynamicThrottle:
         * ``min_rate``: The minimum rate; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE`.
         * ``max_rate``: The maximum rate; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE`.
         * ``window``: Number of calls, successful or unsuccessful, after which the rate is automatically adjusted; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_WINDOW`.
-        * ``ubound``: Lower bound of the ratio successes: total calls such that the rate is multiplied by ``ufactor`` (default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_UFACTOR`) and clamped to ``min_rate`` and ``max_rate``; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_UBOUND`.
+        * ``ubound``: Lower bound of the ratio (successes: total calls) such that the rate is multiplied by ``ufactor`` (default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_UFACTOR`) and clamped to ``min_rate`` and ``max_rate``; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_UBOUND`.
         * ``lbound``: Upper bound of the above ratio such that the rate is multiplied by ``lfactor`` (default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_LFACTOR`) and clamped similarly; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_LBOUND`.
         * ``jitter``: The jitter in calculation of the wait time before the context can enter; default :const:`~asyncutils.context.Context.DYNAMIC_THROTTLE_DEFAULT_JITTER`.
         * ``timer``: Function to return current time as a float.
@@ -152,7 +154,7 @@ class DynamicThrottle:
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''If an error caused the context manager, increment ``fails`` and re-raise; otherwise, increment ``successes``. Also adjust the rate if necessary.'''
     def reset(self) -> None: '''Reset the counts of successes and fails.'''
     @property
-    def ctime(self) -> float: '''The current time as returned by ``timer``.'''
+    def ctime(self) -> JustFloat: '''The current time as returned by ``timer``.'''
     @property
     def fails(self) -> int: '''Current number of failed calls. Reset periodically.'''
     @property

@@ -3,11 +3,13 @@
 '''
 from ._internal.prots import IntCompatible, Openable, ValidSlice
 from collections.abc import Callable, Iterable, Iterator
-from typing import Literal, NamedTuple, NoReturn, Self, final, overload
+from typing import Final, Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
 class VersionInfo(str): # noqa: FURB189
     '''A class representing a version of :mod:`asyncutils`.'''
+    DEFAULT_KEY: Final[int]
+    '''The default value of the shelving and unshelving key.'''
     @overload
     def __new__(cls, from_: object, /) -> Self: ...
     @overload

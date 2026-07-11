@@ -1,4 +1,4 @@
-FROM python:3.15-rc-slim-bookworm
+FROM python:slim-bookworm
 # cspell:disable-next-line
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY dist/*.tar.gz .
@@ -7,5 +7,5 @@ RUN uv venv
 RUN uv pip install --frozen --no-cache *.tar.gz
 RUN rm -rf *.tar.gz
 RUN python3 -c "print(__import__('asyncutils').__version__.representation)"
-RUN asyncutils -h
+RUN asyncutils --help
 ENTRYPOINT ["asyncutils"]

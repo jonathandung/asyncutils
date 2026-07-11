@@ -18,7 +18,7 @@ class B:
         if cls.__dict__.get('__slots__', True): raise TypeError('__slots__ must be an empty tuple')
         async def g(self, *a, **k):
             async with c(self): return await self.__wrapped__(*a, **k)
-        cls.__call__, c = g, f(m); super().__init_subclass__(**_) # ty: ignore[invalid-assignment]
+        cls.__call__, c = g, f(m); super().__init_subclass__(**_)
     def __getattr__(self, n, /): return getattr(self.__wrapped__, n)
 t = 'Locked', (B,), {'__slots__': ()}
 def n(c, /, prefer_writers=None): return _rn(c.__subclasses__()[getcontext().RWLOCK_DEFAULT_PREFER_WRITERS if prefer_writers is None else prefer_writers])

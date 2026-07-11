@@ -12,7 +12,10 @@ def test_helpers():
     assert helpers.check_methods(b'', '__doc__')
     assert not helpers.check_methods(int, 'bit_count')
     assert not helpers.check_methods(0, 'bit_length', 'bar')
-    with raises(AttributeError): helpers.copy_and_clear(())
+    a = [1, 4]
+    assert helpers.copy_and_clear(a) == [1, 4]
+    assert a == []
+    with raises(AttributeError): helpers.copy_and_clear(()) # ty: ignore[invalid-argument-type]
     class _: ...
     assert helpers.subscriptable(_) is _
     o = _[None]()
@@ -20,10 +23,10 @@ def test_helpers():
     assert not helpers.check_methods(_(), 'foo')
     assert not helpers.check_methods(o, 'foo')
 def test_submodules_lazy_loading():
-    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo
+    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo # ty: ignore[unresolved-attribute]
     module = mod.initialize.Module
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
-    with raises(TypeError, match='asyncutils: cannot subclass the type of submodule objects'): type('', (module,), {})
+    with raises(TypeError, match='asyncutils: cannot subclass the type of submodule objects'): type('', (module,), {}) # ty: ignore[subclass-of-final-class]
     assert (t := type(module('constants'))) is type(module('context'))
     assert t.__module__ == 'builtins'
     assert t.__name__ == t.__qualname__ == 'module'
@@ -36,7 +39,7 @@ def test_others(config_json, monkeypatch):
     assert mod.running_console.unsetc() is cons
     with raises(RuntimeError, match='cannot close event loop within REPL'): loop.close()
     with raises(RuntimeError, match='cannot stop event loop within REPL'): loop.stop()
-    loop.close, loop.stop = t
+    loop.close, loop.stop = t # ty: ignore[invalid-assignment]
     cons.refresh()
     exec(cons.compile.compiler('assert 1+1 == 2', '<test>', 'exec'))
     assert cons.exc is None
@@ -49,11 +52,11 @@ def test_others(config_json, monkeypatch):
 def test_patch():
     patch = mod.patch
     patch.patch_function_signatures((f := lambda _: None, 'foo, {}'))
-    assert f.__text_signature__ == '(foo, <unrepresentable>)'
+    assert f.__text_signature__ == '(foo, <unrepresentable>)' # ty: ignore[unresolved-attribute]
     patch.patch_method_signatures((f, patch.exit_sig))
-    assert f.__text_signature__ == '($self, exc_typ, exc_val, exc_tb, /)'
+    assert f.__text_signature__ == '($self, exc_typ, exc_val, exc_tb, /)' # ty: ignore[unresolved-attribute]
     patch.patch_classmethod_signatures((f, ''))
-    assert f.__text_signature__ == '($cls)'
+    assert f.__text_signature__ == '($cls)' # ty: ignore[unresolved-attribute]
 @mark.skipif(sys.version_info >= (3, 13), reason='requires Python <3.13')
 @mk
 async def test_py312():

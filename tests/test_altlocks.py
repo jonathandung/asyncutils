@@ -1,4 +1,4 @@
-import pytest
+import gc, pytest
 from asyncio import Lock, gather, sleep, timeout
 from asyncutils.altlocks import *
 from asyncutils import CircuitOpen, ResourceBusy, locked_lock, timer
@@ -7,34 +7,65 @@ from tests.conftest import mk
 @pytest.fixture
 def obj(): return object()
 def test_rsrc_guard(obj):
-    g = ResourceGuard(obj)
+    g = ResourceGuard(obj, action='foo')
+    assert g.success_ratio == 0
     with g:
         assert g.guarded
         with pytest.raises(ResourceBusy), g: ...
     assert not g.guarded
-    G = ResourceGuard(obj)
+    G = ResourceGuard(obj, action='bar')
     assert G is not g
     with G, g:
         assert G.guarded
         assert g.guarded
     assert not G.guarded
     assert not g.guarded
+    with G.yields_resource() as rsrc:
+        assert rsrc is obj
+        assert G.guarded
+    with g.yields_resource() as rsrc:
+        assert rsrc is obj
+        assert not G.guarded
+    assert g.success_ratio*4 == 3
+    assert G.success_ratio == 1
+    assert G.action == 'bar'
+    assert g.action == 'foo'
 def test_unique_rsrc_guard(obj):
     with UniqueResourceGuard(obj), pytest.raises(ResourceBusy), UniqueResourceGuard(obj): ...
+    i = id(UniqueResourceGuard(obj))
     with ResourceGuard(obj), UniqueResourceGuard(obj): ...
+    gc.collect()
+    g = UniqueResourceGuard(obj)
+    assert id(g) != i
+    with pytest.warns(RuntimeWarning, match=r'asyncutils\.altlocks\.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard'): g = UniqueResourceGuard(obj, action='baz')
+    assert g is UniqueResourceGuard(obj)
+    UniqueResourceGuard.clear_cache()
+    G = UniqueResourceGuard(obj, action='spamming')
+    assert g is not G
+    g = ResourceGuard(obj)
+    with pytest.warns(RuntimeWarning, match=r'asyncutils\.altlocks\.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard'): assert UniqueResourceGuard(obj, action='baz') is G
+    with UniqueResourceGuard(obj), g:
+        assert G.guarded
+        with pytest.raises(ResourceBusy), g: ...
+        with pytest.raises(ResourceBusy), G: ...
+        with pytest.raises(ResourceBusy, match='another task is already spamming resource: <.*>'), UniqueResourceGuard(obj): ...
 @mk
 async def test_circuit_breaker():
-    cb = CircuitBreaker('test', 3, reset=0.05, exc=ZeroDivisionError, max_half_open_calls=2)
+    cb = CircuitBreaker('test', 3, 0.01, exc=TypeError, max_half_open_calls=2)
     @cb
     async def f(): return 1
     assert await f() == 1
-    async def g(): return 1/0
-    g = cb(g, default=0)
-    for _ in range(3): assert await g() == 0
-    with pytest.raises(CircuitOpen): await g()
-    await sleep(0.07)
-    for _ in range(2): assert await g() == 0
+    async def g(): raise TypeError
+    h = cb(g, default=0)
+    for _ in range(3): assert await h() == 0
+    with pytest.raises(CircuitOpen): await h()
+    assert cb.state == cb.State.OPEN
+    await sleep(0.02)
+    for _ in range(2):
+        assert await h() == 0
+        assert cb.state == cb.State.HALF_OPEN
     await f()
+    assert cb.state == cb.State.CLOSED
 @mk
 async def test_stateful_barrier():
     b = StatefulBarrier[int](3)
@@ -58,7 +89,7 @@ async def dts(t):
     async with t, t, t: ...
 @timer
 async def dtf(t):
-    async with t, t, t: 1/0
+    async with t, t, t: raise RuntimeError
 @mk
 async def test_dynamic_throttle():
     t = DynamicThrottle(10, window=6)

@@ -5,6 +5,7 @@ from .config import Executor
 from .mixins import LoopContextMixin
 from asyncio import Future
 from collections.abc import Callable, Iterable, Mapping
+from ty_extensions import JustFloat
 from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'ConnectionPool'
@@ -35,7 +36,7 @@ class AdvancedPool(LoopContextMixin):
     async def complete[T, **P](self, f: Callable[P, T], *a: P.args, **k: P.kwargs) -> T: ...
     @overload
     async def complete[T](self, f: Callable[..., T], *a: object, _priority_: int, **k: object) -> T: '''Wait for a sync function to complete its execution by the pool asynchronously and get its result.'''
-    async def shutdown(self, cancel_pending: bool=..., idle_timeout: float|None=..., total_timeout: float|None=...) -> float: '''Shut down the pool, waiting for all workers to finish their current tasks and exit. If ``cancel_pending`` is ``True``, pending tasks that have not been picked up by workers will be cancelled immediately. If ``idle_timeout`` is passed, it will limit the time waiting to join the task queue.'''
+    async def shutdown(self, cancel_pending: bool=..., idle_timeout: float|None=..., total_timeout: float|None=...) -> JustFloat: '''Shut down the pool, waiting for all workers to finish their current tasks, and return the total time the pool has been active. If ``cancel_pending`` is ``True``, pending tasks that have not been picked up by workers will be cancelled immediately. If ``idle_timeout`` is passed, it will limit the time used to join the task queue.'''
     async def join(self) -> list[int|BaseException]: '''Return a list containing the number of tasks completed by each worker in a random order or an exception if a worker thread has been terminated by an unhandled exception.'''
     @overload
     async def map[R, T](self, f: Callable[[R], T], it: SupportsIteration[R], /, *, priority: int=..., strict: bool=...) -> list[T]: ...
@@ -47,12 +48,12 @@ class AdvancedPool(LoopContextMixin):
     async def map[R, V, U, S, T](self, f: Callable[[R, V, U, S], T], i1: SupportsIteration[R], i2: SupportsIteration[V], i3: SupportsIteration[U], i4: SupportsIteration[S], /, *, priority: int=..., strict: bool=...) -> list[T]: ...
     @overload
     async def map[T](self, f: Callable[..., T], /, *its: SupportsIteration[Any], priority: int=..., strict: bool=...) -> list[T]: '''Apply the function ``f`` to the items from the iterables in a concurrent manner, returning the results in a list. If ``strict`` is ``True``, all iterables must have the same length.'''
-    async def starmap[T, *Ts](self, f: Callable[[*Ts], T], it: SupportsIteration[tuple[*Ts]], /, priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterables should yield tuples that are unpacked as arguments to the function.'''
-    async def double_starmap[T](self, f: Callable[..., T], it: SupportsIteration[Mapping[str, Any]], /, priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterable should yield dicts that are unpacked as keyword arguments to the function.'''
-    async def starmap_with_kwds[T](self, f: Callable[..., T], it: SupportsIteration[tuple[SupportsIteration[Any], Mapping[str, Any]]], /, priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterable should yield tuples of the form ``(args, kwargs)``, where ``args`` is an iterable of positional arguments and ``kwargs`` is a mapping of keyword arguments.'''
+    async def starmap[T, *Ts](self, f: Callable[[*Ts], T], /, it: SupportsIteration[tuple[*Ts]], priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterables should yield tuples that are unpacked as arguments to the function.'''
+    async def double_starmap[T](self, f: Callable[..., T], /, it: SupportsIteration[Mapping[str, Any]], priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterable should yield dicts that are unpacked as keyword arguments to the function.'''
+    async def starmap_with_kwds[T](self, f: Callable[..., T], /, it: SupportsIteration[tuple[SupportsIteration[Any], Mapping[str, Any]]], priority: int=...) -> list[T]: '''Like :meth:`map`, but the iterable should yield tuples of the form ``(args, kwargs)``, where ``args`` is an iterable of positional arguments and ``kwargs`` is a mapping of keyword arguments.'''
     async def resize(self, min_workers: int, max_workers: int) -> None: '''Adjust the lower and upper limits of the pool size, and destroy or spawn threads accordingly.'''
     async def drain(self) -> None: '''Wait until all pending tasks have been completed.'''
-    async def wait_for_slot(self, timeout: float|None=...) -> float: '''Wait until there is a slot in the internal queue for pending tasks, and return the time spent waiting. If ``timeout`` is passed, it will limit the waiting time.'''
+    async def wait_for_slot(self, timeout: float|None=...) -> JustFloat: '''Wait until there is a slot in the internal queue for pending tasks, and return the time spent waiting. If ``timeout`` is passed, it will limit the waiting time.'''
     async def __cleanup__(self) -> None: ...
     def __del__(self) -> None: '''Shut down the pool synchronously with a short timeout if needed. To avoid this blocking up GC, shut down the pool explicitly by using it as an async context manager.'''
     @property
@@ -64,7 +65,7 @@ class AdvancedPool(LoopContextMixin):
     @property
     def idle(self) -> bool: '''Whether all workers are idle, i.e. not executing any tasks currently. This also implies :attr:`empty` is ``True``.'''
     @property
-    def uptime(self) -> float: '''The time in seconds since the pool started.'''
+    def uptime(self) -> JustFloat: '''The time in seconds since the pool started.'''
     @property
     def completed(self) -> int: '''The total number of tasks completed by the pool.'''
 class ConnectionPool[T, **P](LoopMixinBase):

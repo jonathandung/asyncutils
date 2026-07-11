@@ -20,14 +20,14 @@ class Releasing:
         if I.iscoroutine(r := l.release()): await r
     async def __aexit__(self, *_): await self.__lock.acquire()
 class Resource:
-    _inc_cnt = staticmethod(count(1).__next__); __slots__ = '__',
-    def __init__(self): self.__ = f'anonymous resource #{self._inc_cnt()}'
+    __inc_cnt = count(1).__next__; __slots__ = '__',
+    def __init__(self): self.__ = f'anonymous resource #{__class__.__inc_cnt()}'
     def __repr__(self): return self.__
-class ResourceGuard(RuntimeError, A.AsyncContextMixin):
+class ResourceGuard(A.AsyncContextMixin):
     __slots__ = '__', '_t', '_u', 'action', 'guarded'
-    def __new__(cls, rsrc=_NO_DEFAULT, *, action='using', t=Resource):
-        if rsrc is _NO_DEFAULT: rsrc = t()
-        (_ := RuntimeError.__new__(cls)).__, _.action, _.guarded = rsrc, action, False; _._t = _._u = 0; return _
+    def __new__(cls, rsrc=_NO_DEFAULT, *, action='using', _=Resource):
+        if rsrc is _NO_DEFAULT: rsrc = _()
+        (s := object.__new__(cls)).__, s.action, s.guarded = rsrc, action, False; s._t = s._u = 0; return s
     def __enter__(self):
         r = self.__; self._t += 1
         if self.guarded: raise A.ResourceBusy(f'another task is already {self.action} resource: {r!r}')
@@ -36,27 +36,27 @@ class ResourceGuard(RuntimeError, A.AsyncContextMixin):
         if not self.guarded: raise RuntimeError(e)
         self.guarded = False
     @A.dualcontextmanager(use_existing_executor=False, create_executor=False, strict=False)
-    def yields_resource(self, t=Resource):
-        if not isinstance(_ := self.__, t): raise TypeError('asyncutils.altlocks.ResourceGuard.yields_resource expected resource guard to have been instantiated with a resource')
-        with self: yield _
+    def yields_resource(self, _=Resource):
+        if isinstance(r := self.__, _): raise TypeError('asyncutils.altlocks.ResourceGuard.yields_resource expected resource guard to have been instantiated with a resource')
+        with self: yield r
     @property
     def success_ratio(self): return u/self._t if (u := self._u) else 0.0
     P.patch_method_signatures((__exit__, P.exit_sig), (yields_resource, ''), (__new__, "rsrc={0}, *, action='using'"))
 class UniqueResourceGuard(ResourceGuard):
     _cache = __import__('weakref').WeakValueDictionary(); __slots__ = '__weakref__',
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.altlocks.UniqueResourceGuard')
-    def __new__(cls, rsrc, **_):
-        if (r := (c := cls._cache).get(i := id(rsrc))) is None: audit('asyncutils.altlocks.UniqueResourceGuard', fullname(rsrc)); c[i] = r = super().__new__(cls, rsrc, **_)
-        elif _: warn('asyncutils.altlocks.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard', RuntimeWarning, 2)
+    def __new__(cls, rsrc, **k):
+        if (r := (c := cls._cache).get(i := id(rsrc))) is None: audit('asyncutils.altlocks.UniqueResourceGuard', fullname(rsrc)); c[i] = r = super().__new__(cls, rsrc, **k)
+        elif k: warn('asyncutils.altlocks.UniqueResourceGuard: ignoring keyword arguments in favour of pre-existing guard', RuntimeWarning, 2)
         return r
     @classmethod
     def clear_cache(cls): audit('asyncutils.altlocks.UniqueResourceGuard.clear_cache'); cls._cache.clear()
 class CircuitBreaker:
     State = __import__('enum').IntEnum('State', ('CLOSED', 'HALF_OPEN', 'OPEN'), module=__name__)
-    __slots__ = '__exc', '__hoc', '__lock', '__max_hoc', '__mf', '__opened', '__reset', '__unlock', 'fails', 'name', 'state'; _inc_cnt = staticmethod(count(1).__next__)
+    __slots__ = '__exc', '__hoc', '__lock', '__max_hoc', '__mf', '__opened', '__reset', '__unlock', 'fails', 'name', 'state'; __inc_cnt = count(1).__next__
     def __new__(cls, n, /, max_fails=None, reset=None, *, exc=Exception, max_half_open_calls=None, _='#%d'):
         f = None
-        if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls._inc_cnt()
+        if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls.__inc_cnt()
         audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s.__mf, s.__reset, s.__exc, s.__opened, s.__max_hoc, s.__unlock, s.__lock, s.state = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l, cls.State.CLOSED; s.fails = s.__hoc = 0; return s if f is None else s(f)
     def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))

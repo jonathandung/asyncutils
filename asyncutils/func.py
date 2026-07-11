@@ -20,7 +20,14 @@ def acompose(*F, wrap_last=True, _=I.iscoroutine):
     if wrap_last: update_wrapper(g, F[-1])
     return g
 async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
-    async for _ in A.iter_to_agen(it): initial = _ if initial is _NO_DEFAULT else (await f(initial, _)) if await_ else f(initial, _)
+    it = A.iter_to_agen(it)
+    if initial is _NO_DEFAULT:
+        try: initial = await anext(it)
+        except StopAsyncIteration: raise TypeError('asyncutils.iters.areduce: empty (async) iterable passed without initial value') from None
+    if await_:
+        async for i in it: initial = await f(initial, i)
+    else:
+        async for i in it: initial = f(initial, i)
     return initial
 def star(f, /):
     async def g(a=(), k=None, /): return await f(*a, **(k or {}))

@@ -8,14 +8,11 @@ Please note we have a [code of conduct](https://asyncutils.readthedocs.io/en/sta
 
 ## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when building.
+1. Fill in the pull request template, following it as faithfully as you can.
 2. If applicable, [update the README](https://github.com/jonathandung/asyncutils/edit/main/README.md) with details of changes to the interface,
-including new environment variables and useful file locations where appropriate. There should already be a section for each of
-the above cases. Do not add extraneous new sections without another issue.
-3. If this PR bumps the version, as previously discussed with an owner or maintainer, increase the version number in the relevant locations. Only
-maintainers are allowed to increment the minor version. The versioning scheme we use is [SemVer](https://semver.org/spec/v2.0.0.html), but we
-currently only have major, minor and patch parts for simplicity.
-4. Once you have the sign-off of one other developer, you may either merge the PR yourself if you have permission, or ask the reviewer to do so on
+including new environment variables and useful file locations where appropriate. There should already be a section for each of the above cases. Do
+not add a new section without another issue.
+3. Once you have the sign-off of one other developer, you may either merge the PR yourself if you have permission, or ask the reviewer to do so on
 your behalf otherwise.
 
 ## Notes

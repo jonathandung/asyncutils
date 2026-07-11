@@ -4,6 +4,7 @@ import asyncio as I, asyncutils as A
 from asyncio.staggered import staggered_race
 from sys import audit
 async def first_completed(*C, ret_exc=False, timeout=None):
+    if not C: raise TypeError('asyncutils.compete.first_completed: pass in at least one coroutine')
     audit('asyncutils.compete.first_completed/start', L := len(C)); t = tuple(A.new_eager_tasks(*C))
     try:
         async with I.timeout(timeout):

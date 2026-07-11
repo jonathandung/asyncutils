@@ -73,10 +73,10 @@ class AdvancedPool(A.LoopContextMixin):
         with self.__tl: q.shutdown(True)
         await self.join(); self.__sde.set(); return self.uptime
     async def join(self): return await I.gather(*self.__fs, return_exceptions=True)
-    async def map(self, f, /, *its, priority=0, strict=False): return await A.agather(A.amap(partial(self.complete, f, _priority_=priority), *its, strict=strict))
-    async def starmap(self, f, it, /, priority=0): return await A.agather(A.astarmap(partial(self.complete, f, _priority_=priority), it))
-    async def double_starmap(self, f, it, /, priority=0): return await A.agather(A.adouble_starmap(partial(self.complete, f, _priority_=priority), it))
-    async def starmap_with_kwds(self, f, it, /, priority=0): return await A.agather(A.astarmap_with_kwds(partial(self.complete, f, _priority_=priority), it))
+    async def map(self, f, /, *i, priority=0, strict=False): return await A.agather(A.amap(partial(self.complete, f, _priority_=priority), *i, strict=strict))
+    async def starmap(self, f, /, it, priority=0): return await A.agather(A.astarmap(partial(self.complete, f, _priority_=priority), it))
+    async def double_starmap(self, f, /, it, priority=0): return await A.agather(A.adouble_starmap(partial(self.complete, f, _priority_=priority), it))
+    async def starmap_with_kwds(self, f, /, it, priority=0): return await A.agather(A.astarmap_with_kwds(partial(self.complete, f, _priority_=priority), it))
     async def resize(self, min_workers, max_workers): M = max(max_workers, m := max(1, min_workers)); self.__scale_to(min(max(self.__cur, m), M)); self.__min, self.__max = m, M
     def drain(self): return self.__q.join()
     async def wait_for_slot(self, timeout=None):
@@ -128,7 +128,7 @@ class ConnectionPool(LoopMixinBase):
         if akgen is None:
             for _ in repeat(None, self.minsize): await f(_executor_=executor)
         else:
-            async for a, k in A.take(akgen, self.minsize, default=((), {})): await f(*a, _executor_=executor, **k)
+            async for a, k in A.take(akgen, self.minsize, ((), {})): await f(*a, _executor_=executor, **k)
         self.__mtr = self.make(self._maintain())
     async def stop(self):
         if m := self.__mtr: await A.safe_cancel(m)

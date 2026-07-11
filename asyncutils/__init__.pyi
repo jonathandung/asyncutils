@@ -1,8 +1,8 @@
 # ruff: noqa: F403,F405 # cspell:disable
 '''A feature-rich asynchronous utilities library with CLI and REPL support.
 
-.. autoapidata:: __version__
 .. autoapidata:: __hexversion__
+.. autoapidata:: __version__
 .. autoapidata:: console_preloaded_submodules
 .. autoapidata:: preloaded_submodules
 .. autoapidata:: submodules_map
@@ -41,12 +41,10 @@ from .signals import *
 from .tools import *
 from .util import *
 from .version import *
+from ty_extensions import JustFloat
 from types import ModuleType
 from typing import Final
-def time_since_boot() -> float:
-    '''Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.
-    Useful for benchmarking the module's performance.
-    '''
+def time_since_boot() -> JustFloat: '''Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.'''
 __version__: Final[VersionInfo]
 '''An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.
 
