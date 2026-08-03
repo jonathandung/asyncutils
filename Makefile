@@ -1,4 +1,4 @@
-.PHONY: audit-deps build-docs changelog clean gen-badges gen-baseline help install install-silent lint lock pc release ruff sc tc test venv watch
+.PHONY: audit docs changelog clean gen-badges gen-baseline help install install-silent lint lock pc release ruff sc tc test venv watch
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -26,12 +26,8 @@ O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 	fi
 	(uv tool install --force -U ruff &&	uv tool install --force -U ty) 2>/dev/null
 	touch .uv-stamp
-audit-deps: .uv-stamp
+audit: .uv-stamp
 	uv audit --preview-features audit-command
-build-docs:
-	. scripts/unix/genhelp.sh
-	. scripts/unix/genmakefileusage.sh
-	make -C docs html -W
 changelog:
 # cspell:disable-next-line
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -39,6 +35,10 @@ clean:
 	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/help.rst docs/source/makefile-usage.rst py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[codz]' -delete
+docs:
+	. scripts/unix/genhelp.sh
+	. scripts/unix/genmakefileusage.sh
+	make -C docs html -W
 gen-badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings

@@ -22,12 +22,12 @@ uv tool install --force -U ty 2>nul
 type nul > .uv-stamp
 goto :eof
 
-:audit-deps
+:audit
 call :.uv-stamp
 uv audit --preview-features audit-command
 goto :eof
 
-:build-docs
+:docs
 powershell -ExecutionPolicy ByPass -File ".\scripts\win\genhelp.ps1"
 powershell -ExecutionPolicy ByPass -File ".\scripts\win\genmakefileusage.ps1"
 cd docs

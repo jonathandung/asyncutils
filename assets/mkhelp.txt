@@ -1,8 +1,8 @@
 Available targets:
- audit-deps     - Run a security audit on all (optional) dependencies using uv
- build-docs     - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning
+ audit          - Run a security audit on all optional dependencies using uv
  changelog      - Generate a compact changelog from Git history and print it in the terminal with colour
  clean          - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
+ docs           - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning
  gen-badges     - Run the test suite twice, exiting on any failure; generate static badges on success
  gen-baseline   - Regenerate the detect-secrets baseline at the project root
  help           - Show this help message
