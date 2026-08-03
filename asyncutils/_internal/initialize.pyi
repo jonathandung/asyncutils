@@ -1,4 +1,5 @@
-'''A special module used to set up the :mod:`asyncutils` module namespace.
+'''
+A special module used to set up the :mod:`asyncutils` module namespace.
 
 .. danger:: Modifying the module's contents or reloading it at runtime may break the module.
 '''
@@ -12,8 +13,8 @@ class Module:
     @overload
     def __new__(cls, name: Submodule, /) -> Self|ModuleType: ...
     @overload
-    def __new__(cls, name: str, /) -> Any: ... # noqa: ANN401
-    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
+    def __new__(cls, name: str, /) -> Any: ... # ruff: ignore[any-type]
+    def __getattr__(self, name: str, /) -> Any: ... # ruff: ignore[any-type]
     def __setattr__(self, name: str, value: object, /) -> None: ...
     def __delattr__(self, name: str, /) -> None: ...
     def __reduce__(self) -> tuple[type[Self], tuple[str]]: ...

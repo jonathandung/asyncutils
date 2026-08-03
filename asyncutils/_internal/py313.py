@@ -13,7 +13,7 @@ def _get_merger(A, _=__import__('operator').itemgetter):
         if a is Placeholder: f(j); j += 1
         else: f(i)
     j -= n; return j, _(*O) if j else None
-class partial: # noqa: N801
+class partial: # ruff: ignore[invalid-class-name]
     __slots__ = '__weakref__', '_merger', '_phcount', 'args', 'func', 'keywords'
     @__import__('reprlib').recursive_repr()
     def __repr__(self): (f := (A := [repr(self.func)]).extend)(map(repr, self.args)); f(f'{k}={v!r}' for k, v in self.keywords.items()); return f'asyncutils._internal.py313.partial({', '.join(A)})'

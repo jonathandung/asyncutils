@@ -51,19 +51,18 @@ Update your package installer, then try the following fixes:
 uv pip install -U py-asyncutils # Upgrade
 uv pip check # Check for dependency shenanigans
 uv pip tree # Pretty print the pip packages dependency tree
-uv pip tree --package py-asyncutils # Show only the dependents and dependencies of this package
+uv tree # Show only the dependencies of this package
 uv pip uninstall py-asyncutils && uv pip install py-asyncutils # Clean install
 ```
 
 Other (slower) package managers:
 <!-- cspell:disable -->
 ```bash
+pip install -U pipx && pipx ensurepath # pipx, installed with pip
+conda update py-asyncutils # conda
 # pip
 pip install -U pipdeptree && pipdeptree # Quite a bit more clutter than uv pip tree, showing a single package repeatedly
 pipdeptree --packages py-asyncutils # Only this package as above
-
-pip install -U pipx && pipx ensurepath # pipx, installed with pip
-conda update py-asyncutils # conda
 ```
 <!-- cspell:enable -->
 ### Import Errors
@@ -71,11 +70,12 @@ conda update py-asyncutils # conda
 Check if asyncutils is installed:
 
 ```bash
-pip list | grep py-asyncutils
-# or
-pip show py-asyncutils
 # uv
 uv pip show py-asyncutils
+# pip
+pip show py-asyncutils
+# or
+pip list | grep py-asyncutils
 ```
 
 If the package is not working with python, perform the steps below:

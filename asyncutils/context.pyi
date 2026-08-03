@@ -1,16 +1,17 @@
 '''Contextual configuration system, inspired by the :mod:`decimal` module.'''
 from ._internal.prots import ExcType, HashAlgorithm, CanWriteAndFlush
+from _typeshed import Incomplete
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType
 from typing import Any, ClassVar, Self, final, overload
-from _typeshed import Incomplete
 __all__ = 'Context', 'LocalContext', 'NonReusableLocalContext', 'all_contextual_consts', 'getcontext', 'setcontext'
 @final
 @dataclass(slots=True, kw_only=True, match_args=False)
 class Context:
-    '''| An object storing configuration for various functions and patterns in this library, for immutability and performance; that is, not loading :mod:`dataclasses` for :func:`~dataclasses.dataclass`, which loads :mod:`inspect`, triggering a cascade of imports.
+    '''
+    | An object storing configuration for various functions and patterns in this library. Not a dataclass at runtime.
     | :func:`~collections.namedtuple` is also unsuitable for this use case, since it behaves like a sequence.
     | The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
     | For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what it configures.
@@ -18,7 +19,6 @@ class Context:
     .. tip:: If you need to use any of the settings, you can find the documentation under the API reference for the utilities that use that setting.
     .. note:: Refer to :mod:`~asyncutils.config` for the factory default values of each setting.
     .. note:: It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.
-    .. note:: This is only type annotated as a dataclass for convenience. It is a regular class at runtime.
     '''
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...
@@ -67,12 +67,13 @@ class Context:
     MEMORY_MAPPED_IO_MANAGER_DEFAULT_CHECKSUM_ALG: HashAlgorithm = ...
     MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES: bool = ...
     AFREIVALDS_DEFAULT_K: int = ...
-    AONLINE_SORTER_DEFAULT_SLOW: bool = ...
+    AUNZIP_DEFAULT_FAIL_FAST: bool = ...
     AUNZIP_DEFAULT_MAX_QSIZE: int = ...
     AUNZIP_DEFAULT_PUT_BATCH: int = ...
     MERGE_DEFAULT_MAX_QSIZE: int = ...
-    TEE_DEFAULT_PUT_EXC: bool = ...
+    TEE_DEFAULT_FAIL_FAST: bool = ...
     TEE_DEFAULT_MAX_QSIZE: int = ...
+    TEE_DEFAULT_PUT_BATCH: int = ...
     ADVANCED_RATE_LIMIT_DEFAULT_TOKENS: float = ...
     DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE: int = ...
     LOCKSMITH_BASE_DEFAULT_TIMEOUTS: tuple[float|None, float|None, float|None] = ...
@@ -119,7 +120,7 @@ class Context:
     def update(self, dct: dict[str, Any]=..., /, **k: object) -> None: '''Update the values of the instance with ``dct`` if passed, then the keyword arguments.'''
     def __copy__(self) -> Self: '''Alias for :meth:`copy`.'''
     def __eq__(self, other: object, /) -> bool: '''Two contexts are considered equal if they are of the same type and all of their fields are equal.'''
-    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.''' # noqa: ANN401
+    def __getitem__(self, name: str, /) -> Any: ''':class:`Context`'s also behave like mappings.''' # ruff: ignore[any-type]
     def __setitem__(self, name: str, value: object, /) -> None: '''Alias for :meth:`~object.__setattr__`.'''
     __hash__: ClassVar[None]
     '''Contexts are not hashable since they are mutable.'''
@@ -130,16 +131,16 @@ class LocalContext:
     def new_ctx(self) -> Context: '''The new context to be set on context manager entry.'''
     @property
     def saved_ctx(self) -> Context: '''The previous context to be restored on context manager exit.'''
-    def __enter__(self) -> Context: '''Return the new context after setting it.'''
+    def __enter__(self) -> Context: '''Return :attr:`new_ctx` after setting it as the current context.'''
     @overload
     def __exit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
-    async def __aenter__(self) -> Context: '''Return the new context after setting it.'''
+    def __exit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to :attr:`saved_ctx`.'''
+    async def __aenter__(self) -> Context: '''Return :attr:`new_ctx` after setting it as the current context.'''
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
     @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to the previous.'''
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Reset the context to :attr:`saved_ctx`.'''
 @final
 class NonReusableLocalContext(LocalContext): '''Version of :class:`LocalContext` that is not reusable. Use this to avoid subtle bugs, especially since it's not that expensive to instantiate a :class:`Context`.'''
 def getcontext() -> Context: '''Return the current context for the active thread.'''
@@ -148,7 +149,6 @@ all_contextual_consts: frozenset[str]
 '''A :class:`frozenset` of all contextual constant names, for use in validating that only valid contextual constants are accessed or modified.
 
 .. note::
-  These names are not listed by calling :func:`dir` on this submodule, since there are so many of them (87 as of now!) and more may be added in
-  the future, and the recommended way to get their values is to query them on the actual context object anyway. However, they are still provided
-  below to facilitate type checking.'''
+  These names are not listed by calling :func:`dir` on this submodule due to the sheer number of them.
+  It is recommended to get their values accessing them on the actual context object.'''
 def __getattr__(name: str, /) -> Incomplete: '''Return the value of the contextual constant with the name ``name``.'''

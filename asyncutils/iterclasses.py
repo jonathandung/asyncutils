@@ -3,6 +3,7 @@ from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import iterclasses_all as __all__
 from _collections import defaultdict, deque
+from operator import index
 from sys import maxsize as I
 @H.subscriptable
 class AChain:
@@ -14,7 +15,7 @@ class AChain:
                 async for _ in cls._flatten_it_of_its(i.__its): yield _
             else: yield i
     @classmethod
-    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__its = cls._flatten_it_of_its(it_of_its); return s
+    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__its = cls._flatten_it_of_its(it_of_its); return s # ty: ignore[unresolved-attribute]
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
         async for i in self.__its: # ty: ignore[unresolved-attribute]
@@ -49,26 +50,27 @@ class APeekable(H.LoopMixinBase):
             elif (d := min(max(a, b)+1, I)-len(C)) >= 0:
                 async for s in A.take(self.__it, d): f(s)
             return tuple(C)[a:b:c]
-        async for s in A.iter_to_agen(self.__it) if (i := i.__index__()) < 0 else A.empty_agen() if i < (l := len(C)) else A.take(self.__it, i-l+1): f(s)
+        if (i := index(i)) < (l := len(C)): return C[i]
+        async for s in A.iter_to_agen(self.__it) if i < 0 else A.take(self.__it, i-l+1): f(s)
         return C[i]
-    P.patch_method_signatures((__getitem__, 'idx, /'))
+    P.patch_method_signatures((__getitem__, 'idx, /'), (peek, 'default={}'))
 @H.subscriptable
 class ABucket:
-    __slots__ = '__ca', '__it', '__key', '__vd'
-    def __init__(self, it, key, validator=None): super().__init__(); self.__it, self.__key, self.__ca, self.__vd = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
+    __slots__ = '__c', '__i', '__k', '__v'
+    def __init__(self, it, key, validator=None): super().__init__(); self.__i, self.__k, self.__c, self.__v = A.iter_to_agen(it), key, defaultdict(deque), validator or (lambda _: True)
     async def contains(self, k, /):
-        if not self.__vd(k): return False
+        if not self.__v(k): return False
         try: i = await anext(self[k])
         except StopAsyncIteration: return False
-        self.__ca[k].append(i); return True
+        self.__c[k].append(i); return True
     async def __aiter__(self):
-        K, V, C = self.__key, self.__vd, self.__ca
-        async for i in self.__it:
+        K, V, C = self.__k, self.__v, self.__c
+        async for i in self.__i:
             if V(k := K(i)): C[k].append(i)
         for k in C: yield k
     async def __getitem__(self, k, /):
-        if not (V := self.__vd)(k): return
-        p, I, K = (a := (C := self.__ca)[k]).popleft, self.__it, self.__key
+        if not (V := self.__v)(k): return
+        p, I, K = (a := (C := self.__c)[k]).popleft, self.__i, self.__k
         while True:
             if a: yield p(); continue
             while True:

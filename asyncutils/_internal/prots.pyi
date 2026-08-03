@@ -1,4 +1,5 @@
-'''| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
+'''
+| Defines interfaces and type aliases used in this module's stubs to facilitate lightweight type annotations, inline or otherwise.
 | To avoid confusion with builtin modules, this module is named ``prots``, which may be less than descriptive, but it is what it is.
 | Neither this module nor any of its symbols exist at runtime.
 | Thus, we export nothing intentionally and prompt type checkers to emit errors when symbols here are used with ``from asyncutils._internal.prots import *``.
@@ -10,35 +11,29 @@
   Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
   even prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.
 '''
+from .helpers import LoopMixinBase
 from ..config import FaultyConfig
 from ..constants import SentinelBase
 from ..exceptions import ForbiddenOperation
-from ..mixins import LoopContextMixin
-import sys, ty_extensions as tyx
+from ..futures import TimeAwareFuture, TimeAwareTask
+from ..iotools import AsyncReadWriteCouple
+from ..iters import FirstMisMatch, Longer, Shorter
+import asyncio as aio, concurrent.futures as cf, sys, ty_extensions as tyx
+from _typeshed import Incomplete
 from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator
-from asyncio import AbstractEventLoop, Future, Task
-from concurrent.futures import Future as SyncFuture
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from contextvars import Context
 from io import TextIOWrapper
 from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, TracebackType
-from typing import Any, Concatenate, Literal, NamedTuple, NewType, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+from typing import Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 from typing_extensions import TypeForm
 @type_check_only
-class Reader[T](Protocol):
-    ''':class:`io.Reader` is not used due to version compatibility issues.'''
-    def read(self, size: int=..., /) -> T: ...
-@type_check_only
-class Writer[T](Protocol):
-    ''':class:`io.Writer` is not used due to version compatibility issues.'''
-    def write(self, data: T, /) -> int: ...
-@type_check_only
 class SupportsLT(Protocol):
-    '''An object that implements the < operator.'''
+    '''An object that implements <.'''
     def __lt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class SupportsGT(Protocol):
-    '''An object that implements the > operator.'''
+    '''An object that implements >.'''
     def __gt__(self, other: Self, /) -> bool: ...
 @type_check_only
 class AsyncContextManager[T](Protocol):
@@ -57,14 +52,9 @@ class AsyncLockLike[T](AsyncContextManager[T], Protocol):
 @type_check_only
 class FutWrapType(Protocol):
     '''The signature of the functions accepted for the ``futwrap`` parameter in :func:`~asyncutils.compete.convert_to_coro_iter`.'''
-    def __call__[T](self, future: Future[T]|SyncFuture[T], *, loop: AbstractEventLoop|None) -> Future[T]: ...
+    def __call__[T](self, future: AnyFut[T], *, loop: aio.AbstractEventLoop|None) -> aio.Future[T]: ...
 @type_check_only
-class GenericSized[T](Protocol):
-    '''A generic version of :class:`~typing.Sized`.'''
-    def __len__(self) -> int: ...
-    def __iter__(self) -> Iterator[T]: ...
-@type_check_only
-class SupportsSlicing[T](GenericSized[T], Protocol):
+class SupportsSlicing[T](Iterable[T], Protocol):
     '''Protocol for iterables with size, and index and slice access.'''
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> Self: ...
@@ -81,20 +71,16 @@ class CanClearAndCopy[T](SupportsCopy, Protocol):
     def clear(self) -> None: ...
     def __iter__(self) -> Iterator[T]: ...
 @type_check_only
-class PathLike[T](Protocol):
-    '''An object that represents a path. Basically :class:`os.PathLike`, but a :class:`~typing.Protocol`.'''
-    def __fspath__(self) -> T: ...
-@type_check_only
 class SupportsPop[T](Protocol):
-    '''Types with a :meth:`~list.pop` method.'''
+    '''Types with a :meth:`!pop` method.'''
     def pop(self) -> T: ...
 @type_check_only
 class SupportsPopLeft[T](Protocol):
-    '''Types with a :meth:`~collections.deque.popleft` method.'''
+    '''Types with a :meth:`!popleft` method.'''
     def popleft(self) -> T: ...
 @type_check_only
 class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
-    '''Objects such as those returned by :func:`types.coroutine`-decorated generator functions.'''
+    '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
     def send(self, val: S, /) -> T: ...
     @overload
     def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
@@ -119,18 +105,19 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
 @type_check_only
 class PartialInterfaceMeta(type):
     '''Metaclass for partial interfaces, as described and justified in :class:`PartialInterface`.'''
-    def __getattr__(cls, name: str, /) -> Any: ... # noqa: ANN401
+    def __getattr__(cls, name: str, /) -> Incomplete: ...
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
-    '''| Base class for partial interfaces.
+    '''
+    | Base class for partial interfaces.
     | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may actually exist on the object or class.
-    | This is a simplistic fix that asks type checkers to assume those attributes always exist and make no attempt to infer their types.
+    | This is a simplistic fix that makes type checkers assume those attributes always exist.
     '''
     def __init__(self, *a: object, **k: object): ...
-    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
+    def __getattr__(self, name: str, /) -> Incomplete: ...
 @type_check_only
 class DumpType(Protocol):
-    '''Encapsulates the signature of simple json-dumping functions accepted by :func:`~asyncutils.tools.argv_to_json` and :func:`~asyncutils.tools.argstr_to_json`.'''
+    '''Simple JSON-dumping functions accepted by :func:`~asyncutils.tools.argv_to_json` and :func:`~asyncutils.tools.argstr_to_json`.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper, /) -> None: '''``dict[str, Any]`` is used here because the callable needs only handle strict instances of :class:`dict`.'''
 @type_check_only
 class CanWriteAndFlush[T](Protocol):
@@ -138,38 +125,25 @@ class CanWriteAndFlush[T](Protocol):
     def flush(self) -> None: ...
     def write(self, s: T, /) -> int|None: ...
 @type_check_only
+class FuncProxy[T](Protocol):
+    '''Intermediate protocol to build the recursive definition of :type:`Wrapper`.'''
+    @property
+    def __func__(self) -> T: ...
+@type_check_only
 class FuncWrapper[T](Protocol):
     '''Intermediate protocol to build the recursive definition of :type:`Wrapper`.'''
     @property
     def __wrapped__(self) -> T: ...
 @type_check_only
-class FuncProxy[T](Protocol):
-    '''Same as above.'''
-    @property
-    def __func__(self) -> T: ...
-@type_check_only
 class HasClassGetItem(Protocol):
+    '''Protocol for objects whose types are generic over something.'''
     def __class_getitem__(cls, item: TypeForm, /) -> GenericAlias: ...
-type Proxy[T] = FuncProxy[T]|FuncWrapper[T]
-'''A supposed callable object having a :attr:`FuncWrapper.__wrapped__` or :attr:`~method.__func__` attribute pointing to the callable it wraps.'''
-type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
-'''A function or wrapper of any depth thereof.'''
-type SigPatcherArg = tuple[Wrapper, str]
-'''The type of a positional argument passed to a signature-patching function in :mod:`~asyncutils._internal.patch`.'''
-type Middleware = Callable[[str, Any], Any]
-'''Represents a middleware accepted by :class:`~asyncutils.channels.EventBus`.'''
-type NonGroupExc = tyx.Intersection[BaseException, tyx.Not[BaseExceptionGroup]]
-'''Exceptions that are not exception groups.'''
-type NotNone = tyx.Not[None]
-'''The complement of ``None``.'''
-type Subscriptable[T] = type[tyx.Intersection[T, HasClassGetItem]]
-'''Returned by :func:`~asyncutils._internal.helpers.subscriptable`.'''
 @type_check_only
 class SupportsMatMul(Protocol):
     '''Objects that implement matrix multiplication to return an instance of its own type.'''
     def __matmul__(self, other: Self, /) -> Self: ...
 @type_check_only
-class QProtBase[R, V](Protocol):
+class QueueProtocolBase[R, V](Protocol):
     '''A base protocol representing password-protected queues.'''
     exc: type[ForbiddenOperation]
     '''Convenience alias for :exc:`~asyncutils.exceptions.ForbiddenOperation`.'''
@@ -178,7 +152,8 @@ class QProtBase[R, V](Protocol):
     @property
     def maxsize(self) -> int: '''Maximum number of items allowed in the queue at any moment.'''
     def cancel_extend(self, msg: object=...) -> bool:
-        '''| Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any.
+        '''
+        | Cancel the currently running task to put in the initial items to the queue asynchronously, optionally with a message, which will be the argument for the :exc:`~asyncio.CancelledError` seen by the extender if any.
         | Return ``False`` if the task is already done or cancelled, or there was no task to begin with.
         '''
     def empty(self) -> bool: '''Check if the queue is empty.'''
@@ -188,21 +163,21 @@ class QProtBase[R, V](Protocol):
     def change_get_password(self, opw: R, npw: R) -> bool: '''Attempt to change the get password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect gets or is empty and has been shut down.'''
     def change_put_password(self, opw: V, npw: V) -> bool: '''Attempt to change the put password of the password-protected queue to ``npw`` given the old password ``opw`` and return success. Always returns ``False`` if the queue does not protect puts or has been shut down.'''
 @type_check_only
-class GetProtectedQProtocol[R, T](QProtBase[R, Any], Protocol):
+class GetProtectedQueueProtocol[R, T](QueueProtocolBase[R, Any], Protocol):
     '''Queues for which :meth:`~asyncio.Queue.get` and :meth:`~asyncio.Queue.get_nowait` are protected by a password.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
     async def put(self, item: T) -> None: '''Put ``item`` into the queue; if the queue is full, asynchronously wait until a free slot is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
     def put_nowait(self, item: T) -> None: '''Put ``item`` into the queue immediately; raise :exc:`~asyncio.QueueFull` if impossible.'''
 @type_check_only
-class PutProtectedQProtocol[V, T](QProtBase[Any, V], Protocol):
+class PutProtectedQueueProtocol[V, T](QueueProtocolBase[Any, V], Protocol):
     '''Queues for which :meth:`~asyncio.Queue.put` and :meth:`~asyncio.Queue.put_nowait` are protected by a password.'''
     async def get(self) -> T: '''Asynchronously get an item from the queue; if the queue is empty, wait until an item is available.'''
     def get_nowait(self) -> T: '''Get an item from the queue immediately; raise :exc:`~asyncio.QueueEmpty` if impossible.'''
     async def put(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, wait until a free slot is available.'''
     def put_nowait(self, item: T, pwd: V, /) -> None: '''Put ``item`` into the password-protected queue, if ``pwd`` is the correct password; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is full, raise :exc:`~asyncio.QueueFull`.'''
 @type_check_only
-class GetAndPutProtectedQProtocol[R, V, T](QProtBase[R, V], Protocol):
+class GetAndPutProtectedQueueProtocol[R, V, T](QueueProtocolBase[R, V], Protocol):
     '''Queues for which all mutating operations are protected by passwords. There is no requirement as to whether they are the same or different.'''
     async def get(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, wait until an item is available.'''
     def get_nowait(self, pwd: R, /) -> T: '''Remove and return an item from the password-protected queue, if the password provided was correct; raise :exc:`~asyncutils.exceptions.WrongPassword` otherwise. If the queue is empty, raise :exc:`~asyncio.QueueEmpty`.'''
@@ -256,7 +231,7 @@ class BenchmarkResult(NamedTuple):
     '''The ``times`` constructor parameter.'''
 @type_check_only
 class CountItem[T, R](NamedTuple):
-    '''The type of items in the async generator returned by :func:`~asyncutils.iters.counts`.'''
+    '''Yielded by async generators returned by :func:`~asyncutils.iters.counts`.'''
     count: int
     '''The number of items mapping to the key up to this point, including :attr:`item`.'''
     key: R
@@ -264,23 +239,30 @@ class CountItem[T, R](NamedTuple):
     item: T
     '''The item itself.'''
 @type_check_only
-class MemoryMappedFile(LoopContextMixin):
+class StdCoupType(AsyncReadWriteCouple[str, str]):
+    '''The type of :data:`~asyncutils.iotools.stdcoup`.'''
+    async def __aenter__(self) -> NoReturn: ...
+@type_check_only
+class MemoryMappedFile(LoopMixinBase):
     '''The type of async memory-mapped files as opened and returned by :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
     if sys.platform != 'win32':
-        def madvise(self, option: int, start: int=..., length: int|None=...) -> None: '''Advise the kernel about how to handle the memory map by making the ``madvise`` system call.'''
+        def madvise(self, option: int, start: int=..., length: int|None=...) -> None: '''Advise the kernel to handle the region of the memory map that starts at ``start`` with length ``length`` according to ``option``.'''
     async def read(self, offset: int=..., size: int=...) -> bytes: '''Read ``size`` bytes from the file at ``offset``. A negative ``size`` reads until the end of the file.'''
     async def write(self, data: bytes, offset: int=...) -> None: '''Write ``data`` into the file at ``offset``.'''
     async def readline(self, offset: int=..., size: int|None=..., include_newline: bool=...) -> bytes: '''Read a line from the file at ``offset``, up to a maximum of ``size`` bytes if ``size`` is not ``None``, and return it, optionally including the newline character.'''
     async def readlines(self, hint: int=...) -> list[bytes]: '''Read lines from the file until the total size of the lines read reaches or exceeds ``hint`` if ``hint`` is non-negative, and return a list of the lines read.'''
-    async def flush(self, offset: int=..., size: int|None=..., /) -> None: '''Flush the file, or a portion of it if ``offset`` and ``size`` are specified. If ``size`` is ``None``, flush until the end of the file.'''
+    async def flush(self, offset: int=..., size: int|None=...) -> None: '''Flush the file, or a portion of it if ``offset`` and ``size`` are specified. If ``size`` is ``None``, flush until the end of the file.'''
     async def move(self, dest: int, src: int, count: int) -> None: '''Move ``count`` bytes of data within the file starting from ``src`` to ``dest``.'''
-    async def __setup__(self) -> None: ...
-    async def __cleanup__(self) -> None: ...
     async def seek(self, pos: int, whence: Seek=...) -> None: '''Move the file pointer to ``pos`` according to ``whence``.'''
-    def __iter__(self) -> Iterator[bytes]: '''Return an iterator over the lines of the file.'''
-    def __aiter__(self) -> AsyncGeneratorType[bytes]: '''Return an asynchronous iterator over the lines of the file.'''
+    def __iter__(self) -> Iterator[int]: '''Return an iterator over the bytes in the file.'''
+    def __aiter__(self) -> AsyncGeneratorType[bytes]: '''Return an asynchronous iterator over the lines in the file.'''
+    async def __aenter__(self) -> Self: ...
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Re-enter the lock, propagating errors.'''
     @property
-    def closed(self) -> bool: '''Whether the file and memory map have been closed.'''
+    def closed(self) -> bool: '''Whether the file and memory map have been closed by a :meth:`close` or :meth:`aclose` call.'''
     @property
     def open_files(self) -> OpenFiles: '''A dictionary mapping tuples of the form ``(file, mode)`` to the file objects underlying this memory-mapped file.'''
     def fileno(self) -> int: '''Return the file descriptor of the underlying file.'''
@@ -288,10 +270,10 @@ class MemoryMappedFile(LoopContextMixin):
     def close(self) -> None: '''Close the memory-mapped file and the underlying file. It is safe to call this method multiple times, but no other methods should be called after closing.'''
     async def aclose(self) -> None: '''Close the memory-mapped file and the underlying file concurrently in async. It is safe to call this method multiple times, but no other methods should be called after closing.'''
     def read_byte(self) -> int: '''Read one byte from the file at the current file pointer, advance the pointer and return the byte as an integer >=0, <256.'''
-    def write_byte(self, b: int, /) -> None: '''Write a byte to the file at the current file pointer and advance the pointer.'''
-    def resize(self, new_size: int) -> None: '''Resize the file to ``new_size`` bytes. If the file is extended, the added bytes are zero-filled.'''
-    def find(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the lowest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
-    def rfind(self, sub: bytes, start: int|None=..., end: int|None=...) -> int: '''Return the highest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
+    def write_byte(self, byte: int, /) -> None: '''Write a byte to the file at the current file pointer and advance the pointer.'''
+    def resize(self, new_size: int) -> None: '''Resize the file to ``new_size`` bytes. If the file is extended, null bytes are written.'''
+    def find(self, sub: Buffer, start: int=..., end: int=...) -> int: '''Return the lowest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
+    def rfind(self, sub: Buffer, start: int=..., end: int=...) -> int: '''Return the highest index in the file where the bytes ``sub`` is found, such that ``sub`` is contained in the slice ``file[start:end]``. Return -1 if ``sub`` is not found.'''
     def tell(self) -> int: '''Return the current file pointer position.'''
     def size(self) -> int: '''Return the size of the file in bytes.'''
     def isatty(self) -> bool: '''Return whether the file is connected to a TTY device.'''
@@ -299,10 +281,10 @@ class MemoryMappedFile(LoopContextMixin):
     def writable(self) -> Literal[True]: '''Return ``True`` unconditionally.'''
     def seekable(self) -> Literal[True]: '''Return ``True`` unconditionally.'''
     async def writelines(self, lines: Iterable[bytes], /, *, sep: bytes=..., minimize_writes: bool=...) -> None: '''Write each line in ``lines``, followed by ``sep``, into the file. If ``minimize_writes`` is ``True`` (default :const:`~asyncutils.context.Context.MEMORY_MAPPED_IO_MANAGER_DEFAULT_MINIMIZE_WRITES`), write all the lines in one call.'''
-    async def read_str(self, offset: int=..., size: int=..., encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified ``encoding`` and ``errors``.'''
-    async def write_str(self, text: str, offset: int=..., encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified ``encoding`` and ``errors``.'''
+    async def read_str(self, offset: int=..., size: int=..., *, encoding: str=..., errors: str=...) -> str: '''Version of :meth:`read` returning a string instead, decoded with the specified ``encoding`` and ``errors``.'''
+    async def write_str(self, text: str, offset: int=..., *, encoding: str=..., errors: str=...) -> None: '''Write a string to the file at the specified offset, encoded with the specified ``encoding`` and ``errors``.'''
     @overload
-    async def smart_write(self, data: str, offset: int=..., encoding: str=..., errors: str=...) -> None: ...
+    async def smart_write(self, data: str, offset: int=..., *, encoding: str=..., errors: str=...) -> None: ...
     @overload
     async def smart_write(self, data: bytes, offset: int=...) -> None: '''Write data to the file at the specified offset, automatically encoding strings.'''
     async def copy_range(self, src_offset: int, dest_offset: int, size: int) -> bool: '''Copy a range of bytes from one location to another in the file.'''
@@ -320,24 +302,25 @@ class MemoryMappedFile(LoopContextMixin):
     async def search_non_overlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Version of :meth:`search` that ensures the offsets returned do not overlap using a greedy approach.'''
     async def compact(self) -> int: '''Reduce the size of the file by stripping all contiguous null bytes at the end, and return the number of bytes removed.'''
 @type_check_only
-class AUnzipConsumer[T]:
-    '''The type of each consumer in the tuple return value of :func:`~asyncutils.iters.aunzip`.'''
+class Consumer[T]:
+    '''The type of each consumer in the tuple return value of :func:`~asyncutils.iters.aunzip` and :func:`~asyncutils.iters.tee`.'''
     def __aiter__(self) -> Self: ...
     async def __anext__(self) -> T: ...
-    def close(self) -> None: '''Shut down the underlying queue, such that this consumer no longer receives the values at its position.'''
+    def close(self) -> None: '''Shut down the underlying queue.'''
 @type_check_only
 class ToSyncFromLoopRV(Protocol):
-    '''The signature of the return value of :func:`~asyncutils.util.to_sync_from_loop`.'''
+    '''The signature of the return value of :func:`~asyncutils.func.to_sync_from_loop`.'''
     def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: ...
 @type_check_only
 class TransientBlockFromLoopRV(Protocol):
     '''The signature of the return value of :func:`~asyncutils.util.transient_block_from_loop`.'''
-    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> Future[T]: ...
+    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> aio.Future[T]: ...
 @type_check_only
 class NullContextType:
-    '''The type of :const:`~asyncutils.util.anullcontext`; that is, a simple async-only version of :func:`contextlib.nullcontext` that does not depend on :mod:`contextlib`.
+    '''
+    The type of :const:`~asyncutils.util.anullcontext`.
 
-    .. note:: This does not support the ``enter_result`` argument of the original.
+    .. note:: This does not support the ``enter_result`` argument of :func:`contextlib.nullcontext`.
     '''
     async def __aenter__(self) -> None: ...
     @overload
@@ -363,7 +346,7 @@ class EventProtocol(Protocol):
     def is_set(self) -> bool: '''Return whether the event is set.'''
     def set(self) -> None: '''Set the event, allowing any waiters to proceed.'''
     def clear(self) -> None: '''Clear the event, causing future waiters to block until it is set again.'''
-    async def wait(self) -> Any: '''Asynchronously wait until the event is set.''' # noqa: ANN401
+    async def wait(self) -> Any: '''Asynchronously wait until the event is set.''' # ruff: ignore[any-type]
 @type_check_only
 class FutProtocol[T](Protocol):
     '''The barest of protocol for future-like objects such that the class is accepted at runtime by :func:`~asyncutils.util.done_fut`. Does not require the object to be awaitable, for instance.'''
@@ -381,8 +364,41 @@ class StrictDualContextFactory(Protocol):
     @overload
     def __call__[T, **P](self, agenf: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
 @type_check_only
-class TaskFactory[T: Task[Any]](Protocol):
-    def __call__(self, loop: AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
+class TaskFactory[T: aio.Task[Any]](Protocol):
+    '''Callable protocol for the return type of :func:`~asyncutils.util.make_task_factory`.'''
+    def __call__(self, loop: aio.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
+@type_check_only
+class FaultyConfigA(FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> str: ...
+    @property
+    def correct(self) -> tuple[str, ...]: ...
+@type_check_only
+class FaultyConfigB[T, R: type|tuple[type, ...]](FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> T: ...
+    @property
+    def correct(self) -> R: ...
+type Diff[T, R] = FirstMisMatch[T, R]|Shorter[T]|Longer[R]
+'''Return type of :func:`~asyncutils.iters.diff_with`.'''
+type Proxy[T] = FuncProxy[T]|FuncWrapper[T]
+'''A supposed callable object having a :attr:`FuncWrapper.__wrapped__` or :attr:`~method.__func__` attribute pointing to the callable it wraps.'''
+type Wrapper = FunctionType|Proxy[FunctionType|Wrapper]
+'''A function or wrapper of any depth thereof.'''
+type SigPatcherArg = tuple[Wrapper, str]
+'''A positional argument passed to a signature-patching function in :mod:`~asyncutils._internal.patch`.'''
+type Middleware = Callable[[str, Any], Any]
+'''Middlewares accepted by :class:`~asyncutils.channels.EventBus`.'''
+type NonGroupExc = tyx.Intersection[BaseException, tyx.Not[BaseExceptionGroup]]
+'''Exceptions that are not exception groups.'''
+type NotNone = tyx.Not[None]
+'''The complement of ``None``.'''
+type Subscriptable[T] = type[tyx.Intersection[T, HasClassGetItem]]
+'''Returned by :func:`~asyncutils._internal.helpers.subscriptable`.'''
+type TimeAware = TimeAwareFuture[Any]|TimeAwareTask[Any]
+'''A future that implements comparison to determine which was created first.'''
 type IntCompatible = str|SupportsInt|SupportsIndex|Buffer
 '''Objects accepted by the :class:`int` constructor.'''
 type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
@@ -393,8 +409,6 @@ type ExcType = type[BaseException]
 '''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__` methods.'''
 type CanExcept = ExcType|tuple[ExcType, ...]
 '''The type of objects that may follow an except statement.'''
-type Openable = int|str|bytes|PathLike[str]|PathLike[bytes]
-'''Anything that can normally be passed to :func:`open`.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
 '''A slice with start, stop and step being integers or ``None``, representing a slice that typical sequences supporting slicing should accept.'''
 type Timer = Callable[[], float]
@@ -439,23 +453,13 @@ else:
     * 4: :data:`~os.SEEK_HOLE`'''
 type EveryMethodRV[R, T] = Callable[[EveryMethodFT[T, R]], Callable[Concatenate[T, ...], CoroutineType[Any, Any, R|None]]]
 '''Return type of :func:`~asyncutils.func.everymethod`.'''
-type Observer[**P] = Callable[Concatenate[Any, P], Awaitable[Any]]
+type Observer[**P] = tyx.Intersection[Callable[Concatenate[Any, P], Awaitable[Any]], Hashable]
 '''The type of :class:`~asyncutils.channels.Observable` observers.'''
 type RWLockCM = AbstractAsyncContextManager[None, None]
 '''The type of the context managers returned by the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
+type AnyFut[T] = aio.Future[T]|cf.Future[T]
+'''A sync or async future.'''
+type PipePairCM[T: (str, bytes)] = DualContextManager[tuple[AsyncReadWriteCouple[T, T], AsyncReadWriteCouple[T, T]]]
+'''The return type of :func:`~asyncutils.iotools.double_ended_text_pipe` and :func:`~asyncutils.iotools.double_ended_binary_pipe`.'''
 ExceptionWrapper = NewType('ExceptionWrapper', object)
 '''The return type of :func:`~asyncutils.exceptions.wrap_exc`.'''
-@type_check_only
-class FaultyConfigA(FaultyConfig):
-    '''For better type checking. Unstable.'''
-    @property
-    def wrong(self) -> str: ...
-    @property
-    def correct(self) -> tuple[str, ...]: ...
-@type_check_only
-class FaultyConfigB[T, R: type|tuple[type, ...]](FaultyConfig):
-    '''For better type checking. Unstable.'''
-    @property
-    def wrong(self) -> T: ...
-    @property
-    def correct(self) -> R: ...

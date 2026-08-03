@@ -7,5 +7,5 @@ RUN uv venv
 RUN uv pip install --frozen --no-cache *.tar.gz
 RUN rm -rf *.tar.gz
 RUN python3 -c "print(__import__('asyncutils').__version__.representation)"
-RUN asyncutils --help
+RUN asyncutils -h
 ENTRYPOINT ["asyncutils"]

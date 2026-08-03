@@ -1,9 +1,9 @@
 # ty: ignore[unresolved-attribute]
 from asyncutils._internal.helpers import copy_and_clear, fullname, simple_wrap
 from asyncutils._internal.submodules import futures_all as __all__
-from contextvars import copy_context
 from asyncio.futures import Future, _PyFuture # ty: ignore[unresolved-import]
 from asyncio.tasks import Task, _PyTask # ty: ignore[unresolved-import]
+from contextvars import copy_context
 from sys import audit
 from time import monotonic_ns
 t = '_callbacks', '_async_callbacks', '_noargs_callbacks', '_noargs_async_callbacks'
@@ -23,7 +23,7 @@ class A:
     def add_noargs_async_callback(self, f, /, *, context=None):
         if self._state == 'PENDING': type(self)._acb(self._noargs_async_callbacks, f, context)
         else: self._loop.create_task(simple_wrap(f()), context=context)
-    def _Future__schedule_callbacks(self): # noqa: N802
+    def _Future__schedule_callbacks(self): # ruff: ignore[invalid-function-name]
         audit(f'{fullname(self)}/schedule_callbacks', id(self)); a, b = (l := self._loop).create_task, l.call_soon; c, d, e, f = map(type(self)._icb, (self._async_callbacks, self._callbacks, self._noargs_async_callbacks, self._noargs_callbacks))
         for g, _ in c: a(g(self), context=_)
         for g, _ in d: b(g, self, context=_)

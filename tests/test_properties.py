@@ -52,7 +52,7 @@ class TestProp:
 @mk
 async def test_outer():
     with raises(AttributeError): await TestProp.rp
-    with raises(AttributeError): TestProp.meth
+    with raises(AttributeError): TestProp.meth  # ruff: ignore[useless-expression]
     assert type(await TestProp.lp) is LazyAsyncProperty
     assert isinstance(await TestProp.cp, AsyncPropertyBase)
     assert (await TestProp.lp).__doc__ == 'Docstring.'

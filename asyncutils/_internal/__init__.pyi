@@ -1,4 +1,5 @@
-'''For internal use of :mod:`asyncutils`.
+'''
+For internal use of :mod:`asyncutils`.
 
 .. caution:: All the contents of this subpackage may change without notice, unless documented in the API reference or otherwise specified.
 '''

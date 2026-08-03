@@ -12,11 +12,11 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### Tests
 
-58% coverage, 87 tests
+58% coverage, 91 tests
 
 ### Docs
 
-96% complete
+98% complete
 
 ## Versions
 
@@ -27,7 +27,15 @@ Breaking changes:
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
 
-### [1.1.0] - 2026-07-11; newest
+### [1.1.2] - 2026-08-03
+
+Some bug fixes and appropriate moves around submodules.
+
+### [1.1.1] - skipped
+
+Switched from pre-commit to prek; removed pre-commit.ci step and replaced with a prek workflow.
+
+### [1.1.0] - 2026-07-11
 
 Semantic versioning be damned! No one uses this project anyway.
 
@@ -267,6 +275,12 @@ Breaking changes:
 
     Functions:
     - areduce
+    - discard_retval
+    - to_sync
+    - to_async
+    - to_sync_from_loop
+    - aiter_from_f
+    - afcopy
     - iterf
     - acompose
     - every
@@ -354,7 +368,6 @@ Breaking changes:
   - mixins
 
     Interfaces/Mixins:
-    - LoopContextMixin
     - AwaitableMixin
     - AsyncContextMixin
     - ExecutorRequiredAsyncContextMixin
@@ -458,15 +471,10 @@ Breaking changes:
     Functions:
     - aawcmf2dcmf
     - aawcmf2dcmff
-    - afcopy
     - dcm
-    - discard_retval
     - get_future
     - make_task_factory
     - new_eager_tasks
-    - to_sync
-    - to_async
-    - to_sync_from_loop
     - sync_await
     - lockf
     - done_evt
@@ -474,7 +482,6 @@ Breaking changes:
     - locked_lock
     - dualcontextmanager
     - semaphore
-    - aiter_from_f
     - safe_cancel
     - transient_block
     - transient_block_from_loop

@@ -1,5 +1,4 @@
-# ruff: noqa: BLE001
-__lazy_modules__ = frozenset(('asyncio',))
+# ruff: file-ignore[blind-except]
 import asyncutils as A, asyncio as I, collections as c
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H, patch as P
@@ -23,15 +22,13 @@ class StateMachine:
         async with _: await getattr(self, s[i])[self.__state]()
     P.patch_method_signatures((_helper, 'attr'))
 async def gather_with_limited_concurrency(n=None, *a, ret_exc=False):
-    async def wrapped(c, s=I.Semaphore(A.getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # noqa: B008
+    async def wrapped(c, s=I.Semaphore(A.getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # ruff: ignore[function-call-in-default-argument]
         async with s: return await c
     return await I.gather(*map(wrapped, a), return_exceptions=ret_exc)
 class CallbackAccumulator(c.deque, A.ExecutorRequiredAsyncContextMixin):
-    __slots__ = 'call_once', 'default_getter', 't'
     def __init__(self, name, it=(), maxlen=None, default=_NO_DEFAULT, call_once=True, default_getter=None): super().__init__(A.aiter_to_gen(it, use_futures=True), maxlen); self.t, self.call_once, self.default_getter = tuple(H.filter_out(name, default, s=_NO_DEFAULT)), call_once, (lambda: (exc_info(), {}) if name == '__exit__' else ((), {})) if default_getter is None else default_getter
     def __call__(self, *a, **k):
         for f in self: f(*a, **k)
-    def __enter__(self): return self
     def __exit__(self, /, *_): a, k = self.default_getter(); self(*a, **k)
     def add(self, o, /): self.append(getattr(o, *self.t))
     def offer_last(self, o, /):
@@ -44,14 +41,14 @@ class CallbackAccumulator(c.deque, A.ExecutorRequiredAsyncContextMixin):
             p = self.popleft
             while self: yield p()
         else: yield from self.callbacks
-class CacheWithBackgroundRefresh(A.LoopContextMixin):
+class CacheWithBackgroundRefresh(H.LoopMixinBase):
     _executor = None; __slots__ = '__cache', '__evt', '__ld', '__lock', '__processor', '__refresh', '__timer', '__tk', '__ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic):
         C = A.getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
         audit(H.fullname(self), ttl, refresh); super().__init__(); self.__cache, self.__lock, self.__ld, self.__tk, self.__evt, self.__timer = {}, I.Lock(), c.defaultdict(lambda: default_loader), None, I.Event(), timer; self.configure(ttl, refresh, processor)
-    def __contains__(self, key): return key in self.__cache
+    def __contains__(self, k, /): return k in self.__cache
     def register_loader(self, key, loader): self.__ld[key] = loader
     def expired(self, key): return self.time_past(key) > self.__ttl
     def should_refresh(self, key): return self.time_past(key) > self.__ttl-self.__refresh if key in self else False
@@ -69,10 +66,10 @@ class CacheWithBackgroundRefresh(A.LoopContextMixin):
             if self.should_refresh(key): await self.refresh_item(key)
             if key not in self.__cache or self.expired(key): await self.load_item(key)
             return self.__cache[key].value
-    async def __setup__(self):
+    async def __aenter__(self):
         if self.__tk is None: self.__evt.clear(); self.__tk = self.make(self.refresh_loop())
-    async def __cleanup__(self):
-        if self.__tk: self.__evt.set(); await A.safe_cancel(self.__tk); self.__tk = None
+    async def __aexit__(self, /, *_):
+        if t := self.__tk: self.__evt.set(); await A.safe_cancel(t); self.__tk = None
     async def load_item(self, key, _=c.namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.misc')):
         _ = _(await self.get_loader(key)(key), self.__timer(), False)
         async with self.__lock: self.__cache[key] = _

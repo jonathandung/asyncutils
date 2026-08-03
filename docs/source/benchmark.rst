@@ -60,8 +60,8 @@ n = 10
 
 .. note:: This includes Python startup time and immense I/O and process overhead with piping.
 .. note::
-  The time command is not really a benchmarking tool, so these are rounded to 0.1 ms. It is also run in Git Bash on a slow computer. This must be
-  improved on in the future.
+  The ``time`` command is not really a benchmarking tool, so these are rounded to 0.1 ms. It is also run in Git Bash on a slow computer, which can
+  greatly skew the results.
 
 asyncutils
 ----------

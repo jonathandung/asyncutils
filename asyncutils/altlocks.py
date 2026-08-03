@@ -1,5 +1,4 @@
 # ty: ignore[unresolved-attribute]
-__lazy_modules__ = frozenset(('functools',))
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import patch as P
@@ -32,12 +31,12 @@ class ResourceGuard(A.AsyncContextMixin):
         r = self.__; self._t += 1
         if self.guarded: raise A.ResourceBusy(f'another task is already {self.action} resource: {r!r}')
         self.guarded = True; self._u += 1
-    def __exit__(self, /, *_, e='asyncutils.altlocks.ResourceGuard: __aexit__ called without prior __aenter__ call'):
+    def __exit__(self, /, *_, e='asyncutils.altlocks.ResourceGuard: context manager used improperly'):
         if not self.guarded: raise RuntimeError(e)
         self.guarded = False
     @A.dualcontextmanager(use_existing_executor=False, create_executor=False, strict=False)
     def yields_resource(self, _=Resource):
-        if isinstance(r := self.__, _): raise TypeError('asyncutils.altlocks.ResourceGuard.yields_resource expected resource guard to have been instantiated with a resource')
+        if isinstance(r := self.__, _): raise TypeError('asyncutils.altlocks.ResourceGuard: yields_resource expected resource guard to have been instantiated with a resource')
         with self: yield r
     @property
     def success_ratio(self): return u/self._t if (u := self._u) else 0.0
@@ -116,7 +115,7 @@ class StatefulBarrier(A.AwaitableMixin):
     def n_waiting(self): return self.__cn
 class DynamicThrottle:
     __slots__ = '__fails', '__jitter', '__lb', '__lc', '__lf', '__lock', '__max', '__min', '__rate', '__rf', '__successes', '__timer', '__ub', '__uf', '__window'
-    def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)): # noqa: PLR0913
+    def __init__(self, init_rate, min_rate=None, max_rate=None, window=None, *, ubound=None, lbound=None, ufactor=None, lfactor=None, jitter=None, timer=monotonic, rand=lambda j, u=_randinst.uniform: u(-j, j)): # ruff: ignore[too-many-arguments]
         C = A.getcontext()
         if min_rate is None: min_rate = C.DYNAMIC_THROTTLE_DEFAULT_MIN_RATE
         if max_rate is None: max_rate = C.DYNAMIC_THROTTLE_DEFAULT_MAX_RATE
@@ -130,7 +129,7 @@ class DynamicThrottle:
     @property
     def jitter(self): return self.__jitter
     @jitter.setter
-    def jitter(self, jitter, /): self.__jitter = max(0.0, float(jitter))
+    def jitter(self, j, /): self.__jitter = max(0.0, float(j))
     @property
     def ctime(self): return self.__timer()
     @property

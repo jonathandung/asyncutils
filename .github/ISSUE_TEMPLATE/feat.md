@@ -7,12 +7,10 @@ assignees: jonathandung
 ---
 
 ## Describe the feature
-
 <!--If the change proposed is a major alteration, refactoring, rewrite or migration, only open the issue after sufficient prior discussion on the
 discussion page and link to it in the bottom of the additional context section.
 If what you're suggesting is an entire utility rather than an improvement on an existing one, you should use
 [the pattern request template](https://github.com/jonathandung/asyncutils/issues/new?template=pattern.md) instead.-->
-
 ## Snippets
 
 ```python
@@ -21,9 +19,6 @@ If what you're suggesting is an entire utility rather than an improvement on an 
 ```
 
 ## Screenshots
-
 <!--If applicable, add screenshots to help explain your feature.-->
-
 ## Additional context
-
 <!--Add any other context here.-->

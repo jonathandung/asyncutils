@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncio', 'time'))
 import asyncutils as A, asyncio as I
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.submodules import events_all as __all__
@@ -35,7 +34,7 @@ class EventWithValue(A.EventMixin):
             f, w = (t := []).append, self.__ws
             for _ in w: f(_) if _.done() else _.set_result(value)
             w.difference_update(t)
-    def remove_done_waiters(self, _=__import__('operator').methodcaller('done')): (W := self.__ws).difference_update(filter(_, W)) # noqa: B008
+    def remove_done_waiters(self, _=__import__('operator').methodcaller('done')): (W := self.__ws).difference_update(filter(_, W)) # ruff: ignore[function-call-in-default-argument]
     def set_once(self, value): v = self.__val; self.set(value); self.set(v)
     def clear(self): self.set(None, strict=False)
     def get(self, default=_NO_DEFAULT):

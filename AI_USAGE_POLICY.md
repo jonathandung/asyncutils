@@ -81,4 +81,4 @@ If you're unsure whether your use of AI tools complies with this policy, ask in 
 
 ## Disclosure
 
-This document is based on its [analogue](https://github.com/JabRef/jabref/blob/main/AI_USAGE_POLICY.md) from [JabRef](https://www.jabref.org).
+This document is based on its [analogue from JabRef](https://github.com/JabRef/jabref/blob/main/AI_USAGE_POLICY.md).

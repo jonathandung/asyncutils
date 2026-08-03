@@ -1,18 +1,20 @@
 '''Exception handling utilities and exception classes used by this module.'''
-from ._internal.prots import AsyncLockLike, CanExcept, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QProtBase
+from ._internal.prots import AsyncLockLike, CanExcept, ExceptionWrapper, ExcType, Middleware, NonGroupExc, QueueProtocolBase
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
 from collections.abc import Callable, Iterable
+from ty_extensions import Not
 from types import AsyncGeneratorType, GeneratorType, TracebackType
 from typing import Any, Final, Literal, NoReturn, Self, final, overload
 from typing_extensions import TypeIs
 from weakref import ref
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'MoreThanOne', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'MoreThanOne', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'raise_for', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> GeneratorType[BaseException, BaseException]:
-    '''| Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in.
+    '''
+    | Flatten exceptions that may be nested in :class:`BaseExceptionGroup`'s, with priority for those just sent in.
     | Keyword arguments are as in :func:`potent_derive`.
 
     .. tip:: Use this only when you must preserve the order, and the faster :func:`unnest_reverse` otherwise.
@@ -26,7 +28,8 @@ def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, order
 def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: BaseException, suppress: bool=...) -> BaseExceptionGroup: ...
 @overload
 def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, ordered: bool=..., predicate: Callable[[BaseException], bool]=..., raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=..., notes: Iterable[str]|None=..., traceback: TracebackType|None=..., context: None=..., cause: None=..., suppress: bool=...) -> BaseExceptionGroup:
-    '''| Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
+    '''
+    | Return an instance of :exc:`BaseExceptionGroup`, applying the specified filtering and combining the exceptions from other groups, flattening when necessary.
     | ``ordered``, whether to emit the exceptions in original order, defaults to ``False``, because that is more efficient.
     | The intersection of ``filter_out`` and ``keep``, which are exception types (or tuples thereof), should be non-empty; they are redundant otherwise.
     | The acknowledgement parameters ``ack1``, ``ack2`` and ``ack3`` are called on exceptions in the above intersection, exceptions that don't pass the predicate and exceptions that are not in ``keep`` respectively.
@@ -36,7 +39,8 @@ def potent_derive(exc: NonGroupExc, /, *more: BaseException, message: str, order
     | ``suppress``, ``context``, ``cause`` and ``traceback`` are used to add metadata to the result group; see :func:`prepare_exception`. They only take effect, however, when the first argument is not a group.
     '''
 def prepare_exception[T: BaseException](exc: T, /, *, traceback: TracebackType|None=..., cause: BaseException|None=..., context: BaseException|None=..., suppress: bool=..., notes: Iterable[str]=...) -> T:
-    '''| Attach some info to the exception ``exc`` and return it.
+    '''
+    | Attach some info to the exception ``exc`` and return it.
     | ``notes`` is an iterable of strings that are added to the exception using :meth:`~BaseException.add_note`. If a single string, it is treated as one note; to avoid this for some reason, convert the string to a tuple beforehand.
     | ``traceback`` corresponds to the attribute :attr:`~BaseException.__traceback__`, ``cause`` to :attr:`~BaseException.__cause__`,
     | ``context`` to :attr:`~BaseException.__context__` and ``suppress`` to :attr:`~BaseException.__suppress_context__`.
@@ -48,6 +52,10 @@ def raise_exc(exc_val: BaseException, /, *, traceback: TracebackType|None=..., c
 def wrap_exc(exc: BaseException, /) -> ExceptionWrapper: '''Wrap an exception in a special proxy ``wrapper``, such that ``exception_occurred(wrapper)`` returns ``True``.'''
 def unwrap_exc(instance: ExceptionWrapper, /) -> BaseException: '''Recover the exception wrapped by :func:`wrap_exc`. This function does not raise the exception because it may sometimes be useful to have the exception object itself, for example when setting it on a :class:`~asyncio.Future`.'''
 def exception_occurred(instance: object, /) -> TypeIs[ExceptionWrapper]: '''Whether the object is actually a special proxy to an exception.'''
+@overload
+def raise_for(e: ExceptionWrapper, /) -> NoReturn: ...
+@overload
+def raise_for[T: Not[ExceptionWrapper]](e: T, /) -> T: '''Raise the exception embedded in the wrapper if recognized and return the argument otherwise.'''
 class StateCorrupted(BaseException):
     '''Raised when the module-internal state is corrupted. Should not be caught by users.'''
     def __init__(self, adjective: str, details: str, /): ...
@@ -94,7 +102,7 @@ class VersionNormalizerFault[T](VersionConversionError):
 class VersionCorrupted(VersionError, RuntimeError):
     '''Raised when internal state consistency checks of a version fail, indicating modifications by the user affected private state.'''
     def __init__(self, obj: VersionInfo, /): ...
-    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
+    def __getattr__(self, name: str, /) -> Any: ... # ruff: ignore[any-type]
     @property
     def obj(self) -> VersionInfo|None: '''The instance of :class:`~asyncutils.version.VersionInfo` having been corrupted. ``None`` if garbage collected.'''
 class Deadlock(BaseException): '''Raised when a deadlock is detected. Should not be caught by users.'''
@@ -122,13 +130,14 @@ class MoreThanOne[T](ValueError):
     @property
     def it(self) -> AsyncGeneratorType[T]: '''An async iterator over the original iterable. The second item is the offending item.'''
 class RateLimitExceeded(RuntimeError):
-    '''Raised when a call to a function exceeds its rate limit and waiting is not allowed.
+    '''
+    Raised when a call to a function exceeds its rate limit and waiting is not allowed.
 
     .. admonition:: Implementation detail
 
       The initialization signature may change without notice, and is therefore not documented here.
     '''
-    async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.''' # noqa: ANN401
+    async def repeat_call(self) -> Any: '''Repeat the call to the function that exceeded the rate limit without the rate limiter.''' # ruff: ignore[any-type]
 class BusPublishingError(BusError):
     '''Raised when an event bus fails to publish an event.'''
     def __init__(self, bus: EventBus, mw: Middleware, /): ...
@@ -169,10 +178,10 @@ class PasswordError[T](PasswordQueueError):
     def qid(self) -> int: '''The memory address of the queue associated with the exception. Invalid if the queue has been garbage collected.'''
 class WrongPassword[T](PasswordError[T], ValueError):
     '''Raised when the wrong password of the correct type is provided to the get or put methods of a password-protected queue.'''
-    def __init__(self, queue: QProtBase[Any, Any], pwd: T, /): ...
+    def __init__(self, queue: QueueProtocolBase[Any, Any], pwd: T, /): ...
 class WrongPasswordType[T, R: type](PasswordError[T], TypeError):
     '''Raised when the password provided to the get or put methods of a password-protected queue is of the incorrect type.'''
-    def __init__(self, queue: QProtBase[Any, Any]|None, pwd: T, wrong_type: type[T], correct_type: R, /): ...
+    def __init__(self, queue: QueueProtocolBase[Any, Any]|None, pwd: T, wrong_type: type[T], correct_type: R, /): ...
     @property
     def wrong_type(self) -> type[T]|None: '''The wrong password type associated with the exception. May be ``None`` if the wrong password type has been garbage collected.'''
     @property

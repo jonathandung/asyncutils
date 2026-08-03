@@ -28,7 +28,7 @@ The below environment variables directly affect what this library does, mostly i
 
   Force coloured output to be disabled; overrides :envvar:`FORCE_COLOR`
 
-  .. note:: The override is an arbitrary Python convention. It differs in other languages and frameworks.
+  .. note:: The override is a Python convention. Related behaviour differs in other languages and frameworks.
 
 .. ifconfig:: py313
 

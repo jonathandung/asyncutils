@@ -6,7 +6,7 @@ from _functools import partial
 from itertools import count, repeat
 from threading import Thread, Lock as TLock
 from time import monotonic
-class AdvancedPool(A.LoopContextMixin):
+class AdvancedPool(LoopMixinBase):
     __slots__ = '__cnt', '__cur', '__fs', '__kae', '__max', '__min', '__pending', '__q', '__scaling', '__sde', '__shutdown', '__start', '__tl', '__workers', 'completed'
     @property
     def __tiebreak(self): return next(self.__cnt)
@@ -18,18 +18,18 @@ class AdvancedPool(A.LoopContextMixin):
         with self.__tl: self.__q.task_done()
     def __wl(self, _):
         x, g, G = 0, (L := self.loop).call_soon_threadsafe, self.__ts_get
-        try: # noqa: PLW0717
+        try: # ruff: ignore[too-many-statements-in-try-clause]
             while not self.__shutdown:
                 if (F := A.sync_await(G(), loop=L)[2]) is None: self.__ts_task_done(); break
                 f, a, k, F = F
                 try: F.set_result(f(*a, **k))
-                except BaseException as e: F.set_exception(e) # noqa: BLE001
+                except BaseException as e: F.set_exception(e) # ruff: ignore[blind-except]
                 finally:
                     self.__ts_task_done(); x += 1
                     with self.__tl: self.completed += 1; self.__pending -= 1
-        except BaseException as e: g(_.set_exception, A.Critical(e) if isinstance(e, A.CRITICAL) else e) # noqa: BLE001
+        except BaseException as e: g(_.set_exception, A.Critical(e) if isinstance(e, A.CRITICAL) else e) # ruff: ignore[blind-except]
         else: g(_.set_result, x)
-    def __scale_to(self, new):
+    def __st(self, new):
         if (d := new-self.__cur) > 0:
             a, b, f, g = self.__workers.add, self.__fs.add, self.__wl, self.make_fut
             for _ in repeat(None, d): (T := Thread(target=f, args=(F := g(),))).start(); a(T); b(F)
@@ -37,11 +37,11 @@ class AdvancedPool(A.LoopContextMixin):
             f = self.__q.put_nowait
             for _ in repeat(None, -d): f((0, self.__tiebreak, None))
         self.__cur = new
-    def __set_adj(self):
+    def __sa(self):
         if not self.__scaling: return
         C = A.getcontext()
-        if (l := self.__pending/((c := self.__cur) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self.__max): self.__scale_to(min(M, c+max(1, c>>1)))
-        elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self.__min): self.__scale_to(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
+        if (l := self.__pending/((c := self.__cur) or 1)) > C.ADVANCED_POOL_THRESHOLD_HI and c < (M := self.__max): self.__st(min(M, c+max(1, c>>1)))
+        elif l < C.ADVANCED_POOL_THRESHOLD_LO and c > (m := self.__min): self.__st(max(m, c-max(1, int(c*C.ADVANCED_POOL_FACTOR))))
     async def wait_for_shutdown(self): return await self.__sde.wait()
     def raise_for_shutdown(self):
         if self.__shutdown: raise A.PoolShutDown(f'{fullname(self)} is shutting down')
@@ -49,7 +49,7 @@ class AdvancedPool(A.LoopContextMixin):
         self.raise_for_shutdown()
         if self.full: raise A.PoolFull('asyncutils.pool.AdvancedPool.submit_nowait: task queue full')
         with self.__tl: self.__pending += 1
-        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adj(); return F
+        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__sa(); return F
     async def _kill_helper(self):
         f, g = (q := self.__q).get_nowait, q.task_done
         with self.__tl, A.ignore_qempty:
@@ -60,7 +60,7 @@ class AdvancedPool(A.LoopContextMixin):
     async def submit(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         with self.__tl: self.__pending += 1
-        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__set_adj(); return F
+        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__sa(); return F
     async def shutdown(self, cancel_pending=False, idle_timeout=None):
         if self.__shutdown: return await self.wait_for_shutdown()
         if cancel_pending: await self._kill_helper()
@@ -77,16 +77,15 @@ class AdvancedPool(A.LoopContextMixin):
     async def starmap(self, f, /, it, priority=0): return await A.agather(A.astarmap(partial(self.complete, f, _priority_=priority), it))
     async def double_starmap(self, f, /, it, priority=0): return await A.agather(A.adouble_starmap(partial(self.complete, f, _priority_=priority), it))
     async def starmap_with_kwds(self, f, /, it, priority=0): return await A.agather(A.astarmap_with_kwds(partial(self.complete, f, _priority_=priority), it))
-    async def resize(self, min_workers, max_workers): M = max(max_workers, m := max(1, min_workers)); self.__scale_to(min(max(self.__cur, m), M)); self.__min, self.__max = m, M
+    async def resize(self, min_workers, max_workers): M = max(max_workers, m := max(1, min_workers)); self.__st(min(max(self.__cur, m), M)); self.__min, self.__max = m, M
     def drain(self): return self.__q.join()
     async def wait_for_slot(self, timeout=None):
         self.raise_for_shutdown()
         if not self.full: return 0.0
         try: t = monotonic(); await I.wait_for(self.drain(), timeout); return monotonic()-t
         except TimeoutError: raise A.PoolFull('asyncutils.pools.AdvancedPool: timeout waiting for queue space') from None
-    async def __cleanup__(self): await self.shutdown(self.__kae)
-    def __del__(self):
-        if self.loop.is_running(): self.make(self.shutdown(True, 0.03))
+    async def __aenter__(self): return self
+    async def __aexit__(self, *_): await self.shutdown(self.__kae)
     @property
     def full(self): return self.__q.full()
     @property
@@ -136,7 +135,7 @@ class ConnectionPool(LoopMixinBase):
         while P: c(p())
         while u: c(f())
     async def __aenter__(self): await self.start(); return self
-    async def __aexit__(self, /, *_): await self.stop()
+    def __aexit__(self, /, *_): return self.stop()
     @property
     def cursize(self): return self.available+self.in_use
     @property

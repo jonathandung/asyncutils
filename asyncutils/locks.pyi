@@ -1,10 +1,11 @@
-'''| Locking primitives, more advanced than or supplementing the functionality of those in :mod:`asyncio`.
+'''
+| Locking primitives, more advanced than or supplementing the functionality of those in :mod:`asyncio`.
 | All classes strictly follow the asynchronous lock interface as defined by :class:`asyncio.Lock` and made explicit in the :class:`~asyncutils._internal.prots.AsyncLockLike` protocol,
 | besides :class:`MultiCountDownLatch`, since it uses :class:`KeyedCondition` internally and it is not desired for :mod:`asyncutils.altlocks` to import this submodule as well.
 '''
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import AsyncContextManager
-from .mixins import LockMixin, LockWithOwnerMixin, LoopContextMixin
+from .mixins import LockMixin, LockWithOwnerMixin
 from asyncio import BoundedSemaphore, Lock, Task
 from collections.abc import Callable, Hashable, Mapping
 from typing import Any, Literal
@@ -19,7 +20,8 @@ class DynamicBoundedSemaphore(BoundedSemaphore):
 class AdvancedRateLimit(LoopMixinBase, LockMixin[None]):
     '''A rate limiter that supports a mode in which waiters can cut the queue.'''
     def __init__(self, rate: float, capacity: float=..., fair: bool=...):
-        '''* ``rate`` (required): The initial rate at which tokens refill.
+        '''
+        * ``rate`` (required): The initial rate at which tokens refill.
         * ``capacity``: The maximum rate, defaulting to the current rate.
         * ``fair``: Whether to maintain FIFO (first in, first out) for waiters; default ``True``.
         '''
@@ -41,7 +43,7 @@ class PrioritySemaphore(LoopMixinBase, LockMixin[None]):
     def release(self, strict: bool=...) -> None: '''Release the semaphore. If ``strict`` is ``True`` (the default) and the number of releases is more than the number of acquisitions, a :exc:`RuntimeError` is raised.'''
     def locked(self) -> bool: '''Return ``True`` if the semaphore is currently locked.'''
     def reset(self) -> None: '''Reset the semaphore to its initial state.'''
-class KeyedCondition[T](LockMixin[KeyedCondition[T]], LoopContextMixin):
+class KeyedCondition[T](LockMixin[KeyedCondition[T]], LoopMixinBase):
     '''A condition variable that allows waiting on and notifying individual keys, or all keys at once.'''
     def __init__(self, lock: Lock|LockMixin[Any]|None=...): '''Initialize the condition variable with the given lock, or create a new one if not passed.'''
     async def acquire(self) -> bool: '''Wrap the acquire method of the underlying lock to only re-raise critical errors and return success.'''

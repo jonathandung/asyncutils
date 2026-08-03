@@ -8,7 +8,7 @@ async def test_rwlocks(lt):
     lock = lt()
     async with lock.reading():
         async with lock.reading():
-            task = create_task((c := lock.writing()).__aenter__()) # noqa: PLC2801
+            task = create_task((c := lock.writing()).__aenter__()) # ruff: ignore[unnecessary-dunder-call]
             await sleep(0.01)
             assert not task.done()
             assert lock.is_reading()

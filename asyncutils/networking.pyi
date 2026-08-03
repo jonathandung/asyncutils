@@ -1,4 +1,4 @@
-# ruff: noqa: D401
+# ruff: file-ignore[non-imperative-mood]
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import DualContextManager
@@ -8,7 +8,8 @@ from socket import socket
 from typing import ClassVar, Literal
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, LoopMixinBase):
-    '''| An implementation of :class:`~asyncio.Protocol` providing line-based buffering and writing. Not thread-safe.
+    '''
+    | An implementation of :class:`~asyncio.Protocol` providing line-based buffering and writing. Not thread-safe.
     | The idea was originally introduced in :pep:`3153`, but did not see eventual adaptation in the standard library.
     | This particular implementation is designed to be used with :class:`SocketTransport`, though other transports can enforce it too.
     | Instantiating this class will give an :class:`LFProtocol` or :class:`CRLFProtocol` depending on :data:`os.linesep`.
@@ -48,7 +49,7 @@ class SocketTransport(Transport):
     def __init__(self, sock: socket|None=...): '''Initialize the transport, connecting the socket immediately if given.'''
     def connect_sock(self, sock: socket=...) -> None: '''Connect the transport to the given socket.'''
     def disconnect_sock(self) -> socket|None: '''Disconnect the transport from its socket and return it, or ``None`` if not connected.'''
-    def sock_context(self, sock: socket) -> DualContextManager[None]: '''Return a context manager, that works in both sync and async, that connects the transport to the given socket on entry and disconnects it on exit.'''
+    def sock_context(self, sock: socket) -> DualContextManager[None]: '''Return a context manager that works in both sync and async, connecting the transport to the given socket on entry and disconnects it on exit.'''
     def write(self, data: Iterable[int]) -> None: '''Write the given iterable over integers in ``range(256)`` interpreted as characters into the transport.'''
     def get_write_buffer_size(self) -> int: '''Return the current size of the output buffer used by the transport.'''
     def get_write_buffer_limits(self) -> tuple[int, int]: '''Get the high and low watermarks for write flow control. Return a tuple ``(low, high)``, where ``low`` and ``high`` are positive number of bytes.'''

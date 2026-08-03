@@ -1,35 +1,23 @@
 import asyncio as I, asyncutils as A
-from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal import helpers as H
 from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.submodules import util_all as __all__
 from functools import partial, wraps
 from sys import audit, exc_info
 def avalify(v):
-    async def g(*_a, **_): return v # noqa: RUF029
+    async def g(*_a, **_): return v # ruff: ignore[unused-async]
     return g
 afalsify, atruthify, anullify = map(avalify, (False, True, None))
 anullcontext = object.__new__(type('anullcontext', (), {'__new__': lambda _, /: anullcontext, '__aenter__': anullify, '__aexit__': anullify}))
-async def wrap_in_coro(aw, /):
-    try: return await aw
+async def wrap_in_coro(a, /):
+    try: return await a
     except A.CRITICAL: raise A.Critical
 def done_evt(*, evtcls=I.Event): (E := evtcls()).set(); return E
 def done_fut(res=None, *, futcls=I.Future): F = futcls(); F.set_exception(A.unwrap_exc(res)) if A.exception_occurred(res) else F.set_result(res); return F
 async def locked_lock(*, lcls=I.Lock): await (l := lcls()).acquire(); return l
 def get_future(aw, loop=None): return (H.get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
 def new_eager_tasks(*aws): (l := H.get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)
-def afcopy(f, /): return wraps(f)(lambda *a, **k: wrap_in_coro(f(*a, **k)))
-def discard_retval(f, /): return evaluate_and_return(f, None)
-def evaluate_and_return(f, r, /):
-    async def g(*a, **k): await f(*a, **k); return r
-    return wraps(f)(g)
-def to_sync(f, /, loop=None, *, timeout=None):
-    audit('asyncutils.util.to_sync', H.fullname(f))
-    if (f := getattr(f, '__sync__', f)) is not f: return f
-    (g := afcopy(f)).__sync__ = r = wraps(f)(lambda *a, **k: sync_await(f(*a, **k), timeout=timeout, loop=loop)); r.__async__ = g; return r # ty: ignore[unresolved-attribute]
-def to_sync_from_loop(loop): return partial(to_sync, loop=loop)
-def _(f, c, /): f.set_result(c())
-def transient_block(l, f, /, *a, _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_, F := l.create_future(), partial(f, *a, **k)); return F
+def transient_block(l, f, /, *a, _callback_=lambda f, c, /: f.set_result(c()), _threadsafe_=False, **k): (l.call_soon_threadsafe if _threadsafe_ else l.call_soon)(_callback_, F := l.create_future(), partial(f, *a, **k)); return F
 def transient_block_from_loop(loop, *, threadsafe=False): return partial(transient_block, loop, _threadsafe_=threadsafe)
 def sync_await(aw, loop=None, *, never_block=True, timeout=None):
     audit('asyncutils.util.sync_await', H.fullname(aw))
@@ -38,24 +26,11 @@ def sync_await(aw, loop=None, *, never_block=True, timeout=None):
 def semaphore(bounded=False, workers=None):
     if workers is None: workers = A.getcontext().SEMAPHORE_DEFAULT_VALUE
     return (I.Lock() if workers == 1 else I.BoundedSemaphore(workers)) if bounded else I.Semaphore(workers)
-def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # noqa: B008
+def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # ruff: ignore[function-call-in-default-argument]
     if (l := _lc.get(f)) is None: _lc[f] = l = lf()
     async def r(*a, **k):
         async with l: return await f(*a, **k)
     return wraps(f)(r)
-def to_async(f, /):
-    audit('asyncutils.util.to_async', H.fullname(f))
-    if (f := getattr(f, '__async__', f)) is not f: return f
-    if (e := getattr(to_async, 'executor', None)) is None: e = H.create_executor(to_async)
-    r = partial(H.get_loop_and_set().run_in_executor, e)
-    async def h(*a, **k): return await r(partial(f, *a, **k))
-    g.__async__, h.__sync__ = wraps(f)(h), (g := wraps(f)(lambda *a, **k: f(*a, **k))); return h # noqa: PLW0108 # ty: ignore[unresolved-attribute]
-async def aiter_from_f(f, s=_NO_DEFAULT, /, *, yield_sentinel=False):
-    while True:
-        if H.check(r := await f(), s):
-            if yield_sentinel: yield r
-            break
-        yield r
 async def safe_cancel(t, /):
     F = t.get_loop().create_future()
     def f(_):
@@ -117,12 +92,12 @@ def dualcontextmanager(f=None, /, _=DualContextManager, *, use_existing_executor
     if f is None: return lambda f, /: dualcontextmanager(f, use_existing_executor=use_existing_executor, create_executor=create_executor, strict=strict)
     return wraps(f)(lambda *a, **k: (c := A.getcontext()) and _(f(*a, **k), c.DUAL_CONTEXT_MANAGER_DEFAULT_USE_EXISTING_EXECUTOR if use_existing_executor is None else use_existing_executor, c.DUAL_CONTEXT_MANAGER_DEFAULT_MAY_CREATE_EXECUTOR if create_executor is None else create_executor, c.DUAL_CONTEXT_MANAGER_DEFAULT_STRICT if strict is None else strict))
 def aawcmf2dcmff(**d):
-    def f(f, /, _=dualcontextmanager(**d)): # noqa: B008
+    def f(f, /, _=dualcontextmanager(**d)): # ruff: ignore[function-call-in-default-argument]
         async def g(*a, **k):
             c = f(*a, **k)
             with A.ignore_typeerrs: c = await c
             if H.check_methods(c, '__aenter__', '__aexit__'):
-                async with c as r: yield r; return # noqa: ASYNC119
+                async with c as r: yield r; return # ruff: ignore[yield-in-context-manager-in-async-generator]
             if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = H.create_executor(aawcmf2dcmff)
             r = await (h := partial(H.get_loop_and_set().run_in_executor, e))(c.__enter__)
             try: yield r

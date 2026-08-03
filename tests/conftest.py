@@ -14,5 +14,5 @@ mk = pytest.mark.asyncio
 @dec
 def contents(): return '{"load_all": true, "V": 2, "max_memory_errors": 5}'
 def pytest_configure(config):
-    if config.pluginmanager.hasplugin('asyncio-cooperative'): global mk; mk = pytest.mark.asyncio_cooperative # noqa: PLW0603 # cspell:disable-line
+    if config.pluginmanager.hasplugin('asyncio-cooperative'): global mk; mk = pytest.mark.asyncio_cooperative # ruff: ignore[global-statement] # cspell:disable-line
     asyncutils._internal.patch.patch_aio_logs()

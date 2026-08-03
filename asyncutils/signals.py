@@ -3,7 +3,7 @@ from asyncutils._internal import log, helpers as H
 from asyncutils._internal.running_console import getc
 from asyncutils._internal.submodules import signals_all as __all__
 from asyncio.tasks import wait_for
-async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=None, sigs=None, logger=log): # noqa: C901,PLR0912,PLR0915
+async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=None, sigs=None, logger=log): # ruff: ignore[complex-structure,too-many-branches,too-many-statements]
     if loop is None: loop = H.get_loop_and_set()
     P, x, a, h = (S := {*S, *(A.getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs)}).pop, 0, (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(B.Signals(s)); M.audit('asyncutils.signals.wait_for_signal', S)
     if M.platform == 'win32':

@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('heapq',))
 import asyncutils as A, asyncio as I
 from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
 from asyncutils._internal.submodules import locks_all as __all__
@@ -58,10 +57,10 @@ class PrioritySemaphore(LoopMixinBase, A.LockMixin):
         self.__value, self.__tiebreak = 1, 0; self.__waiters.clear()
 class KeyedCondition(LoopMixinBase, A.LockMixin):
     __slots__ = '__lock', '__sw'
-    def __init__(self, lock=None): super().__init__(); self.__lock, self.__sw = lock or I.Lock(), defaultdict(set)
+    def __init__(self, lock=None): super().__init__(); self.__lock, self.__sw = I.Lock() if lock is None else lock, defaultdict(set)
     async def acquire(self):
         with A.ignore_noncritical:
-            if await self.__lock.acquire() != False: return True # noqa: E712
+            if await self.__lock.acquire() != False: return True # ruff: ignore[true-false-comparison]
         return False
     async def release(self):
         if I.iscoroutine(r := self.__lock.release()): await r

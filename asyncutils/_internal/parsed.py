@@ -18,9 +18,9 @@ As such, it is probably incompatible with full-fledged third-party async framewo
 When FILE, interpreted as a file descriptor if an integer, is passed, the logging output goes to a file with that name.
 Passing 'NULL' for FILE is equivalent to specifying the --no-log option.
 If FILE is 'MEMORY', logs are stored in memory and returned and voided whenever get_past_logs is called.
-If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<number>.log' in the
-current working directory for logging, for number from 1 to 4096. If you have more than 4096 log files, you should probably clean them up.
-Log file rotation is not currently supported.
+If FILE is 'MAKE' or no filename is passed but the option specified, an attempt is made to create a file of format 'asyncutils_log<n>.log' in the
+current working directory for logging, for integer n from 1 to 4096 inclusive. You are advised to clean up old log files periodically.
+Log file rotation is not currently supported, and the program is unlikely to produce a large enough volume of logs to warrant it anyway.
 If FILE is 'STDOUT', log to standard output.
 If FILE is 'STDERR', log to standard error. This is also the default behaviour and fallback if the above steps fail.''')
 a('-n', '--no-log', action=b, const='NULL', dest='log_to', help='''Disable logging completely.
@@ -34,7 +34,7 @@ interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. May thr
 The below options are third-party.
 loky_no_reuse: Use a new loky.process_executor.ProcessPoolExecutor every time.
 loky: Reuse a loky.process_executor.ProcessPoolExecutor if possible.
-dask: Use dask.distributed.Client, the API of which just so happens to be a superset of that of concurrent.futures executors.
+dask: Use dask.distributed.Client, the API of which just so happens to be a superset of that of the concurrent.futures executors.
 ipython: Use ipyparallel.ViewExecutor.
 elib_flux_cluster: Use executorlib.executor.flux.FluxClusterExecutor.
 elib_flux_job: Use executorlib.executor.flux.FluxJobExecutor.
@@ -43,12 +43,7 @@ elib_slurm_job: Use executorlib.executor.slurm.SlurmJobExecutor.
 elib_single_node: Use executorlib.executor.single.SingleNodeExecutor.
 pebble_thread: Use pebble.pool.thread.ThreadPool.
 pebble_process: Use pebble.pool.process.ProcessPool.
-deadpool: Use deadpool.Deadpool.
-There are some implementations from niche libraries (found on a PyPI-wide search using the keyword "executor") that are intentionally excluded, since
-they either require prior configuration to be useful (as is the case with adaptive-executor), are too small (contextvars-executor), unmaintained
-(celery-executor), too little-known (sequential-executor), rely on possibly outdated implementation details (bounded-pool-executor), have specific
-backends seldom used for this purpose (Flask-Executor) or have completely incompatible APIs (thread-executor). In those cases, pass the fully qualified
-name to -c and bear the potential consequences.''')
+deadpool: Use deadpool.Deadpool.''')
 a('-c', '--custom-executor', dest='executor', metavar=J, help='Use a custom executor not included in the above options by specifying the name of an implementation.\nPassing "package.submodule.Implementation", for example, will execute "from package.submodule import Implementation as Executor".')
 for _ in c: a(i+_.replace('_', '-'), action=b, const=_, dest=d, help=e%_)
 (a := (h := lambda t, d, f=p.add_argument_group: f(t, d).add_argument)('verbosity', 'Adjust the amount of output of this program.'))('-Q', action=g, default=0, help='Produce less logging output. Additive.')

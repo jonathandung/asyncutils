@@ -1,4 +1,5 @@
-'''| Backport of ``functools.partial`` that supports passing placeholders, as well as max-heap variants of ``heapq`` functions, to python 3.13 or under.
+'''
+| Backport of ``functools.partial`` that supports passing placeholders, as well as max-heap variants of ``heapq`` functions, to python 3.13 or under.
 | It is impossible to satisfy type checkers when using this implementation, because they would assume placeholders as ordinary arguments.
 '''
 from functools import partial

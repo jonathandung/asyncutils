@@ -1,4 +1,4 @@
-from _io import StringIO
+from io import StringIO
 import asyncutils as au, pytest as pt
 from asyncutils.tools import *
 @(dec := __import__('pytest').fixture(scope='module'))

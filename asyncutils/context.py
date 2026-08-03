@@ -3,18 +3,18 @@ from asyncutils._internal.submodules import context_all as __all__
 from asyncutils._internal.unparsed import C
 _, k, all_contextual_consts, x = __import__('contextvars').ContextVar(__name__), None, frozenset(C), {'sort_dicts': False, 'underscore_numbers': True, 'width': 88}
 if __import__('sys').version_info >= (3, 15): x.update(indent=4, expand=True)
-class Context: # noqa: PLW1641
-    __slots__ = tuple(C); exec(f'def __new__(cls,/,*,{','.join(f'{k}={v!r}' for k, v in C.items())}):\n\t(_:=object.__new__(cls)).{'\n\t_.'.join(f'{k}={k}' for k in __slots__)}\n\treturn _') # noqa: S102
+class Context: # ruff: ignore[eq-without-hash]
+    __slots__ = tuple(C); exec(f'def __new__(cls,/,*,{','.join(f'{k}={v!r}' for k, v in C.items())}):\n\t(_:=object.__new__(cls)).{'\n\t_.'.join(f'{k}={k}' for k in __slots__)}\n\treturn _') # ruff: ignore[exec-builtin]
     def __init_subclass__(cls, /, **_): raise TypeError('cannot subclass asyncutils.context.Context')
     def __getattribute__(self, n, /, _=frozenset(('ascurctx', 'replace_from_dct', 'replace', 'update', 'asdict', 'copy', 'pprint', 'from_dct')), u='__'): return super().__getattribute__(n if n in _ or (n.startswith(u) and n.endswith(u)) else n.upper())
     def __getitem__(self, n, /): return super().__getattribute__(n.upper())
     def __setattr__(self, n, v, /):
-        if (n := n.upper()) not in all_contextual_consts: raise AttributeError('asyncutils.context.Context: attribute not found', name=n, obj=self)
+        if (n := n.upper()) not in all_contextual_consts: raise AttributeError
         if isinstance(v, list):
             if v and isinstance(v[0], list): v = map(tuple, v) # ty: ignore[invalid-argument-type]
             v = tuple(v)
         super().__setattr__(n, v)
-    def __delattr__(self, n, /): raise AttributeError('asyncutils.context.Context: cannot delete attribute', name=n, obj=self)
+    def __delattr__(self, n, /): raise AttributeError
     def replace_from_dct(self, d, /, _=all_contextual_consts):
         D = self.asdict()
         for n, v in d.items():
@@ -34,12 +34,12 @@ class Context: # noqa: PLW1641
     def asdict(self): return {k: getattr(self, k) for k in self.__slots__}
     def copy(self): return type(self)(**self.asdict())
     def replace(self, /, **k): return self.replace_from_dct(k)
-    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=__import__('pprint').PrettyPrinter(**x), include_newline=True): file.write('Context.from_dct(\n'); pp._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*include_newline, file=file, flush=flush) # noqa: B008 # ty: ignore[invalid-argument-type]
+    def pprint(self, file=__import__('sys').stdout, *, flush=True, pp=__import__('pprint').PrettyPrinter(**x), include_newline=True): file.write('Context.from_dct(\n'); pp._format(self.asdict(), file, 0, 0, {}, 0); print('\n)', end='\n'*include_newline, file=file, flush=flush) # ruff: ignore[function-call-in-default-argument] # ty: ignore[invalid-argument-type]
     def __str__(self, _=__import__('_io').StringIO): self.pprint(s := _(), include_newline=False); return s.getvalue()
     def __repr__(self): return f'Context({', '.join(f'{k}={getattr(self, k)!r}' for k in self.__slots__)})'
     def __reduce__(self): return __class__.from_dct, (self.asdict(),)
     __copy__, __replace__, __setitem__ = copy, replace, __setattr__; P.patch_method_signatures((__str__, ''), (update, 'd=None, /, **k'), (pprint, 'file={0}, *, pp={0}, include_newline=True'), (replace_from_dct, 'd, /'), (__getattribute__, 'name, /'))
-def getcontext(_=_, d=Context()): # noqa: B008
+def getcontext(_=_, d=Context()): # ruff: ignore[function-call-in-default-argument]
     try: return _.get()
     except LookupError: _.set(d); return d
 def setcontext(c, /, _=_):

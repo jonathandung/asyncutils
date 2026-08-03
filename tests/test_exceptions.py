@@ -10,10 +10,11 @@ def test_wrap_exc():
     wrapper = wrap_exc(e := IndexError('a'))
     assert unwrap_exc(wrapper) is e
     assert exception_occurred(wrapper)
+    with raises(IndexError, match='a'): raise_for(wrapper)
 def test_critical():
-    with raises(Critical, match='critical error occurred or user attempted to terminate the program', check=lambda e: e.__cause__ is None and e.exc is e.__context__ and isinstance(e.exc, KeyboardInterrupt) and e.exc.args == ('a',) and isinstance(e.exc, CRITICAL)): # noqa: PT012
+    with raises(Critical, match='critical error occurred or user attempted to terminate the program', check=lambda e: e.__cause__ is None and e.exc is e.__context__ and isinstance(e.exc, KeyboardInterrupt) and e.exc.args == ('a',) and isinstance(e.exc, CRITICAL)): # ruff: ignore[pytest-raises-with-multiple-statements]
         try: raise KeyboardInterrupt('a')
-        except: raise Critical # noqa: E722
+        except: raise Critical # ruff: ignore[bare-except]
 def test_raise_exc():
     def check(e):
         n, = e.__notes__
@@ -26,7 +27,7 @@ async def test_ignore_errors():
     with ignore_valerrs: raise ValueError('foo')
     async with ignore_typeerrs: raise type('TypeError', (TypeError,), {})('bar')
     with ignore_all: raise SystemError('baz')
-    async with ignore_typical: 1/0
+    async with ignore_typical: 1/0  # ruff: ignore[useless-expression]
     with ignore_stop_iteration.excluding(BytesWarning): next(iter(int, 0))
     async with ignore_warnings.combined(ignore_stop_async_iteration): await anext(empty_agen())
     with raises(KeyboardInterrupt, match='qux'), ignore_noncritical: raise KeyboardInterrupt('qux')

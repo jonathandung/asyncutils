@@ -7,10 +7,8 @@ assignees: jonathandung
 ---
 
 ## Describe the bug
-
-A clear and concise description of what the bug is. Include the pattern implementation/utility function at fault, and the relevant snippet of the
-source if possible. Also link to the source file here; a permalink (not /blob/main/) to the first faulty line is preferred.
-
+<!--A clear and concise description of what the bug is. Include the pattern implementation/utility function at fault, and the relevant snippet of the
+source if possible. Also link to the source file here; a permalink (not /blob/main/) to the first faulty line is preferred.-->
 ## To Reproduce
 
 ```python
@@ -19,13 +17,9 @@ source if possible. Also link to the source file here; a permalink (not /blob/ma
 ```
 
 ## Expected behaviour
-
-A clear and concise description of what you expected to happen.
-
+<!--A clear and concise description of what you expected to happen.-->
 ## Screenshots
-
-If applicable, add screenshots to help explain your problem.
-
+<!--If applicable, add screenshots to help explain your problem.-->
 ## Complete the following
 
 - Python version tag (`python3 -VV`):
@@ -39,5 +33,4 @@ If applicable, add screenshots to help explain your problem.
 ```
 
 ## Additional context
-
 <!--Add any other context about the problem here.-->

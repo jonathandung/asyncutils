@@ -1,12 +1,12 @@
-import asyncio, sys, os
+import sys
 from signal import Signals
 from pytest import fixture, mark, raises, warns
 from asyncutils import WarningToError
 from asyncutils.signals import wait_for_signal
 from tests.conftest import mk
-async def processor(sig): return sig.value
+async def processor(sig): return sig.value  # ruff: ignore[unused-async]
 class Log(BaseException): ...
-def raise_(msg, *a, exc_info=False): raise Log(msg%a)
+def raise_(msg, *a, exc_info=False): raise Log(msg%a)  # ruff: ignore[unused-function-argument]
 def ignore(*_): ...
 @fixture(scope='module')
 def wait_partial(): return __import__('_functools').partial(wait_for_signal, processor, logger=type(sys.implementation)(warning=raise_, error=raise_, exception=raise_, info=ignore, debug=ignore)) # ty: ignore[unknown-argument]

@@ -1,12 +1,12 @@
 import asyncio, pytest
-from asyncutils import event_loop, safe_cancel
+from asyncutils import safe_cancel
 from asyncutils.futures import *
 from functools import partial
 from tests.conftest import mk
-async def dummy(): return 42
-async def dummy2(fut): fut.set_exception(ValueError('foo'))
+def dummy(): return asyncio.sleep(0, 42)
+async def dummy2(fut): fut.set_exception(ValueError('foo'))  # ruff: ignore[unused-async]
 @mk
-@pytest.mark.skipif("sys.version_info < (3, 13) and sys.platform == 'win32'")
+@pytest.mark.skipif('sys.version_info < (3, 13) and sys.platform == "win32"')
 async def test_time_aware():
     t1 = TimeAwareTask(dummy())
     t2 = TimeAwareTask(dummy())

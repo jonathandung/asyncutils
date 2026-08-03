@@ -1,10 +1,9 @@
-import asyncio as I, asyncutils as A
+import asyncio as I, asyncutils as A, asyncutils._internal.helpers as H
 from asyncutils._internal.py312 import Queue, QueueShutDown
-from asyncutils._internal.helpers import copy_and_clear, fullname, subscriptable
 from asyncutils._internal.submodules import processors_all as __all__
 from _functools import partial
 from time import monotonic
-@subscriptable
+@H.subscriptable
 class BoundedBatchProcessor:
     __slots__ = '__b', '__p', '__s'
     def __init__(self, processor, batch=None, max_concurrent=None): C = A.getcontext(); self.__p, self.__b, self.__s = processor, C.BOUNDED_BATCH_PROCESSOR_DEFAULT_BATCH_SIZE if batch is None else batch, I.Semaphore(C.BOUNDED_BATCH_PROCESSOR_DEFAULT_MAX_CONCURRENT if max_concurrent is None else max_concurrent)
@@ -12,10 +11,10 @@ class BoundedBatchProcessor:
         f, p, s = partial(A.collect, A.iter_to_agen(items), self.__b), self.__p, self.__s
         while b := await f():
             async with s: x = await p(b)
-            yield x # noqa: RUF070
-@subscriptable
-class BatchProcessor(A.LoopContextMixin):
-    __slots__ = '__batch', '__lock', '__lp', '__ms', '__p', '__sleep', '__timer'
+            yield x # ruff: ignore[unnecessary-assign-before-yield]
+@H.subscriptable
+class BatchProcessor(H.LoopMixinBase):
+    __slots__ = '__batch', '__lock', '__lp', '__ms', '__p', '__sleep', '__t', '__timer'
     def __init__(self, processor, *, maxsize=None, maxtime=None, timer=monotonic): C = A.getcontext(); self.__p, self.__ms, self.__sleep, self.__batch, self.__lp, self.__lock, self.__timer = processor, C.BATCH_PROCESSOR_DEFAULT_MAX_SIZE if maxsize is None else maxsize, I.sleep.__get__(C.BATCH_PROCESSOR_DEFAULT_MAX_TIME if maxtime is None else maxtime), [], timer(), I.Lock(), timer
     async def add(self, item):
         async with self.__lock:
@@ -25,15 +24,16 @@ class BatchProcessor(A.LoopContextMixin):
         while True: await self.__sleep(); await self.flush()
     async def _process(self):
         if not (b := self.__batch): return
-        b, self.__lp = copy_and_clear(b), self.__timer()
+        b, self.__lp = H.copy_and_clear(b), self.__timer()
         await self.__p(b)
     async def flush(self):
         async with self.__lock:
             if self.__batch: await self._process()
     @property
     def time_since_last_process(self): return self.__timer()-self.__lp
-    async def __setup__(self): super().__init__(); self.make(self._flush_periodic())
-class Bulkhead(A.LoopContextMixin):
+    async def __aenter__(self): self.__t = self.make(self._flush_periodic()); return self
+    async def __aexit__(self, /, *_): await I.gather(self.flush(), A.safe_cancel(self.__t)); del self.__t
+class Bulkhead(H.LoopMixinBase):
     __slots__ = '__exc', '__iv', '__mr', '__mt', '__p', '__queue', '__rej', '__sd', '__sem'
     def __init__(self, max_concurrent, *, max_queue=None, max_rej=None, exc=Exception, processor=None):
         if max_concurrent <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_concurrent must be positive')
@@ -45,16 +45,17 @@ class Bulkhead(A.LoopContextMixin):
     async def execute(self, coro):
         try: self.__queue.put_nowait(coro)
         except I.QueueFull as e:
-            if (x := self.__rej) == self.__mr: await self.shutdown(); raise A.BulkheadShutDown(f'{fullname(self)} has been shutdown because too many tasks were rejected') from e
-            self.__rej = x+1; raise A.BulkheadFull(f'{fullname(self)} queue full') from None
-        if self.is_shutdown: raise A.BulkheadShutDown(f'{fullname(self)} is shutting down')
+            if (x := self.__rej) == self.__mr: await self.shutdown(); raise A.BulkheadShutDown(f'{H.fullname(self)} has been shutdown because too many tasks were rejected') from e
+            self.__rej = x+1; raise A.BulkheadFull(f'{H.fullname(self)} queue full') from None
+        if self.is_shutdown: raise A.BulkheadShutDown(f'{H.fullname(self)} is shutting down')
         async with self.__sem:
             try: await (await self.__queue.get())
-            except (I.QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{fullname(self)} is shutting down') from None
+            except (I.QueueEmpty, QueueShutDown, I.CancelledError): raise A.BulkheadShutDown(f'{H.fullname(self)} is shutting down') from None
             except self.__exc as e:
                 if p := self.__p: await p(e)
         getattr(self.__mt, 'clear' if self.active_tasks else 'set')()
-    async def __cleanup__(self): await self.shutdown()
+    async def __aenter__(self): return self
+    async def __aexit__(self, /, *_): await self.shutdown()
     @property
     def available_slots(self): return self.__sem._value
     @property
@@ -81,5 +82,5 @@ class Bulkhead(A.LoopContextMixin):
             f, g = r.append, q.get_nowait
             while True:
                 try: f(g())
-                except: h(True); break # noqa: E722
+                except: h(True); break # ruff: ignore[bare-except]
         return r

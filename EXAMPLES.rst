@@ -91,16 +91,14 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
 .. highlight:: bash
 
 The following commands can all enter the console to verify the above, ordered in approximately descending order of preference. They have no known
-behavioural differences, and the same arguments that the :mod:`asyncutils` shell accepts can be appended behind each::
+behavioural differences in typical environments, and the same arguments that the :mod:`asyncutils` shell accepts can be appended behind each::
 
-  asyncutils # prefer for explicitness and terseness
-  python3 -m asyncutils # python -m on Windows; similar below
+  asyncutils # preferred
+  python3 -m asyncutils # python -m on Windows
   autils # shortened name for convenience
   python3 asyncutils
   python3 -m asyncutils.__main__
   python3 asyncutils/__main__.py
-  # python3 -m asyncutils/__main__.py: documented to be unsupported, but works on some versions
-  # note: python3 asyncutils.__main__ doesn't work because python attempts to find a file called asyncutils.__main__ in the current working directory
 
 .. ifconfig:: py313
 

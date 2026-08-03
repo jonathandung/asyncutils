@@ -5,7 +5,8 @@ from collections.abc import Awaitable, Callable
 from typing import Any, Concatenate, Literal, Self, final, overload
 __all__ = 'AgingRWLock', 'CoercedMethod', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):
-    '''| Common base class for all readers-writer locks.
+    '''
+    | Common base class for all readers-writer locks.
     | If you would like to subclass this, you must implement :meth:`reading`, :meth:`writing` and :meth:`setup`.
     '''
     @overload
@@ -49,8 +50,9 @@ class FairRWLock(RWLock):
     def reading(self) -> RWLockCM: ...
     def writing(self) -> RWLockCM: ...
 class PriorityRWLock(RWLock):
-    '''| Common base class of :class:`AgingRWLock`, :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
-    | Lower priority levels are preferred, and the default priority is ``0``, as in other patterns in this module related to priority.
+    '''
+    | Common base class of :class:`AgingRWLock`, :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
+    | Lower priority levels are prioritized, and the default priority is ``0``, as in other patterns in this module related to priority.
     '''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredPriorityRWLock: ...
@@ -70,20 +72,21 @@ class WritePreferredPriorityRWLock(PriorityRWLock):
 class AgingRWLock(PriorityRWLock):
     '''A readers-writer lock with a priority policy multiplying the current number of attempts to acquire the reading or writing lock, counted per corresponding task, by the respective factor given at construction, to obtain the priority.'''
     def __new__(cls, /, rf: float=..., wf: float=...) -> Self:
-        '''* ``rf``, the read priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
+        '''
+        * ``rf``, the read priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_READ_PRIORITY_FACTOR`.
         * ``wf``, the write priority factor, defaults to :const:`~asyncutils.context.Context.AGING_RWLOCK_DEFAULT_WRITE_PRIORITY_FACTOR`.
         '''
     def reading(self, priority: int=...) -> RWLockCM: ...
     def writing(self, priority: int=...) -> RWLockCM: ...
     def setup(self) -> None: ...
     @property
-    def cur_unsuccessful_reads(self) -> int: '''The current number of unsuccessful attempts to acquire the reading lock, counted across all tasks.'''
+    def current_unsuccessful_reads(self) -> int: '''The current number of unsuccessful attempts to acquire the reading lock, counted across all tasks.'''
     @property
-    def cur_unsuccessful_writes(self) -> int: '''The current number of unsuccessful attempts to acquire the writing lock, counted across all tasks.'''
+    def current_unsuccessful_writes(self) -> int: '''The current number of unsuccessful attempts to acquire the writing lock, counted across all tasks.'''
 @final
 class CoercedMethod[T, R, **P]:
     '''Interpret any callable as a regular function in a class body so that access on instance returns something like a bound method.'''
     def __init__(self, func: Callable[Concatenate[R, P], T], /): ...
-    def __getattr__(self, name: str, /) -> Any: ... # noqa: ANN401
+    def __getattr__(self, name: str, /) -> Any: ... # ruff: ignore[any-type]
     def __set_name__(self, owner: type[R], name: str, /) -> None: ...
     def __get__(self, instance: R, owner: type[R]|None=..., /) -> Callable[P, T]: '''Return the 'bound method'. The descriptor itself cannot be directly accessed on the class it is defined in, only instances of.'''

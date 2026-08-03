@@ -131,15 +131,16 @@ Some keys can have various types, as detailed by the comments attached. */
     },
     iters: {
       afreivalds_default_k: 2,
-      aonline_sorter_default_slow: false,
       aunzip: {
+        default_fail_fast: true,
         default_max_qsize: 64,
         default_put_batch: 16
       },
       merge_default_max_qsize: 0,
       tee: {
-        default_put_exc: true,
-        default_max_qsize: 32
+        default_fail_fast: true,
+        default_max_qsize: 64,
+        default_put_batch: 16
       }
     },
     locks: {

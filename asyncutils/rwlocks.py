@@ -1,7 +1,5 @@
 # ty: ignore[unresolved-attribute]
-__lazy_modules__ = frozenset(('heapq',))
 from asyncutils import getcontext, ignore_valerrs
-from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import rwlocks_all as __all__
 from _collections import defaultdict, deque
 from asyncio import Condition, Lock, current_task
@@ -34,7 +32,7 @@ class CoercedMethod:
     def __set_name__(self, /, *_): self.__o, self.__n = _
     def __getattr__(self, n, /): return getattr(self.__f, n)
     def __get__(self, o, t=None, /):
-        if o is None: raise AttributeError(f'class {fullname(t)} has no attribute {self.__n!r}', name=self.__n) if t is self.__o else TypeError('incorrectly bound asyncutils.rwlocks.CoercedMethod')
+        if o is None: raise AttributeError(name=self.__n, obj=t) if t is self.__o else TypeError('asyncutils.rwlocks.CoercedMethod: incorrectly bound')
         if not (t is None or isinstance(o, t)): raise TypeError('asyncutils.rwlocks.CoercedMethod: __get__ called incorrectly')
         return lambda *a, **k: self.__f(o, *a, **k)
 @d
@@ -183,7 +181,7 @@ class AgingRWLock(PriorityRWLock):
         if priority is None: priority = self.__wf*p
         async with super().writing(priority): d.pop(i, None); yield
     @property
-    def cur_unsuccessful_reads(self): return sum(self.__rt.values())
+    def current_unsuccessful_reads(self): return sum(self.__rt.values())
     @property
-    def cur_unsuccessful_writes(self): return sum(self.__wt.values())
+    def current_unsuccessful_writes(self): return sum(self.__wt.values())
 del B, t, d, n, s

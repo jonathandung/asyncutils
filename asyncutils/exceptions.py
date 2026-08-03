@@ -2,7 +2,7 @@ from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import exceptions_all as __all__
 from sys import audit, exception
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
-def _unnest(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit): # noqa: PLR0913
+def u(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit): # ruff: ignore[too-many-arguments]
     _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))
     while s:
         if isinstance(group := f(), BaseExceptionGroup): g(group.exceptions)
@@ -12,8 +12,8 @@ def _unnest(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=()
             elif not predicate(group): ack2(group)
             elif (y := (yield group)) is not None: h(y)
         else: ack3(group)
-def unnest(g, /, *A, d=__import__('_collections').deque, h=_unnest, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
-def unnest_reverse(g, /, *A, h=_unnest, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
+def unnest(g, /, *A, d=__import__('_collections').deque, h=u, **k): (s := d(g.exceptions)).extend(A) if isinstance(g, BaseExceptionGroup) else (s := d(A)).appendleft(g); return h(s.popleft, lambda e, g=s.extendleft: g(reversed(e)), s.appendleft, s, **k)
+def unnest_reverse(g, /, *A, h=u, **k): (g := (s := list(g.exceptions) if isinstance(g, BaseExceptionGroup) else [g]).extend)(A); return h(s.pop, g, s.append, s, **k)
 def potent_derive(*G, ordered=False, **k):
     n = (P := lambda _, p=(p := k.pop): p(_, None))('notes')
     if not isinstance(g := G[0], BaseExceptionGroup): _ = p('suppress', False), *map(P, ('context', 'cause', 'traceback')); (g := BaseExceptionGroup(p('message'), tuple((unnest if ordered else unnest_reverse)(*G, **k)))).__suppress_context__, g.__context__, g.__cause__, g.__traceback__ = _
@@ -39,34 +39,37 @@ class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
-        (s := super().__new__(cls)).__exc = e; return s
+        (s := super().__new__(cls)).__exc = e; return s # ty: ignore[unresolved-attribute]
     def __getattr__(self, n, /): return getattr(self.__exc, n)
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
 exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # ty: ignore[unresolved-attribute]
+def raise_for(e, /):
+    if exception_occurred(e): raise unwrap_exc(e)
+    return e
 @H.subscriptable
-class ref: # noqa: N801
+class ref: # ruff: ignore[invalid-class-name]
     __slots__ = '__o',
     def __new__(cls, obj, r=__import__('_weakref').ref):
         if isinstance(obj, (cls, r)): return obj
         try: return r(obj)
-        except TypeError: (_ := object.__new__(cls)).__o = obj; return _
+        except TypeError: (_ := object.__new__(cls)).__o = obj; return _ # ty: ignore[unresolved-attribute]
     def __call__(self): return self.__o # ty: ignore[unresolved-attribute]
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @H.subscriptable
 class Critical(BaseException):
     def __init__(self, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception): super().__init__(_m); self.__context__ = e.__context__ if isinstance(e, __class__) else _e() if e is None else e
     @property
-    def __suppress_context__(self): return False # noqa: PLW3201
+    def __suppress_context__(self): return False # ruff: ignore[bad-dunder-method-name]
     @property
     def exc(self): return self.__cause__ or self.__context__
 class StateCorrupted(BaseException):
     def __init__(self, a, d, /): self.adjective, self.details = a, d; super().__init__(f'asyncutils: user tampered with {a} state; {d}')
 class VersionError(Exception): ...
 for A, B in (('obj', '_ro'), ('normalizer', '_rn'), ('exc', '_re')):
-    def _(self, a=A, b=B, f=H.fullname):
-        if (r := getattr(self, b, None)) is None: raise AttributeError(f'object of type {f(self)!r} has no attribute {a!r}')
-        if isinstance(r, ref) and (r := r()) is None: raise RuntimeError(f'{a} has been garbage collected')
+    def _(self, a=A, b=B):
+        if (r := getattr(self, b, None)) is None: raise AttributeError(name=a, obj=self)
+        if isinstance(r, ref) and (r := r()) is None: raise AttributeError('attribute has been garbage collected', name=a, obj=self)
         return r
     _.__name__, _.__qualname__ = A, f'VersionError.{A}'; setattr(VersionError, A, property(_))
 class VersionConversionError(VersionError): ...
@@ -176,4 +179,4 @@ class WarningToError:
     async def __aenter__(self): return self.__enter__()
     async def __aexit__(self, /, *_): self.__exit__(*_)
     P.patch_method_signatures((__enter__, ''), (__aenter__, ''), (__exit__, P.exit_sig), (__aexit__, P.exit_sig))
-del P, s, _, A, B, H, ExceptionWrapper, _unnest, audit, exception
+del P, s, _, A, B, H, ExceptionWrapper, u, audit, exception

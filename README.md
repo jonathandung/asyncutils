@@ -8,7 +8,7 @@
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/release.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/release.yaml)
 [![GitHub Pages](https://github.com/jonathandung/asyncutils/actions/workflows/deploy.yaml/badge.svg)](https://jonathandung.github.io/asyncutils)
 [![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/jonathandung/asyncutils/security/dependabot)
-[![pre-commit.ci](https://results.pre-commit.ci/badge/github/jonathandung/asyncutils/main.svg)](https://results.pre-commit.ci/latest/github/jonathandung/asyncutils/main)
+[![Prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/jonathandung/asyncutils/actions/workflows/prek.yaml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13018/badge)](https://www.bestpractices.dev/projects/13018)
 [![Read the Docs: stable](https://img.shields.io/readthedocs/asyncutils/stable?logo=readthedocs&label=docs%20(stable))](https://asyncutils.readthedocs.io/en/stable)
 [![Read the Docs: latest](https://img.shields.io/readthedocs/asyncutils/latest?logo=readthedocs)](https://asyncutils.readthedocs.io/en)
@@ -43,7 +43,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.1.0. For your reference, here are [all version tags up to now](https://github.com/jonathandung/asyncutils/tags).
+This is asyncutils v1.1.2, with [all stable version tags up to now](https://github.com/jonathandung/asyncutils/tags) attached for your reference.
 
 ## Configuration
 

@@ -1,4 +1,4 @@
-# ruff: noqa: PLR6301
+# ruff: file-ignore[no-self-use]
 import asyncio as I, asyncutils as A, asyncutils._internal.log as L
 from asyncutils.constants import _NO_DEFAULT
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
@@ -8,7 +8,7 @@ from sys import audit
 ForceResult, RecognitionResult = E('ForceResult', 'UNFORCEABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:
-    __slots__ = '__lock', '__loop', '__recognized'; handlers = {} # noqa: RUF012
+    __slots__ = '__lock', '__loop', '__recognized'; handlers = {} # ruff: ignore[mutable-class-default]
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
         def register(t, H=cls.handlers, h=h):
@@ -27,7 +27,7 @@ class LocksmithBase:
             if callable(f := getattr(l, 'acknowledge_locksmith_lock_held', None)):
                 try: return bool((await f) if I.iscoroutine(f := f(self)) else f)
                 except A.CRITICAL: raise A.Critical
-                except: return RecognitionResult.FAILED_ACK # noqa: E722
+                except: return RecognitionResult.FAILED_ACK # ruff: ignore[bare-except]
             r.add(l); return RecognitionResult.SUCCESS
     async def force(self, l, /, info=_NO_DEFAULT, *, purge_waiters=True):
         audit('asyncutils.locksmiths.LocksmithBase.force', id(self), id(l))
@@ -37,7 +37,7 @@ class LocksmithBase:
         try:
             if I.iscoroutine(r := l.release()): r = await r
         except A.CRITICAL: raise A.Critical
-        except: return await self._force_except(l, info) # noqa: E722
+        except: return await self._force_except(l, info) # ruff: ignore[bare-except]
         else: return await self.release_returned_false(l) if r is False else ForceResult.RELEASED
         finally:
             if purge_waiters: await self.purge_waiters(l)
@@ -57,7 +57,7 @@ class LocksmithBase:
             if (r := e.requester) is not self: await self.lock_busy(l, r, {})
             elif e is E: await self.task_propagated_request(l)
             else: return await self.already_forcing(l)
-        except BaseException as e: await self.task_raised_other(l, e) # noqa: BLE001
+        except BaseException as e: await self.task_raised_other(l, e) # ruff: ignore[blind-except]
         else: await self.answer_received(l, await F)
     async def purge_waiters(self, l, /):
         if w := getattr(l, '_waiters', None): await A.safe_cancel_batch(w, disembowel=True)

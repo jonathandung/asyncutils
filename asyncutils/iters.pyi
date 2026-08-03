@@ -1,15 +1,16 @@
-'''| Functional and composable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`, but some are unique to async.
+'''
+| Functional and composable interface to get async generators from (async) iterables. Many of the algorithms here are taken from :mod:`more_itertools`, but some are unique to async.
 | However, since they must support both sync and async iterables, they are much less efficient than their sync counterparts.
 '''
-from ._internal.prots import CanExcept, CountItem, EventProtocol, IntCompatible, NoCoalesce, NotNone, Raise, SupportsCopy, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing, AUnzipConsumer
+from ._internal.prots import CanExcept, Consumer, CountItem, Diff, EventProtocol, IntCompatible, NoCoalesce, NotNone, Raise, SupportsCopy, SupportsIteration, SupportsMatMul, SupportsRichComparison, SupportsSlicing
 from .iterclasses import AChain
-from asyncio import AbstractEventLoop, Future, Task
+from asyncio import Future, Task
 from collections import deque
 from collections.abc import AsyncIterable, AsyncGenerator, Awaitable, Callable, Hashable, Iterable, Mapping, MutableSequence, Reversible
 from types import AsyncGeneratorType
 from typing import Any, Concatenate, Literal, NamedTuple, Never, SupportsIndex, overload
 from typing_extensions import deprecated
-__all__ = 'FirstMisMatch', 'Longer', 'Shorter', 'aaccumulate', 'aadjacent', 'aall', 'aall_equal', 'aall_unique', 'aany', 'aappend', 'aargmax', 'aargmin', 'aargminmax', 'aawgenf2agenf', 'abefore_and_after', 'abfs', 'abrent', 'ac3merge', 'acanonical', 'acat', 'acollapse', 'acombinations', 'acombinations_with_replacement', 'acompress', 'aconsume', 'aconvolve', 'acount', 'acount_cycle', 'acountdown', 'acycle', 'aderangements', 'adfs', 'adft', 'adifference', 'adistinct_permutations', 'adouble_starmap', 'adropuntil', 'adropuntil_exclusive', 'adropwhile', 'adropwhile_exclusive', 'advance_by', 'aevery', 'aevery_other', 'afactor', 'afilter', 'afilterfalse', 'afirst', 'afirstfalse', 'afirstfalse_or_first', 'afirstfalse_or_last', 'afirsttrue', 'afirsttrue_or_first', 'afirsttrue_or_last', 'aflatten', 'aflatten_tensor', 'aforever', 'afreivalds', 'agather', 'agives', 'agroupby', 'agroupby_transform', 'agrouper', 'aguessmax', 'aguessmin', 'aichunked', 'aidft', 'aiequals', 'ailen', 'ainterleave_evenly', 'ainterleave_randomly', 'ainterleave_stopearly', 'aintersend', 'aintersperse', 'aisempty', 'aislice', 'aisprime', 'aiter_idx', 'aiterate', 'aiterexcept', 'alast', 'all_max', 'all_min', 'aloops', 'amap', 'amapif', 'amatmul', 'amatprod', 'amax', 'amerge_sorted_by', 'amin', 'aminmax', 'aminmax_keyed', 'amultifilter', 'amultifilterfalse', 'amultimapif', 'amultistarfilter', 'amultistarfilterfalse', 'amultistarmapif', 'ancycles', 'anth', 'anth_combination', 'anth_combination_with_replacement', 'anth_or_last', 'anth_permutation', 'anth_product', 'aonline_sorter', 'aouter_product', 'apadded', 'apadnone', 'apairwise', 'apartition', 'apermutations', 'apolynomial_derivative', 'apolynomial_eval', 'apolynomial_from_roots', 'apowers', 'apowers_of_two', 'apowerset', 'apowerset_of_sets', 'aprepend', 'aprod', 'aproduct', 'aquantify', 'arandom_combination', 'arandom_combination_with_replacement', 'arandom_derangement', 'arandom_permutation', 'arandom_product', 'arange', 'arepeat', 'arepeat_each', 'arepeat_func', 'arepeat_last', 'areshape', 'areversed', 'aroundrobin', 'aroundrobin2', 'arunlength_decode', 'arunlength_encode', 'arunning_mean', 'arunning_median', 'asample_l', 'asample_weighted', 'asattolo', 'asendstream', 'aserialize', 'aside_effect', 'asieve', 'asliced', 'asorted', 'asplitat', 'aspy', 'astarfilter', 'astarfilterfalse', 'astarmap', 'astarmap_with_kwds', 'asubslices', 'asubstr_indices', 'asubstrings', 'asum', 'asum_of_squares', 'asumprod', 'at_most_one', 'atabulate', 'atabulate_finite', 'atail', 'atakeuntil', 'atakeuntil_inclusive', 'atakewhile', 'atakewhile_inclusive', 'atranspose', 'atriplewise', 'aunique', 'aunique_everseen', 'aunique_justseen', 'aunique_to_each', 'aunzip', 'awindowed_complete', 'awrap', 'awrapf', 'azip', 'azip_offset', 'aziplongest', 'basic_collect', 'batch', 'batch2', 'batch_process', 'buffer', 'circular_shifts', 'cloned', 'coalesce', 'counts', 'decreasing_runs', 'diff_with', 'distribute', 'duplicates', 'empty_agen', 'extract', 'extract_monotonic', 'filter_identical', 'flat_map', 'fmap', 'fmap_parallel', 'fmap_sequential', 'fuse', 'gray_product', 'group_from', 'hamming_dist', 'increasing_runs', 'is_sorted', 'iter_task', 'iterate_with_key', 'locate', 'longest_common_prefix', 'lstrip', 'map_if_else', 'map_on_map', 'map_windows', 'mark_ends', 'mat_vec_mul', 'merge', 'pad_using', 'partial_product', 'partitions', 'product_index', 'rstrip', 'scan', 'sort_together', 'split_when', 'stagger', 'strip', 'tee', 'to_deque', 'to_list', 'to_set', 'to_tuple', 'vecs_eq', 'window'
+__all__ = 'FirstMisMatch', 'Longer', 'Shorter', 'aaccumulate', 'aadjacent', 'aall', 'aall_equal', 'aall_unique', 'aany', 'aappend', 'aargmax', 'aargmin', 'aargminmax', 'aawgenf2agenf', 'abefore_and_after', 'abfs', 'abrent', 'ac3merge', 'acanonical', 'acat', 'acollapse', 'acombinations', 'acombinations_with_replacement', 'acompress', 'aconsume', 'aconvolve', 'acount', 'acount_cycle', 'acountdown', 'acycle', 'aderangements', 'adfs', 'adft', 'adifference', 'adistinct_permutations', 'adouble_starmap', 'adropuntil', 'adropuntil_exclusive', 'adropwhile', 'adropwhile_exclusive', 'advance_by', 'aevery', 'aevery_other', 'afactor', 'afilter', 'afilterfalse', 'afirst', 'afirstfalse', 'afirstfalse_or_first', 'afirstfalse_or_last', 'afirsttrue', 'afirsttrue_or_first', 'afirsttrue_or_last', 'aflatten', 'aflatten_tensor', 'aforever', 'afreivalds', 'agather', 'agives', 'agroupby', 'agroupby_transform', 'agrouper', 'aguessmax', 'aguessmin', 'aichunked', 'aidft', 'aiequals', 'ailen', 'ainterleave_evenly', 'ainterleave_randomly', 'ainterleave_stopearly', 'aintersend', 'aintersperse', 'aisempty', 'aislice', 'aisprime', 'aiter_idx', 'aiterate', 'aiterexcept', 'alast', 'all_max', 'all_min', 'aloops', 'amap', 'amapif', 'amatmul', 'amatprod', 'amax', 'amerge_sorted_by', 'amin', 'aminmax', 'aminmax_keyed', 'amultifilter', 'amultifilterfalse', 'amultimapif', 'amultistarfilter', 'amultistarfilterfalse', 'amultistarmapif', 'ancycles', 'anth', 'anth_combination', 'anth_combination_with_replacement', 'anth_or_last', 'anth_permutation', 'anth_product', 'aonline_sorter', 'aouter_product', 'apadded', 'apadnone', 'apairwise', 'apartition', 'apermutations', 'apowers', 'apowers_of_two', 'apowerset', 'apowerset_of_sets', 'aprepend', 'aprod', 'aproduct', 'aquantify', 'arandom_combination', 'arandom_combination_with_replacement', 'arandom_derangement', 'arandom_permutation', 'arandom_product', 'arange', 'arepeat', 'arepeat_each', 'arepeat_func', 'arepeat_last', 'areshape', 'areversed', 'aroundrobin', 'aroundrobin2', 'arunlength_decode', 'arunlength_encode', 'arunning_mean', 'arunning_median', 'asample_l', 'asample_weighted', 'asattolo', 'asendstream', 'aserialize', 'aside_effect', 'asieve', 'asliced', 'asorted', 'asplitat', 'aspy', 'astarfilter', 'astarfilterfalse', 'astarmap', 'astarmap_with_kwds', 'asubslices', 'asubstr_indices', 'asubstrings', 'asum', 'asum_of_squares', 'asumprod', 'at_most_one', 'atabulate', 'atabulate_finite', 'atakeuntil', 'atakeuntil_inclusive', 'atakewhile', 'atakewhile_inclusive', 'atranspose', 'atriplewise', 'aunique', 'aunique_everseen', 'aunique_justseen', 'aunique_to_each', 'aunzip', 'awindowed_complete', 'awrap', 'awrapf', 'azip', 'azip_offset', 'aziplongest', 'basic_collect', 'batch', 'batch2', 'batch_process', 'buffer', 'circular_shifts', 'cloned', 'coalesce', 'counts', 'decreasing_runs', 'diff_with', 'distribute', 'duplicates', 'empty_agen', 'extract', 'extract_monotonic', 'filter_identical', 'flat_map', 'fmap', 'fmap_parallel', 'fmap_sequential', 'fuse', 'gray_product', 'group_from', 'hamming_dist', 'increasing_runs', 'is_sorted', 'iter_task', 'iterate_with_key', 'locate', 'longest_common_prefix', 'lstrip', 'map_if_else', 'map_on_map', 'map_windows', 'mark_ends', 'mat_vec_mul', 'merge', 'pad_using', 'partial_product', 'partitions', 'polynomial_derivative', 'polynomial_eval', 'polynomial_from_roots', 'product_index', 'rstrip', 'scan', 'sort_together', 'split_when', 'stagger', 'strip', 'tee', 'to_deque', 'to_list', 'to_set', 'to_tuple', 'vecs_eq', 'window'
 def agives[T](x: T, /) -> AsyncGeneratorType[T]: '''Yield the given value, then return.'''
 def empty_agen() -> AsyncGeneratorType[Never]: '''Return an async generator that yields nothing. Due to async generator finalization issues, this is not a constant like :const:`~asyncutils.base.yield_to_event_loop`.'''
 def aawgenf2agenf[T, **P](f: Callable[P, AsyncIterable[T]], /) -> Callable[P, AsyncGeneratorType[T]]: '''Convert a function that returns an awaitable resolving to an async iterable into one returning an async generator.'''
@@ -26,57 +27,62 @@ def map_on_map[T, R, V](outer: Callable[[R], V], inner: Callable[[T], Awaitable[
 @overload
 def map_on_map[T, R, V](outer: Callable[[R], Awaitable[V]], inner: Callable[[T], Awaitable[SupportsIteration[R]]], it: SupportsIteration[T], *, inner_await: Literal[True], outer_await: Literal[True]) -> AsyncGeneratorType[tuple[V, ...]]: '''Apply a transformation on an (async) iterable on top of another.'''
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[1]) -> tuple[AsyncGeneratorType[T]]: ...
+def tee(it: SupportsIteration[object], n: Literal[0]) -> tuple[()]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[2]=..., *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
+def tee[T](it: SupportsIteration[T], n: Literal[1], *, sentinel: T=...) -> tuple[Consumer[T]]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[3], *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
+def tee[T](it: SupportsIteration[T], n: Literal[2]=..., *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[T]]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[4], *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
+def tee[T](it: SupportsIteration[T], n: Literal[3], *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[T], Consumer[T]]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[5], *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
+def tee[T](it: SupportsIteration[T], n: Literal[4], *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[T], Consumer[T], Consumer[T]]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: Literal[6], *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
+def tee[T](it: SupportsIteration[T], n: Literal[5], *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[T], Consumer[T], Consumer[T], Consumer[T]]: ...
 @overload
-def tee[T](it: SupportsIteration[T], n: int, *, maxqsize: int=..., put_exc: bool=..., loop: AbstractEventLoop|None=...) -> tuple[AsyncGeneratorType[T], ...]:
-    '''| Create ``n`` independent async generators from a single (async) iterable ``it`` that yield the same items, caching items in a queue when needed.
-    | A background task is spawned to consume the iterable.
-    | Unlike :func:`itertools.tee`, the returned iterators are plain async generators, and the flattening step with a linked list as specified in the :mod:`itertools` docs is not done.
-    | ``maxqsize`` (default :const:`~asyncutils.context.Context.TEE_DEFAULT_MAX_QSIZE`) specifies how many unproduced items can be consumed from the source ahead of the slowest consumer(s) before the background task and the faster consumers start blocking to wait for them. 0 or below indicates an unbounded queue.
-    | If ``put_exc`` is ``True`` (default :const:`~asyncutils.context.Context.TEE_DEFAULT_PUT_EXC`), an exception raised by the source iterable will be propagated as late as possible; that is, only when the caller gets to that point. Slower consumers are not immediately affected.
-    | Otherwise, the exception is raised in the background task used to consume the iterable, and :exc:`~asyncio.QueueShutDown` will be propagated to callers waiting on consumers.
+def tee[T](it: SupportsIteration[T], n: Literal[6], *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[T], Consumer[T], Consumer[T], Consumer[T], Consumer[T]]: ...
+@overload
+def tee[T](it: SupportsIteration[T], n: int, *, sentinel: T=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], ...]:
+    '''
+    | Create ``n`` independent async generators from a single (async) iterable ``it`` that yield the same items, caching items in a queue when needed.
+    | ``maxqsize`` (default :const:`~asyncutils.context.Context.TEE_DEFAULT_MAX_QSIZE`) specifies how many unproduced items can be consumed from the source ahead of the slowest consumer(s) before the faster consumers start blocking to wait for them. ``0`` or below indicates an unbounded queue.
+    | If ``fail_fast`` is ``True`` (default :const:`~asyncutils.context.Context.TEE_DEFAULT_FAIL_FAST`), an exception raised by the source iterable will be propagated as late as possible; that is, only when the caller gets to that point. Slower consumers are not immediately affected.
+    | Otherwise, :exc:`~asyncio.QueueShutDown` will be propagated to callers waiting on consumers.
     '''
 def adouble_starmap[T](f: Callable[..., T], it: SupportsIteration[Mapping[str, Any]], /) -> AsyncGeneratorType[T]: '''Like :func:`amap`, but the iterables should yield mappings that are unpacked as arguments to the function.'''
 def astarmap_with_kwds[T](f: Callable[..., T], it: SupportsIteration[tuple[Iterable[Any], Mapping[str, Any]]], /) -> AsyncGeneratorType[T]: '''Like :func:`amap`, but the iterable should yield tuples of the form ``(args, kwargs)``, where ``args`` is an iterable of positional arguments and ``kwargs`` is a mapping of keyword arguments.'''
 @overload
-async def aunzip[T](ait: SupportsIteration[tuple[T]], *, put_batch: int=...) -> tuple[AUnzipConsumer[T]]: ...
+async def aunzip(it: SupportsIteration[tuple[()]]) -> tuple[()]: ...
 @overload
-async def aunzip[T, R](ait: SupportsIteration[tuple[T|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=...) -> tuple[AUnzipConsumer[T]]: ...
+async def aunzip[T](it: SupportsIteration[tuple[T]], *, put_batch: int=..., fail_fast: bool=...) -> tuple[Consumer[T]]: ...
 @overload
-async def aunzip[T, S](ait: SupportsIteration[tuple[T, S]], *, put_batch: int=..., maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S]]: ...
+async def aunzip[T, R](it: SupportsIteration[tuple[T|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T]]: ...
 @overload
-async def aunzip[T, S, R](ait: SupportsIteration[tuple[T|R, S|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S]]: ...
+async def aunzip[T, S](it: SupportsIteration[tuple[T, S]], *, put_batch: int=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S]]: ...
 @overload
-async def aunzip[T, S, V](ait: SupportsIteration[tuple[T, S, V]], *, put_batch: int=..., maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S], AUnzipConsumer[V]]: ...
+async def aunzip[T, S, R](it: SupportsIteration[tuple[T|R, S|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S]]: ...
 @overload
-async def aunzip[T, S, V, R](ait: SupportsIteration[tuple[T|R, S|R, V|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S], AUnzipConsumer[V]]: ...
+async def aunzip[T, S, V](it: SupportsIteration[tuple[T, S, V]], *, put_batch: int=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S], Consumer[V]]: ...
 @overload
-async def aunzip[T, S, V, U](ait: SupportsIteration[tuple[T, S, V, U]], *, put_batch: int=..., maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S], AUnzipConsumer[V], AUnzipConsumer[U]]: ...
+async def aunzip[T, S, V, R](it: SupportsIteration[tuple[T|R, S|R, V|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S], Consumer[V]]: ...
 @overload
-async def aunzip[T, S, V, U, R](ait: SupportsIteration[tuple[T|R, S|R, V|R, U|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=...) -> tuple[AUnzipConsumer[T], AUnzipConsumer[S], AUnzipConsumer[V], AUnzipConsumer[U]]: ...
+async def aunzip[T, S, V, U](it: SupportsIteration[tuple[T, S, V, U]], *, put_batch: int=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S], Consumer[V], Consumer[U]]: ...
 @overload
-async def aunzip[T](ait: SupportsIteration[tuple[T, ...]], *, put_batch: int=..., maxqsize: int=...) -> tuple[AUnzipConsumer[T], ...]: ...
+async def aunzip[T, S, V, U, R](it: SupportsIteration[tuple[T|R, S|R, V|R, U|R]], *, put_batch: int=..., fillvalue: R, maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], Consumer[S], Consumer[V], Consumer[U]]: ...
 @overload
-async def aunzip[T, R](ait: SupportsIteration[tuple[T|R, ...]], *, put_batch: int=..., fillvalue: R, maxqsize: int=...) -> tuple[AUnzipConsumer[T], ...]: ...
+async def aunzip[T](it: SupportsIteration[tuple[T, ...]], *, put_batch: int=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], ...]: ...
 @overload
-async def aunzip(ait: SupportsIteration[tuple[Any, ...]], *, put_batch: int=..., fillvalue: object=..., maxqsize: int=...) -> tuple[AUnzipConsumer[Any], ...]:
-    '''| Undo the effect of :class:`zip`, :func:`itertools.zip_longest`, :func:`aziplongest` or :func:`azip`.
+async def aunzip[T, R](it: SupportsIteration[tuple[T|R, ...]], *, put_batch: int=..., fillvalue: R, maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[T], ...]: ...
+@overload
+async def aunzip(it: SupportsIteration[tuple[Any, ...]], *, put_batch: int=..., fillvalue: object=..., maxqsize: int=..., fail_fast: bool=...) -> tuple[Consumer[Any], ...]:
+    '''
+    | Undo the effect of :class:`zip`, :func:`itertools.zip_longest`, :func:`aziplongest` or :func:`azip`.
     | This function operates lazily, consuming items from the async iterable only when needed, in batches of size ``put_batch`` (default :const:`~asyncutils.context.Context.AUNZIP_DEFAULT_PUT_BATCH`) and caching other items in queues of capacity ``maxqsize`` (default :const:`~asyncutils.context.Context.AUNZIP_DEFAULT_MAX_QSIZE`).
 
     .. warning:: This function may require significant auxiliary space.
     '''
 def merge[T](*I: SupportsIteration[T], reverse: bool=..., maxqsize: int=...) -> AsyncGeneratorType[T]:
-    '''| Merge items from the (async) iterables into a single async generator, according to the order in which they come.
+    '''
+    | Merge items from the (async) iterables into a single async generator, according to the order in which they come.
     | If ``reverse`` is ``True``, the order is reversed, but the returned generator only starts when all items are available.
     | ``maxqsize`` (default :const:`~asyncutils.context.Context.MERGE_DEFAULT_MAX_QSIZE`) controls the maximum number of items the consumer can fall behind the producers before the producers cease to be advanced.
 
@@ -94,16 +100,19 @@ def aevery_other[T](it: SupportsIteration[T], *, skip_first: bool=...) -> AsyncG
 def aside_effect[T](f: Callable[[list[T]], object], it: SupportsIteration[T], /, *, size: int, before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGeneratorType[T]: ...
 @overload
 def aside_effect[T](f: Callable[[T], object], it: SupportsIteration[T], /, *, size: None=..., before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGeneratorType[T]:
-    '''| Apply a side effect function ``f`` to each item in an (async) iterable ``it`` and yield the items unchanged in an async generator.
+    '''
+    | Apply a side effect function ``f`` to each item in an (async) iterable ``it`` and yield the items unchanged in an async generator.
     | If ``size`` is specified, the side effect function is applied to batches of that size instead of individual items, but the items are still yielded separately.
     | The ``before`` and ``after`` functions are called before and after the iteration, respectively, but ``after`` is not called if ``before`` fails.
     '''
 def asliced[T: SupportsSlicing[Any]](seq: T, n: int, strict: bool=...) -> AsyncGeneratorType[T]:
-    '''| Slice a sliceable object ``seq`` (so named because these are usually sequences) and yield slices of the size ``n``, which should be of the same type as ``seq``, from the start to the end.
+    '''
+    | Slice a sliceable object ``seq`` (so named because these are usually sequences) and yield slices of the size ``n``, which should be of the same type as ``seq``, from the start to the end.
     | If ``strict`` is ``True``, raise :exc:`ValueError` if the length of any slice is less than ``n`` (should only happen for the last slice unless the :meth:`~object.__getitem__` method is implemented incorrectly).
     '''
 def buffer[T](it: SupportsIteration[T], maxsize: int=..., *, timeout_get: float|None=..., timeout_put: float|None=..., cooldown: float=...) -> AsyncGeneratorType[T]:
-    '''| Buffer the given (async) iterable in an async generator, with an async queue as buffer of capacity ``maxsize`` (default unbounded) and optional timeouts for getting and putting items into the buffer.
+    '''
+    | Buffer the given (async) iterable in an async generator, with an async queue as buffer of capacity ``maxsize`` (default unbounded) and optional timeouts for getting and putting items into the buffer.
     | ``cooldown`` specifies how long to wait after hitting a get timeout before trying again; whereas when a put timeout is reached, the async generator finishes.
     '''
 def asplitat[T](it: SupportsIteration[T], pred: Callable[[T], object], maxsplit: int=..., keep_sep: bool=...) -> AsyncGeneratorType[list[T]]: '''Split an async iterator at each item satisfying ``pred``, with ``keep_sep`` dictating whether the separator is to be included as the last item of each list.'''
@@ -386,14 +395,14 @@ async def asum[T: (int, float, complex)](it: SupportsIteration[T], start: T=...)
 async def aprod[T: (int, float, complex)](it: SupportsIteration[T], start: T=...) -> T: '''Return the product of the items in the (async) iterable, preceded by ``start`` if passed.'''
 async def amatprod[T: SupportsMatMul](it: SupportsIteration[T], start: T) -> T: '''Return the product of the matrices in the (async) iterable, preceded by ``start`` if passed.'''
 def acountdown(n: int, step: int=..., *, include_zero: bool=...) -> AsyncGeneratorType[int]: '''Count down from ``n`` to zero, excluding zero if it is to appear and ``include_zero`` is ``False`` (the default), by a step size of ``step``.'''
-def atail[T](n: int, it: SupportsIteration[T], /) -> AsyncGeneratorType[T]: '''Yield the last ``n`` items from the (async) iterable ``it``.'''
 def abfs[T: Hashable](start: T, neighbours: Callable[[T], SupportsIteration[T]], *, include_start: bool=...) -> AsyncGeneratorType[T]: '''Breadth-first search on a start node ``start``, given a function ``neighbours`` that returns an (async) iterable of neighbours to be traversed in order. If ``include_start`` is ``True``, the start node is yielded first.'''
 def adfs[T: Hashable](start: T, neighbours: Callable[[T], SupportsIteration[T]], *, include_start: bool=...) -> AsyncGeneratorType[T]: '''Depth-first search on a start node ``start``, given a function ``neighbours`` that returns an (async) iterable of neighbours to be traversed in order. If ``include_start`` is ``True``, the start node is yielded first.'''
 async def abrent[T](next_node: Callable[[T], Awaitable[T]], start: T, /) -> tuple[T, int, int]:
-    '''| Brent's algorithm for cycle detection, assuming that a cycle is indeed present, given a function ``next_node`` returning the next node from the previous.
+    '''
+    | Brent's algorithm for cycle detection, assuming that a cycle is indeed present, given a function ``next_node`` returning the next node from the previous.
     | Return a tuple ``(node, la, mu)``, where ``node`` is the first node involved in a cycle, ``mu`` its index (the least number of times ``next_node`` was applied to get ``node``), and ``la`` the cycle length.
 
-    .. note:: ``next_node`` should be deterministic. Also, if there is no cycle, the algorithm hangs indefinitely.
+    .. note:: ``next_node`` must be deterministic. Also, if no cycle exists, the algorithm hangs indefinitely, so call only on a function that takes its parameters and return values in a finite set.
     '''
 async def hamming_dist[T](a: SupportsIteration[T], b: SupportsIteration[T], /, cmpeq: Callable[[T, T], object]=...) -> int: '''Return the Hamming distance between two (async) iterables, using ``cmpeq`` to check for equality if passed.'''
 @overload
@@ -525,7 +534,7 @@ def astarfilterfalse[T](pred: Callable[[*tuple[T, ...]], object], it: SupportsIt
 @overload
 def astarfilterfalse[T](pred: Callable[[*tuple[T, ...]], Awaitable[object]], it: SupportsIteration[SupportsIteration[T]], await_pred: Literal[True]) -> AsyncGeneratorType[tuple[T, ...]]: '''Filter an (async) iterable of tuples of items, yielding only those tuples for which the predicate returns a falsy value when called on the tuple unpacked.'''
 async def to_tuple[T](it: SupportsIteration[T]) -> tuple[T, ...]: '''Convert the output of :func:`to_list` into a tuple.'''
-async def to_deque[T](it: SupportsIteration[T]) -> deque[T]: '''Collect all items in the (async) iterable ``it`` into a :class:`~collections.deque`.'''
+async def to_deque[T](it: SupportsIteration[T], n: int|None=...) -> deque[T]: '''Collect all items in the (async) iterable ``it`` into a :class:`~collections.deque` with maximum length ``n``.'''
 @overload
 async def to_set[T: Hashable](it: SupportsIteration[T], frozen: Literal[False]=...) -> set[T]: ...
 @overload
@@ -541,7 +550,8 @@ async def aquantify[T](it: SupportsIteration[T], pred: Callable[[T], object]=...
 def apadded[T](it: SupportsIteration[T], fillvalue: T, n: int|None=...) -> AsyncGeneratorType[T]: '''Yield the items in the (async) iterable ``it``, followed by ``fillvalue`` repeatedly, such that the iterable is fully consumed and the result has length at least ``n`` if passed.'''
 def apadnone[T](it: SupportsIteration[T], n: int|None=...) -> AsyncGeneratorType[T|None]: '''Yield the items in the (async) iterable ``it``, followed by ``None`` repeatedly, such that the iterable is fully consumed and the result has length at least ``n`` if passed.'''
 def agrouper[T](it: SupportsIteration[T], n: int, fillvalue: T|Raise=...) -> AsyncGeneratorType[tuple[T|None, ...]]:
-    '''| Collect items of the (async) iterable ``it`` into tuples of length ``n`` each.
+    '''
+    | Collect items of the (async) iterable ``it`` into tuples of length ``n`` each.
     | If ``fillvalue`` is :const:`~asyncutils.constants.RAISE`, raise :exc:`ValueError` if the last group is not of length ``n``.
     | Otherwise, pad the last group with ``fillvalue`` to length ``n`` if needed. No padding is done if not passed.
     '''
@@ -574,7 +584,8 @@ def asorted[T](it: SupportsIteration[T], *, key: Callable[[T], Awaitable[Support
 def acanonical[T](it: SupportsIteration[T]) -> list[T]: '''Return a canonicalized ordering of the items in ``it``, which may change across different Python invocations or sessions.'''
 def adistinct_permutations[T](it: SupportsIteration[T], r: int|None=...) -> AsyncGeneratorType[tuple[T, ...]]: '''Successive distinct permutations of the elements in ``it`` of size ``r``, or all sizes if not passed.'''
 async def aisempty(it: SupportsIteration[object]) -> bool:
-    '''Return whether the (async) iterable ``it`` is empty.
+    '''
+    Return whether the (async) iterable ``it`` is empty.
 
     .. note::
       This advances the iterable on success and discards the item.
@@ -584,7 +595,7 @@ def aunique_to_each[T: Hashable](*its: SupportsIteration[T]) -> AsyncGeneratorTy
 def aderangements[T](it: SupportsIteration[T], r: int|None=...) -> AsyncGeneratorType[T]: '''Successive derangements of the elements in ``it`` of size ``r``, or all sizes if not passed. Derangements are permutations with no fixed points.'''
 def aintersperse[T](e: T, it: SupportsIteration[T], n: int=...) -> AsyncGeneratorType[T]: '''Yield ``e``, then the next ``n`` items in ``it``, and repeat until ``it`` is exhausted.'''
 def ainterleave_stopearly[T](*it: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Yield the items from the iterables in a round-robin fashion until at least one is exhausted.'''
-def aspy[T](it: SupportsIteration[T], n: int=...) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T]]: '''Return an async generator containing the first ``n`` items, and another containing all the original items.'''
+async def aspy[T](it: SupportsIteration[T], n: int=...) -> tuple[list[T], AsyncGeneratorType[T]]: '''Return a list containing the first ``n`` items in the iterable and an async generator containing all the original items in a tuple.'''
 def ainterleave_evenly[T](its: SupportsIteration[SupportsIteration[T]], lengths: SupportsIteration[int]|None=...) -> AsyncGeneratorType[T]: '''Interleave items of the iterables evenly according to the lengths if passed, and determined by calling the :meth:`~object.__len__` method on the iterables if present otherwise.'''
 def ainterleave_randomly[T](its: SupportsIteration[SupportsIteration[T]]) -> AsyncGeneratorType[T]: '''Interleave items of the iterables randomly, skipping exhausted iterables.'''
 def acollapse(it: SupportsIteration[object], base_typ: tuple[type, ...]|type=..., levels: int|None=...) -> AsyncGeneratorType[Any]: '''Flatten the (async) iterable ``it`` by at most ``levels`` levels, without collapsing objects of types specified in ``base_typ``.'''
@@ -611,11 +622,11 @@ async def anth_or_last[T](it: SupportsIteration[T], n: int, default: T=...) -> T
 def abefore_and_after[T](pred: Callable[[T], object], it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T]]: ''':func:`atakewhile`, but return all remaining items in the second async generator (after the first is consumed).'''
 def asubslices[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[T, ...]]: ''':func:`asubstrings`, but yield all subslices containing the first item first in ascending order of length, then all subslices containing the second item but not the first, and so on.'''
 def arepeat_func[T, *Ts](f: Callable[[*Ts], Awaitable[T]], times: int|None=..., *a: *Ts) -> AsyncGeneratorType[T]: '''Call the async function ``f`` with arguments ``a`` repeatedly for ``times`` times, or indefinitely if ``times`` is not passed, and yield the results awaited.'''
-def apolynomial_from_roots[T: (int, float, complex)](roots: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Generate the coefficients of a polynomial given its roots in order of descending powers.'''
+def polynomial_from_roots[T: (int, float, complex)](roots: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Generate the coefficients of a polynomial given its roots in order of descending powers.'''
 def atranspose[T](mat: SupportsIteration[SupportsIteration[T]]) -> AsyncGeneratorType[tuple[T, ...]]: '''Compute the transpose of a matrix.'''
 def aflatten_tensor(tensor: SupportsIteration[object], base_typ: tuple[type, ...]|type=...) -> AsyncGeneratorType[Any]: ''':func:`acollapse`, but using a different, more memory-efficient strategy that does not support the ``levels`` parameter.'''
-def apolynomial_derivative[T: (int, float, complex)](coeff: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Compute the coefficients of the derivative of a polynomial. Both input and output iterables are in order of descending powers.'''
-async def apolynomial_eval[T: (int, float, complex)](coeff: SupportsIteration[T], x: T) -> T: '''Evaluate a polynomial at ``x`` given its coefficients in order of descending powers.'''
+def polynomial_derivative[T: (int, float, complex)](coeff: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Compute the coefficients of the derivative of a polynomial. Both input and output iterables are in order of descending powers.'''
+async def polynomial_eval[T: (int, float, complex)](coeff: SupportsIteration[T], x: T) -> T: '''Evaluate a polynomial at ``x`` given its coefficients in order of descending powers.'''
 @overload
 def areshape[T](mat: SupportsIteration[SupportsIteration[T]], shape: int) -> AsyncGeneratorType[list[T]]: ...
 @overload
@@ -629,7 +640,8 @@ async def vecs_eq[T](u: SupportsIteration[T], v: SupportsIteration[T], cmpeq: Ca
 async def afreivalds(A: SupportsIteration[SupportsIteration[int]], B: SupportsIteration[SupportsIteration[int]], C: SupportsIteration[SupportsIteration[int]], k: int=...) -> bool: '''Determine if the matrix product of ``A`` and ``B`` equals ``C``. This is the probabilistic Freivalds algorithm. O(kn^2) time, with a false positive rate of at most 2^(-k) and no false negatives.'''
 async def basic_collect[T](it: SupportsIteration[T], n: int=...) -> list[T]: '''Return a list of the first ``n`` items in the (async) iterable ``it``, signalling no error if there are not enough items.'''
 def asubstrings[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[T, ...]]:
-    '''Yield all contiguous subsequences of the (async) iterable ``it`` as tuples, in increasing order of length.
+    '''
+    Yield all contiguous subsequences of the (async) iterable ``it`` as tuples, in increasing order of length.
 
     .. seealso:: :func:`asubslices`
       does the same in a different order.
@@ -640,7 +652,8 @@ def asubstr_indices[S: (str, bytes, bytearray)](seq: S, reverse: bool=...) -> As
 def asubstr_indices[T](seq: SupportsSlicing[T], reverse: bool=...) -> AsyncGeneratorType[tuple[Iterable[T], int, int]]: '''Yield tuples of the form ``(substr, start, end)``, where ``substr`` is a contiguous subsequence of ``seq`` starting at index ``start`` and ending at index ``end-1`` (such that its length is ``end-start``).'''
 def iter_task[T: SupportsIteration[object]](it: T, summaryf: Callable[[T], Awaitable[Any]]=...) -> Task[float]: '''Return a task that calls ``summaryf`` on the passed (async) iterable and returns the time taken to run it. By default, ``summaryf`` consumes ``it`` fully.'''
 def extract[T](it: SupportsIteration[T], indices: SupportsIteration[SupportsIndex], fut: Future[float]|None=..., finish: bool=...) -> list[Future[T]]:
-    '''| Take an (async) iterable and an (async) iterable of integers interpreted as indices, and immediately returns a list of futures.
+    '''
+    | Take an (async) iterable and an (async) iterable of integers interpreted as indices, and immediately returns a list of futures.
     | Their eventual results represent the items of that iterable at the corresponding index.
     | Also begin consumption of the iterable in the background.
     | Exceptions will be set in the futures that are not done if results are encountered during iteration or if the index is out of bounds.
@@ -674,10 +687,11 @@ def apowers_of_two(*, init: int=..., init_shift: int=..., shift: int=...) -> Asy
 def areversed[T](it: SupportsIteration[T]|Reversible[T], /) -> AsyncGeneratorType[T]: '''Reverse an (async) iterable, calling its :meth:`~object.__reversed__` method and converting the result into an async generator if present, and fall back to consuming and saving all the items and yielding them in reverse order.'''
 async def to_list[T](it: SupportsIteration[T]) -> list[T]: '''Collect all items of an async iterable into a list. Faster than :func:`~asyncutils.base.collect`.'''
 async def aisprime(n: int) -> bool: '''Probabilistically test for primality of ``n``. O(log^3 n), with false-positive rate below 2^(-128) for integers above 10^24.'''
-def adft(xarr: SupportsIteration[complex], /) -> AsyncGeneratorType[complex]: '''The discrete Fourier transform. O(n^2), since this library does not specialize in these operations.''' # noqa: D401
-def aidft(Xarr: SupportsIteration[complex], /) -> AsyncGeneratorType[complex]: '''The inverse discrete Fourier transform. O(n^2) just like :func:`adft`.''' # noqa: D401
+def adft(xarr: SupportsIteration[complex], /) -> AsyncGeneratorType[complex]: '''The discrete Fourier transform. O(n^2), since this library does not specialize in these operations.''' # ruff: ignore[non-imperative-mood]
+def aidft(Xarr: SupportsIteration[complex], /) -> AsyncGeneratorType[complex]: '''The inverse discrete Fourier transform. O(n^2) just like :func:`adft`.''' # ruff: ignore[non-imperative-mood]
 def apowers[T: (int, float, complex)](base: T, start: T=...) -> AsyncGeneratorType[T]:
-    '''Yield ``start``, ``start*base``, ``start*base*base``, ...
+    '''
+    Yield ``start``, ``start*base``, ``start*base*base``, ...
 
     .. note:: When it is found that the base is a perfect power of two, this will delegate to :func:`apowers_of_two` as an optimization.
     '''
@@ -709,22 +723,32 @@ async def aargminmax[T: SupportsRichComparison](it: SupportsIteration[T]) -> tup
 async def aargminmax[T: SupportsRichComparison, R](it: SupportsIteration[T], *, default: R) -> tuple[int, int]|R: '''Return a tuple of the indices of the first occurrences of the minimum and maximum elements in the (async) iterable ``it`` according to ``key``, or ``default`` if empty.'''
 def arunning_mean[T: (int, float, complex)](it: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Repeatedly yield the mean of the items in the iterable so far, and advance the iterable.'''
 class FirstMisMatch[T, R](NamedTuple):
+    '''Variant of :class:`~asyncutils._internal.prots.Diff` representing a mismatch between two items at the same index.'''
     i: int
+    '''The index of the first mismatch.'''
     lrem: AsyncGeneratorType[T]
+    '''The remainder of the items in the left iterable as an async generator. The first item yielded is the offending item.'''
     rrem: AsyncGeneratorType[R]
-    async def collect_left(self) -> list[T]: ...
-    async def collect_right(self) -> list[R]: ...
-    def remainder(self, strict: bool=...) -> AsyncGeneratorType[tuple[T, R]]: ...
+    '''The remainder of the items in the right iterable as an async generator. The first item yielded is the offending item.'''
+    async def collect_left(self) -> list[T]: '''Return a list of all the items in the left iterable.'''
+    async def collect_right(self) -> list[R]: '''Return a list of all the items in the right iterable.'''
+    def remainder(self, strict: bool=...) -> AsyncGeneratorType[tuple[T, R]]: '''Zip the remainders.'''
 class Shorter[T](NamedTuple):
+    '''Variant of :class:`~asyncutils._internal.prots.Diff` representing the case where the right iterable is shorter.'''
     i: int
+    '''The number of items in the right iterable.'''
     lrem: AsyncGeneratorType[T]
-    async def collect(self) -> list[T]: ...
+    '''The items remaining in the left iterable.'''
+    async def collect(self) -> list[T]: '''Return a list of all the items in the left iterable.'''
 class Longer[T](NamedTuple):
+    '''Variant of :class:`~asyncutils._internal.prots.Diff` representing the case where the right iterable is longer.'''
     i: int
+    '''The number of items in the left iterable.'''
     rrem: AsyncGeneratorType[T]
-    async def collect(self) -> list[T]: ...
-def longest_common_prefix[T](*its: SupportsIteration[T]) -> AsyncGeneratorType[T]: ...
-async def diff_with[T, R](it1: SupportsIteration[T], it2: SupportsIteration[R], /, *, cmpeq: Callable[[T, R], object]=...) -> FirstMisMatch[T, R]|Shorter[T]|Longer[R]|None: ...
+    '''The items remaining in the right iterable.'''
+    async def collect(self) -> list[T]: '''Return a list of all the items in the right iterable.'''
+def longest_common_prefix[T](*its: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Yield the items of the first (async) iterable, advancing all iterables passed in lockstep, until any two give different items.'''
+async def diff_with[T, R](it1: SupportsIteration[T], it2: SupportsIteration[R], /, *, cmpeq: Callable[[T, R], object]=...) -> Diff[T, R]|None: '''Return a diff between the two (async) iterables, treating ``cmpeq`` as a function that gives equality. The return value should be switched over the :class:`FirstMisMatch`, :class:`Shorter` and :class:`Longer` variants in a match-case statement.'''
 def cloned[T: SupportsCopy](it: SupportsIteration[T]) -> AsyncGeneratorType[T]: '''Yield copies of the items in the (async) iterable ``it``, as returned by :meth:`!copy`.'''
 @overload
 def fuse[T](it: SupportsIteration[T|None], end_at: None=..., *, keep_end: bool=...) -> AsyncGeneratorType[T|None]: ...
@@ -737,7 +761,7 @@ def fuse[T, R](it: SupportsIteration[T|R], end_at: R, *, keep_end: bool=...) -> 
 @overload
 def fuse[T, R, V](it: SupportsIteration[T|R], end_at: R, *, keep_end: Literal[False]=..., yield_after: V) -> AsyncGeneratorType[T|V]: ...
 @overload
-def fuse[T, R, V](it: SupportsIteration[T|R], end_at: R, *, keep_end: Literal[True], yield_after: V) -> AsyncGeneratorType[T|R|V]: ...
+def fuse[T, R, V](it: SupportsIteration[T|R], end_at: R, *, keep_end: Literal[True], yield_after: V) -> AsyncGeneratorType[T|R|V]: '''Yield the items in the (async) iterable ``it`` until exhaustion or an item equals ``end_at`` (default ``None``), yielding that item as well if ``keep_end=True`` is passed, then yield ``yield_after`` forever or ``end_at`` if not passed.'''
 @overload
 def map_windows[T, R](it: SupportsIteration[T], f: Callable[[*tuple[T, ...]], R], n: int, *, await_: Literal[False]=..., star: Literal[True]=...) -> AsyncGeneratorType[R]: ...
 @overload
@@ -745,8 +769,8 @@ def map_windows[T, R](it: SupportsIteration[T], f: Callable[[*tuple[T, ...]], Aw
 @overload
 def map_windows[T, R](it: SupportsIteration[T], f: Callable[[tuple[T, ...]], R], n: int, *, await_: Literal[False]=..., star: Literal[False]) -> AsyncGeneratorType[R]: ...
 @overload
-def map_windows[T, R](it: SupportsIteration[T], f: Callable[[tuple[T, ...]], Awaitable[R]], n: int, *, await_: Literal[True], star: Literal[False]) -> AsyncGeneratorType[R]: ...
-async def advance_by(it: SupportsIteration[object], n: int) -> None: ...
+def map_windows[T, R](it: SupportsIteration[T], f: Callable[[tuple[T, ...]], Awaitable[R]], n: int, *, await_: Literal[True], star: Literal[False]) -> AsyncGeneratorType[R]: '''Composition of :func:`astarmap` and :func:`window`, or :func:`amap` and :func:`window`, depending on ``star``.'''
+async def advance_by(it: SupportsIteration[object], n: int) -> None: '''Asynchronously consume the first ``n`` items of the (async) iterable ``it``.'''
 @overload
 def distribute[T](n: Literal[1], it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T]]: ...
 @overload
@@ -758,7 +782,7 @@ def distribute[T](n: Literal[4], it: SupportsIteration[T]) -> tuple[AsyncGenerat
 @overload
 def distribute[T](n: Literal[5], it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T], AsyncGeneratorType[T]]: ...
 @overload
-def distribute[T](n: int, it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T], ...]: ...
+def distribute[T](n: int, it: SupportsIteration[T]) -> tuple[AsyncGeneratorType[T], ...]: '''Distribute items in the (async) iterable ``it`` into ``n`` async generators that can be consumed at different rates. Requires a lot of storage.'''
 @overload
 def stagger[T](it: SupportsIteration[T], *, longest: Literal[False]=..., fillvalue: None=...) -> AsyncGeneratorType[tuple[T|None, T, T]]: ...
 @overload
@@ -786,7 +810,7 @@ def stagger[T, R](it: SupportsIteration[T], offsets: tuple[IntCompatible, IntCom
 @overload
 def stagger[T](it: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], *, longest: bool=..., fillvalue: None=...) -> AsyncGeneratorType[tuple[T|None, ...]]: ...
 @overload
-def stagger[T, R](it: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], *, longest: bool=..., fillvalue: R) -> AsyncGeneratorType[tuple[T|R, ...]]: ...
+def stagger[T, R](it: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], *, longest: bool=..., fillvalue: R) -> AsyncGeneratorType[tuple[T|R, ...]]: '''Yield tuples of items offset relative to the items in the original (async) iterable ``it`` according to ``offsets`` (default ``(-1, 0, 1)``). See :func:`azip_offset` for an explanation of the parameters.'''
 @overload
 def azip_offset[T](it: SupportsIteration[T], /, *, offsets: SupportsIteration[IntCompatible], longest: bool=..., fillvalue: None=...) -> AsyncGeneratorType[tuple[T|None]]: ...
 @overload
@@ -808,11 +832,11 @@ def azip_offset[T, R, V, U, S](i1: SupportsIteration[T], i2: SupportsIteration[R
 @overload
 def azip_offset[T](i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], i5: SupportsIteration[T], i6: SupportsIteration[T], /, *its: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], longest: bool=..., fillvalue: None=...) -> AsyncGeneratorType[tuple[T|None, ...]]: ...
 @overload
-def azip_offset[T, R](i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], i5: SupportsIteration[T], /, *its: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], longest: bool=..., fillvalue: R) -> AsyncGeneratorType[tuple[T|R, ...]]: ...
+def azip_offset[T, R](i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], i5: SupportsIteration[T], /, *its: SupportsIteration[T], offsets: SupportsIteration[IntCompatible], longest: bool=..., fillvalue: R) -> AsyncGeneratorType[tuple[T|R, ...]]: '''Zip multiple iterables, shifting the ``i``-th iterable by the ``i``-th item in ``offsets``. ``fillvalue`` is used to fill the gaps for shorter iterables if ``longest=True`` is passed, which makes the generator continue until the longest iterable is exhausted, as well as the first ``k`` items yielded by the iterables shifted by ``-k``.'''
 @overload
 async def at_most_one[T](it: SupportsIteration[T], default: None=...) -> T|None: ...
 @overload
-async def at_most_one[T, R](it: SupportsIteration[T], default: R) -> T|R: ...
+async def at_most_one[T, R](it: SupportsIteration[T], default: R) -> T|R: '''Assert that there is at most one item in the (async) iterable ``it`` and return that item, or ``default`` if ``it`` was empty. If there is more than one item, raise :exc:`~asyncutils.exceptions.MoreThanOne`. An async generator over the original items, including the first and second, is attached to the exception as its :attr:`~asyncutils.exceptions.MoreThanOne.it` attribute.'''
 @overload
 def counts[T](it: SupportsIteration[T], key: None=..., await_key: Literal[False]=...) -> AsyncGeneratorType[CountItem[T, T]]: ...
 @overload
@@ -820,25 +844,25 @@ def counts[T](it: SupportsIteration[T], key: None=..., await_key: Literal[False]
 @overload
 def counts[T, R](it: SupportsIteration[T], key: Callable[[T], R], await_key: Literal[False]=...) -> AsyncGeneratorType[CountItem[T, R]]: ...
 @overload
-def counts[T, R](it: SupportsIteration[T], key: Callable[[T], Awaitable[R]], await_key: Literal[True]) -> AsyncGeneratorType[CountItem[T, R]]: ...
+def counts[T, R](it: SupportsIteration[T], key: Callable[[T], Awaitable[R]], await_key: Literal[True]) -> AsyncGeneratorType[CountItem[T, R]]: '''Yield named tuples ``(count, key, item)`` for each ``item`` in the (async) iterable ``it``, where ``count`` is the number of items mapping to the same key as ``item`` under ``key`` so far and ``key`` is the result of calling ``key(item)``. If ``await_key=True`` is passed, the return value of the key is awaited.'''
 @overload
 def lstrip[T](it: SupportsIteration[T], pred: Callable[[T], object]|None=..., await_pred: Literal[False]=...) -> AsyncGeneratorType[T]: ...
 @overload
-def lstrip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: ...
+def lstrip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: '''Strip the left of the (async) iterable of items passing ``pred``, awaited if ``await_pred=True`` is passed.'''
 @overload
 def rstrip[T](it: SupportsIteration[T], pred: Callable[[T], object]|None=..., await_pred: Literal[False]=...) -> AsyncGeneratorType[T]: ...
 @overload
-def rstrip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: ...
+def rstrip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: '''Strip the right of the (async) iterable of items passing ``pred``, awaited if ``await_pred=True`` is passed.'''
 @overload
 def strip[T](it: SupportsIteration[T], pred: Callable[[T], object]|None=..., await_pred: Literal[False]=...) -> AsyncGeneratorType[T]: ...
 @overload
-def strip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: ...
+def strip[T](it: SupportsIteration[T], pred: Callable[[T], Awaitable[object]], await_pred: Literal[True]) -> AsyncGeneratorType[T]: '''Strip the ends of the (async) iterable of items passing ``pred``, awaited if ``await_pred=True`` is passed.'''
 def aichunked[T](it: SupportsIteration[T], n: int) -> AsyncGeneratorType[AChain[T]]: ...
 @overload
 async def product_index[T](p: tuple[()], repeat: int=...) -> Literal[0]: ...
 @overload
-async def product_index[T](p: SupportsIteration[T], *its: SupportsIteration[T], repeat: int=...) -> int: ...
-def circular_shifts[T](it: SupportsIteration[T], steps: int=...) -> AsyncGeneratorType[tuple[T, ...]]: ...
+async def product_index[T](p: SupportsIteration[T], *its: SupportsIteration[T], repeat: int=...) -> int: '''Return the index of the element ``p`` in the Cartesian product of the given iterables repeated ``repeat`` times.'''
+def circular_shifts[T](it: SupportsIteration[T], steps: int=...) -> AsyncGeneratorType[tuple[T, ...]]: '''Yield the circular shifts of the (async) iterable, where ``steps`` is the number of places to rotate to the left (or the negative of the number of places to rotate to the right), default 1.'''
 @overload
 def gray_product[T](i1: SupportsIteration[T], /, *, repeat: Literal[1]=...) -> AsyncGeneratorType[tuple[T]]: ...
 @overload
@@ -862,7 +886,7 @@ def gray_product[T, R, V, U, S](i1: SupportsIteration[T], i2: SupportsIteration[
 @overload
 def gray_product(i1: SupportsIteration[object], i2: SupportsIteration[object], i3: SupportsIteration[object], i4: SupportsIteration[object], i5: SupportsIteration[object], /, *its: SupportsIteration[object], repeat: int=...) -> AsyncGeneratorType[tuple[Any, ...]]: ...
 @overload
-def gray_product[T](*its: SupportsIteration[T], repeat: int=...) -> AsyncGeneratorType[tuple[T, ...]]: ...
+def gray_product[T](*its: SupportsIteration[T], repeat: int=...) -> AsyncGeneratorType[tuple[T, ...]]: ''':func:`aproduct`, but yielding items in a word-ladder-like order, such that each pair of adjacent tuples differ by exactly one item.'''
 @overload
 def partial_product[T](i1: SupportsIteration[T], /, *, repeat: Literal[1]=...) -> AsyncGeneratorType[tuple[T]]: ...
 @overload
@@ -886,8 +910,8 @@ def partial_product[T, R, V, U, S](i1: SupportsIteration[T], i2: SupportsIterati
 @overload
 def partial_product(i1: SupportsIteration[object], i2: SupportsIteration[object], i3: SupportsIteration[object], i4: SupportsIteration[object], i5: SupportsIteration[object], /, *its: SupportsIteration[object], repeat: int=...) -> AsyncGeneratorType[tuple[Any, ...]]: ...
 @overload
-def partial_product[T](*its: SupportsIteration[T], repeat: int=...) -> AsyncGeneratorType[tuple[T, ...]]: ...
-def partitions[T](it: SupportsIteration[T]) -> AsyncGeneratorType[list[tuple[T, ...]]]: ...
+def partial_product[T](*its: SupportsIteration[T], repeat: int=...) -> AsyncGeneratorType[tuple[T, ...]]: '''Yield tuples containing one item from each (async) iterable, with subsequent tuples changing a single item at a time by advancing each until exhaustion. This sequence guarantees every value in each iterable is output at least once without generating all possible combinations.'''
+def partitions[T](it: SupportsIteration[T]) -> AsyncGeneratorType[list[tuple[T, ...]]]: '''Yield all order-preserving partitions of ``it``.'''
 @overload
 def scan[T, R, V](f: Callable[[deque[R], T], V], s: R, it: SupportsIteration[T], /, *, await_: Literal[False]=...) -> AsyncGeneratorType[V]: ...
 @overload
@@ -903,7 +927,7 @@ def scan[T, U, S, R, V](f: Callable[[deque[R], T, U, S], Awaitable[V]], s: R, i1
 @overload
 def scan[T, R, V](f: Callable[[deque[R], T, T, T, T, *tuple[T, ...]], V], s: R, i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], /, *its: SupportsIteration[T], await_: Literal[False]=...) -> AsyncGeneratorType[V]: ...
 @overload
-def scan[T, R, V](f: Callable[[deque[R], T, T, T, T, *tuple[T, ...]], Awaitable[V]], s: R, i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], /, *its: SupportsIteration[T], await_: Literal[True]) -> AsyncGeneratorType[V]: ...
+def scan[T, R, V](f: Callable[[deque[R], T, T, T, T, *tuple[T, ...]], Awaitable[V]], s: R, i1: SupportsIteration[T], i2: SupportsIteration[T], i3: SupportsIteration[T], i4: SupportsIteration[T], /, *its: SupportsIteration[T], await_: Literal[True]) -> AsyncGeneratorType[V]: '''Scan the variable arguments with the function ``f``, which should accept a deque containing a single item representing the state seeded with ``s`` initially, followed by the items in each (async) iterable passed and return a value, which is then yielded. The function can modify the state, which will be passed right back, such that a stateless function effectively becomes stateful.'''
 @overload
 async def sort_together[T](its: SupportsIteration[SupportsIteration[T]], key_list: SupportsIteration[SupportsIndex]=..., key: None=..., reverse: bool=..., strict: bool=..., *, await_key: Literal[False]=...) -> list[tuple[T, ...]]: ...
 @overload
@@ -913,7 +937,7 @@ async def sort_together[T](its: SupportsIteration[SupportsIteration[T]], key_lis
 @overload
 async def sort_together[T](its: SupportsIteration[SupportsIteration[T]], *, key: Callable[..., Awaitable[SupportsRichComparison]], reverse: bool=..., strict: bool=..., await_key: Literal[True]) -> list[tuple[T, ...]]: ...
 @overload
-async def sort_together[T](its: SupportsIteration[SupportsIteration[T]], key_list: SupportsIteration[SupportsIndex], key: Callable[..., Awaitable[SupportsRichComparison]], reverse: bool=..., strict: bool=..., *, await_key: Literal[True]) -> list[tuple[T, ...]]: ...
+async def sort_together[T](its: SupportsIteration[SupportsIteration[T]], key_list: SupportsIteration[SupportsIndex], key: Callable[..., Awaitable[SupportsRichComparison]], reverse: bool=..., strict: bool=..., *, await_key: Literal[True]) -> list[tuple[T, ...]]: '''Return the iterables sorted together according to the key priority specified by ``key_list``. ``key``, if passed, should take the same number of positional arguments as the length of ``key_list``, and return a key suitable for sorting or an awaitable thereof if ``await_key=True`` is passed. If ``strict=True`` is passed, the iterables must have the same length.'''
 @overload
 def apowerset_of_sets[T: Hashable](it: SupportsIteration[T], *, frozen: Literal[True]=...) -> AsyncGeneratorType[frozenset[T]]: ...
 @overload
@@ -925,12 +949,12 @@ def atabulate_finite[T](f: Callable[[int], Awaitable[T]], start: int, stop: int,
 @overload
 def atabulate_finite[T](f: Callable[[int], T], stop: int, /, *, await_: Literal[False]) -> AsyncGeneratorType[T]: ...
 @overload
-def atabulate_finite[T](f: Callable[[int], T], start: int, stop: int, step: int=..., /, *, await_: Literal[False]) -> AsyncGeneratorType[T]: ...
+def atabulate_finite[T](f: Callable[[int], T], start: int, stop: int, step: int=..., /, *, await_: Literal[False]) -> AsyncGeneratorType[T]: '''Map ``f`` over ``range([start, ]stop[, step])``, awaiting its return value if and only if ``await_=False`` is not passed.'''
 @overload
 def pad_using[T](it: SupportsIteration[T], f: Callable[[int], Awaitable[T]], size: int|None=..., *, await_: Literal[True]=...) -> AsyncGeneratorType[T]: ...
 @overload
-def pad_using[T](it: SupportsIteration[T], f: Callable[[int], T], size: int|None=..., *, await_: Literal[False]) -> AsyncGeneratorType[T]: ...
-def mark_ends[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[bool, bool, T]]: ...
+def pad_using[T](it: SupportsIteration[T], f: Callable[[int], T], size: int|None=..., *, await_: Literal[False]) -> AsyncGeneratorType[T]: '''Pad the (async) iterable ``it`` with values generated by the function ``f`` called on the indices until it has at least ``size`` items, or indefinitely if ``size`` is ``None``. If ``await_=True`` is passed, the function will be awaited.'''
+def mark_ends[T](it: SupportsIteration[T]) -> AsyncGeneratorType[tuple[bool, bool, T]]: '''Yield tuples ``(is_first, is_last, item)`` for each ``item`` in the (async) iterable ``it``, where ``is_first`` is ``True`` for the first item and ``is_last`` is ``True`` for the last item.'''
 @overload
 def locate[T](it: SupportsIteration[T], pred: Callable[[T], object]=..., window_size: None=..., *, await_pred: Literal[False]=...) -> AsyncGeneratorType[int]: ...
 @overload
@@ -1063,7 +1087,8 @@ def aonline_sorter[T: NotNone](it: SupportsIteration[T], key: Callable[[T], Supp
 def aonline_sorter[T: SupportsRichComparison](it: SupportsIteration[T], key: None=..., reverse: bool=..., *, await_key: Literal[False]=...) -> AsyncGeneratorType[T, T|None]: ...
 @overload
 def aonline_sorter[T: SupportsRichComparison](it: SupportsIteration[T], key: Callable[[T], Awaitable[SupportsRichComparison]], reverse: bool=..., *, await_key: Literal[True]) -> AsyncGeneratorType[T, T|None]:
-    '''| Sort items from an (async) iterable and those sent in on the fly in the async generator interface (i.e. by awaiting the return value of ``asend``).
+    '''
+    | Sort items from an (async) iterable and those sent in on the fly in the async generator interface (i.e. by awaiting the return value of ``asend``).
     | If ``reverse`` is ``True``, emit items in descending order.
     | The return value of ``key`` is awaited iff ``await_key=True`` is passed. If ``key`` is ``None`` (the default), the items themselves are compared.
     | Items cannot be ``None``, because for an async generator ``agen``, ``agen.asend(None)`` and ``anext(agen)`` are indistinguishable.

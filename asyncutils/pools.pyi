@@ -2,20 +2,21 @@
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import SupportsIteration, ExcType
 from .config import Executor
-from .mixins import LoopContextMixin
 from asyncio import Future
 from collections.abc import Callable, Iterable, Mapping
 from ty_extensions import JustFloat
 from types import TracebackType
 from typing import Any, Self, overload
 __all__ = 'AdvancedPool', 'ConnectionPool'
-class AdvancedPool(LoopContextMixin):
-    '''A pool implementation used to call sync functions concurrently in an async-first interface, managing event loop and threading resource shenanigans internally.
+class AdvancedPool(LoopMixinBase):
+    '''
+    A pool implementation used to call sync functions concurrently in an async-first interface, managing event loop and threading resource shenanigans internally.
 
     .. caution:: Use instances of this class as async context managers only.
     '''
     def __init__(self, max_workers: int=..., min_workers: int=..., qsize: int=..., scaling: bool=..., kill_at_exit: bool=...):
-        '''All arguments are optional.
+        '''
+        All arguments are optional.
 
         * ``max_workers`` controls the maximum number of workers (threads) that can run concurrently. Defaults to :const:`~asyncutils.context.Context.ADVANCED_POOL_DEFAULT_MAX_WORKERS`.
         * ``min_workers`` determines the least number of threads there will be at any instance. Defaults to :const:`~asyncutils.context.Context.ADVANCED_POOL_DEFAULT_MIN_WORKERS`.
@@ -54,8 +55,11 @@ class AdvancedPool(LoopContextMixin):
     async def resize(self, min_workers: int, max_workers: int) -> None: '''Adjust the lower and upper limits of the pool size, and destroy or spawn threads accordingly.'''
     async def drain(self) -> None: '''Wait until all pending tasks have been completed.'''
     async def wait_for_slot(self, timeout: float|None=...) -> JustFloat: '''Wait until there is a slot in the internal queue for pending tasks, and return the time spent waiting. If ``timeout`` is passed, it will limit the waiting time.'''
-    async def __cleanup__(self) -> None: ...
-    def __del__(self) -> None: '''Shut down the pool synchronously with a short timeout if needed. To avoid this blocking up GC, shut down the pool explicitly by using it as an async context manager.'''
+    async def __aenter__(self) -> Self: ...
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
     @property
     def full(self) -> bool: '''Whether the internal queue for pending tasks is full, such that :meth:`wait_for_slot` will block.'''
     @property
@@ -69,12 +73,14 @@ class AdvancedPool(LoopContextMixin):
     @property
     def completed(self) -> int: '''The total number of tasks completed by the pool.'''
 class ConnectionPool[T, **P](LoopMixinBase):
-    '''A pool managing resources in a simple and intuitive lock interface, with support for health checking, auto-recycling and dynamic rescaling.
+    '''
+    A pool managing resources in a simple and intuitive lock interface, with support for health checking, auto-recycling and dynamic rescaling.
 
     .. caution:: Use instances of this class as async context managers only.
     '''
     def __init__(self, factory: Callable[P, T], maxsize: int=..., minsize: int=..., maxlife: float=..., healthchecker: Callable[[T], bool]|None=..., cleaner: Callable[[T], None]|None=...):
-        '''All arguments except ``factory``, which should be a callable returning a connection, are optional.
+        '''
+        All arguments except ``factory``, which should be a callable returning a connection, are optional.
 
         * ``maxsize`` controls the maximum number of connections that can be created. Defaults to :const:`~asyncutils.context.Context.CONNECTION_POOL_DEFAULT_MAX_SIZE`.
         * ``minsize`` determines the least number of connections that will be maintained at any instance. Defaults to :const:`~asyncutils.context.Context.CONNECTION_POOL_DEFAULT_MIN_SIZE`.

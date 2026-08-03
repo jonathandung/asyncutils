@@ -13,7 +13,8 @@ class FaultyConfig(BaseException):
     @property
     def key(self) -> str: ...
 class Executor(_, PartialInterface):
-    '''A class that implements the :pep:`3148` executor interface.
+    '''
+    A class that implements the :pep:`3148` executor interface.
 
     .. note:: The exact class is determined at runtime by command-line arguments.
     .. tip:: Since instances of this class are only ever passed into :meth:`~asyncio.loop.run_in_executor`, nothing stops you from monkey-patching the event loop itself or policy thereof, and using a custom class that does not follow the interface, but that may be too hacky and fragile.

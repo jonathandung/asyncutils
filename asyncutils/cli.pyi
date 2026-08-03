@@ -1,7 +1,8 @@
 from collections.abc import Iterable
 __all__ = 'run',
 def run(argv: Iterable[str]|None=...) -> int|None:
-    '''| Run this module's REPL and return the integer return code.
+    '''
+    | Run this module's REPL and return the integer return code.
     | If passed, ``argv`` should be a non-string iterable of strings representing the command-line arguments, and it should not have the executable name as the first item.
     | Otherwise, :data:`sys.argv` is used, as per standard :mod:`argparse` behaviour.
     | An attempt will be made to parse all arguments and the program will exit entirely on an unrecognized option.

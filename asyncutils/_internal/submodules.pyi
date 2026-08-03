@@ -1,4 +1,5 @@
-'''| Exports the ``__all__`` attributes of all of `asyncutils`'s public submodules.
+'''
+| Exports the ``__all__`` attributes of all of `asyncutils`'s public submodules.
 | This is the single source of truth that the name exposure system needs.
 '''
 from .prots import All

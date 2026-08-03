@@ -6,16 +6,17 @@ This file aims to detail guidelines for some monotonous tasks contributors to th
 Preliminaries
 -------------
 
-You are recommended to install an IDE plugin to support .editorconfig and use a grammar and spelling checker. Regarding .markdownlint.json, even
-though there is no longer a pre-commit or workflow step requiring it, it contains the most basic ignores suitable for this project's files and should
-be respected. You should run the linter locally to check for markdown stylistic issues. Also ensure you have pre-commit installed from pip and the
-hooks activated using ``pre-commit install``, you have ``cspell`` and ``@cspell/cspell-tools`` installed (e.g. from ``npm``), and that you are
-comfortable with having uv installed on your system.
+You are recommended to install an IDE plugin to support .editorconfig and use a grammar and spelling checker. A ready-to-use VS Code configuration
+file is in the repo. Regarding .markdownlint.json, even though there is no longer a pre-commit or workflow step requiring it, it contains the most
+basic ignores suitable for this project's files and should be respected. You may run the linter locally to check for markdown stylistic issues. Also
+ensure you have ``cspell`` and ``@cspell/cspell-tools`` installed (e.g. from ``npm``) if you want the spell-checking target to work, and that you are
+comfortable with having `uv <https://docs.astral.sh/uv>`__ and `prek <https://prek.j178.dev>`__ installed on your system. Next, simply run
+``make install`` and ``make lint``.
 
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and check for regressions with ``make spellcheck``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
+Edit ``assets/words.txt`` and check for regressions with ``make sc``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
 
 Bumping the version
 -------------------
@@ -28,8 +29,8 @@ certain locations, some of which are to be left untouched. Instead, follow these
 2. In pyproject.toml, there may be optional dependencies whose version coincides with the project's, so take care not to modify those as well.
 3. Also exclude the ``CHANGELOG.md`` at the project root from the replace operation.
 4. A core developer of this project will help you create a GitHub release with default release notes, since you are not allowed to do so yourself.
-   (Core devs, this is ``make release``.) This will automatically trigger a stable Read the Docs build, a push to PyPI and cause a conda-forge bot
-   automerge.
+   (Core devs, this is ``make release``.) This will automatically trigger, among others, a stable Read the Docs build, a push to PyPI and cause a
+   conda-forge bot automerge.
 5. If you include your desired remarks in the PR under a "Release Notes" section, those will be used as the release notes instead after the developer
    tries their best to correct grammatical or spelling mistakes.
 

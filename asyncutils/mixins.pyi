@@ -3,32 +3,20 @@ from ._internal.helpers import LoopMixinBase
 from ._internal.prots import ExcType
 from .locksmiths import LocksmithBase
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, Future, Task
+from asyncio import Future
 from collections.abc import Awaitable, Callable, Coroutine
 from functools import cached_property
 from types import GeneratorType, TracebackType
 from typing import Any, Literal, Self, overload
-__all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin', 'LoopContextMixin'
-class LoopContextMixin(LoopMixinBase):
-    '''Like :class:`~asyncio.TaskGroup`, but manages an event loop publicly, allows custom setup and teardown logic and waits for the cancellations to complete on exit.'''
-    @property
-    def running_tasks(self) -> set[Task[Any]]: '''A set of all tasks currently running in the underlying loop.'''
-    @property
-    def loop(self) -> AbstractEventLoop: '''The underlying event loop.'''
-    async def __setup__(self) -> None: '''Default implementation does nothing.'''
-    async def __cleanup__(self) -> None: '''Default implementation does nothing.'''
-    async def __aenter__(self) -> Self: '''Call :meth:`__setup__` and return self.'''
-    @overload
-    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Call :meth:`__cleanup__` and cancel all running tasks in the loop.'''
+__all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin'
 class AwaitableMixin[T](ABC):
     '''A subclass that implements :meth:`wait` automatically becomes awaitable, resolving to the return value of that method.'''
     def __await__(self) -> GeneratorType[Any, None, T]: '''Await statement support.'''
     @abstractmethod
     def wait(self) -> Awaitable[T]: ...
 class AsyncContextMixin[T](ABC):
-    '''| A mixin to derive :meth:`__aenter__` and :meth:`__aexit__` from :meth:`__enter__` and :meth:`__exit__` of subclasses.
+    '''
+    | A mixin to derive :meth:`__aenter__` and :meth:`__aexit__` from :meth:`__enter__` and :meth:`__exit__` of subclasses.
     | :meth:`__enter__` is optional and returns self by default, but that cannot be typed accurately.
     '''
     def __enter__(self) -> T: ...
@@ -83,7 +71,8 @@ class LockWithOwnerMixin[R: (None, Coroutine[Any, Any, None])](LockMixin[None]):
     def _release(self) -> R: '''Will be wrapped by :meth:`release` to throw :exc:`RuntimeError` if the current task is not the owner of the lock.'''
     def release(self) -> R: ...
 class EventMixin[T](AwaitableMixin[T], LoopMixinBase, ABC):
-    '''| Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some mixin methods, most notably making the event itself awaitable.
+    '''
+    | Mixin for event classes that don't inherit from :class:`asyncio.Event` but provide enhanced functionality with the same API and some mixin methods, most notably making the event itself awaitable.
     | This is simply syntactic sugar for calling the wait method, but more convenient and intuitive when thinking of events as reusable futures.
     '''
     @abstractmethod

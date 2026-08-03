@@ -1,7 +1,7 @@
-# ruff: noqa: BLE001,PLR2004
+# ruff: file-ignore[blind-except,magic-value-comparison]
 from asyncutils import __version__ as V, config as C, exceptions as E
 from asyncutils._internal import patch as P, running_console as R, log
-from asyncutils._internal.helpers import fullname
+from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import console_all as __all__
 import abc, sys as S
 from asyncio import iscoroutine
@@ -15,20 +15,20 @@ if not C.basic_repl:
 _s = object()
 _f = '',
 class ConsoleBase(B, metaclass=abc.ABCMeta):
-    LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_internal_caches' if S.version_info >= (3, 13) else '_clear_type_cache', None), g=__import__('gc').collect, d=log.debug: (f and f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
+    LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_type_cache' if S.version_info < (3, 13) else '_clear_internal_caches', None), g=__import__('gc').collect, d=log.debug: (f and f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
     if C.basic_repl: CAN_USE_PYREPL, STATEMENT_FAILED = False, None # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
-    def __init__(self, loop, mod=None, modname=None, *, context_factory=__import__('contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # noqa: B006
-        S.audit(fullname(type(self)), loop)
+    def __init__(self, mod=None, modname=None, *, context_factory=__import__('contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # ruff: ignore[mutable-argument-default]
+        S.audit(fullname(type(self)), l := get_loop_and_set())
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f if '.' in modname else ())
-        def stop(p=None, /, _=loop.stop, *, asap=False):
-            if p is _s: _() if asap else loop.call_soon_threadsafe(_)
-            else: raise RuntimeError(_m%'stop')
-        def close(p=None, /, _=loop.close):
+        def stop(p=None, /, _=l.stop, *, asap=False):
+            if p is not _s: raise RuntimeError(_m%'stop')
+            _() if asap else l.call_soon_threadsafe(_)  # ty: ignore[invalid-argument-type]
+        def close(p=None, /, _=l.close):
             if p is _s: _()
             else: raise RuntimeError(_m%'close')
-        loop.stop, loop.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, loop, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__)
+        l.stop, l.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, l, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__)  # ty: ignore[invalid-assignment]
         if H > 0x30e00a0: d['__annotate__'] = g('__annotate__') # cover: off
         if H < 0x30f00a1:
             for k in _: d[k] = g(k)
@@ -57,25 +57,26 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         except BaseException as e:
             if not isinstance(e, no_traceback): self.showtraceback()
             return self.STATEMENT_FAILED
-    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # noqa: B008
+    def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # ruff: ignore[function-call-in-default-argument]
         x = False; self.write_special(self.BANNER if banner is None else banner)
         if p and not S.flags.ignore_environment: # pragma: no cover
             with __import__('tokenize').open(p) as f:
                 if _q: S.stdout, _o = _o, S.stdout
-                S.audit('cpython.run_startup', p); exec(compile(f.read(), p, 'exec'), self.locals) # noqa: S102
+                S.audit('cpython.run_startup', p); exec(compile(f.read(), p, 'exec'), self.locals) # ruff: ignore[exec-builtin]
                 if _q: S.stdout = _o
         if (p := getattr(S, 'ps1', None)) is None: p, x = ps1, True
         self._interact_hook(*((f'{(t := __import__('_colorize').get_theme().syntax).prompt}{p}{(r := t.reset)}', t.keyword, r, t.builtin) if (c := self.CAN_USE_PYREPL) and S.version_info >= (3, 14) else (p, '', '', '')))
         try: __import__('_pyrepl.simple_interact', fromlist=_f).run_multiline_interactive_console(self) if c else super().interact('', '')
         finally: self._loop.stop(_s); S.ps1 = ps1 if x else getattr(S, 'ps1', ps1) if p is None else p
-    def _interact_hook(self, ps1, kcolour, reset, fcolour): n, S.ps1 = self.NAME, ps1; self.write_special(f'{ps1}{kcolour}import{reset} {n}\n{ps1}{kcolour}from{reset} {n} {kcolour}import{reset} *\n') # noqa: ARG002
+    def _interact_hook(self, ps1, kcolour, reset, fcolour): n, S.ps1 = self.NAME, ps1; self.write_special(f'{ps1}{kcolour}import{reset} {n}\n{ps1}{kcolour}from{reset} {n} {kcolour}import{reset} *\n') # ruff: ignore[unused-method-argument]
     @abc.abstractmethod
     def before_run(self, max_memory_errors): self._max_memory_errors, self._internal_is_running = 3 if max_memory_errors is None else max_memory_errors, True
     def after_run(self): self._internal_is_running = False
     def write_special(self, msg): self.write(msg)
     def interrupt(self, _=_f, m='\nKeyboardInterrupt\n'):
-        if not self.CAN_USE_PYREPL: self.write(m)
-        elif callable(f := getattr(__import__('_pyrepl.readline', fromlist=_)._get_reader().threading_hook, 'add', None)): f('')
+        if self.CAN_USE_PYREPL:
+            if callable(f := getattr(__import__('_pyrepl.readline', fromlist=_)._get_reader().threading_hook, 'add', None)): f('')
+        else: self.write(m)
         self.refresh()
     def memory_error(self):
         if (m := self.memory_errors) == self._max_memory_errors: return self.set_return_code(f'ERROR: Exceeded MemoryError threshold: {m}\n')
@@ -92,14 +93,14 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
     def __repr__(self): return f'{fullname(self)}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
-    def run(self, *, exit_message='Thank you for using %s!\nExiting REPL...\n', thread_name='<%s REPL thread>', max_memory_errors=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))):
+    def run(self, *, exit_message='Thank you for using %s!\nExiting REPL...\n', thread_name='<%s REPL thread>', max_memory_errors=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))): # ruff: ignore[too-many-statements]
         self.before_run(max_memory_errors); S.audit(f'{fullname(self)}.run', id(self)); l, w, n = self._loop, S.stderr.write, self.NAME
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=thread_name%n, target=self.interact, daemon=True).start()
             if callable(h := getattr(S, i := '__interactivehook__', None)): # pragma: no cover
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
-                except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # noqa: E722
+                except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # ruff: ignore[bare-except]
                 if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == h.__qualname__ == 'register_readline'):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete) # ty: ignore[possibly-missing-attribute]
                     except ImportError: w('Failed to install readline completer\n')
@@ -119,7 +120,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         return 0 if (e := self.exc) is None else e.code
     P.patch_method_signatures((run, '*, exit_message=None, thread_name=None, max_memory_errors=None, always_run_interactive=None, always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False'), (interrupt, ''), (set_return_code, 'e, /'), (__init__, 'loop, mod=None, modname=None, *, context_factory={}'), (interact, "banner=None, *, ps1='>>> '")); P.patch_classmethod_signatures((__init_subclass__, '*, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memory_error_hooks=(), template={}, version=None, description=None, **k'))
 def _(d, /):
-    def load_all(_=d):
+    def load_all(_=d, /):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
     load_all.__qualname__, load_all.__module__, load_all.__text_signature__ = load_all.__name__, 'asyncutils', '()'; return load_all # ty: ignore[unresolved-attribute]
 class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilities library.\nYou can use await statements directly instead of asyncio.run for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
@@ -147,12 +148,12 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
             if (t := e.__traceback__) is None: raise e
             __import__('pdb').post_mortem(t)
         super().after_run()
-    def showtraceback(self, s=3, a=('asyncutils\\console.py', 'asyncutils/console.py'), m=S.intern('__runcode_callback')):
+    def showtraceback(self, s=3, m=S.intern('__runcode_callback')):
         t, v, b = S.exc_info()
         if b is None: return
         for _ in repeat(None, s):
             if (b := b.tb_next) is None: return
-        if (c := b.tb_frame.f_code).co_filename.endswith(a) and c.co_name == m and (b := b.tb_next) is None: return # cspell:disable-line
+        if b.tb_frame.f_code.co_name == m and (b := b.tb_next) is None: return
         self._showtraceback(t, v, b, '')
     P.patch_method_signatures((showtraceback, ''), (after_run, ''), (before_run, 'max_memory_errors'), (write_special, 'msg'))
 del _f, _s, g, C, V, B, _, iscoroutine, E, log

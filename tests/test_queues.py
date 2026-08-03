@@ -1,5 +1,5 @@
 from asyncio import QueueEmpty, QueueFull, create_task, sleep
-from pytest import fixture, mark, raises
+from pytest import fixture, raises
 from asyncutils._internal.py312 import QueueShutDown
 from asyncutils.config import _randinst
 from asyncutils.exceptions import *
@@ -8,7 +8,7 @@ from tests.conftest import mk
 @fixture
 def pwd(): return _randinst.randbytes(8)
 @mk
-async def test_pwd_q(pwd):
+async def test_pwd_q(pwd): # ruff: ignore[too-many-statements]
     Q = password_queue(pwd, maxsize=2, init_items=[0, 1], can_change_put=True, puttyp=bytes)
     await sleep(0.01)
     assert Q.full()

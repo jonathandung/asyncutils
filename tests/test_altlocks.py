@@ -1,5 +1,5 @@
 import gc, pytest
-from asyncio import Lock, gather, sleep, timeout
+from asyncio import Lock, gather, sleep
 from asyncutils.altlocks import *
 from asyncutils import CircuitOpen, ResourceBusy, locked_lock, timer
 from collections import deque
@@ -52,11 +52,13 @@ def test_unique_rsrc_guard(obj):
 @mk
 async def test_circuit_breaker():
     cb = CircuitBreaker('test', 3, 0.01, exc=TypeError, max_half_open_calls=2)
+    # ruff: disable[unused-async]
     @cb
     async def f(): return 1
-    assert await f() == 1
     async def g(): raise TypeError
+    # ruff: enable[unused-async]
     h = cb(g, default=0)
+    assert await f() == 1
     for _ in range(3): assert await h() == 0
     with pytest.raises(CircuitOpen): await h()
     assert cb.state == cb.State.OPEN

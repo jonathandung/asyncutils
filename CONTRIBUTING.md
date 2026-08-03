@@ -10,8 +10,7 @@ Please note we have a [code of conduct](https://asyncutils.readthedocs.io/en/sta
 
 1. Fill in the pull request template, following it as faithfully as you can.
 2. If applicable, [update the README](https://github.com/jonathandung/asyncutils/edit/main/README.md) with details of changes to the interface,
-including new environment variables and useful file locations where appropriate. There should already be a section for each of the above cases. Do
-not add a new section without another issue.
+including but not limited to new environment variables and useful file locations.
 3. Once you have the sign-off of one other developer, you may either merge the PR yourself if you have permission, or ask the reviewer to do so on
 your behalf otherwise.
 

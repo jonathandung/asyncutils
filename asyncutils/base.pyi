@@ -7,7 +7,7 @@ from types import AsyncGeneratorType, GeneratorType, TracebackType
 from typing import Any, Literal, Never, NoReturn, Self, final, overload
 __all__ = 'adisembowel', 'adisembowel_left', 'aenumerate', 'aiter_to_gen', 'collect', 'collect_into', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
-class event_loop: # noqa: N801
+class event_loop: # ruff: ignore[invalid-class-name]
     '''A context manager controlling lifecycles of native event loops. Has specialized handling for :mod:`asyncio` implementation details.'''
     class Flags(IntFlag):
         '''An enumeration of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
@@ -64,7 +64,8 @@ def iter_to_agen[T](it: AsyncIterable[T], sentinel: T=..., *, use_existing_execu
 def iter_to_agen[T](it: Iterable[T], *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGeneratorType[T]: ...
 @overload
 def iter_to_agen[T](it: Iterable[T], sentinel: T, *, use_existing_executor: bool=..., create_executor: bool=..., strict: bool=...) -> AsyncGeneratorType[T]:
-    '''| Convert the (async) iterable ``it`` to an async generator, blocking as little as possible.
+    '''
+    | Convert the (async) iterable ``it`` to an async generator, blocking as little as possible.
     | If ``it`` is an async generator and ``sentinel`` is not passed, it is returned as is.
     | Values sent to the return async generator will be passed through to the original.
     | The async generator will stop when it encounters an item identical to ``sentinel``.
@@ -79,7 +80,8 @@ def aiter_to_gen[T](ait: AsyncIterable[T], *, use_futures: bool=..., loop: Abstr
 def aiter_to_gen[T, R, V](ait: Generator[T, R, V], *, use_futures: bool=..., loop: AbstractEventLoop|None=..., strict: Literal[False]=...) -> GeneratorType[T, R, V]: ...
 @overload
 def aiter_to_gen[T](ait: Iterable[T], *, use_futures: bool=..., loop: AbstractEventLoop|None=..., strict: Literal[False]=...) -> GeneratorType[T]:
-    '''| Convert an async iterable ``ait`` to a sync generator.
+    '''
+    | Convert an async iterable ``ait`` to a sync generator.
     | If the event loop is currently running and ``use_futures`` is ``False`` (default :const:`~asyncutils.context.Context.AITER_TO_GEN_DEFAULT_ALLOW_FUTURES`), raise :exc:`RuntimeError` to clarify that :class:`concurrent.futures.Future` must be used in this case, one per item yielded, which is somewhat inefficient, but that can't be helped.
     | If ``strict`` is ``True`` (default :const:`~asyncutils.context.Context.AITER_TO_GEN_DEFAULT_STRICT`), only async iterables are accepted.
     '''
@@ -89,14 +91,16 @@ def adisembowel_left[T](it: SupportsPopLeft[T], /) -> AsyncGeneratorType[T]: '''
 async def safe_cancel_batch[T](batch: SupportsIteration[Future[T]], /, *, callback: Callable[[T|BaseException], object]|None=..., disembowel: Literal[False]=..., raising: bool=...) -> None: ...
 @overload
 async def safe_cancel_batch[T](batch: SupportsPop[Future[T]], /, *, callback: Callable[[T|BaseException], object]|None=..., disembowel: Literal[True], raising: bool=...) -> None:
-    '''| Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
+    '''
+    | Cancel an (async) iterable of futures, waiting for the cancellations to complete asynchronously.
     | The batch cancellation itself can be cancelled, but less reliably and granularly than :func:`~asyncutils.util.safe_cancel`.
-    | Afterwards, if ``disembowel`` is ``True``, clear the iterable using its :meth:`~list.pop` method repeatedly, falling back to :meth:`~list.clear`.
+    | Afterwards, if ``disembowel`` is ``True``, clear the iterable using its :meth:`!pop` method repeatedly, falling back to :meth:`~list.clear`.
     | The callback is called on each result or exception of the futures after :exc:`~asyncio.CancelledError` was thrown into them concurrently.
     | If ``raising`` is ``True``, all calls of the callback that themselves threw exceptions are collected into a :exc:`BaseExceptionGroup`, which is then raised.
     '''
 async def collect[T](it: SupportsIteration[T], n: int|None=..., default: T|Raise=...) -> list[T]:
-    '''| Return a list of the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
+    '''
+    | Return a list of the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than ``n`` items to collect, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if default is :const:`~asyncutils.constants.RAISE` and emit a debug message through the logger before padding the behind of the list with copies of the default if passed otherwise.
 
     .. seealso::
@@ -108,14 +112,16 @@ async def collect[T](it: SupportsIteration[T], n: int|None=..., default: T|Raise
         the most bare-bones variant equivalent to the case when ``n`` is not passed.
     '''
 async def collect_into[T](out: MutableSequence[T], it: SupportsIteration[T], n: int|None=..., default: T|Raise=...) -> None:
-    '''| Extend a mutable sequence with the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
+    '''
+    | Extend a mutable sequence with the first ``n`` items in the (async) iterable, consuming it up to that point exactly.
     | If there are less than ``n`` items to collect, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if default is :const:`~asyncutils.constants.RAISE` and emit a debug message through the logger before padding the behind of the list with copies of the default if passed otherwise.
     '''
 @overload
 def take[T](it: SupportsIteration[T], n: None, default: T=...) -> AsyncGeneratorType[T]: ...
 @overload
 def take[T](it: SupportsIteration[T], n: int, default: T|Raise=...) -> AsyncGeneratorType[T]:
-    '''| Yield ``n`` items from the (async) iterable. If ``default`` is :const:`~asyncutils.constants.RAISE`, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if there are less than ``n`` items to take.
+    '''
+    | Yield ``n`` items from the (async) iterable. If ``default`` is :const:`~asyncutils.constants.RAISE`, throw :exc:`~asyncutils.exceptions.ItemsExhausted` if there are less than ``n`` items to take.
     | Otherwise, pad the behind of the async generator with the default until there are exactly ``n`` items if it was passed.
     | If ``n`` is ``None``, yield all items, then yield ``default`` indefinitely if passed.
     '''

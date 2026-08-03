@@ -52,7 +52,6 @@ colourful command line interface.
   .zip archive of pages <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip/>
 
 .. note:: This project is being actively developed and maintained. It currently only fully supports CPython 3.12 or above.
-
 .. note::
   :collapsible: closed
 

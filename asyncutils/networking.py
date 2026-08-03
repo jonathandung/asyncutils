@@ -1,12 +1,9 @@
-import asyncutils as A, asyncio as I
+import asyncutils as A, asyncio as I, asyncutils._internal as M
 from sys import audit
-from asyncutils._internal.py312 import Queue
-from asyncutils._internal.helpers import LoopMixinBase, fullname
-from asyncutils._internal.log import warning
 from asyncutils._internal.submodules import networking_all as __all__
-class LineProtocol(I.Protocol, LoopMixinBase):
+class LineProtocol(I.Protocol, M.helpers.LoopMixinBase):
     NEWLINE, CARRIAGE_RETURN, _h = __import__('os').linesep.encode(), b'\r', A.ignore_cancellation.combined(I.InvalidStateError); __slots__ = '__buf', '__cl', '__dw', '__er', '__lines', '__paused', 'transport'
-    def __init__(self): audit(fullname(self)); self.__buf, self.__lines = bytearray(), Queue(); self.__cl = self.__paused = self.__er = False; self.transport = self.__dw = None
+    def __init__(self): audit(M.helpers.fullname(self)); self.__buf, self.__lines = bytearray(), M.py312.Queue(); self.__cl = self.__paused = self.__er = False; self.transport = self.__dw = None
     @property
     def connected_transport(self):
         if (t := self.transport) is None: raise ConnectionError('asyncutils.networking.LineProtocol: no transport connected')
@@ -62,12 +59,12 @@ class SocketTransport(I.Transport):
     @property
     def loop(self): return self.__protocol.loop
     def __init__(self, sock=None):
-        audit(fullname(self)); self.__rx(); (p := self.ptc()).connection_made(self); self.__sock, self.__cl, self.__buf, self.__lim, self.__protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
+        audit(M.helpers.fullname(self)); self.__rx(); (p := self.ptc()).connection_made(self); self.__sock, self.__cl, self.__buf, self.__lim, self.__protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
         if sock is not None: self.connect_sock(sock)
     def __rx(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def __rr(self, sock, size=None):
         try: self.__protocol.data_received(d) if (d := sock.recv(A.getcontext().LINE_PROTOCOL_DEFAULT_BUFFER_SIZE if size is None else size)) else (self.__protocol.eof_received() or self.close())
-        except OSError as e: warning('%s: read error', fullname(self)); self.close(e)
+        except OSError as e: M.log.warning('%s: read error', M.helpers.fullname(self)); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None and (sock := self.__sock) is None: return
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self.__rr, sock); (e := self._extra)['sockname'] = sock.getsockname() # ty: ignore[unresolved-attribute]
@@ -86,7 +83,7 @@ class SocketTransport(I.Transport):
         if bufsize is None: bufsize = A.getcontext().SOCKET_TRANSPORT_LIMITS[1]
         if len(b) <= bufsize or (s := self.__sock) is None: return
         try: s.sendall(b); b.clear()
-        except OSError as e: warning('%s: write error', fullname(self)); self.close(e)
+        except OSError as e: M.log.warning('%s: write error', M.helpers.fullname(self)); self.close(e)
     def write(self, data): self.loop.call_soon(self.__writer, data)
     def get_write_buffer_size(self): return len(self.__buf)
     def get_write_buffer_limits(self): return self.__lim
@@ -98,7 +95,7 @@ class SocketTransport(I.Transport):
     def write_eof(self):
         if not (self.__cl or (s := self.__sock) is None):
             with self._h: s.shutdown(1)
-    def can_write_eof(self): return True # noqa: PLR6301
+    def can_write_eof(self): return True # ruff: ignore[no-self-use]
     def is_closing(self): return self.__cl
     def close(self, e=None):
         if self.__cl: return

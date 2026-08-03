@@ -1,4 +1,3 @@
-__lazy_modules__ = frozenset(('asyncio',))
 from asyncutils import AsyncContextMixin, getcontext
 from asyncutils._internal.helpers import LoopMixinBase, fullname
 from asyncutils._internal.submodules import buckets_all as __all__
@@ -7,7 +6,7 @@ from sys import audit
 from time import monotonic
 class TokenBucket:
     __slots__ = '__c', '__lock', '__lu', '__rate', '__timer', '__tokens'
-    def __init__(self, rate, capacity, timer=monotonic): audit(fullname(self), rate, capacity); self.__c = self.__tokens = capacity; self.__rate, self.__lock, self.__lu, self.__timer = rate, Lock(), timer(), timer
+    def __init__(self, rate, capacity, timer=monotonic): audit(fullname(self), rate, capacity); self.__c = self.__tokens = float(capacity); self.__rate, self.__lock, self.__lu, self.__timer = rate, Lock(), timer(), timer
     async def consume(self, tokens=None):
         if tokens is None: tokens = float(getcontext().TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS)
         async with self.__lock:
@@ -43,9 +42,9 @@ class LeakyBucket(AsyncContextMixin, LoopMixinBase):
     @factor.setter
     def factor(self, v, /):
         if self.__efs: self.__factor = max(self.__lf, min(self.__hf, v))
-        else: raise AttributeError(f'{fullname(self)}: cannot set factor because external_factor_settable=True not passed')
+        else: raise AttributeError(name='factor', obj=self)
     @factor.deleter
-    def factor(self): self.__factor = 1
+    def factor(self): self.__factor = 1.0
     def _adjust(self):
         c = self.__c
         for b, t in getcontext().LEAKY_BUCKET_ADJMAP:

@@ -115,7 +115,6 @@ apadnone
 apairwise
 apartition
 apermutations
-apolynomial
 apowers
 apowerset
 appendleft
@@ -154,7 +153,6 @@ asum
 asumprod
 asyncutils
 atabulate
-atail
 atakeuntil
 atakewhile
 athrow
@@ -193,6 +191,7 @@ dunders
 elem
 elib
 estlen
+evans
 everseen
 everymethod
 evtcls
@@ -235,6 +234,7 @@ kcolour
 lcls
 lfactor
 lifo
+linux
 literalinclude
 livelock
 loadf
@@ -265,6 +265,7 @@ phcount
 popleft
 poppush
 pred
+prek
 prots
 pushpop
 puttyp
@@ -287,6 +288,7 @@ setc
 setcontext
 siftdown
 siftup
+signoff
 skipif
 sockname
 sphinxext
@@ -297,6 +299,7 @@ subclassed
 subslices
 summaryf
 sumprod
+taiki
 tcls
 teardown
 testpaths

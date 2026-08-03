@@ -19,7 +19,7 @@ async def race_with_callback(*C, winner=None, loser=None, timeout=None):
         if winner is not None and I.iscoroutine(r := winner(w)): await r
         return w
     finally: audit('asyncutils.compete.race_with_callback/end', L); await A.safe_cancel_batch(p, callback=loser)
-async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, _=__import__('operator').methodcaller('result')): # noqa: B008
+async def multi_winner_race_with_callback(*C, timeout, winner=None, loser=None, _=__import__('operator').methodcaller('result')): # ruff: ignore[function-call-in-default-argument]
     if not C: raise TypeError('asyncutils.compete.multi_winner_race_with_callback: pass in at least one coroutine')
     audit('asyncutils.compete.multi_winner_race_with_callback/start', L := len(C)); d, p = await I.wait(A.new_eager_tasks(*C), timeout=timeout); d = map(_, d)
     try:
@@ -36,7 +36,7 @@ def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=I.iscor
     if skip_invalid is None: from asyncutils.context import CONVERT_TO_CORO_ITER_DEFAULT_SKIP_INVALID as skip_invalid
     for i in A.aiter_to_gen(cfs, loop=loop):
         if corocheck(i): yield i; continue
-        try: i = futwrap(i, loop=loop) # noqa: PLW2901
+        try: i = futwrap(i, loop=loop) # ruff: ignore[redefined-loop-name]
         except A.CRITICAL: raise A.Critical
         except (AssertionError, TypeError):
             if not _c(i, '__await__'):
@@ -46,6 +46,6 @@ def convert_to_coro_iter(cfs, *, loop=None, skip_invalid=None, corocheck=I.iscor
                 continue
         yield A.wrap_in_coro(i)
 def enhanced_staggered_race(cfs, delay=None, *, loop=None): return staggered_race(map(lambda c: lambda: c, convert_to_coro_iter(cfs, loop=loop)), delay, loop=loop)
-def enhanced_gather(it, return_exceptions=False, *, loop=None, _=I.gather): return _(*convert_to_coro_iter(it, loop=loop), return_exceptions=return_exceptions)
-P.patch_function_signatures((first_completed, '*coros, ret_exc=False, timeout=None, loop=None'), (race_with_callback, '*coros, winner=None, loser=None, timeout=None'), (multi_winner_race_with_callback, '*coros, timeout, winner=None, loser=None'), (convert_to_coro_iter, 'cfs, *, loop=None, skip_invalid=None, corocheck={0}, futwrap={0}, handle_aiter=None, handle_iter=None'), (enhanced_gather, 'it, return_exceptions=False, *, loop=None'))
+def enhanced_gather(it, return_exceptions=False, *, _=I.gather): return _(*convert_to_coro_iter(it), return_exceptions=return_exceptions)
+P.patch_function_signatures((first_completed, '*coros, ret_exc=False, timeout=None, loop=None'), (race_with_callback, '*coros, winner=None, loser=None, timeout=None'), (multi_winner_race_with_callback, '*coros, timeout, winner=None, loser=None'), (convert_to_coro_iter, 'cfs, *, loop=None, skip_invalid=None, corocheck={0}, futwrap={0}, handle_aiter=None, handle_iter=None'), (enhanced_gather, 'it, return_exceptions=False'))
 del H, P

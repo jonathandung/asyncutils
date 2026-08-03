@@ -1,12 +1,14 @@
-'''| A versioning scheme for :mod:`asyncutils`. Inspired by `torch.torch_version <https://github.com/pytorch/pytorch/blob/main/torch/torch_version.py>`__, but with quite some differences.
+'''
+| A versioning scheme for :mod:`asyncutils`. Inspired by `torch.torch_version <https://github.com/pytorch/pytorch/blob/main/torch/torch_version.py>`__, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer.
 '''
-from ._internal.prots import IntCompatible, Openable, ValidSlice
+from ._internal.prots import IntCompatible, ValidSlice
+from _typeshed import FileDescriptorOrPath
 from collections.abc import Callable, Iterable, Iterator
 from typing import Final, Literal, NamedTuple, NoReturn, Self, final, overload
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
-class VersionInfo(str): # noqa: FURB189
+class VersionInfo(str):
     '''A class representing a version of :mod:`asyncutils`.'''
     DEFAULT_KEY: Final[int]
     '''The default value of the shelving and unshelving key.'''
@@ -15,7 +17,8 @@ class VersionInfo(str): # noqa: FURB189
     @overload
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''With one argument, attempt to normalize it and return the corresponding instance. Otherwise, treat the arguments as `(major, minor, patch)`, zero-padding if required. Throw an appropriate exception if not possible.'''
     def __hash__(self) -> int:
-        '''| A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
+        '''
+        | A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
         | Since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.
         '''
     def __iter__(self) -> Iterator[int]: '''Yield :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
@@ -24,7 +27,8 @@ class VersionInfo(str): # noqa: FURB189
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
     @overload
     def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: # ty: ignore[invalid-method-override]
-        '''Return a property depending on the value of ``idx``.
+        '''
+        Return a property depending on the value of ``idx``.
 
         * ``0``: :attr:`major`
         * ``1``: :attr:`minor`
@@ -59,7 +63,8 @@ class VersionInfo(str): # noqa: FURB189
     def __sub__(self, other: Self, /) -> VersionDelta: '''Return this version decremented by ``n`` patches or the delta ``delta``, or the delta between ``self`` and ``other``.'''
     def __setattr__(self, name: str, value: object, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
     def __format__(self, format_spec: Literal['x', 'hex', 'o', 'oct', 'b', 'bin', 'd', 'dec', '0', 'major', 'maj', '1', 'minor', 'min', '2', 'patch', 's', 'short', 'l', 'long', 'a', 'ascii', 'c', 'chars', 't', 'tuple', 'h', 'hash', 'n', 'majmin'], /) -> str: # ty: ignore[invalid-method-override]
-        r'''Format the version. See the return values below, using version 123.4.0 as example.
+        r'''
+        Format the version. See the return values below, using version 123.4.0 as example.
 
         * x, hex: ``'0x7b0400'``
         * o, oct: ``'0o36602000'``
@@ -94,7 +99,7 @@ class VersionInfo(str): # noqa: FURB189
     def next_minor(self) -> Self: '''The minor version following this version, with a patch of ``0``.'''
     @property
     def next_major(self) -> Self: '''The major version following this version, with minor and patch ``0``.'''
-    def shelve(self, path: Openable, /, key: int=...) -> None: '''Store this version into the specified ``path``, non-cryptographically transforming the bytes with ``key``, which can be any integer.'''
+    def shelve(self, path: FileDescriptorOrPath, /, key: int=...) -> None: '''Store this version into the specified ``path``, non-cryptographically transforming the bytes with ``key``, which can be any integer.'''
     def assert_valid(self) -> None: '''Signify an error if the user messed something up in this object, likely intentionally.'''
     def is_current_version(self) -> bool: '''Whether this version is the same as the current version of :mod:`asyncutils`.'''
     @classmethod
@@ -102,7 +107,7 @@ class VersionInfo(str): # noqa: FURB189
     @classmethod
     def from_rep(cls, rep: str) -> Self: '''Parse the string representation of a version to get the version back.'''
     @classmethod
-    def unshelve(cls, path: Openable, /, key: int=...) -> Self: '''Recover a stored version from ``path``. A wrong key would usually raise an error, and even if it doesn't, the version would be wrong.'''
+    def unshelve(cls, path: FileDescriptorOrPath, /, key: int=...) -> Self: '''Recover a stored version from ``path``. A wrong key would usually raise an error, and even if it doesn't, the version would be wrong.'''
     @classmethod
     def get_current_version(cls) -> Self: '''Return the current version number of :mod:`asyncutils`; equivalent to :data:`asyncutils.__version__`.'''
     @property
@@ -117,9 +122,11 @@ class VersionInfo(str): # noqa: FURB189
     def patch(self) -> int: '''The patch part of the version.'''
 @final
 class VersionDelta(NamedTuple):
-    '''| A named tuple-like class representing the difference between versions.
-    | Not actually created by :func:`collections.namedtuple`, but implements its methods.
+    '''
+    | A named tuple-like class representing the difference between versions.
     | Accepted by the + or - operators.
+
+    .. note:: This is not actually created by :func:`collections.namedtuple`, but implements its methods.
     '''
     major: int = ...
     '''The major part of the version.'''
@@ -132,7 +139,8 @@ class VersionDelta(NamedTuple):
     def __trunc__(self) -> int: '''Identical to :meth:`__floor__`.'''
     def __neg__(self) -> Self: '''Return the negative of the delta. Additions and subtractions taking the return value correspond to subtractions and additions taking the original delta respectively.'''
 def normalize(o: object, /) -> tuple[int, int, int]:
-    '''| Return a :class:`tuple` of three integers ``(major, minor, patch)`` from the information provided by the object as extracted by registered normalizers.
+    '''
+    | Return a :class:`tuple` of three integers ``(major, minor, patch)`` from the information provided by the object as extracted by registered normalizers.
     | A normalizer can return ``None`` for an unnormalizable object, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to the object itself.
     | If the normalizer raises an exception or returns a non-iterable, it is removed and the error is propagated.
 

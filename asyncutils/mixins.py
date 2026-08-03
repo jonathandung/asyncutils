@@ -1,19 +1,7 @@
-__lazy_modules__ = frozenset(('asyncio',))
-from asyncutils import safe_cancel_batch
 from asyncutils._internal.submodules import mixins_all as __all__
-import functools as F, asyncutils._internal.helpers as H
 from abc import ABCMeta, abstractmethod
 from asyncio import iscoroutine, timeout as _timeout
-class LoopContextMixin(H.LoopMixinBase):
-    __slots__ = 'running_tasks',
-    def __init__(self): self._loop, self.running_tasks = H.get_loop_and_set(), set()
-    @property
-    def loop(self): return self._loop
-    def make(self, aw, /): (_ := self.running_tasks).add(t := super().make(aw)); t.add_done_callback(_.discard); return t
-    async def __setup__(self): ...
-    async def __cleanup__(self): ...
-    async def __aenter__(self): await self.__setup__(); return self
-    async def __aexit__(self, *_): await self.__cleanup__(); await safe_cancel_batch(self.running_tasks)
+import functools as F, asyncutils._internal.helpers as H
 @H.subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
@@ -37,7 +25,9 @@ class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): raise NotImplementedError
-    async def __aenter__(self): return await self.runner(self.__enter__)
+    async def __aenter__(self):
+        if __class__.__enter__ is (m := type(self).__enter__): return self
+        return await self.runner(m, self)
     async def __aexit__(self, /, *_): return await self.runner(self.__exit__, *_)
 @H.subscriptable
 class LockMixin(metaclass=ABCMeta):
@@ -54,7 +44,7 @@ class LockMixin(metaclass=ABCMeta):
         raise RuntimeError('asyncutils.mixins.LockMixin: failed to acquire lock')
     async def __aexit__(self, *_):
         if iscoroutine(a := self.release()): await a
-    def acknowledge_locksmith_lock_held(self, _, /): return True # noqa: PLR6301
+    def acknowledge_locksmith_lock_held(self, _, /): return True # ruff: ignore[no-self-use]
 class LockWithOwnerMixin(LockMixin):
     __slots__ = ()
     @property

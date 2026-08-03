@@ -5,7 +5,7 @@ from asyncutils import iterf
 from asyncio import CancelledError, create_task, gather, sleep
 from _collections import deque
 from operator import is_
-from pytest import fail, fixture, mark, raises
+from pytest import fail, fixture, raises
 from tests.conftest import mk
 from enum import IntEnum
 from random import choice, shuffle
@@ -15,7 +15,7 @@ Set = IntEnum('Set', 'A B C D E F G H I J')
 l = list(Set)
 shuffle(l)
 d = dict(zip(Set, l, strict=True))
-async def next_node(x): return d[x]
+async def next_node(x): return d[x]  # ruff: ignore[unused-async]
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10), strict=True))
 @mk
 async def test_iter_to_agen(): assert await vecs_eq(iter_to_agen(range(10)), arange(10))
@@ -39,7 +39,6 @@ async def test_aisprime(): assert await vecs_eq(afilter(aisprime, range(1, 501),
 @mk
 async def test_agives(): assert await aall_equal(aenumerate(agives(0)), strict=True)
 @mk
-@mark.skipif('sys.implementation.name == "graalpy"')
 async def test_anth():
     assert await anth((), 1, default=0) == 0
     assert await anth(acycle(acount()), 2) == 2

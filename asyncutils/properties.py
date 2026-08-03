@@ -70,7 +70,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.AB
         except A.CRITICAL: raise A.Critical
         except TypeError:
             if self.__ca: raise
-        except BaseException as e: self.__raise(f'failed to {c} attribute due to {fullname(e)}: {e}', a[0]) # noqa: BLE001
+        except BaseException as e: self.__raise(f'failed to {c} attribute due to {fullname(e)}: {e}', a[0]) # ruff: ignore[blind-except]
     def getter(self, f, /): return type(self)(f, self.fset, self.fdel, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
     def setter(self, f, /): return type(self)(self.fget, f, self.fdel, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
     def deleter(self, f, /): return type(self)(self.fget, self.fset, f, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
@@ -80,7 +80,7 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.AB
     def __init_subclass__(cls, /, *, lock_factory=None, **k):
         if not isinstance(cls.__dict__.get('__slots__'), tuple): raise TypeError('subclass of asyncutils.properties.AsyncPropertyBase must define tuple __slots__')
         if lock_factory is not None: cls._lock_factory = lock_factory
-        elif getattr(cls, '_lock_factory', None) is None: raise TypeError('asyncutils.properties.AsyncPropertyBase subclasses must specify lock_factory')
+        elif getattr(cls, '_lock_factory', None) is None: raise TypeError('subclass of asyncutils.properties.AsyncPropertyBase must specify lock_factory')
         super().__init_subclass__(**k)
 class LazyAsyncProperty(AsyncPropertyBase, lock_factory=__import__('asyncio').Lock): __slots__, wrap_aw = (), staticmethod(A.wrap_in_coro)
 class ConcurrentAsyncProperty(AsyncPropertyBase, lock_factory=lambda _=A.anullcontext, /: _): __slots__, wrap_aw = (), LoopMixinBase.make

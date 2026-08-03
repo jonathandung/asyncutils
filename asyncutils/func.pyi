@@ -1,11 +1,11 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.prots import AsyncContextManager, CanExcept, ExceptionWrapper, SupportsIteration, Timer, BenchmarkResult, DecoratorFactoryRV, EveryRV, EveryMethodRV
+from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryRV, EveryMethodRV, ExceptionWrapper, SupportsIteration, Timer, ToSyncFromLoopRV
 from asyncio import AbstractEventLoop, Future
 from collections.abc import Awaitable, Callable, Iterable, Mapping
 from ty_extensions import JustFloat
-from types import CoroutineType
+from types import AsyncGeneratorType, CoroutineType
 from typing import Any, Literal, Never, Self, overload
-__all__ = 'RateLimited', 'acompose', 'areduce', 'benchmark', 'debounce', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'unstar'
+__all__ = 'RateLimited', 'acompose', 'afcopy', 'aiter_from_f', 'areduce', 'benchmark', 'debounce', 'discard_retval', 'evaluate_and_return', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'to_async', 'to_sync', 'to_sync_from_loop', 'unstar'
 def acompose(*functions: Callable[..., Any], wrap_last: bool=...) -> Callable[..., Any]: '''Compose multiple functions. If the result of a function is a coroutine, await it before passing it to the next. Begin from the rightmost function, which can take variadic parameters, and then pipe its return value through as a single argument.'''
 @overload
 async def areduce[T](f: Callable[..., object], it: SupportsIteration[Never], initial: T, *, await_: bool=...) -> T: ...
@@ -15,6 +15,22 @@ async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: '''Async version of :func:`functools.reduce` that takes an async function and possibly async iterable. If the function is sync or the return value is not meant to be awaited, specify ``await_=False``.'''
 def star[T](f: Callable[..., Awaitable[T]], /) -> Callable[[Iterable[Any], Mapping[str, Any]], CoroutineType[Any, Any, T]]: '''Convert a function taking variadic parameters and returning an awaitable into a coroutine function taking two arguments: an iterable of positional arguments and a mapping of keyword arguments.'''
 def unstar[T](f: Callable[[Iterable[Any], Mapping[str, Any]], Awaitable[T]], /) -> Callable[..., CoroutineType[Any, Any, T]]: '''Undo the effect of :func:`star`.'''
+def evaluate_and_return[T, **P](f: Callable[P, Awaitable[object]], r: T, /) -> Callable[P, CoroutineType[Any, Any, T]]: '''Return an async function with the same signature as ``f`` that awaits the result of ``f`` and returns ``r``.'''
+def discard_retval[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, None]]: '''Return an async function with the same signature as ``f`` that awaits the result of ``f`` and discards it.'''
+def afcopy[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T]]: '''Return a copy of the async function ``f`` with the same signature and attributes.'''
+def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, loop: AbstractEventLoop|None=..., *, timeout: float|None=...) -> Callable[P, T]: '''Convert a function that returns an awaitable to an sync function with the same signature, using the event loop ``loop`` when required or creating when necessary.'''
+def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''Return the partial of :func:`to_sync` under ``loop=loop``.'''
+def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
+    '''
+    | Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy initialized and shared by all :func:`to_async`-transformed callables.
+    | If the argument was returned by :func:`to_sync`, a copy of the original async function is returned.
+
+    .. warning:: This function may create reference cycles. If memory is a concern, call :func:`gc.collect` regularly.
+    .. seealso::
+
+      :class:`~asyncutils.pools.AdvancedPool`
+        an async-first thread pool executor-like class.
+    '''
 @overload
 def every(interval: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=...) -> EveryRV[Any]: ...
 @overload
@@ -23,7 +39,8 @@ def every[T](interval: float, /, *, stop_when: Future[T], count_f: bool=..., ver
 def every[T](interval: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryRV[T]: ...
 @overload
 def every[T](interval: float, /, *, stop_when: Future[T], count_f: bool=..., verbose: bool=..., loop: AbstractEventLoop|None=..., stop_on_exc: bool=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryRV[T]:
-    '''| Return a decorator that repeats a function regularly. Useful for periodic monitoring tasks.
+    '''
+    | Return a decorator that repeats a function regularly. Useful for periodic monitoring tasks.
     | The resultant function will run every ``interval`` seconds, as determined by ``timer``, at most ``max_iterations`` times.
     | If ``count_f`` is True, this time includes the execution time of the function.
     | If ``wait_first`` is ``True``, sleep for ``interval`` seconds before the first execution.
@@ -41,8 +58,10 @@ def everymethod[T, R](interval: float, /, *, stop_when_getter: Callable[[T], Fut
 def everymethod[T](interval: float, /, *, count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: T) -> EveryMethodRV[T, Any]: ...
 @overload
 def everymethod[T, R](interval: float, /, *, stop_when_getter: Callable[[T], Future[R]], count_f: bool=..., verbose: bool=..., stop_on_exc: bool=..., loop: AbstractEventLoop|None=..., wait_first: bool=..., max_iterations: int|None=..., timer: Timer=..., supplied_args: Iterable[Any]=..., supplied_kwargs: Mapping[str, Any]=..., default: R) -> EveryMethodRV[R, T]: ''':func:`every`, but applying to methods. ``stop_when_getter``, if passed, should take ``self`` and returns a suitable future ``stop_when``. Other parameters are as in :func:`every`.'''
+def aiter_from_f[T](f: Callable[[], Awaitable[T]], sentinel: T=..., /, *, yield_sentinel: bool=...) -> AsyncGeneratorType[T]: '''Emulate the second form of the builtin :func:`iter` function in async, which the :func:`aiter` function does not have.'''
 def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expected: CanExcept=..., should_log: bool=..., timer: Timer=..., ns: bool=...) -> Callable[P, CoroutineType[Any, Any, tuple[T|ExceptionWrapper, float]]]:
-    '''| Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
+    '''
+    Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
 
     * ``timer`` (default :func:`time.perf_counter`) is used to count ``elapsed``, the time required to execute the function.
     * ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~asyncutils.exceptions.wrap_exc`.
@@ -52,7 +71,8 @@ def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expect
     * If ``should_log=False`` is passed, progress of the function execution (start and end) is not logged.
     '''
 def retry(tries: int=..., delay: float=..., *, max_delay: float=..., backoff: float=..., jitter: float=..., exc: CanExcept=..., on_retry: Callable[[int, BaseException], Any]=..., on_success: Callable[[int, float], Any]=..., random: Callable[[], float]=...) -> DecoratorFactoryRV:
-    '''| Return a decorator that retries the wrapped function with exponential backoff, returning once the function succeeds.
+    '''
+    Return a decorator that retries the wrapped function with exponential backoff, returning once the function succeeds.
 
     * If the function does not succeed within ``tries`` attempts (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_TRIES`), the last exception is propagated.
     * ``backoff`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_BACKOFF`) is the multiplier applied to the delay (initially ``delay`` which defaults to :const:`~asyncutils.context.Context.RETRY_DEFAULT_DELAY`) after each failed attempt, which can never exceed ``max_delay`` (default :const:`~asyncutils.context.Context.RETRY_DEFAULT_MAX_DELAY`).
@@ -66,10 +86,13 @@ def iterf[T](n: int, /) -> Callable[[Callable[[T], Awaitable[T]]], Callable[[T],
 async def measure[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> tuple[T, JustFloat]: '''Return a tuple ``(result, elapsed)``, where ``result`` is the awaited return value of the function and ``elapsed`` is the time taken.'''
 async def measure2[T](f: Callable[[], Awaitable[T]], /, *, timer: Timer=...) -> JustFloat: '''Return the time used to execute the function, discarding the return value.'''
 async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: int=..., *, sequential: bool=...) -> BenchmarkResult:
-    '''* ``f``: the function to benchmark, which should take no arguments and return an awaitable
+    '''
+    Benchmark the time required to run the function ``f`` asynchronously and return a named tuple ``(min, max, total, avg, iterations)``.
+
+    * ``f``: the function to benchmark, which should take no arguments and return an awaitable
     * ``times`` (default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_TIMES`): the number of times the function should be run
     * ``warmup`` (default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_WARMUP`): the number of warmup rounds to call the function for; not included in the benchmark results
-    * ``sequential`` (default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_SEQUENTIAL`): determines whether the function calls are made sequentially or gathered at once. For example, for functions requiring a mutex to be acquired or with other rate-limiting policies in place, you should explicitly pass ``sequential=True``.
+    * ``sequential`` (default :const:`~asyncutils.context.Context.BENCHMARK_DEFAULT_SEQUENTIAL`): whether the function calls are made sequentially or gathered at once; for example, for functions requiring a mutex to be acquired or with other rate-limiting policies in place, explicitly pass ``sequential=True``.
 
     This function should only be used in very simple cases, because we recognize the inherent difficulty and abundance of noise in testing IO-bound code, and this library alone is by no means designed to solve that issue.
     '''

@@ -29,7 +29,7 @@
 .gitignore
 .mailmap
 .markdownlint.json
-.pre-commit-config.yaml
+.prek-stamp
 .pytest_cache/
 .python-version
 .readthedocs.yaml
@@ -55,6 +55,7 @@ env/
 htmlcov/
 make.bat
 pip-delete-this-directory.txt
+prek.toml
 sdist/
 tests/
 venv/

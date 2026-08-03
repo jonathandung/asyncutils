@@ -2,11 +2,11 @@
 
 ## Technical leads
 
-- Jonathan Dung - owner - Hong Kong
+- Jonathan Dung - owner
 
 ## Developers
 
-- Jonathan Dung - sole maintainer - Hong Kong
+- Jonathan Dung - sole maintainer
 
 ## All other contributors and their affiliations
 

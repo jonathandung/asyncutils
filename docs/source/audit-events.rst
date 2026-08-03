@@ -123,6 +123,12 @@ inspiration.
   * - asyncutils.func.RateLimited
     - ``fname``: :class:`str`, ``calls``: :class:`int`, ``period``: :class:`float`
     - Raised when a :class:`func.RateLimited` is instantiated, with ``fname`` being the name of the function being rate limited, ``calls`` the number of calls allowed every ``period`` seconds.
+  * - asyncutils.func.to_async
+    - ``fname``: :class:`str`
+    - Raised when :func:`func.to_async` is called on a function with name ``fname``.
+  * - asyncutils.func.to_sync
+    - ``fname``: :class:`str`
+    - Raised when :func:`func.to_sync` is called on a function with name ``fname``.
   * - asyncutils.futures.AsyncCallbacksFuture/schedule_callbacks
     - ``addr``: :class:`int`
     - Raised when the exact instance of :class:`futures.AsyncCallbacksFuture` at address ``addr`` schedules its sync and async callbacks.
@@ -282,9 +288,3 @@ inspiration.
   * - asyncutils.util.sync_await
     - ``atname``: :class:`str`
     - Raised when :func:`util.sync_await` is called on an awaitable whose type is of name ``atname``.
-  * - asyncutils.util.to_async
-    - ``fname``: :class:`str`
-    - Raised when :func:`util.to_async` is called on a function with name ``fname``.
-  * - asyncutils.util.to_sync
-    - ``fname``: :class:`str`
-    - Raised when :func:`util.to_sync` is called on a function with name ``fname``.

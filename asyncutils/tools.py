@@ -3,12 +3,12 @@ get_cmd_help, __all__ = I.parsed.p.format_help, I.submodules.tools_all
 def loadf(p, e=None, /, l=I.unparsed.r, _=I.helpers.fullname):
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'asyncutils.tools.loadf: __fspath__ method returned {_(p)} instead of str or bytes')
     if not (isinstance(p, int) or e is None): raise TypeError('asyncutils.tools.loadf: did not expect extension')
-    if e == '': raise ValueError('asyncutils.tools.loadf: empty extension') # noqa: PLC1901
+    if e == '': raise ValueError('asyncutils.tools.loadf: empty extension') # ruff: ignore[compare-to-empty-string]
     return l(p.decode() if isinstance(p, bytes) else p, e)
 def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
     f = (R := []).append
     if s := (p := (m := loadf(p)).pop)('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
-    if (l := p('max_memory_errors', None)) != 3: f('-m'); f(str(l)) # noqa: PLR2004
+    if (l := p('max_memory_errors', None)) != 3: f('-m'); f(str(l)) # ruff: ignore[magic-value-comparison]
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
     if (l := p('logging_to', s := 'STDERR')) == 'NULL' or p('no_log', False): f('-n')
     elif l != s:
@@ -24,7 +24,7 @@ def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):
     with open(p, 'w', encoding='utf-8') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
-def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
+def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'all_symbols', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
     if o in _: return 'https://asyncutils.readthedocs.io/en/stable/index.html'
     s = None
     if isinstance(o, str):

@@ -1,4 +1,4 @@
-# ruff: noqa: D401
+# ruff: file-ignore[non-imperative-mood]
 '''Implementation of a base class for locksmiths, magical entities that can compel not intentionally uncooperative locks to be released while limiting collateral damage and hindrance of the control flow of the program as much as possible and allowing customization of behaviour in different steps regarding some locks.'''
 from ._internal.prots import AsyncLockLike
 from asyncio import AbstractEventLoop, Task
@@ -37,15 +37,16 @@ class LocksmithBase:
     async def recognize_lock(self, lock: AsyncLockLike[Any], /) -> RecognitionResult: '''Recognize the given lock as one that this locksmith can handle.'''
     @final
     async def force(self, lock: AsyncLockLike[Any], /, info: object=..., *, purge_waiters: bool=...) -> ForceResult:
-        '''| The main feature of the locksmith; that is, to try to force the lock ``lock``.
+        '''
+        | The main feature of the locksmith; that is, to try to force the lock ``lock``.
         | This method cannot be overridden, because it already delegates lock-specific behaviour to overridable methods and handlers in its core logic.
         | ``info``, if passed, should be an object representing the context of the force attempt, and will be passed to the exception thrown to the
         | task asking to release the lock.
         '''
     async def host[T](self, task: Awaitable[T], lock: AsyncLockLike[Any], /, *, timeout1: float|None=..., timeout2: float|None=..., timeout3: float|None=...) -> T: '''Run ``task`` holding ``lock`` immediately after forcing it. The default values of the timeouts are taken from :const:`~asyncutils.context.Context.LOCKSMITH_BASE_DEFAULT_TIMEOUTS`.'''
-    async def get_info(self, lock: AsyncLockLike[Any], /) -> Any: '''Return information about the lock that will be passed to the forcing request.''' # noqa: ANN401
+    async def get_info(self, lock: AsyncLockLike[Any], /) -> Any: '''Return information about the lock that will be passed to the forcing request.''' # ruff: ignore[any-type]
     async def lock_busy(self, lock: AsyncLockLike[Any], requester: LocksmithBase, context: dict[str, Any], /) -> None: '''Called when a :class:`~asyncutils.exceptions.LockForceRequest` by a different locksmith propagates, meaning that another locksmith is trying to do the same thing. The ``context`` parameter is a dictionary that can be passed to ``extra`` of a log record, for example. The implementation is allowed to call :meth:`lock_busy` on the requester in this method with a modified ``context``, but care should be taken to avoid infinite recursion.'''
-    async def purge_waiters(self, lock: AsyncLockLike[Any], /) -> None: '''Clear all waiters on the lock after a force attempt, if necessary. The default implementation assumes this data is attached to the lock as its ``_waiters`` attribute, which is a data structure that evaluates to whether it still has any items in a boolean context, with a :meth:`~list.pop` method.'''
+    async def purge_waiters(self, lock: AsyncLockLike[Any], /) -> None: '''Clear all waiters on the lock after a force attempt, if necessary. The default implementation assumes this data is attached to the lock as its ``_waiters`` attribute, which is a data structure that evaluates to whether it still has any items in a boolean context, with a :meth:`!pop` method.'''
     async def task_propagated_request(self, lock: AsyncLockLike[Any], /) -> None: '''Called when a task that was forced to release the lock does not handle or re-raises the exception.'''
     async def throw_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but there is no current task that owns it or it could not be found, and no task appears to be running. Its return value is returned by :meth:`force`.'''
     async def eager_fallback(self, lock: AsyncLockLike[Any], /) -> ForceResult: '''Called when the locksmith attempts to force a lock but the owner task appears to have completed, since it has no coroutine. Its return value is returned by :meth:`force`.'''

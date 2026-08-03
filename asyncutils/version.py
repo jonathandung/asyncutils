@@ -1,4 +1,5 @@
-# ruff: noqa: B008,PLR2004
+# ruff: file-ignore[function-call-in-default-argument,magic-value-comparison]
+from asyncutils._internal.helpers import check_methods
 from asyncutils import exceptions as E
 from asyncutils._internal import patch as P
 from asyncutils._internal.submodules import version_all as __all__
@@ -19,9 +20,9 @@ def c(key, _=_, f=b): return (key := f(key))&_, (key>>9)&_, key>>17, key>>8&1
 class VersionDelta(tuple):
     __slots__ = (); _make = classmethod(tuple.__new__)
     def __new__(cls, major=0, minor=0, patch=0): return cls._make((major, minor, patch))
-    def __neg__(self): return __class__(*map(int.__neg__, self))
+    def __neg__(self, _=int.__neg__): return __class__(*map(_, self))
 @a
-class VersionInfo(str): # noqa: FURB189
+class VersionInfo(str): # ruff: ignore[subclass-builtin]
     DEFAULT_KEY = 0x659db; __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
@@ -64,7 +65,7 @@ class VersionInfo(str): # noqa: FURB189
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
-    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # noqa: C408,PLR0911
+    def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # ruff: ignore[unnecessary-collection-call,too-many-return-statements]
         match s := a(s := s.lower(), s):
             case '0'|'1'|'2': return str(self[int(s)])
             case 's': return 'v'+'.'.join(map(str, self if self[2] else self[:2 if self[1] else 1]))
@@ -92,7 +93,7 @@ class VersionInfo(str): # noqa: FURB189
         return p|m<<8|M<<16
     def compatible(self, o, /, maj_tol=0, min_tol=None): return maj_tol is None or (abs(self[0]-o[0]) <= maj_tol and (min_tol is None or abs(self[1]-o[1]) <= min_tol)) # cspell:disable-line
     representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (_hash, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
-def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(type, (p.__get__(True), True.__init__, ''.lower))), a='__iter__': isinstance(getattr(o, a, None), t), s=frozenset(('inf', '-inf', 'nan')), m=0xFF):
+def normalize_allow_unimplemented(o, /, E=E, p=p, c=check_methods, s=frozenset(('inf', '-inf', 'nan')), m=0xff):
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
     elif T is complex: o = o.real, o.imag, 0
@@ -104,10 +105,10 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=lambda o, /, t=tuple(map(typ
         try:
             if (o := f(o)) is None: return None
         except E.CRITICAL: raise E.Critical
-        except BaseException as e: unregister_normalizer(o, type); raise E.VersionNormalizerFault(f, o, e) from None # noqa: BLE001
+        except BaseException as e: unregister_normalizer(o, type); raise E.VersionNormalizerFault(f, o, e) from None # ruff: ignore[blind-except]
         else:
-            if not c(o): raise E.VersionNormalizerTypeError(f, o)
-    elif not c(o): return None
+            if not c(o, '__iter__'): raise E.VersionNormalizerTypeError(f, o)
+    elif not c(o, '__iter__'): return None
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
 def normalize(o, /, _=E.VersionNormalizerMissing):
     if (r := normalize_allow_unimplemented(o)): return r

@@ -1,15 +1,16 @@
 '''Bridges between asynchronous consumers/subscribers and producers/publishers.'''
-from ._internal.prots import DualContextManager, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
-from .mixins import LoopContextMixin
-from asyncio import AbstractEventLoop, Future, Lock, Queue, Task
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import DualContextManager, ExcType, Middleware, Observer, SpecificSubscriber, SubscriptionRV, StateSnapshot, WildcardSubscriber, WildcardType
+from asyncio import Future, Lock, Queue, Task
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
-from types import AsyncGeneratorType, GeneratorType
+from types import AsyncGeneratorType, GeneratorType, TracebackType
 from typing import Any, Literal, Self, overload
 from weakref import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
-class Observable[**P](LoopContextMixin):
-    '''A class representing an observable stream of data, that observers can subscribe to and receive notifications from.
+class Observable[**P](LoopMixinBase):
+    '''
+    A class representing an observable stream of data, that observers can subscribe to and receive notifications from.
 
     .. attention:: Observers must be hashable!
     .. caution:: Use instances of this class as context managers only.
@@ -32,13 +33,16 @@ class Observable[**P](LoopContextMixin):
     async def unsubscribe(self, observer: Observer[P], strict: bool=...) -> None: '''Call :meth:`wait_until_idle`, then remove the observer. If ``strict`` is ``True``, assert that the observer was indeed subscribed.'''
     async def handle_notifications(self) -> None: '''Execute the queued notifications one by one and wait for each to complete.'''
     async def handle_unsubscriptions(self) -> None: '''Perform the unsubscriptions as requested by :meth:`unsubscribe_eventually`.'''
+    async def __aenter__(self) -> Self: '''Prepare the observable for use.'''
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Complete pending notifications.'''
     @overload
     def __init__(self, init_observers: Iterable[Observer[P]], maxsize: int|None=...): ...
     @overload
     def __init__(self, *, maxsize: int|None=...): '''Instantiate the observable with the initial observers taken from the iterable ``init_observers``. If ``maxsize`` is ``None``, accumulation of notifications is disabled; otherwise, it is the maximum size of the queue of notifications (default is no maximum).'''
     def __iter__(self) -> GeneratorType[Observer[P]]: '''Iterate over the current observers. When this iterator is active, no subscriptions or unsubscriptions can be done.'''
-    async def __setup__(self) -> None: ...
-    async def __cleanup__(self) -> None: ...
     def start_accumulation(self) -> bool: '''Begin accumulation of notifications and return ``True``, or return ``False`` if accumulation is already occurring.'''
     async def restart_accumulation(self, flush: bool=...) -> None: '''Complete all notifications if ``flush`` is ``True``, then restart notification accumulation.'''
     def subscribe_nowait(self, observer: Observer[P]) -> SubscriptionRV: '''Add an observer without waiting for the observable to be idle.'''
@@ -54,8 +58,9 @@ class Observable[**P](LoopContextMixin):
     def at_change(self, key: Callable[P, object]=..., ret_exc: bool=...) -> Self: '''Return a new observable that will only emit notifications when the value returned by ``key`` changes.'''
     def fork(self, ret_exc: bool=...) -> Self: '''Return a new observable that will emit all notifications to its observers.'''
     def merge(*obs: Self, ret_exc: bool=...) -> Self: '''Return a new observable that will emit notifications from all the observables in ``obs``.'''
-class EventBus(LoopContextMixin):
-    '''| A class abstracting the communication between notable events and asynchronous callbacks (an async auditing system), that can optionally be hooked up to sys.audit.
+class EventBus(LoopMixinBase):
+    '''
+    | A class abstracting the communication between notable events and asynchronous callbacks (an async auditing system), that can optionally be hooked up to sys.audit.
     | Has extensive telemetry and middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers. Subscribers must be hashable!
     | A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     | Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
@@ -65,7 +70,8 @@ class EventBus(LoopContextMixin):
     WILDCARD: WildcardType
     '''Sentinel representing the event type of subscribers that accept any event name.'''
     def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
-        '''All the arguments below are optional.
+        '''
+        All the arguments below are optional.
 
         * ``name``: The name of this event bus, which will appear in error messages.
         * ``handler``: A function that takes an exception having occurred in a subscribers and handles it.
@@ -104,13 +110,15 @@ class EventBus(LoopContextMixin):
     @auditing.setter
     def auditing(self, val: bool, /) -> None: ...
     def auditor(self, event: str, args: tuple[object, ...], /) -> None:
-        '''| The auditor of the event bus. You probably don't want to call this directly.
+        '''
+        | The auditor of the event bus. You probably don't want to call this directly.
         | Not an instance method at runtime, just a function as an attribute of the instance.
         '''
     def start_audit(self) -> None: '''Connect the audit hook of the bus to :func:`sys.audit`, creating if necessary. Incurs overhead. Use with caution.'''
     def stop_audit(self) -> None: '''Disconnect the audit hook of the bus from :func:`sys.audit`. Note that it is currently impossible to actually remove an audit hook, so this function just deactivates it.'''
     def add_middleware(self, middleware: Middleware) -> int:
-        '''| Append a middleware to the back of the pipe of middlewares, and return a permanent cookie that can be passed to :meth:`remove_middleware` to invalidate it. O(1) time.
+        '''
+        | Append a middleware to the back of the pipe of middlewares, and return a permanent cookie that can be passed to :meth:`remove_middleware` to invalidate it. O(1) time.
         | The middleware must take the event type as the first argument and the associated data as the second.
         | If the middleware does not recognize the event type, it should simply return the data immediately.
         | There is no protection in place against malicious middlewares but the user's abstraction.
@@ -122,8 +130,9 @@ class EventBus(LoopContextMixin):
     @overload
     def remove_middleware[T](self, cookie: int, *, result: T, strict: bool=...) -> T: ...
     @overload
-    def remove_middleware(self, cookie: int, *, result: object=..., strict: bool=...) -> Any: # noqa: ANN401
-        '''| Remove a previously added middleware, via :meth:`add_middleware` or :meth:`add_temp_middleware`, and return its result. O(1) time.
+    def remove_middleware(self, cookie: int, *, result: object=..., strict: bool=...) -> Any: # ruff: ignore[any-type]
+        '''
+        | Remove a previously added middleware, via :meth:`add_middleware` or :meth:`add_temp_middleware`, and return its result. O(1) time.
         | If ``strict`` is ``True`` and the middleware was never added, throw :exc:`ValueError`.
         | If the middleware has an associated future :meth:`add_temp_middleware` and it is done, return its result. If an exception was set, propagate it.
         | Otherwise, set its result to ``result`` and return it.
@@ -150,7 +159,8 @@ class EventBus(LoopContextMixin):
     def on[T: WildcardSubscriber](self, event_type: WildcardType) -> Callable[[T], T]: '''Return a decorator for functions to subscribe to this event bus under the specified event type.'''
     def sync_start_publish(self, event_type: str, data: object=..., *, safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None: '''Begin a publication synchronously. Parameters are as in :meth:`publish`, below.'''
     async def publish(self, event_type: str, data: object=..., *, wait: bool=..., safe: bool=..., timeout: float|None=..., chaperone: Callable[[ExceptionGroup|Exception], object]|None=...) -> None:
-        '''| Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout ``timeout``.
+        '''
+        | Publish an event, that is, some data attached to an event type, to the subscribers involved, with timeout ``timeout``.
         | Each subscriber for that event type and wildcard subscribers will be triggered by the publication, receiving the data after processing by the middlewares in order.
         | If ``wait`` is ``False`` (default ``True``), possibly return before the publication completes.
         | If ``safe`` is ``False`` (default ``True``), drop error handling logic in callback execution.
@@ -158,7 +168,8 @@ class EventBus(LoopContextMixin):
         | Otherwise, these exception( group)s are flattened and collected into an :exc:`ExceptionGroup` and propagated; the caller should be prepared to handle that case.
         '''
     async def wait_for_event(self, event_type: str, *, timeout: bool|None=..., condition: Callable[[Any], object]=...) -> Task[Any]:
-        '''Wait for an event of the specified event type that satisfies the condition to occur.
+        '''
+        Wait for an event of the specified event type that satisfies the condition to occur.
 
         .. note:: The function completes once the subscription has registered and returns a task, which will be cancelled on timeout.
         '''
@@ -166,7 +177,8 @@ class EventBus(LoopContextMixin):
     async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, *, till_permanent: float|None=...) -> Task[T]: ...
     @overload
     async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., *, till_permanent: float|None=...) -> Task[T]:
-        '''| Add the subscriber under the event type (as a wildcard if ``event_type`` is :const:`WILDCARD` or not passed) and return a task.
+        '''
+        | Add the subscriber under the event type (as a wildcard if ``event_type`` is :const:`WILDCARD` or not passed) and return a task.
         | The subscriber is removed once ``fut`` completes, and its result returned through the returned task.
         | After ``till_permanent`` seconds elapse (if passed), the task errors and the subscriber is left under that event type.
         '''
@@ -178,12 +190,14 @@ class EventBus(LoopContextMixin):
     def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGeneratorType[Any]: ...
     @overload
     def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGeneratorType[tuple[str, Any]]:
-        '''| Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
+        '''
+        | Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
         | If ``event_type`` is not passed, the stream will include the event type in the output.
         | ``timeout``, ``item_timeout`` and ``bufsize`` default to :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.
         '''
     async def shutdown(self, immediate: bool=..., *, timeout: float|None=..., preserve_stats: bool=...) -> None:
-        '''| Gracefully shut down the event bus.
+        '''
+        | Gracefully shut down the event bus.
         | After the shutdown, publications fail fast and middlewares are cleared.
         | This waits for as many subscriber callbacks to complete as possible, within ``timeout`` seconds if specified.
         | If ``immediate`` is ``True``, getters for the queue for the event stream will error immediately.
@@ -200,21 +214,23 @@ class EventBus(LoopContextMixin):
     def subscriber_count(self, event_type: str|WildcardType) -> int: '''Return the number of subscribers to ``event_type``.'''
     def clear_wildcards(self) -> WeakSet[WildcardSubscriber]|None: '''Equivalent to ``bus.clear(EventBus.WILDCARD)``.'''
     def clear_stats(self) -> None: '''Clear the event publication statistics.'''
-    async def __setup__(self) -> None: ...
-    async def __cleanup__(self) -> None: ...
+    async def __aenter__(self) -> Self: '''Async context support.'''
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Shut down the event bus as quickly as possible.'''
 class Rendezvous[T]:
     '''A rendezvous object, emulating Golang's unbuffered channels.'''
-    def __init__(self, *, loop: AbstractEventLoop=..., lock: Lock=...):
-        '''| Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically, according to :const:`~asyncutils.context.Context.RENDEZVOUS_MAINTENANCE_INTERVAL`.
-        | If ``loop`` is not passed, the running event loop is used. If there is no running event loop, one is created and set.
-        '''
+    def __init__(self, *, lock: Lock=...): '''Instantiate a rendezvous object, which will be maintained by a background task cleaning up its done getters and putters periodically, according to :const:`~asyncutils.context.Context.RENDEZVOUS_MAINTENANCE_INTERVAL`.'''
     async def raising_put(self, value: T, /, *, timeout: float) -> None:
-        '''| Put in ``value`` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
+        '''
+        | Put in ``value`` to the rendezvous, blocking until it is gotten or timeout is reached, at which point :exc:`TimeoutError` is raised and the put cancelled.
         | Also be prepared to intercept or re-raise :exc:`~asyncio.CancelledError` resulting from reset.
         '''
     async def put(self, value: T, /, *, timeout: float|None=...) -> bool: '''Like :meth:`raising_put`, but returns a boolean representing if the put succeeded. The recommended interface.'''
     async def get(self, default: T|None=..., *, timeout: float|None=...) -> T:
-        '''| Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.
+        '''
+        | Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.
         | If ``default`` is not passed and ``timeout`` is reached, the :exc:`TimeoutError` is propagated. In any case, the get is cancelled at timeout.
         '''
     def cleanup(self) -> None: '''Clean up the internal getter and putter stacks.'''
@@ -222,6 +238,7 @@ class Rendezvous[T]:
     def __length_hint__(self) -> int: '''Approximate number of operations pending. Implemented for :func:`operator.length_hint`.'''
     def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, asap: bool=...) -> T:
-        '''| Put in a value to the rendezvous and get and return a different value gotten from it.
+        '''
+        | Put in a value to the rendezvous and get and return a different value gotten from it.
         | If ``asap`` is ``True``, return once a value is available, without necessarily having completed the put.
         '''

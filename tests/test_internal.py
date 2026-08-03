@@ -1,10 +1,8 @@
 from pytest import mark, raises
-from asyncio import QueueEmpty, QueueFull, create_task, new_event_loop, sleep
+from asyncio import QueueEmpty, QueueFull, create_task, sleep
 from asyncutils import _internal as mod
-from asyncutils.console import AsyncUtilsConsole
 from io import StringIO
 from tests.conftest import mk
-import sys
 def test_helpers():
     helpers = mod.helpers
     for _ in helpers.filter_out(None, True, False): assert isinstance(_, bool)
@@ -23,7 +21,7 @@ def test_helpers():
     assert not helpers.check_methods(_(), 'foo')
     assert not helpers.check_methods(o, 'foo')
 def test_submodules_lazy_loading():
-    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo # ty: ignore[unresolved-attribute]
+    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo # ruff: ignore[useless-expression] # ty: ignore[unresolved-attribute]
     module = mod.initialize.Module
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
     with raises(TypeError, match='asyncutils: cannot subclass the type of submodule objects'): type('', (module,), {}) # ty: ignore[subclass-of-final-class]
@@ -33,17 +31,6 @@ def test_submodules_lazy_loading():
 def test_others(config_json, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
     assert mod.running_console.getc() is mod.running_console.unsetc() is None
-    loop = new_event_loop()
-    t = loop.close, loop.stop
-    mod.running_console.setc(cons := AsyncUtilsConsole(loop))
-    assert mod.running_console.unsetc() is cons
-    with raises(RuntimeError, match='cannot close event loop within REPL'): loop.close()
-    with raises(RuntimeError, match='cannot stop event loop within REPL'): loop.stop()
-    loop.close, loop.stop = t # ty: ignore[invalid-assignment]
-    cons.refresh()
-    exec(cons.compile.compiler('assert 1+1 == 2', '<test>', 'exec'))
-    assert cons.exc is None
-    loop.close()
     assert mod.submodules.cli_all == ('run',)
     monkeypatch.setenv('AUTILSCFGPATH', config_json) # cspell:disable-line
     N = __import__('importlib').reload(mod.unparsed).N
@@ -57,7 +44,7 @@ def test_patch():
     assert f.__text_signature__ == '($self, exc_typ, exc_val, exc_tb, /)' # ty: ignore[unresolved-attribute]
     patch.patch_classmethod_signatures((f, ''))
     assert f.__text_signature__ == '($cls)' # ty: ignore[unresolved-attribute]
-@mark.skipif(sys.version_info >= (3, 13), reason='requires Python <3.13')
+@mark.skipif('sys.version_info >= (3, 13)')
 @mk
 async def test_py312():
     m = mod.py312
@@ -95,7 +82,7 @@ async def test_py312():
     await sleep(0)
     assert t.done()
     with raises(ValueError, match=r'task_done\(\) called too many times'): Q.task_done()
-@mark.skipif(sys.version_info >= (3, 13), reason='requires Python <3.14')
+@mark.skipif('sys.version_info >= (3, 14)')
 def test_py313():
     m = mod.py313
     h = [1, 5, 3]

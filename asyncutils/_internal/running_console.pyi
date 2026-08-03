@@ -1,4 +1,5 @@
-'''Submodule managing the current running :mod:`asyncutils` console. No more thread safe than is necessary.
+'''
+Submodule managing the current running :mod:`asyncutils` console. No more thread safe than is necessary.
 
 .. caution:: These functions are internal and unstable. Do not call any of them or risk corrupting module state.
 '''

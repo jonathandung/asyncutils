@@ -3,11 +3,37 @@ Installation
 
 .. highlight:: bash
 
+You can prototype async code quickly using the ``uv tool`` interface, if you need only the executable (that is, the CLI) and not the library. This
+can be helpful if you wish to decide how much this library suits your needs before committing to installation. Simply execute::
+
+  uvx --from py-asyncutils asyncutils
+
+The REPL starts with the following banner:
+
+.. code-block:: text
+
+  asyncutils REPL (version 1.1.2) running on linux
+  Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
+  asyncutils is a multi-purpose and efficient asynchronous utilities library.
+  You can use await statements directly instead of asyncio.run for quick testing.
+  All the submodules of asyncutils are also loaded into the namespace.
+
+:mod:`asyncutils` injects itself into the globals and the import is automated visually. Afterwards, simply type Python code as you normally would,
+bearing in mind that ``await`` statements are magically supported:
+
+.. code-block:: pycon
+
+  >>> import asyncutils
+  >>> from asyncutils import *
+  >>> # Your code here
+
+For the normal installation pathway, many more package managers are supported.
+
 You are advised to ensure that your package manager is updated to the latest version as follows::
 
   # uv (preferred for modernity, speed and compatibility with this project)
-  uv self update # may not work if uv was installed with pip
-  pip install -U uv # in that case
+  uv self update # standalone installation of uv
+  pip install -U uv # pip installation of uv
   pip install -U pip # pip
   pip install -U pipx # pipx
   # conda
@@ -35,6 +61,11 @@ Optionally make and activate a virtual environment::
   . .venv/bin/activate # bash/zsh
   . .venv/bin/activate.fish # fish
   . .venv/bin/activate.csh # (t)csh
+
+.. code-block:: bat
+
+  rem activation on Windows (cmd.exe)
+  .venv\Scripts\activate
 
 Next, install py-asyncutils:
 
@@ -89,8 +120,7 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, themes, json5, test, tools, and includes pre-commit as well.
-  Notably, ruff and ty are absent because they should be installed with and managed by uv.
+* dev: Packages one would want installed for development; superset of docs, themes, json5, test, tools.
 * docs: Documentation dependencies, including Sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.

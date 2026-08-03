@@ -1,4 +1,4 @@
-'''Functions related to asynchronous signal handling.'''
+'''Functions related to `asynchronous signal handling <https://en.wikipedia.org/wiki/Sigaction>`__.'''
 from ._internal.prots import ExcType
 from asyncio import AbstractEventLoop
 from collections.abc import Awaitable, Callable, Iterable
@@ -22,7 +22,8 @@ async def wait_for_signal[T](processor: Callable[[Signals], T], /, *S: int, time
 async def wait_for_signal[T](processor: Callable[[Signals], T], /, *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ExcType, ...]=..., sigs: Iterable[int]=..., logger: Logger=...) -> T|None: ...
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], T], /, *S: int, timeout: float|None=..., raise_on_timeout: Literal[False]=..., loop: AbstractEventLoop|None=..., possible_errors: tuple[ExcType, ...]=..., default_on_processor_failure: T, sigs: Iterable[int]=..., logger: Logger=...) -> T|None:
-    '''| Wait for an operating system level signal included in ``sigs`` (default :const:`~asyncutils.context.Context.WAIT_FOR_SIGNAL_DEFAULT_SIGNALS`) and the variable positional arguments to be signalled within ``timeout`` and handle it.
+    '''
+    | Wait for an operating system level signal included in ``sigs`` (default :const:`~asyncutils.context.Context.WAIT_FOR_SIGNAL_DEFAULT_SIGNALS`) and the variable positional arguments to be signalled within ``timeout`` and handle it.
     | See the docs for the :mod:`signal` module, :meth:`~asyncio.loop.add_signal_handler`, as well as `the Wikipedia page for signals <https://en.wikipedia.org/wiki/Signal_(IPC)>`__.
     | ``processor`` should be a function that takes the signal occurred, preferably returning an awaitable object.
     | If ``raise_on_timeout`` is ``True``, throw :exc:`TimeoutError` on timeout. Otherwise, return ``None``.

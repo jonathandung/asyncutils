@@ -11,7 +11,7 @@ __all__ = 'AsyncPropertyBase', 'ConcurrentAsyncProperty', 'Deleters', 'LazyAsync
 class Deleters(IntFlag):
     '''Integer flags configuring a fallback deleter for async properties.'''
     DEFAULT = 0
-    '''The default deleter.'''
+    '''The default deleter, that disallows getting and re-deleting but allows setting after deleting.'''
     CANNOT_SET_AFTER_DELETE = 1
     '''This flag is only meaningful if :const:`NO_DELETER` is not set. Setting this flag means the setter will not be allowed to run after the deleter has been executed on an instance.'''
     SILENT = 1
@@ -26,7 +26,8 @@ class AsyncPropertyBase[T, R](ABC):
     def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], AsyncPropertyBase[T, R]]: ...
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]|None]|None=..., fdel: Callable[[R], Awaitable[None]|None]|Deleters=..., *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Self:
-        '''| Create a new async property with getter ``fget``, setter ``fset`` and deleter ``fdel``.
+        '''
+        | Create a new async property with getter ``fget``, setter ``fset`` and deleter ``fdel``.
         | ``fget`` must return an awaitable resolving to the value of the property and take only the instance as argument.
         | ``fset`` should take the instance and value as arguments.
         | ``fdel`` can be a callable taking the instance as an argument, or a member of :class:`Deleters` to configure a basic deleter that disallows gets after deletion on the instance in question.
@@ -45,7 +46,7 @@ class AsyncPropertyBase[T, R](ABC):
     def __set__(self, instance: R, value: T, /) -> None: '''Note that the setter is to be called with the instance and value as arguments.'''
     def __delete__(self, instance: R, /) -> None: '''Note that the deleter is to be called with the instance as the only argument.'''
     def __set_name__(self, owner: type[R], name: str, /) -> None: '''Bind the property to the class.'''
-    def __getattr__(self, name: str, /) -> Any: '''Find the attribute on the getter if it exists.''' # noqa: ANN401
+    def __getattr__(self, name: str, /) -> Any: '''Find the attribute on the getter if it exists.''' # ruff: ignore[any-type]
     def __reduce__(self) -> str: '''Return the qualified name of this property for pickling. Hidden properties cannot be pickled.'''
     def getter(self, fget: Callable[[R], Awaitable[T]], /) -> Self: '''Return another async property with the given function as the getter.'''
     def setter(self, fset: Callable[[R, T], Awaitable[None]|None], /) -> Self: '''Return another async property with the given function as the setter.'''
@@ -87,7 +88,8 @@ class ConcurrentAsyncProperty[T, R](AsyncPropertyBase[T, R]):
     def __new__(cls, *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Callable[[Callable[[R], Awaitable[T]]], Self]: ...
     @overload
     def __new__(cls, fget: Callable[[R], Awaitable[T]]|None, fset: Callable[[R, T], Awaitable[None]|None]|None=..., fdel: Callable[[R], Awaitable[None]|None]|Deleters=..., *, doc: str|None=..., strict: bool=..., hide: bool=..., mutable: bool=..., assert_modifiers_return_none: bool=...) -> Self:
-        '''| The setters and deleters can be implemented acquire a writer lock and the getter the corresponding reader lock from :mod:`~asyncutils.rwlocks` with its lock policies that provide fluent decorator interfaces.
+        '''
+        | The setters and deleters can be implemented acquire a writer lock and the getter the corresponding reader lock from :mod:`~asyncutils.rwlocks` with its lock policies that provide fluent decorator interfaces.
         | Note, however, that the accessor decorators must be outermost because they turn callables into properties.
         '''
     def wrap_aw[S](self, aw: Awaitable[S], /) -> Task[S]: '''Return a task for the awaitable returned by the setter or deleter.'''

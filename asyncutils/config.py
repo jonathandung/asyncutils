@@ -1,4 +1,4 @@
-# ruff: noqa: BLE001,SIM115
+# ruff: file-ignore[blind-except,open-file-with-context-handler]
 from asyncutils._internal import log as l, patch as P, initialize as I
 from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
@@ -6,7 +6,7 @@ import logging as L, sys as S
 def __dir__(_=__all__): return _
 class FaultyConfig(BaseException):
     def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {', '.join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
-def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # noqa: B008,C901,PLR0911,PLR0912 # pragma: no cover
+def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # ruff: ignore[complex-structure,function-call-in-default-argument,too-many-branches,too-many-return-statements] # pragma: no cover
     if not isinstance(e, str): raise TypeError('asyncutils: executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
@@ -46,7 +46,7 @@ def k(e, a=False, N=N):
     return x
 def g(e, a=False, t=(str, int, bytes), _=k):
     if isinstance(x := _(e), str) and ((x.startswith("b'") and x.endswith("'")) or (x.startswith('b"') and x.endswith('"'))):
-        try: x = x.encode()[2:-1] # noqa: SIM105
+        try: x = x.encode()[2:-1] # ruff: ignore[suppressible-exception]
         except UnicodeEncodeError: ...
     if isinstance(x, t) or (a and (x is None or isinstance(x, float))): return x
     raise FaultyConfig(e, x, t)
@@ -86,7 +86,7 @@ l.addHandler(_)
 class Debugging:
     __slots__ = 'orig_level', 'orig_name'
     @property
-    def level(self, _=l): return _.level # noqa: PLR0206
+    def level(self, _=l): return _.level # ruff: ignore[property-with-parameters]
     @property
     def entered(self): return self.orig_level is not None
     def __init__(self): self.orig_level = self.orig_name = None
@@ -106,12 +106,12 @@ class Debugging:
 debug, p = Debugging(), (A := I.A).pop
 I.p = d = l.debug # ty: ignore[invalid-assignment]
 if N.debug:
-    debug.__enter__(); d('python %s', S.version) # noqa: PLC2801
+    debug.__enter__(); d('python %s', S.version) # ruff: ignore[unnecessary-dunder-call]
     if silent: from asyncutils import __version__ as V; d(V.representation); d('platform: %s', S.platform)
     if c: d('config file path: %s', c)
 while A: d(*p())
 __import__('atexit').register(lambda s=s, _=d: None if s.closed else _('bye') or s.flush() or s.close())
-def r(n, /): raise AttributeError(f"module 'asyncutils.config' has no attribute {n!r}")
+def r(n, /): raise AttributeError(f'module {__name__!r} has no attribute {n!r}')
 def __getattr__(n, /, _=e, r=r):
     if n != '_randinst': r(n)
     global _randinst; _randinst, __getattr__.__code__ = __import__('random').Random(_), r.__code__; return _randinst # ty: ignore[unresolved-global]

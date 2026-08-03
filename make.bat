@@ -5,18 +5,20 @@ if "%AUTILSTESTMAXFAIL%" == "" set AUTILSTESTMAXFAIL=3
 if "%1"=="" goto help
 goto %1
 
+:.prek-stamp
+if exist .prek-stamp goto :eof
+where prek >nul 2>nul
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.4.10/prek-installer.ps1 | iex")
+prek install -f
+type nul > .prek-stamp
+goto :eof
+
 :.uv-stamp
 if exist .uv-stamp goto :eof
 where uv >nul 2>nul
-if %errorlevel% neq 0 (
-    where curl >nul 2>nul
-    if %errorlevel% equ 0 (curl -LsSf https://astral.sh/uv/install.sh | sh) else (
-        where wget >nul 2>nul
-        if %errorlevel% equ 0 (wget -qO- https://astral.sh/uv/install.sh | sh) else (
-            echo curl or wget required to install uv >&2
-            exit /b 1)))
-uv tool install -U ruff 2>nul
-uv tool install -U ty 2>nul
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex")
+uv tool install --force -U ruff 2>nul
+uv tool install --force -U ty 2>nul
 type nul > .uv-stamp
 goto :eof
 
@@ -26,11 +28,21 @@ uv audit --preview-features audit-command
 goto :eof
 
 :build-docs
-pwsh .\scripts\win\genhelp.ps1
-pwsh .\scripts\win\genmakefileusage.ps1
+powershell -ExecutionPolicy ByPass -File ".\scripts\win\genhelp.ps1"
+powershell -ExecutionPolicy ByPass -File ".\scripts\win\genmakefileusage.ps1"
 cd docs
-make html -W
-goto :eof
+shift
+set "REST_ARGS="
+:__loop
+if "%~1"=="" (
+    if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
+    set O=-W %REST_ARGS%
+    make html
+    goto :eof
+)
+set "REST_ARGS=!REST_ARGS! %1"
+shift
+goto __loop
 
 :changelog
 :: cspell:disable-next-line
@@ -38,8 +50,8 @@ git log --graph --pretty=format:"%%Cred%%h%%Creset -%%C(yellow)%%d%%Creset %%s %
 goto :eof
 
 :clean
-for %%i in (build dist py_asyncutils.egg-info .ruff_cache .pytest_cache docs\build docs\source\api) do if exist "%%i" rmdir /s /q "%%i"
-for %%i in (.coverage .cspellcache .uv-stamp docs\source\help.rst docs\source\makefile-usage.rst) do if exist "%%i" del /q "%%i"
+for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
+for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\help.rst docs\source\makefile-usage.rst) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
 del /s /q *.pyc *.pyo *.pyd *.pyz 2>nul
 goto :eof
@@ -58,6 +70,7 @@ type assets\mkhelp.txt
 goto :eof
 
 :install
+call :.prek-stamp
 call :.uv-stamp
 uv pip install -Ue .[dev]
 goto :eof
@@ -66,12 +79,26 @@ goto :eof
 call :install > nul
 goto :eof
 
-:pre-commit
-pre-commit run --all-files
+:lint
+call :ruff
+ty check
+call :sc
+goto :eof
+
+:lock
+call :.uv-stamp
+uv lock -U
+goto :eof
+
+:pc
+call :.prek-stamp
+prek run
 goto :eof
 
 :release
-gh release create
+choice /m "You are about to create a release. Are you sure?"
+if errorlevel 2 exit /b 1
+if errorlevel 1 gh release create
 goto :eof
 
 :ruff
@@ -79,15 +106,15 @@ call :.uv-stamp
 ruff check
 goto :eof
 
-:spellcheck
-cspell lint .
+:sc
+cspell .
 goto :eof
 
 :test
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
 goto :eof
 
-:type-check
+:tc
 call :.uv-stamp
 ty check
 goto :eof

@@ -1,7 +1,6 @@
 '''Implementation of an :class:`interactive async console base class <ConsoleBase>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
 from ._internal.prots import ExcType
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop
 from contextvars import Context
 from code import InteractiveConsole
 from collections import ChainMap
@@ -17,14 +16,14 @@ class ConsoleBase(InteractiveConsole, ABC):
     '''A %-formattable string representing the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument ``name`` is not provided to the subclass constructor.'''
-    if sys.version_info >= (3, 13):
+    if sys.version_info < (3, 13):
+        CAN_USE_PYREPL: ClassVar[Literal[False]]
+        '''PyREPL is only supported on Python 3.13 and above.'''
+    else:
         CAN_USE_PYREPL: ClassVar[bool]
         '''Whether :mod:`!_pyrepl` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
         '''This is present iff :class`!_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
-    else:
-        CAN_USE_PYREPL: ClassVar[Literal[False]]
-        '''PyREPL is only supported on Python 3.13 and above.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
     '''| Maps module names to a function taking locals of a console of the corresponding type. The return value is discarded.
     | Add handlers for the module of your own console with ``native_handler`` and other modules with ``other_handlers``.'''
@@ -52,14 +51,17 @@ class ConsoleBase(InteractiveConsole, ABC):
     def _internal_is_running(self) -> bool: '''Whether the console thinks itself is running. Can be used in :attr:`is_running` for state consistency checks.'''
     @property
     def is_running(self) -> bool: '''Whether the console is running. The default implementation simply returns :attr:`_internal_is_running`.'''
-    def __init__(self, loop: AbstractEventLoop, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
-        '''* ``loop`` (required): Event loop used by console interaction.
+    def __init__(self, mod: ModuleType=..., modname: str=..., *, context_factory: Callable[[], Context]=...):
+        '''
+        All arguments are optional.
+
         * ``mod``: The module to import within the console.
         * ``modname``: The name of the above module, determined by the subclass name by default.
         * ``context_factory``: A function that takes no arguments and returns an instance of :class:`contextvars.Context`, to be used by the event loop.
         '''
     def __init_subclass__(cls, *, name: str=..., version: str=..., description: str=..., default_local_exit: bool=..., disallow_subclass_msg: str|None=..., native_handler: Callable[[dict[str, Any]], object]|None=..., other_handlers: dict[str, Callable[[dict[str, Any]], object]|None]=..., additional_interrupt_hooks: Iterable[Callable[[Self], object]]=..., additional_memory_error_hooks: Iterable[Callable[[Self], object]]=..., template: str=..., **k: object) -> None:
-        r'''All of the arguments below are optional.
+        r'''
+        All arguments are optional.
 
         * ``name``: name of the module using the console
         * ``version``: version of the module using the console
@@ -69,15 +71,17 @@ class ConsoleBase(InteractiveConsole, ABC):
 
         Additional keyword arguments are used to :ref:`substitute %-placeholders in \`\`template\`\` <python:old-string-formatting>`.
         '''
-    def runcode(self, code: CodeType, *, fimp: Callable[[], Future[Any]]=..., no_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # noqa: ANN401
-        '''| Run ``code``, an instance of :class:`types.CodeType`, as a callback managed by the event loop, and return its result, or :const:`!STATEMENT_FAILED` if the statement fails.
+    def runcode(self, code: CodeType, *, fimp: Callable[[], Future[Any]]=..., no_traceback: tuple[ExcType, ...]=..., threadsafe: bool=...) -> Any|None: # ruff: ignore[any-type]
+        '''
+        | Run ``code``, a code object, as a callback managed by the event loop, and return its result, or :const:`!STATEMENT_FAILED` if the statement fails.
         | ``fimp`` is a function that returns an instance of :class:`concurrent.futures.Future`.
         | ``no_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`~asyncio.loop.call_soon_threadsafe` instead of :meth:`~asyncio.loop.call_soon`.
         '''
     def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # ty: ignore[invalid-method-override]
     def run(self, *, exit_message: str=..., thread_name: str=..., max_memory_errors: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
-        '''| Run the console and return the integer return code.
+        '''
+        | Run the console and return the integer return code.
         | The strings ``exit_message`` and ``thread_name`` should support %-formatting, the placeholder being the module name.
         | Pass a negative value for ``max_memory_errors`` to disable the stop after certain number of :exc:`MemoryError`'s behaviour.
         | If ``always_install_completer`` is True, set the completer on readline as long as readline is available.
@@ -85,7 +89,8 @@ class ConsoleBase(InteractiveConsole, ABC):
         | If you wish the console to act like a console even when stdin is piped, pass ``always_run_interactive=True`` or start Python with the ``-i`` flag.
         '''
     def showtraceback(self) -> None:
-        '''Display the formatted traceback of the exception being handled. If there was no exception, do nothing.
+        '''
+        Display the formatted traceback of the exception being handled. If there was no exception, do nothing.
 
         .. note:: This differs from the superclass behaviour, where :exc:`AttributeError` is raised outright.
         '''
@@ -97,11 +102,13 @@ class ConsoleBase(InteractiveConsole, ABC):
     def refresh(self) -> None: '''Cancel the internal future such that it no longer resolves to the result of an async call. Called by :meth:`interrupt` and :meth:`memory_error`.'''
     @abstractmethod
     def before_run(self, max_memory_errors: int|None) -> None:
-        '''| Prepare for the interaction logic to begin in :meth:`run`. Can raise errors.
+        '''
+        | Prepare for the interaction logic to begin in :meth:`run`. Can raise errors.
         | When implementing, call ``super().before_run(max_memory_errors)`` before everything. This allows subclasses to pass their own value of ``max_memory_errors``.
         '''
     def after_run(self) -> None:
-        '''| Finalize the interaction from :meth:`run`. Called before writing the exit message. Should not raise errors.
+        '''
+        | Finalize the interaction from :meth:`run`. Called before writing the exit message. Should not raise errors.
         | It is highly recommended that subclasses implement this and call ``super().after_run()`` within the implementation after the custom logic.
         '''
     @overload

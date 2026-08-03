@@ -4,7 +4,7 @@ from asyncutils._internal.submodules import __dict__ as d
 if (a := d.pop('__all_submodules', None)) is None: raise type('InitializationError', (BaseException,), {})('asyncutils: cannot reload internal initialization module')
 _u, _f, _s, s, t, U, A = (_d := {}).update, ('',), 'asyncutils.', {}, '_all', (S := list(a)).extend, []
 class Module:
-    slots = frozenset(__slots__ := ('__all__', '_n', '_s')); (dunders := dir(L))[-1] = '__dir__'
+    slots = frozenset(__slots__ := ('__all__', '_c', '_n', '_s'))
     def __new__(cls, name, /, d=_d, a=frozenset(a), _=s):
         if name in a: return _[name]
         try: return getattr(_[d[name]], name)
@@ -29,12 +29,12 @@ class Module:
         else: p(_c, n)
         if d := getattr(_g(), 'locals', None): d[n] = m
         _s[n], m.__dir__ = m, self.__dir__; return m # ty: ignore[invalid-assignment]
-    def __dir__(self): return (*self.dunders, *self.__all__)
+    def __dir__(self): return self._c
     P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__repr__, ''), (__getattr__, _)); del _
-f, b, _a, n = object.__new__, object.__setattr__, (z := Module.__slots__)[0], z[1]
-for _k in a: U(_v := d[_k+t]); _u(dict.fromkeys(_v, _k)); s[_k] = a = f(Module); b(a, n, _k); b(a, _a, _v)
+f, b, _a, c, n, (e := dir(L))[-1] = object.__new__, object.__setattr__, *Module.__slots__[:3], '__dir__'
+for _k in a: U(_v := d[_k+t]); _u(dict.fromkeys(_v, _k)); s[_k] = z = f(Module); b(z, n, _k); b(z, _a, _v); b(z, c, (*e, *_v))
 def p(*a, _=A.append): _(a)
 for _k, _v in (('version', V), ('exceptions', E), ('context', F), ('constants', D), ('cli', L)): p('preloading: %s', _k); s[_k], _v.__dir__ = _v, s[_k].__dir__
 p('all submodules initialized in %.2f milliseconds', T())
-U(('console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
-del P, R, E, V, F, L, D, T, U, d, f, t, n, z, _d, _k, _v, _f, _s, _u, _a, b
+U(('all_symbols', 'console_preloaded_submodules', 'preloaded_submodules', 'submodules_map', 'time_since_boot'))
+del P, R, E, V, F, L, D, T, U, d, f, t, n, c, _d, _k, _v, _f, _s, _u, _a, b
