@@ -85,7 +85,7 @@ class CacheWithBackgroundRefresh(H.LoopMixinBase):
         while True:
             await I.sleep(r)
             try:
-                async with self.__lock: d, f = self.__timer()-self.__ttl+self.__refresh, self.refresh_item; t.extend(self.make_multiple(f(k) for k, v in self.__cache.items() if not v.loading and d > v.timestamp))
+                async with self.__lock: d, f = self.__timer()-self.__ttl+self.__refresh, self.refresh_item; t.extend(self.make(f(k)) for k, v in self.__cache.items() if not v.loading and d > v.timestamp)
                 if t: await I.gather(*t); t.clear()
             except A.CRITICAL: raise A.Critical
             except I.CancelledError: raise

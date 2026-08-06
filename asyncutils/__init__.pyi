@@ -4,6 +4,7 @@ A feature-rich asynchronous utilities library with CLI and REPL support.
 
 .. autoapidata:: __hexversion__
 .. autoapidata:: __version__
+.. autoapidata:: all_symbols
 .. autoapidata:: console_preloaded_submodules
 .. autoapidata:: preloaded_submodules
 .. autoapidata:: submodules_map

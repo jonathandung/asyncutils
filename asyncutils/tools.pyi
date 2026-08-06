@@ -9,7 +9,7 @@ def json_to_argv(path: FileDescriptorOrPath, /) -> list[str]:
     '''
     | Return a list of strings representing the command-line arguments for this module from ``path`` to the corresponding json file, with as little items as possible.
     | For integer file descriptors as ``path``, the format is assumed to be plain JSON.
-    | The module should have a ``load`` function that takes ``path`` and returns a dict of its contents.
+    | The module should have a :func:`!loads` function that takes a string of the file contents and returns a :class:`dict` deserialized from it.
     | Perfect round-trip conversion with :func:`argv_to_json` is guaranteed only with no other configuration file active.
     '''
 def json_to_argstr(path: FileDescriptorOrPath, /, *, join: Callable[[list[str]], str]=...) -> str: '''Essentially the output of :func:`json_to_argv`, but joined into a shell-escaped string with ``join``.'''

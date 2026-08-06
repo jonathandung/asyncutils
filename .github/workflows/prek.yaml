@@ -24,3 +24,4 @@ jobs:
           sign-commits: true
           signoff: true
           title: Weekly prek hooks update
+    timeout-minutes: 5

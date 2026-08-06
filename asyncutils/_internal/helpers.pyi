@@ -2,7 +2,7 @@
 from .prots import CanClearAndCopy, Subscriptable
 from ..config import Executor
 from asyncio import AbstractEventLoop, Future, Task
-from collections.abc import Awaitable, Callable, Iterable
+from collections.abc import Awaitable, Callable
 from ty_extensions import Not
 from types import GeneratorType, ModuleType
 from typing import Any, overload
@@ -27,7 +27,6 @@ class LoopMixinBase:
     def loop(self) -> AbstractEventLoop: '''The underlying event loop.'''
     def make[T](self, aw: Awaitable[T], /) -> Task[T]: '''Create and return a :class:`~asyncio.Task` for the given awaitable that runs in the underlying loop.'''
     def make_fut(self) -> Future[Any]: '''Create and return a :class:`~asyncio.Future` attached to the underlying loop.'''
-    def make_multiple[T](self, aws: Iterable[Awaitable[T]], /) -> GeneratorType[Task[T]]: '''Return an iterator over instances of :class:`~asyncio.Task` created for each coroutine in C, in that order.'''
 class Bag[T](dict[str, T]):
     '''A thin dictionary subclass that supports attribute access, setting and deleting.'''
     def __getattr__(self, key: str, /) -> T: ...

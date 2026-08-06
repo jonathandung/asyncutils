@@ -9,8 +9,10 @@ Before jumping to seek support, do skim through [the readme](https://github.com/
 If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
-2. If so, participate meaningfully there; create a new issue otherwise
-3. Refer and adhere to the issue template chosen, or risk your issue being closed without going through actual review
+2. If so, participate meaningfully there
+3. Open a new issue otherwise, possibly using the dedicated ``asyncutils bug`` sub-command to pre-fill information
+4. Enter the required information into the issue form
+5. Wait for review
 
 ## Feature Requests
 
@@ -18,7 +20,7 @@ Have an idea? We'd love to hear it!
 
 - Search existing issues to avoid duplicates
 - Explain the use case and expected behaviour
-- Include examples unless you think the idea is straightforward enough
+- Include examples in non-trivial cases
 
 ## Questions
 

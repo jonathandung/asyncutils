@@ -3,6 +3,7 @@ on:
   schedule: [{cron: "0 0 * * *"}]
   workflow_dispatch:
 permissions:
+  discussions: write
   issues: write
   pull-requests: write
 jobs:
@@ -23,9 +24,9 @@ jobs:
         stale-issue-message: This issue has been marked as stale due to inactivity.
         stale-pr-label: stale-pr
         stale-pr-message: This pull request has been marked as stale due to inactivity.
+    timeout-minutes: 5
   lock:
     runs-on: ubuntu-latest
-    permissions: {discussions: write}
     concurrency: {group: lock}
     steps:
       - uses: dessant/lock-threads@v6.0.2 # cspell:disable-line
@@ -37,3 +38,4 @@ jobs:
           log-output: true
           pr-inactive-days: 90
           pr-comment: This pull request thread has been automatically locked due to inactivity. For a related enhancement, please file a new issue or open another PR and link to relevant comments here.
+    timeout-minutes: 5

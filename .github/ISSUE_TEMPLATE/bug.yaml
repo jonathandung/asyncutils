@@ -1,0 +1,95 @@
+name: Bug report
+description: File a bug report to help us improve.
+labels: [bug]
+assignees: [jonathandung]
+body:
+  - type: textarea
+    id: desc
+    attributes:
+      label: Describe the bug
+      description: |
+        A clear and concise description of what the bug is. Include the pattern implementation/utility function at fault, and the relevant snippet of
+        the source if you can find it.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to source file
+      description: |
+        If possible, use the GitHub web interface to create a permalink to the source file, pointing to the first line where the bug occurs on
+        current main. This is done by clicking on the line number in the file view and selecting "Copy permalink" under the three-dot menu. A
+        /blob/main-style link is not sufficient because file modifications may invalidate the line number.
+      placeholder: e.g. https://github.com/jonathandung/asyncutils/blob/cd5b7a174751c7e7f059aa6a8835f0d324cd1124/asyncutils/__init__.py#L1
+  - type: textarea
+    id: mre
+    attributes:
+      label: To reproduce
+      description: Include a minimal, self-contained, reproducible example as a Python snippet below.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, such as when the CLI output appears malformed, add visual media to help explain your problem. GIFs are acceptable.
+  - type: input
+    id: pyv
+    attributes:
+      label: Python version tag
+      description: The output of `python3 -VV`
+    validations:
+      required: true
+  - type: input
+    id: auv
+    attributes:
+      label: asyncutils version
+      description: The output of `asyncutils -v`
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: The output of `python3 -m platform`
+    validations:
+      required: true
+  - type: input
+    id: pkv
+    attributes:
+      label: Package version
+      description: The output of `uv pip show py-asyncutils | grep Version:`, `conda list py-asyncutils --fields version` or similar
+    validations:
+      required: true
+  - type: textarea
+    id: tb
+    attributes:
+      label: Traceback
+      description: Paste the full error traceback here, or a [pastebin](https://pastebin.com) link if it is too long.
+      render: python traceback
+  - type: textarea
+    id: cfg
+    attributes:
+      label: Configuration
+      description: The `asyncutils` configuration file used, pointed to by `AUTILSCFGPATH`, or the `[tool.asyncutils]` section in `pyproject.toml`.
+      value: |
+        ```toml
+        # change the language to that of your config if applicable
+        ```
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste the relevant log output here, best in debug level, or a [pastebin](https://pastebin.com) link if it is too long.
+      render: text
+  - type: textarea
+    id: ctx
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.

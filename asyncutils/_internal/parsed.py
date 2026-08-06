@@ -9,7 +9,6 @@ On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.S
 The file should have one argument per line; this format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a file of a supported type containing the default configuration.
-A --config option is not offered due to the complexity of implementation and ease to revert to a default config within a one-off config.
 See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
 Note that the inner workings of this library is tightly coupled with the ever-evolving asyncio framework.
@@ -58,5 +57,11 @@ a('-s', '--seed', help='Seed the random instance used internally by this module 
 a('-d', '--debug', action=f, help='Enable debug mode to produce more logging output by entering the global debug context manager. Different from -VV, since\nthe verbosity flags take effect again when the context manager is manually exited.')
 a('-P', '--pdb', action=f, help='Intended for developers of this library only; open the pdb debugger interface when the exit code of the console is greater than zero,\nor an uncaught error occurs in the console execution logic itself.')
 (a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit.\nUseful for checking if the installation succeeded.')
-a('-?', '-h', '--help', action='help', help='Print this help message and exit.')
-del a, b, c, d, e, f, g, h, i, j, J, A
+t = '-?', '-h', '--help'
+a(*t, action='help', help='Print this help message and exit.')
+s = p.add_subparsers(dest='command').add_parser('bug', help='Streamline the process of opening a bug report on GitHub.', description='''This command will print a link to open a new issue on GitHub with pre-filled information detected from the environment to stdout
+and exit, or if --open is passed, the link is opened directly using the webbrowser module.''', epilog='Some text area fields cannot be filled here, since they expect longer responses and cannot be crammed into a link, which has hard character limits.', add_help=False)
+(a := s.add_argument)('-l', '--src-link', default='', help='The permalink to the source file the bug primarily concerns, preferably HTTPS.')
+a('-o', '--open', action=f, help='Open the link in the default browser instead of printing it to the console.')
+a(*t, action='help', help='Print this help message and exit.')
+del a, b, c, d, e, f, g, h, i, j, s, t, J, A

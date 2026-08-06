@@ -11,7 +11,7 @@ class Context: # ruff: ignore[eq-without-hash]
     def __setattr__(self, n, v, /):
         if (n := n.upper()) not in all_contextual_consts: raise AttributeError
         if isinstance(v, list):
-            if v and isinstance(v[0], list): v = map(tuple, v) # ty: ignore[invalid-argument-type]
+            if v and isinstance(v[0], list): v = map(tuple, v)
             v = tuple(v)
         super().__setattr__(n, v)
     def __delattr__(self, n, /): raise AttributeError

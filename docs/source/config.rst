@@ -133,19 +133,6 @@ Hjson  .hjson         hjson       hjson
 XML    .xml           xmltodict   xmltodict
 ====== ============== =========== ==================
 
-Be especially careful with using XML, because it is verbose, overkill and not recommended for use, especially with many simpler alternatives.
-
-.. seealso::
-
-  `CVE-2025-9375 <https://nvd.nist.gov/vuln/detail/CVE-2025-9375>`__
-    a vulnerability of the :class:`~xml.sax.saxutils.XMLGenerator` class from the standard library used by
-    `xmltodict <https://pypi.org/project/xmltodict>`__ without input sanitization
-
-    .. note:: This exploit is disputed by the maintainers of the project.
-
-  `the CVE database <https://www.cve.org/CVERecord>`__
-    for any new vulnerabilities
-
 .. important::
   To write the config in each format, adhere to the exact analogue of the nested dictionary structure shown in format.json5 in the chosen language.
 

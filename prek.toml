@@ -21,13 +21,13 @@ hooks = [{id = "ruff-check"}]
 
 [[repos]]
 repo = "https://github.com/astral-sh/ty-pre-commit"
-rev = "v0.0.65"
+rev = "v0.0.69"
 hooks = [{id = "ty"}]
 
 [[repos]]
-repo = "https://github.com/Yelp/detect-secrets"
-rev = "v1.5.0"
-hooks = [{id = "detect-secrets", args = ["--baseline", ".secrets.baseline"]}]
+repo = "https://github.com/betterleaks/betterleaks"
+rev = "v1.7.3"
+hooks = [{id = "betterleaks"}]
 
 [[repos]]
 repo = "https://github.com/sphinx-contrib/sphinx-lint"

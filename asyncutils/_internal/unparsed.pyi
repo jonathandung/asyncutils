@@ -13,6 +13,8 @@ Z: Final[dict[str, str]]
 '''A :class:`dict` mapping file extensions to module names for loading config files. Is queried by :func:`~asyncutils.tools.loadf`.'''
 c: Final[str]
 '''The path to the config file read, or an empty string if no config file was read.'''
+z: Final[str]
+'''The contents of the config file read fenced in a markdown code block, or an empty string if no config file was read. If the config file is in ``pyproject.toml`` format, this will be a synthesized JSON string containing only the :mod:`asyncutils` keys, made as compact as can be.'''
 @overload
 def r(path: int, ext: str, /) -> dict[str, Any]: ...
 @overload

@@ -7,8 +7,8 @@ concurrency: {group: pages}
 jobs:
   build:
     permissions:
-      pages: write
       id-token: write
+      pages: write
     environment:
       name: github-pages
       url: ${{steps.deploy.outputs.page_url}}
@@ -26,3 +26,4 @@ jobs:
           path: docs/build/html
       - uses: actions/deploy-pages@v5.0.0
         id: deploy
+    timeout-minutes: 5

@@ -61,10 +61,6 @@ pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir ba
 pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 goto :eof
 
-:gen-baseline
-detect-secrets scan > .secrets.baseline
-goto :eof
-
 :help
 type assets\mkhelp.txt
 goto :eof

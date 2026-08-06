@@ -34,7 +34,6 @@
 .python-version
 .readthedocs.yaml
 .ruff_cache/
-.secrets.baseline
 .uv-stamp
 .venv/
 .vscode/

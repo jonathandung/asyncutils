@@ -170,6 +170,7 @@ awrapf
 azip
 aziplongest
 backpressure
+betterleaks
 blake
 cmpeq
 codz
@@ -259,6 +260,7 @@ noncritical
 ntimes
 onfail
 opengraph
+pastebin
 pconf
 peername
 phcount

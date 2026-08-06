@@ -1,0 +1,36 @@
+name: Pattern request
+description: Ask for a new utility to be implemented
+labels: pattern
+assignees: jonathandung
+body:
+  - type: markdown
+    attributes:
+      value: If you are not adding a pattern, switch to [the feature request template](https://github.com/jonathandung/asyncutils/issues/new?template=feat.yaml).
+  - type: textarea
+    id: desc
+    attributes:
+      label: Describe the pattern
+      description: An approximate picture of how the pattern would be used.
+    validations:
+      required: true
+  - type: textarea
+    id: pitch
+    attributes:
+      label: Pitch your idea
+      description: Why is the inclusion of this tool desired? What problem does it solve? Where is it to be added?
+  - type: textarea
+    id: code
+    attributes:
+      label: Draft
+      description: Write some preliminary code for the pattern here.
+      render: python
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add visual media to help explain your features. GIFs are acceptable.
+  - type: textarea
+    id: ctx
+    attributes:
+      label: Additional context
+      description: Add any other context about the proposal here, including links.

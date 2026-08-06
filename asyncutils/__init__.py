@@ -12,7 +12,7 @@ from time import monotonic as T
 def time_since_boot(t=T(), T=T): return round(T()-t, 7)*1000 # ruff: ignore[function-call-in-default-argument]
 M['asyncutils._internal.log'] = __import__('logging').getLogger('asyncutils') # ty: ignore[invalid-assignment]
 def __getattr__(n, /, _=globals()):
-    from asyncutils._internal import initialize as I; (s := I.S).sort(); _.update(__getattr__=I.Module, __all__=I.a, submodules_map=I.s, all_symbols=s)
+    from asyncutils._internal import initialize as I; _.update(__getattr__=I.Module, __all__=I.a, submodules_map=I.s, all_symbols=I.S)
     try: return _[n]
     except KeyError: return I.Module(n)
 from asyncutils.version import VersionInfo as V # ruff: ignore[module-import-not-at-top-of-file]

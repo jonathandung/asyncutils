@@ -1,4 +1,7 @@
 name: CI
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
 on:
   push:
     branches: [main]
@@ -26,12 +29,13 @@ jobs:
         name: codecov-umbrella
         token: ${{secrets.CODECOV_TOKEN}}
         verbose: true
+    timeout-minutes: 5
   secondary:
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest, windows-latest]
         python-version: ["3.12", "3.15"]
         include:
           - os: macos-latest
@@ -44,3 +48,4 @@ jobs:
       with:
         python-version: ${{matrix.python-version}}
     - run: uv run --with ".[test]" pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
+    timeout-minutes: 5

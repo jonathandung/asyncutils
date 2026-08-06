@@ -4,7 +4,6 @@ Available targets:
  clean          - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
  docs           - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning
  gen-badges     - Run the test suite twice, exiting on any failure; generate static badges on success
- gen-baseline   - Regenerate the detect-secrets baseline at the project root
  help           - Show this help message
  install        - Install the package in editable mode with development dependencies and install prek hooks
  install-silent - Install without output

@@ -20,12 +20,13 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ## Versions
 
-### [1.0]
+### [1.1]
 
-Breaking changes:
+Breaking changes: There shouldn't be any, but I made a lot.
 
-- Declared end of life for all beta versions.
-- Included all the symbols listed in the previous section in the public API.
+### [1.1.3]
+
+Switched from detect-secrets to betterleaks.
 
 ### [1.1.2] - 2026-08-03
 
@@ -34,6 +35,13 @@ Some bug fixes and appropriate moves around submodules.
 ### [1.1.1] - skipped
 
 Switched from pre-commit to prek; removed pre-commit.ci step and replaced with a prek workflow.
+
+### [1.0]
+
+Breaking changes:
+
+- Declared end of life for all beta versions.
+- Included all the symbols listed in the previous section in the public API.
 
 ### [1.1.0] - 2026-07-11
 

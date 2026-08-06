@@ -1,0 +1,38 @@
+name: Feature request
+description: Ask for a feature or enhancement to be implemented
+labels: [feature]
+assignees: [jonathandung]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the change proposed is a major alteration, refactoring, rewrite or migration, only open the issue after sufficient prior discussion on the
+        discussion page and link to it at the bottom of the additional context section.
+        If what you're suggesting is an entire utility rather than an improvement on an existing one, you should use
+        [the pattern request template](https://github.com/jonathandung/asyncutils/issues/new?template=pattern.yaml) instead.
+  - type: textarea
+    id: desc
+    attributes:
+      label: Describe the feature
+    validations:
+      required: true
+  - type: textarea
+    id: mot
+    attributes:
+      label: Why is this feature desired?
+  - type: textarea
+    id: code
+    attributes:
+      label: Snippets
+      description: Write some code to demonstrate your feature here.
+      render: python
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add visual media to help explain your suggestion. GIFs are acceptable.
+  - type: textarea
+    id: ctx
+    attributes:
+      label: Additional context
+      description: Add any other context about the proposal here.

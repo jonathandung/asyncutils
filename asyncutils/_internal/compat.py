@@ -5,7 +5,7 @@ if d := g('TERM') == 'dumb':
     if g('FORCE_COLOR'): __import__('_warnings').warn('possibly undesired conflict in environment variables: non-empty FORCE_COLOR overrides TERM=dumb', RuntimeWarning)
     else: c = False
     if r and not b and V >= (3, 13): E['PYTHON_BASIC_REPL'] = '1'
-    (s := S.stdout).write('\x1b[?2004l'); s.flush(); del s
+    (s := S.stdout).write('\x1b[?2004l'); s.flush()
 y = () if V < (3, 15) else (frozendict(),) # ruff: ignore[undefined-name]
 if V < (3, 14): j = {}; from asyncutils._internal.py313 import * # ruff: ignore[undefined-local-with-import-star]
 else: j = {'suggest_on_error': not d, 'color': c}; from _functools import Placeholder, partial; from heapq import heapify_max as heapify, heappop_max as heappop, heappush_max as heappush, heappushpop_max as heappushpop, heapreplace_max as heapreplace

@@ -1,7 +1,6 @@
 # ruff: file-ignore[function-call-in-default-argument,magic-value-comparison]
 from asyncutils._internal.helpers import check_methods
-from asyncutils import exceptions as E
-from asyncutils._internal import patch as P
+import asyncutils.exceptions as E, asyncutils._internal.patch as P
 from asyncutils._internal.submodules import version_all as __all__
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     a, i = (r := []).append, 0
@@ -61,7 +60,7 @@ class VersionInfo(str): # ruff: ignore[subclass-builtin]
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i) # ty: ignore[unresolved-attribute]
     def assert_valid(self, _=E.VersionCorrupted):
         try:
-            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unsupported-operator,unresolved-attribute]
+            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unresolved-attribute]
         except (ValueError, TypeError, AttributeError): ...
         raise _(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))

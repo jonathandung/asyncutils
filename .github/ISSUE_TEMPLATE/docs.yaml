@@ -1,0 +1,26 @@
+name: Documentation issue
+description: Point out an issue with our documentation.
+labels: [docs]
+assignees: [jonathandung]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template applies to inconsistencies with runtime behaviour that are likely not programmatic bugs.
+        If the issue is a minor typo or tiny grammar mistake, open a PR directly. Otherwise, wait until your issue has been triaged.
+        Only report issues with the latest version of the docs, not the stable build.
+        If the referenced build is outdated by five builds or more at the time of opening, the issue will be closed.
+  - type: input
+    id: links
+    attributes:
+      label: Link to problematic documentation page
+  - type: textarea
+    id: desc
+    attributes:
+      label: Description
+      description: Describe the problem concisely.
+  - type: textarea
+    id: ctx
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.

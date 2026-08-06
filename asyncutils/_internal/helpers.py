@@ -34,7 +34,6 @@ class LoopMixinBase:
         return l
     def make(self, a, /): return self.loop.create_task(simple_wrap(a))
     def make_fut(self): return self.loop.create_future()
-    def make_multiple(self, a, /): yield from map(self.make, a)
 class Bag(dict): # ruff: ignore[subclass-builtin]
     __slots__, __setattr__, __delattr__ = (), dict.__setitem__, dict.__delitem__
     def __getattr__(self, k, /):

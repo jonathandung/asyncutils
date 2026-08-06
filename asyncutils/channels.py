@@ -46,8 +46,8 @@ class Observable(H.LoopMixinBase):
             try: await self._notify_helper(*q.get_nowait())
             except (I.QueueEmpty, C.QueueShutDown): break
     async def handle_unsubscriptions(self):
-        async with self.__l: self.__d.difference_update(s := self.__r); s.clear()
-    async def _notify_helper(self, r, a, k): await I.gather(*self.make_multiple(obs(*a, **k) for obs in self.__d.copy()), return_exceptions=r)
+        async with self.__l: self.__d -= (s := self.__r); s.clear()
+    async def _notify_helper(self, r, a, k): await I.gather(*(self.make(obs(*a, **k)) for obs in self.__d.copy()), return_exceptions=r)
     def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable', maxsize); self.__d, self.__l, self.__r, self.__q, self.__e = set(init_observers), I.Lock(), set(), None if maxsize is None else C.Queue(maxsize), I.Event()
     def __iter__(self): yield from self.__d
     async def __aenter__(self): self.__e.set(); return self

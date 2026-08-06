@@ -1,4 +1,4 @@
-.PHONY: audit docs changelog clean gen-badges gen-baseline help install install-silent lint lock pc release ruff sc tc test venv watch
+.PHONY: audit docs changelog clean gen-badges help install install-silent lint lock pc release ruff sc tc test venv watch
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -42,8 +42,6 @@ docs:
 gen-badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
-gen-baseline:
-	detect-secrets scan > .secrets.baseline
 help:
 	@cat assets/mkhelp.txt
 install: .prek-stamp .uv-stamp
