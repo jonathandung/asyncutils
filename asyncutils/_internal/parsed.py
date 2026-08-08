@@ -1,11 +1,12 @@
 from asyncutils.constants import POSSIBLE_EXECUTORS as c
 from asyncutils._internal.compat import j
 import argparse as A
-i, b, d, e, f, g, J, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', description='''Copyright (c) 2026 Jonathan Dung. All rights reserved.
+j.update(add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter)
+i, b, d, e, f, g, J, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', argument_default=A.SUPPRESS, description='''Copyright (c) 2026 Jonathan Dung. All rights reserved.
 
 A versatile, feature-rich library of async tools integrated into the asyncio framework, aiming to make asynchronous programming easier for everyone.
 Has CLI and coloured REPL support for quick development.
-On both conda and pip as py-asyncutils.''', add_help=False, argument_default=A.SUPPRESS, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter, epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
+On both conda and pip as py-asyncutils.''', epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line; this format differs from that described below.
 
 Use the AUTILSCFGPATH environment variable to specify a path to a file of a supported type containing the default configuration.
@@ -59,9 +60,18 @@ a('-P', '--pdb', action=f, help='Intended for developers of this library only; o
 (a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit.\nUseful for checking if the installation succeeded.')
 t = '-?', '-h', '--help'
 a(*t, action='help', help='Print this help message and exit.')
-s = p.add_subparsers(dest='command').add_parser('bug', help='Streamline the process of opening a bug report on GitHub.', description='''This command will print a link to open a new issue on GitHub with pre-filled information detected from the environment to stdout
-and exit, or if --open is passed, the link is opened directly using the webbrowser module.''', epilog='Some text area fields cannot be filled here, since they expect longer responses and cannot be crammed into a link, which has hard character limits.', add_help=False)
-(a := s.add_argument)('-l', '--src-link', default='', help='The permalink to the source file the bug primarily concerns, preferably HTTPS.')
-a('-o', '--open', action=f, help='Open the link in the default browser instead of printing it to the console.')
+s = p.add_subparsers(dest='command').add_parser('bug', help='Streamline the process of opening a bug report on GitHub.', description='This command will print a link to open a new issue on GitHub with pre-filled information detected from the environment to stdout\nand exit, or if --open is passed, the link is opened directly using the webbrowser module.', epilog='Some text area fields cannot be filled here, since they expect longer responses and cannot be crammed into a link, which has\nhard character limits.', **j)
+(a := s.add_mutually_exclusive_group().add_argument)('-v', '--verbose', action=f, help='Emit more output.')
+a('-q', '--quiet', action=f, help='Emit less output.')
+(a := s.add_argument)('title', nargs='?', default='', help='The title of the bug report. If not specified, the title will be left blank.')
+a('-u', '--src-url', default='', help='The permalink to the source file the bug primarily concerns. Must be a proper URL that passes urllib.parse.urlsplit validation.')
+a('-l', '--log-path', nargs='?', const='', help='The filesystem path to the logs to include in the report.')
+a('-t', '--traceback-path', nargs='?', const='', help='The filesystem path to the traceback.')
+a('-n', '--no-prefill-env', action=f, help='Do not fill the context section of the bug report with the values of environment variables that may affect ``asyncutils``.')
+a('-e', '--ensure-filled', action=f, help='Ensure that all fillable fields are filled and fail if not.')
+a('-P', '--pastebin', action=f, help='Create a public paste.rs paste for each field with long content.')
+a('-p', '--print-on-fail', action=f, help='Print the link to the console and exit with code 1 if opening it in a browser fails.')
+a('-i', '--interactive', action=f, help='Prompt the user to enter missing fields interactively. Will also prompt for log and traceback if ')
+a('-o', '--open', nargs='?', const=None, default=NotImplemented, metavar='BROWSER', help='Open the link in a browser instead of printing it to the console.')
 a(*t, action='help', help='Print this help message and exit.')
 del a, b, c, d, e, f, g, h, i, j, s, t, J, A

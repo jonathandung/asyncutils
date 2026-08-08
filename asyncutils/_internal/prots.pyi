@@ -86,7 +86,7 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
     @overload
     def throw(self, exc: BaseException, val: None=..., tb: TracebackType|None=..., /) -> T: ...
-    def close(self) -> R|None: ...
+    def close(self) -> R|None: ... # ty: ignore[invalid-method-override]
     @property
     def gi_code(self) -> CodeType: ...
     @property
@@ -375,12 +375,14 @@ class FaultyConfigA(FaultyConfig):
     @property
     def correct(self) -> tuple[str, ...]: ...
 @type_check_only
-class FaultyConfigB[T, R: type|tuple[type, ...]](FaultyConfig):
+class FaultyConfigB[T, R: TypeOrTuple](FaultyConfig):
     '''For better type checking. Unstable.'''
     @property
     def wrong(self) -> T: ...
     @property
     def correct(self) -> R: ...
+type TypeOrTuple[T] = type[T]|tuple[type[T], ...]
+'''Self-explanatory.'''
 type Diff[T, R] = FirstMisMatch[T, R]|Shorter[T]|Longer[R]
 '''Return type of :func:`~asyncutils.iters.diff_with`.'''
 type Proxy[T] = FuncProxy[T]|FuncWrapper[T]
@@ -407,7 +409,7 @@ type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing one of the operators < and >.'''
 type ExcType = type[BaseException]
 '''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__` methods.'''
-type CanExcept = ExcType|tuple[ExcType, ...]
+type CanExcept = TypeOrTuple[BaseException]
 '''The type of objects that may follow an except statement.'''
 type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
 '''A slice with start, stop and step being integers or ``None``, representing a slice that typical sequences supporting slicing should accept.'''

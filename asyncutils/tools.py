@@ -7,7 +7,8 @@ def loadf(p, e=None, /, l=I.unparsed.r, _=I.helpers.fullname):
     return l(p.decode() if isinstance(p, bytes) else p, e)
 def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
     f = (R := []).append
-    if s := (p := (m := loadf(p)).pop)('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
+    if (p := (m := loadf(p)).pop)('command', None) is not None: raise TypeError('asyncutils.tools.json_to_argv: unexpected key "command" in config file')
+    if s := p('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
     if (l := p('max_memory_errors', None)) != 3: f('-m'); f(str(l)) # ruff: ignore[magic-value-comparison]
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
     if (l := p('logging_to', s := 'STDERR')) == 'NULL' or p('no_log', False): f('-n')

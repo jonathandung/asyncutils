@@ -1,7 +1,7 @@
 name: Pattern request
 description: Ask for a new utility to be implemented
-labels: pattern
-assignees: jonathandung
+labels: [pattern]
+assignees: [jonathandung]
 body:
   - type: markdown
     attributes:

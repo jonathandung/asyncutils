@@ -4,7 +4,6 @@ from .exceptions import IgnoreErrors
 from asyncio import AbstractEventLoop, BoundedSemaphore, Event, Future, Lock, Semaphore, Task
 from collections.abc import AsyncIterable, Awaitable, Callable, Iterable
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
-from ty_extensions import Not
 from types import CoroutineType, GeneratorType
 from typing import Any, Literal, Never, overload
 __all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'make_task_factory', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
@@ -30,13 +29,13 @@ def done_fut(exc: ExceptionWrapper, /, *, futcls: type[FutProtocol[Any]]) -> Inc
 @overload
 def done_fut(res: None=..., *, futcls: type[FutProtocol[Any]]) -> IncompleteFut[None]: ...
 @overload
-def done_fut[T: Not[ExceptionWrapper]](res: T, *, futcls: type[FutProtocol[Any]]) -> IncompleteFut[T]: ...
+def done_fut[T](res: T, *, futcls: type[FutProtocol[Any]]) -> IncompleteFut[T]: ...
 @overload
 def done_fut(exc: ExceptionWrapper, /) -> Future[Never]: ...
 @overload
 def done_fut(res: None=...) -> Future[None]: ...
 @overload
-def done_fut[T: Not[ExceptionWrapper]](res: T) -> Future[T]: '''Return a future that is already done with the result ``res`` or the exception wrapped by the wrapper ``exc`` if it is an exception wrapper returned by :func:`~asyncutils.exceptions.wrap_exc`, with type ``futcls`` if passed and :class:`asyncio.Future` by default.'''
+def done_fut[T](res: T) -> Future[T]: '''Return a future that is already done with the result ``res`` or the exception wrapped by the wrapper ``exc`` if it is an exception wrapper returned by :func:`~asyncutils.exceptions.wrap_exc`, with type ``futcls`` if passed and :class:`asyncio.Future` by default.'''
 def get_future[T](aw: Awaitable[T], loop: AbstractEventLoop|None=...) -> Future[T]:
     '''
     | Wrap an arbitrary awaitable ``aw`` in a task under ``loop``, creating one and setting if required, and begin waiting on it.

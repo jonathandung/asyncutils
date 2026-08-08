@@ -43,7 +43,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.1.2, with [all stable version tags up to now](https://github.com/jonathandung/asyncutils/tags) attached for your reference.
+This is asyncutils v1.1.3, with [all stable version tags up to now](https://github.com/jonathandung/asyncutils/tags) attached for your reference.
 
 ## Configuration
 

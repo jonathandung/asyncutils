@@ -51,7 +51,12 @@ The below environment variables directly affect what this library does, mostly i
   The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses :mod:`!_colorize` under the hood,
   may. To avoid this inconsistency, do not use it to customize :mod:`asyncutils`'s colouring.
 
-.. note:: Below Python 3.13, the output of the REPL does not highlight language keywords, only the prompt.
+.. note:: Below Python 3.14, the output of the REPL does not highlight language keywords, only the prompt.
+
+.. envvar:: BROWSER
+
+  Queried implicitly by ``asyncutils bug --open`` to choose the browser to open the bug report in if the browser type is not appended, as well as
+  :func:`~asyncutils.tools.open_help` for the same purpose.
 
 .. seealso::
 

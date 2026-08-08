@@ -84,9 +84,12 @@ inspiration.
   * - asyncutils.channels.EventBus.event_stream
     - ``addr``: :class:`int`, ``event_type``: ``str|None``
     - Raised when the :meth:`~channels.EventBus.event_stream` method of :class:`channels.EventBus` is called. ``addr`` is the memory address of the instance, and ``event_type`` is the event type the stream was opened for or ``None`` for catch-all streams.
+  * - asyncutils.cli.bug
+    - ``url``: :class:`str`
+    - Raised when the command-line interface of this library is invoked with the ``--bug`` option, where ``url`` is the synthesized URL to open the issue.
   * - asyncutils.cli.run
     - \
-    - Raised with no arguments when the command-line interface of this library is first invoked through the entry point ``asyncutils``, even if just asking for the version or help.
+    - Raised with no arguments when the REPL of this library is invoked through the entry point ``asyncutils``.
   * - asyncutils.compete.first_completed/start
     - ``ntasks``: :class:`int`
     - Raised when :func:`compete.first_completed` is called, with ``ntasks`` coroutines.

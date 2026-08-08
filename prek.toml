@@ -15,16 +15,6 @@ rev = "v0.25"
 hooks = [{id = "validate-pyproject"}]
 
 [[repos]]
-repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.1"
-hooks = [{id = "ruff-check"}]
-
-[[repos]]
-repo = "https://github.com/astral-sh/ty-pre-commit"
-rev = "v0.0.69"
-hooks = [{id = "ty"}]
-
-[[repos]]
 repo = "https://github.com/betterleaks/betterleaks"
 rev = "v1.7.3"
 hooks = [{id = "betterleaks"}]

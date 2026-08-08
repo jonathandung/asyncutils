@@ -20,9 +20,9 @@ jobs:
         exempt-draft-pr: true
         exempt-issue-labels: need-help,pinned
         exempt-pr-labels: need-help
-        stale-issue-label: stale-issue
+        stale-issue-label: stale
         stale-issue-message: This issue has been marked as stale due to inactivity.
-        stale-pr-label: stale-pr
+        stale-pr-label: stale
         stale-pr-message: This pull request has been marked as stale due to inactivity.
     timeout-minutes: 5
   lock:

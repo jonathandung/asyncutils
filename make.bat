@@ -27,22 +27,14 @@ call :.uv-stamp
 uv audit --preview-features audit-command
 goto :eof
 
-:docs
-powershell -ExecutionPolicy ByPass -File ".\scripts\win\genhelp.ps1"
-powershell -ExecutionPolicy ByPass -File ".\scripts\win\genmakefileusage.ps1"
-cd docs
-shift
-set "REST_ARGS="
-:__loop
-if "%~1"=="" (
-    if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
-    set O=-W %REST_ARGS%
-    make html
-    goto :eof
-)
-set "REST_ARGS=!REST_ARGS! %1"
-shift
-goto __loop
+:badges
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
+pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
+goto :eof
+
+:bug
+asyncutils bug --open %O%
+goto :eof
 
 :changelog
 :: cspell:disable-next-line
@@ -56,10 +48,25 @@ for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
 del /s /q *.pyc *.pyo *.pyd *.pyz 2>nul
 goto :eof
 
-:gen-badges
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
-pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
-goto :eof
+:docs
+powershell -ExecutionPolicy ByPass -File ".\scripts\win\genhelp.ps1"
+powershell -ExecutionPolicy ByPass -File ".\scripts\win\genmakefileusage.ps1"
+cd docs
+shift
+set "__O=%O%"
+set "REST_ARGS="
+:__loop
+if "%~1"=="" (
+    if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
+    set "O=-W %REST_ARGS% %__O%"
+    set "__O="
+    set "REST_ARGS="
+    make html
+    goto :eof
+)
+set "REST_ARGS=!REST_ARGS! %1"
+shift
+goto __loop
 
 :help
 type assets\mkhelp.txt

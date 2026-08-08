@@ -15,7 +15,7 @@ if not C.basic_repl:
 _s = object()
 _f = '',
 class ConsoleBase(B, metaclass=abc.ABCMeta):
-    LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_type_cache' if S.version_info < (3, 13) else '_clear_internal_caches', None), g=__import__('gc').collect, d=log.debug: (f and f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
+    LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_type_cache' if S.version_info < (3, 13) else '_clear_internal_caches', None) if S.version_info < (3, 16) else None, g=__import__('gc').collect, d=log.debug: (None if f is None else f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
     if C.basic_repl: CAN_USE_PYREPL, STATEMENT_FAILED = False, None # pragma: no cover
     else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
     def __init__(self, mod=None, modname=None, *, context_factory=__import__('contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # ruff: ignore[mutable-argument-default]

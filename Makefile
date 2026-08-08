@@ -1,7 +1,7 @@
-.PHONY: audit docs changelog clean gen-badges help install install-silent lint lock pc release ruff sc tc test venv watch
+.PHONY: audit badges bug changelog clean docs help install install-silent lint lock pc release ruff sc tc test venv watch
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
-O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
 .prek-stamp:
 	@if command -v prek >/dev/null 2>&1; then true;
 	elif command -v curl >/dev/null 2>&1; then
@@ -28,6 +28,11 @@ O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 	touch .uv-stamp
 audit: .uv-stamp
 	uv audit --preview-features audit-command
+badges:
+	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
+	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
+bug:
+	asyncutils bug --open $(O)
 changelog:
 # cspell:disable-next-line
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -39,9 +44,6 @@ docs:
 	. scripts/unix/genhelp.sh
 	. scripts/unix/genmakefileusage.sh
 	make -C docs html -W
-gen-badges:
-	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
-	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 help:
 	@cat assets/mkhelp.txt
 install: .prek-stamp .uv-stamp

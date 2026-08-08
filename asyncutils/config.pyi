@@ -1,5 +1,5 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.prots import PartialInterface, FaultyConfigA, FaultyConfigB, ExcType
+from ._internal.prots import PartialInterface, FaultyConfigA, FaultyConfigB, ExcType, TypeOrTuple
 from concurrent.futures import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload
@@ -9,7 +9,7 @@ class FaultyConfig(BaseException):
     @overload
     def __init__(self: FaultyConfigA, key: str, wrong: str, correct: tuple[str, ...], /): ...
     @overload
-    def __init__[T, R: type|tuple[type, ...]](self: FaultyConfigB[T, R], key: str, wrong: T, correct: R, /): ...
+    def __init__[T, R: TypeOrTuple](self: FaultyConfigB[T, R], key: str, wrong: T, correct: R, /): ...
     @property
     def key(self) -> str: ...
 class Executor(_, PartialInterface):

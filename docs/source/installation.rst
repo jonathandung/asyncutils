@@ -12,7 +12,7 @@ The REPL starts with the following banner:
 
 .. code-block:: text
 
-  asyncutils REPL (version 1.1.2) running on linux
+  asyncutils REPL (version 1.1.3) running on linux
   Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
   asyncutils is a multi-purpose and efficient asynchronous utilities library.
   You can use await statements directly instead of asyncio.run for quick testing.
@@ -120,11 +120,13 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, themes, json5, test, tools.
+* dev: Packages one would want installed for development; superset of docs, themes, json5, req (implicitly), test, tools.
 * docs: Documentation dependencies, including Sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
+* req: The requests library, required when filing bug reports using the pastebin option.
 * test: Test dependencies, including pytest and related plugins
-* themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.
+* themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs and
+  req (implicitly).
