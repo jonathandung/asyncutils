@@ -28,7 +28,6 @@ A disabled logger is still created to make subsequent logging.getLogger calls re
 Thus, this option cannot avoid the cost of importing logging and instantiating the logger early on.''')
 (a := h())('-e', '--executor', choices=c, metavar=J, help='''Choose an executor class to use when necessary depending on the value of ETYP as follows:
 thread: Use concurrent.futures.thread.ThreadPoolExecutor. This is the default and will be used if the third-party options are passed but not installed.
-The below options are experimental.
 process: Use concurrent.futures.process.ProcessPoolExecutor. Use with care, since this depends on CPU architecture.
 interpreter: Use concurrent.futures.interpreter.InterpreterPoolExecutor. May throw various errors relating to unshareable objects.
 The below options are third-party.
@@ -60,7 +59,7 @@ a('-P', '--pdb', action=f, help='Intended for developers of this library only; o
 (a := h('metadata', 'Get basic information about this installation of asyncutils.'))('-v', '--version', action='version', version=__import__('asyncutils').__version__.representation, help='Print the current version number of asyncutils, in the form as specified by __version__.representation, and exit.\nUseful for checking if the installation succeeded.')
 t = '-?', '-h', '--help'
 a(*t, action='help', help='Print this help message and exit.')
-s = p.add_subparsers(dest='command').add_parser('bug', help='Streamline the process of opening a bug report on GitHub.', description='This command will print a link to open a new issue on GitHub with pre-filled information detected from the environment to stdout\nand exit, or if --open is passed, the link is opened directly using the webbrowser module.', epilog='Some text area fields cannot be filled here, since they expect longer responses and cannot be crammed into a link, which has\nhard character limits.', **j)
+s = p.add_subparsers(title='subcommands', dest='command').add_parser('bug', help='Streamline the process of opening a bug report on GitHub.', description='This command will print a link to open a new issue on GitHub with pre-filled information detected from the environment to stdout\nand exit, or if --open is passed, the link is opened directly using the webbrowser module.', epilog='Some text area fields cannot be filled here, since they expect longer responses and cannot be crammed into a link, which has hard character limits.', **j)
 (a := s.add_mutually_exclusive_group().add_argument)('-v', '--verbose', action=f, help='Emit more output.')
 a('-q', '--quiet', action=f, help='Emit less output.')
 (a := s.add_argument)('title', nargs='?', default='', help='The title of the bug report. If not specified, the title will be left blank.')

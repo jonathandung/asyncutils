@@ -16,7 +16,7 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### Docs
 
-98% complete
+97% complete
 
 ## Versions
 
@@ -24,17 +24,21 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 Breaking changes: There shouldn't be any, but I made a lot.
 
-### [1.1.3] - 2026-08-12
+### [1.1.3] - 2026-08-13
 
-Switched from detect-secrets to betterleaks.
+Switched from detect-secrets to betterleaks; added `asyncutils bug` subcommand.
 
 ### [1.1.2] - 2026-08-03
 
-Some bug fixes and appropriate moves around submodules.
+Some bug fixes and moves around submodules.
 
 ### [1.1.1] - skipped
 
 Switched from pre-commit to prek; removed pre-commit.ci step and replaced with a prek workflow.
+
+### [1.1.0] - 2026-07-11
+
+Semantic versioning be damned! No one uses this project anyway.
 
 ### [1.0]
 
@@ -42,10 +46,6 @@ Breaking changes:
 
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
-
-### [1.1.0] - 2026-07-11
-
-Semantic versioning be damned! No one uses this project anyway.
 
 ### [1.0.2] - skipped
 
@@ -547,7 +547,7 @@ Added more tests and more badges to the readme; removed codecov upload step supe
 
 #### [0.9.8] - 2026-05-23
 
-Added the genmakefileusage scripts, among some rewrites, most notably eliminating instances of a bare `Any` annotating an argument.
+Eliminated instances of bare `Any` used to annotate arguments.
 
 #### [0.9.7] - 2026-05-21
 

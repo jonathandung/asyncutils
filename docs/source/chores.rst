@@ -76,7 +76,7 @@ For collaborators and those interested, this is the general procedure:
 5. Edit the definition of :func:`~asyncutils.tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as
    promised.
 6. Update the literalinclude's in logging.rst with the line numbers jotted down from steps 2 and 4.
-7. Execute the platform-suitable genhelp script without committing the outputs. This serves as a sanity check.
+7. Run ``make docs`` and look at the help pages in the generated documentation as a sanity check.
 
 Adding a new contextual constant
 --------------------------------
@@ -142,19 +142,15 @@ Adding a documentation page
 Changing help messages for command-line arguments
 -------------------------------------------------
 
-Remember not to indent the help strings when using multiline strings; keep them at the left margin such that they display correctly.
-
-If you want to preview the changes to the argument parser help in the form of an HTML page, run ``./scripts/unix/genhelp.sh`` on Unix or
-``.\scripts\win\genhelp.ps1`` on Windows before running the sphinx-build command. Do not, however, commit the resultant file.
+Remember not to indent the help strings when using multiline strings; keep them at the left margin such that they display correctly. Then run
+``make docs`` as a sanity check.
 
 Modifying the Makefile
 ----------------------
 
 Remember to sync up the Makefile with ``make.bat`` in the same directory, and vice versa. If you wish to remove a target, it must have exceeded a
-previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output.
-
-If you want to preview the changes to the help message in the form of the eventually created page, run ``./scripts/unix/genmakefileusage.sh`` on
-Unix or ``.\scripts\win\genmakefileusage.ps1`` on Windows before running ``sphinx-build``. Do not, however, commit the resultant file.
+previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output. Then
+run ``make docs`` as a sanity check.
 
 Adding tests
 ------------

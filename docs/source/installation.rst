@@ -120,13 +120,11 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, themes, json5, req (implicitly), test, tools.
+* dev: Packages one would want installed for development; superset of docs, themes, json5, test, tools.
 * docs: Documentation dependencies, including Sphinx and some of its plugins, along with sphinx-lint
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
 * ptw: Monitor test failures on the command line while editing code through pytest-watch
-* req: The requests library, required when filing bug reports using the pastebin option.
 * test: Test dependencies, including pytest and related plugins
-* themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs and
-  req (implicitly).
+* themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.

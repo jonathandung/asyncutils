@@ -32,6 +32,7 @@ build/
 coverage.xml
 dist/
 docs/source/api/
+docs/source/bug-help.rst
 docs/source/help.rst
 docs/source/makefile-usage.rst
 eggs/

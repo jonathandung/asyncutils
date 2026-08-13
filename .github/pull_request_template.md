@@ -12,12 +12,12 @@
 
 - [] The pull request title is descriptive.
 - [] The title is prefixed with one of "bugfix", "docs", "deps", "feat", "pattern", "tests", followed by a colon.
-- [] The full expanse of the title fits in the box without scrolling to the right.
+- [] The entirety of the title fits in the dialog box.
 
 ### For documentation PRs
 
-- [] Local Sphinx build passes.
-- [] I have refrained from touching `docs/source/conf.py` unless absolutely necessary.
+- [] Local Sphinx build passes, according to ``make docs``.
+- [] Made as little modifications to `docs/source/conf.py` as possible.
 
 ### For small PRs
 

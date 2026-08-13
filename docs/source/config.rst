@@ -78,12 +78,7 @@ Some arguments consumed by the Python interpreter are also taken into account by
     ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace
 
 * ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this relationship out-of-the-box; documented here for completeness)
-* ``-i`` - Always make the console interactive even if standard input is not a TTY
-
-  .. warning::
-    A piped standard input will cause deadlocks or fail for most shells, and this flag might worsen the situation. It is thus declared experimental
-    and unstable; you might see this anomaly vanish after a single patch version, or in a push that does not even bump the patch.
-
+* ``-i`` - Always make the console interactive even if standard input is not a TTY (not recommended)
 * ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``
 
 .. tip::

@@ -7,8 +7,7 @@ build:
   tools: {python: "3.14"}
   jobs:
     post_create_environment:
-      - scripts/unix/genhelp.sh
-      - scripts/unix/genmakefileusage.sh
+      - scripts/generate.sh
       - |
         for p in AI_USAGE_POLICY.md:ai-use.md CHANGELOG.md:changelog.md CODE_OF_CONDUCT.md:conduct.md COMPATIBILITY.rst:compat.rst CONTRIBUTING.md:contributing.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
           do cp "${p%:*}" "docs/source/${p#*:}";
