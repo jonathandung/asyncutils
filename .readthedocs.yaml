@@ -7,10 +7,10 @@ build:
   tools: {python: "3.14"}
   jobs:
     post_create_environment:
+      - python3 -m pip install -e .[themes]
       - scripts/generate.sh
       - |
         for p in AI_USAGE_POLICY.md:ai-use.md CHANGELOG.md:changelog.md CODE_OF_CONDUCT.md:conduct.md COMPATIBILITY.rst:compat.rst CONTRIBUTING.md:contributing.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
           do cp "${p%:*}" "docs/source/${p#*:}";
           done
 formats: [htmlzip, pdf]
-python: {install: [{path: ., extra_requirements: [themes]}]}

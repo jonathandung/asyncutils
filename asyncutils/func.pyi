@@ -1,5 +1,5 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryRV, EveryMethodRV, ExceptionWrapper, SupportsIteration, Timer, ToSyncFromLoopRV
+from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryRV, EveryMethodRV, ExceptionWrapper, SupportsIteration, StarRV, Timer, ToSyncFromLoopRV
 from asyncio import AbstractEventLoop, Future
 from collections.abc import Awaitable, Callable, Iterable, Mapping
 from ty_extensions import JustFloat
@@ -13,8 +13,11 @@ async def areduce[T](f: Callable[..., object], it: SupportsIteration[Never], ini
 async def areduce[T, R](f: Callable[[T, R], Awaitable[T]], it: SupportsIteration[R], initial: T=..., *, await_: Literal[True]=...) -> T: ...
 @overload
 async def areduce[T, R](f: Callable[[T, R], T], it: SupportsIteration[R], initial: T=..., *, await_: Literal[False]) -> T: '''Async version of :func:`functools.reduce` that takes an async function and possibly async iterable. If the function is sync or the return value is not meant to be awaited, specify ``await_=False``.'''
-def star[T](f: Callable[..., Awaitable[T]], /) -> Callable[[Iterable[Any], Mapping[str, Any]], CoroutineType[Any, Any, T]]: '''Convert a function taking variadic parameters and returning an awaitable into a coroutine function taking two arguments: an iterable of positional arguments and a mapping of keyword arguments.'''
-def unstar[T](f: Callable[[Iterable[Any], Mapping[str, Any]], Awaitable[T]], /) -> Callable[..., CoroutineType[Any, Any, T]]: '''Undo the effect of :func:`star`.'''
+def star[T, **P](f: Callable[P, Awaitable[T]], /) -> StarRV[T, P]: '''Convert a function taking variadic parameters and returning an awaitable into a coroutine function taking two arguments: an iterable of positional arguments and a mapping of keyword arguments.'''
+@overload
+def unstar[T, **P](f: StarRV[T, P], /) -> Callable[P, CoroutineType[Any, Any, T]]: ...
+@overload
+def unstar[T](f: Callable[[tuple[object, ...], dict[str, object]], Awaitable[T]], /) -> Callable[..., CoroutineType[Any, Any, T]]: '''Undo the effect of :func:`star`.'''
 def evaluate_and_return[T, **P](f: Callable[P, Awaitable[object]], r: T, /) -> Callable[P, CoroutineType[Any, Any, T]]: '''Return an async function with the same signature as ``f`` that awaits the result of ``f`` and returns ``r``.'''
 def discard_retval[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, None]]: '''Return an async function with the same signature as ``f`` that awaits the result of ``f`` and discards it.'''
 def afcopy[T, **P](f: Callable[P, Awaitable[T]], /) -> Callable[P, CoroutineType[Any, Any, T]]: '''Return a copy of the async function ``f`` with the same signature and attributes.'''

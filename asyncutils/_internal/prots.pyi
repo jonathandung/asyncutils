@@ -20,7 +20,7 @@ from ..iotools import AsyncReadWriteCouple
 from ..iters import FirstMisMatch, Longer, Shorter
 import asyncio as aio, concurrent.futures as cf, sys, ty_extensions as tyx
 from _typeshed import Incomplete
-from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator
+from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator, Mapping
 from contextlib import AbstractContextManager, AbstractAsyncContextManager
 from contextvars import Context
 from io import TextIOWrapper
@@ -408,8 +408,12 @@ class BugArgs(Protocol):
     def print_on_fail(self) -> bool: ...
     @property
     def open(self) -> str|NotImplementedType|None: ...
+@type_check_only
+class StarRV[T, **P](Protocol):
+    '''Return type of :func:`~asyncutils.func.star`.'''
+    async def __call__(self, a: SupportsIteration[Any]=..., k: Mapping[str, Any]|None=..., /) -> T: ...
 type TypeOrTuple[T] = type[T]|tuple[type[T], ...]
-'''Self-explanatory.'''
+'''The type of the type parameter passed, or a tuple thereof.'''
 type Diff[T, R] = FirstMisMatch[T, R]|Shorter[T]|Longer[R]
 '''Return type of :func:`~asyncutils.iters.diff_with`.'''
 type Proxy[T] = FuncProxy[T]|FuncWrapper[T]

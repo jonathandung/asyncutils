@@ -94,11 +94,11 @@ class Debugging:
         if self.entered: _l.warning('config.Debugging: context manager already entered')
         else:
             self.orig_name, self.orig_level = _m(l := _l.level), l; _s(_d)
-            if l != _d: _l.debug('config.Debugging: debug mode entered')
+            if l != _d: _l.debug('config.Debugging: entered debug mode')
         return self
     def __exit__(self, /, *_, _s=set_logger_level, _l=l, _L=10):
         if not self.entered: return _l.warning('config.Debugging: context manager not entered')
-        if (l := self.orig_level) != _l.level == _L: _l.debug('config.Debugging: exiting debug mode'); _s(l)
+        if (l := self.orig_level) != _l.level == _L: _l.debug('config.Debugging: exited debug mode'); _s(l)
         else: _l.warning('config.Debugging: user already exited debug mode; original level was %s', self.orig_name)
         self.orig_name = self.orig_level = None
     def __repr__(self): return f'<asyncutils debug mode context manager (entered: {self.entered}) at {id(self):#x}>'

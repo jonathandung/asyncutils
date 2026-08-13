@@ -16,18 +16,19 @@ class Observable(H.LoopMixinBase):
     @property
     def notifying(self): return not self.idle
     async def notify(self, *a, _ret_exc_=False, **k):
-        if not self: return
+        if not self.__d: return
         async with self.__l:
             if self.notifying:
-                if (q := self.__q) is None: await self.wait_until_idle()
-                else: await q.put((_ret_exc_, a, k)); return
+                if (q := self.__q) is not None: await q.put((_ret_exc_, a, k)); return
+                await self.wait_until_idle()
             self.__e.clear()
         try: await self._notify_helper(_ret_exc_, a, k); await self.handle_notifications()
         finally: self.__e.set(); await self.handle_unsubscriptions()
     async def notify_sequential(self, *a, _silent_=False, _persistent_=False, **k):
-        for observer in self.__d.copy():
-            try: yield await observer(*a, **k)
-            except Exception:
+        for o in self.__d.copy():
+            try: yield await o(*a, **k)
+            except A.CRITICAL: raise
+            except: # ruff: ignore[bare-except]
                 if _silent_:
                     if _persistent_: continue
                     break
@@ -42,8 +43,9 @@ class Observable(H.LoopMixinBase):
     async def subscribe(self, observer): await self.wait_until_idle(); return self.subscribe_nowait(observer)
     async def unsubscribe(self, observer, strict=False): await self.wait_until_idle(); self.unsubscribe_nowait(observer, strict)
     async def handle_notifications(self):
-        while (q := self.__q) is not None:
-            try: await self._notify_helper(*q.get_nowait())
+        if self.__q is None: return
+        while True:
+            try: await self._notify_helper(*self.__q.get_nowait())
             except (I.QueueEmpty, C.QueueShutDown): break
     async def handle_unsubscriptions(self):
         async with self.__l: self.__d -= (s := self.__r); s.clear()
@@ -51,7 +53,7 @@ class Observable(H.LoopMixinBase):
     def __init__(self, init_observers=(), maxsize=0): audit('asyncutils.channels.Observable', maxsize); self.__d, self.__l, self.__r, self.__q, self.__e = set(init_observers), I.Lock(), set(), None if maxsize is None else C.Queue(maxsize), I.Event()
     def __iter__(self): yield from self.__d
     async def __aenter__(self): self.__e.set(); return self
-    async def __aexit__(self, *_): await I.gather(self.handle_notifications(), self.handle_unsubscriptions())
+    async def __aexit__(self, /, *_): await I.gather(self.handle_notifications(), self.handle_unsubscriptions())
     def start_accumulation(self): return self.restart_accumulation() or True if self.__q is None else False
     async def restart_accumulation(self, flush=True):
         if flush: await self.handle_notifications()
@@ -61,7 +63,7 @@ class Observable(H.LoopMixinBase):
         if asap and self.__e.is_set(): self.unsubscribe_nowait(observer)
         else: self.__r.add(observer)
     def unsubscribe_nowait(self, observer, strict=False): getattr(self.__d, 'remove' if strict else 'discard')(observer)
-    def subscribe_sync_func(self, observer): return self.subscribe_nowait(A.to_async(observer))
+    def subscribe_sync_observer(self, observer): return self.subscribe_nowait(A.to_async(observer))
     def ntimes(self, observer, n=None):
         if n is None: n = A.getcontext().OBSERVABLE_DEFAULT_NTIMES_N
         if n <= 0: raise ValueError('asyncutils.channels.Observable.ntimes: n must be positive')
@@ -106,17 +108,17 @@ class Observable(H.LoopMixinBase):
             if (c := key(*a, **k)) != l: l = c; await f(a, k)
         self.subscribe_nowait(distinct); return _
     def fork(self, ret_exc=False): self.subscribe_nowait(partial((_ := type(self)()).notify, _ret_exc_=ret_exc)); return _
-    def merge(*obs, ret_exc=False):
-        p = partial((_ := type(obs[0])()).notify, _ret_exc_=ret_exc)
-        for o in obs: o._data.add(p)
+    def merge(*O, ret_exc=False):
+        p = partial((_ := type(O[0])()).notify, _ret_exc_=ret_exc)
+        for o in O: o.__d.add(p)
         return _
 class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     __slots__ = '_auditing', '_handler', '_is_shutdown', '_lock', '_middlewares', '_published', '_publishers', '_sem', '_subscribers', '_tracking', 'auditor', 'name'
-    def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False):
+    def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False, evs_bufsize=None):
         if max_concurrent is None: max_concurrent = A.getcontext().EVENT_BUS_DEFAULT_MAX_CONCURRENT
         def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):
             if f(): _(*a)
-        audit('asyncutils.channels.EventBus', name, id(self)); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), [], set(), f'{H.fullname(self)} {name or f'#{__class__.__inc_cnt()}'}', I.Lock(), False, handler or (lambda _: None), I.Semaphore(max_concurrent), False, tracking_stats, WeakSet()
+        audit('asyncutils.channels.EventBus', name, id(self)); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self.stream_queue, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), [], set(), f'{H.fullname(self)} {name or f'#{__class__.__inc_cnt()}'}', I.Lock(), False, handler or (lambda _: None), I.Semaphore(max_concurrent), False, tracking_stats, C.Queue(A.getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if evs_bufsize is None else evs_bufsize), WeakSet()
     def raise_for_shutdown(self):
         if self._is_shutdown: raise A.BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -125,7 +127,7 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     def subscribers_for(self, event_type): return self._subscribers[event_type].copy()
     def events(self): (s := set(self._subscribers)).discard(None); return s
     def has_subscribers(self, event_type): return bool(self._subscribers[event_type])
-    def is_subscribed(self, subscriber, event_type=_NO_DEFAULT): return any(subscriber in i for i in self._subscribers.values()) if event_type is _NO_DEFAULT else subscriber in self._subscribers.get(event_type, ())
+    def is_subscribed(self, s, /, event_type=_NO_DEFAULT): return any(s in i for i in self._subscribers.values()) if event_type is _NO_DEFAULT else s in self._subscribers.get(event_type, ())
     @property
     def total_subscribers(self): return sum(map(len, self._subscribers.values()))
     @property
@@ -134,12 +136,6 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     def wildcard_count(self): return len(self._subscribers[None])
     @property
     def active_tasks(self): return self._sem._value
-    @property
-    def stream_queue(self):
-        if (r := getattr(self, '_stream_queue', None)) is None: self._stream_queue = r = C.Queue()
-        return r
-    @stream_queue.setter
-    def stream_queue(self, val, /): self._stream_queue = val
     def is_auditing(self): return self._auditing
     auditing = property(is_auditing, lambda self, v, /: (self.start_audit if v else self.stop_audit)())
     def start_audit(self):
@@ -156,26 +152,20 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     def add_temp_middleware(self, middleware, until): self._middlewares.append((middleware, until))
     @(c := A.dualcontextmanager(use_existing_executor=False, create_executor=False, strict=False))
     def audit_context(self):
-        o = not self._auditing
-        try:
-            if o: self.start_audit()
-            yield
-        finally:
-            if o: self.stop_audit()
+        if self._auditing: yield; return
+        try: self.start_audit(); yield
+        finally: self.stop_audit()
     @c
     def tracking_context(self, stats_receiver=None):
-        o = not self._tracking
-        try:
-            if o: self.start_tracking()
-            yield
-        finally:
-            if o: self.stop_tracking() if stats_receiver is None else stats_receiver.set_result(self.stop_tracking(True))
+        if self._tracking: yield; return
+        try: self.start_tracking(); yield
+        finally: self.stop_tracking() if stats_receiver is None else stats_receiver.set_result(self.stop_tracking(True))
     def start_tracking(self): self._tracking = True
     def stop_tracking(self, ret_stats=False): self._tracking = False; return H.copy_and_clear(self._published) if ret_stats else self._published.clear()
-    def subscribe(self, subscriber, /, event_type=None): self.raise_for_shutdown(); self._subscribers[event_type].add(subscriber); return subscriber
-    def unsubscribe(self, subscriber, /, event_type=None):
+    def subscribe(self, s, /, event_type=None): self.raise_for_shutdown(); self._subscribers[event_type].add(s); return s
+    def unsubscribe(self, s, /, event_type=None):
         self.raise_for_shutdown()
-        try: self._subscribers[event_type].remove(subscriber); return True
+        try: self._subscribers[event_type].remove(s); return True
         except KeyError: return False
     def on(self, event_type): return partial(self.subscribe, event_type=event_type)
     def subscriber_count(self, event_type): return len(self._subscribers[event_type])
@@ -213,24 +203,24 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
             if I.iscoroutine(c := condition(d)): c = await c
             if c: F.set_result(d)
         return self.make(I.wait_for(await self.subscribe_until(F := self.loop.create_future(), handler, event_type), timeout))
-    def subscribe_until(self, fut, subscriber, event_type=None, *, till_permanent=None, _=A.ignore_cancellation.combined(TimeoutError)): # ruff: ignore[function-call-in-default-argument]
-        if fut.done(): raise RuntimeError('asyncutils.channels.EventBus.subscribe_until: future is already done')
-        async def f():
-            with _: r = await I.wait_for(fut, till_permanent); self.unsubscribe(subscriber, event_type); return r
-        self.subscribe(subscriber, event_type); return self.make(f())
+    def subscribe_until(self, f, s, /, event_type=None, *, till_permanent=None, _=A.ignore_cancellation.combined(TimeoutError)): # ruff: ignore[function-call-in-default-argument]
+        if f.done(): raise RuntimeError('asyncutils.channels.EventBus.subscribe_until: future is already done')
+        async def g():
+            with _: r = await I.wait_for(f, till_permanent); self.unsubscribe(s, event_type); return r
+        self.subscribe(s, event_type); return self.make(g())
     async def feed_event(self, *d, timeout=None):
         if (q := self.stream_queue).full(): L.warning('%s: event stream buffer full', self.name)
         try: await I.wait_for(q.put(d[0] if len(d) == 1 else d), timeout)
         except C.QueueShutDown: L.info('%s: event stream is closing', self.name, exc_info=True)
         except TimeoutError:
             if q.full(): L.warning('%s: event stream data lost', self.name, exc_info=True); q.get_nowait(); q.put_nowait(d)
-    async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT, bufsize=None):
+    async def event_stream(self, event_type=None, *, timeout=_NO_DEFAULT, item_timeout=_NO_DEFAULT):
         self.raise_for_shutdown()
         if not self._auditing: audit('asyncutils.channels.EventBus.event_stream', id(self), event_type)
-        t = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=A.getcontext().EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type); self.stream_queue = q = C.Queue(A.getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if bufsize is None else bufsize)
+        t, g = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=A.getcontext().EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type), self.stream_queue.get
         if _NO_DEFAULT is item_timeout: item_timeout = A.getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
-            while True: yield await I.wait_for(q.get(), item_timeout)
+            while True: yield await I.wait_for(g(), item_timeout)
         except C.QueueShutDown: L.info('%s: event stream has been shut down', self.name, exc_info=True)
         except TimeoutError: L.exception('%s: event stream is stopping because of timeout in waiting for item', self.name)
         finally: F.set_result(None); await t
@@ -263,7 +253,7 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     async def __aenter__(self): return self
     def __aexit__(self, *_): return self.shutdown(True)
     __inc_cnt = count(1).__next__
-    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False'), (subscribe_until, 'fut, subscriber, event_type=None, *, till_permanent=None')); WILDCARD, _inc_cnt = None, classmethod(_); del _, c # ruff: ignore[function-call-in-default-argument]
+    P.patch_classmethod_signatures((_ := lambda _, /, f='#%d', c=count(1).__next__: f%c(), '')); P.patch_method_signatures((__init__, 'name=None, *, handler=None, max_concurrent=128, tracking_stats=False'), (subscribe_until, 'fut, subscriber, /, event_type=None, *, till_permanent=None')); WILDCARD, _inc_cnt = None, classmethod(_); del _, c # ruff: ignore[function-call-in-default-argument]
 @H.subscriptable
 class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'

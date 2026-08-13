@@ -5,7 +5,7 @@ from asyncio import Future, Lock, Queue, Task
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from types import AsyncGeneratorType, GeneratorType, TracebackType
-from typing import Any, Literal, Self, overload
+from typing import Any, Final, Literal, Self, overload
 from weakref import WeakSet
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopMixinBase):
@@ -48,7 +48,7 @@ class Observable[**P](LoopMixinBase):
     def subscribe_nowait(self, observer: Observer[P]) -> SubscriptionRV: '''Add an observer without waiting for the observable to be idle.'''
     def unsubscribe_eventually(self, observer: Observer[P], asap: bool=...) -> None: '''Note that the observer is to be removed at some point in the future. If ``asap`` is ``True`` and there is no notification running, the observer is removed immediately.'''
     def unsubscribe_nowait(self, observer: Observer[P], strict: bool=...) -> None: '''Remove the observer immediately even if a notification is occurring. If ``strict`` is ``True``, assert that the observer was indeed subscribed.'''
-    def subscribe_sync_func(self, observer: Observer[P]) -> SubscriptionRV: '''Subscribe a synchronous observer by converting it to async in an executor.'''
+    def subscribe_sync_observer(self, observer: Observer[P]) -> SubscriptionRV: '''Subscribe a synchronous observer by converting it to async in an executor.'''
     def ntimes(self, observer: Observer[P], n: int=...) -> SubscriptionRV: '''Add an observer immediately and automatically have it removed after ``n`` notifications. ``n`` defaults to :const:`~asyncutils.context.Context.OBSERVABLE_DEFAULT_NTIMES_N`.'''
     def filter(self, pred: Callable[P, bool], ret_exc: bool=...) -> Self: '''Return a new observable emitting the notifications of this observable to its observers only when the parameters, starred and passed to ``pred``, evaluate to a true value.'''
     def map(self, transform: Callable[P, tuple[Iterable[object], Mapping[str, object]]], ret_exc: bool=...) -> Observable[...]: '''Return a new observable transforming the parameters of notifications from this observable by ``transform``.'''
@@ -67,9 +67,9 @@ class EventBus(LoopMixinBase):
 
     .. caution:: Use instances as context managers only for proper setup and shutdown.
     '''
-    WILDCARD: WildcardType
+    WILDCARD: Final[WildcardType]
     '''Sentinel representing the event type of subscribers that accept any event name.'''
-    def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=...):
+    def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=..., evs_bufsize: int|None=...):
         '''
         All the arguments below are optional.
 
@@ -77,6 +77,7 @@ class EventBus(LoopMixinBase):
         * ``handler``: A function that takes an exception having occurred in a subscribers and handles it.
         * ``max_concurrent``: The maximum number of concurrent callbacks; default :const:`~asyncutils.context.Context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
         * ``tracking_stats``: Whether to remember the amount of published data to subscribers of each event type.
+        * ``evs_bufsize``: The maximum size of the queue of events for the event stream; default :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE`.
         '''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
     def get_event_stats(self) -> defaultdict[str, int]: '''Return a copy of the stats, mapping event type to number of published events.'''
@@ -87,9 +88,9 @@ class EventBus(LoopMixinBase):
     def events(self) -> set[str]: '''Return a set of the names of the current event types.'''
     def has_subscribers(self, event_type: str|WildcardType) -> bool: '''Whether the event type has any subscribers.'''
     @overload
-    def is_subscribed(self, subscriber: SpecificSubscriber, event_type: str=...) -> bool: ...
+    def is_subscribed(self, subscriber: SpecificSubscriber, /, event_type: str=...) -> bool: ...
     @overload
-    def is_subscribed(self, subscriber: WildcardSubscriber, event_type: WildcardType=...) -> bool: '''Whether the callback is subscribed for the event type, or subscribed for any event type if event_type is not passed.'''
+    def is_subscribed(self, subscriber: WildcardSubscriber, /, event_type: WildcardType=...) -> bool: '''Whether the callback is subscribed for the event type, or subscribed for any event type if event_type is not passed.'''
     @property
     def total_subscribers(self) -> int: '''The total number of subscribers for any event type.'''
     @property
@@ -102,8 +103,6 @@ class EventBus(LoopMixinBase):
     def active_tasks(self) -> int: '''The number of callbacks occurring at this moment.'''
     @property
     def stream_queue(self) -> Queue[Any]: '''An asynchronous queue of tuples ``(event_type, data)`` if the event type was not specified in the creation of the event stream, otherwise just the data attached to each event of that type, to which :meth:`event_stream` outputs events.'''
-    @stream_queue.setter
-    def stream_queue(self, val: Queue[tuple[str, Any]|Any], /) -> None: ...
     def is_auditing(self) -> bool: '''Whether the event bus is connected to :func:`sys.audit`.'''
     @property
     def auditing(self) -> bool: '''Get-set property for :meth:`is_auditing`. When changed, connect or disconnect the underlying audit hook accordingly.'''
@@ -138,7 +137,7 @@ class EventBus(LoopMixinBase):
         | Otherwise, set its result to ``result`` and return it.
         '''
     def add_temp_middleware(self, middleware: Middleware, until: Future[Any]) -> None: '''Add a middleware that should take effect until the future ``until`` is done, after which the result of the future will be treated as the result of the middleware on removal. No cookie is returned in this case.'''
-    def audit_context(self) -> DualContextManager[None]: '''Start receiving publications from and sending publications to :func:`sys.audit` upon entry and stop on exit. Use as a context manager.'''
+    def audit_context(self) -> DualContextManager[None]: '''If not already so, start receiving publications from and sending publications to :func:`sys.audit` upon entry and stop on exit. Use as a context manager.'''
     def tracking_context(self, stats_receiver: Future[Mapping[str, int]]|None=...) -> DualContextManager[None]: '''Context manager, under which stats are tracked and finally sent to the stats_receiver future.'''
     def start_tracking(self) -> None: '''Start tracking event publication statistics (number of publications under each event type).'''
     @overload
@@ -174,9 +173,9 @@ class EventBus(LoopMixinBase):
         .. note:: The function completes once the subscription has registered and returns a task, which will be cancelled on timeout.
         '''
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, event_type: str, *, till_permanent: float|None=...) -> Task[T]: ...
+    async def subscribe_until[T](self, fut: Future[T], subscriber: SpecificSubscriber, /, event_type: str, *, till_permanent: float|None=...) -> Task[T]: ...
     @overload
-    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, event_type: WildcardType=..., *, till_permanent: float|None=...) -> Task[T]:
+    async def subscribe_until[T](self, fut: Future[T], subscriber: WildcardSubscriber, /, event_type: WildcardType=..., *, till_permanent: float|None=...) -> Task[T]:
         '''
         | Add the subscriber under the event type (as a wildcard if ``event_type`` is :const:`WILDCARD` or not passed) and return a task.
         | The subscriber is removed once ``fut`` completes, and its result returned through the returned task.
@@ -187,13 +186,13 @@ class EventBus(LoopMixinBase):
     @overload
     async def feed_event(self, event_type: str, data: object, /, *, timeout: float|None=...) -> None: '''Feed the data for an event into the event stream, the queue for which is created if necessary, such that the event stream needs not be active.'''
     @overload
-    def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGeneratorType[Any]: ...
+    def event_stream(self, event_type: str, *, timeout: float|None=..., item_timeout: float|None=...) -> AsyncGeneratorType[Any]: ...
     @overload
-    def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=..., bufsize: int=...) -> AsyncGeneratorType[tuple[str, Any]]:
+    def event_stream(self, *, timeout: float|None=..., item_timeout: float|None=...) -> AsyncGeneratorType[tuple[str, Any]]:
         '''
         | Open an event stream for the specified event type, that is, an async generator from which consumers can receive events and the corresponding data as they occur.
         | If ``event_type`` is not passed, the stream will include the event type in the output.
-        | ``timeout``, ``item_timeout`` and ``bufsize`` default to :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT`, :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` and :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE` respectively.
+        | ``timeout`` and ``item_timeout`` default to :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_TIMEOUT` and :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT` respectively.
         '''
     async def shutdown(self, immediate: bool=..., *, timeout: float|None=..., preserve_stats: bool=...) -> None:
         '''

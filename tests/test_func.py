@@ -2,8 +2,10 @@ from asyncutils.func import *
 from asyncutils.config import _randinst
 from tests.conftest import mk
 from asyncio import create_task, sleep
-from asyncutils.iters import acount, vecs_eq
+from asyncutils import acount, amap, arange, vecs_eq
 from itertools import count
+from pytest import raises
+async def func(a, b=3, /, c=24, *, d, e=7): return a+b-c/d*e # ruff: ignore[unused-async]
 @mk
 async def test_areduce():
     assert await areduce(int.__add__, range(10), await_=False) == 45
@@ -22,3 +24,15 @@ async def test_easy():
     c = afcopy(create_task)(sleep(0, 1))
     assert not c.cr_running
     assert await c == 1
+@mk
+async def test_acompose():
+    assert await vecs_eq(amap(acompose(1 .__lshift__, 8 .__rshift__, wrap_last=False), range(4), await_=True), (256, 16, 4, 2), strict=True)
+    assert await vecs_eq(amap(acompose(2 .__add__, 3 .__mul__, wrap_last=True), range(5), await_=True), (2, 5, 8, 11, 14), strict=True)
+@mk
+async def test_star():
+    f = star(func)
+    with raises(TypeError): await f()
+    assert await f((1,), {'c': 16, 'd': 2}) == -52
+    assert await f(arange(16, 25, 4), {'e': 6, 'd': 8}) == 18
+    g = unstar(f)
+    assert await g(5, d=7) == -16

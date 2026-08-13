@@ -59,7 +59,7 @@ async def test_sleep_forever():
 async def test_dummies():
     await gather(yield_to_event_loop, dummy_task)
     for i in dummy_task: fail(f'dummy_task should be empty; got {i}')
-    async for i in aloops(4): assert i is None
+    async for i in aloops(0x500): assert i is None
 @mk
 async def test_adisembowel():
     assert await vecs_eq(aappend(0, adisembowel([1, 2, 3])), areversed(range(4)), is_)
@@ -101,3 +101,22 @@ async def test_abrent():
         assert cur not in s
         s.add(cur)
     assert d[cur] is node
+@mk
+async def test_tee():
+    x, y, z = tee(arange(5), 3)
+    assert await anext(x) == 0
+    assert await gather(anext(y), anext(z), anext(y), anext(x), anext(x)) == [0, 0, 1, 1, 2]
+    assert await anext(y) == 2
+    assert await gather(anext(x), anext(z), anext(y), anext(z)) == [3, 1, 3, 2]
+    assert await anext(z) == 3
+    async for i in AChain(x, y, z): assert i == 4
+@mk
+async def test_aunzip():
+    x, y, z = await aunzip(tuple(range(i, i+3)) for i in range(1, 8, 3))
+    assert await vecs_eq(x, (1, 4, 7), strict=True)
+    assert await anext(z) == 3
+    assert await gather(anext(y), anext(z)) == [2, 6]
+    assert await gather(anext(z), anext(y), anext(y)) == [9, 5, 8]
+    assert await aisempty(y)
+    assert await aisempty(z)
+    assert await aisempty(x)

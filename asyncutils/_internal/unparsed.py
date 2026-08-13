@@ -8,16 +8,16 @@ def r(p, e=None, /):
     with open(p, encoding='utf-8') as F:
         z = F.read()
         match L := Z[e or p.rpartition('.')[-1]]:
-            case 'yaml':
+            case 'yaml': # pragma: no cover
                 try: import yaml as y; f = y.load(z, getattr(y, 'CSafeLoader', None) or y.SafeLoader) # ruff: ignore[unsafe-yaml-load]
                 except ImportError as a: raise RuntimeError('asyncutils: PyYAML library is required to load YAML configuration file') from a
             case 'xmltodict': f = __import__(L).parse(z); L = 'xml'
             case 'configparser': raise RuntimeError('asyncutils: cannot parse ini-like format due to type ambiguities; you should rewrite the configuration in TOML, which is the most similar to ini')
             case _:
                 try: f = __import__(L, fromlist=('',) if '.' in L else None).loads(z)
-                except ImportError as a: raise RuntimeError(f'asyncutils: {L} library must be installed for asyncutils to accept configuration from {p!r}') from a
+                except ImportError as a: raise RuntimeError(f'asyncutils: {L} library must be installed for asyncutils to accept configuration from {p!r}') from a # pragma: no cover
                 L = {'tomllib': 'toml', 'pyjson5': 'json5'}.get(L, L)
-    if F.name.endswith(('/pyproject.toml', '\\pyproject.toml')):
+    if F.name.endswith(('/pyproject.toml', '\\pyproject.toml')): # pragma: no cover
         try: z, L = __import__('json').dumps(f := f['tool']['asyncutils'], separators=(',', ':')), 'json'
         except KeyError: z = ''; return {}
     if type(f) is not dict: raise TypeError(f'asyncutils: incorrect configuration format at {p}; top-level structure should be an object/mapping')
@@ -26,8 +26,8 @@ def m(m, a, /, _='see format.json5'): (e := TypeError(m%(c, a))).add_note(_); ra
 if c := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\' \t\r\n\v\f'):
     a('asyncutils/read_config', c)
     if isinstance(v := (d := r(c)).pop('next_config', c), str): a('asyncutils/set_next_config', c, v); E[k] = v
-    elif v is None: a('asyncutils/discontinue_config', c); del E[k]
-    else: m('asyncutils: key "next_config" in %s should point to a string or null, not %r', v)
+    elif v is None: a('asyncutils/discontinue_config', c); del E[k] # pragma: no cover
+    else: m("asyncutils: key 'next_config' in %s should point to a string or null, not %r", v) # pragma: no cover
 else:
     A, s, t, i = __import__('pathlib').Path.cwd(), 'asyncutils/try_config', 'pyproject.toml', None; a('asyncutils/recurse_dirs', A)
     for i, A in enumerate(__import__('itertools').chain((A,), A.parents)): # ruff: ignore[loop-variable-overrides-iterator]
@@ -36,10 +36,10 @@ else:
         with A.open() as f:
             try: z = f'```json\n{__import__('json').dumps(d := __import__('tomllib').loads(f.read())['tool']['asyncutils'], separators=(',', ':'))}\n```'
             except KeyError: continue
-        a('asyncutils/read_config', c := str(A)); break
+        a('asyncutils/read_config', c := str(A)); break # pragma: no cover
     else: d = {}
     del A, s, i
-for S in d.pop('context', {}).values(): # ruff: ignore[import-shadowed-by-loop-var]
+for S in d.pop('context', {}).values(): # ruff: ignore[import-shadowed-by-loop-var] # pragma: no cover
     if (t := type(S)) is not dict: m('asyncutils: key "context" in %s should be an object mapping submodule names to objects, not %r', H.fullname(t))
     for K, V in S.items():
         if type(V) is dict:

@@ -28,12 +28,12 @@ def aawgenf2agenf(f, /):
         async for _ in await f(*a, **k): yield _
     return wraps(f)(g)
 async def _aunzip_one_put(q, i, /):
-    with A.ignore_qshutdown: await q.put(i)
+    with A.ignore_qshutdown: await q._q.put(i)
 def _aunzip_put(*_, f=_aunzip_one_put): return B.gather(*map(f, *_))
 class BaseConsumer:
     __slots__ = '_q',
-    def __init_subclass__(cls, /, *, m): cls._f = partial(Z.Queue, m)
-    def __init__(self): self._q = self._f()
+    def __init_subclass__(cls, /, *, m): cls._m = m
+    def __init__(self): self._q = Z.Queue(self._m)
     def close(self): self._q.shutdown()
     __aiter__ = _identity
 class FakeConsumer:
@@ -59,7 +59,7 @@ def _make_consumers(i, z, p, b, m, x, n, h, c=BaseConsumer, t='($self)'): # ruff
                     except BaseException as e:
                         if p: await h(Q, A.wrap_exc(e))
                         else:
-                            for q in Q: q.close()
+                            for q in Q: q._q.shutdown()
                             raise
             try: r = await s.get()
             except Z.QueueShutDown: raise StopAsyncIteration from None
@@ -68,7 +68,7 @@ def _make_consumers(i, z, p, b, m, x, n, h, c=BaseConsumer, t='($self)'): # ruff
             return r
         __anext__.__text_signature__ = t # ty: ignore[unresolved-attribute]
     return (Q := tuple(Consumer() for _ in repeat(None, n)))
-def _tee_helper(Q, i, /): return B.gather(*(q.put(i) for q in Q), return_exceptions=True)
+def _tee_helper(Q, i, /): return B.gather(*(q._q.put(i) for q in Q), return_exceptions=True)
 async def aunzip(it, *, fillvalue=_NO_DEFAULT, put_batch=None, maxqsize=None, fail_fast=None, _=_aunzip_put, f=FakeConsumer):
     try: l = len(t := await anext(it := iter_to_agen(it)))
     except StopAsyncIteration: raise A.ItemsExhausted('asyncutils.iters.aunzip: no items in iterable to unzip') from None
