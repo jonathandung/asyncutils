@@ -16,6 +16,7 @@ colourful command line interface.
   audit-events
   logging
   help
+  bug-help
   examples
   submodules
   api/index

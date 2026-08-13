@@ -37,12 +37,11 @@ changelog:
 # cspell:disable-next-line
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 clean:
-	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/help.rst docs/source/makefile-usage.rst py_asyncutils.egg-info
+	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/compat.rst docs/source/conduct.md docs/source/contributing.md docs/source/examples.rst docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[codz]' -delete
 docs:
-	. scripts/unix/genhelp.sh
-	. scripts/unix/genmakefileusage.sh
+	. scripts/generate.sh
 	make -C docs html -W
 help:
 	@cat assets/mkhelp.txt

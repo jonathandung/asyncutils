@@ -27,11 +27,8 @@ Takes pride in:
 ## Setup
 
 Make sure you have CPython 3.12 or above; even a pre-release of 3.15 will do. GraalPy 25.0 or above is also acceptable. You should have at least one
-Python package manager you are comfortable with. CPython free-threaded and debug builds are also supported. I have plans to support PyPy, but they are
-currently lagging behind the releases of the reference implementation and a 3.11 backport would be required, which is not going to happen.
-
-The support for GraalPy is also experimental and I don't think its particular performance benefits would apply to this library, provided that part of
-`asyncio` is written in C, and GraalPy's `asyncio` doesn't support Windows yet.
+Python package manager you are comfortable with. CPython free-threaded and debug builds are also supported. There are plans to support PyPy, but PyPy
+is currently lagging behind the releases of the reference implementation and a 3.11 backport would be required, which is not going to happen.
 
 Discounting the installation, no extra setup is needed. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html)
 for more.

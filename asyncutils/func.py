@@ -51,7 +51,7 @@ async def aiter_from_f(f, s=_NO_DEFAULT, /, *, yield_sentinel=False):
         yield r
     if yield_sentinel: yield r
 def star(f, /):
-    async def g(a=(), k=None, /): return await f(*a, **(k or {}))
+    async def g(a=(), k=None, /): return await f(*await A.to_list(a), **(k or {}))
     return wraps(f)(g)
 def unstar(f, /):
     async def g(*a, **k): return await f(a, k)

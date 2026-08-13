@@ -1,2 +1,8 @@
 version: 2
-updates: [{directory: /, package-ecosystem: uv, schedule: {interval: weekly}}]
+updates:
+  - directory: /
+    package-ecosystem: uv
+    schedule: {interval: weekly}
+  - directory: /
+    package-ecosystem: github-actions
+    schedule: {interval: weekly}

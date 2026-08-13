@@ -31,7 +31,7 @@ class SentinelBase:
             if (n := getattr(self, '_SentinelBase__n', None)) is None:
                 if self is not self._cache.setdefault(N, self): raise NameError(f'{fullname(self)} name collision', name=N)
                 self.__n = N
-            elif n != N or self._cache.get(N) is not self: raise NameError(f'cannot bind named {fullname(self)} to class {fullname(owner)!r}', name=N)
+            elif n != N or self._cache.get(N) is not self: raise NameError(f'cannot bind named {fullname(self)} to class {fullname(owner)!r}', name=N) # pragma: no cover
             if (b := self.bound_to) is None: raise NameError(f'cannot bind named unbound {fullname(self)} to class {fullname(owner)!r}', name=N)
             __import__('sys').stderr.write(_(b.rpartition('.')[-1], self.back, fullname(self), N))
     def __reduce__(self):

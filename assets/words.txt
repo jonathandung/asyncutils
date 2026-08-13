@@ -208,8 +208,6 @@ fspath
 futcls
 futwrap
 genf
-genhelp
-genmakefileusage
 getc
 getcontext
 getframe

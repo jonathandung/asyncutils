@@ -1,8 +1,6 @@
 Using the Makefile
 ==================
 
-.. highlight:: none
-
 ``make.bat`` on Windows, or ``Makefile`` on \*nix, is often a handy companion in development. It makes development less dry, repetitive and
 error-prone, and the process as a whole more smooth-sailing. It can also pull in non-Python dependencies when needed and leaves behind automatically
 ignored marker files removable by a simple cleanup command. Tasks are effectively automated using the ``make <target>`` syntax.

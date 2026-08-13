@@ -22,7 +22,7 @@ def coerce_callable[T: Not[Callable[..., Any]]](o: T, /) -> type[T]: '''Return t
 def fullname(f: object, /, remove_prefix: bool=...) -> str: '''Return the fully-qualified name of the given object, including its module, optionally removing the ``'asyncutils'`` prefix.'''
 async def simple_wrap[T](aw: Awaitable[T], /) -> T: '''Return a coroutine wrapping the given awaitable. Use :func:`~asyncutils.util.wrap_in_coro` instead for better error handling.'''
 class LoopMixinBase:
-    '''Much like :class:`!asyncio.mixins._LoopBoundMixin`.'''
+    '''Much like :class:`!asyncio.mixins._LoopBoundMixin`, but with more methods.'''
     @property
     def loop(self) -> AbstractEventLoop: '''The underlying event loop.'''
     def make[T](self, aw: Awaitable[T], /) -> Task[T]: '''Create and return a :class:`~asyncio.Task` for the given awaitable that runs in the underlying loop.'''

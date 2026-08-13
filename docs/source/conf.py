@@ -16,9 +16,7 @@ if __import__('os').getenv('READTHEDOCS') == 'True':
     source_suffix = {'.rst': 'restructuredtext', '.md': 'markdown'}
     extensions += ('myst_parser', 'sphinxext.opengraph')
     ogp_canonical_url = f'https://{project}.readthedocs.io/en/stable/'
-else:
-    html_theme = 'sphinx_book_theme'
-    suppress_warnings.append('toc.not_readable')
+else: html_theme = 'sphinx_book_theme'
 html_short_title = f'{project} {release} docs'
 autoapi_dirs = [f'../../{project}']
 autoapi_file_patterns = ['*.pyi']

@@ -1,4 +1,4 @@
-# ruff: file-ignore[builtin-argument-shadowing,builtin-variable-shadowing,invalid-function-name]
+# ruff: file-ignore[builtin-argument-shadowing, builtin-variable-shadowing, invalid-function-name]
 '''Re-export all the attributes of the logger used by :mod:`asyncutils`.'''
 import logging as L
 from collections.abc import Mapping

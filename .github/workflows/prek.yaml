@@ -9,11 +9,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: taiki-e/install-action@prek
       - run: prek update
       - run: prek run --all-files
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - uses: astral-sh/setup-uv@v10.0.0
       - run: uv audit --preview-features audit-command
       - uses: peter-evans/create-pull-request@v8.1.1
         with:

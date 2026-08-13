@@ -69,7 +69,7 @@ class Releasing:
     async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: '''Re-enter the lock, propagating errors.'''
 class CircuitBreaker:
     '''
-    | The circuit breaker pattern. Use on async functions that may fail often, such as requests to an unreliable server.
+    | The circuit breaker pattern. Use on async functions that may fail often, such as asynchronous requests to an unreliable server.
     | Instances can be used as decorators, unless instantiated with a function as the first parameter, in which case the decorated function is returned.
     '''
     class State(IntEnum):
