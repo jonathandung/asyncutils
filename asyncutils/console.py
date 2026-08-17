@@ -68,7 +68,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         self._interact_hook(*((f'{(t := __import__('_colorize').get_theme().syntax).prompt}{p}{(r := t.reset)}', t.keyword, r, t.builtin) if (c := self.CAN_USE_PYREPL) and S.version_info >= (3, 14) else (p, '', '', '')))
         try: __import__('_pyrepl.simple_interact', fromlist=_f).run_multiline_interactive_console(self) if c else super().interact('', '')
         finally: self._loop.stop(_s); S.ps1 = ps1 if x else getattr(S, 'ps1', ps1) if p is None else p
-    def _interact_hook(self, ps1, kcolour, reset, fcolour): n, S.ps1 = self.NAME, ps1; self.write_special(f'{ps1}{kcolour}import{reset} {n}\n{ps1}{kcolour}from{reset} {n} {kcolour}import{reset} *\n') # ruff: ignore[unused-method-argument]
+    def _interact_hook(self, p, k, r, _, /): n, S.ps1 = self.NAME, p; self.write_special(f'{p}{k}import{r} {n}\n{p}{k}from{r} {n} {k}import{r} *\n')
     @abc.abstractmethod
     def before_run(self, max_memory_errors): self._max_memory_errors, self._internal_is_running = 3 if max_memory_errors is None else max_memory_errors, True
     def after_run(self): self._internal_is_running = False
@@ -128,21 +128,21 @@ class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a mul
     @property
     def is_running(self):
         if not self._loop.is_running(): self._internal_is_running = False; return False
-        if self._internal_is_running == (b := R.getc() is self): return b
+        if self._internal_is_running == (b := R.get() is self): return b
         if b: self._internal_is_running = True
         else: self.set_return_code(1)
         S.stderr.write('User tampered with console-internal state!\n'); return False
-    def _interact_hook(self, ps1, kcolour, reset, fcolour):
-        super()._interact_hook(ps1, kcolour, reset, fcolour)
-        if R.should_write_load_all(): self.write_special(f'{ps1}{fcolour}load_all{reset}()\n')
+    def _interact_hook(self, p, k, r, f, /):
+        super()._interact_hook(p, k, r, f)
+        if R.should_write_load_all(): self.write_special(f'{p}{f}load_all{r}()\n')
     def write_special(self, msg, _=C.silent):
         if not _: self.write(msg)
     def before_run(self, max_memory_errors, _=C.max_memory_errors, _r='this console is already running', _a='another console is running'):
         if self._internal_is_running: raise RuntimeError(_r)
-        if r := R.getc(): raise RuntimeError(_r if r is self else _a)
-        R.setc(self); super().before_run(_ if max_memory_errors is None else max_memory_errors) # ty: ignore[invalid-argument-type]
+        if r := R.get(): raise RuntimeError(_r if r is self else _a)
+        R.run(self); super().before_run(_ if max_memory_errors is None else max_memory_errors) # ty: ignore[invalid-argument-type]
     def after_run(self, _m='WARNING: user tampered with asyncutils module state\n', _=C.pdb, _e=E.StateCorrupted('console-internal', 'console.exc was set to a non-SystemExit exception')):
-        if R.unsetc() is not self: S.stderr.write(_m); del S.modules[__name__]
+        if R.unset() is not self: S.stderr.write(_m); del S.modules[__name__]
         if _ and isinstance(e := self.exc, BaseException):
             if not isinstance(e, SystemExit): raise _e
             if (t := e.__traceback__) is None: raise e

@@ -36,6 +36,6 @@ Below is the Makefile help as of $v::
 "
 cat assets/mkhelp.txt | sed '/^$/! s/^/  /'
 echo "$m"
-for p in AI_USAGE_POLICY.md:ai-use.md CHANGELOG.md:changelog.md CODE_OF_CONDUCT.md:conduct.md COMPATIBILITY.rst:compat.rst CONTRIBUTING.md:contributing.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
-  do cp "${p%:*}" "docs/source/${p#*:}";
-  done
+curl -Z -o docs/source/ai-use.md https://raw.githubusercontent.com/jonathandung/.github/main/AI_USAGE_POLICY.md -o docs/source/conduct.md https://raw.githubusercontent.com/jonathandung/.github/main/CODE_OF_CONDUCT.md -o docs/source/contributing.md https://raw.githubusercontent.com/jonathandung/.github/main/CONTRIBUTING.md
+for p in CHANGELOG.md:changelog.md COMPATIBILITY.rst:compat.rst EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
+  do cp "${p%:*}" "docs/source/${p#*:}"; done

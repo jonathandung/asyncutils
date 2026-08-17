@@ -23,7 +23,7 @@ As to how the loquacity and output location of the logger can be altered, refer 
 .. literalinclude:: ../../asyncutils/config.pyi
   :language: python
   :caption: relevant portion of the stub of the :mod:`~asyncutils.config` submodule
-  :lines: 22-42,55-
+  :lines: 23-43,56-
   :force:
 
 .. literalinclude:: ../../asyncutils/format.json5

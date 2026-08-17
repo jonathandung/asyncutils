@@ -11,7 +11,7 @@ class FaultyConfig(BaseException):
     @overload
     def __init__[T, R: TypeOrTuple](self: FaultyConfigB[T, R], key: str, wrong: T, correct: R, /): ...
     @property
-    def key(self) -> str: ...
+    def key(self) -> str: '''The configuration key that was invalid, as a :class:`str`.'''
 class Executor(_, PartialInterface):
     '''
     A class that implements the :pep:`3148` executor interface.

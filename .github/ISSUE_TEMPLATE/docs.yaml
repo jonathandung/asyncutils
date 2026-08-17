@@ -6,10 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        This template applies to inconsistencies with runtime behaviour that are likely not programmatic bugs.
-        If the issue is a minor typo or tiny grammar mistake, open a PR directly. Otherwise, wait until your issue has been triaged.
-        Only report issues with the latest version of the docs, not the stable build.
-        If the referenced build is outdated by five builds or more at the time of opening, the issue will be closed.
+        This template applies to inconsistencies with runtime behaviour that are likely not programmatic bugs. If the issue is a minor typo or tiny grammar mistake, open a PR directly. Otherwise, wait until your issue has been triaged.
+        Only report issues with the latest version of the docs, not the stable build. If the referenced build is outdated by five builds or more at the time of opening, the issue will be closed.
   - type: input
     id: links
     attributes:

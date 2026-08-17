@@ -16,7 +16,7 @@ comfortable with having `uv <https://docs.astral.sh/uv>`__ and `prek <https://pr
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and check for regressions with ``make sc``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
+Edit ``assets/words.txt`` and check for regressions with ``cspell .``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
 
 Bumping the version
 -------------------

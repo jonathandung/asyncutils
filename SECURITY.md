@@ -5,14 +5,14 @@
 | Version | Supported |
 | --- | --- |
 | 1.1.x | Yes |
-| 1.0.x | Yes |
+| 1.0.x | No |
 | 0.x | No |
 
 ## Reporting a Vulnerability
 
 It is thought to be highly unlikely that there will be any security vulnerabilities will emerge in the near future, since the nature of this project
-means it should not see much applications in security-sensitive fields, but this is still included for compliance with OpenSSF Best Practices
-standards. Please report as follows:
+means it should not see much applications in security-sensitive fields. However, I still choose to include this for compliance with OpenSSF Best
+Practices. Please report as follows:
 
 - GitHub-native method
 
