@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v7.0.1
       with:
         ref: ${{github.event.pull_request.head.sha || github.sha}}
-    - uses: astral-sh/setup-uv@v10.0.0
+    - uses: astral-sh/setup-uv@v10.0.1
       with:
         activate-environment: true
         python-version: "3.15"
@@ -42,7 +42,7 @@ jobs:
             python-version: 3.14t
     steps:
     - uses: actions/checkout@v7.0.1
-    - uses: astral-sh/setup-uv@v10.0.0
+    - uses: astral-sh/setup-uv@v10.0.1
       with:
         python-version: ${{matrix.python-version}}
     - run: uv run --with ".[test]" pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
