@@ -13,7 +13,6 @@ Available targets:
  pc             - Run prek hooks on all files
  release        - Call the GitHub CLI (gh) to make an release interactively
  ruff           - Run the ruff linter
- sc             - Run CSpell on the codebase
  tc             - Run ty for type checking
  test           - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
  venv           - Create a virtual environment using uv

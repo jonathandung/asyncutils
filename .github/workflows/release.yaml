@@ -18,7 +18,7 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.0.0
+      - uses: astral-sh/setup-uv@v10.0.1
       - run: uv build
       - run: uv publish
     timeout-minutes: 5

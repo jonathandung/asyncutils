@@ -13,7 +13,7 @@ jobs:
       - uses: taiki-e/install-action@prek
       - run: prek update
       - run: prek run --all-files
-      - uses: astral-sh/setup-uv@v10.0.0
+      - uses: astral-sh/setup-uv@v10.0.1
       - run: uv audit --preview-features audit-command
       - uses: peter-evans/create-pull-request@v8.1.1
         with:

@@ -115,7 +115,7 @@ class ConsoleBase(InteractiveConsole, ABC):
     def set_return_code(self, exc: SystemExit, /) -> None: ...
     @overload
     def set_return_code(self, code: int|str, /) -> None: '''Set the return code of this console from an instance of :exc:`SystemExit` or an integer return code and exit the console.'''
-    def _interact_hook(self, ps1: object, kcolour: str, reset: str, fcolour: str) -> None: '''Write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters ``ps1`` representing :data:`sys.ps1` and ``kcolour``, ``reset`` and ``fcolour`` representing the ANSI escape codes for the keyword colour, colour reset and the function colour respectively.'''
+    def _interact_hook(self, ps1: object, keyword_colour: str, reset: str, function_colour: str, /) -> None: '''Write code with emulated colour (such as import statements to represent the namespace) after the banner has been written, with parameters ``ps1`` representing :data:`sys.ps1` and ``keyword_colour``, ``reset`` and ``function_colour`` representing the ANSI escape codes for the keyword colour, colour reset and the function colour respectively.'''
 @final
 class AsyncUtilsConsole(ConsoleBase):
     '''A subclass of :class:`ConsoleBase`, used to implement the :mod:`asyncutils` REPL.'''
@@ -123,6 +123,6 @@ class AsyncUtilsConsole(ConsoleBase):
     def is_running(self) -> bool: '''Whether the console is currently running. Also performs internal state consistency checks, asserting that only one :class:`AsyncUtilsConsole` can be running at a time.'''
     def before_run(self, max_memory_errors: int|None) -> None: '''Ensure the console will be the only one running.'''
     def after_run(self) -> None: '''Ensure the console is not left running after unset.'''
-    def _interact_hook(self, ps1: object, kcolour: str, reset: str, fcolour: str) -> None: ...
+    def _interact_hook(self, ps1: object, keyword_colour: str, reset: str, function_colour: str, /) -> None: ...
     def write_special(self, msg: str) -> None: '''Write ``msg`` to stderr iff the quiet flag is not set.'''
     def showtraceback(self) -> None: ...

@@ -27,7 +27,7 @@ Have an idea? We'd love to hear it!
 ### Community Support
 
 - [GitHub Discussions](https://github.com/jonathandung/asyncutils/discussions)
-- Stack Overflow: Tag questions with `[python]` and `[asyncutils]`
+- [Stack Overflow](https://stackoverflow.com): Tag questions with `[python]` and `[asyncutils]`
 
 ### Quick Questions
 

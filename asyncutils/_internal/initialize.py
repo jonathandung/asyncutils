@@ -22,7 +22,7 @@ class Module:
         delattr(self.load(), n) # cover: on
     def __repr__(self, _=_s): return f"<module '{_}{self._n}' (not loaded)>"
     def __init_subclass__(cls, /, **_): raise TypeError('asyncutils: cannot subclass the type of submodule objects')
-    def load(self, _s=s, _m=__import__('sys').modules, _g=R.getc, _f=_f, _n=_s, _a='retrieved loaded submodule: %s', _b='now loading: %s', _c='found cached submodule: %s'):
+    def load(self, _s=s, _m=__import__('sys').modules, _g=R.get, _f=_f, _n=_s, _a='retrieved loaded submodule: %s', _b='now loading: %s', _c='found cached submodule: %s'):
         if (t := type(self)) is not __class__: return self
         if type(m := _s.get(n := self._n)) is not t: p(_a, n); return m
         if (m := _m.get(_n := _n+n)) is None: p(_b, n); m = __import__(_n, fromlist=_f)

@@ -1,4 +1,4 @@
-.PHONY: audit badges bug changelog clean docs help install install-silent lint lock pc release ruff sc tc test venv watch
+.PHONY: audit badges bug changelog clean docs help install install-silent lint lock pc release ruff tc test venv watch
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
@@ -41,7 +41,7 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[codz]' -delete
 docs:
-	. scripts/generate.sh
+	. scripts/generate.sh 2>/dev/null
 	make -C docs html -W
 help:
 	@cat assets/mkhelp.txt
@@ -52,7 +52,6 @@ install-silent:
 lint: .uv-stamp
 	ruff check
 	ty check
-	$(MAKE) sc
 lock: .uv-stamp
 	uv lock -U
 pc: .prek-stamp
@@ -65,8 +64,6 @@ release:
 	gh release create
 ruff: .uv-stamp
 	ruff check
-sc:
-	cspell .
 tc: .uv-stamp
 	ty check
 test:

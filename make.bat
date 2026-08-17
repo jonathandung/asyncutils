@@ -49,23 +49,23 @@ del /s /q *.pyc *.pyo *.pyz 2>nul
 goto :eof
 
 :docs
-powershell -ExecutionPolicy ByPass -File ".\scripts\generate.ps1"
+powershell -ExecutionPolicy ByPass -File ".\scripts\generate.ps1" 2>nul
 cd docs
 shift
 set "__O=%O%"
 set "REST_ARGS="
 :__loop
-if "%~1"=="" (
-    if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
-    set "O=-W %REST_ARGS% %__O%"
-    set "__O="
-    set "REST_ARGS="
-    make html
-    goto :eof
-)
+if "%~1"=="" goto __done
 set "REST_ARGS=!REST_ARGS! %1"
 shift
 goto __loop
+:__done
+if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
+set "O=-W %REST_ARGS% %__O%"
+set "__O="
+set "REST_ARGS="
+make html
+goto :eof
 
 :help
 type assets\mkhelp.txt
@@ -84,7 +84,6 @@ goto :eof
 :lint
 call :ruff
 ty check
-call :sc
 goto :eof
 
 :lock
@@ -108,10 +107,6 @@ call :.uv-stamp
 ruff check
 goto :eof
 
-:sc
-cspell .
-goto :eof
-
 :test
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
 goto :eof
@@ -127,5 +122,5 @@ uv venv
 goto :eof
 
 :watch
-ptw --runner "pytest" --onfail "echo 'Tests failed!'"
+ptw --runner "pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%" --onfail "echo 'Tests failed!'"
 goto :eof

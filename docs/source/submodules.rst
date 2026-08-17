@@ -1,8 +1,8 @@
 Submodules
 ==========
 
-:mod:`asyncutils` includes a wide range of submodules tailored for specific, mostly high-level, use cases. These include :mod:`asyncutils.context`,
-:mod:`asyncutils.locks`, :mod:`asyncutils.queues` and more. A lazy loading system, complete with logging, is in place to avoid the overhead of
+:mod:`asyncutils` includes a wide range of submodules tailored for specific, mostly high-level, use cases. These include :mod:`~asyncutils.context`,
+:mod:`~asyncutils.locks`, :mod:`~asyncutils.queues` and more. A lazy loading system, complete with logging, is in place to avoid the overhead of
 gathering all submodules on import and make them accessible using attribute access syntax.
 
 .. note::
