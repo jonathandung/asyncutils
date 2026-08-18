@@ -50,7 +50,7 @@ def bug(args, paste=_, j=lambda p, y=S.stdin.buffer.read: print(end=p) or y()): 
     if u and not ((r := p.urlsplit(u)).scheme and r.netloc): raise ValueError(f'asyncutils.cli.bug: invalid source link {u!r}')
     S.audit('asyncutils.cli.bug', s := f'https://github.com/jonathandung/asyncutils/issues/new?{p.urlencode({'template': 'bug.yaml', 'title': t, 'auv': A.__version__.representation, 'pkv': v, 'pyv': f'Python {S.version} on {S.platform}', 'os': __import__('platform').platform(), 'link': u, 'logs': paste(g) if d else g, 'tb': paste(z) if d else z, 'cfg': A._internal.unparsed.z, 'env': '' if args.no_prefill_env else '\n'.join(f'{k}={h(k, '')}' for k in ('AUTILSCFGPATH', 'AUTILSTESTMAXFAIL', 'FORCE_COLOR', 'NO_COLOR', 'PYTHON_BASIC_REPL', 'PYTHONSTARTUP', 'TERM'))}, quote_via=p.quote)}') # cspell: disable-line
     if o is NotImplemented: print(s); return 0
-    import webbrowser as c; c.register_standard_browsers() # ty: ignore[unresolved-attribute]
+    import webbrowser as c; c.register_standard_browsers()
     if l == 1: print(f'Attempting to open link in {(x := 'default browser' if o is None else o)}')
     if (c.get(o) if o is None or o in c._browsers else c.BackgroundBrowser(o)).open(s): return 0 # ty: ignore[unresolved-attribute]
     if args.print_on_fail:

@@ -3,6 +3,8 @@ updates:
   - directory: /
     package-ecosystem: uv
     schedule: {interval: weekly}
+    cooldown: {default-days: 10}
   - directory: /
     package-ecosystem: github-actions
     schedule: {interval: weekly}
+    cooldown: {default-days: 10}

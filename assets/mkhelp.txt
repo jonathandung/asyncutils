@@ -1,16 +1,16 @@
 Available targets:
- audit          - Run a security audit on all optional dependencies using uv
- badges         - Run the test suite twice, exiting on any failure; generate static badges on success
- bug            - File a bug report
- changelog      - Generate a compact changelog from Git history and print it in the terminal with colour
- clean          - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
- docs           - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning; requires internet access
- help           - Show this help message; the default target
- install        - Install the package in editable mode with development dependencies and install prek hooks
- lint           - Run ruff and ty sequentially; likely the most useful target
- lock           - Regenerate the project lockfile at uv.lock
- pc             - Run prek hooks on all files
- release        - Call the GitHub CLI (gh) to make an release interactively
- test           - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
- venv           - Create a virtual environment using uv
-Note: Some targets will automatically install or update the uv package manager, or the prek executable. Targets may be added on popular demand.
+ audit     - Run a security audit on all optional dependencies using uv
+ badges    - Run the test suite twice, exiting on any failure; generate static badges on success
+ bug       - File a bug report
+ changelog - Generate a compact changelog from Git history and print it in the terminal with colour
+ clean     - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
+ docs      - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning; requires internet access
+ help      - Show this help message; the default target
+ install   - Install the package in editable mode with development dependencies and install prek hooks
+ lint      - Run ruff and ty sequentially; likely the most useful target
+ lock      - Regenerate the project lockfile at uv.lock
+ pc        - Run prek hooks on all files
+ release   - Call the GitHub CLI (gh) to make an release interactively
+ test      - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
+ venv      - Create a virtual environment using uv
+Targets may be added on popular demand.

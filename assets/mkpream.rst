@@ -32,7 +32,7 @@ Requires `prek`_:
 * install
 * pc
 
-Requires cURL 7.66.0+ (for parallel downloads):
+Requires cURL 7.66.0+ on Unix (for parallel downloads):
 
 * docs
 

@@ -154,8 +154,10 @@ run ``make docs`` as a sanity check.
 Adding tests
 ------------
 
-Make sure the name of the test function is prefixed with "test\_" such that pytest correctly discovers it. Run pytest, selecting only that test, to
-verify the test is written correctly and your implementation is resilient against edge cases.
+Make sure the name of the test function is prefixed with "test\_" such that pytest correctly discovers it. Run ``pytest`` on each test individually
+with the ``pytest-asyncio`` plugin instead of ``pytest-asyncio-cooperative`` (since its benefits do not apply for singular tests), to verify the test
+is written correctly and your implementation is resilient against edge cases. Do not drop edge cases from tests because they do not pass; try your
+best to fix the code instead. If you are unable to do so, please ask for help in the issue or PR discussion.
 
 .. tip::
   :collapsible:

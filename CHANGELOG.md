@@ -24,6 +24,8 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.2.0] - 2026-08-19; unreleased
 
+Started using Zizmor.
+
 ### [1.1]
 
 Breaking changes: There shouldn't be any, but I made a lot.

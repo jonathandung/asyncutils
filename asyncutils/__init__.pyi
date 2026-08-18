@@ -48,25 +48,31 @@ from typing import Final
 from ty_extensions import JustFloat
 def time_since_boot() -> JustFloat: '''Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.'''
 __version__: Final[VersionInfo] # ruff: ignore[undefined-local-with-import-star-usage]
-'''An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.
+'''
+An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.
 
 .. note:: This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`__.
 '''
 __hexversion__: Final[int]
-'''| An integer representing the current pip/conda version of this library. Comparison operators behave as expected.
+'''
+| An integer representing the current pip/conda version of this library. Comparison operators behave as expected.
 | For version 1.3.11, for instance, this would be ``0x1030b``.
 
-.. note:: Equivalent to ``int(__version__)``.'''
+.. note:: Equivalent to ``int(__version__)``.
+'''
 all_symbols: Final[list[str]]
 '''A :class:`list` of all symbols in this module, in alphabetical order. Does not include any dunder names.'''
 console_preloaded_submodules: Final[frozenset[Submodule]]
-'''A :class:`frozenset` of submodule names which are loaded when starting the interactive console of this module.
+'''
+A :class:`frozenset` of submodule names which are loaded when starting the interactive console of this module.
 
-.. note:: This is a strict superset of :data:`preloaded_submodules`.'''
+.. note:: This is a strict superset of :data:`preloaded_submodules`.
+'''
 preloaded_submodules: Final[frozenset[Submodule]]
 '''A :class:`frozenset` of names of submodules which are preloaded when importing the library for essential initialization.'''
 submodules_map: Final[dict[Submodule, ModuleType]]
-'''A :class:`dict` mapping submodule names to the corresponding submodule objects.
+'''
+A :class:`dict` mapping submodule names to the corresponding submodule objects.
 
 .. note:: For submodules that are already loaded, these are exact instances of :class:`~types.ModuleType`.
 '''

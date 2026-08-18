@@ -11,14 +11,13 @@
   Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
   even prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.
 '''
-import asyncio as a, concurrent.futures as c, sys as s
+import asyncio as a, concurrent.futures as c, sys as s, ty_extensions as tyx
 from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator, Mapping
 from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from contextvars import Context
 from io import TextIOWrapper
 from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, NotImplementedType, TracebackType
 from typing import Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
-import ty_extensions as tyx
 from _typeshed import Incomplete
 from typing_extensions import TypeForm
 from ..config import FaultyConfig

@@ -123,6 +123,7 @@ areshape
 areversed
 argstr
 aroundrobin
+artipacked
 arunlength
 arunning
 asample
@@ -297,3 +298,5 @@ wasi
 weakrefset
 xarr
 xfailed
+zizmor
+zizmorcore

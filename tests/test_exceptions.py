@@ -27,7 +27,7 @@ async def test_ignore_errors():
     with ignore_valerrs: raise ValueError('foo')
     async with ignore_typeerrs: raise type('TypeError', (TypeError,), {})('bar')
     with ignore_all: raise SystemError('baz')
-    async with ignore_typical: 1/0  # ruff: ignore[useless-expression]
+    async with ignore_typical: raise # ruff: ignore[misplaced-bare-raise]
     with ignore_stop_iteration.excluding(BytesWarning): next(iter(int, 0))
     async with ignore_warnings.combined(ignore_stop_async_iteration): await anext(empty_agen())
     with raises(KeyboardInterrupt, match='qux'), ignore_noncritical: raise KeyboardInterrupt('qux')

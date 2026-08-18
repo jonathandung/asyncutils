@@ -8,6 +8,9 @@ permissions:
   pull-requests: write
 jobs:
   stale:
+    permissions:
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93
@@ -26,6 +29,10 @@ jobs:
         stale-pr-message: This pull request has been marked as stale due to inactivity.
     timeout-minutes: 5
   lock:
+    permissions:
+      discussions: write
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     concurrency: {group: lock}
     steps: # cspell:disable-next-line

@@ -33,5 +33,5 @@ nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:deco', r'types\.
 nitpicky = True
 rst_epilog = '.. _prek: https://prek.j178.dev\n.. _ruff: https://docs.astral.sh/ruff\n.. _ty: https://docs.astral.sh/ty\n.. _uv: https://docs.astral.sh/uv'
 suppress_warnings = ['autoapi.python_import_resolution']
-version = '1.1'
+version = '1.2'
 viewcode_line_numbers = True

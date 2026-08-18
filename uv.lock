@@ -1362,7 +1362,7 @@ wheels = [
 
 [[package]]
 name = "py-asyncutils"
-version = "1.1.4"
+version = "1.2.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -1460,36 +1460,36 @@ themes = [
 
 [package.metadata]
 requires-dist = [
-    { name = "deadpool-executor", marker = "extra == 'executors'", specifier = ">=2026.4.1" },
-    { name = "executorlib", marker = "extra == 'executors'", specifier = ">=1.10.0" },
-    { name = "furo", marker = "extra == 'themes'", specifier = ">=2025.12.19" },
-    { name = "hjson", marker = "extra == 'pconf'", specifier = ">=3.1.0" },
-    { name = "ipyparallel", marker = "extra == 'executors'", specifier = ">=9.2.0" },
-    { name = "json-with-comments", marker = "extra == 'pconf'", specifier = ">=1.2.10" },
-    { name = "loky", marker = "extra == 'executors'", specifier = ">=3.5.6" },
-    { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=5.1.0" },
-    { name = "pebble", marker = "extra == 'executors'", specifier = ">=5.2.0" },
-    { name = "py-asyncutils", extras = ["dev", "executors", "pconf", "themes"], marker = "extra == 'all'", specifier = "==1.1.4" },
-    { name = "py-asyncutils", extras = ["docs"], marker = "extra == 'themes'", specifier = "==1.1.4" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'pconf'", specifier = "==1.1.4" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'test'", specifier = "==1.1.4" },
-    { name = "py-asyncutils", extras = ["themes", "test"], marker = "extra == 'dev'", specifier = "==1.1.4" },
-    { name = "pyjson5", marker = "extra == 'json5'", specifier = ">=2.0.1" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=9.1.1" },
-    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=1.4.0" },
-    { name = "pytest-asyncio-cooperative", marker = "extra == 'test'", specifier = ">=0.40.0" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=7.1.0" },
-    { name = "pytest-local-badge", marker = "extra == 'test'", specifier = ">=1.1.1" },
-    { name = "pytest-sugar", marker = "extra == 'test'", specifier = ">=1.1.1" },
-    { name = "pyyaml", marker = "extra == 'pconf'", specifier = ">=6.0.3" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=9.1.0" },
-    { name = "sphinx-autoapi", marker = "extra == 'docs'", specifier = ">=3.8.0" },
-    { name = "sphinx-book-theme", marker = "extra == 'themes'", specifier = ">=1.2.0" },
-    { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = ">=0.5.2" },
-    { name = "sphinx-lint", marker = "extra == 'docs'", specifier = ">=1.0.2" },
-    { name = "sphinx-notfound-page", marker = "extra == 'docs'", specifier = ">=1.1.0" },
-    { name = "sphinxext-opengraph", extras = ["social-cards"], marker = "extra == 'docs'", specifier = ">=0.13.0" },
-    { name = "xmltodict", marker = "extra == 'pconf'", specifier = ">=1.0.4" },
+    { name = "deadpool-executor", marker = "extra == 'executors'", specifier = "==2026.7.1" },
+    { name = "executorlib", marker = "extra == 'executors'", specifier = "==1.10.2" },
+    { name = "furo", marker = "extra == 'themes'", specifier = "==2025.12.19" },
+    { name = "hjson", marker = "extra == 'pconf'", specifier = "==3.1.0" },
+    { name = "ipyparallel", marker = "extra == 'executors'", specifier = "==9.2.0" },
+    { name = "json-with-comments", marker = "extra == 'pconf'", specifier = "==1.2.10" },
+    { name = "loky", marker = "extra == 'executors'", specifier = "==3.5.6" },
+    { name = "myst-parser", marker = "extra == 'docs'", specifier = "==5.1.0" },
+    { name = "pebble", marker = "extra == 'executors'", specifier = "==5.2.1" },
+    { name = "py-asyncutils", extras = ["dev", "executors", "pconf", "themes"], marker = "extra == 'all'", specifier = "==1.2.0" },
+    { name = "py-asyncutils", extras = ["docs"], marker = "extra == 'themes'", specifier = "==1.2.0" },
+    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'pconf'", specifier = "==1.2.0" },
+    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'test'", specifier = "==1.2.0" },
+    { name = "py-asyncutils", extras = ["themes", "test"], marker = "extra == 'dev'", specifier = "==1.2.0" },
+    { name = "pyjson5", marker = "extra == 'json5'", specifier = "==2.0.1" },
+    { name = "pytest", marker = "extra == 'test'", specifier = "==9.1.1" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = "==1.4.0" },
+    { name = "pytest-asyncio-cooperative", marker = "extra == 'test'", specifier = "==0.40.0" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = "==7.1.0" },
+    { name = "pytest-local-badge", marker = "extra == 'test'", specifier = "==1.3.0" },
+    { name = "pytest-sugar", marker = "extra == 'test'", specifier = "==1.1.1" },
+    { name = "pyyaml", marker = "extra == 'pconf'", specifier = "==6.0.3" },
+    { name = "sphinx", marker = "extra == 'docs'", specifier = "==9.1.0" },
+    { name = "sphinx-autoapi", marker = "extra == 'docs'", specifier = "==3.8.0" },
+    { name = "sphinx-book-theme", marker = "extra == 'themes'", specifier = "==1.4.0" },
+    { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "==0.5.2" },
+    { name = "sphinx-lint", marker = "extra == 'docs'", specifier = "==1.0.2" },
+    { name = "sphinx-notfound-page", marker = "extra == 'docs'", specifier = "==1.1.0" },
+    { name = "sphinxext-opengraph", extras = ["social-cards"], marker = "extra == 'docs'", specifier = "==0.13.0" },
+    { name = "xmltodict", marker = "extra == 'pconf'", specifier = "==1.0.4" },
 ]
 provides-extras = ["all", "dev", "docs", "themes", "executors", "json5", "pconf", "test"]
 
@@ -1701,14 +1701,14 @@ wheels = [
 
 [[package]]
 name = "pytest-local-badge"
-version = "1.3.1"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7c/b9/e6d76dad890d39aaa0bf084a5c978609c94a98eca43ec19bf603a280e24e/pytest_local_badge-1.3.1.tar.gz", hash = "sha256:02fefa3a10730dc04530670a4f4974ec3f8d0e5d3a5874ee3013446290bf13be", size = 116266, upload-time = "2026-08-06T15:07:27.204Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/44/6bca408db25e60bcd216f722360c1aa80f58565b0faef254992140777399/pytest_local_badge-1.3.0.tar.gz", hash = "sha256:26d7e3ce7862f7377f785f1b68c9bce3861132f9e6eaf767825b229ea394877c", size = 115404, upload-time = "2026-06-08T11:44:54.254Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/11/73/a913acca25fb510bd35d6c972719dddc523c4813b1f2a76f90c450aa3acb/pytest_local_badge-1.3.1-py3-none-any.whl", hash = "sha256:12244f168111193b2c14ffc592241d518f117911d5f2dc6735d60d04ab95523d", size = 98767, upload-time = "2026-08-06T15:07:25.866Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/73/d7ca0a77e8ce9f6302e1e185ce2a985ba8b3c610bddebb9a62bdd1522d0e/pytest_local_badge-1.3.0-py3-none-any.whl", hash = "sha256:8a57664328847fec531c741e7a5014a3db94f83a7314e9e25490ab66d47a463d", size = 98246, upload-time = "2026-06-08T11:44:52.796Z" },
 ]
 
 [[package]]
