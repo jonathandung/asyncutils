@@ -1,12 +1,12 @@
 # ruff: file-ignore[global-statement,redefined-loop-name] # ty: ignore[unresolved-attribute]
-from asyncutils._internal import helpers as H, patch as P
-from asyncutils._internal.submodules import iotools_all as __all__
-import asyncutils as A, errno as E, os as O, sys as S
+import errno as E, os as O, sys as S, asyncutils as A
 from _functools import partial
 from asyncio import Lock, gather
 from contextlib import asynccontextmanager
 from itertools import starmap
 from mmap import mmap
+from asyncutils._internal import helpers as H, patch as P
+from asyncutils._internal.submodules import iotools_all as __all__
 def f(a, b, f=S.audit, _=O.pipe, c=O.close, /):
     def double_ended_pipe(*, pipe_impl=_, x=partial(open, mode=a), y=partial(open, mode=b), f=f):
         r, W, R, w = t = *pipe_impl(), *pipe_impl()

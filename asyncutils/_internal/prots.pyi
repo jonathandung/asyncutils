@@ -11,22 +11,23 @@
   Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
   even prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.
 '''
-from .helpers import LoopMixinBase
+import asyncio as a, concurrent.futures as c, sys as s
+from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator, Mapping
+from contextlib import AbstractAsyncContextManager, AbstractContextManager
+from contextvars import Context
+from io import TextIOWrapper
+from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, NotImplementedType, TracebackType
+from typing import Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+import ty_extensions as tyx
+from _typeshed import Incomplete
+from typing_extensions import TypeForm
 from ..config import FaultyConfig
 from ..constants import SentinelBase
 from ..exceptions import ForbiddenOperation
 from ..futures import TimeAwareFuture, TimeAwareTask
 from ..iotools import AsyncReadWriteCouple
 from ..iters import FirstMisMatch, Longer, Shorter
-import asyncio as aio, concurrent.futures as cf, sys, ty_extensions as tyx
-from _typeshed import Incomplete
-from collections.abc import AsyncIterable, Awaitable, Buffer, Callable, Coroutine, Generator, Hashable, Iterable, Iterator, Mapping
-from contextlib import AbstractContextManager, AbstractAsyncContextManager
-from contextvars import Context
-from io import TextIOWrapper
-from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, NotImplementedType, TracebackType
-from typing import Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
-from typing_extensions import TypeForm
+from .helpers import LoopMixinBase
 @type_check_only
 class SupportsLT(Protocol):
     '''An object that implements <.'''
@@ -52,7 +53,7 @@ class AsyncLockLike[T](AsyncContextManager[T], Protocol):
 @type_check_only
 class FutWrapType(Protocol):
     '''The signature of the functions accepted for the ``futwrap`` parameter in :func:`~asyncutils.compete.convert_to_coro_iter`.'''
-    def __call__[T](self, future: AnyFut[T], *, loop: aio.AbstractEventLoop|None) -> aio.Future[T]: ...
+    def __call__[T](self, future: AnyFut[T], *, loop: a.AbstractEventLoop|None) -> a.Future[T]: ...
 @type_check_only
 class SupportsSlicing[T](Iterable[T], Protocol):
     '''Protocol for iterables with size, and index and slice access.'''
@@ -245,7 +246,7 @@ class StdCoupType(AsyncReadWriteCouple[str, str]):
 @type_check_only
 class MemoryMappedFile(LoopMixinBase):
     '''The type of async memory-mapped files as opened and returned by :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
-    if sys.platform != 'win32':
+    if s.platform != 'win32':
         def madvise(self, option: int, start: int=..., length: int|None=...) -> None: '''Advise the kernel to handle the region of the memory map that starts at ``start`` with length ``length`` according to ``option``.'''
     async def read(self, offset: int=..., size: int=...) -> bytes: '''Read ``size`` bytes from the file at ``offset``. A negative ``size`` reads until the end of the file.'''
     async def write(self, data: bytes, offset: int=...) -> None: '''Write ``data`` into the file at ``offset``.'''
@@ -314,7 +315,7 @@ class ToSyncFromLoopRV(Protocol):
 @type_check_only
 class TransientBlockFromLoopRV(Protocol):
     '''The signature of the return value of :func:`~asyncutils.util.transient_block_from_loop`.'''
-    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> aio.Future[T]: ...
+    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> a.Future[T]: ...
 @type_check_only
 class NullContextType:
     '''
@@ -364,9 +365,9 @@ class StrictDualContextFactory(Protocol):
     @overload
     def __call__[T, **P](self, agenf: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
 @type_check_only
-class TaskFactory[T: aio.Task[Any]](Protocol):
+class TaskFactory[T: a.Task[Any]](Protocol):
     '''Callable protocol for the return type of :func:`~asyncutils.util.make_task_factory`.'''
-    def __call__(self, loop: aio.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
+    def __call__(self, loop: a.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
 @type_check_only
 class FaultyConfigA(FaultyConfig):
     '''For better type checking. Unstable.'''
@@ -468,7 +469,7 @@ type SpecificSubscriber = CanCallAndHash[[Any]]
 '''The type of subscribers for :class:`~asyncutils.channels.EventBus`.'''
 type WildcardSubscriber = CanCallAndHash[[str, Any]]
 '''The type of wildcard subscribers for :class:`~asyncutils.channels.EventBus`.'''
-if sys.platform == 'win32':
+if s.platform == 'win32':
     type Seek = Literal[0, 1, 2]
     '''Possible values of the ``whence`` parameter for :meth:`MemoryMappedFile.seek`, as follows:
 
@@ -490,7 +491,7 @@ type Observer[**P] = tyx.Intersection[Callable[Concatenate[Any, P], Awaitable[An
 '''The type of :class:`~asyncutils.channels.Observable` observers.'''
 type RWLockCM = AbstractAsyncContextManager[None, None]
 '''The type of the context managers returned by the :meth:`~asyncutils.rwlocks.RWLock.reader` and :meth:`~asyncutils.rwlocks.RWLock.writer` methods of :class:`~asyncutils.rwlocks.RWLock` and subclasses thereof.'''
-type AnyFut[T] = aio.Future[T]|cf.Future[T]
+type AnyFut[T] = a.Future[T]|c.Future[T]
 '''A sync or async future.'''
 type PipePairCM[T: (str, bytes)] = DualContextManager[tuple[AsyncReadWriteCouple[T, T], AsyncReadWriteCouple[T, T]]]
 '''The return type of :func:`~asyncutils.iotools.double_ended_text_pipe` and :func:`~asyncutils.iotools.double_ended_binary_pipe`.'''

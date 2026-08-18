@@ -1,8 +1,8 @@
-from pytest import raises, RaisesGroup
+from warnings import catch_warnings, warn
+from pytest import RaisesGroup, raises
 from asyncutils import empty_agen
 from asyncutils.exceptions import *
 from tests.conftest import mk
-from warnings import catch_warnings, warn
 def test_unnest():
     with RaisesGroup(ValueError, TypeError, match='msg'): raise BaseExceptionGroup('msg', tuple(unnest(BaseExceptionGroup('', (RuntimeError('a'), ValueError('b'), TypeError('c'), SystemExit('d'))), filter_out=RuntimeError, raise_critical=False, keep=Exception)))
     with RaisesGroup(TypeError, ValueError, match='msg'): raise BaseExceptionGroup('msg', tuple(unnest_reverse(BaseExceptionGroup('', (RuntimeError('a'), ValueError('b'), TypeError('c'), SystemExit('d'))), filter_out=RuntimeError, raise_critical=False, keep=Exception)))

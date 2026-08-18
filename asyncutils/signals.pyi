@@ -1,10 +1,10 @@
 '''Functions related to `asynchronous signal handling <https://en.wikipedia.org/wiki/Sigaction>`__.'''
-from ._internal.prots import ExcType
 from asyncio import AbstractEventLoop
 from collections.abc import Awaitable, Callable, Iterable
 from logging import Logger
 from signal import Signals
 from typing import Literal, overload
+from ._internal.prots import ExcType
 __all__ = 'wait_for_signal',
 @overload
 async def wait_for_signal[T](processor: Callable[[Signals], Awaitable[T]], /, *S: int, timeout: float|None=..., raise_on_timeout: Literal[True], loop: AbstractEventLoop|None=..., possible_errors: tuple[ExcType, ...]=..., default_on_processor_failure: T, sigs: Iterable[int]=..., logger: Logger=...) -> T: ...

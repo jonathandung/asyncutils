@@ -1,12 +1,12 @@
 '''Miscellaneous helper routines for :mod:`asyncutils` submodules that are not meant to be called by the user.'''
-from .prots import CanClearAndCopy, Subscriptable
-from ..config import Executor
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import Awaitable, Callable
-from ty_extensions import Not
 from types import GeneratorType, ModuleType
 from typing import Any, overload
+from ty_extensions import Not
 from typing_extensions import TypeIs
+from ..config import Executor
+from .prots import CanClearAndCopy, Subscriptable
 def filter_out(*a: object, s: object=...) -> GeneratorType[Any]: '''Yield items in the positional arguments not identical to the sentinel ``s``, or ``None`` by default.'''
 def get_loop_and_set() -> AbstractEventLoop: '''Return the running event loop. If there is none, create and set one first.'''
 def check_methods(obj: object, /, *meth: str) -> bool: '''Re-implementation of :func:`!collections.abc._check_methods`.'''

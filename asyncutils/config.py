@@ -1,13 +1,12 @@
 # ruff: file-ignore[blind-except,open-file-with-context-handler]
-from asyncutils._internal import log as l, patch as P, initialize as I
+import logging as L, sys as S
+from asyncutils._internal import initialize as I, log as l, patch as P
 from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
-import logging as L, sys as S
 def __dir__(_=__all__): return _
 class FaultyConfig(BaseException):
     def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {', '.join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
 def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # ruff: ignore[complex-structure,function-call-in-default-argument,too-many-branches,too-many-return-statements] # pragma: no cover
-    if not isinstance(e, str): raise TypeError('asyncutils: executor name should be a string')
     d, c, w = e.rpartition(c)
     if c:
         try: return getattr(_(d), w)

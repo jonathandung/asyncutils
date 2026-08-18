@@ -1,10 +1,10 @@
-import asyncutils as A
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import helpers as H, patch as P
-from asyncutils._internal.submodules import iterclasses_all as __all__
 from _collections import defaultdict, deque
 from operator import index
 from sys import maxsize as I
+import asyncutils as A
+from asyncutils._internal import helpers as H, patch as P
+from asyncutils._internal.submodules import iterclasses_all as __all__
+from asyncutils.constants import _NO_DEFAULT
 @H.subscriptable
 class AChain:
     __slots__ = '__its',

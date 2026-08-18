@@ -1,4 +1,4 @@
-import math, sys, pickle, pytest
+import math, pickle, sys, pytest
 from asyncutils.constants import *
 from asyncutils.constants import _NO_DEFAULT
 t = type(NO_COALESCE)

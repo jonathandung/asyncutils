@@ -1,14 +1,14 @@
 # ruff: file-ignore[bare-except,complex-structure,too-many-arguments] # ty: ignore[unresolved-attribute]
-from asyncutils.config import _randinst
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import helpers as H, log, patch as P
-from asyncutils._internal.submodules import func_all as __all__
 import asyncio as I, asyncutils as A
 from collections import deque, namedtuple
 from functools import partial, update_wrapper, wraps
 from itertools import count, repeat
 from sys import audit
 from time import perf_counter
+from asyncutils._internal import helpers as H, log, patch as P
+from asyncutils._internal.submodules import func_all as __all__
+from asyncutils.config import _randinst
+from asyncutils.constants import _NO_DEFAULT
 def acompose(*F, wrap_last=True, _=I.iscoroutine):
     async def g(*a, **k):
         if _(r := next(i := reversed(F))(*a, **k)): r = await r

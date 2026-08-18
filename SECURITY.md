@@ -17,7 +17,7 @@ Practices. Please report as follows:
 - GitHub-native method
 
   Navigate to the [security tab](https://github.com/jonathandung/asyncutils/security), then click on "Report a vulnerability" in the upper right
-  corner. Comprehensive guidelines should be shown.
+  corner. Detailed guidelines will be shown.
 
 - Via email
 

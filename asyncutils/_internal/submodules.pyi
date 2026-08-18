@@ -2,8 +2,8 @@
 | Exports the ``__all__`` attributes of all of `asyncutils`'s public submodules.
 | This is the single source of truth that the name exposure system needs.
 '''
-from .prots import All
 from typing import Final
+from .prots import All
 altlocks_all: Final[All]
 base_all: Final[All]
 buckets_all: Final[All]

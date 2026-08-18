@@ -1,8 +1,8 @@
 '''Utilities related to the command-line interface and getting metadata for package configuration.'''
-from ._internal.prots import CanWriteAndFlush, DumpType
-from _typeshed import FileDescriptorOrPath
 from collections.abc import Callable, Sequence
 from typing import Any
+from _typeshed import FileDescriptorOrPath
+from ._internal.prots import CanWriteAndFlush, DumpType
 __all__ = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'
 def loadf(path: FileDescriptorOrPath, ext: str=..., /) -> dict[str, Any]: '''Load the file at ``path``, with the specified file extension if undeducible from the file name, into a dictionary using the correct library.'''
 def json_to_argv(path: FileDescriptorOrPath, /) -> list[str]:

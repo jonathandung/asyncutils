@@ -1,9 +1,9 @@
+import abc as a, asyncutils as A
+from _collections import deque
+from weakref import WeakKeyDictionary as W
 from asyncutils._internal.compat import Placeholder, partial
 from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
 from asyncutils._internal.submodules import properties_all as __all__
-from _collections import deque
-from weakref import WeakKeyDictionary as W
-import asyncutils as A, abc as a
 class Deleters(__import__('enum').IntFlag): CANNOT_SET_AFTER_DELETE = SILENT = 1; DEFAULT, CAN_DELETE_AGAIN, NO_DELETER = 0, 2, 4
 d, n = Deleters.DEFAULT, 'None'
 class D(W):

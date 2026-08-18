@@ -1,6 +1,6 @@
-from asyncutils.constants import POSSIBLE_EXECUTORS as c
-from asyncutils._internal.compat import j
 import argparse as A
+from asyncutils._internal.compat import j
+from asyncutils.constants import POSSIBLE_EXECUTORS as c
 j.update(add_help=False, fromfile_prefix_chars='@', formatter_class=A.RawTextHelpFormatter)
 i, b, d, e, f, g, J, p = '--', 'store_const', 'executor', 'Equivalent to "-e %s".', 'store_true', 'count', 'ETYP', A.ArgumentParser(prog='asyncutils', argument_default=A.SUPPRESS, description='''Copyright (c) 2026 Jonathan Dung. All rights reserved.
 

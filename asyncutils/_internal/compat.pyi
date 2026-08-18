@@ -1,9 +1,9 @@
-'''Compatibility shims for Python 3.12, 3.13 and 3.15.'''
-from .prots import SupportsRichComparison
-from sys import version_info as v
+'''Compatibility shims for Python 3.12 - 3.15.'''
 from collections.abc import Iterable
-from typing import Any, Final
 from functools import partial
+from sys import version_info as v
+from typing import Any, Final
+from .prots import SupportsRichComparison
 __all__ = 'D', 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'j', 'partial', 's'
 D: Final[dict[str, Any]]
 j: Final[dict[str, Any]]

@@ -1,4 +1,4 @@
-import asyncutils, pytest
+import pytest, asyncutils
 @(dec := pytest.fixture(scope='session'))
 def config_json_file(contents):
     with __import__('tempfile').NamedTemporaryFile(mode='w+', delete=False, suffix='.json') as f: f.write(contents)

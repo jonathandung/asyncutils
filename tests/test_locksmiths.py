@@ -1,7 +1,7 @@
-from asyncutils.locksmiths import *
-from asyncutils import done_fut, locked_lock, wrap_exc
-from tests.conftest import mk
 import asyncio, pytest
+from asyncutils import done_fut, locked_lock, wrap_exc
+from asyncutils.locksmiths import *
+from tests.conftest import mk
 @mk
 async def test_force():
     smith, lock = LocksmithBase(), await locked_lock()

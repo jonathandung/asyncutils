@@ -3,12 +3,12 @@
 | All classes strictly follow the asynchronous lock interface as defined by :class:`asyncio.Lock` and made explicit in the :class:`~asyncutils._internal.prots.AsyncLockLike` protocol,
 | besides :class:`MultiCountDownLatch`, since it uses :class:`KeyedCondition` internally and it is not desired for :mod:`asyncutils.altlocks` to import this submodule as well.
 '''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import AsyncContextManager
-from .mixins import LockMixin, LockWithOwnerMixin
 from asyncio import BoundedSemaphore, Lock, Task
 from collections.abc import Callable, Hashable, Mapping
 from typing import Any, Literal
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import AsyncContextManager
+from .mixins import LockMixin, LockWithOwnerMixin
 __all__ = 'AdvancedRateLimit', 'DynamicBoundedSemaphore', 'KeyedCondition', 'MultiCountDownLatch', 'PriorityLock', 'PriorityRLock', 'PrioritySemaphore', 'RLock'
 class DynamicBoundedSemaphore(BoundedSemaphore):
     '''A subclass of :class:`asyncio.BoundedSemaphore` whose bound can be set by the user via :attr:`~DynamicBoundedSemaphore.bound`.'''

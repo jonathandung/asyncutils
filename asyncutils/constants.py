@@ -1,4 +1,4 @@
-import asyncutils._internal.patch as P, sys as S
+import sys as S, asyncutils._internal.patch as P
 from asyncutils._internal.helpers import fullname
 from asyncutils._internal.submodules import constants_all as __all__
 RECIPROCAL_E, EXECUTORS_FROZENSET = 0.36787944117144233, frozenset(POSSIBLE_EXECUTORS := ('thread', 'process', 'interpreter', 'loky', 'loky_no_reuse', 'dask', 'ipython', 'elib_flux_cluster', 'elib_flux_job', 'elib_slurm_cluster', 'elib_slurm_job', 'elib_single_node', 'pebble_thread', 'pebble_process', 'deadpool'))

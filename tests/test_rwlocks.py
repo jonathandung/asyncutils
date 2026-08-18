@@ -1,5 +1,5 @@
-import pytest
 from asyncio import create_task, sleep
+import pytest
 from asyncutils.rwlocks import *
 from tests.conftest import mk
 @mk

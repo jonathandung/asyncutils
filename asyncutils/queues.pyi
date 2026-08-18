@@ -1,13 +1,13 @@
 '''Non-inheriting extensions of :class:`asyncio.Queue` with more methods and password protection, and a :class:`PotentQueueBase` ABC.'''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import SupportsIteration, GetAndPutProtectedQueueProtocol, GetProtectedQueueProtocol, PutProtectedQueueProtocol
-from .exceptions import IgnoreErrors
 from abc import ABC, abstractmethod
 from asyncio import Future, Queue
 from collections.abc import Awaitable, Callable
 from contextlib import AbstractContextManager
 from types import AsyncGeneratorType, GeneratorType
 from typing import Any, Final, Literal, Self, overload
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import GetAndPutProtectedQueueProtocol, GetProtectedQueueProtocol, PutProtectedQueueProtocol, SupportsIteration
+from .exceptions import IgnoreErrors
 __all__ = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'password_queue'
 ignore_qshutdown: Final[IgnoreErrors]
 '''Instance of :class:`~asyncutils.exceptions.IgnoreErrors` that suppresses :exc:`~asyncio.QueueShutDown`.'''

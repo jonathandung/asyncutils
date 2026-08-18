@@ -1,5 +1,5 @@
 from io import StringIO
-import asyncutils as au, pytest as pt
+import pytest as pt, asyncutils as au
 from asyncutils.tools import *
 @(dec := __import__('pytest').fixture(scope='module'))
 def argstr(): return '-pVVm 5'

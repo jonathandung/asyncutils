@@ -1,4 +1,4 @@
-.PHONY: audit badges bug changelog clean docs help install install-silent lint lock pc release ruff tc test venv watch
+.PHONY: audit badges bug changelog clean docs help install lint lock pc release test venv
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
@@ -24,7 +24,7 @@ O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
 		echo "curl or wget required to install uv" >&2
 		exit 1
 	fi
-	(uv tool install --force -U ruff &&	uv tool install --force -U ty) 2>/dev/null
+	(uv tool install ruff && uv tool install ty) 2>/dev/null
 	touch .uv-stamp
 audit: .uv-stamp
 	uv audit --preview-features audit-command
@@ -47,8 +47,6 @@ help:
 	@cat assets/mkhelp.txt
 install: .prek-stamp .uv-stamp
 	uv pip install -Ue .[dev]
-install-silent:
-	$(MAKE) install > /dev/null
 lint: .uv-stamp
 	ruff check
 	ty check
@@ -62,15 +60,9 @@ release:
 		exit 1
 	fi
 	gh release create
-ruff: .uv-stamp
-	ruff check
-tc: .uv-stamp
-	ty check
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail $(AUTILSTESTMAXFAIL)
 venv: .uv-stamp
 	uv venv
-watch:
-	ptw --runner "pytest" --onfail "echo 'Tests failed!'"
 %::
 	@true

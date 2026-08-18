@@ -1,4 +1,4 @@
-import asyncutils as A, asyncutils._internal as I, shlex as s
+import shlex as s, asyncutils as A, asyncutils._internal as I
 get_cmd_help, __all__ = I.parsed.p.format_help, I.submodules.tools_all
 def loadf(p, e=None, /, l=I.unparsed.r, _=I.helpers.fullname):
     if not ((f := getattr(p, '__fspath__', None)) is None or isinstance(p := f(), (str, bytes))): raise TypeError(f'asyncutils.tools.loadf: __fspath__ method returned {_(p)} instead of str or bytes')

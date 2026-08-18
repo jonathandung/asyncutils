@@ -1,11 +1,11 @@
 # ruff: file-ignore[non-imperative-mood]
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import DualContextManager
 from asyncio import AbstractEventLoop, Protocol, Transport, WriteTransport
 from collections.abc import Iterable
 from socket import socket
 from typing import ClassVar, Literal
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import DualContextManager
 __all__ = 'CRLFProtocol', 'CRProtocol', 'LFProtocol', 'LineProtocol', 'SocketTransport'
 class LineProtocol(Protocol, LoopMixinBase):
     '''

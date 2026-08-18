@@ -1,9 +1,9 @@
 '''Object-oriented (async) iteration helpers.'''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import SupportsIteration, ValidSlice
 from collections.abc import Callable
 from types import AsyncGeneratorType
 from typing import Self, SupportsIndex, overload
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import SupportsIteration, ValidSlice
 __all__ = 'ABucket', 'AChain', 'APeekable'
 class AChain[T]:
     '''Async version of :func:`~itertools.chain` that takes async or sync iterables.'''

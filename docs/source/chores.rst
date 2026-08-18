@@ -6,12 +6,11 @@ This file aims to detail guidelines for some monotonous tasks contributors to th
 Preliminaries
 -------------
 
-You are recommended to install an IDE plugin to support .editorconfig and use a grammar and spelling checker. A ready-to-use VS Code configuration
-file is in the repo. Regarding .markdownlint.json, even though there is no longer a pre-commit or workflow step requiring it, it contains the most
-basic ignores suitable for this project's files and should be respected. You may run the linter locally to check for markdown stylistic issues. Also
-ensure you have ``cspell`` and ``@cspell/cspell-tools`` installed (e.g. from ``npm``) if you want the spell-checking target to work, and that you are
-comfortable with having `uv <https://docs.astral.sh/uv>`__ and `prek <https://prek.j178.dev>`__ installed on your system. Next, simply run
-``make venv`` and ``make install``.
+To start development, see the :doc:`installation guide <installation>`.
+
+A ready-to-use VS Code configuration file is included, which will prompt you to install extensions this project recommends and disable some others to
+avoid conflicts. If you are using a different IDE, you may want to use an `.editorconfig <https://editorconfig.org>`__ extension, have
+`markdownlint <https://github.com/davidanson/markdownlint>`__, `CSpell <https://cspell.org>`__, `ruff`_ and `ty`_ extensions or run them locally.
 
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------

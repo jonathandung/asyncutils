@@ -16,12 +16,8 @@
 
 ### For documentation PRs
 
-- [] Local Sphinx build passes, according to ``make docs``.
-- [] Made as little modifications to `docs/source/conf.py` as possible.
-
-### For small PRs
-
-- [] This is a one-off change, or I have gathered as many homogeneous changes as I can find across the codebase to be patched at once by this PR.
+- [] Local Sphinx build using ``make docs`` succeeds.
+- [] As little modifications to `docs/source/conf.py` as possible were made.
 
 ### For big PRs
 

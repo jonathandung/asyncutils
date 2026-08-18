@@ -1,9 +1,8 @@
-import asyncio as I, asyncutils as A
-from asyncutils._internal import helpers as H
-from asyncutils._internal.patch import patch_function_signatures
-from asyncutils._internal.submodules import util_all as __all__
+import asyncio as I, asyncutils as A, asyncutils._internal.helpers as H
 from functools import partial, wraps
 from sys import audit, exc_info
+from asyncutils._internal.patch import patch_function_signatures
+from asyncutils._internal.submodules import util_all as __all__
 def avalify(v):
     async def g(*_a, **_): return v # ruff: ignore[unused-async]
     return g

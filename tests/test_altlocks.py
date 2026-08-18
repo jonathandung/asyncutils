@@ -1,8 +1,8 @@
 import gc, pytest
 from asyncio import Lock, gather, sleep
-from asyncutils.altlocks import *
-from asyncutils import CircuitOpen, ResourceBusy, locked_lock, timer
 from collections import deque
+from asyncutils import CircuitOpen, ResourceBusy, locked_lock, timer
+from asyncutils.altlocks import *
 from tests.conftest import mk
 @pytest.fixture
 def obj(): return object()

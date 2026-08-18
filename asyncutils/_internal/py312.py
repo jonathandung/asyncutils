@@ -1,6 +1,6 @@
 __all__ = 'LifoQueue', 'PriorityQueue', 'Queue', 'QueueShutDown'
 if __import__('sys').version_info < (3, 13):
-    import asyncutils._internal.helpers as h, heapq as H; from _collections import deque
+    import heapq as H, asyncutils._internal.helpers as h; from _collections import deque
     class QueueShutDown(Exception): ...
     def _wakeup_next(W, /, w=None):
         while W and (w := W.popleft()).done(): ...

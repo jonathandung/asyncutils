@@ -1,12 +1,12 @@
 '''Utilities that cannot be easily classified into any submodule.'''
+from collections import deque
+from collections.abc import Awaitable, Callable, Iterable, Mapping
+from types import GeneratorType, TracebackType
+from typing import Any, Literal, NoReturn, Self, overload
+from ty_extensions import JustFloat
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import ExcType, SupportsIteration, Timer
 from .mixins import ExecutorRequiredAsyncContextMixin
-from collections import deque
-from collections.abc import Awaitable, Callable, Iterable, Mapping
-from ty_extensions import JustFloat
-from types import GeneratorType, TracebackType
-from typing import Any, NoReturn, Self, Literal, overload
 __all__ = 'CacheWithBackgroundRefresh', 'CallbackAccumulator', 'StateMachine', 'gather_with_limited_concurrency'
 class StateMachine:
     '''A simple asynchronous state machine accepting string states.'''

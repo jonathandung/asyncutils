@@ -1,14 +1,14 @@
+from _collections import deque
+from asyncio import CancelledError, create_task, gather, sleep
+from enum import IntEnum
+from operator import is_
+from random import choice, shuffle
+from pytest import fail, fixture, raises
+from asyncutils import iterf
 from asyncutils.base import *
 from asyncutils.iterclasses import *
 from asyncutils.iters import *
-from asyncutils import iterf
-from asyncio import CancelledError, create_task, gather, sleep
-from _collections import deque
-from operator import is_
-from pytest import fail, fixture, raises
 from tests.conftest import mk
-from enum import IntEnum
-from random import choice, shuffle
 @fixture
 def bucket(): return ABucket((10, 20, 30, 11, 21, 31, 12, 22, 23, 33), 10 .__rfloordiv__)
 Set = IntEnum('Set', 'A B C D E F G H I J')

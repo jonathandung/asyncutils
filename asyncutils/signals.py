@@ -1,8 +1,8 @@
-import asyncutils as A, signal as B, sys as M
-from asyncutils._internal import log, helpers as H
+import signal as B, sys as M, asyncutils as A
+from asyncio.tasks import wait_for
+from asyncutils._internal import helpers as H, log
 from asyncutils._internal.running_console import get
 from asyncutils._internal.submodules import signals_all as __all__
-from asyncio.tasks import wait_for
 async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=None, possible_errors=(Exception,), default_on_processor_failure=None, sigs=None, logger=log): # ruff: ignore[complex-structure,too-many-branches,too-many-statements]
     if loop is None: loop = H.get_loop_and_set()
     P, x, a, h = (S := {*S, *(A.getcontext().WAIT_FOR_SIGNAL_DEFAULT_SIGNALS if sigs is None else sigs)}).pop, 0, (F := loop.create_future()).add_done_callback, lambda s, _=None, F=F: F.done() or F.set_result(B.Signals(s)); M.audit('asyncutils.signals.wait_for_signal', S)

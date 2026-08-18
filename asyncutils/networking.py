@@ -1,4 +1,4 @@
-import asyncutils as A, asyncio as I, asyncutils._internal as M
+import asyncio as I, asyncutils as A, asyncutils._internal as M
 from sys import audit
 from asyncutils._internal.submodules import networking_all as __all__
 class LineProtocol(I.Protocol, M.helpers.LoopMixinBase):

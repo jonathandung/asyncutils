@@ -1,11 +1,11 @@
 # ty: ignore[unresolved-attribute]
-from asyncutils._internal.helpers import copy_and_clear, fullname, simple_wrap
-from asyncutils._internal.submodules import futures_all as __all__
-from asyncio.futures import Future, _PyFuture # ty: ignore[unresolved-import]
-from asyncio.tasks import Task, _PyTask # ty: ignore[unresolved-import]
+from asyncio.futures import Future, _PyFuture  # ty: ignore[unresolved-import]
+from asyncio.tasks import Task, _PyTask  # ty: ignore[unresolved-import]
 from contextvars import copy_context
 from sys import audit
 from time import monotonic_ns
+from asyncutils._internal.helpers import copy_and_clear, fullname, simple_wrap
+from asyncutils._internal.submodules import futures_all as __all__
 t = '_callbacks', '_async_callbacks', '_noargs_callbacks', '_noargs_async_callbacks'
 def f(a, /):
     def remove_callback(self, f, /):

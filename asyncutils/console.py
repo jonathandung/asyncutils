@@ -1,14 +1,14 @@
 # ruff: file-ignore[blind-except,magic-value-comparison]
-from asyncutils import __version__ as V, config as C, exceptions as E
-from asyncutils._internal import patch as P, running_console as R, log
-from asyncutils._internal.helpers import fullname, get_loop_and_set
-from asyncutils._internal.submodules import console_all as __all__
 import abc, sys as S
 from asyncio import iscoroutine
 from asyncio.futures import _chain_future
+from code import InteractiveConsole as B
 from itertools import repeat
 from os import getenv as g
-from code import InteractiveConsole as B
+from asyncutils import __version__ as V, config as C, exceptions as E
+from asyncutils._internal import log, patch as P, running_console as R
+from asyncutils._internal.helpers import fullname, get_loop_and_set
+from asyncutils._internal.submodules import console_all as __all__
 if not C.basic_repl:
     try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import]
     except ImportError: C.basic_repl = True

@@ -4,17 +4,13 @@ Available targets:
  bug            - File a bug report
  changelog      - Generate a compact changelog from Git history and print it in the terminal with colour
  clean          - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
- docs           - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning
- help           - Show this help message
+ docs           - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning; requires internet access
+ help           - Show this help message; the default target
  install        - Install the package in editable mode with development dependencies and install prek hooks
- install-silent - Install without output
- lint           - Run ruff, ty, CSpell sequentially
+ lint           - Run ruff and ty sequentially; likely the most useful target
  lock           - Regenerate the project lockfile at uv.lock
  pc             - Run prek hooks on all files
  release        - Call the GitHub CLI (gh) to make an release interactively
- ruff           - Run the ruff linter
- tc             - Run ty for type checking
  test           - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
  venv           - Create a virtual environment using uv
- watch          - Watch for changes and run tests automatically using pytest-watch, assuming it is installed
 Note: Some targets will automatically install or update the uv package manager, or the prek executable. Targets may be added on popular demand.

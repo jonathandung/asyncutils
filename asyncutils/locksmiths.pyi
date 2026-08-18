@@ -1,11 +1,11 @@
 # ruff: file-ignore[non-imperative-mood]
 '''Implementation of a base class for locksmiths, magical entities that can compel not intentionally uncooperative locks to be released while limiting collateral damage and hindrance of the control flow of the program as much as possible and allowing customization of behaviour in different steps regarding some locks.'''
-from ._internal.prots import AsyncLockLike
 from asyncio import AbstractEventLoop, Task
 from collections.abc import Awaitable, Callable
 from enum import IntEnum
 from typing import Any, ClassVar, Literal, final
 from typing_extensions import TypeIs
+from ._internal.prots import AsyncLockLike
 __all__ = 'ForceResult', 'LocksmithBase', 'RecognitionResult', 'succeeded'
 def succeeded(result: object, /) -> TypeIs[Literal[ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS]]: '''Return whether the given result is a successful one.'''
 class ForceResult(IntEnum):

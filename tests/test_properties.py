@@ -1,6 +1,6 @@
+from pytest import raises
 from asyncutils.properties import *
 from asyncutils.rwlocks import CoercedMethod, FairRWLock
-from pytest import raises
 from tests.conftest import mk
 class TestProp:
     __slots__ = '_cp', '_lp', '_rp'

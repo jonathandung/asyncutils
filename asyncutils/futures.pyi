@@ -1,9 +1,9 @@
 '''Various implementations of future and task classes, eager, time-aware and supporting asynchronous and no-argument callbacks.'''
-from ._internal.prots import TimeAware
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import Awaitable, Callable
 from contextvars import Context
 from typing import Literal, Self
+from ._internal.prots import TimeAware
 __all__ = 'AsyncCallbacksFuture', 'AsyncCallbacksTask', 'TimeAwareAsyncCallbacksFuture', 'TimeAwareAsyncCallbacksTask', 'TimeAwareFuture', 'TimeAwareTask', 'TimeAwareUniqueCallbacksFuture', 'TimeAwareUniqueCallbacksTask', 'UniqueCallbacksFuture', 'UniqueCallbacksTask'
 class TimeAwareFuture[T](Future[T]):
     '''A subclass of :class:`~asyncio.Future` that can be compared to other :class:`TimeAwareFuture`'s based on the time they were created.'''

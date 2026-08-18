@@ -17,8 +17,8 @@ goto :eof
 if exist .uv-stamp goto :eof
 where uv >nul 2>nul
 if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex")
-uv tool install --force -U ruff 2>nul
-uv tool install --force -U ty 2>nul
+uv tool install ruff 2>nul
+uv tool install ty 2>nul
 type nul > .uv-stamp
 goto :eof
 
@@ -77,12 +77,9 @@ call :.uv-stamp
 uv pip install -Ue .[dev]
 goto :eof
 
-:install-silent
-call :install > nul
-goto :eof
-
 :lint
-call :ruff
+call :.uv-stamp
+ruff check
 ty check
 goto :eof
 
@@ -102,25 +99,11 @@ if errorlevel 2 exit /b 1
 if errorlevel 1 gh release create
 goto :eof
 
-:ruff
-call :.uv-stamp
-ruff check
-goto :eof
-
 :test
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
-goto :eof
-
-:tc
-call :.uv-stamp
-ty check
 goto :eof
 
 :venv
 call :.uv-stamp
 uv venv
-goto :eof
-
-:watch
-ptw --runner "pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%" --onfail "echo 'Tests failed!'"
 goto :eof

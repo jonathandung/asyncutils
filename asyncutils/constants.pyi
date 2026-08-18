@@ -1,8 +1,8 @@
 '''Exports sentinels and public constants.'''
-from ._internal.prots import Executor, NoCoalesce, Raise
 from collections.abc import Callable
 from threading import Lock
 from typing import Final, Self
+from ._internal.prots import Executor, NoCoalesce, Raise
 __all__ = 'EXECUTORS_FROZENSET', 'NO_COALESCE', 'POSSIBLE_EXECUTORS', 'RAISE', 'RECIPROCAL_E', 'SentinelBase'
 RECIPROCAL_E: Final[float]
 '''The reciprocal of Euler's number, used by :func:`~asyncutils.iters.aguessmin` and :func:`~asyncutils.iters.aguessmax`.'''
