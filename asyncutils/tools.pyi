@@ -1,6 +1,6 @@
 '''Utilities related to the command-line interface and getting metadata for package configuration.'''
 from collections.abc import Callable, Sequence
-from typing import Any
+from typing import Any, Literal
 from _typeshed import FileDescriptorOrPath
 from ._internal.prots import CanWriteAndFlush, DumpType
 __all__ = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'
@@ -40,10 +40,10 @@ def get_cmd_help() -> str:
       This is actually a bound method of the library's argument parser at runtime.
     '''
 def print_cmd_help(file: CanWriteAndFlush[str]=..., *, flush: bool=...) -> None: '''Print the help, as returned by :func:`get_cmd_help`, into the specified file (default :data:`~sys.stdout`) and flush it.'''
-def find_help_url(obj: object=..., /) -> str:
+def find_help_url(obj: object=..., /, *, ver: Literal['latest', 'stable']=...) -> str:
     '''
     Get the URL of the :mod:`asyncutils` documentation page for ``obj``. See the supported calling patterns `here <https://asyncutils.readthedocs.io/en/stable/examples.html>`__.
 
     .. caution:: The URL returned is not guaranteed to work with strings representing non-existent, undocumented or internal symbols.
     '''
-def open_help(obj: object=..., /) -> bool: '''Open the URL to the documentation of the specified symbol defined in :mod:`asyncutils` via the default browser, returning success.'''
+def open_help(obj: object=..., /, *, ver: Literal['latest', 'stable']=...) -> bool: '''Open the URL to the documentation of the specified symbol defined in :mod:`asyncutils` via the default browser, returning success.'''

@@ -9,12 +9,6 @@ Benchmarks
 
   .. cspell:enable
 
-.. note::
-  :collapsible:
-
-  The above quote is not to downplay the importance of this document, but the performance of async code depends heavily on the event loop
-  implementation, which is not well captured by this data because only import time is counted.
-
 When used as a REPL (Read-Eval-Print Loop), this module starts slow since it builds on the standard library :mod:`asyncio`, which loads all its
 submodules on import, and the event loop is quite difficult to implement. This is understandable but suboptimal. On the contrary, we focus on
 simplifying boilerplate-heavy code and integrating and combining existing patterns seamlessly with a set of core utilities, so :mod:`asyncutils` is
@@ -46,23 +40,6 @@ Baseline: asyncio
 
 Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49 ms; n = 10
 
-::
-
-  time printf "raise SystemExit\n" | python -SIqm asyncio 2>/dev/null
-
-Time taken to start and immediately exit the asyncio console:
-
-* real: 500.7 ± 14.5 ms; max 520 ms, min 474 ms
-* user: 42.0 ± 28.1 ms; max 105 ms, min 15 ms
-* sys: 67.5 ± 19.1 ms; max 90 ms, min 30 ms
-
-n = 10
-
-.. note:: This includes Python startup time and immense I/O and process overhead with piping.
-.. note::
-  The ``time`` command is not really a benchmarking tool, so these are rounded to 0.1 ms. It is also run in Git Bash on a slow computer, which can
-  greatly skew the results.
-
 asyncutils
 ----------
 
@@ -91,30 +68,6 @@ Time taken to start the console, which includes importing :mod:`asyncio`: 99.89 
 Time taken to import :mod:`asyncio` along with all 31 ordinary submodules: 196.96 ± 18.30 ms; max 225.08 ms, min 172.51 ms, n = 10
 
 .. note:: Up to 10 required internal submodules are also fetched.
-
-::
-
-  time printf "raise SystemExit\n" | asyncutils 2>/dev/null
-
-Time taken to start and immediately exit the asyncutils console, timed like the asyncio console:
-
-* real: 380.8 ± 22.7 ms; max 412 ms, min 350 ms
-* user: 25.5 ± 17.4 ms; max 45 ms, min 0 ms
-* sys: 37.5 ± 17.7 ms; max 60 ms, min 0 ms
-
-n = 10
-
-::
-
-  time printf "load_all()\nraise SystemExit\n" | asyncutils 2>/dev/null
-
-The above including all submodules:
-
-* real: 485.3 ± 12.2 ms; max 506 ms, min 459 ms
-* user: 19.5 ± 10.1 ms; max 30 ms, min 0 ms
-* sys: 55.5 ± 17.4 ms; max 90 ms, min 30 ms
-
-n = 10
 
 .. note::
   :collapsible:

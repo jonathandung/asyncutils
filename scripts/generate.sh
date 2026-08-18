@@ -13,6 +13,8 @@ echo "Bug Reporting
 
 .. version-added:: 1.1.3
 
+.. highlight:: text
+
 The \`\`asyncutils bug\`\` command, which calls :func:\`~asyncutils.cli.bug\` under the hood, is used to assist ticket submission to the GitHub issue
 tracker for :mod:\`asyncutils\`. It utilizes the GitHub issue form schema to grab environment information the bug report needs, such that you need
 not enter them manually, making for better UX and easier debugging.
@@ -24,6 +26,8 @@ echo "$m"
 exec > docs/source/help.rst
 echo "CLI Usage
 =========
+
+.. highlight:: text
 
 This is the output of ``asyncutils --help``, as of $v::
 "
@@ -37,5 +41,5 @@ Below is the Makefile help as of $v::
 cat assets/mkhelp.txt | sed '/^$/! s/^/  /'
 echo "$m"
 curl -Z -o docs/source/ai-use.md https://raw.githubusercontent.com/jonathandung/.github/main/AI_USAGE_POLICY.md -o docs/source/conduct.md https://raw.githubusercontent.com/jonathandung/.github/main/CODE_OF_CONDUCT.md -o docs/source/contributing.md https://raw.githubusercontent.com/jonathandung/.github/main/CONTRIBUTING.md -o docs/source/governance.md https://raw.githubusercontent.com/jonathandung/.github/main/GOVERNANCE.md
-for p in CHANGELOG.md:changelog.md COMPATIBILITY.rst:compat.rst EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
+for p in CHANGELOG.md:changelog.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md;
   do cp "${p%:*}" "docs/source/${p#*:}"; done

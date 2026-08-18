@@ -25,11 +25,11 @@ def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(
 def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):
     with open(p, 'w', encoding='utf-8') as f: dump(_(a).__dict__, f)
 def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
-def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'all_symbols', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
-    if o in _: return 'https://asyncutils.readthedocs.io/en/stable/index.html'
+def find_help_url(o=None, /, *, ver='stable', _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'all_symbols', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
+    if o in _: return f'https://asyncutils.readthedocs.io/en/{ver}/index.html'
     s = None
     if isinstance(o, str):
-        if (o := o.removeprefix('asyncutils.')) == '__init__': return 'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/index.html#module-asyncutils'
+        if (o := o.removeprefix('asyncutils.')) == '__init__': return f'https://asyncutils.readthedocs.io/en/{ver}/api/asyncutils/index.html#module-asyncutils'
         s, _, o = o.partition('.')
         if s in m: s, o = 'asyncutils', s
         elif _: o = getattr(g(s), o)
@@ -39,8 +39,8 @@ def find_help_url(o=None, /, _=frozenset((None, 'asyncutils', A)), g=I.initializ
     if h.ismodule(o): s, o = o.__name__, None # ty: ignore[unresolved-attribute]
     elif callable(o): s, o = o.__module__, o.__qualname__
     elif s is None: raise TypeError(f'asyncutils.tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
-    s = s.removeprefix('asyncutils.'); return (f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{o}/index.html' if o in M else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/index.html#asyncutils.{o}') if s == 'asyncutils' else f'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/{s}/index.html#{f'module-asyncutils.{s}' if o is None else f'asyncutils.{s}.{o}'}'
-def open_help(o=None, /): return __import__('webbrowser').open(find_help_url(o))
+    s = s.removeprefix('asyncutils.'); return f'https://asyncutils.readthedocs.io/en/{ver}/api/asyncutils/{(f'{o}/index.html' if o in M else f'index.html#asyncutils.{o}') if s == 'asyncutils' else f'{s}/index.html#{f'module-asyncutils.{s}' if o is None else f'asyncutils.{s}.{o}'}'}'
+def open_help(o=None, /, **_): return __import__('webbrowser').open(find_help_url(o, **_))
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
 def print_cfg_json_format(file=None, *, flush=True): print(get_cfg_json_format(), file=file, flush=flush, end='')
 def print_cmd_help(file=None, *, flush=True): print(get_cmd_help(), file=file, flush=flush, end='')

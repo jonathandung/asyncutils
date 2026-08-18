@@ -43,7 +43,7 @@ goto :eof
 
 :clean
 for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
-for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\compat.rst docs\source\conduct.md docs\source\contributing.md docs\source\examples.rst docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
+for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\examples.rst docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
 del /s /q *.pyc *.pyo *.pyz 2>nul
 goto :eof

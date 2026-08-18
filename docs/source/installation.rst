@@ -12,7 +12,7 @@ The REPL starts with the following banner:
 
 .. code-block:: text
 
-  asyncutils REPL (version 1.1.4) running on linux
+  asyncutils REPL (version 1.2.0) running on linux
   Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
   asyncutils is a multi-purpose and efficient asynchronous utilities library.
   You can use await statements directly instead of asyncio.run for quick testing.
