@@ -9,13 +9,13 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: taiki-e/install-action@prek
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+      - run: uv audit --preview-features audit-command
+      - run: uv tool install prek
       - run: prek update
       - run: prek run --all-files
-      - uses: astral-sh/setup-uv@v10.0.1
-      - run: uv audit --preview-features audit-command
-      - uses: peter-evans/create-pull-request@v8.1.1
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           assignees: jonathandung
           branch: auto-prek

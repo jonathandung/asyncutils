@@ -43,9 +43,9 @@ from .signals import *
 from .tools import *
 from .util import *
 from .version import *
-from ty_extensions import JustFloat
 from types import ModuleType
 from typing import Final
+from ty_extensions import JustFloat
 def time_since_boot() -> JustFloat: '''Time since the module was imported or invoked in the command line in milliseconds, as returned by :func:`time.monotonic`, as a :class:`float`.'''
 __version__: Final[VersionInfo] # ruff: ignore[undefined-local-with-import-star-usage]
 '''An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.

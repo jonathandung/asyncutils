@@ -1,5 +1,5 @@
 newIssueWelcomeComment: >
-  Thank you for opening your first issue here! Be sure to fill out all relevant fields in the issue template!
+  Thank you for opening your first issue!
 newPRWelcomeComment: >
   Thanks for making this pull request! Please read through our [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html).
 firstPRMergeComment: >

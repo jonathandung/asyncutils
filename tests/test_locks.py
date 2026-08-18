@@ -1,5 +1,5 @@
-import pytest
 from asyncio import create_task, gather, sleep
+import pytest
 from asyncutils.locks import *
 from tests.conftest import mk
 @mk

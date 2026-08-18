@@ -1,11 +1,12 @@
-import asyncutils as A, asyncio as I
-from asyncutils._internal.py312 import PriorityQueue
-from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
-from asyncutils._internal.submodules import pools_all as __all__
+import asyncio as I, asyncutils as A
 from _functools import partial
 from itertools import count, repeat
-from threading import Thread, Lock as TLock
+from threading import Lock as TLock
+from threading import Thread
 from time import monotonic
+from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
+from asyncutils._internal.py312 import PriorityQueue
+from asyncutils._internal.submodules import pools_all as __all__
 class AdvancedPool(LoopMixinBase):
     __slots__ = '__cnt', '__cur', '__fs', '__kae', '__max', '__min', '__pending', '__q', '__scaling', '__sde', '__shutdown', '__start', '__tl', '__workers', 'completed'
     @property

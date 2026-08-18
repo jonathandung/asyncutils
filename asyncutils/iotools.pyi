@@ -7,16 +7,17 @@
   This library is not designed specifically for I/O, and the functionality in this submodule is far from comprehensive.
   See `aiostream <https://aiostream.readthedocs.io/en/stable>`__ or similar for that.
 '''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import ExcType, HashAlgorithm, MemoryMappedFile, OpenFiles, OpenRV, PipePairCM, StdCoupType
-from .config import Executor
-from _typeshed import FileDescriptorOrPath
 from collections.abc import Buffer, Callable, Iterable
 from contextlib import AbstractAsyncContextManager
 from mmap import mmap
 from types import TracebackType
-from typing import Any, IO, Literal, NoReturn, Self, overload
+from typing import IO, Any, Literal, NoReturn, Self, overload
 from weakref import WeakSet
+from _typeshed import FileDescriptorOrPath
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import ExcType, HashAlgorithm, MemoryMappedFile, OpenFiles, OpenRV, PipePairCM, StdCoupType
+from .config import Executor
+
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'ainput', 'double_ended_binary_pipe', 'double_ended_text_pipe', 'stdcoup'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> PipePairCM[str]:
     '''

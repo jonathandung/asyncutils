@@ -1,9 +1,9 @@
 # ty: ignore[no-matching-overload]
 from asyncio import sleep, timeout
-from asyncutils.compete import *
-from asyncutils import arange, agives, done_evt, done_fut
-from tests.conftest import mk
 import pytest
+from asyncutils import agives, arange, done_evt, done_fut
+from asyncutils.compete import *
+from tests.conftest import mk
 @mk
 async def test_coro_it_conv():
     for i, j in zip(convert_to_coro_iter([arange(2), sleep(0, 2), {3}, done_fut(4)], skip_invalid=False), ([0, 1], 2, [3], 4), strict=True): assert await i == j

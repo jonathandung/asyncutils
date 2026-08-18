@@ -1,6 +1,6 @@
+from sys import audit, exception
 from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import exceptions_all as __all__
-from sys import audit, exception
 CRITICAL = SystemExit, SystemError, KeyboardInterrupt
 def u(f, g, h, s, /, *, raise_critical=True, keep=Exception, filter_out=(), predicate=lambda _, /: True, ack1=(a := lambda _, /: None), ack2=a, ack3=a, _=audit): # ruff: ignore[too-many-arguments]
     _('asyncutils.exceptions.unnest'+'_reverse'*isinstance(s, list), len(s))

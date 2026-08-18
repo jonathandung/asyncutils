@@ -1,11 +1,11 @@
-from ._internal.prots import BugArgs
 from collections.abc import Callable, Iterable
+from ._internal.prots import BugArgs
 __all__ = 'bug', 'run'
-def bug(args: BugArgs, paste_backend: Callable[[bytes], bytes|str]=...) -> None:
+def bug(args: BugArgs, paste: Callable[[bytes], bytes|str]=...) -> None:
     '''
     | Open a new issue in the `GitHub issue tracker <https://github.com/jonathandung/asyncutils/issues>`__.
     | Called by :func:`run` under the appropriate ``argv``.
-    | If calling manually, pass a callable taking a bytestring and returning a link from a pastebin service as a string or the bytestring itself depending on the length for ``paste_backend`` if desired,
+    | If calling manually, pass a callable taking a bytestring and returning a link from a pastebin service as a string or the bytestring itself depending on the length for ``paste`` if desired,
     | and an object with the following attributes for ``args``.
 
     - ``title`` (:class:`str`): The title of the bug report.

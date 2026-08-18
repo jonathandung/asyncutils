@@ -7,7 +7,7 @@ def _(d, /):
     with l.urlopen(l.Request('https://paste.rs', d), timeout=6) as r:
         if (c := r.status) == 201: return r.read()
         raise RuntimeError('asyncutils.cli.bug: content truncated; erroring since logs or traceback should not be this big' if c == 206 else f'asyncutils.cli.bug: could not upload to paste.rs due to {r.reason}; status: {c}')
-def bug(args, paste_backend=_, j=lambda p, y=S.stdin.buffer.read: print(end=p) or y()): # ruff: ignore[complex-structure, too-many-branches, too-many-statements]
+def bug(args, paste=_, j=lambda p, y=S.stdin.buffer.read: print(end=p) or y()): # ruff: ignore[complex-structure, too-many-branches, too-many-statements]
     import asyncutils as A, importlib.metadata as m, urllib.parse as p; h, e, i, t, u, l, d, g, z, o, w = __import__('os').environ.get, args.ensure_filled, args.interactive, args.title, args.src_url, args.verbose-args.quiet, args.pastebin, args.log_path, args.traceback_path, args.open, S.stderr.write
     try: v = m.version('py-asyncutils')
     except m.PackageNotFoundError:
@@ -48,7 +48,7 @@ def bug(args, paste_backend=_, j=lambda p, y=S.stdin.buffer.read: print(end=p) o
         else: z = b''
     if not t.startswith(b := 'Bug: '): t = b+t
     if u and not ((r := p.urlsplit(u)).scheme and r.netloc): raise ValueError(f'asyncutils.cli.bug: invalid source link {u!r}')
-    S.audit('asyncutils.cli.bug', s := f'https://github.com/jonathandung/asyncutils/issues/new?{p.urlencode({'template': 'bug.yaml', 'title': t, 'auv': A.__version__.representation, 'pkv': v, 'pyv': f'Python {S.version} on {S.platform}', 'os': __import__('platform').platform(), 'link': u, 'logs': paste_backend(g) if d else g, 'tb': paste_backend(z) if d else z, 'cfg': A._internal.unparsed.z, 'env': '' if args.no_prefill_env else '\n'.join(f'{k}={h(k, '')}' for k in ('AUTILSCFGPATH', 'AUTILSTESTMAXFAIL', 'FORCE_COLOR', 'NO_COLOR', 'PYTHON_BASIC_REPL', 'PYTHONSTARTUP', 'TERM'))}, quote_via=p.quote)}') # cspell: disable-line
+    S.audit('asyncutils.cli.bug', s := f'https://github.com/jonathandung/asyncutils/issues/new?{p.urlencode({'template': 'bug.yaml', 'title': t, 'auv': A.__version__.representation, 'pkv': v, 'pyv': f'Python {S.version} on {S.platform}', 'os': __import__('platform').platform(), 'link': u, 'logs': paste(g) if d else g, 'tb': paste(z) if d else z, 'cfg': A._internal.unparsed.z, 'env': '' if args.no_prefill_env else '\n'.join(f'{k}={h(k, '')}' for k in ('AUTILSCFGPATH', 'AUTILSTESTMAXFAIL', 'FORCE_COLOR', 'NO_COLOR', 'PYTHON_BASIC_REPL', 'PYTHONSTARTUP', 'TERM'))}, quote_via=p.quote)}') # cspell: disable-line
     if o is NotImplemented: print(s); return 0
     import webbrowser as c; c.register_standard_browsers() # ty: ignore[unresolved-attribute]
     if l == 1: print(f'Attempting to open link in {(x := 'default browser' if o is None else o)}')

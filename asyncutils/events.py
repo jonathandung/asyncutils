@@ -1,8 +1,8 @@
-import asyncutils as A, asyncio as I
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.submodules import events_all as __all__
+import asyncio as I, asyncutils as A
 from _collections import deque
 from time import monotonic
+from asyncutils._internal.submodules import events_all as __all__
+from asyncutils.constants import _NO_DEFAULT
 class SingleWaiterEventWithValue(A.EventMixin):
     __slots__ = '__w',
     def set(self, value):

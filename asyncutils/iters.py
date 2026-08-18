@@ -1,15 +1,15 @@
 # ruff: file-ignore[complex-structure,unused-async]
-from asyncutils import aenumerate, getcontext, iter_to_agen
-from asyncutils.config import _randinst
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import py312 as Z, compat as C, helpers as H, patch as P
-from asyncutils._internal.submodules import iters_all as __all__
-import asyncutils as A, asyncio as B, operator as O, math as M
+import asyncio as B, math as M, operator as O, asyncutils as A
 from collections import Counter, defaultdict, deque, namedtuple
-from functools import partial, lru_cache, wraps
+from functools import lru_cache, partial, wraps
 from itertools import count, repeat
 from sys import audit, maxsize
 from time import monotonic
+from asyncutils import aenumerate, getcontext, iter_to_agen
+from asyncutils._internal import compat as C, helpers as H, patch as P, py312 as Z
+from asyncutils._internal.submodules import iters_all as __all__
+from asyncutils.config import _randinst
+from asyncutils.constants import _NO_DEFAULT
 _get0, _get1 = map(O.itemgetter, range(2))
 _rand, _randrange, _sample, _small_primes, _perfect_test, _identity = _randinst.random, _randinst.randrange, _randinst.sample, frozenset(_little_primes := (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199)), ((0x7ff, (2,)), (0x8a8d7f, (31, 73)), (0x11baa74c5, (2, 7, 61)), (0x1053cb094c1, (2, 13, 23, 0x195f53)), (0x1f51f3fee3b, _little_primes[:5]), (0x32907381cdf, _little_primes[:6]), (1<<64, (2, 0x145, 0x249f, 0x6e12, 0x6e0d7, 0x953d18, 0x6b0191fe)), (0x2be6951adc5b22410a5fd, _little_primes[:13]), (0x4c16c7697197146a6b8eb49518c5, _little_primes[:18])), lambda _, /: _
 def fmap(fs, /, *a, **k): return agather(f(*a, **k) async for f in iter_to_agen(fs))
@@ -806,14 +806,14 @@ def iter_task(it, summaryf=aconsume):
     return (l := H.get_loop_and_set()).create_task(task(l.time))
 def extract(it, indices, fut=None, finish=False, _='index %d beyond the ends of (async) iterable {!r}'.format, _c=A.AChain, _m=O.methodcaller('done')): # ruff: ignore[too-many-statements]
     L, r, it = H.get_loop_and_set(), [], iter_to_agen(it)
-    async def consume(f=r.append):
-        s, M, m, d = L.time(), 0, 0, defaultdict(list)
+    async def y(f=r.append): # ruff: ignore[too-many-branches, too-many-statements]
+        audit('asyncutils.iters.extract', H.fullname(it)); s, d = L.time(), defaultdict(list); M = m = 0
         async for x in amap(O.index, indices):
             if M is not None:
                 if x < 0: M, m = None, min(m, x)
                 else: M = max(x, M)
             d[x].append(F := L.create_future()); f(F)
-        def helper(i, j, p=d.pop):
+        def h(i, j, p=d.pop):
             for x, F in enumerate(p(i, ())):
                 if F.cancelled(): continue
                 if F.done(): raise A.FutureCorrupted(f'asyncutils.iters.extract: future at index {x} associated with index {i} called on (async) iterable {it!r} had its result/exception set by an external party')
@@ -821,9 +821,9 @@ def extract(it, indices, fut=None, finish=False, _='index %d beyond the ends of 
         try:
             if M is None:
                 b = deque(maxlen=-m)
-                def helper2(i, j): helper(i, j); b.append(j)
-                await aconsume(_c(astarmap(helper2, aenumerate(it)), amap(helper, acount(-1, -1), A.adisembowel_left(b))))
-            else: await aconsume(astarmap(helper, aenumerate(A.take(it, M))))
+                def j(*a): h(*a); b.append(a[1])
+                await aconsume(_c(astarmap(j, aenumerate(it)), amap(h, acount(-1, -1), A.adisembowel_left(b))))
+            else: await aconsume(astarmap(h, aenumerate(A.take(it, M))))
         except A.CRITICAL: raise A.Critical
         except BaseException as e:
             async for F in afilterfalse(_m, r): F.set_exception(e)
@@ -832,17 +832,18 @@ def extract(it, indices, fut=None, finish=False, _='index %d beyond the ends of 
         for i, l in d.items():
             e = IndexError(a%i)
             for x, F in enumerate(l):
-                if not F.cancelled():
-                    if F.done(): raise A.FutureCorrupted(f'asyncutils.iters.extract: future at index {x} associated with index {i} called on (async) iterable {it!r} had its result/exception set by an external party')
-                    F.set_exception(e)
+                if F.cancelled(): continue
+                if F.done(): raise A.FutureCorrupted(f'asyncutils.iters.extract: future at index {x} associated with index {i} called on (async) iterable {it!r} had its result/exception set by an external party')
+                F.set_exception(e)
             await A.yield_to_event_loop
         if finish: await aconsume(it)
         if fut is None: return
-        if fut.done() and not fut.cancelled(): raise A.FutureCorrupted(f'asyncutils.iters.extract: future at {id(fut):#x} had its result set by an external party')
+        if fut.cancelled(): return
+        if fut.done(): raise A.FutureCorrupted(f'asyncutils.iters.extract: future at {id(fut):#x} had its result set by an external party')
         fut.set_result(L.time()-s)
-    c = L.create_task(consume())
-    if fut is not None: fut.add_done_callback(lambda _: setattr(_, '__cancel', t := B.gather(A.safe_cancel(c), A.safe_cancel_batch(r))) or t.add_done_callback(lambda _: delattr(fut, '__cancel')))
-    audit('asyncutils.iters.extract', H.fullname(it)); return r
+    c = L.create_task(y())
+    if fut is not None: fut.add_done_callback(lambda _: setattr(_, '_ct', t := B.gather(A.safe_cancel(c), A.safe_cancel_batch(r))) or t.add_done_callback(lambda _: delattr(fut, '_ct')))
+    return r
 async def aintersend(i1, i2):
     audit('asyncutils.iters.aintersend', H.fullname(i1), H.fullname(i2)); t = None, None; f, g = i1.asend, i2.asend
     while True: yield (t := tuple(await B.gather(f(t[1]), g(t[0]))))

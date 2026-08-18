@@ -3,8 +3,8 @@ Automatically read the config from the file whose path is specified by :envvar:`
 
 .. important:: Values will be overwritten by command-line arguments when this module runs as a script.
 '''
-from .helpers import Bag
 from typing import Any, Final, overload
+from .helpers import Bag
 N: Final[Bag[Any]]
 '''The frozen part of the configuration as a light namespace-like object.'''
 C: Final[dict[str, Any]]

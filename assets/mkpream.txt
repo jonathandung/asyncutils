@@ -5,8 +5,35 @@ Using the Makefile
 error-prone, and the process as a whole more smooth-sailing. It can also pull in non-Python dependencies when needed and leaves behind automatically
 ignored marker files removable by a simple cleanup command. Tasks are effectively automated using the ``make <target>`` syntax.
 
-The Makefile is intended to be used by developers, not end users, and it obviously requires GNU Make. The batch file, on the other hand, is
-dependency-free. Neither pull in CSpell because there are many ways to install it; you should choose your own package manager if you need it.
+The Makefile is intended to be used by developers, not end users, and it obviously requires
+`GNU Make <https://ftp.gnu.org/old-gnu/Manuals/make-3.80/html_node/make.html>`__.
 
-If you are in PowerShell, ``make`` will not work directly and you must run ``.\make`` or ``.\make.bat`` instead, which is more verbose; thus, you are
-strongly advised to develop in the traditional command prompt (``cmd.exe``).
+If you are in PowerShell, ``make`` will not work directly and you must run ``.\make`` instead, which is more verbose; thus, you are strongly advised
+to develop in ``cmd.exe``.
+
+Target-specific dependencies
+----------------------------
+
+Besides some Python dependencies that will be on ``PATH`` once ``make install`` has been run and the environment is activated, the following
+executables will be automatically installed on your system if not present. This implicit installation process requires internet access, as well as
+`cURL <https://curl.se>`__ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix (dependency-free on Windows):
+
+Requires `uv`_:
+
+* audit
+* install (Also pulls in `ruff`_ and `ty`_ if not present)
+* lint (Requires `ruff`_ and `ty`_)
+* lock
+* venv
+
+Requires `prek`_:
+
+* install
+* pc
+
+Requires cURL 7.66.0+ (for parallel downloads):
+
+* docs
+
+All targets
+-----------

@@ -1,7 +1,7 @@
 import asyncio, pytest
+from functools import partial
 from asyncutils import safe_cancel
 from asyncutils.futures import *
-from functools import partial
 from tests.conftest import mk
 def dummy(): return asyncio.sleep(0, 42)
 async def dummy2(fut): fut.set_exception(ValueError('foo'))  # ruff: ignore[unused-async]

@@ -2,10 +2,10 @@
 | A versioning scheme for :mod:`asyncutils`. Inspired by `torch.torch_version <https://github.com/pytorch/pytorch/blob/main/torch/torch_version.py>`__, but with quite some differences.
 | :mod:`asyncutils` uses a subset of SemVer.
 '''
-from ._internal.prots import IntCompatible, ValidSlice
-from _typeshed import FileDescriptorOrPath
 from collections.abc import Callable, Iterable, Iterator
 from typing import Final, Literal, NamedTuple, NoReturn, Self, final, overload
+from _typeshed import FileDescriptorOrPath
+from ._internal.prots import IntCompatible, ValidSlice
 __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
 @final
 class VersionInfo(str):

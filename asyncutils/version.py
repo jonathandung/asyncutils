@@ -1,6 +1,6 @@
 # ruff: file-ignore[function-call-in-default-argument,magic-value-comparison]
+import asyncutils._internal.patch as P, asyncutils.exceptions as E
 from asyncutils._internal.helpers import check_methods
-import asyncutils.exceptions as E, asyncutils._internal.patch as P
 from asyncutils._internal.submodules import version_all as __all__
 def p(I, /, f=0 .__gt__, e=E.VersionValueError):
     a, i = (r := []).append, 0

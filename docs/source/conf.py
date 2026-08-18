@@ -1,5 +1,5 @@
 from sphinx.directives.code import CodeBlock
-def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.1.3')):
+def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.1.4')):
     app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include parts of documentation that only apply to Python >=3.13')
     app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
@@ -31,6 +31,7 @@ maximum_signature_line_length = 120
 need_sphinx = '9.1.0'
 nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts'), ('py:deco', r'types\.coroutine'), ('py:class', r'_typeshed\..*|[a-z]*\.Future|TypeForm|tuple\[\]|P\.(kw)?args|tyx\..*|Abstract(Async)?ContextManager|(types\.)?(Coroutine|Frame|Function|(Async)?Generator)Type|Ellipsis|Buffer|TextIOWrapper|collections\.abc\.Callable\[\[\]'), ('py:meth', '__ae(nter|xit)__|acquire|release|wait'), ('py:class', 'ty_extensions.JustFloat')] # cSpell:disable-line
 nitpicky = True
+rst_epilog = '.. _prek: https://prek.j178.dev\n.. _ruff: https://docs.astral.sh/ruff\n.. _ty: https://docs.astral.sh/ty\n.. _uv: https://docs.astral.sh/uv'
 suppress_warnings = ['autoapi.python_import_resolution']
 version = '1.1'
 viewcode_line_numbers = True

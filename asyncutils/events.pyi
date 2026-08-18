@@ -2,10 +2,10 @@
 | Classes that extend the functionality of :class:`~asyncio.Event` with the interface it specifies, without inheriting from it.
 | Not at all related to ``asyncio.events``, which manages the event loop, despite the common name.
 '''
-from ._internal.prots import NotNone
-from .mixins import EventMixin
 from types import GeneratorType
 from typing import Literal, overload
+from ._internal.prots import NotNone
+from .mixins import EventMixin
 __all__ = 'EventWithValue', 'SingleWaiterEventWithValue'
 class SingleWaiterEventWithValue[T](EventMixin[T]):
     '''Essentially wraps a future in the event interface.'''

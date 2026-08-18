@@ -1,8 +1,8 @@
 import asyncio as I, asyncutils as A, asyncutils._internal.helpers as H
-from asyncutils._internal.py312 import Queue, QueueShutDown
-from asyncutils._internal.submodules import processors_all as __all__
 from _functools import partial
 from time import monotonic
+from asyncutils._internal.py312 import Queue, QueueShutDown
+from asyncutils._internal.submodules import processors_all as __all__
 @H.subscriptable
 class BoundedBatchProcessor:
     __slots__ = '__b', '__p', '__s'

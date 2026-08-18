@@ -1,6 +1,6 @@
 '''Utilities to patch various things, from function signatures to annoying warnings emitted by :mod:`asyncio` and python itself.'''
-from .prots import SigPatcherArg
 from typing import Final
+from .prots import SigPatcherArg
 def patch_aio_logs() -> None: '''Equivalent to ``logging.getLogger('asyncio').disabled = True``.'''
 def patch_unawaited_coroutine_warnings() -> None: '''Silence instances of :exc:`RuntimeWarning` emitted when an unawaited coroutine is garbage collected.'''
 def patch_function_signatures(*to_patch: SigPatcherArg, follow_wrapped: bool=...) -> None:

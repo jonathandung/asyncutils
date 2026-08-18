@@ -1,16 +1,15 @@
 # ty: ignore[unresolved-attribute]
-from asyncutils.config import _randinst
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import patch as P
-from asyncutils._internal.helpers import fullname
-from asyncutils._internal.submodules import altlocks_all as __all__
+import asyncio as I, asyncutils as A, asyncutils._internal.patch as P
 from _collections import deque
-import asyncio as I, asyncutils as A
+from _warnings import warn
 from functools import wraps
 from itertools import count
 from sys import audit
 from time import monotonic
-from _warnings import warn
+from asyncutils._internal.helpers import fullname
+from asyncutils._internal.submodules import altlocks_all as __all__
+from asyncutils.config import _randinst
+from asyncutils.constants import _NO_DEFAULT
 class Releasing:
     __slots__ = '__lock',
     def __init__(self, l, /): self.__lock = l

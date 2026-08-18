@@ -1,9 +1,9 @@
-from ._internal.prots import ExceptionWrapper, FutWrapType, SupportsIteration
 from asyncio import AbstractEventLoop
 from collections.abc import AsyncIterable, Awaitable, Callable, Coroutine, Iterable
 from types import CoroutineType, GeneratorType
 from typing import Any, Literal, overload
 from typing_extensions import TypeIs
+from ._internal.prots import ExceptionWrapper, FutWrapType, SupportsIteration
 __all__ = 'convert_to_coro_iter', 'enhanced_gather', 'enhanced_staggered_race', 'first_completed', 'multi_winner_race_with_callback', 'race_with_callback'
 @overload
 async def first_completed[T](aw: Awaitable[T], /, *aws: Awaitable[T], ret_exc: Literal[True], timeout: None=...) -> ExceptionWrapper|T: ...

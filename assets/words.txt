@@ -244,7 +244,6 @@ opengraph
 pastebin
 pconf
 phcount
-popleft
 poppush
 pred
 prek
@@ -266,7 +265,6 @@ rrem
 rsrc
 rwlocks
 seealso
-setcontext
 siftdown
 siftup
 signoff

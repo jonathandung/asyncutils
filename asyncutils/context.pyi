@@ -1,11 +1,11 @@
 '''Contextual configuration system, inspired by the :mod:`decimal` module.'''
-from ._internal.prots import ExcType, HashAlgorithm, CanWriteAndFlush
-from _typeshed import Incomplete
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pprint import PrettyPrinter
 from types import TracebackType
 from typing import Any, ClassVar, Self, final, overload
+from _typeshed import Incomplete
+from ._internal.prots import CanWriteAndFlush, ExcType, HashAlgorithm
 __all__ = 'Context', 'LocalContext', 'NonReusableLocalContext', 'all_contextual_consts', 'getcontext', 'setcontext'
 @final
 @dataclass(slots=True, kw_only=True, match_args=False)

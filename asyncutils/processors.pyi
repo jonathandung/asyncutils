@@ -1,10 +1,10 @@
 '''Processors for asynchronous tasks.'''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import CanExcept, SupportsIteration, Timer
 from collections.abc import Awaitable, Callable
-from ty_extensions import JustFloat
 from types import AsyncGeneratorType
 from typing import Any, Literal
+from ty_extensions import JustFloat
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import CanExcept, SupportsIteration, Timer
 __all__ = 'BatchProcessor', 'BoundedBatchProcessor', 'Bulkhead'
 class BoundedBatchProcessor[T, R]:
     '''Call a processor with items batched to a certain size from different sources with bounded concurrency.'''

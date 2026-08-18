@@ -1,13 +1,13 @@
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import py312 as C, helpers as H, log as L, patch as P
-from asyncutils._internal.submodules import channels_all as __all__
+import asyncio as I, asyncutils as A
 from _functools import partial
 from _weakrefset import WeakSet
-import asyncio as I, asyncutils as A
 from collections import defaultdict, deque, namedtuple
 from itertools import count, repeat, starmap
 from sys import addaudithook, audit
 from time import monotonic
+from asyncutils._internal import helpers as H, log as L, patch as P, py312 as C
+from asyncutils._internal.submodules import channels_all as __all__
+from asyncutils.constants import _NO_DEFAULT
 @H.subscriptable
 class Observable(H.LoopMixinBase):
     __slots__ = '__d', '__e', '__l', '__q', '__r'

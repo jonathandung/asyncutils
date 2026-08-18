@@ -1,12 +1,12 @@
 '''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
-from ._internal.prots import AsyncLockLike, DualContextManager, CanExcept, ExcType, SupportsIteration, Timer
-from .mixins import AsyncContextMixin, AwaitableMixin
 from collections import deque
 from collections.abc import Awaitable, Callable, Hashable
 from enum import IntEnum
-from ty_extensions import JustFloat
 from types import CoroutineType, TracebackType
 from typing import Any, Never, Self, final, overload
+from ty_extensions import JustFloat
+from ._internal.prots import AsyncLockLike, CanExcept, DualContextManager, ExcType, SupportsIteration, Timer
+from .mixins import AsyncContextMixin, AwaitableMixin
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard[T](AsyncContextMixin[None]):
     '''

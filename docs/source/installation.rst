@@ -12,7 +12,7 @@ The REPL starts with the following banner:
 
 .. code-block:: text
 
-  asyncutils REPL (version 1.1.3) running on linux
+  asyncutils REPL (version 1.1.4) running on linux
   Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
   asyncutils is a multi-purpose and efficient asynchronous utilities library.
   You can use await statements directly instead of asyncio.run for quick testing.
@@ -43,46 +43,19 @@ You are advised to ensure that your package manager is updated to the latest ver
   pip install -U pdm # pdm
   pip install -U pipenv # pipenv
 
-Optionally make and activate a virtual environment::
-
-  uv venv # uv
-  pipenv shell # pipenv
-  poetry shell # poetry
-  hatch shell # hatch
-  python -m venv .venv # standard library
-  virtualenv venv # virtualenv
-  # conda
-  conda create --name asyncutils
-  conda activate asyncutils
-  # pyenv-virtualenv
-  pyenv virtualenv 3.14.6 asyncutils
-  pyenv activate asyncutils
-  # manual activation (venv, virtualenv):
-  . .venv/bin/activate # bash/zsh
-  . .venv/bin/activate.fish # fish
-  . .venv/bin/activate.csh # (t)csh
-
-.. code-block:: bat
-
-  rem activation on Windows (cmd.exe)
-  .venv\Scripts\activate
-
-Next, install py-asyncutils:
+Next, install ``py-asyncutils``:
 
 .. sub-code-block::
 
   # recommended: uv
   uv pip install py-asyncutils==|version|
   uv pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
-  # for development, after:
+  # for development:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
-  # you have the three options below:
-  uv pip install -e .
+  make venv # creates a virtual environment at .venv using uv
+  . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
   make install
-  make install-silent # no clutter
-  # the last two options need GNU Make on Unix-like systems, but the Windows version points to a batch file.
-  # uv is invoked under the hood and installed if absent; pip is not needed!
 
 other installation pathways:
 
@@ -102,8 +75,6 @@ other installation pathways:
   # no package manager (needs Python and the build and installer packages)
   python -m build # generate sdist and wheel in dist/
   python -m installer dist/*.whl # install from the wheel
-
-.. note:: We will never add setup.py, since only pyproject.toml is the modern way to go.
 
 After this, as long as you have the python Scripts (Windows) or bin (otherwise) directory on
 `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__, ``asyncutils`` and ``autils`` will be made available as entry points to the asyncutils CLI,
@@ -125,6 +96,5 @@ The extras are listed below for reference:
 * executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
 * json5: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
-* ptw: Monitor test failures on the command line while editing code through pytest-watch
 * test: Test dependencies, including pytest and related plugins
 * themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.

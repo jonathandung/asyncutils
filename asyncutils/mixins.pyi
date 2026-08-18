@@ -1,13 +1,13 @@
 '''Mixins classes for some common or specialized patterns that provide methods based on some abstract methods.'''
-from ._internal.helpers import LoopMixinBase
-from ._internal.prots import ExcType
-from .locksmiths import LocksmithBase
 from abc import ABC, abstractmethod
 from asyncio import Future
 from collections.abc import Awaitable, Callable, Coroutine
 from functools import cached_property
 from types import GeneratorType, TracebackType
 from typing import Any, Literal, Self, overload
+from ._internal.helpers import LoopMixinBase
+from ._internal.prots import ExcType
+from .locksmiths import LocksmithBase
 __all__ = 'AsyncContextMixin', 'AwaitableMixin', 'EventMixin', 'ExecutorRequiredAsyncContextMixin', 'LockMixin', 'LockWithOwnerMixin'
 class AwaitableMixin[T](ABC):
     '''A subclass that implements :meth:`wait` automatically becomes awaitable, resolving to the return value of that method.'''

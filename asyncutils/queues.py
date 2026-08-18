@@ -1,16 +1,16 @@
 # ruff: file-ignore[function-call-in-default-argument,no-self-use] # ty: ignore[invalid-argument-type]
-import asyncutils as A
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal import compat as Z, py312 as D, patch as P
-from asyncutils._internal.helpers import LoopMixinBase, check, get_loop_and_set, fullname
-from asyncutils._internal.log import info
-from asyncutils._internal.submodules import queues_all as __all__
 from _collections import deque
 from _functools import partial
 from abc import ABCMeta, abstractmethod
 from asyncio import Event, QueueEmpty, QueueFull, wait_for
 from itertools import count
 from sys import _getframe, audit
+import asyncutils as A
+from asyncutils._internal import compat as Z, patch as P, py312 as D
+from asyncutils._internal.helpers import LoopMixinBase, check, fullname, get_loop_and_set
+from asyncutils._internal.log import info
+from asyncutils._internal.submodules import queues_all as __all__
+from asyncutils.constants import _NO_DEFAULT
 ignore_qempty, ignore_qfull = map((f := (ignore_qshutdown := A.IgnoreErrors(D.QueueShutDown)).combined), _ := (QueueEmpty, QueueFull))
 ignore_qerrs, f = f(*_), object.__setattr__
 def _wakeup_next(W):

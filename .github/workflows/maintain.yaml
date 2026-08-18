@@ -10,7 +10,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v11.0.0
+    - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93
       with:
         days-before-issue-close: 14
         days-before-issue-stale: 28
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: {group: lock}
     steps:
-      - uses: dessant/lock-threads@v6.0.2 # cspell:disable-line
+      - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c # cspell:disable-line
         with:
           discussion-inactive-days: 180
           discussion-comment: This discussion thread has been automatically locked due to inactivity. For a related topic, please start a new discussion and refer to relevant comments here.

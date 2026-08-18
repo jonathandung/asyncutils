@@ -1,10 +1,10 @@
 '''The most useful and fundamental patterns and helpers core to this module and are therefore required by :mod:`asyncutils.console`, among many other submodules.'''
-from ._internal.prots import ExcType, GeneratorCoroutine, Raise, SupportsIteration, SupportsPop, SupportsPopLeft
 from asyncio import AbstractEventLoop, Future
 from collections.abc import AsyncGenerator, AsyncIterable, Awaitable, Callable, Generator, Iterable, MutableSequence
 from enum import IntFlag
 from types import AsyncGeneratorType, GeneratorType, TracebackType
 from typing import Any, Literal, Never, NoReturn, Self, final, overload
+from ._internal.prots import ExcType, GeneratorCoroutine, Raise, SupportsIteration, SupportsPop, SupportsPopLeft
 __all__ = 'adisembowel', 'adisembowel_left', 'aenumerate', 'aiter_to_gen', 'collect', 'collect_into', 'drop', 'dummy_task', 'event_loop', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class event_loop: # ruff: ignore[invalid-class-name]

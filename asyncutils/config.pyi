@@ -1,8 +1,8 @@
 '''Set up some module-global state and sentinels, and expose some user-specified flags.'''
-from ._internal.prots import PartialInterface, FaultyConfigA, FaultyConfigB, ExcType, TypeOrTuple
 from concurrent.futures import Executor as _
 from types import TracebackType
 from typing import Final, Self, overload
+from ._internal.prots import ExcType, FaultyConfigA, FaultyConfigB, PartialInterface, TypeOrTuple
 __all__ = 'Debugging', 'Executor', 'FaultyConfig', 'basic_repl', 'debug', 'get_past_logs', 'loaded_all', 'logging_to', 'max_memory_errors', 'pdb', 'set_logger_level', 'silent'
 class FaultyConfig(BaseException):
     '''Raised when the user specifies a configuration value that is of the wrong type or otherwise invalid. This is basically impossible to catch, since it is only raised during the import of this module.'''

@@ -1,12 +1,12 @@
 '''Asynchronous descriptors, mimicking :class:`property` and optionally applying a lock.'''
-from ._internal.prots import AsyncContextManager
-from .rwlocks import RWLock
 from abc import ABC, abstractmethod
 from asyncio import Task
 from collections.abc import Awaitable, Callable
 from enum import IntFlag
 from types import CoroutineType
 from typing import Any, Concatenate, Self, overload
+from ._internal.prots import AsyncContextManager
+from .rwlocks import RWLock
 __all__ = 'AsyncPropertyBase', 'ConcurrentAsyncProperty', 'Deleters', 'LazyAsyncProperty', 'RWLockedAsyncProperty'
 class Deleters(IntFlag):
     '''Integer flags configuring a fallback deleter for async properties.'''

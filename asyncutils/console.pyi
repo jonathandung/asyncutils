@@ -1,14 +1,14 @@
 '''Implementation of an :class:`interactive async console base class <ConsoleBase>`, as well as an :class:`AsyncUtilsConsole` class derived from it.'''
-from ._internal.prots import ExcType
+import sys
 from abc import ABC, abstractmethod
-from contextvars import Context
 from code import InteractiveConsole
 from collections import ChainMap
 from collections.abc import Callable, Iterable
 from concurrent.futures import Future
+from contextvars import Context
 from types import CodeType, ModuleType
 from typing import Any, ClassVar, Literal, Self, final, overload
-import sys
+from ._internal.prots import ExcType
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
     '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`!_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.'''

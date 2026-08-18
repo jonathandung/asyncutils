@@ -1,12 +1,12 @@
 # ruff: file-ignore[bare-except]
-from asyncutils._internal import compat as Z, helpers as H, log as L, patch as P
-from asyncutils._internal.submodules import base_all as __all__
-from asyncutils.constants import _NO_DEFAULT, RAISE
+import asyncio as I, asyncutils as A
 from _functools import partial
-import asyncutils as A, asyncio as I
 from enum import IntFlag as E
 from itertools import batched, repeat
 from sys import audit, exc_info
+from asyncutils._internal import compat as Z, helpers as H, log as L, patch as P
+from asyncutils._internal.submodules import base_all as __all__
+from asyncutils.constants import _NO_DEFAULT, RAISE
 b, c = H.check_methods, H.fullname
 class event_loop: # ruff: ignore[invalid-class-name]
     __reusable, Flags, State = [], E('Flags', ('FLIP_RELEASE_LOOP_ON_FINALIZATION', 'SILENT_ON_FINALIZE', 'NEVER_CLEAR_TASKS_ON_REUSE', 'CLOSE_EXISTING_ON_EXIT', 'SOMETIMES_CONTINUE_ON_EXIT', 'KEEP_CREATED_OPEN_ON_EXIT', 'CANCEL_ALL_TASKS', 'KEEP_LOOP', 'SUPPRESS_RUNTIME_ERRORS', 'FAIL_SILENT', 'DISALLOW_REUSE', 'NO_REUSE', 'NEVER_ENTER', 'ATTEMPT_AENTER', 'SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR', 'SUPPRESS_INNER_AEXIT_ON_RUNTIME_ERROR'), module=__name__), E('State', ('ENTERED', 'CREATED_LOOP', 'ENTERED_INNER', 'AENTERED_INNER'), module=__name__); __slots__ = '_flags', '_is', '_loop', '_state', '_task'

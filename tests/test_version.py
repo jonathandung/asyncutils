@@ -1,7 +1,7 @@
+from math import ceil, floor, trunc
 from pytest import fixture, raises
 from asyncutils import VersionValueError, __version__
 from asyncutils.version import *
-from math import floor, trunc, ceil
 @fixture(scope='module')
 def ver(): from asyncutils.config import _randinst as _; return VersionInfo(*map(_.randrange, (10, 20)), _.randint(256, 300))
 def test_hash(ver):

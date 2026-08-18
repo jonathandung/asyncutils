@@ -1,10 +1,10 @@
 # ruff: file-ignore[no-self-use]
 import asyncio as I, asyncutils as A, asyncutils._internal.log as L
-from asyncutils.constants import _NO_DEFAULT
-from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
-from asyncutils._internal.submodules import locksmiths_all as __all__
 from enum import IntEnum as E
 from sys import audit
+from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
+from asyncutils._internal.submodules import locksmiths_all as __all__
+from asyncutils.constants import _NO_DEFAULT
 ForceResult, RecognitionResult = E('ForceResult', 'UNFORCEABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:

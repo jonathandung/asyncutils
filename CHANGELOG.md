@@ -24,6 +24,10 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 Breaking changes: There shouldn't be any, but I made a lot.
 
+### [1.1.4] - 2026-08-18
+
+Pinned GitHub workflow action usages by hashes; some workflow enhancements.
+
 ### [1.1.3] - 2026-08-13
 
 Switched from detect-secrets to betterleaks; added `asyncutils bug` subcommand.

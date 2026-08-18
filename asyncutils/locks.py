@@ -1,9 +1,9 @@
-import asyncutils as A, asyncio as I
-from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
-from asyncutils._internal.submodules import locks_all as __all__
+import asyncio as I, asyncutils as A
 from _collections import defaultdict, deque
 from heapq import heappop, heappush
 from time import monotonic
+from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
+from asyncutils._internal.submodules import locks_all as __all__
 class DynamicBoundedSemaphore(I.BoundedSemaphore):
     def __init__(self, value=None): super().__init__(A.getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque()
     @property

@@ -1,11 +1,11 @@
 # ty: ignore[unresolved-attribute]
-from asyncutils import getcontext, ignore_valerrs
-from asyncutils._internal.submodules import rwlocks_all as __all__
+import abc
 from _collections import defaultdict, deque
 from asyncio import Condition, Lock, current_task
 from contextlib import asynccontextmanager
-from heapq import heappush, heappop
-import abc
+from heapq import heappop, heappush
+from asyncutils import getcontext, ignore_valerrs
+from asyncutils._internal.submodules import rwlocks_all as __all__
 def _rn(cls, /): (_ := object.__new__(cls)).setup(); return _
 class B:
     __slots__ = '__wrapped__', 'reader', 'reading', 'writer', 'writing'

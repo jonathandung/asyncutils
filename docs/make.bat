@@ -1,5 +1,4 @@
 @echo off
-:: cspell:disable
 pushd %~dp0
 if "%SPHINXBUILD%" == "" set SPHINXBUILD=sphinx-build
 if "%1" == "" %SPHINXBUILD% -M help source build %SPHINXOPTS% %O%
@@ -7,7 +6,6 @@ if "%1" == "" %SPHINXBUILD% -M help source build %SPHINXOPTS% %O%
 if errorlevel 9009 (
 	echo.Command 'sphinx-build' not found. Make sure you have Sphinx installed,
 	echo.then set the SPHINXBUILD environment variable to point to the full path
-    :: cspell:enable
 	echo.of the 'sphinx-build' executable. Alternatively you may add the Sphinx
 	echo.directory to PATH.
 	echo.
@@ -15,6 +13,5 @@ if errorlevel 9009 (
     echo.https://www.sphinx-doc.org/en/master/usage/installation.html.
 	exit /b 1
 )
-:: cspell:disable
 %SPHINXBUILD% -M %1 source build %SPHINXOPTS% %O%
 popd

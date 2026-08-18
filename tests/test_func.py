@@ -1,10 +1,10 @@
-from asyncutils.func import *
-from asyncutils.config import _randinst
-from tests.conftest import mk
 from asyncio import create_task, sleep
-from asyncutils import acount, amap, arange, vecs_eq
 from itertools import count
 from pytest import raises
+from asyncutils import acount, amap, arange, vecs_eq
+from asyncutils.config import _randinst
+from asyncutils.func import *
+from tests.conftest import mk
 async def func(a, b=3, /, c=24, *, d, e=7): return a+b-c/d*e # ruff: ignore[unused-async]
 @mk
 async def test_areduce():

@@ -1,10 +1,10 @@
 '''Higher-order functions with asynchronous APIs, containing utilities to retry, time, throttle, run functions periodically and more.'''
-from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryRV, EveryMethodRV, ExceptionWrapper, SupportsIteration, StarRV, Timer, ToSyncFromLoopRV
 from asyncio import AbstractEventLoop, Future
 from collections.abc import Awaitable, Callable, Iterable, Mapping
-from ty_extensions import JustFloat
 from types import AsyncGeneratorType, CoroutineType
 from typing import Any, Literal, Never, Self, overload
+from ty_extensions import JustFloat
+from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryMethodRV, EveryRV, ExceptionWrapper, StarRV, SupportsIteration, Timer, ToSyncFromLoopRV
 __all__ = 'RateLimited', 'acompose', 'afcopy', 'aiter_from_f', 'areduce', 'benchmark', 'debounce', 'discard_retval', 'evaluate_and_return', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'to_async', 'to_sync', 'to_sync_from_loop', 'unstar'
 def acompose(*functions: Callable[..., Any], wrap_last: bool=...) -> Callable[..., Any]: '''Compose multiple functions. If the result of a function is a coroutine, await it before passing it to the next. Begin from the rightmost function, which can take variadic parameters, and then pipe its return value through as a single argument.'''
 @overload

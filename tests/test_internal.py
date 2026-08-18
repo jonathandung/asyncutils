@@ -1,7 +1,7 @@
-from pytest import mark, raises
 from asyncio import QueueEmpty, QueueFull, create_task, sleep
-from asyncutils import _internal as mod
 from io import StringIO
+from pytest import mark, raises
+from asyncutils import _internal as mod
 from tests.conftest import mk
 def test_helpers():
     helpers = mod.helpers
@@ -47,8 +47,7 @@ def test_patch():
 @mark.skipif('sys.version_info >= (3, 13)')
 @mk
 async def test_py312():
-    m = mod.py312
-    Q = m.Queue(2)
+    Q = (m := mod.py312).Queue(2)
     await Q.put(0)
     await Q.put(1)
     assert Q.full()
