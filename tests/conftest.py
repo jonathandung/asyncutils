@@ -1,11 +1,11 @@
 import pytest, asyncutils
 @(dec := pytest.fixture(scope='session'))
-def config_json_file(contents):
+def cfg_json_file(contents):
     with __import__('tempfile').NamedTemporaryFile(mode='w+', delete=False, suffix='.json') as f: f.write(contents)
     yield f
 @dec
-def config_json(config_json_file, contents):
-    n = config_json_file.name
+def cfg_json(cfg_json_file, contents):
+    n = cfg_json_file.name
     try:
         yield n; import json as J
         with open(n, encoding='utf-8') as f: assert J.load(f).items() >= J.loads(contents).items()

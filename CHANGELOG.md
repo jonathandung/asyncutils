@@ -682,28 +682,28 @@ Set up git; added version submodule.
 
 Began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
 
-### [0.6] - 2026-01-1x
+### [0.6] - 2026-01
 
 Completed migration from inline annotations to separated stubs; perfected `base.event_loop` and lazy loading; added `console` and `cli` submodules.
 
-### [0.5] - 2025-12-0x
+### [0.5] - 2025-12
 
 Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule;
 began separation of type annotations from .py into .pyi.
 
-### [0.4] - 2025-10-0x
+### [0.4] - 2025-10
 
 Added more complicated patterns and procedures such as `channels.Observable` and `signals.wait_for_signal`.
 
-### [0.3] - 2025-08-2x
+### [0.3] - 2025-08
 
 Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `misc.CacheWithBackgroundRefresh`.
 
-### [0.2] - 2025-07-0x
+### [0.2] - 2025-07
 
 Began reorganizing single file containing all functions into submodules.
 
-### [0.1] - 2025-06-xx
+### [0.1] - 2025-06
 
 Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `util.sync_await`.
 

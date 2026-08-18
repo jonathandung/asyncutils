@@ -55,7 +55,7 @@ match logging_to := g('log_to'):
     case 'NULL': l.disabled = True
     case 'MAKE':
         T, m, h = 'asyncutils_log%d.log', 'x', 0
-        for h in range(1, 0x1001):
+        for h in range(1, 4097):
             try: logging_to = (s := open(T%h, m)).name; break
             except PermissionError as M: s.write(f'ERROR: insufficient permissions: {M}\n'); M = True; break
             except AttributeError: raise SystemError("asyncutils: Python opened a file with no 'name' attribute when finding log file") from None

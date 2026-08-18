@@ -28,11 +28,11 @@ def test_submodules_lazy_loading():
     assert (t := type(module('constants'))) is type(module('context'))
     assert t.__module__ == 'builtins'
     assert t.__name__ == t.__qualname__ == 'module'
-def test_others(config_json, monkeypatch):
+def test_others(cfg_json, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
     assert mod.running_console.get() is mod.running_console.unset() is None
     assert mod.submodules.cli_all == ('bug', 'run')
-    monkeypatch.setenv('AUTILSCFGPATH', config_json) # cspell:disable-line
+    monkeypatch.setenv('AUTILSCFGPATH', cfg_json) # cspell:disable-line
     N = __import__('importlib').reload(mod.unparsed).N
     assert N.load_all
     assert N.V == 2

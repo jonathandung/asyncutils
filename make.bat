@@ -9,7 +9,7 @@ goto %1
 if exist .prek-stamp goto :eof
 where prek >nul 2>nul
 if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.4.10/prek-installer.ps1 | iex")
-prek install -f
+prek install
 type nul > .prek-stamp
 goto :eof
 

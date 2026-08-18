@@ -1,4 +1,4 @@
-# ruff: file-ignore[blind-except,magic-value-comparison]
+# ruff: file-ignore[blind-except]
 import abc, sys as S
 from asyncio import iscoroutine
 from asyncio.futures import _chain_future
@@ -22,18 +22,16 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         S.audit(fullname(type(self)), l := get_loop_and_set())
         if modname is None: modname = self.NAME
         if mod is None: mod = __import__(modname, fromlist=_f if '.' in modname else ())
-        def stop(p=None, /, _=l.stop, *, asap=False):
+        def c(p=None, /, _=l.close):
+            if p is not _s: raise RuntimeError(_m%'close')
+            _()
+        def s(p=None, /, _=l.stop):
             if p is not _s: raise RuntimeError(_m%'stop')
-            _() if asap else l.call_soon_threadsafe(_)  # ty: ignore[invalid-argument-type]
-        def close(p=None, /, _=l.close):
-            if p is _s: _()
-            else: raise RuntimeError(_m%'close')
-        l.stop, l.close, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = stop, close, False, 0, l, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (H := S.hexversion) > 0x30d00a0 else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__)  # ty: ignore[invalid-assignment]
-        if H > 0x30e00a0: d['__annotate__'] = g('__annotate__') # cover: off
-        if H < 0x30f00a1:
+            l.call_soon_threadsafe(_) # ty: ignore[invalid-argument-type]
+        l.close, l.stop, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = c, s, False, 0, l, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (v := S.version_info) >= (3, 13) else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__) # ty: ignore[invalid-assignment]
+        if v >= (3, 14): d['__annotate__'] = g('__annotate__')
+        if v < (3, 15):
             for k in _: d[k] = g(k)
-        elif H < 0x30f00f0:
-            for k, v in _.items(): d[k] = getattr(__spec__, v) # cover: on
         if callable(h := self.LOCALS_HANDLERS.get(modname)): h(d)
         elif h is not None: raise TypeError(f'asyncutils.console.ConsoleBase: locals handler for module {modname!r} should be callable, not {fullname(h)!r}')
     def refresh(self):

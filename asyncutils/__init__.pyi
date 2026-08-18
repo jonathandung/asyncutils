@@ -54,7 +54,7 @@ __version__: Final[VersionInfo] # ruff: ignore[undefined-local-with-import-star-
 '''
 __hexversion__: Final[int]
 '''| An integer representing the current pip/conda version of this library. Comparison operators behave as expected.
-| For version 1.3.11, for instance, this would be ``0x01030b``.
+| For version 1.3.11, for instance, this would be ``0x1030b``.
 
 .. note:: Equivalent to ``int(__version__)``.'''
 all_symbols: Final[list[str]]

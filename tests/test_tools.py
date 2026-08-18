@@ -5,12 +5,12 @@ from asyncutils.tools import *
 def argstr(): return '-pVVm 5'
 @dec
 def argv(argstr): return argstr.split(' ')
-def test_json_argv_conv(config_json, argv):
-    assert json_to_argv(config_json) == argv
-    argv_to_json(argv, config_json)
-def test_json_argstr_conv(config_json, argstr):
-    assert json_to_argstr(config_json) == argstr
-    argstr_to_json(argstr, config_json)
+def test_json_argv_conv(cfg_json, argv):
+    assert json_to_argv(cfg_json) == argv
+    argv_to_json(argv, cfg_json)
+def test_json_argstr_conv(cfg_json, argstr):
+    assert json_to_argstr(cfg_json) == argstr
+    argstr_to_json(argstr, cfg_json)
 def test_cmd_help():
     print_cmd_help(s := StringIO())
     assert s.getvalue() == get_cmd_help()

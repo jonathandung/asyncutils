@@ -27,4 +27,4 @@ hooks = [{id = "sphinx-lint"}]
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
 rev = "v1.0.1"
-hooks = [{id = "check-empty", files = "asyncutils/py.typed"}]
+hooks = [{id = "check-empty", files = "asyncutils/py.typed|tests/__init__.py"}]

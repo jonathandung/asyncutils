@@ -28,8 +28,8 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     concurrency: {group: lock}
-    steps:
-      - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c # cspell:disable-line
+    steps: # cspell:disable-next-line
+      - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c
         with:
           discussion-inactive-days: 180
           discussion-comment: This discussion thread has been automatically locked due to inactivity. For a related topic, please start a new discussion and refer to relevant comments here.

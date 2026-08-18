@@ -36,3 +36,4 @@ def test_cls():
     assert issubclass(VersionInfo, str)
     with raises(TypeError): type('', (VersionInfo,), {}) # ty: ignore[subclass-of-final-class]
     assert __version__ is VersionInfo.get_current_version()
+    assert isinstance(__version__, str)

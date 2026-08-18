@@ -12,7 +12,7 @@ O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
 		echo "curl or wget required to install prek" >&2
 		exit 1
 	fi
-	prek install -f
+	prek install
 	touch .prek-stamp
 .uv-stamp:
 	@if command -v uv >/dev/null 2>&1; then true;

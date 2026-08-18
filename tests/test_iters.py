@@ -59,7 +59,7 @@ async def test_sleep_forever():
 async def test_dummies():
     await gather(yield_to_event_loop, dummy_task)
     for i in dummy_task: fail(f'dummy_task should be empty; got {i}')
-    async for i in aloops(0x500): assert i is None
+    async for i in aloops(0x1000): assert i is None
 @mk
 async def test_adisembowel():
     assert await vecs_eq(aappend(0, adisembowel([1, 2, 3])), areversed(range(4)), is_)

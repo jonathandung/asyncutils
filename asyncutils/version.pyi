@@ -10,7 +10,7 @@ __all__ = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_n
 @final
 class VersionInfo(str):
     '''A class representing a version of :mod:`asyncutils`.'''
-    DEFAULT_KEY: Final[int]
+    DEFAULT_KEY: Final = 416219
     '''The default value of the shelving and unshelving key.'''
     @overload
     def __new__(cls, from_: object, /) -> Self: ...

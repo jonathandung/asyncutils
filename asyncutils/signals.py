@@ -10,9 +10,10 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         if get() is None: __import__('_warnings').warn('signals.wait_for_signal has limited functionality on Windows', RuntimeWarning, 2)
         while S:
             s = P()
-            try: o = B.signal(s := B.Signals(s), h)
-            except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s)
-            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name) # ty: ignore[unresolved-attribute]
+            try: s = B.Signals(s)
+            except ValueError: logger.exception('signals.wait_for_signal: invalid signal %r', s); continue
+            try: o = B.signal(s, h)
+            except OSError: logger.exception('signals.wait_for_signal: OS-level error for signal %s', s.name)
             else: a(lambda _, s=s, o=o: B.signal(s, o)); x += 1; logger.debug('signals.wait_for_signal: registered handler for signal %s', s.name)
     else:
         while S:

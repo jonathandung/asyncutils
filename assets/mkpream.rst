@@ -1,6 +1,8 @@
 Using the Makefile
 ==================
 
+.. highlight:: text
+
 ``make.bat`` on Windows, or ``Makefile`` on \*nix, is often a handy companion in development. It makes development less dry, repetitive and
 error-prone, and the process as a whole more smooth-sailing. It can also pull in non-Python dependencies when needed and leaves behind automatically
 ignored marker files removable by a simple cleanup command. Tasks are effectively automated using the ``make <target>`` syntax.
@@ -8,8 +10,7 @@ ignored marker files removable by a simple cleanup command. Tasks are effectivel
 The Makefile is intended to be used by developers, not end users, and it obviously requires
 `GNU Make <https://ftp.gnu.org/old-gnu/Manuals/make-3.80/html_node/make.html>`__.
 
-If you are in PowerShell, ``make`` will not work directly and you must run ``.\make`` instead, which is more verbose; thus, you are strongly advised
-to develop in ``cmd.exe``.
+If you are in PowerShell, ``make`` will not work directly and you must input ``.\make`` instead. You are strongly advised to develop in ``cmd.exe``.
 
 Target-specific dependencies
 ----------------------------

@@ -30,7 +30,7 @@ This is the output of ``asyncutils --help``, as of $v::
 asyncutils -h | sed '/^$/! s/^/  /'
 echo "$m"
 exec > docs/source/makefile-usage.rst
-cat assets/mkpream.txt
+cat assets/mkpream.rst
 echo "
 Below is the Makefile help as of $v::
 "
