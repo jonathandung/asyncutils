@@ -54,7 +54,7 @@ Next, install ``py-asyncutils``:
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
   make venv # creates a virtual environment at .venv using uv
-  . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
+  . .venv/Scripts/activate # or how you would normally activate the uv environment in your preferred shell
   make install
 
 other installation pathways:

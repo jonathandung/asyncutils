@@ -1,28 +1,28 @@
+SHELL := /bin/bash
 .PHONY: audit badges bug changelog clean docs help install lint lock pc release test venv
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
 O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
+.SILENT:
 .prek-stamp:
-	@if command -v prek >/dev/null 2>&1; then true
-	elif command -v curl >/dev/null 2>&1; then
-		curl -LsSf https://github.com/j178/prek/releases/download/v0.4.10/prek-installer.sh | sh
-	elif command -v wget >/dev/null 2>&1; then
-		wget -qO- https://github.com/j178/prek/releases/download/v0.4.10/prek-installer.sh | sh
-	else
-		echo "curl or wget required to install prek" >&2
-		exit 1
+	if command -v prek >/dev/null 2>&1; then true;\
+	elif command -v curl >/dev/null 2>&1; then\
+		curl -LsSf https://github.com/j178/prek/releases/download/v0.4.14/prek-installer.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then\
+		wget -qO- https://github.com/j178/prek/releases/download/v0.4.14/prek-installer.sh | sh;\
+	else\
+		echo "curl or wget required to install prek" >&2; exit 1;\
 	fi
 	prek install
 	touch .prek-stamp
 .uv-stamp:
-	@if command -v uv >/dev/null 2>&1; then true
-	elif command -v curl >/dev/null 2>&1; then
-		curl -LsSf https://astral.sh/uv/install.sh | sh
-	elif command -v wget >/dev/null 2>&1; then
-		wget -qO- https://astral.sh/uv/install.sh | sh
-	else
-		echo "curl or wget required to install uv" >&2
-		exit 1
+	if command -v uv >/dev/null 2>&1; then true;\
+	elif command -v curl >/dev/null 2>&1; then\
+		curl -LsSf https://astral.sh/uv/install.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then\
+		wget -qO- https://astral.sh/uv/install.sh | sh;\
+	else\
+		echo "curl or wget required to install uv" >&2; exit 1;\
 	fi
 	(uv tool install ruff && uv tool install ty) 2>/dev/null
 	touch .uv-stamp
@@ -42,9 +42,9 @@ clean:
 	find . -type f -name '*.py[codz]' -delete
 docs:
 	. scripts/generate.sh 2>/dev/null
-	make -C docs html -W
+	$(MAKE) -C docs html -W
 help:
-	@cat assets/mkhelp.txt
+	cat assets/mkhelp.txt
 install: .prek-stamp .uv-stamp
 	uv pip install -Ue .[dev]
 lint: .uv-stamp
@@ -55,9 +55,8 @@ lock: .uv-stamp
 pc: .prek-stamp
 	prek run
 release:
-	if [[ ! $$(read -p "You are about to create a release. Are you sure? (y/N) ") =~ ^([yY][eE][sS]|[yY])$$ ]]; then
-		echo "Release aborted."
-		exit 1
+	if [[ ! $$(read -p "You are about to create a release. Are you sure? (y/N) ") =~ ^([yY][eE][sS]|[yY])$$ ]]; then\
+		echo "Release aborted." >&2; exit 1;\
 	fi
 	gh release create
 test:
@@ -65,4 +64,4 @@ test:
 venv: .uv-stamp
 	uv venv
 %::
-	@true
+	true
