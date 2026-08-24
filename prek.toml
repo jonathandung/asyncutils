@@ -11,12 +11,12 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/abravalheri/validate-pyproject"
-rev = "v0.25"
+rev = "0.26"
 hooks = [{id = "validate-pyproject"}]
 
 [[repos]]
 repo = "https://github.com/betterleaks/betterleaks"
-rev = "v1.7.4"
+rev = "v1.8.1"
 hooks = [{id = "betterleaks"}]
 
 [[repos]]
@@ -26,5 +26,5 @@ hooks = [{id = "sphinx-lint"}]
 
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v1.0.1"
+rev = "v1.1.0"
 hooks = [{id = "check-empty", files = "asyncutils/py.typed|tests/__init__.py"}]
