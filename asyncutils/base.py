@@ -27,7 +27,7 @@ class event_loop: # ruff: ignore[invalid-class-name]
     @classmethod
     def from_flags(cls, flags, /, m=0x10000):
         if not 0 <= flags < m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
-        r._flags, r._state, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.event_loop at {id(r := object.__new__(cls)):#x}'; return r # ty: ignore[unresolved-attribute]
+        r._flags, r._state, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.event_loop at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, **k):
         F, p = A.getcontext().EVENT_LOOP_BASE_FLAGS, k.pop
         for f, s in cls.Flags.__members__.items():
@@ -48,15 +48,15 @@ class event_loop: # ruff: ignore[invalid-class-name]
             try: g(); s |= S.ENTERED_INNER
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
-                if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __enter__ of associated event loop: {e}') from e # ty: ignore[unresolved-attribute]
+                if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&c.ATTEMPT_AENTER and callable(g := getattr(l, '__aenter__', None)):
             try: l.run_until_complete(g()); s |= S.AENTERED_INNER
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
-                if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __aenter__ of associated event loop: {e}') from e # ty: ignore[unresolved-attribute]
+                if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __aenter__ of associated event loop: {e}') from e
         self._loop, self._state = l, s+S.ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=A.IgnoreErrors(RuntimeError), _l=L): # ruff: ignore[complex-structure,too-many-branches,too-many-statements]
-        n, l, a, z, S = self._is, self._loop, not (f := self._flags)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS, self.State # ty: ignore[unresolved-attribute]
+        n, l, a, z, S = self._is, self._loop, not (f := self._flags)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS, self.State
         if not (s := self._state)&S.ENTERED:
             if a: raise RuntimeError(_m%n) if v is None else BaseExceptionGroup(_n%n, tuple(A.unnest_reverse(v))).with_traceback(b)
             return False
@@ -90,7 +90,7 @@ class event_loop: # ruff: ignore[invalid-class-name]
         if not f&d.KEEP_LOOP: del self._loop
         return r or (q and not z)
     def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'): # pragma: no cover
-        b, n = not (f := self._flags)&(c := self.Flags).SILENT_ON_FINALIZE, self._is # ty: ignore[unresolved-attribute]
+        b, n = not (f := self._flags)&(c := self.Flags).SILENT_ON_FINALIZE, self._is
         if not self._state&self.State.ENTERED:
             if b: _f(_d, n)
             return

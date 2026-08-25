@@ -39,7 +39,7 @@ class ExceptionWrapper:
     __slots__ = '__exc',
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
-        (s := super().__new__(cls)).__exc = e; return s # ty: ignore[unresolved-attribute]
+        (s := super().__new__(cls)).__exc = e; return s
     def __getattr__(self, n, /): return getattr(self.__exc, n)
     def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
@@ -53,8 +53,8 @@ class ref: # ruff: ignore[invalid-class-name]
     def __new__(cls, obj, r=__import__('_weakref').ref):
         if isinstance(obj, (cls, r)): return obj
         try: return r(obj)
-        except TypeError: (_ := object.__new__(cls)).__o = obj; return _ # ty: ignore[unresolved-attribute]
-    def __call__(self): return self.__o # ty: ignore[unresolved-attribute]
+        except TypeError: (_ := object.__new__(cls)).__o = obj; return _
+    def __call__(self): return self.__o
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @H.subscriptable
 class Critical(BaseException):

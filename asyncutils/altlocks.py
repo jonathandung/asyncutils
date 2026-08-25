@@ -1,4 +1,3 @@
-# ty: ignore[unresolved-attribute]
 import asyncio as I, asyncutils as A, asyncutils._internal.patch as P
 from _collections import deque
 from _warnings import warn

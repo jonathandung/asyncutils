@@ -67,7 +67,7 @@ class SocketTransport(I.Transport):
         except OSError as e: M.log.warning('%s: read error', M.helpers.fullname(self)); self.close(e)
     def connect_sock(self, sock=None):
         if sock is None and (sock := self.__sock) is None: return
-        sock.setblocking(False); self.loop.add_reader(sock.fileno(), self.__rr, sock); (e := self._extra)['sockname'] = sock.getsockname() # ty: ignore[unresolved-attribute]
+        sock.setblocking(False); self.loop.add_reader(sock.fileno(), self.__rr, sock); (e := self._extra)['sockname'] = sock.getsockname()
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
         if (s := self.__sock) is None: return s

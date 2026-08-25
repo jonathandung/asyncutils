@@ -113,12 +113,14 @@ class Observable(H.LoopMixinBase):
         for o in O: o.__d.add(p)
         return _
 class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
-    __slots__ = '_auditing', '_handler', '_is_shutdown', '_lock', '_middlewares', '_published', '_publishers', '_sem', '_subscribers', '_tracking', 'auditor', 'name'
+    __slots__ = '_auditing', '_handler', '_is_shutdown', '_lock', '_middlewares', '_published', '_publishers', '_sem', '_subscribers', '_tracking', 'auditor', 'name', 'stream_queue'
     def __init__(self, name=None, *, handler=None, max_concurrent=None, tracking_stats=False, evs_bufsize=None):
         if max_concurrent is None: max_concurrent = A.getcontext().EVENT_BUS_DEFAULT_MAX_CONCURRENT
         def auditor(*a, f=self.is_auditing, _=self.sync_start_publish):
             if f(): _(*a)
-        audit('asyncutils.channels.EventBus', name, id(self)); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self.stream_queue, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), [], set(), f'{H.fullname(self)} {name or f'#{__class__.__inc_cnt()}'}', I.Lock(), False, handler or (lambda _: None), I.Semaphore(max_concurrent), False, tracking_stats, C.Queue(A.getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if evs_bufsize is None else evs_bufsize), WeakSet()
+        audit('asyncutils.channels.EventBus', name, id(self)); self.auditor, self._subscribers, self._published, self._middlewares, self._publishers, self.name, self._lock, self._auditing, self._handler, self._sem, self._is_shutdown, self._tracking, self.stream_queue, s[None] = auditor, (s := defaultdict(WeakSet)), defaultdict(int), [], set(), f'{type(self).__name__} {name or f'#{__class__.__inc_cnt()}'}', I.Lock(), False, handler or self._default_handler, I.Semaphore(max_concurrent), False, tracking_stats, C.Queue(A.getcontext().EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE if evs_bufsize is None else evs_bufsize), WeakSet()
+    def _default_handler(self, e): L.error('Error occurred in callback of %s', self.name, exc_info=e)
+    def __repr__(self): return self.name
     def raise_for_shutdown(self):
         if self._is_shutdown: raise A.BusShutDown(f'{self.name} is shutting down')
     def get_event_stats(self):
@@ -218,7 +220,7 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
         self.raise_for_shutdown()
         if not self._auditing: audit('asyncutils.channels.EventBus.event_stream', id(self), event_type)
         t, g = await self.subscribe_until(F := self.loop.create_future(), partial(self.feed_event, timeout=A.getcontext().EVENT_BUS_STREAM_DEFAULT_TIMEOUT if timeout is _NO_DEFAULT else timeout), event_type), self.stream_queue.get
-        if _NO_DEFAULT is item_timeout: item_timeout = A.getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
+        if item_timeout is _NO_DEFAULT: item_timeout = A.getcontext().EVENT_BUS_STREAM_DEFAULT_ITEM_TIMEOUT
         try:
             while True: yield await I.wait_for(g(), item_timeout)
         except C.QueueShutDown: L.info('%s: event stream has been shut down', self.name, exc_info=True)
@@ -246,7 +248,7 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     async def _safe_callback(self, c, d, t=None, i=None):
         try:
             async with self._sem:
-                if I.iscoroutine(r := c(*H.filter_out(t, s=_NO_DEFAULT), d)): await I.wait_for(r, i)
+                await I.wait_for(c(*H.filter_out(t, s=None), d), i)
         except TimeoutError: L.warning('%s: callback %s timed out', self.name, H.fullname(c), exc_info=True)
         except A.CRITICAL: raise A.Critical
         except BaseException as e: await self.handle_exception(e) # ruff: ignore[blind-except]
@@ -259,34 +261,35 @@ class Rendezvous:
     __slots__ = '_getters', '_lock', '_loop', '_putters', '_task'
     def __init__(self, *, lock=None): self._getters, self._putters, self._loop, self._lock = deque(), deque(), H.get_loop_and_set(), I.Lock() if lock is None else lock; self._make_task()
     async def _maintainer(self):
-        f, g = I.sleep.__get__(A.getcontext().RENDEZVOUS_MAINTENANCE_INTERVAL), self.cleanup
+        f, g = I.sleep.__get__(A.getcontext().RENDEZVOUS_MAINTENANCE_INTERVAL), self._cleanup
         while True: await f(); g()
     async def put(self, v, /, *, timeout=None):
         try: await self.raising_put(v, timeout=timeout); return True
         except (I.CancelledError, TimeoutError): return False
     async def raising_put(self, v, /, *, timeout): await I.wait_for(await I.shield(self._put_helper(v)), timeout)
-    async def get(self, default=_NO_DEFAULT, *, timeout=None, _=100):
+    async def get(self, default=_NO_DEFAULT, *, timeout=None):
         f = (p := self._putters).popleft
-        while p:
-            v, F = f()
-            if not F.done(): F.set_result(None); return v
-        if timeout is None and default is not _NO_DEFAULT: return default
-        self._getters.append(F := self._loop.create_future())
+        async with self._lock:
+            while p:
+                v, F = f()
+                if not F.done(): F.set_result(None); return v
+            if timeout is None and default is not _NO_DEFAULT: return default
+            self._getters.append(F := self._loop.create_future())
         try: return await I.wait_for(F, timeout)
         except TimeoutError:
             if default is _NO_DEFAULT: raise
             return default
     def __length_hint__(self): return len(self._getters)+len(self._putters)
-    def state_snapshot(self, _=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')): self.cleanup(); t = len(self._getters), len(self._putters); return _(*t, sum(t), not any(t))
-    def cleanup(self): self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
-    async def exchange(self, v, /, *, asap=False):
+    def state_snapshot(self, _=namedtuple('StateSnapshot', 'num_getters num_putters num_ops idle', module='asyncutils.channels')): self._cleanup(); t = len(self._getters), len(self._putters); return _(*t, sum(t), not any(t))
+    def _cleanup(self): self._getters, self._putters = deque(F for F in self._getters if not F.done()), deque(t for t in self._putters if not t[1].done())
+    async def exchange(self, v, /):
         g, f = self._getters, True
         async with self._lock:
             while g:
                 if not (F := g.popleft()).done(): break
             else: g.append(F := self._loop.create_future()); f = False
         if f: F.set_result(v); return await self.get()
-        await (self._put_helper if asap else self.put)(v); g.appendleft(F); return await F
+        await self.put(v); g.appendleft(F); return await F
     async def _put_helper(self, v, /):
         g = self._getters
         async with self._lock:

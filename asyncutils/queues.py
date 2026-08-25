@@ -29,7 +29,7 @@ class Q:
     def _put(self, _=exc('call _put() on')): raise _
     def _init(self, maxsize, _=exc('call _init() on')): raise _ # ruff: ignore[unused-method-argument]
     @property
-    def maxsize(self): return self._ms # ty: ignore[unresolved-attribute]
+    def maxsize(self): return self._ms
     P.patch_method_signatures((_get, ''), (_put, ''), (_init, 'maxsize')); P.patch_classmethod_signatures((__init_subclass__, '**k'), (__new__, 'maxsize, cancel_extend, change_get_password, change_put_password, empty, full, get, get_nowait, join, put, put_nowait, qsize, shutdown, task_done, /'))
 def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0, *, protect_get=False, protect_put=True, can_change_get=False, can_change_put=False, priority=False, lifo=False, init_items=(), strict=True, get_from=None, put_from=None, gettyp=object, puttyp=object, _=Q): # ruff: ignore[complex-structure,too-many-arguments,too-many-statements]
     audit('asyncutils.queues.password_queue', get_from if protect_get else None, put_from if protect_put else None); C, E, y, z, U, S, m, b = A.getcontext(), A.done_evt(), (G := deque()).append, (P := deque()).append, 0, False, (L := get_loop_and_set()).create_future, object()
@@ -128,7 +128,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
     if init_items:
         async def extend(f=Z.partial(put, Z.Placeholder, password_put)):
             async for i in A.iter_to_agen(init_items): await f(i)
-        q.cancel_extend = L.create_task(extend()).cancel # ty: ignore[invalid-assignment]
+        q.cancel_extend = L.create_task(extend()).cancel
     return q
 class PotentQueueBase(D.Queue, LoopMixinBase, metaclass=ABCMeta): # ruff: ignore[too-many-public-methods]
     @abstractmethod

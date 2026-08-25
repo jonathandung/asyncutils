@@ -69,14 +69,14 @@ class EventBus(LoopMixinBase):
     '''
     WILDCARD: Final[WildcardType]
     '''Sentinel representing the event type of subscribers that accept any event name.'''
-    def __init__(self, name: str=..., *, handler: Callable[[BaseException], None]=..., max_concurrent: int=..., tracking_stats: bool=..., evs_bufsize: int|None=...):
+    def __init__(self, name: str=..., *, handler: Callable[[BaseException], object]|None=..., max_concurrent: int=..., tracking_stats: bool=..., evs_bufsize: int|None=...):
         '''
         All the arguments below are optional.
 
         * ``name``: The name of this event bus, which will appear in error messages.
-        * ``handler``: A function that takes an exception having occurred in a subscribers and handles it.
+        * ``handler``: A function that takes an exception having occurred in a subscriber and handles it.
         * ``max_concurrent``: The maximum number of concurrent callbacks; default :const:`~asyncutils.context.Context.EVENT_BUS_DEFAULT_MAX_CONCURRENT`.
-        * ``tracking_stats``: Whether to remember the amount of published data to subscribers of each event type.
+        * ``tracking_stats``: Whether to remember the amount of published data to subscribers of each event type; default ``False``.
         * ``evs_bufsize``: The maximum size of the queue of events for the event stream; default :const:`~asyncutils.context.Context.EVENT_BUS_STREAM_DEFAULT_BUFFER_SIZE`.
         '''
     def raise_for_shutdown(self) -> None: '''Throw an exception if the event bus is shutting down.'''
@@ -232,10 +232,9 @@ class Rendezvous[T]:
         | Get a value from the rendezvous, blocking until available unless default is passed and timeout is not, in which case the default is returned if a value is not immediately available.
         | If ``default`` is not passed and ``timeout`` is reached, the :exc:`TimeoutError` is propagated. In any case, the get is cancelled at timeout.
         '''
-    def cleanup(self) -> None: '''Clean up the internal getter and putter stacks.'''
     async def reset(self) -> None: '''Hard reset the rendezvous, cancelling all pending gets, puts and exchanges; their callers will see :exc:`~asyncio.CancelledError`. Call from a monitoring task when, for example, a deadlock appears to have occurred.'''
     def __length_hint__(self) -> int: '''Approximate number of operations pending. Implemented for :func:`operator.length_hint`.'''
-    def state_snapshot(self) -> StateSnapshot: '''Trigger a cleanup and return a snapshot of the current state of the object.'''
+    def state_snapshot(self) -> StateSnapshot: '''Return a snapshot of the current state of the object.'''
     async def exchange(self, put_val: T, /, *, asap: bool=...) -> T:
         '''
         | Put in a value to the rendezvous and get and return a different value gotten from it.

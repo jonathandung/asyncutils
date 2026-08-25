@@ -17,7 +17,7 @@ from contextlib import AbstractAsyncContextManager, AbstractContextManager
 from contextvars import Context
 from io import TextIOWrapper
 from types import AsyncGeneratorType, CodeType, CoroutineType, FrameType, FunctionType, GenericAlias, NotImplementedType, TracebackType
-from typing import Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
+from typing import _ProtocolMeta, Any, Concatenate, Literal, NamedTuple, NewType, NoReturn, Protocol, Self, SupportsIndex, SupportsInt, final, overload, type_check_only
 from _typeshed import Incomplete
 from typing_extensions import TypeForm
 from ..config import FaultyConfig
@@ -103,9 +103,9 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     def __qualname__(self) -> str: ...
     def __await__(self) -> Generator[Any, None, R]: ...
 @type_check_only
-class PartialInterfaceMeta(type):
+class PartialInterfaceMeta(_ProtocolMeta):
     '''Metaclass for partial interfaces, as described and justified in :class:`PartialInterface`.'''
-    def __getattr__(cls, name: str, /) -> Incomplete: ...
+    def __getattr__(self, name: str, /) -> Incomplete: ...
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
     '''

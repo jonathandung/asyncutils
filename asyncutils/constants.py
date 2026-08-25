@@ -12,13 +12,13 @@ class SentinelBase:
         if _(name) or not all(p.isidentifier() and not _(p) for p in name.split('.', 1)): raise ValueError('asyncutils.constants.SentinelBase: invalid name')
         if (m := g(1)) is not None: name = f'{m}.{name}'
         if (o := (c := cls._cache).get(name)) is None:
-            (o := super().__new__(cls)).__n, o.__m = name, m # ty: ignore[unresolved-attribute]
+            (o := super().__new__(cls)).__n, o.__m = name, m
             with cls._lock: c[name] = o
         return o
     @property
     def name(self): return self.__n
     @property
-    def module(self): return self.__m # ty: ignore[unresolved-attribute]
+    def module(self): return self.__m
     @classmethod
     def _assert_can_instantiate(cls):
         if not cls._can_instantiate: raise TypeError(f'cannot instantiate {fullname(cls)!r}')

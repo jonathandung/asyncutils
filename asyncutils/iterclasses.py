@@ -15,10 +15,10 @@ class AChain:
                 async for _ in cls._flatten_it_of_its(i.__its): yield _
             else: yield i
     @classmethod
-    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__its = cls._flatten_it_of_its(it_of_its); return s # ty: ignore[unresolved-attribute]
+    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__its = cls._flatten_it_of_its(it_of_its); return s
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in self.__its: # ty: ignore[unresolved-attribute]
+        async for i in self.__its:
             async for _ in i: yield _
 @H.subscriptable
 class APeekable(H.LoopMixinBase):

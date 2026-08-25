@@ -221,6 +221,7 @@ loadf
 lockf
 loky
 lrem
+ludeeus
 majmin
 maxfail
 maxhist
@@ -240,6 +241,7 @@ opengraph
 pastebin
 pconf
 phcount
+pipefail
 poppush
 pred
 prek
@@ -261,6 +263,7 @@ rrem
 rsrc
 rwlocks
 seealso
+shellcheck
 siftdown
 siftup
 signoff

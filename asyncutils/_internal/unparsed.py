@@ -39,7 +39,7 @@ else:
         a('asyncutils/read_config', c := str(A)); break # pragma: no cover
     else: d = {}
     del A, s, i
-for S in d.pop('context', {}).values(): # ruff: ignore[import-shadowed-by-loop-var] # pragma: no cover
+for S in d.pop('context', {}).values(): # ruff: ignore[import-shadowed-by-loop-var] # ty: ignore[unsound-assignment] # pragma: no cover
     if (t := type(S)) is not dict: m('asyncutils: key "context" in %s should be an object mapping submodule names to objects, not %r', H.fullname(t))
     for K, V in S.items():
         if type(V) is dict:

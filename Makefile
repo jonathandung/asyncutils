@@ -1,8 +1,9 @@
 SHELL := /bin/bash
+.SHELLFLAGS := -euo pipefail -c
 .PHONY: audit badges bug changelog clean docs help install lint lock pc release test venv
 AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
-O := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS)) $(O)
+O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 .SILENT:
 .prek-stamp:
 	if command -v prek >/dev/null 2>&1; then true;\
@@ -32,7 +33,7 @@ badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 bug:
-	asyncutils bug --open $(O)
+	asyncutils bug --open "$(O)"
 changelog:
 # cspell:disable-next-line
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -55,12 +56,16 @@ lock: .uv-stamp
 pc: .prek-stamp
 	prek run
 release:
-	if [[ ! $$(read -p "You are about to create a release. Are you sure? (y/N) ") =~ ^([yY][eE][sS]|[yY])$$ ]]; then\
-		echo "Release aborted." >&2; exit 1;\
+	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r
+	echo
+	if [[ $REPLY =~ [Yy]$ ]]; then\
+		gh release create;\
+	else\
+        echo "Release aborted." >&2; exit 1;\
 	fi
-	gh release create
+
 test:
-	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail $(AUTILSTESTMAXFAIL)
+	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"
 venv: .uv-stamp
 	uv venv
 %::

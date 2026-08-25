@@ -12,17 +12,17 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### Tests
 
-59% coverage, 96 tests
-
-### Docs
-
-97% complete
+60% coverage, 97 tests
 
 ## Versions
 
 ### [1.2]
 
-### [1.2.0] - 2026-08-19; unreleased
+### [1.2.1] - 2026-08-25
+
+Various workflows.
+
+### [1.2.0] - 2026-08-19
 
 Started using Zizmor.
 
