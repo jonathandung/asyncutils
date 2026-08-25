@@ -4,7 +4,9 @@ updates:
     package-ecosystem: uv
     schedule: {interval: weekly}
     cooldown: {default-days: 10}
+    groups: {all: {patterns: ['*']}}
   - directory: /
     package-ecosystem: github-actions
     schedule: {interval: weekly}
     cooldown: {default-days: 10}
+    groups: {all: {patterns: ['*']}}

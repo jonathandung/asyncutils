@@ -28,4 +28,4 @@ jobs:
           enable-cache: false
       - run: uv build
       - run: uv publish
-    timeout-minutes: 5
+    timeout-minutes: 3

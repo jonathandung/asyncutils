@@ -12,3 +12,6 @@ contact_links:
   - name: Creator's profile
     url: https://github.com/jonathandung
     about: More of my work, mainly Python projects, can be found here.
+  - name: GitHub Pages
+    url: https://jonathandung.github.io/asyncutils
+    about: A mirror of the Read the Docs site built with the Sphinx Book Theme instead.

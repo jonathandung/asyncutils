@@ -27,7 +27,7 @@ jobs:
         stale-issue-message: This issue has been marked as stale due to inactivity.
         stale-pr-label: stale
         stale-pr-message: This pull request has been marked as stale due to inactivity.
-    timeout-minutes: 5
+    timeout-minutes: 3
   lock:
     permissions:
       discussions: write
@@ -45,4 +45,4 @@ jobs:
           log-output: true
           pr-inactive-days: 90
           pr-comment: This pull request thread has been automatically locked due to inactivity. For a related enhancement, please file a new issue or open another PR and link to relevant comments here.
-    timeout-minutes: 5
+    timeout-minutes: 3

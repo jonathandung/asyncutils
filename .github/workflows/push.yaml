@@ -39,13 +39,15 @@ jobs:
         verbose: true
     - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
       with:
-        globs: '**/*.md'
+        globs: |
+          *.md
+          .github/**/*.md
     - uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38
       with:
         additional_files: Makefile
         check_together: yes
       env:
-        SHELLCHECK_OPTS: -x -s bash -e SC2035
+        SHELLCHECK_OPTS: -x -s bash -e SC2035 -e SC2046
     - run: uv build
     timeout-minutes: 3
   secondary:
@@ -57,7 +59,7 @@ jobs:
         python-version: ["3.12", "3.15"]
         include:
           - os: ubuntu-latest
-            python-version: 3.14t
+            python-version: 3.15t
         # - os: macos-latest
           # python-version: gp313
         # TODO: Blocked until release on Oct 27

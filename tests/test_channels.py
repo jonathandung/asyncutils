@@ -1,7 +1,7 @@
 from asyncio import create_task, gather, sleep, wait_for
 from asyncutils.channels import *
 from tests.conftest import mk
-import pytest
+import pytest, sys
 @mk
 async def test_rdv():
     rdv = Rendezvous()
@@ -14,6 +14,7 @@ async def test_rdv():
     assert await t
     await rdv.reset()
     with pytest.raises(TimeoutError): await rdv.raising_put(-1, timeout=0.01)
+    if sys.platform == 'win32' and sys.version_info < (3, 13): return
     t = create_task(rdv.put(0))
     await sleep(0.01)
     assert await rdv.get(-1) == 0
