@@ -8,8 +8,8 @@ Available targets:
  help      - Show this help message; the default target
  install   - Install the package in editable mode with development dependencies and install prek hooks
  lint      - Run ruff and ty sequentially; likely the most useful target
- lock      - Regenerate the project lockfile at uv.lock
- pc        - Run prek hooks on all files
+ lock      - Regenerate the project lockfile at uv.lock, updating dependencies
+ pc        - Run prek hooks on all files, unlike the run before each commit which only runs on modified files
  release   - Call the GitHub CLI (gh) to make an release interactively
  test      - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
  venv      - Create a virtual environment using uv

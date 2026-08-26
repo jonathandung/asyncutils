@@ -30,6 +30,15 @@ jobs:
     - run: uvx ty check --output-format github
     - run: make audit
     - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054
+    - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
+      with:
+        globs: |
+          *.md
+          .github/**/*.md
+    - uses: luizm/action-sh-checker@883217215b11c1fabbf00eb1a9a041f62d74c744
+      env:
+        SHELLCHECK_OPTS: -x -s bash -e SC2035 -e SC2046 Makefile docs/Makefile
+        SHFMT_OPTS: -s
     - run: pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
     - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
       with:
@@ -37,18 +46,6 @@ jobs:
         name: codecov-umbrella
         token: ${{secrets.CODECOV_TOKEN}}
         verbose: true
-    - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
-      with:
-        globs: |
-          *.md
-          .github/**/*.md
-    - uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38
-      with:
-        additional_files: Makefile
-        check_together: yes
-      env:
-        SHELLCHECK_OPTS: -x -s bash -e SC2035 -e SC2046
-    - run: uv build
     timeout-minutes: 3
   secondary:
     runs-on: ${{matrix.os}}

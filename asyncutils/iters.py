@@ -681,14 +681,14 @@ def anth_or_last(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), def
 async def awrapf(it, before=None, after=None):
     if before is not None:
         r = before()
-        with A.ignore_typeerrs: await r
+        with A.ignore_type_errors: await r
     it = iter_to_agen(it)
     try:
         async for i in it: yield i
     finally:
         if after is not None:
             r = after()
-            with A.ignore_typeerrs: await r
+            with A.ignore_type_errors: await r
 def abefore_and_after(pred, it): a, b = tee(it); return acompress(atakewhile(pred, a), azip(b)), b
 async def anth_combination(it, r, n):
     if not 0 <= r <= (l := len(p := await to_tuple(it))): raise IndexError(f'asyncutils.iters.anth_combination: {r=} is out of range')
@@ -703,7 +703,7 @@ async def anth_combination(it, r, n):
 @aawgenf2agenf
 async def asubslices(it): return astarmap(O.getitem, azip(arepeat(s := await to_tuple(it)), astarmap(slice, acombinations(range(len(s)+1), 2))))
 async def arepeat_func(f, n=None, /, *a):
-    async def g(i=A.ignore_typeerrs, _=partial(f, *a)): # ruff: ignore[function-call-in-default-argument]
+    async def g(i=A.ignore_type_errors, _=partial(f, *a)): # ruff: ignore[function-call-in-default-argument]
         r = _()
         with i: r = await r
     async for _ in aloops(n): await g()

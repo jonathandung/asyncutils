@@ -168,7 +168,7 @@ class IgnoreErrors:
         return type(self)(*S, exclude=P)
     P.patch_method_signatures((__init__, '*exc, exclude=()'), (excluding, r := '*others'), (combined, r), (__exit__, P.exit_sig), (__aexit__, P.exit_sig)); del r
 ignore_noncritical, ignore_typical = (ignore_all := IgnoreErrors(BaseException)).excluding(*CRITICAL), IgnoreErrors()
-ignore_stop_iteration, ignore_stop_async_iteration, ignore_valerrs, ignore_typeerrs, ignore_warnings = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError, Warning))
+ignore_stop_iteration, ignore_stop_async_iteration, ignore_value_errors, ignore_type_errors, ignore_warnings = map(IgnoreErrors, (StopIteration, StopAsyncIteration, ValueError, TypeError, Warning))
 class WarningToError:
     __slots__ = '__cm', '__w'
     def __init__(self, /, *_): self.__w, self.__cm = _ or (Warning,), None

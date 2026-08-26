@@ -18,6 +18,10 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.2]
 
+## [1.2.2] - 2026-08-26
+
+Again, some workflow changes.
+
 ### [1.2.1] - 2026-08-25
 
 Various workflows.
@@ -229,8 +233,8 @@ Breaking changes:
     - ignore_typical
     - ignore_stop_iteration
     - ignore_stop_async_iteration
-    - ignore_valerrs
-    - ignore_typeerrs
+    - ignore_value_errors
+    - ignore_type_errors
 
     Exception types:
     - Critical

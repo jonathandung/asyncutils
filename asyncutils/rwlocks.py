@@ -4,7 +4,7 @@ from _collections import defaultdict, deque
 from asyncio import Condition, Lock, current_task
 from contextlib import asynccontextmanager
 from heapq import heappop, heappush
-from asyncutils import getcontext, ignore_valerrs
+from asyncutils import getcontext, ignore_value_errors
 from asyncutils._internal.submodules import rwlocks_all as __all__
 def _rn(cls, /): (_ := object.__new__(cls)).setup(); return _
 class B:
@@ -105,7 +105,7 @@ class FairRWLock(RWLock):
                     if Q[0] is not E or self._wa: await w()
                     else: self._nr += 1; Q.popleft(); E[-1].set_result(True); break
             except:
-                with ignore_valerrs: Q.remove(E)
+                with ignore_value_errors: Q.remove(E)
                 raise
         try: yield
         finally:
@@ -122,7 +122,7 @@ class FairRWLock(RWLock):
                     if Q[0] is not E or self._wa or self._nr > 0: await w()
                     else: self._wa = True; Q.popleft(); E[-1].set_result(True); break
             except:
-                with ignore_valerrs: Q.remove(E)
+                with ignore_value_errors: Q.remove(E)
                 raise
         try: yield
         finally:
@@ -143,7 +143,7 @@ class PriorityRWLock(RWLock):
                     if Q[0] is not E or self._wa: await w()
                     else: self._nr += 1; heappop(Q); E[-1].set_result(True); break
             except:
-                with ignore_valerrs: Q.remove(E)
+                with ignore_value_errors: Q.remove(E)
                 raise
         try: yield
         finally:
@@ -159,7 +159,7 @@ class PriorityRWLock(RWLock):
                     if Q[0] is not E or self._wa or self._nr > 0: await w()
                     else: self._wa = True; heappop(Q); E[-1].set_result(True); break
             except:
-                with ignore_valerrs: Q.remove(E)
+                with ignore_value_errors: Q.remove(E)
                 raise
         try: yield
         finally:

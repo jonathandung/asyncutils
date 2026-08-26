@@ -90,7 +90,7 @@ goto :eof
 
 :pc
 call :.prek-stamp
-prek run
+prek run --all-files
 goto :eof
 
 :release

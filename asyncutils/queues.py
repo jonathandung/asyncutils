@@ -70,7 +70,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             try: y(F); await F
             except:
                 F.cancel()
-                with A.ignore_valerrs: G.remove(F)
+                with A.ignore_value_errors: G.remove(F)
                 if l and not F.cancelled(): _wakeup_next(G)
                 raise
         return get_nowait(_=b)
@@ -86,7 +86,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             try: await F
             except:
                 F.cancel()
-                with A.ignore_valerrs: P.remove(F)
+                with A.ignore_value_errors: P.remove(F)
                 if not (full() or F.cancelled()): _wakeup_next(P)
                 raise
         return put_nowait(i, _=b)

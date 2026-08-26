@@ -94,7 +94,7 @@ def aawcmf2dcmff(**d):
     def f(f, /, _=dualcontextmanager(**d)): # ruff: ignore[function-call-in-default-argument]
         async def g(*a, **k):
             c = f(*a, **k)
-            with A.ignore_typeerrs: c = await c
+            with A.ignore_type_errors: c = await c
             if H.check_methods(c, '__aenter__', '__aexit__'):
                 async with c as r: yield r; return # ruff: ignore[yield-in-context-manager-in-async-generator]
             if (e := getattr(aawcmf2dcmff, 'executor', None)) is None: e = H.create_executor(aawcmf2dcmff)

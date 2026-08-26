@@ -1362,7 +1362,7 @@ wheels = [
 
 [[package]]
 name = "py-asyncutils"
-version = "1.2.0"
+version = "1.2.1"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -1469,11 +1469,11 @@ requires-dist = [
     { name = "loky", marker = "extra == 'executors'", specifier = "==3.5.6" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "==5.1.0" },
     { name = "pebble", marker = "extra == 'executors'", specifier = "==5.2.1" },
-    { name = "py-asyncutils", extras = ["dev", "executors", "pconf", "themes"], marker = "extra == 'all'", specifier = "==1.2.0" },
-    { name = "py-asyncutils", extras = ["docs"], marker = "extra == 'themes'", specifier = "==1.2.0" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'pconf'", specifier = "==1.2.0" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'test'", specifier = "==1.2.0" },
-    { name = "py-asyncutils", extras = ["themes", "test"], marker = "extra == 'dev'", specifier = "==1.2.0" },
+    { name = "py-asyncutils", extras = ["dev", "executors", "pconf", "themes"], marker = "extra == 'all'", specifier = "==1.2.1" },
+    { name = "py-asyncutils", extras = ["docs"], marker = "extra == 'themes'", specifier = "==1.2.1" },
+    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'pconf'", specifier = "==1.2.1" },
+    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'test'", specifier = "==1.2.1" },
+    { name = "py-asyncutils", extras = ["themes", "test"], marker = "extra == 'dev'", specifier = "==1.2.1" },
     { name = "pyjson5", marker = "extra == 'json5'", specifier = "==2.0.1" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==9.1.1" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = "==1.4.0" },

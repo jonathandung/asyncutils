@@ -54,7 +54,7 @@ lint: .uv-stamp
 lock: .uv-stamp
 	uv lock -U
 pc: .prek-stamp
-	prek run
+	prek run --all-files
 release:
 	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r
 	echo

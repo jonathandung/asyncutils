@@ -36,7 +36,7 @@ async def wait_for_signal(p, /, *S, timeout=None, raise_on_timeout=False, loop=N
         logger.info('signals.wait_for_signal: signal received: %s', s.name)
         try:
             r = p(s)
-            with A.ignore_typeerrs: r = await r
+            with A.ignore_type_errors: r = await r
         except possible_errors: logger.exception('signals.wait_for_signal processor %r encountered error for signal %s', p, s); return default_on_processor_failure
         except A.CRITICAL: raise A.Critical
         except BaseException as e: raise RuntimeError(f'asyncutils.signals.wait_for_signal: unexpected {H.fullname(e)} in processor {p!r} for signal {s.name}') from e

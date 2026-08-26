@@ -281,7 +281,6 @@ tcls
 testpaths
 tiebreak
 toctree
-typeerrs
 ufactor
 undeducible
 undoc
@@ -294,7 +293,6 @@ unshelve
 unshelving
 unstar
 unsubscriptions
-valerrs
 vecs
 viewcode
 wasi

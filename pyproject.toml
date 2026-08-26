@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = ["uv_build>=0.12.5"]
+requires = ["uv_build>=0.12.6"]
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -126,7 +126,7 @@ dynamic-function-decorator-return = "ignore"
 missing-type-argument = "ignore"
 
 [tool.uv]
-required-version = ">=0.12.5"
+required-version = ">=0.12.6"
 
 [tool.uv.build-backend]
 module-name = "asyncutils"

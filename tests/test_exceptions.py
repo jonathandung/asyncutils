@@ -24,8 +24,8 @@ def test_raise_exc():
     with raises(ValueError, match='message', check=check): raise_exc(ValueError, 'message', cause=KeyboardInterrupt('cause'), notes='note')
 @mk
 async def test_ignore_errors():
-    with ignore_valerrs: raise ValueError('foo')
-    async with ignore_typeerrs: raise type('TypeError', (TypeError,), {})('bar')
+    with ignore_value_errors: raise ValueError('foo')
+    async with ignore_type_errors: raise type('TypeError', (TypeError,), {})('bar')
     with ignore_all: raise SystemError('baz')
     async with ignore_typical: raise # ruff: ignore[misplaced-bare-raise]
     with ignore_stop_iteration.excluding(BytesWarning): next(iter(int, 0))

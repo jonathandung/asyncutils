@@ -9,7 +9,7 @@ from ._internal.prots import AsyncLockLike, CanExcept, ExceptionWrapper, ExcType
 from .channels import EventBus
 from .locksmiths import LocksmithBase
 from .version import VersionInfo
-__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'MoreThanOne', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_typeerrs', 'ignore_typical', 'ignore_valerrs', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'raise_for', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
+__all__ = 'CRITICAL', 'BulkheadError', 'BulkheadFull', 'BulkheadShutDown', 'BusError', 'BusPublishingError', 'BusShutDown', 'BusStatsError', 'BusTimeout', 'CircuitBreakerError', 'CircuitHalfOpen', 'CircuitOpen', 'Critical', 'Deadlock', 'EventValueError', 'ForbiddenOperation', 'FutureCorrupted', 'GetPasswordMissing', 'GetPasswordRetrievalError', 'IgnoreErrors', 'ItemsExhausted', 'LockForceRequest', 'MaxIterationsError', 'MoreThanOne', 'PasswordError', 'PasswordMissing', 'PasswordQueueError', 'PasswordRetrievalError', 'PoolError', 'PoolFull', 'PoolShutDown', 'PutPasswordMissing', 'PutPasswordRetrievalError', 'RateLimitExceeded', 'ResourceBusy', 'StateCorrupted', 'VersionConversionError', 'VersionCorrupted', 'VersionError', 'VersionNormalizerFault', 'VersionNormalizerMissing', 'VersionNormalizerTypeError', 'VersionValueError', 'WarningToError', 'WrongPassword', 'WrongPasswordType', 'exception_occurred', 'ignore_all', 'ignore_noncritical', 'ignore_stop_async_iteration', 'ignore_stop_iteration', 'ignore_type_errors', 'ignore_typical', 'ignore_value_errors', 'ignore_warnings', 'potent_derive', 'prepare_exception', 'raise_exc', 'raise_for', 'ref', 'unnest', 'unnest_reverse', 'unwrap_exc', 'wrap_exc'
 CRITICAL: Final[tuple[type[SystemExit], type[SystemError], type[KeyboardInterrupt]]]
 '''The tuple (:exc:`SystemExit`, :exc:`SystemError`, :exc:`KeyboardInterrupt`), representing exceptions that should be allowed to propagate under most error handling mechanisms.'''
 def unnest(group: BaseException, /, *more: BaseException, raise_critical: bool=..., keep: CanExcept=..., filter_out: CanExcept=..., predicate: Callable[[BaseException], bool]=..., ack1: Callable[[BaseException], object]|None=..., ack2: Callable[[BaseException], object]|None=..., ack3: Callable[[BaseException], object]|None=...) -> GeneratorType[BaseException, BaseException]:
@@ -235,9 +235,9 @@ ignore_stop_iteration: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`StopIteration`. Equivalent to ``IgnoreErrors(StopIteration)``.'''
 ignore_stop_async_iteration: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`StopAsyncIteration`. Equivalent to ``IgnoreErrors(StopAsyncIteration)``.'''
-ignore_valerrs: Final[IgnoreErrors]
+ignore_value_errors: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`ValueError`. Equivalent to ``IgnoreErrors(ValueError)``.'''
-ignore_typeerrs: Final[IgnoreErrors]
+ignore_type_errors: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`TypeError`. Equivalent to ``IgnoreErrors(TypeError)``.'''
 ignore_warnings: Final[IgnoreErrors]
 '''Instance of :class:`IgnoreErrors` that ignores :exc:`Warning`. Equivalent to ``IgnoreErrors(Warning)``.'''
