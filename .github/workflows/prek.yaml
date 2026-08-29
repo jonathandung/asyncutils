@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # zizmor: ignore[artipacked]
-      - uses: taiki-e/install-action@5b4d68e2e660441203ab128a23676f1e4faf1532
+      - uses: taiki-e/install-action@37f7c5781271959fb65b6b35224e28652ff2b63d
         with:
-          tool: prek@0.4.14
+          tool: prek
       - run: prek update
       - run: prek run --all-files
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1

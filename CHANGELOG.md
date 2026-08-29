@@ -18,11 +18,11 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.2]
 
-## [1.2.2] - 2026-08-26
+## [1.2.2] - 2026-08-28
 
 Again, some workflow changes.
 
-### [1.2.1] - 2026-08-25
+### [1.2.2] - 2026-08-25
 
 Various workflows.
 

@@ -5,7 +5,7 @@ from sys import audit
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
 from asyncutils._internal.submodules import locksmiths_all as __all__
 from asyncutils.constants import _NO_DEFAULT
-ForceResult, RecognitionResult = E('ForceResult', 'UNFORCEABLE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
+ForceResult, RecognitionResult = E('ForceResult', 'CANNOT_FORCE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:
     __slots__ = '__lock', '__loop', '__recognized'; handlers = {} # ruff: ignore[mutable-class-default]
@@ -32,7 +32,7 @@ class LocksmithBase:
     async def force(self, l, /, info=_NO_DEFAULT, *, purge_waiters=True):
         audit('asyncutils.locksmiths.LocksmithBase.force', id(self), id(l))
         async with self.__lock:
-            if not self.can_force_lock_held(l): return ForceResult.UNFORCEABLE
+            if not self.can_force_lock_held(l): return ForceResult.CANNOT_FORCE
         if info is _NO_DEFAULT: info = await self.get_info(l)
         try:
             if I.iscoroutine(r := l.release()): r = await r

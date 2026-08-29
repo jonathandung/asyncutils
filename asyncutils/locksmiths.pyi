@@ -10,7 +10,7 @@ __all__ = 'ForceResult', 'LocksmithBase', 'RecognitionResult', 'succeeded'
 def succeeded(result: object, /) -> TypeIs[Literal[ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS]]: '''Return whether the given result is a successful one.'''
 class ForceResult(IntEnum):
     '''The possible results of a force attempt.'''
-    UNFORCEABLE = 1
+    CANNOT_FORCE = 1
     NO_CURRENT_TASK = 2
     OWNER_COMPLETED = 3
     ALREADY_BEING_FORCED = 4

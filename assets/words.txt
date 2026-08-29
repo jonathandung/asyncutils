@@ -10,7 +10,7 @@ Mersenne
 Numberphile
 Peekable
 RWLOCK
-UNFORCEABLE
+SHFMT
 Xarr
 aaccumulate
 aadjacent
@@ -222,6 +222,7 @@ lockf
 loky
 lrem
 ludeeus
+luizm
 majmin
 maxfail
 maxhist

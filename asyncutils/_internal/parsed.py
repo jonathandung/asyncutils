@@ -70,7 +70,7 @@ a('-n', '--no-prefill-env', action=f, help='Do not fill the context section of t
 a('-e', '--ensure-filled', action=f, help='Ensure that all fillable fields are filled and fail if not.')
 a('-P', '--pastebin', action=f, help='Create a public paste.rs paste for each field with long content.')
 a('-p', '--print-on-fail', action=f, help='Print the link to the console and exit with code 1 if opening it in a browser fails.')
-a('-i', '--interactive', action=f, help='Prompt the user to enter missing fields interactively. Will also prompt for log and traceback if ')
+a('-i', '--interactive', action=f, help='Prompt the user to enter missing fields interactively. Will also prompt for log and traceback if the corresponding options are passed but a value is not given.')
 a('-o', '--open', nargs='?', const=None, default=NotImplemented, metavar='BROWSER', help='Open the link in a browser instead of printing it to the console.')
 a(*t, action='help', help='Print this help message and exit.')
 del a, b, c, d, e, f, g, h, i, j, s, t, J, A

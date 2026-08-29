@@ -10,7 +10,7 @@ If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
 2. If so, participate meaningfully there
-3. Open a new issue otherwise, possibly using the dedicated ``asyncutils bug`` sub-command to pre-fill information
+3. Open a new issue otherwise, possibly using the dedicated `asyncutils bug` sub-command to pre-fill information
 4. Enter the required information into the issue form
 5. Wait for review
 

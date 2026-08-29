@@ -91,10 +91,14 @@ appropriate for your package manager as shown in the installation instructions a
 The extras are listed below for reference:
 
 * all: All the extras combined
-* dev: Packages one would want installed for development; superset of docs, themes, json5, test, tools.
-* docs: Documentation dependencies, including Sphinx and some of its plugins, along with sphinx-lint
-* executors: All the libraries implementing executors this module supports, except distributed, since that is much too specialized and heavy.
-* json5: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
+* dev: Packages one would want installed for development; superset of ``docs``, ``themes``, ``json5``, ``test``, and ``tools``.
+* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins, along with
+  `sphinx-lint <https://pypi.org/project/sphinx-lint>`__.
+* executors: All the libraries implementing executors this module supports, except `distributed <https://distributed.dask.org/en/stable>`__, since
+  that is much too specialized and heavy.
+* `json5 <https://pypi.org/project/pyjson5>`__: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
 * pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
-* test: Test dependencies, including pytest and related plugins
-* themes: Sphinx themes, including furo and sphinx-book-theme, used in the Read the Docs and GitHub Pages builds respectively; superset of docs.
+* test: Test dependencies, including `pytest <https://docs.pytest.org/en/stable>`__ and related plugins
+* themes: Sphinx themes, including `furo <https://pradyunsg.me/furo>`__ and
+  `sphinx-book-theme <https://sphinx-book-theme.readthedocs.io/en/stable/index.html>`__, used in the Read the Docs and GitHub Pages builds
+  respectively; superset of ``docs``.

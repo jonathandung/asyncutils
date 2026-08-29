@@ -40,7 +40,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.2.1.
+This is asyncutils v1.2.2.
 
 ## Configuration
 
@@ -84,3 +84,5 @@ For more, check out the [contributing guide](https://asyncutils.readthedocs.io/e
 | ![GitHub pull requests](https://img.shields.io/github/issues-pr/jonathandung/asyncutils) | ![Repo creation](https://img.shields.io/github/created-at/jonathandung/asyncutils) | ![Language count](https://img.shields.io/github/languages/count/jonathandung/asyncutils) | ![Sphinx-lint](https://img.shields.io/badge/sphinx--lint-darkblue?logo=sphinx) | ![Free-threaded support](https://img.shields.io/badge/free_threading-supported-blue) | ![Last test run](https://raw.githubusercontent.com/jonathandung/asyncutils/main/badges/last-run.svg) |
 | ![GitHub contributors](https://img.shields.io/github/contributors/jonathandung/asyncutils) | ![GitHub repo size](https://img.shields.io/github/repo-size/jonathandung/asyncutils) | ![Top language](https://img.shields.io/github/languages/top/jonathandung/asyncutils) | ![CSpell](https://img.shields.io/badge/spelling-cspell-green) | | |
 | ![GitHub last commit](https://img.shields.io/github/last-commit/jonathandung/asyncutils) | ![Code size](https://img.shields.io/github/languages/code-size/jonathandung/asyncutils) | ![Visits](https://badges.pufler.dev/visits/jonathandung/asyncutils) | ![Pytest](https://img.shields.io/badge/tests-Pytest-yellow?logo=pytest) | | |
+| | | | ![zizmor](https://img.shields.io/badge/security-%F0%9F%8C%88_zizmor-white?labelColor=white) | | |
+| | | | ![markdownlint](https://img.shields.io/badge/markdown-markdownlint-green) | | |

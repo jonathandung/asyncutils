@@ -7,9 +7,7 @@ body:
     id: desc
     attributes:
       label: Describe the bug
-      description: |
-        A clear and concise description of what the bug is. Include the pattern implementation or utility function at fault, and the relevant snippet
-        of the source if you can find it.
+      description: A clear and concise description of what the bug is. Include the pattern implementation or utility function at fault, and the relevant snippet of the source if you can find it.
     validations:
       required: true
   - type: input
@@ -78,8 +76,7 @@ body:
     id: cfg
     attributes:
       label: Configuration
-      description: |
-        The contents of `asyncutils` configuration file used, pointed to by `AUTILSCFGPATH`, or the `[tool.asyncutils]` section in `pyproject.toml`.
+      description: The contents of `asyncutils` configuration file used, pointed to by `AUTILSCFGPATH`, or the `[tool.asyncutils]` section in `pyproject.toml`.
       value: |
         ```toml
         # change the language to that of your config if applicable

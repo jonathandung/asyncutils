@@ -409,6 +409,10 @@ class BugArgs(Protocol):
     @property
     def open(self) -> str|NotImplementedType|None: ...
 @type_check_only
+class PasteFunc(Protocol):
+    '''Callable protocol for the ``paste`` parameter passed to :func:`~asyncutils.cli.bug`.'''
+    def __call__(self, data: bytes, /, *, timeout: float) -> str|bytes: ...
+@type_check_only
 class StarRV[T, **P](Protocol):
     '''Return type of :func:`~asyncutils.func.star`.'''
     async def __call__(self, a: SupportsIteration[Any]=..., k: Mapping[str, Any]|None=..., /) -> T: ...

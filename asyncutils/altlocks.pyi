@@ -1,4 +1,4 @@
-'''Non-conventional asynchronous synchronization primitives that may not adhere to the traditional lock interface.'''
+'''Non-conventional asynchronous synchronization primitives that do not adhere to the traditional lock interface.'''
 from collections import deque
 from collections.abc import Awaitable, Callable, Hashable
 from enum import IntEnum

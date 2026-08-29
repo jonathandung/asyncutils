@@ -4,7 +4,7 @@
 ### All PRs
 
 - [] I have skimmed through the [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html) and followed relevant links.
-- [] All existing tests pass locally, according to ``make test``.
+- [] All existing tests pass locally, according to `make test`.
 - [] No lints or type checker complaints have emerged as a direct consequence of my change.
 - [] I did not add a broken link. This has been checked on the GitHub view and the generated documentation pages.
 
@@ -16,7 +16,7 @@
 
 ### For documentation PRs
 
-- [] Local Sphinx build using ``make docs`` succeeds.
+- [] Local Sphinx build using `make docs` succeeds.
 - [] As little modifications to `docs/source/conf.py` as possible were made.
 
 ### For big PRs
