@@ -79,43 +79,6 @@ class SupportsPopLeft[T](Protocol):
     '''Types with a :meth:`!popleft` method.'''
     def popleft(self) -> T: ...
 @type_check_only
-class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
-    '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
-    def send(self, val: S, /) -> T: ...
-    @overload
-    def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
-    @overload
-    def throw(self, exc: BaseException, val: None=..., tb: TracebackType|None=..., /) -> T: ...
-    def close(self) -> R|None: ... # ty: ignore[invalid-method-override]
-    @property
-    def gi_code(self) -> CodeType: ...
-    @property
-    def gi_frame(self) -> FrameType|None: ...
-    @property
-    def gi_running(self) -> bool: ...
-    @property
-    def gi_yieldfrom(self) -> Iterator[T]|None: ... # cspell:disable-line
-    @property
-    def gi_suspended(self) -> bool: ...
-    @property
-    def __name__(self) -> str: ...
-    @property
-    def __qualname__(self) -> str: ...
-    def __await__(self) -> Generator[Any, None, R]: ...
-@type_check_only
-class PartialInterfaceMeta(_ProtocolMeta):
-    '''Metaclass for partial interfaces, as described and justified in :class:`PartialInterface`.'''
-    def __getattr__(self, name: str, /) -> Incomplete: ...
-@type_check_only
-class PartialInterface(metaclass=PartialInterfaceMeta):
-    '''
-    | Base class for partial interfaces.
-    | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may actually exist on the object or class.
-    | This is a simplistic fix that makes type checkers assume those attributes always exist.
-    '''
-    def __init__(self, *a: object, **k: object): ...
-    def __getattr__(self, name: str, /) -> Incomplete: ...
-@type_check_only
 class DumpType(Protocol):
     '''Simple JSON-dumping functions accepted by :func:`~asyncutils.tools.argv_to_json` and :func:`~asyncutils.tools.argstr_to_json`.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper, /) -> None: '''``dict[str, Any]`` is used here because the callable needs only handle strict instances of :class:`dict`.'''
@@ -206,6 +169,76 @@ class SubscriptionRV(Protocol):
     '''Return type of the :meth:`~asyncutils.channels.Observable.subscribe`, :meth:`~asyncutils.channels.Observable.subscribe_nowait` and :meth:`~asyncutils.channels.Observable.ntimes` methods of :class:`~asyncutils.channels.Observable`.'''
     def __call__(self, strict: bool=...) -> None: ...
 @type_check_only
+class ToSyncFromLoopRV(Protocol):
+    '''The signature of the return value of :func:`~asyncutils.func.to_sync_from_loop`.'''
+    def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: ...
+@type_check_only
+class TransientBlockFromLoopRV(Protocol):
+    '''The signature of the return value of :func:`~asyncutils.util.transient_block_from_loop`.'''
+    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> a.Future[T]: ...
+@type_check_only
+class EventProtocol(Protocol):
+    '''Protocol for event objects.'''
+    def is_set(self) -> bool: '''Return whether the event is set.'''
+    def set(self) -> None: '''Set the event, allowing any waiters to proceed.'''
+    def clear(self) -> None: '''Clear the event, causing future waiters to block until it is set again.'''
+    async def wait(self) -> Any: '''Asynchronously wait until the event is set.''' # ruff: ignore[any-type]
+@type_check_only
+class FutProtocol[T](Protocol):
+    '''The barest of protocol for future-like objects such that the class is accepted at runtime by :func:`~asyncutils.util.done_fut`. Does not require the object to be awaitable, for instance.'''
+    def set_result(self, result: T, /) -> None: '''Set a result on the future, making it available to any waiters.'''
+    def set_exception(self, exc: BaseException, /) -> None: '''Set an exception on the future, causing it to be raised by any waiters.'''
+    def result(self) -> T: '''Return the result or raise the exception set on the future.'''
+    def exception(self) -> BaseException|None: '''Return the exception set on the future if any.'''
+@type_check_only
+class IncompleteFut[T](FutProtocol[T], PartialInterface): '''Since the type system does not allow modelling a type variable to have an upper bound parametrized by another type variable, this is necessary to type the return type of :func:`~asyncutils.util.done_fut` while losing much type information.'''
+@type_check_only
+class StrictDualContextFactory(Protocol):
+    '''Protocol for the return type of the strict decorator factory overload of :func:`~asyncutils.util.dualcontextmanager`.'''
+    @overload
+    def __call__[T, **P](self, genf: Callable[P, Iterable[T]], /) -> Callable[P, AbstractContextManager[T]]: ...
+    @overload
+    def __call__[T, **P](self, agenf: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
+@type_check_only
+class TaskFactory[T: a.Task[Any]](Protocol):
+    '''Callable protocol for the return type of :func:`~asyncutils.util.make_task_factory`.'''
+    def __call__(self, loop: a.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
+@type_check_only
+class BugArgs(Protocol):
+    '''Things that :func:`~asyncutils.cli.bug` accepts as the first argument.'''
+    @property
+    def title(self) -> str: ...
+    @property
+    def src_url(self) -> str: ...
+    @property
+    def ensure_filled(self) -> bool: ...
+    @property
+    def interactive(self) -> bool: ...
+    @property
+    def verbose(self) -> bool: ...
+    @property
+    def quiet(self) -> bool: ...
+    @property
+    def pastebin(self) -> bool: ...
+    @property
+    def log_path(self) -> str|None: ...
+    @property
+    def traceback_path(self) -> str|None: ...
+    @property
+    def no_prefill_env(self) -> bool: ...
+    @property
+    def print_on_fail(self) -> bool: ...
+    @property
+    def open(self) -> str|NotImplementedType|None: ...
+@type_check_only
+class PasteFunc(Protocol):
+    '''Callable protocol for the ``paste`` parameter passed to :func:`~asyncutils.cli.bug`.'''
+    def __call__(self, data: bytes, /, *, timeout: float) -> str|bytes: ...
+@type_check_only
+class StarRV[T, **P](Protocol):
+    '''Return type of :func:`~asyncutils.func.star`.'''
+    async def __call__(self, a: SupportsIteration[Any]=..., k: Mapping[str, Any]|None=..., /) -> T: ...
+@type_check_only
 class StateSnapshot(NamedTuple):
     '''Type of snapshots of the current state of a :class:`~asyncutils.channels.Rendezvous` object as returned by its :meth:`~asyncutils.channels.Rendezvous.state_snapshot` method.'''
     num_getters: int
@@ -239,9 +272,78 @@ class CountItem[T, R](NamedTuple):
     item: T
     '''The item itself.'''
 @type_check_only
+class FaultyConfigA(FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> str: ...
+    @property
+    def correct(self) -> tuple[str, ...]: ...
+@type_check_only
+class FaultyConfigB[T, R: TypeOrTuple](FaultyConfig):
+    '''For better type checking. Unstable.'''
+    @property
+    def wrong(self) -> T: ...
+    @property
+    def correct(self) -> R: ...
+@type_check_only
+class PartialInterfaceMeta(_ProtocolMeta):
+    '''Metaclass for partial interfaces, as described and justified in :class:`PartialInterface`.'''
+    def __getattr__(self, name: str, /) -> Incomplete: ...
+@type_check_only
+class PartialInterface(metaclass=PartialInterfaceMeta):
+    '''
+    | Base class for partial interfaces.
+    | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may actually exist on the object or class.
+    | This is a simplistic fix that makes type checkers assume those attributes always exist.
+    '''
+    def __init__(self, *a: object, **k: object): ...
+    def __getattr__(self, name: str, /) -> Incomplete: ...
+@type_check_only
+class NullContextType:
+    '''
+    The type of :const:`~asyncutils.util.anullcontext`.
+
+    .. note:: This does not support the ``enter_result`` argument of :func:`contextlib.nullcontext`.
+    '''
+    async def __aenter__(self) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
+    @overload
+    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
+@type_check_only
+class Consumer[T]:
+    '''The type of each consumer in the tuple return value of :func:`~asyncutils.iters.aunzip` and :func:`~asyncutils.iters.tee`.'''
+    def __aiter__(self) -> Self: ...
+    async def __anext__(self) -> T: ...
+    def close(self) -> None: '''Shut down the underlying queue.'''
+@type_check_only
 class StdCoupType(AsyncReadWriteCouple[str, str]):
     '''The type of :data:`~asyncutils.iotools.stdcoup`.'''
     async def __aenter__(self) -> NoReturn: ...
+@type_check_only
+class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
+    '''Objects such as those returned by :deco:`types.coroutine`-decorated generator functions.'''
+    def send(self, val: S, /) -> T: ...
+    @overload
+    def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
+    @overload
+    def throw(self, exc: BaseException, val: None=..., tb: TracebackType|None=..., /) -> T: ...
+    def close(self) -> R|None: ... # ty: ignore[invalid-method-override]
+    @property
+    def gi_code(self) -> CodeType: ...
+    @property
+    def gi_frame(self) -> FrameType|None: ...
+    @property
+    def gi_running(self) -> bool: ...
+    @property
+    def gi_yieldfrom(self) -> Iterator[T]|None: ... # cspell:disable-line
+    @property
+    def gi_suspended(self) -> bool: ...
+    @property
+    def __name__(self) -> str: ...
+    @property
+    def __qualname__(self) -> str: ...
+    def __await__(self) -> Generator[Any, None, R]: ...
 @type_check_only
 class MemoryMappedFile(LoopMixinBase):
     '''The type of async memory-mapped files as opened and returned by :class:`~asyncutils.iotools.MemoryMappedIOManager`.'''
@@ -302,32 +404,6 @@ class MemoryMappedFile(LoopMixinBase):
     async def search_non_overlapping(self, pattern: bytes, offset: int=..., max_results: int=...) -> list[int]: '''Version of :meth:`search` that ensures the offsets returned do not overlap using a greedy approach.'''
     async def compact(self) -> int: '''Reduce the size of the file by stripping all contiguous null bytes at the end, and return the number of bytes removed.'''
 @type_check_only
-class Consumer[T]:
-    '''The type of each consumer in the tuple return value of :func:`~asyncutils.iters.aunzip` and :func:`~asyncutils.iters.tee`.'''
-    def __aiter__(self) -> Self: ...
-    async def __anext__(self) -> T: ...
-    def close(self) -> None: '''Shut down the underlying queue.'''
-@type_check_only
-class ToSyncFromLoopRV(Protocol):
-    '''The signature of the return value of :func:`~asyncutils.func.to_sync_from_loop`.'''
-    def __call__[R, **P](self, f: Callable[P, Awaitable[R]], /, timeout: float|None=...) -> Callable[P, R]: ...
-@type_check_only
-class TransientBlockFromLoopRV(Protocol):
-    '''The signature of the return value of :func:`~asyncutils.util.transient_block_from_loop`.'''
-    def __call__[T, **P](self, f: Callable[P, T], /, *a: P.args, **k: P.kwargs) -> a.Future[T]: ...
-@type_check_only
-class NullContextType:
-    '''
-    The type of :const:`~asyncutils.util.anullcontext`.
-
-    .. note:: This does not support the ``enter_result`` argument of :func:`contextlib.nullcontext`.
-    '''
-    async def __aenter__(self) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
-    @overload
-    async def __aexit__(self, exc_typ: None, exc_val: None, exc_tb: None, /) -> None: ...
-@type_check_only
 class Raise(SentinelBase):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
     def __reduce__(self) -> Literal['RAISE']: ... # ty: ignore[invalid-method-override]
@@ -340,82 +416,6 @@ class NoCoalesce(SentinelBase):
 class WildcardType:
     '''Type of :const:`~asyncutils.channels.EventBus.WILDCARD`.'''
     def __bool__(self) -> Literal[False]: ...
-@type_check_only
-class EventProtocol(Protocol):
-    '''Protocol for event objects.'''
-    def is_set(self) -> bool: '''Return whether the event is set.'''
-    def set(self) -> None: '''Set the event, allowing any waiters to proceed.'''
-    def clear(self) -> None: '''Clear the event, causing future waiters to block until it is set again.'''
-    async def wait(self) -> Any: '''Asynchronously wait until the event is set.''' # ruff: ignore[any-type]
-@type_check_only
-class FutProtocol[T](Protocol):
-    '''The barest of protocol for future-like objects such that the class is accepted at runtime by :func:`~asyncutils.util.done_fut`. Does not require the object to be awaitable, for instance.'''
-    def set_result(self, result: T, /) -> None: '''Set a result on the future, making it available to any waiters.'''
-    def set_exception(self, exc: BaseException, /) -> None: '''Set an exception on the future, causing it to be raised by any waiters.'''
-    def result(self) -> T: '''Return the result or raise the exception set on the future.'''
-    def exception(self) -> BaseException|None: '''Return the exception set on the future if any.'''
-@type_check_only
-class IncompleteFut[T](FutProtocol[T], PartialInterface): '''Since the type system does not allow modelling a type variable to have an upper bound parametrized by another type variable, this is necessary to type the return type of :func:`~asyncutils.util.done_fut` while losing much type information.'''
-@type_check_only
-class StrictDualContextFactory(Protocol):
-    '''Protocol for the return type of the strict decorator factory overload of :func:`~asyncutils.util.dualcontextmanager`.'''
-    @overload
-    def __call__[T, **P](self, genf: Callable[P, Iterable[T]], /) -> Callable[P, AbstractContextManager[T]]: ...
-    @overload
-    def __call__[T, **P](self, agenf: Callable[P, AsyncIterable[T]], /) -> Callable[P, AbstractAsyncContextManager[T]]: ...
-@type_check_only
-class TaskFactory[T: a.Task[Any]](Protocol):
-    '''Callable protocol for the return type of :func:`~asyncutils.util.make_task_factory`.'''
-    def __call__(self, loop: a.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
-@type_check_only
-class FaultyConfigA(FaultyConfig):
-    '''For better type checking. Unstable.'''
-    @property
-    def wrong(self) -> str: ...
-    @property
-    def correct(self) -> tuple[str, ...]: ...
-@type_check_only
-class FaultyConfigB[T, R: TypeOrTuple](FaultyConfig):
-    '''For better type checking. Unstable.'''
-    @property
-    def wrong(self) -> T: ...
-    @property
-    def correct(self) -> R: ...
-@type_check_only
-class BugArgs(Protocol):
-    '''Things that :func:`~asyncutils.cli.bug` accepts as the first argument.'''
-    @property
-    def title(self) -> str: ...
-    @property
-    def src_url(self) -> str: ...
-    @property
-    def ensure_filled(self) -> bool: ...
-    @property
-    def interactive(self) -> bool: ...
-    @property
-    def verbose(self) -> bool: ...
-    @property
-    def quiet(self) -> bool: ...
-    @property
-    def pastebin(self) -> bool: ...
-    @property
-    def log_path(self) -> str|None: ...
-    @property
-    def traceback_path(self) -> str|None: ...
-    @property
-    def no_prefill_env(self) -> bool: ...
-    @property
-    def print_on_fail(self) -> bool: ...
-    @property
-    def open(self) -> str|NotImplementedType|None: ...
-@type_check_only
-class PasteFunc(Protocol):
-    '''Callable protocol for the ``paste`` parameter passed to :func:`~asyncutils.cli.bug`.'''
-    def __call__(self, data: bytes, /, *, timeout: float) -> str|bytes: ...
-@type_check_only
-class StarRV[T, **P](Protocol):
-    '''Return type of :func:`~asyncutils.func.star`.'''
-    async def __call__(self, a: SupportsIteration[Any]=..., k: Mapping[str, Any]|None=..., /) -> T: ...
 type TypeOrTuple[T] = type[T]|tuple[type[T], ...]
 '''The type of the type parameter passed, or a tuple thereof.'''
 type Diff[T, R] = FirstMisMatch[T, R]|Shorter[T]|Longer[R]

@@ -6,12 +6,12 @@
 - [] I have skimmed through the [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html) and followed relevant links.
 - [] All existing tests pass locally, according to `make test`.
 - [] No lints or type checker complaints have emerged as a direct consequence of my change.
-- [] I did not add a broken link. This has been checked on the GitHub view and the generated documentation pages.
+- [] All links I added or modified are valid.
 
-#### Title
+#### PR Title
 
-- [] The pull request title is descriptive.
-- [] The title is prefixed with one of "bugfix", "docs", "deps", "feat", "pattern", "tests", followed by a colon.
+- [] The title is descriptive.
+- [] The title starts with one of "bugfix", "docs", "deps", "feat", "pattern", "tests", followed by a colon.
 - [] The entirety of the title fits in the dialog box.
 
 ### For documentation PRs

@@ -6,11 +6,11 @@ updates:
     cooldown: {default-days: 10}
     groups:
       major:
-        patterns: ['version-update:semver-major']
+        patterns: [version-update:semver-major]
       minor:
-        patterns: ['version-update:semver-minor']
+        patterns: [version-update:semver-minor]
       patch:
-        patterns: ['version-update:semver-patch']
+        patterns: [version-update:semver-patch]
     exclude-paths: [assets]
   - directory: /
     package-ecosystem: github-actions
@@ -18,9 +18,9 @@ updates:
     cooldown: {default-days: 10}
     groups:
       major:
-        patterns: ['version-update:semver-major']
+        patterns: [version-update:semver-major]
       minor:
-        patterns: ['version-update:semver-minor']
+        patterns: [version-update:semver-minor]
       patch:
-        patterns: ['version-update:semver-patch']
+        patterns: [version-update:semver-patch]
     exclude-paths: [assets]

@@ -1,30 +1,22 @@
-SHELL := /bin/bash
-.SHELLFLAGS := -euo pipefail -c
-.PHONY: audit badges bug changelog clean docs help install lint lock pc release test venv
-AUTILSTESTMAXFAIL ?= 3
 .DEFAULT_GOAL := help
-O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
+.PHONY: audit badges bug clean docs help install lint lock log pc release test venv
+.SHELLFLAGS := -eo pipefail -c
 .SILENT:
+AUTILSTESTMAXFAIL ?= 3
+O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
+SHELL := /bin/bash
 .prek-stamp:
 	if command -v prek >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then\
-		curl -LsSf https://github.com/j178/prek/releases/download/v0.4.14/prek-installer.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then\
-		wget -qO- https://github.com/j178/prek/releases/download/v0.4.14/prek-installer.sh | sh;\
-	else\
-		echo "curl or wget required to install prek" >&2; exit 1;\
-	fi
+	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.sh | sh;\
+	else echo "curl or wget required to install prek" >&2; exit 1; fi
 	prek install
 	touch .prek-stamp
 .uv-stamp:
 	if command -v uv >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then\
-		curl -LsSf https://astral.sh/uv/install.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then\
-		wget -qO- https://astral.sh/uv/install.sh | sh;\
-	else\
-		echo "curl or wget required to install uv" >&2; exit 1;\
-	fi
+	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://astral.sh/uv/install.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then wget -qO- https://astral.sh/uv/install.sh | sh;\
+	else echo "curl or wget required to install uv" >&2; exit 1; fi
 	(uv tool install ruff && uv tool install ty) 2>/dev/null
 	touch .uv-stamp
 audit: .uv-stamp
@@ -34,9 +26,6 @@ badges:
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 bug:
 	asyncutils bug --open "$(O)"
-changelog:
-# cspell:disable-next-line
-	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 clean:
 	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/examples.rst docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
@@ -53,6 +42,9 @@ lint: .uv-stamp
 	ty check
 lock: .uv-stamp
 	uv lock -U
+log:
+# cspell:disable-next-line
+	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 pc: .prek-stamp
 	prek run --all-files
 release:

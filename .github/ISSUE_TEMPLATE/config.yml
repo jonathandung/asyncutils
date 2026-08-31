@@ -9,9 +9,15 @@ contact_links:
   - name: Discussions
     url: https://github.com/jonathandung/asyncutils/discussions
     about: Ask questions and share your ideas about asyncutils.
+  - name: PyPI
+    url: https://pypi.org/p/asyncutils
+    about: The Python Package Index page for asyncutils.
   - name: Creator's profile
     url: https://github.com/jonathandung
     about: More of my work, mainly Python projects, can be found here.
   - name: GitHub Pages
     url: https://jonathandung.github.io/asyncutils
     about: A mirror of the Read the Docs site built with the Sphinx Book Theme instead.
+  - name: Creator's website
+    url: https://jonathandung.github.io
+    about: Holds some stuff of mine.

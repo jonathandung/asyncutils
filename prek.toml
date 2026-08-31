@@ -4,9 +4,8 @@ hooks = [
   {id = "check-added-large-files", args = ["--maxkb=80", "--enforce-all"], exclude = '^(uv\.lock|asyncutils/iters\.pyi)'},
   {id = "check-case-conflict"}, {id = "check-executables-have-shebangs"}, {id = "check-illegal-windows-names"},
   {id = "check-merge-conflict"}, {id = "check-shebang-scripts-are-executable"}, {id = "check-toml"},
-  {id = "check-yaml"}, {id = "end-of-file-fixer"},
-  {id = "file-contents-sorter", files = '^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py|assets/words\.txt|\..*ignore)$'},
-  {id = "trailing-whitespace"}
+  {id = "check-yaml"}, {id = "end-of-file-fixer"}, {id = "trailing-whitespace"},
+  {id = "file-contents-sorter", files = '^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py|assets/words\.txt|\..*ignore)$'}
 ]
 
 [[repos]]
@@ -26,5 +25,5 @@ hooks = [{id = "sphinx-lint"}]
 
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v1.1.3"
+rev = "v1.1.4"
 hooks = [{id = "check-empty", files = '^asyncutils/py\.typed|tests/__init__\.py$'}]
