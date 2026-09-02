@@ -14,7 +14,6 @@ jobs:
         with:
           tool: prek
       - run: prek update
-      - run: prek run --all-files
       - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           assignees: jonathandung
@@ -24,4 +23,5 @@ jobs:
           sign-commits: true
           signoff: true
           title: Weekly prek hooks update
+      - run: prek run --all-files
     timeout-minutes: 3

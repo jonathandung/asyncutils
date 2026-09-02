@@ -15,22 +15,22 @@ If you are in PowerShell, ``make`` will not work directly and you must input ``.
 Target-specific dependencies
 ----------------------------
 
-Besides some Python dependencies that will be on ``PATH`` once ``make install`` has been run and the environment is activated, the following
-executables will be automatically installed on your system if not present. This implicit installation process requires internet access, as well as
+Besides some Python dependencies that will be on ``PATH`` once ``make sync`` has been run and the environment is activated, the following executables
+will be automatically installed on your system if not present. This implicit installation process requires internet access, as well as
 `cURL <https://curl.se>`__ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix (dependency-free on Windows):
 
 Requires `uv`_:
 
 * audit
-* install (Also pulls in `ruff`_ and `ty`_ if not present)
 * lint (Requires `ruff`_ and `ty`_)
 * lock
+* sync (Also pulls in `ruff`_ and `ty`_ if not present)
 * venv
 
 Requires `prek`_:
 
-* install
 * pc
+* sync
 
 Requires cURL 7.66.0+ on Unix (for parallel downloads):
 

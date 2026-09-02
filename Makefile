@@ -35,8 +35,6 @@ docs:
 	$(MAKE) -C docs html -W
 help:
 	cat assets/mkhelp.txt
-install: .prek-stamp .uv-stamp
-	uv pip install -Ue .[dev]
 lint: .uv-stamp
 	ruff check
 	ty check
@@ -51,6 +49,8 @@ release:
 	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r
 	echo
 	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
+sync:
+	uv sync --extra dev
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"
 venv: .uv-stamp

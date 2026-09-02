@@ -15,7 +15,6 @@ autoapi_root = 'api'
 copybutton_exclude = '.linenos, .gp, .go'
 copybutton_prompt_text = '>>> '
 copyright = '2026 Jonathan Dung'
-default_role = 'py:obj'
 extensions = ['autoapi.extension', 'myst_parser', 'notfound.extension', 'sphinx_copybutton', 'sphinx.ext.ifconfig', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
 if __import__('os').getenv('READTHEDOCS') == 'True':
     html_theme = 'furo'

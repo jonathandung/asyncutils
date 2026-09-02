@@ -18,6 +18,10 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.2]
 
+### [1.2.4] - 2026-09-04
+
+Upgraded to Python 3.15.0rc2.
+
 ### [1.2.3] - 2026-08-31
 
 This changelog is getting frustrating to maintain.
@@ -596,7 +600,7 @@ behaviour; completed benchmarks; added myst_parser as an optional dependency; bu
 #### [0.9.1] - 2026-05-01
 
 Declared full support for python[ -m] asyncutils an entry point; patched function, method and class method signatures where appropriate; added
--P/--pdb option; switched to furo theme.
+-P/--pdb option; switched to `furo` theme.
 
 #### [0.9.0] - 2026-04-27
 

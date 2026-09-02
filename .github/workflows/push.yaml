@@ -25,11 +25,10 @@ jobs:
         activate-environment: true
         enable-cache: false
         python-version: "3.15"
-    - run: uv pip install -e ".[test]"
+    - run: uv pip install sphinx-lint -e ".[test]"
     - run: uvx ruff check --output-format github
     - run: uvx ty check --output-format github
-    - run: make audit
-    - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054
+    - run: sphinx-lint docs
     - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
       with:
         globs: |
@@ -39,6 +38,12 @@ jobs:
       env:
         SHELLCHECK_OPTS: -x -s bash -e SC2035 -e SC2046 Makefile docs/Makefile
         SHFMT_OPTS: -s
+    - uses: streetsidesoftware/cspell-action@e0668cf020899e887ee8ad4d173c31738a79eae8
+      with:
+        config: cspell.json
+        incremental_files_only: true
+    - run: make audit
+    - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054
     - run: pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
     - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
       with:

@@ -10,7 +10,7 @@ if exist .prek-stamp goto :eof
 where prek >nul 2>nul
 if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.ps1 | iex")
 prek install
-type nul > .prek-stamp
+type nul >.prek-stamp
 goto :eof
 
 :.uv-stamp
@@ -19,7 +19,7 @@ where uv >nul 2>nul
 if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex")
 uv tool install ruff 2>nul
 uv tool install ty 2>nul
-type nul > .uv-stamp
+type nul >.uv-stamp
 goto :eof
 
 :audit
@@ -54,12 +54,12 @@ cd docs
 shift
 set "__O=%O%"
 set "REST_ARGS="
-:__loop
-if "%~1"=="" goto __done
+:__l
+if "%~1"=="" goto __d
 set "REST_ARGS=!REST_ARGS! %1"
 shift
-goto __loop
-:__done
+goto __l
+:__d
 if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
 set "O=-W %REST_ARGS% %__O%"
 set "__O="
@@ -69,12 +69,6 @@ goto :eof
 
 :help
 type assets\mkhelp.txt
-goto :eof
-
-:install
-call :.prek-stamp
-call :.uv-stamp
-uv pip install -Ue .[dev]
 goto :eof
 
 :lint
@@ -97,6 +91,12 @@ goto :eof
 choice /m "You are about to create a release. Are you sure?"
 if errorlevel 2 exit /b 1
 if errorlevel 1 gh release create
+goto :eof
+
+:sync
+call :.prek-stamp
+call :.uv-stamp
+uv sync --extra dev
 goto :eof
 
 :test
