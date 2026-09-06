@@ -11,7 +11,6 @@ updates:
         patterns: [version-update:semver-minor]
       patch:
         patterns: [version-update:semver-patch]
-    exclude-paths: [assets]
   - directory: /
     package-ecosystem: github-actions
     schedule: {interval: weekly}
@@ -23,4 +22,3 @@ updates:
         patterns: [version-update:semver-minor]
       patch:
         patterns: [version-update:semver-patch]
-    exclude-paths: [assets]

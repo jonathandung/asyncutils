@@ -25,7 +25,7 @@ jobs:
         activate-environment: true
         enable-cache: false
         python-version: "3.15"
-    - run: uv pip install sphinx-lint -e ".[test]"
+    - run: uv pip install sphinx-lint -e . --group test
     - run: uvx ruff check --output-format github
     - run: uvx ty check --output-format github
     - run: sphinx-lint docs
@@ -73,5 +73,5 @@ jobs:
       with:
         python-version: ${{matrix.python-version}}
         enable-cache: false
-    - run: uv run --with ".[test]" pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
+    - run: uv run --group test pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
     timeout-minutes: 3

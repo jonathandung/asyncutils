@@ -27,7 +27,7 @@ badges:
 bug:
 	asyncutils bug --open "$(O)"
 clean:
-	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/examples.rst docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
+	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.py[codz]' -delete
 docs:
@@ -51,7 +51,7 @@ release:
 	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 setup: .prek-stamp .uv-stamp
 	uv venv
-	uv sync --extra dev
+	uv sync
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"
 %::

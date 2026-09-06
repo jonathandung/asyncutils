@@ -148,7 +148,7 @@ XML    .xml           xmltodict   xmltodict
 .. tip::
   :collapsible:
 
-  To ensure all supported formats can be parsed, install the ``pconf`` :term:`extra`.
+  To ensure all supported formats can be parsed, install the ``pconf`` group.
 
 INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
 

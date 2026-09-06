@@ -23,5 +23,5 @@ jobs:
           sign-commits: true
           signoff: true
           title: Weekly prek hooks update
-      - run: prek run --all-files
+      - run: make pc
     timeout-minutes: 3

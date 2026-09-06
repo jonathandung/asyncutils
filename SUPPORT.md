@@ -10,9 +10,9 @@ If you've found a bug, please:
 
 1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
 2. If so, participate meaningfully there
-3. Open a new issue otherwise, possibly using the dedicated `asyncutils bug` sub-command to pre-fill information
-4. Enter the required information into the issue form
-5. Wait for review
+3. Open a new issue otherwise, possibly using `make bug` to scrape environment information into the issue form
+4. Enter the remaining required information
+5. Await review and respond to questions
 
 ## Feature Requests
 
@@ -88,7 +88,6 @@ python3 -c "print(*__import__('sys').path, sep='\n')"
 # Check for package naming conflicts; following snippet should print altlocks, base, buckets, channels, cli, compete, config, console
 # constants, context, events, exceptions, ... separated by newlines
 python3 -c "print(*__import__('asyncutils').__all__, sep='\n')"
-# If not loading site, repeat the above steps w/ python3 -Sc
 ```
 
 ## Response Times

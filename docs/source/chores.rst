@@ -1,12 +1,19 @@
 Development Chores
 ==================
 
+.. highlight:: bash
+
 This file aims to detail guidelines for some monotonous tasks contributors to this library may need to complete in different recurring scenarios.
 
 Preliminaries
 -------------
 
-To start development, see the :doc:`installation guide <installation>`.
+To start development, run the following::
+
+  git clone https://github.com/jonathandung/asyncutils.git
+  cd asyncutils
+  make setup # creates a virtual environment at .venv using uv and installs uv, prek and the development dependencies
+  . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
 
 A ready-to-use VS Code configuration file is included, which will prompt you to install extensions this project recommends and disable some others to
 avoid conflicts. If you are using a different IDE, you may want to use an `.editorconfig <https://editorconfig.org>`__ extension, have
@@ -42,8 +49,7 @@ certain locations, some of which are to be left untouched. Instead, follow these
 Cleaning artifacts and caches
 -----------------------------
 
-Safer: ``make clean``
-More aggressive: ``git clean -dxf``
+Safer: ``make clean``; more aggressive: ``make clean-all``
 
 Implementing a new utility
 --------------------------

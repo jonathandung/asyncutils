@@ -41,4 +41,4 @@ echo $'\nBelow is the Makefile help as of $v::\n'
 cat assets/mkhelp.txt | sed '/^$/! s/^/  /'
 echo "$m"
 curl -Z -o docs/source/ai-use.md https://raw.githubusercontent.com/jonathandung/.github/main/AI_USAGE_POLICY.md -o docs/source/conduct.md https://raw.githubusercontent.com/jonathandung/.github/main/CODE_OF_CONDUCT.md -o docs/source/contributing.md https://raw.githubusercontent.com/jonathandung/.github/main/CONTRIBUTING.md -o docs/source/governance.md https://raw.githubusercontent.com/jonathandung/.github/main/GOVERNANCE.md
-for p in CHANGELOG.md:changelog.md EXAMPLES.rst:examples.rst ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md; do cp "${p%:*}" "docs/source/${p#*:}"; done
+for p in CHANGELOG.md:changelog.md ROADMAP.md:roadmap.md SECURITY.md:security.md SUPPORT.md:support.md; do cp "${p%:*}" "docs/source/${p#*:}"; done

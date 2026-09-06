@@ -11,13 +11,13 @@ Current version: 1.2.4
 
 ## [2.x]
 
-- Increase coverage to 75%
+- Increase coverage to 80%
 
 ## [3.0] - 2027-10 or before
 
 - Comprehensive bugfixes
 - Deprecate Python <=3.12 compatibility module
-- Ramp up coverage to 90%
+- Increase coverage to 90%
 - Remove or supersede faulty patterns
 
 ## [3.x]
@@ -27,8 +27,11 @@ Current version: 1.2.4
 
 ## [4.0] - 2028-06
 
-- Set up funding
 - Deprecate Python <=3.13 compatibility module
+
+## [4.3] - 2028-09
+
+- Set up funding
 
 ## [4.4] - 2028-10
 

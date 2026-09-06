@@ -15,7 +15,7 @@ The REPL starts with the following banner:
   asyncutils REPL (version |version|) running on linux
   Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
   asyncutils is a multi-purpose and efficient asynchronous utilities library.
-  You can use await statements directly instead of asyncio.run for quick testing.
+  You can use *await* statements directly instead of *asyncio.run* for quick testing.
   All the submodules of asyncutils are also loaded into the namespace.
 
 :mod:`asyncutils` injects itself into the globals and the import is automated visually. Afterwards, simply type Python code as you normally would,
@@ -50,46 +50,36 @@ Next, install ``py-asyncutils``:
   # recommended: uv
   uv pip install py-asyncutils==|version|
   uv pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
-  # for development:
-  git clone https://github.com/jonathandung/asyncutils.git
-  cd asyncutils
-  make setup # creates a virtual environment at .venv using uv and installs uv, prek and the development dependencies
-  . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
+  # pip
+  pip install py-asyncutils==|version|
+  pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
+  # conda
+  conda install -c conda-forge py-asyncutils=|version|
+  # alternatively:
+  conda config --add channels conda-forge
+  conda config --set channel_priority strict
+  conda install py-asyncutils==|version|
 
 other installation pathways:
 
 .. sub-code-block::
 
-  pip install py-asyncutils==|version| # pip
-  pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
-  conda install -c conda-forge py-asyncutils=|version| # conda
-  # alternatively:
-  conda config --add channels conda-forge
-  conda config --set channel_priority strict
-  conda install py-asyncutils==|version|
   pipx install py-asyncutils==|version| # pipx
   poetry add py-asyncutils@|version| # poetry
   pdm add py-asyncutils==|version| # pdm
   pipenv install py-asyncutils==|version| # pipenv
   # no package manager (needs Python and the build and installer packages)
-  python -m build # generate sdist and wheel in dist/
-  python -m installer dist/*.whl # install from the wheel
+  python3 -m build # generate sdist and wheel in dist/
+  python3 -m installer dist/*.whl # install from the wheel
 
-After this, as long as you have the python Scripts (Windows) or bin (otherwise) directory on
-`PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__, ``asyncutils`` and ``autils`` will be made available as entry points to the asyncutils CLI,
-which can also be called with a typical and perhaps more familiar ``python -m asyncutils``.
+``asyncutils`` and ``autils`` will then be made available as entry points to the asyncutils CLI. The CLI can also be called with a typical and
+perhaps more familiar ``python3 -m asyncutils``.
 
-.. _extras:
+Dependency groups
+-----------------
 
-Extras
-------
+The :pep:`735` dependency groups of this package are listed below for reference:
 
-The all :term:`extra` includes the dependencies for development, which are not required for normal usage. To install with extras, use the syntax
-appropriate for your package manager as shown in the installation instructions above.
-
-The extras are listed below for reference:
-
-* all: All the extras combined.
 * dev: Packages one would want installed for development; superset of ``docs``, ``json5``, ``test``, and ``tools``.
 * docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins
 * executors: All the libraries implementing executors this module supports, except `distributed <https://distributed.dask.org/en/stable>`__, since

@@ -32,8 +32,7 @@ Takes pride in:
 Make sure you have CPython 3.12 or above; even a release candidate of 3.15 will do. GraalPy 25.0 or above is also acceptable. You should have at
 least one Python package manager you are comfortable with. CPython free-threaded and debug builds are also supported.
 
-Discounting the installation, no extra setup is needed. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html)
-for more.
+No setup is needed after installation. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html) for more.
 
 ## Usage
 

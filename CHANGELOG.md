@@ -16,9 +16,15 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ## Versions
 
+### [1.3]
+
+### [1.3.0] - 2026-09-10
+
+Changed all extras to dependency groups.
+
 ### [1.2]
 
-### [1.2.4] - 2026-09-04
+### [1.2.4] - 2026-09-06
 
 Upgraded to Python 3.15.0rc2.
 
@@ -692,7 +698,7 @@ Created pyproject.toml and SECURITY.md.
 
 #### [0.8.0] - 2026-03-06
 
-Set up git; added version submodule.
+Set up version control; added version submodule.
 
 ## Below entries are [abridged](https://dictionary.cambridge.org/dictionary/english/abridged)
 

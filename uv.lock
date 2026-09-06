@@ -940,31 +940,7 @@ name = "py-asyncutils"
 version = "1.2.4"
 source = { editable = "." }
 
-[package.optional-dependencies]
-all = [
-    { name = "deadpool-executor" },
-    { name = "executorlib" },
-    { name = "hjson" },
-    { name = "ipyparallel" },
-    { name = "json-with-comments" },
-    { name = "loky" },
-    { name = "myst-parser" },
-    { name = "pebble" },
-    { name = "pyjson5" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-asyncio-cooperative" },
-    { name = "pytest-cov" },
-    { name = "pytest-local-badge" },
-    { name = "pytest-sugar" },
-    { name = "pyyaml" },
-    { name = "sphinx" },
-    { name = "sphinx-autoapi" },
-    { name = "sphinx-book-theme" },
-    { name = "sphinx-copybutton" },
-    { name = "sphinx-notfound-page" },
-    { name = "xmltodict" },
-]
+[package.dev-dependencies]
 dev = [
     { name = "myst-parser" },
     { name = "pyjson5" },
@@ -1015,35 +991,54 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "deadpool-executor", marker = "extra == 'executors'", specifier = "==2026.7.1" },
-    { name = "executorlib", marker = "extra == 'executors'", specifier = "==1.10.2" },
-    { name = "hjson", marker = "extra == 'pconf'", specifier = "==3.1.0" },
-    { name = "ipyparallel", marker = "extra == 'executors'", specifier = "==9.2.0" },
-    { name = "json-with-comments", marker = "extra == 'pconf'", specifier = "==1.3.0" },
-    { name = "loky", marker = "extra == 'executors'", specifier = "==3.5.6" },
-    { name = "myst-parser", marker = "extra == 'docs'", specifier = "==5.1.0" },
-    { name = "pebble", marker = "extra == 'executors'", specifier = "==5.2.1" },
-    { name = "py-asyncutils", extras = ["dev", "executors", "pconf"], marker = "extra == 'all'", specifier = "==1.2.4" },
-    { name = "py-asyncutils", extras = ["docs", "test"], marker = "extra == 'dev'", specifier = "==1.2.4" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'pconf'", specifier = "==1.2.4" },
-    { name = "py-asyncutils", extras = ["json5"], marker = "extra == 'test'", specifier = "==1.2.4" },
-    { name = "pyjson5", marker = "extra == 'json5'", specifier = "==2.0.1" },
-    { name = "pytest", marker = "extra == 'test'", specifier = "==9.1.1" },
-    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = "==1.4.0" },
-    { name = "pytest-asyncio-cooperative", marker = "extra == 'test'", specifier = "==0.40.0" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = "==7.1.0" },
-    { name = "pytest-local-badge", marker = "extra == 'test'", specifier = "==1.3.1" },
-    { name = "pytest-sugar", marker = "extra == 'test'", specifier = "==1.1.1" },
-    { name = "pyyaml", marker = "extra == 'pconf'", specifier = "==6.0.3" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = "==9.1.0" },
-    { name = "sphinx-autoapi", marker = "extra == 'docs'", specifier = "==3.8.1" },
-    { name = "sphinx-book-theme", marker = "extra == 'dev'", specifier = "==1.4.0" },
-    { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "==0.5.2" },
-    { name = "sphinx-notfound-page", marker = "extra == 'docs'", specifier = "==1.1.0" },
-    { name = "xmltodict", marker = "extra == 'pconf'", specifier = "==1.0.4" },
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "myst-parser", specifier = "==5.1.0" },
+    { name = "pyjson5", specifier = "==2.0.1" },
+    { name = "pytest", specifier = "==9.1.1" },
+    { name = "pytest-asyncio", specifier = "==1.4.0" },
+    { name = "pytest-asyncio-cooperative", specifier = "==0.40.0" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
+    { name = "pytest-local-badge", specifier = "==1.3.1" },
+    { name = "pytest-sugar", specifier = "==1.1.1" },
+    { name = "sphinx", specifier = "==9.1.0" },
+    { name = "sphinx-autoapi", specifier = "==3.8.1" },
+    { name = "sphinx-book-theme", specifier = "==1.4.0" },
+    { name = "sphinx-copybutton", specifier = "==0.5.2" },
+    { name = "sphinx-notfound-page", specifier = "==1.1.0" },
 ]
-provides-extras = ["all", "dev", "docs", "executors", "json5", "pconf", "test"]
+docs = [
+    { name = "myst-parser", specifier = "==5.1.0" },
+    { name = "sphinx", specifier = "==9.1.0" },
+    { name = "sphinx-autoapi", specifier = "==3.8.1" },
+    { name = "sphinx-copybutton", specifier = "==0.5.2" },
+    { name = "sphinx-notfound-page", specifier = "==1.1.0" },
+]
+executors = [
+    { name = "deadpool-executor", specifier = "==2026.7.1" },
+    { name = "executorlib", specifier = "==1.10.2" },
+    { name = "ipyparallel", specifier = "==9.2.0" },
+    { name = "loky", specifier = "==3.5.6" },
+    { name = "pebble", specifier = "==5.2.1" },
+]
+json5 = [{ name = "pyjson5", specifier = "==2.0.1" }]
+pconf = [
+    { name = "hjson", specifier = "==3.1.0" },
+    { name = "json-with-comments", specifier = "==1.3.0" },
+    { name = "pyjson5", specifier = "==2.0.1" },
+    { name = "pyyaml", specifier = "==6.0.3" },
+    { name = "xmltodict", specifier = "==1.0.4" },
+]
+test = [
+    { name = "pyjson5", specifier = "==2.0.1" },
+    { name = "pytest", specifier = "==9.1.1" },
+    { name = "pytest-asyncio", specifier = "==1.4.0" },
+    { name = "pytest-asyncio-cooperative", specifier = "==0.40.0" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
+    { name = "pytest-local-badge", specifier = "==1.3.1" },
+    { name = "pytest-sugar", specifier = "==1.1.1" },
+]
 
 [[package]]
 name = "pycparser"
