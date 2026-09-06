@@ -12,10 +12,6 @@ gathering all submodules on import and make them accessible using attribute acce
   returns the real submodule object. For attribute accesses, it acts as a proxy to the real submodule, loading it when strictly required; however,
   when modifying or deleting attributes, the submodule is gotten unconditionally and replaces the proxy.
 
-.. admonition:: Implementation detail
-
-  The exact deferment mechanism is not part of the public API.
-
 The remarks below are inapplicable to the contextually configured constants in :mod:`~asyncutils.context`:
 
 * One can directly access members of submodules as attributes of the main module, which will dispatch to the appropriate submodule.

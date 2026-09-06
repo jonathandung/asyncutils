@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: audit badges bug clean docs help install lint lock log pc release test venv
+.PHONY: audit badges bug clean docs help lint lock log pc release setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTILSTESTMAXFAIL ?= 3
@@ -49,11 +49,10 @@ release:
 	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r
 	echo
 	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
-sync:
+setup: .prek-stamp .uv-stamp
+	uv venv
 	uv sync --extra dev
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"
-venv: .uv-stamp
-	uv venv
 %::
 	true

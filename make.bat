@@ -36,11 +36,6 @@ goto :eof
 asyncutils bug --open %O%
 goto :eof
 
-:changelog
-:: cspell:disable-next-line
-git log --graph --pretty=format:"%%Cred%%h%%Creset -%%C(yellow)%%d%%Creset %%s %%Cgreen(%%cr) %%C(bold blue)<%%an>%%Creset" --abbrev-commit
-goto :eof
-
 :clean
 for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
 for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\examples.rst docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
@@ -82,6 +77,11 @@ call :.uv-stamp
 uv lock -U
 goto :eof
 
+:log
+:: cspell:disable-next-line
+git log --graph --pretty=format:"%%Cred%%h%%Creset -%%C(yellow)%%d%%Creset %%s %%Cgreen(%%cr) %%C(bold blue)<%%an>%%Creset" --abbrev-commit
+goto :eof
+
 :pc
 call :.prek-stamp
 prek run --all-files
@@ -93,17 +93,13 @@ if errorlevel 2 exit /b 1
 if errorlevel 1 gh release create
 goto :eof
 
-:sync
+:setup
 call :.prek-stamp
 call :.uv-stamp
+uv venv
 uv sync --extra dev
 goto :eof
 
 :test
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
-goto :eof
-
-:venv
-call :.uv-stamp
-uv venv
 goto :eof
