@@ -263,6 +263,7 @@ rsrc
 rwlocks
 seealso
 shellcheck
+shfmt
 siftdown
 siftup
 signoff
