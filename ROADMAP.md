@@ -2,7 +2,7 @@
 
 This file provides an overview of the direction towards which this project is heading.
 
-Current version: 1.2.3
+Current version: 1.2.4
 
 ## [1.x]
 
@@ -29,6 +29,10 @@ Current version: 1.2.3
 
 - Set up funding
 - Deprecate Python <=3.13 compatibility module
+
+## [4.4] - 2028-10
+
+- Promise to support all non-EOL Python versions is met
 
 ## [5.0] - 2029-02
 

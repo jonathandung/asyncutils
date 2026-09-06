@@ -8,7 +8,7 @@ from asyncutils._internal import compat as Z, helpers as H, log as L, patch as P
 from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
 b, c = H.check_methods, H.fullname
-class event_loop: # ruff: ignore[invalid-class-name]
+class EventLoop:
     __reusable, Flags, State = [], E('Flags', ('FLIP_RELEASE_LOOP_ON_FINALIZATION', 'SILENT_ON_FINALIZE', 'NEVER_CLEAR_TASKS_ON_REUSE', 'CLOSE_EXISTING_ON_EXIT', 'SOMETIMES_CONTINUE_ON_EXIT', 'KEEP_CREATED_OPEN_ON_EXIT', 'CANCEL_ALL_TASKS', 'KEEP_LOOP', 'SUPPRESS_RUNTIME_ERRORS', 'FAIL_SILENT', 'DISALLOW_REUSE', 'NO_REUSE', 'NEVER_ENTER', 'ATTEMPT_AENTER', 'SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR', 'SUPPRESS_INNER_AEXIT_ON_RUNTIME_ERROR'), module=__name__), E('State', ('ENTERED', 'CREATED_LOOP', 'ENTERED_INNER', 'AENTERED_INNER'), module=__name__); __slots__ = '_flags', '_is', '_loop', '_state', '_task'
     def _get_unclosed_loop(self, factory=I.new_event_loop, _=A.IgnoreErrors(AttributeError)): # pragma: no cover
         if self._flags&(c := self.Flags).NO_REUSE: return factory()
@@ -26,18 +26,18 @@ class event_loop: # ruff: ignore[invalid-class-name]
     def flags_eq(self, o, /): return self._flags == (o if isinstance(o, int) else o._flags)
     @classmethod
     def from_flags(cls, flags, /, m=0x10000):
-        if not 0 <= flags < m: raise OverflowError(f'asyncutils.base.event_loop: flags value {flags:#x} has forbidden bits set')
-        r._flags, r._state, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.event_loop at {id(r := object.__new__(cls)):#x}'; return r
+        if not 0 <= flags < m: raise OverflowError(f'asyncutils.base.EventLoop: flags value {flags:#x} has forbidden bits set')
+        r._flags, r._state, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.EventLoop at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, **k):
         F, p = A.getcontext().EVENT_LOOP_BASE_FLAGS, k.pop
         for f, s in cls.Flags.__members__.items():
             if (x := p(f.lower(), None)) is None: continue
             if x: F |= s
             else: F &= ~s
-        if k: A.raise_exc(TypeError, 'asyncutils.base.event_loop: got unexpected keyword arguments; shown below', notes=k) # pragma: no cover
+        if k: A.raise_exc(TypeError, 'asyncutils.base.EventLoop: got unexpected keyword arguments; shown below', notes=k) # pragma: no cover
         return cls.from_flags(F)
     def __hash__(self): return self._flags
-    def __enter__(self, _='asyncutils.base.event_loop: context already entered'):
+    def __enter__(self, _='asyncutils.base.EventLoop: context already entered'):
         q, S = (f := self._flags)&(c := self.Flags).FAIL_SILENT, self.State
         if (s := self._state)&S.ENTERED: # pragma: no cover
             if q: return self._loop
@@ -166,7 +166,7 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
                     if c((l := await _()), sentinel): break
                     yield l
     # ruff: enable[yield-in-context-manager-in-async-generator]
-def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set):
+def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set): # ruff: ignore[complex-structure]
     audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = A.getcontext(), I.futures._chain_future # ty: ignore[unresolved-attribute]
     if b(ait, '__iter__') and not (C.AITER_TO_GEN_DEFAULT_STRICT if strict is None else strict): return (yield from ait) # ruff: ignore[return-in-generator]
     if not b(ait, '__aiter__'): raise TypeError(f'asyncutils.base.aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')

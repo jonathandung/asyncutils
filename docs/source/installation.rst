@@ -92,7 +92,7 @@ The extras are listed below for reference:
 
 * all: All the extras combined.
 * dev: Packages one would want installed for development; superset of ``docs``, ``json5``, ``test``, and ``tools``.
-* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins, along with
+* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins
 * executors: All the libraries implementing executors this module supports, except `distributed <https://distributed.dask.org/en/stable>`__, since
   that is much too specialized and heavy.
 * `json5 <https://pypi.org/project/pyjson5>`__: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.

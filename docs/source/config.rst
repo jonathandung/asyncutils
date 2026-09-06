@@ -21,8 +21,8 @@ The below environment variables directly affect what this library does, mostly i
   Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
 
   .. attention::
-    `FORCE_COLOR <https://force-color.org>`__, `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control both the argument parser and
-    the PyREPL console.
+    The environment variables `FORCE_COLOR <https://force-color.org>`__, `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control
+    both the argument parser and the PyREPL console.
 
 .. envvar:: NO_COLOR
 

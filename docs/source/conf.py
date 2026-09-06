@@ -1,5 +1,5 @@
 from sphinx.directives.code import CodeBlock
-def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.2.3')):
+def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.2.4')):
     app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include parts of documentation that only apply to Python >=3.13')
     app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
@@ -20,8 +20,6 @@ if __import__('os').getenv('READTHEDOCS') == 'True':
     html_theme = 'furo'
     html_theme_options = {'top_of_page_buttons': ['edit', 'view'], 'source_repository': f'https://github.com/jonathandung/{project}', 'source_branch': 'main', 'source_directory': 'docs/source/'}
     source_suffix = {'.rst': 'restructuredtext', '.md': 'markdown'}
-    extensions.append('sphinxext.opengraph')
-    ogp_canonical_url = f'https://{project}.readthedocs.io/en/stable/'
 else: html_theme = 'sphinx_book_theme'
 html_short_title = f'{project} {release} docs'
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None), 'anyio': ('https://anyio.readthedocs.io/en/stable', None), 'more-itertools': ('https://more-itertools.readthedocs.io/en/stable', None)}

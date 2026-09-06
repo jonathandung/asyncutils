@@ -31,8 +31,8 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   >>> from .version import VersionInfo, normalize # relative imports work as if the root is asyncutils
   >>> print(VersionInfo(4, 2).representation)
   asyncutils v4.2.0
-  >>> normalize('1.2.3')
-  (1, 2, 3)
+  >>> normalize('1.2.4')
+  (1, 2, 4)
   >>> normalize(19.0203)
   (19, 2, 3)
   >>> normalize(0x10F0203)
@@ -67,8 +67,8 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#module-asyncutils.tools'
   >>> find_help_url(signals.wait_for_signal)
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/signals/index.html#asyncutils.signals.wait_for_signal'
-  >>> find_help_url('asyncutils.event_loop')
-  'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/base/index.html#asyncutils.base.event_loop'
+  >>> find_help_url('asyncutils.EventLoop')
+  'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/base/index.html#asyncutils.base.EventLoop'
   >>> find_help_url(asyncutils.context.Context)
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/context/index.html#asyncutils.context.Context'
   >>> find_help_url(asyncutils.channels.EventBus.audit_context)

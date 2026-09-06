@@ -16,7 +16,7 @@ def json_to_argstr(path: FileDescriptorOrPath, /, *, join: Callable[[list[str]],
 def argv_to_json(argv: Sequence[str], path: FileDescriptorOrPath, /, *, dump: DumpType=...) -> None:
     '''
     | Writes the sequence of strings, parsed as command-line arguments for this module, into ``path`` in JSON format.
-    | Since this function is 'environment-agnostic', it may have unintended behaviour if the arguments passed rely on current configuration, which is not captured.
+    | Since this function is environment-agnostic, it may behave unexpectedly if the arguments passed rely on current configuration, which is not captured.
     '''
 def argstr_to_json(argstr: str, path: FileDescriptorOrPath, /, *, dump: DumpType=..., split: Callable[[str], Sequence[str]]=...) -> None: '''Parse the shell-escaped string representing the command-line arguments for this module and writes it into a .json path.'''
 def get_cfg_json_format() -> str:

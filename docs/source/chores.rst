@@ -15,7 +15,7 @@ avoid conflicts. If you are using a different IDE, you may want to use an `.edit
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and check for regressions with ``cspell .``. The file is kept sorted by a pre-commit hook for aesthetic reasons.
+Edit ``assets/words.txt`` and check for regressions with ``cspell .``.
 
 Bumping the version
 -------------------
@@ -38,6 +38,12 @@ certain locations, some of which are to be left untouched. Instead, follow these
   There is no lower bound on the number of patches per minor, though because support for packing versions into integers in a specific format must
   be supported, and there is concern of code churn or low-quality changes, the upper bound is 256, i.e. the numbers from 0 to 255.
   The same applies for minor releases per major, but we aim to drop majors every year and minors per month, so this should be a non-issue.
+
+Cleaning artifacts and caches
+-----------------------------
+
+Safer: ``make clean``
+More aggressive: ``git clean -dxf``
 
 Implementing a new utility
 --------------------------
@@ -133,10 +139,6 @@ Adding a documentation page
 4. Update the relevant table of contents tree (toctree) in docs/source/index.rst. Do not move documents across the four different trees.
 5. If copying from the root to the Read the Docs page is required during build, so that users can see it in both places, add an entry to the mapping
    representing sources and respective targets for copy statements inlined in .readthedocs.yaml, maintaining alphabetical order.
-
-.. note::
-  ``autoapi_keep_files`` is set to ``True`` in conf.py only to allow local incremental builds. This is why the docs/source/api directory is in
-  .gitignore, and you should not commit it.
 
 Changing help messages for command-line arguments
 -------------------------------------------------

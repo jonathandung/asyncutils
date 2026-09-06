@@ -8,21 +8,24 @@
 [![Publish](https://github.com/jonathandung/asyncutils/actions/workflows/release.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/release.yaml)
 [![GitHub Pages](https://github.com/jonathandung/asyncutils/actions/workflows/deploy.yaml/badge.svg)](https://jonathandung.github.io/asyncutils)
 [![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/jonathandung/asyncutils/security/dependabot)
-[![Prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/jonathandung/asyncutils/actions/workflows/prek.yaml)
+[![prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/jonathandung/asyncutils/actions/workflows/prek.yaml)
+[![AI ticket management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml)
+[![AI PR management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13018/badge)](https://www.bestpractices.dev/projects/13018)
 [![Read the Docs: stable](https://img.shields.io/readthedocs/asyncutils/stable?logo=readthedocs&label=docs%20(stable))](https://asyncutils.readthedocs.io/en/stable)
 [![Read the Docs: latest](https://img.shields.io/readthedocs/asyncutils/latest?logo=readthedocs)](https://asyncutils.readthedocs.io/en)
-[![Conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview)
+[![conda version](https://anaconda.org/conda-forge/py-asyncutils/badges/version.svg)](https://anaconda.org/channels/conda-forge/packages/py-asyncutils/overview)
 [![conda-forge feedstock](https://img.shields.io/conda/v/conda-forge/py-asyncutils?logo=condaforge)](https://github.com/conda-forge/py-asyncutils-feedstock)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor_Covenant-v3.0-ff69b4.svg?logo=contributor-covenant&logoColor=purple)](https://asyncutils.readthedocs.io/en/stable/conduct.html)
 
-A Python library abstracting all the common patterns I can think of that somehow always pop up in async code.
+A Python library abstracting many common async patterns.
 
 Takes pride in:
 
 - being as fast as can be in terms of import time
 - providing detailed type checking via stub files included in the distribution
 - having a well-equipped command line interface taking many flags and options
+- ease of bug reporting in the form of an optionally interactive subcommand
 
 ## Setup
 

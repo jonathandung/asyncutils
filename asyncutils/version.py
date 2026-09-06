@@ -92,7 +92,7 @@ class VersionInfo(str): # ruff: ignore[subclass-builtin]
         return p|m<<8|M<<16
     def compatible(self, o, /, maj_tol=0, min_tol=None): return maj_tol is None or (abs(self[0]-o[0]) <= maj_tol and (min_tol is None or abs(self[1]-o[1]) <= min_tol)) # cspell:disable-line
     representation, __index__, __radd__ = property('asyncutils v'.__add__), __int__, __add__; P.patch_classmethod_signatures((__new__, '/, *args'), (get_current_version, ''), (from_hash, 'hashed'), (unshelve, _ := 'path, /, key=5')); P.patch_method_signatures((shelve, _), (__format__, 'format_spec, /'), (_hash, ''), (__sub__, 'other, /'), (replace_parts, '*, major=None, minor=None, patch=None')); del _
-def normalize_allow_unimplemented(o, /, E=E, p=p, c=check_methods, s=frozenset(('inf', '-inf', 'nan')), m=0xff):
+def normalize_allow_unimplemented(o, /, E=E, p=p, c=check_methods, s=frozenset(('inf', '-inf', 'nan')), m=0xff): # ruff: ignore[complex-structure]
     if (T := type(o)) is VersionInfo: return o.parts
     if T is str: o = o.split('.')
     elif T is complex: o = o.real, o.imag, 0

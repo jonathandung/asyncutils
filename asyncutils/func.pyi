@@ -25,7 +25,7 @@ def to_sync[T, **P](f: Callable[P, Awaitable[T]], /, loop: AbstractEventLoop|Non
 def to_sync_from_loop(loop: AbstractEventLoop) -> ToSyncFromLoopRV: '''Return the partial of :func:`to_sync` under ``loop=loop``.'''
 def to_async[T, **P](f: Callable[P, T], /) -> Callable[P, CoroutineType[Any, Any, T]]:
     '''
-    | Return the async version of the original function with all the attributes from its instance dictionary, which runs in an executor lazy initialized and shared by all :func:`to_async`-transformed callables.
+    | Return the async version of the original function with all the attributes from its instance dictionary, which runs in a lazily initialized executor shared by all callables transformed by this function.
     | If the argument was returned by :func:`to_sync`, a copy of the original async function is returned.
 
     .. warning:: This function may create reference cycles. If memory is a concern, call :func:`gc.collect` regularly.

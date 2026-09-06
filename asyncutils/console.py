@@ -91,7 +91,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
     def __repr__(self): return f'{fullname(self)}({self._loop!r}, local_exit={self.local_exit})'
     @property
     def is_running(self): return self._internal_is_running
-    def run(self, *, exit_message='Thank you for using %s!\nExiting REPL...\n', thread_name='<%s REPL thread>', max_memory_errors=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))): # ruff: ignore[too-many-statements]
+    def run(self, *, exit_message='Thank you for using %s!\nExiting REPL...\n', thread_name='<%s REPL thread>', max_memory_errors=None, always_run_interactive=bool(S.flags.inspect), always_install_completer=False, suppress_asyncio_warnings=False, suppress_unawaited_coroutine_warnings=False, _=frozenset(('win32', 'cygwin', 'android', 'ios', 'wasi'))): # ruff: ignore[complex-structure, too-many-statements]
         self.before_run(max_memory_errors); S.audit(f'{fullname(self)}.run', id(self)); l, w, n = self._loop, S.stderr.write, self.NAME
         if always_run_interactive or S.stdin.isatty():
             S.audit('cpython.run_stdin'); __import__('threading').Thread(name=thread_name%n, target=self.interact, daemon=True).start()
@@ -99,10 +99,10 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
                 S.audit('cpython.run_interactivehook', h)
                 try: h()
                 except: w(f'Error running {self!r}!\nFailed calling sys.__interactivehook__\n'); __import__('traceback').print_exc() # ruff: ignore[bare-except]
-                if always_install_completer or (S.platform not in _ and h.__module__ == 'site' and h.__name__ == h.__qualname__ == 'register_readline'):
+                if always_install_completer or (h.__module__ == 'site' and h.__name__ == h.__qualname__ == 'register_readline' and S.platform not in _):
                     try: __import__('readline').set_completer(__import__('rlcompleter').Completer(self.locals).complete) # ty: ignore[possibly-missing-attribute]
                     except ImportError: w('Failed to install readline completer\n')
-            elif h is not None: w('Removing sys.__interactivehook__ since it is not callable\n'); delattr(S, i)
+            elif h is not None: w('asyncutils: Unsetting sys.__interactivehook__ since it is not callable\n'); delattr(S, i)
             while True:
                 try: l.run_forever(); break
                 except KeyboardInterrupt: self.interrupt()

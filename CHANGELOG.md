@@ -119,7 +119,7 @@ Breaking changes:
   - base
 
     Classes:
-    - event_loop (context manager)
+    - EventLoop (context manager)
 
     Functions:
     - adisembowel
@@ -545,7 +545,7 @@ Committed uv.lock to version control; replaced `AsyncGenerator` with `AsyncGener
 
 #### [0.9.14] - 2026-06-13
 
-Refactored `base.event_loop`; improved submodule logging and `__dir__` method handling.
+Refactored `base.EventLoop`; improved submodule logging and `__dir__` method handling.
 
 #### [0.9.13] - 2026-06-12
 
@@ -604,7 +604,7 @@ Declared full support for python[ -m] asyncutils an entry point; patched functio
 
 #### [0.9.0] - 2026-04-27
 
-Added `__lazy_modules__` attribute to submodules where appropriate; added some iteration, functional programming and context management utilities.
+Added some iteration, functional programming and context management utilities.
 
 ## Below versions have reached [EOL](https://en.wikipedia.org/wiki/Software_release_life_cycle#End-of-life)
 
@@ -702,7 +702,7 @@ Began migration of implementation details into `_internal` subpackage; fixed ini
 
 ### [0.6] - 2026-01
 
-Completed migration from inline annotations to separated stubs; perfected `base.event_loop` and lazy loading; added `console` and `cli` submodules.
+Completed migration from inline annotations to separated stubs; perfected `base.EventLoop` and lazy loading; added `console` and `cli` submodules.
 
 ### [0.5] - 2025-12
 

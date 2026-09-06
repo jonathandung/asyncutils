@@ -237,8 +237,6 @@ ndigits
 noarch
 noncritical
 ntimes
-onfail
-opengraph
 pastebin
 pconf
 phcount

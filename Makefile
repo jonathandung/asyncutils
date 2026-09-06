@@ -7,8 +7,8 @@ O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 SHELL := /bin/bash
 .prek-stamp:
 	if command -v prek >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.sh | sh;\
+	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.2/prek-installer.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.2/prek-installer.sh | sh;\
 	else echo "curl or wget required to install prek" >&2; exit 1; fi
 	prek install
 	touch .prek-stamp

@@ -1,6 +1,6 @@
 # ty: ignore[unresolved-attribute]
 import pytest
-from asyncutils import event_loop
+from asyncutils import EventLoop
 from asyncutils.context import *
 @pytest.fixture
 def ctx(): return getcontext()
@@ -19,15 +19,15 @@ def test_essential(ctx):
     d['TIMER_DEFAULT_PRECISION'] = 4
     assert ctx.TIMER_DEFAULT_precision == 7
     assert ctx['SOCKET_TRANSPORT_limits'] == (2048, 8192)
-    assert len(event_loop.Flags) == 16
-    assert len(event_loop.State) == 4
+    assert len(EventLoop.Flags) == 16
+    assert len(EventLoop.State) == 4
 def test_contextual_behaviour(ctx):
     man = ctx.ascurctx(event_loop_base_flags=5)
     assert type(man) is NonReusableLocalContext
     with man as c:
         assert c is not ctx
         assert isinstance(c, Context)
-        evl = event_loop(**{event_loop.Flags(1)._name_.lower(): False})
+        evl = EventLoop(**{EventLoop.Flags(1)._name_.lower(): False})
         assert evl._flags == 4
         evl.clear_flags(3)
         assert evl._flags == hash(evl) == 0
