@@ -43,7 +43,7 @@ jobs:
         config: cspell.json
         incremental_files_only: true
     - run: make audit
-    - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054
+    - uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99
     - run: pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
     - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
       with:
