@@ -24,6 +24,7 @@
 - [] If this PR concerns a big architectural change or loosely related modifications, I have split them into smaller PRs tracked in an umbrella issue
      linked to in the Issue reference section without marking it as a resolution.
 - [] I have added passing tests such that the coverage did not decrease by over 0.5%.
+- [] Status badges have been updated using `make badges`.
 - [] Documentation has been updated suitably.
 - [] The section corresponding to the next release in the changelog has been updated.
 - [] I have read through [the chores page](https://asyncutils.readthedocs.io/en/latest/chores.html) and followed through with the relevant processes.

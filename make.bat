@@ -8,7 +8,7 @@ goto %1
 :.prek-stamp
 if exist .prek-stamp goto :eof
 where prek >nul 2>nul
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.2/prek-installer.ps1 | iex")
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.3/prek-installer.ps1 | iex")
 prek install
 type nul >.prek-stamp
 goto :eof
@@ -41,6 +41,10 @@ for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_a
 for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
 del /s /q *.pyc *.pyo *.pyz 2>nul
+goto :eof
+
+:clean-all
+git clean -dxf
 goto :eof
 
 :docs
@@ -84,7 +88,7 @@ goto :eof
 
 :pc
 call :.prek-stamp
-prek run --all-files
+prek run -a
 goto :eof
 
 :release

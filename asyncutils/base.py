@@ -146,7 +146,7 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
             if create_executor: e = s(iter_to_agen)
             else: w('asyncutils.base.iter_to_agen: no existing executor')
     elif create_executor: e = s(iter_to_agen, False)
-    with g:
+    with g: # ruff: ignore[too-many-nested-blocks]
         if e is None:
             if g:
                 l = (_ := it.send)(None)

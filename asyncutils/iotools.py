@@ -78,13 +78,12 @@ class File(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
         return r
     def __iter__(self): return memoryview(self.__f).__iter__()
     def __aiter__(self): return self.__rs(-1)
-    def __del__(self): self.make(self.aclose())
     @property
     def closed(self): return self.__f.closed
     def fileno(self): return self.__n
     def sync(self, _=O.fsync): self.__fl(0, None); _(self.__n)
     async def aclose(self): await gather(*map(self._run, (self.__m.close, self.__f.close)))
-    def close(self): self.__m.close(); self.__f.close()
+    __del__ = close = lambda self: self.__m.close() or self.__f.close()
     def read_byte(self): return self.__m.read_byte()
     def write_byte(self, b, /): self.__m.write_byte(b)
     def resize(self, new_size): self.__m.resize(new_size)

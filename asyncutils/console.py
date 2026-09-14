@@ -10,7 +10,7 @@ from asyncutils._internal import log, patch as P, running_console as R
 from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import console_all as __all__
 if not C.basic_repl:
-    try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import]
+    try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import] # cspell: disable-line
     except ImportError: C.basic_repl = True
 _s = object()
 _f = '',

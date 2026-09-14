@@ -6,13 +6,13 @@ from asyncutils.constants import _NO_DEFAULT
 class SingleWaiterEventWithValue(A.EventMixin):
     __slots__ = '__w',
     def set(self, value):
-        if (w := self.__w) is None or w.done(): self.__w = w = self.make_fut()
+        if (w := self.__w) is None or w.done(): self.__w = w = self.loop.create_future()
         w.set_result(value)
     def is_set(self): return False if (w := self.__w) is None else w.done()
     async def wait_for_next(self, timeout=None, *, strict=False):
         if w := self.__w:
             if strict: raise RuntimeError('asyncutils.events.SingleWaiterEventWithValue: another waiter is already waiting and strict=True was passed')
-        else: self.__w = w = self.make_fut()
+        else: self.__w = w = self.loop.create_future()
         try: return await I.wait_for(w, timeout)
         finally: self.__w = None
     def get(self, default=_NO_DEFAULT):
@@ -43,7 +43,7 @@ class EventWithValue(A.EventMixin):
             return default
         return v
     async def wait_for_next(self, timeout=None):
-        (w := self.__ws).add(F := self.make_fut())
+        (w := self.__ws).add(F := self.loop.create_future())
         try: return await I.wait_for(F, timeout)
         finally: w.discard(F)
     def is_set(self): return self.__val is not None

@@ -49,7 +49,7 @@ def _make_consumers(i, z, p, b, m, x, n, h, c=BaseConsumer, t='($self)'): # ruff
     class Consumer(c, m=m):
         __slots__ = ()
         async def __anext__(self, l=B.Lock(), f=partial(A.take, i, b, default=A.RAISE)): # ruff: ignore[function-call-in-default-argument]
-            if (s := self._q).empty():
+            if (s := self._q).empty(): # ruff: ignore[too-many-nested-blocks]
                 async with l:
                     try:
                         async for j in f(): await h(Q, j)

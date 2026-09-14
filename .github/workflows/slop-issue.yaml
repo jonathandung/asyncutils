@@ -21,4 +21,4 @@ jobs:
             });
             await i.update({...c, state: 'closed', state_reason: 'not_planned'});
             await i.lock({...c, lock_reason: 'spam'});
-    timeout-minutes: 3
+    timeout-minutes: 1

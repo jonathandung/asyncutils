@@ -45,7 +45,7 @@ class PrioritySemaphore(LoopMixinBase, A.LockMixin):
     def __init__(self, value=None): self.__value, self.__tiebreak, self.__waiters = A.getcontext().PRIORITY_SEMAPHORE_DEFAULT_VALUE if value is None else value, 0, []
     async def acquire(self, priority=0):
         self.__value -= 1; self.__tiebreak += 1; w = self.__waiters
-        while self.__value < 0: heappush(w, (priority, self.__tiebreak, F := self.make_fut())); await F
+        while self.__value < 0: heappush(w, (priority, self.__tiebreak, F := self.loop.create_future())); await F
         return True
     def release(self, strict=True):
         if w := self.__waiters: heappop(w)[-1].set_result(None)
@@ -66,11 +66,11 @@ class KeyedCondition(LoopMixinBase, A.LockMixin):
         if I.iscoroutine(r := self.__lock.release()): await r
     def locked(self): return self.__lock.locked()
     async def wait(self, key, timeout=None):
-        self.assert_locked(); (s := self.__sw[key]).add(F := self.make_fut())
+        self.assert_locked(); (s := self.__sw[key]).add(F := self.loop.create_future())
         try: await I.wait_for(F, timeout)
         finally: s.discard(F)
     async def wait_for(self, key, pred, per_wait_timeout=None):
-        self.assert_locked(); f, g, h, F = (s := self.__sw[key]).add, s.discard, self.make_fut, None
+        self.assert_locked(); f, g, h, F = (s := self.__sw[key]).add, s.discard, self.loop.create_future, None
         try:
             while not pred(): f(F := h()); await I.wait_for(F, per_wait_timeout); g(F)
         finally: g(F)
@@ -146,7 +146,7 @@ class PriorityLock(LoopMixinBase, A.LockWithOwnerMixin):
     __slots__ = '__owner', '__tiebreak', '__waiters'
     def __init__(self): super().__init__(); self.__waiters, self.__tiebreak, self.__owner = [], 0, None
     async def acquire(self, priority=0, timeout=None):
-        heappush(self.__waiters, (priority, self.__tiebreak, F := self.make_fut())); self.__tiebreak += 1
+        heappush(self.__waiters, (priority, self.__tiebreak, F := self.loop.create_future())); self.__tiebreak += 1
         try:
             if len(self.__waiters) == 1 and self.__owner is None: F.set_result(True)
             await I.wait_for(F, timeout); self.__owner = I.current_task(); return True

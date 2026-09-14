@@ -63,8 +63,9 @@ Other (slower) package managers:
 pip install -U pipx && pipx ensurepath # pipx, installed with pip
 conda update py-asyncutils # conda
 # pip
-pip install -U pipdeptree && pipdeptree # Quite a bit more clutter than uv pip tree, showing a single package repeatedly
-pipdeptree --packages py-asyncutils # Only this package as above
+pip install -U pipdeptree
+pipdeptree # More clutter than uv pip tree, showing a single package repeatedly
+pipdeptree --packages py-asyncutils # Only this package, like uv tree
 ```
 <!-- cspell:enable -->
 ### Import Errors

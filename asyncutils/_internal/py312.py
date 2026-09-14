@@ -28,7 +28,7 @@ if __import__('sys').version_info < (3, 13):
             f, a = self.full, (P := self._putters).append
             while f():
                 if self._is_shutdown: raise QueueShutDown
-                a(p := self.make_fut())
+                a(p := self.loop.create_future())
                 try: await p
                 except:
                     p.cancel()
@@ -45,7 +45,7 @@ if __import__('sys').version_info < (3, 13):
             A, e = (G := self._getters).append, self.empty
             while e():
                 if self._is_shutdown: raise QueueShutDown
-                A(g := self.make_fut())
+                A(g := self.loop.create_future())
                 try: await g
                 except:
                     g.cancel()

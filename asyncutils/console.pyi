@@ -11,7 +11,7 @@ from typing import Any, ClassVar, Literal, Self, final, overload
 from ._internal.prots import ExcType
 __all__ = 'AsyncUtilsConsole', 'ConsoleBase'
 class ConsoleBase(InteractiveConsole, ABC):
-    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`!_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.'''
+    '''A base class for async consoles. Derives from :class:`~code.InteractiveConsole`, or :class:`!_pyrepl.console.InteractiveColoredConsole` if available. It is inspired by `asyncio <https://github.com/python/cpython/blob/main/Lib/asyncio/__main__.py>`__ and highly adaptable.''' # cspell: disable-line
     BANNER: ClassVar[str]
     '''A %-formattable string representing the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
@@ -23,7 +23,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         CAN_USE_PYREPL: ClassVar[bool]
         '''Whether :mod:`!_pyrepl` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
-        '''This is present iff :class`!_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.'''
+        '''This is present iff :class`!_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.''' # cspell: disable-line
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
     '''| Maps module names to a function taking locals of a console of the corresponding type. The return value is discarded.
     | Add handlers for the module of your own console with ``native_handler`` and other modules with ``other_handlers``.'''

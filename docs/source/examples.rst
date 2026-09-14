@@ -31,8 +31,8 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   >>> from .version import VersionInfo, normalize # relative imports work as if the root is asyncutils
   >>> print(VersionInfo(4, 2).representation)
   asyncutils v4.2.0
-  >>> normalize('1.2.4')
-  (1, 2, 4)
+  >>> normalize('1.3.0')
+  (1, 3, 0)
   >>> normalize(19.0203)
   (19, 2, 3)
   >>> normalize(0x10F0203)

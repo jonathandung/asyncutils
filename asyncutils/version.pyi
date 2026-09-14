@@ -113,7 +113,7 @@ class VersionInfo(str):
     @property
     def representation(self) -> str: '''String representation of the version for pretty printing, used by ``asyncutils -v``.'''
     @property
-    def parts(self) -> tuple[int, int, int]: '''The tuple ``(major, minor, patch)``.'''
+    def parts(self) -> tuple[int, int, int]: '''``ver.parts == (ver.major, ver.minor, ver.patch)`` holds.'''
     @property
     def major(self) -> int: '''The major part of the version.'''
     @property
@@ -129,11 +129,11 @@ class VersionDelta(NamedTuple):
     .. note:: This is not actually created by :func:`collections.namedtuple`, but implements its methods.
     '''
     major: int = ...
-    '''The major part of the version.'''
+    '''The major part of the version delta.'''
     minor: int = ...
-    '''The minor part of the version.'''
+    '''The minor part of the version delta.'''
     patch: int = ...
-    '''The patch part of the version.'''
+    '''The patch part of the version delta.'''
     def __replace__(self, *, major: int=..., minor: int=..., patch: int=...) -> Self: '''Alias for :meth:`~collections.somenamedtuple._replace`.''' # cspell:disable-line
     def __floor__(self) -> int: '''Return the major part of the delta.'''
     def __trunc__(self) -> int: '''Identical to :meth:`__floor__`.'''
@@ -142,7 +142,7 @@ def normalize(o: object, /) -> tuple[int, int, int]:
     '''
     | Return a :class:`tuple` of three integers ``(major, minor, patch)`` from the information provided by the object as extracted by registered normalizers.
     | A normalizer can return ``None`` for an unnormalizable object, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to the object itself.
-    | If the normalizer raises an exception or returns a non-iterable, it is removed and the error is propagated.
+    | If the normalizer raises an exception or returns a non-iterable, it is removed from the registry and the error is propagated.
 
     .. note::
       Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
@@ -153,7 +153,7 @@ def normalize_allow_unimplemented(o: object, /) -> tuple[int, int, int]|None: ''
 @overload
 def register_normalizer[T](o: type[T], f: Callable[[T], Iterable[int]], /) -> bool: ...
 @overload
-def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: '''Register a custom normalizer for the object or type; return whether the normalizer was newly registered.'''
+def register_normalizer[T](o: T, f: Callable[[T], Iterable[int]], /) -> bool: '''Register a custom normalizer for the object or type; return whether the normalizer was newly registered. The registry is hidden and only accessible by invoking the public functions.'''
 @overload
 def unregister_normalizer[T](o: type[T], /) -> Callable[[T], Iterable[int]]|None: ...
 @overload

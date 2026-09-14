@@ -22,4 +22,4 @@ jobs:
             });
             await r.pulls.update({...c, pull_number: n, state: 'closed'});
             await i.lock({...d, lock_reason: 'spam'});
-    timeout-minutes: 3
+    timeout-minutes: 1

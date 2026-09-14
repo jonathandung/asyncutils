@@ -18,13 +18,13 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.3]
 
-### [1.3.0] - 2026-09-10
+### [1.3.0] - 2026-09-14; unreleased
 
 Changed all extras to dependency groups.
 
 ### [1.2]
 
-### [1.2.4] - 2026-09-06
+### [1.2.4] - 2026-09-06; newest
 
 Upgraded to Python 3.15.0rc2.
 
@@ -487,10 +487,10 @@ Breaking changes:
     Functions:
 
     - loadf
-    - json_to_argv
-    - json_to_argstr
-    - argv_to_json
-    - argstr_to_json
+    - cfg_to_argv
+    - cfg_to_argstr
+    - argv_to_cfg
+    - argstr_to_cfg
     - get_cfg_json_format
     - print_cfg_json_format
     - get_cmd_help

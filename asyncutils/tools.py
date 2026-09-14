@@ -5,9 +5,9 @@ def loadf(p, e=None, /, l=I.unparsed.r, _=I.helpers.fullname):
     if not (isinstance(p, int) or e is None): raise TypeError('asyncutils.tools.loadf: did not expect extension')
     if e == '': raise ValueError('asyncutils.tools.loadf: empty extension') # ruff: ignore[compare-to-empty-string]
     return l(p.decode() if isinstance(p, bytes) else p, e)
-def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
+def cfg_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all', 'p'), ('debug', 'd'), ('pdb', 'P')), g=A.raise_exc, a=('context', 'next_config'), *, strict=True):
     f = (R := []).append
-    if (p := (m := loadf(p)).pop)('command', None) is not None: raise TypeError('asyncutils.tools.json_to_argv: unexpected key "command" in config file')
+    if (p := (m := loadf(p)).pop)('command', None) is not None: raise TypeError('asyncutils.tools.cfg_to_argv: unexpected key "command" in config file')
     if s := p('executor', l := 'thread') != l: f('-c' if d in s else '-e'); f(s)
     if (l := p('max_memory_errors', None)) != 3: f('-m'); f(str(l)) # ruff: ignore[magic-value-comparison]
     if (s := p('seed', None)) is not None: f('-s'); f(repr(s))
@@ -19,12 +19,12 @@ def json_to_argv(p, /, d='.', D=(('quiet', 'q'), ('basic_repl', 'b'), ('load_all
         if R: R[0] = r+R[0][1:]
         else: f(r)
     for k in a: p(k, None)
-    if strict and m: g(ValueError, 'asyncutils.tools.json_to_argv: unknown keys in config file', notes=m)
+    if strict and m: g(ValueError, 'asyncutils.tools.cfg_to_argv: unknown keys in config file', notes=m)
     return R
-def json_to_argstr(p, /, *, join=s.join, strict=True): return join(json_to_argv(p, strict=strict))
-def argv_to_json(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):
+def cfg_to_argstr(p, /, *, join=s.join, strict=True): return join(cfg_to_argv(p, strict=strict))
+def argv_to_cfg(a, p, /, *, dump=__import__('json').dump, _=I.parsed.p.parse_args):
     with open(p, 'w', encoding='utf-8') as f: dump(_(a).__dict__, f)
-def argstr_to_json(a, p, /, *, split=s.split, **k): argv_to_json(split(a), p, **k)
+def argstr_to_cfg(a, p, /, *, split=s.split, **k): argv_to_cfg(split(a), p, **k)
 def find_help_url(o=None, /, *, ver='stable', _=frozenset((None, 'asyncutils', A)), g=I.initialize.Module, h=I.helpers, m=frozenset(('__hexversion__', '__version__', 'all_symbols', 'console_preloaded_submodules', 'preloaded_submodules', 'time_since_boot', 'submodules_map')), M=A.submodules_map):
     if o in _: return f'https://asyncutils.readthedocs.io/en/{ver}/index.html'
     s = None
@@ -44,5 +44,5 @@ def open_help(o=None, /, **_): return __import__('webbrowser').open(find_help_ur
 def get_cfg_json_format(_=('',)): return __import__('importlib.resources', fromlist=_).files('asyncutils').joinpath('format.json5').read_text()
 def print_cfg_json_format(file=None, *, flush=True): print(get_cfg_json_format(), file=file, flush=flush, end='')
 def print_cmd_help(file=None, *, flush=True): print(get_cmd_help(), file=file, flush=flush, end='')
-I.patch.patch_function_signatures((find_help_url, 'o=None, /'), (loadf, "path, ext='json', /"), (json_to_argv, 'path, /'), (json_to_argstr, 'path, /, *, join={}'), (argv_to_json, 'argv, path, /, *, dump={}'), (argstr_to_json, 'argstr, path, /, *, dump={0}, split={0}'), (get_cfg_json_format, ''))
+I.patch.patch_function_signatures((find_help_url, 'o=None, /'), (loadf, "path, ext='json', /"), (cfg_to_argv, 'path, /'), (cfg_to_argstr, 'path, /, *, join={}'), (argv_to_cfg, 'argv, path, /, *, dump={}'), (argstr_to_cfg, 'argstr, path, /, *, dump={0}, split={0}'), (get_cfg_json_format, ''))
 del A, I, s

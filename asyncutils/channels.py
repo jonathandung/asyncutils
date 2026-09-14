@@ -36,7 +36,7 @@ class Observable(H.LoopMixinBase):
                 L.exception('asyncutils.channels.Observable: error in observer')
     async def wait_for_next(self, timeout=None, strict=False):
         async def f(*a, **k): F.set_result((a, k)) # ruff: ignore[unused-async]
-        F, u = self.make_fut(), self.subscribe_nowait(f)
+        F, u = self.loop.create_future(), self.subscribe_nowait(f)
         try: return await I.wait_for(F, timeout)
         finally: u(strict)
     async def wait_until_idle(self, timeout=None): await I.wait_for(self.__e.wait(), timeout)

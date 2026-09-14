@@ -80,7 +80,7 @@ class SupportsPopLeft[T](Protocol):
     def popleft(self) -> T: ...
 @type_check_only
 class DumpType(Protocol):
-    '''Simple JSON-dumping functions accepted by :func:`~asyncutils.tools.argv_to_json` and :func:`~asyncutils.tools.argstr_to_json`.'''
+    '''Functions accepted by :func:`~asyncutils.tools.argv_to_cfg` and :func:`~asyncutils.tools.argstr_to_cfg` to write arguments to a config file.'''
     def __call__(self, dct: dict[str, Any], file: TextIOWrapper, /) -> None: '''``dict[str, Any]`` is used here because the callable needs only handle strict instances of :class:`dict`.'''
 @type_check_only
 class CanWriteAndFlush[T](Protocol):

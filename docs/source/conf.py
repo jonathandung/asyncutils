@@ -1,5 +1,5 @@
 from sphinx.directives.code import CodeBlock
-def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.2.4')):
+def setup(app, f=__import__('operator').methodcaller('replace', '|version|', release := '1.3.0')):
     app.add_config_value('py313', __import__('sys').version_info >= (3, 13), 'env', 'whether to include parts of documentation that only apply to Python >=3.13')
     app.add_directive('sub-code-block', type('SubCodeBlock', (CodeBlock,), {'run': lambda self: setattr(self, 'content', tuple(map(f, self.content))) or CodeBlock.run(self)}))
 project = 'asyncutils'
@@ -30,5 +30,5 @@ nitpick_ignore_regex = [('py:(class|obj)', '[TRVUSP]|Ts|_ProtocolMeta'), ('py:de
 nitpicky = True
 rst_epilog = '.. _prek: https://prek.j178.dev\n.. _ruff: https://docs.astral.sh/ruff\n.. _ty: https://docs.astral.sh/ty\n.. _uv: https://docs.astral.sh/uv'
 suppress_warnings = ['autoapi.python_import_resolution']
-version = '1.2'
+version = '1.3'
 viewcode_line_numbers = True

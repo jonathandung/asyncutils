@@ -84,7 +84,7 @@ For collaborators and those interested, this is the general procedure:
 3. If the value of the configuration option is to be accessible by users at runtime, it should be in the form of a symbol in
    :mod:`~asyncutils.config`.
 4. Update ``config.pyi``, noting the line numbers at which the logging-related declarations appear.
-5. Edit the definition of :func:`~asyncutils.tools.json_to_argv` and update the test suite to account for that, preserving round-trip conversion as
+5. Edit the definition of :func:`~asyncutils.tools.cfg_to_argv` and update the test suite to account for that, preserving round-trip conversion as
    promised.
 6. Update the literalinclude's in logging.rst with the line numbers jotted down from steps 2 and 4.
 7. Run ``make docs`` and look at the help pages in the generated documentation as a sanity check.

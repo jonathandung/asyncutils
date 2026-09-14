@@ -41,7 +41,7 @@ class Bulkhead(H.LoopMixinBase):
         if max_queue is None: max_queue = C.BULKHEAD_DEFAULT_MAX_QUEUE
         if max_queue <= 0: raise ValueError('asyncutils.processors.Bulkhead: max_queue must be positive')
         if max_rej is None: max_rej = C.BULKHEAD_DEFAULT_MAX_REJ
-        super().__init__(); self.__sem, self.__queue, self.__rej, self.__iv, self.__exc, self.__p, self.__sd, self.__mt, self.__mr = I.Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.make_fut(), I.Event(), max_rej
+        super().__init__(); self.__sem, self.__queue, self.__rej, self.__iv, self.__exc, self.__p, self.__sd, self.__mt, self.__mr = I.Semaphore(max_concurrent), Queue(max_queue), 0, max_concurrent, exc, processor, self.loop.create_future(), I.Event(), max_rej
     async def execute(self, coro):
         try: self.__queue.put_nowait(coro)
         except I.QueueFull as e:

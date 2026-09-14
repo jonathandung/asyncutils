@@ -32,7 +32,7 @@ class AdvancedPool(LoopMixinBase):
         else: g(_.set_result, x)
     def __st(self, new):
         if (d := new-self.__cur) > 0:
-            a, b, f, g = self.__workers.add, self.__fs.add, self.__wl, self.make_fut
+            a, b, f, g = self.__workers.add, self.__fs.add, self.__wl, self.loop.create_future
             for _ in repeat(None, d): (T := Thread(target=f, args=(F := g(),))).start(); a(T); b(F)
         elif d < 0:
             f = self.__q.put_nowait
@@ -50,7 +50,7 @@ class AdvancedPool(LoopMixinBase):
         self.raise_for_shutdown()
         if self.full: raise A.PoolFull('asyncutils.pool.AdvancedPool.submit_nowait: task queue full')
         with self.__tl: self.__pending += 1
-        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__sa(); return F
+        self.__q.put_nowait((_priority_, self.__tiebreak, (f, a, k, F := self.loop.create_future()))); self.__sa(); return F
     async def _kill_helper(self):
         f, g = (q := self.__q).get_nowait, q.task_done
         with self.__tl, A.ignore_qempty:
@@ -61,7 +61,7 @@ class AdvancedPool(LoopMixinBase):
     async def submit(self, f, *a, _priority_=0, **k):
         self.raise_for_shutdown()
         with self.__tl: self.__pending += 1
-        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.make_fut()))); self.__sa(); return F
+        await self.__q.put((_priority_, self.__tiebreak, (f, a, k, F := self.loop.create_future()))); self.__sa(); return F
     async def shutdown(self, cancel_pending=False, idle_timeout=None):
         if self.__shutdown: return await self.wait_for_shutdown()
         if cancel_pending: await self._kill_helper()
@@ -111,12 +111,11 @@ class ConnectionPool(LoopMixinBase):
                 self.__clean(c)
             if self.cursize < self.maxsize: self.__in_use.add(c := await self.create_connection(*a, **k)); return c
         await self.__av.wait(); return await self.acquire(*a, **k)
-    def release(self, c, /, *a, **k):
+    async def release(self, c, /, *a, **k):
         self.__in_use.discard(c)
-        if self._is_healthy(c) and len(self.__pool) < self.maxsize: self.__pool.append(c); self.__av.set(); self.__av.clear()
-        else:
-            self.__clean(c)
-            if self.cursize < self.minsize: self.make(self.create_connection(*a, **k))
+        if self._is_healthy(c) and len(self.__pool) < self.maxsize: self.__pool.append(c); self.__av.set(); self.__av.clear(); return
+        self.__clean(c)
+        if self.cursize < self.minsize: await self.create_connection(*a, **k)
     async def _maintain(self):
         f = I.sleep.__get__(A.getcontext().CONNECTION_POOL_MAINTENANCE_INTERVAL)
         while True:

@@ -6,7 +6,7 @@ from ._internal.prots import RWLockCM, RWLockRV
 __all__ = 'AgingRWLock', 'CoercedMethod', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 class RWLock(ABC):
     '''
-    | Common base class for all readers-writer locks.
+    | Base class for all readers-writer locks.
     | If you would like to subclass this, you must implement :meth:`reading`, :meth:`writing` and :meth:`setup`.
     '''
     @overload
@@ -51,8 +51,8 @@ class FairRWLock(RWLock):
     def writing(self) -> RWLockCM: ...
 class PriorityRWLock(RWLock):
     '''
-    | Common base class of :class:`AgingRWLock`, :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
-    | Lower priority levels are prioritized, and the default priority is ``0``, as in other patterns in this module related to priority.
+    | Base class of :class:`AgingRWLock`, :class:`FairPriorityRWLock` and :class:`WritePreferredPriorityRWLock`.
+    | Smaller priority values are prioritized, and the default priority is ``0``, as in other patterns in :mod:`asyncutils` related to priority.
     '''
     @overload
     def __new__(cls, /, prefer_writers: Literal[True]) -> WritePreferredPriorityRWLock: ...

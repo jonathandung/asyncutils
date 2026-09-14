@@ -31,7 +31,7 @@ class LineProtocol(I.Protocol, M.helpers.LoopMixinBase):
     def signal_eof(self): self.__lines.put_nowait(None)
     def pause_writing(self):
         self.__paused = True
-        if self.__dw is None: self.__dw = self.make_fut()
+        if self.__dw is None: self.__dw = self.loop.create_future()
     def resume_writing(self):
         self.__paused = False
         if w := self.__dw:

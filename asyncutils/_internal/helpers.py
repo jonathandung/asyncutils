@@ -29,11 +29,15 @@ class LoopMixinBase:
     __slots__ = '_loop',
     @property
     def loop(self):
-        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set()
+        if (l := getattr(self, '_loop', None)) is None: self._loop = l = get_loop_and_set(); self._setup()
         elif l is not __import__('asyncio.events', fromlist=('',))._get_running_loop(): raise RuntimeError('asyncutils: could not bind asyncio event loop')
         return l
     def make(self, a, /): return self.loop.create_task(simple_wrap(a))
-    def make_fut(self): return self.loop.create_future()
+    def _setup(self): ...
+class RefTaskLoopMixin(LoopMixinBase):
+    __slots__ = '_tasks',
+    def _setup(self): self._tasks = set()
+    def make(self, a, /): (r := super().make(a)).add_done_callback((t := self._tasks).discard); t.add(r); return r
 class Bag(dict): # ruff: ignore[subclass-builtin]
     __slots__, __setattr__, __delattr__ = (), dict.__setitem__, dict.__delitem__
     def __getattr__(self, k, /):

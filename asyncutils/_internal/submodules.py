@@ -27,6 +27,6 @@ properties_all = 'AsyncPropertyBase', 'ConcurrentAsyncProperty', 'Deleters', 'La
 queues_all = 'PotentQueueBase', 'SmartLifoQueue', 'SmartPriorityQueue', 'SmartQueue', 'UserPriorityQueue', 'ignore_qempty', 'ignore_qerrs', 'ignore_qfull', 'ignore_qshutdown', 'password_queue'
 rwlocks_all = 'AgingRWLock', 'CoercedMethod', 'FairPriorityRWLock', 'FairRWLock', 'PriorityRWLock', 'RWLock', 'ReadPreferredRWLock', 'WritePreferredPriorityRWLock', 'WritePreferredRWLock'
 signals_all = 'wait_for_signal',
-tools_all = 'argstr_to_json', 'argv_to_json', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'json_to_argstr', 'json_to_argv', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'
+tools_all = 'argstr_to_cfg', 'argv_to_cfg', 'cfg_to_argstr', 'cfg_to_argv', 'find_help_url', 'get_cfg_json_format', 'get_cmd_help', 'loadf', 'open_help', 'print_cfg_json_format', 'print_cmd_help'
 util_all = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'make_task_factory', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 version_all = 'VersionDelta', 'VersionInfo', 'autogenerate_normalizers', 'dispatch_normalizer', 'normalize', 'normalize_allow_unimplemented', 'register_normalizer', 'unregister_normalizer'
