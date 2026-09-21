@@ -486,15 +486,15 @@ wheels = [
 
 [[package]]
 name = "executorlib"
-version = "1.10.2"
+version = "1.10.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
     { name = "pyzmq" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/88/d6be7ecb0653ec48a6efdb7d6163f73f550aaadf5ae275f99bab044bd657/executorlib-1.10.2.tar.gz", hash = "sha256:24bd55625bba81f782a3a5ff41df9f94a103ce35edb99cea3cf4979dc7db1103", size = 63233, upload-time = "2026-08-07T06:54:44.173Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/43/22b9994a599df937f36417db1300fe5f213951d0dbce2d800da0fea2311e/executorlib-1.10.3.tar.gz", hash = "sha256:be98caf0c0dc7a1a6c27b30f518f81feaf65029caf130e4a62b94abc3abea1de", size = 63998, upload-time = "2026-09-11T09:42:10.917Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/20/80b75b74af36df6432dab0f95e49fc807955affcba26e402982f2d92a838/executorlib-1.10.2-py3-none-any.whl", hash = "sha256:29271d29d95d0bfb80f12390baa0cbb296d763ae411c16fe25bb5648a426997d", size = 90245, upload-time = "2026-08-07T06:54:42.906Z" },
+    { url = "https://files.pythonhosted.org/packages/74/ab/151897856f83c047993b5220e82f30c9899f07aa242cb418df5575f414ea/executorlib-1.10.3-py3-none-any.whl", hash = "sha256:7caf873f50d6cf04267a37ea18116b3a1d9df6b65d72df77a666bc3376ac377a", size = 91093, upload-time = "2026-09-11T09:42:09.274Z" },
 ]
 
 [[package]]
@@ -1017,7 +1017,7 @@ docs = [
 ]
 executors = [
     { name = "deadpool-executor", specifier = "==2026.7.1" },
-    { name = "executorlib", specifier = "==1.10.2" },
+    { name = "executorlib", specifier = "==1.10.3" },
     { name = "ipyparallel", specifier = "==9.2.0" },
     { name = "loky", specifier = "==3.5.6" },
     { name = "pebble", specifier = "==5.2.1" },
