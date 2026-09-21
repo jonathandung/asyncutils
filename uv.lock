@@ -486,15 +486,15 @@ wheels = [
 
 [[package]]
 name = "executorlib"
-version = "1.10.2"
+version = "1.10.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
     { name = "pyzmq" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/42/88/d6be7ecb0653ec48a6efdb7d6163f73f550aaadf5ae275f99bab044bd657/executorlib-1.10.2.tar.gz", hash = "sha256:24bd55625bba81f782a3a5ff41df9f94a103ce35edb99cea3cf4979dc7db1103", size = 63233, upload-time = "2026-08-07T06:54:44.173Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/43/22b9994a599df937f36417db1300fe5f213951d0dbce2d800da0fea2311e/executorlib-1.10.3.tar.gz", hash = "sha256:be98caf0c0dc7a1a6c27b30f518f81feaf65029caf130e4a62b94abc3abea1de", size = 63998, upload-time = "2026-09-11T09:42:10.917Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d3/20/80b75b74af36df6432dab0f95e49fc807955affcba26e402982f2d92a838/executorlib-1.10.2-py3-none-any.whl", hash = "sha256:29271d29d95d0bfb80f12390baa0cbb296d763ae411c16fe25bb5648a426997d", size = 90245, upload-time = "2026-08-07T06:54:42.906Z" },
+    { url = "https://files.pythonhosted.org/packages/74/ab/151897856f83c047993b5220e82f30c9899f07aa242cb418df5575f414ea/executorlib-1.10.3-py3-none-any.whl", hash = "sha256:7caf873f50d6cf04267a37ea18116b3a1d9df6b65d72df77a666bc3376ac377a", size = 91093, upload-time = "2026-09-11T09:42:09.274Z" },
 ]
 
 [[package]]
@@ -676,14 +676,14 @@ wheels = [
 
 [[package]]
 name = "loky"
-version = "3.5.6"
+version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/76/61/690a4503ede61d36cc7fa2d5fa11fe02d94f030bd82155cd8935b2694580/loky-3.5.6.tar.gz", hash = "sha256:d96935ed689aa53eeb7b329769544950fa10a52706968f5d0af3d9c33a761e77", size = 102275, upload-time = "2025-08-27T09:53:52.4Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/22/278d945801da206ad49ec30686a9faa140f977afd07143c136252546af0d/loky-3.6.0.tar.gz", hash = "sha256:12c1655148c369dd1739a514a4f5b01b76538ffead916f9ad442ef6c0e9be896", size = 115338, upload-time = "2026-08-31T08:38:07.59Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/80/7f1f1bf8c2d5dfd8e9c0e1191aa355ff8b80b5619f84d6dcc2703fa7fd5a/loky-3.5.6-py3-none-any.whl", hash = "sha256:6d5300ac68cbd5084e89a6a0a187785d6a79950d461c80223d2c9a41d672b3d4", size = 56515, upload-time = "2025-08-27T09:53:51.145Z" },
+    { url = "https://files.pythonhosted.org/packages/42/f9/d9b7f7551d397c1a11b0aea666e8607fc95b7e3ba97b338d83b94e44a51e/loky-3.6.0-py3-none-any.whl", hash = "sha256:992365f32e034277a995b170f49549ad7d0ee62d9c91d190ef2c267f8339df17", size = 66017, upload-time = "2026-08-31T08:38:06.036Z" },
 ]
 
 [[package]]
@@ -840,11 +840,11 @@ wheels = [
 
 [[package]]
 name = "pebble"
-version = "5.2.1"
+version = "5.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f9/6b/fba8cb6ca12e6bbcfac48da790b6a9d262d5beb6f34dc1b63fccc32a9ff8/pebble-5.2.1.tar.gz", hash = "sha256:9743537aa0e40751a1cbf297928e141bd2202a24624a7c0f9fc14818a7f227b1", size = 40496, upload-time = "2026-07-19T20:18:17.044Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/60/daeaa992b73667dc6976fd6ed137aaff88801ad497e3ba19464d5dcf1c1d/pebble-5.2.2.tar.gz", hash = "sha256:eb49a0f6862f7e75df4a40107f1c8c267cf8adfbd6d29a0dac29d17ac188c878", size = 41367, upload-time = "2026-09-04T13:15:22.559Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ad/cf/f838e54b229bb202575daf7542d39da3c38434959d7a9252d4be66cb7d9a/pebble-5.2.1-py3-none-any.whl", hash = "sha256:154feb48f187ffff842cbc2fe0768ed1524d6fa72e90577a78bcea21a2f929f9", size = 34984, upload-time = "2026-07-19T20:18:15.692Z" },
+    { url = "https://files.pythonhosted.org/packages/95/34/acd4067ea2dadc43038d7940836d893904671e404978eb455887cb3fb0f9/pebble-5.2.2-py3-none-any.whl", hash = "sha256:1058e3ed41c6bb5cc16fcf6a249502cd4637a597211b997d9a0a499f46bc91a4", size = 36355, upload-time = "2026-09-04T13:15:21.256Z" },
 ]
 
 [[package]]
@@ -1017,10 +1017,10 @@ docs = [
 ]
 executors = [
     { name = "deadpool-executor", specifier = "==2026.7.1" },
-    { name = "executorlib", specifier = "==1.10.2" },
+    { name = "executorlib", specifier = "==1.10.3" },
     { name = "ipyparallel", specifier = "==9.2.0" },
-    { name = "loky", specifier = "==3.5.6" },
-    { name = "pebble", specifier = "==5.2.1" },
+    { name = "loky", specifier = "==3.6.0" },
+    { name = "pebble", specifier = "==5.2.2" },
 ]
 json5 = [{ name = "pyjson5", specifier = "==2.0.1" }]
 pconf = [

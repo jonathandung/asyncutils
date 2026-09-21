@@ -16,7 +16,7 @@ def test_helpers():
     with raises(AttributeError): helpers.copy_and_clear(()) # ty: ignore[invalid-argument-type]
     class _: ...
     assert helpers.subscriptable(_) is _
-    o = _[None]()
+    o = _[None]()  # ty: ignore[not-subscriptable]
     o.foo = lambda: None
     assert not helpers.check_methods(_(), 'foo')
     assert not helpers.check_methods(o, 'foo')
