@@ -9,8 +9,7 @@ build:
   jobs:
     post_create_environment:
       - python3 -m pip install -U pip
-      - python3 -m pip install furo -e .
-      - python3 -m pip install --group docs
+      - python3 -m pip install furo -e . --group docs
       - scripts/generate.sh
 formats:
   - htmlzip

@@ -18,13 +18,13 @@ This project uses [Semantic Versioning](https://semver.org) when I feel like it.
 
 ### [1.3]
 
-### [1.3.0] - 2026-09-14; unreleased
+### [1.3.0] - 2026-09-22; newest
 
 Changed all extras to dependency groups.
 
 ### [1.2]
 
-### [1.2.4] - 2026-09-06; newest
+### [1.2.4] - 2026-09-06
 
 Upgraded to Python 3.15.0rc2.
 
