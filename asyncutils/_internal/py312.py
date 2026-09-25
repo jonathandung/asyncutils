@@ -6,7 +6,7 @@ if __import__('sys').version_info < (3, 13):
         while W and (w := W.popleft()).done(): ...
         if w: w.set_result(None)
     @h.subscriptable
-    class Queue(h.LoopMixinBase):
+    class Queue(h.RefTaskLoopMixin):
         __slots__ = '_finished', '_getters', '_is_shutdown', '_putters', '_queue', '_unfinished_tasks', 'maxsize'
         def __init__(self, maxsize=0): self.maxsize, self._getters, self._putters, self._unfinished_tasks, self._is_shutdown, self._finished = maxsize, deque(), deque(), 0, False, __import__('asyncutils').done_evt(); self._init(maxsize)
         def __repr__(self): return self.__str__('at', format(id(self), '#x'))

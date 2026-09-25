@@ -30,5 +30,5 @@ hooks = [{id = "ruff-check", args = ["--fix"]}]
 
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v1.3.0"
+rev = "v2.0.0"
 hooks = [{id = "check-empty", files = '^asyncutils/py\.typed|tests/__init__\.py$'}]

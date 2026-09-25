@@ -1,16 +1,18 @@
 version: 2
 sphinx:
   configuration: docs/source/conf.py
-  fail_on_warning: true
 build:
   os: ubuntu-26.04
-  tools:
-    python: latest
-  jobs:
-    post_create_environment:
-      - python3 -m pip install -U pip
-      - python3 -m pip install furo -e . --group docs
-      - scripts/generate.sh
+  commands:
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - $HOME/.local/bin/uv venv --python 3.15 $READTHEDOCS_VIRTUALENV_PATH
+    - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv sync --group docs
+    - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv pip install furo
+    - scripts/generate.sh
+    - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b html docs/source $READTHEDOCS_OUTPUT/html
+    - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b singlehtml docs/source $READTHEDOCS_OUTPUT/htmlzip
+    - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b latex docs/source $READTHEDOCS_OUTPUT/pdf
+    - cd $READTHEDOCS_OUTPUT/pdf && latexmk -f -r latexmkrc -pdf -dvi- -ps- -jobname=asyncutils -interaction=nonstopmode
 formats:
   - htmlzip
   - pdf

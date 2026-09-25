@@ -1,4 +1,3 @@
-# ruff: file-ignore[non-imperative-mood]
 '''Some asyncio protocols and a transport. See :doc:`the asyncio documentation page <python:library/asyncio-protocol>`.'''
 from asyncio import AbstractEventLoop, Protocol, Transport, WriteTransport
 from collections.abc import Iterable
@@ -23,13 +22,13 @@ class LineProtocol(Protocol, LoopMixinBase):
     @property
     def connected_transport(self) -> WriteTransport: '''The transport associated with this protocol; raises :exc:`ConnectionError` if not connected.'''
     def connection_made(self, transport: WriteTransport) -> None: '''Unlike the base class, this method does not take read-only transports.''' # ty: ignore[invalid-method-override]
-    def connection_lost(self, exc: Exception|None) -> None: '''Called when the connection is lost.'''
+    def connection_lost(self, exc: Exception|None) -> None: '''Note the that connection has been lost.'''
     def close(self) -> bool: '''Close the transport and return success.'''
-    def data_received(self, data: bytes, bufsize: int=...) -> None: '''Called when some data is received, with ``data`` being a non-empty bytes object containing it.'''
+    def data_received(self, data: bytes, bufsize: int=...) -> None: '''Receive some data. ``data`` is a non-empty :class:`bytes` object containing it.'''
     def flush(self) -> None: '''Flush the internal buffer and put in remaining data as a single line.'''
     def signal_eof(self) -> None: '''Signal that the stream is at EOF.'''
-    def pause_writing(self) -> None: '''Called when the transport's buffer goes over the high watermark.'''
-    def resume_writing(self) -> None: '''Called when the transport's buffer drains below the low watermark.'''
+    def pause_writing(self) -> None: '''Note that the transport's buffer has gone over the high watermark.'''
+    def resume_writing(self) -> None: '''Note that the transport's buffer has drained below the low watermark.'''
     def write_line(self, line: str) -> None: '''Write the string ``line`` to the transport, followed by the newline sequence.'''
     def write_literal(self, data: bytes) -> None: '''Write the given bytes into the transport without appending a newline.'''
     def eof_received(self) -> None: '''Receive the signal from the other end that it won't send any more data, for example when :meth:`~asyncio.WriteTransport.write_eof` is called, which closes the transport.'''

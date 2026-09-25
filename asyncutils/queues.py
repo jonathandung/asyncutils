@@ -129,7 +129,7 @@ def password_queue(password_put=_NO_DEFAULT, password_get=_NO_DEFAULT, maxsize=0
             async for i in A.iter_to_agen(init_items): await f(i)
         q.cancel_extend = L.create_task(extend()).cancel
     return q
-class PotentQueueBase(D.Queue, H.RefTaskLoopMixin, metaclass=ABCMeta): # ruff: ignore[too-many-public-methods]
+class PotentQueueBase(D.Queue, metaclass=ABCMeta): # ruff: ignore[too-many-public-methods]
     @abstractmethod
     def _init(self, maxsize): raise NotImplementedError
     @abstractmethod
