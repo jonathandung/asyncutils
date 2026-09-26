@@ -12,7 +12,7 @@ To start development, run the following::
 
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
-  make setup # creates a virtual environment at .venv using uv and installs uv, prek and the development dependencies
+  make setup # installs the latest version of uv, prek 0.5.3 and the development dependencies and creates a virtual environment at .venv using uv
   . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
 
 A ready-to-use VS Code configuration file is included, which will prompt you to install extensions this project recommends and disable some others to
@@ -126,6 +126,11 @@ complete the following:
   There should be a massive dictionary assigned to the name ``C`` that contains the option names mapped to their factory defaults on line 5. Edit it
   accordingly.
 
+Regenerating the lockfile after dependency updates
+--------------------------------------------------
+
+Run ``make lock``.
+
 Updating config.pyi
 -------------------
 
@@ -137,8 +142,8 @@ Adding a documentation page
 ---------------------------
 
 1. Choose a format: .md or .rst.
-   Though .md is easier to write, one may want .rst for its rich directive support that integrates seamlessly with Sphinx and allows for smoother
-   redirection, though the MyST parser is improving to accommodate these.
+   Though .md is easier to write, you may want .rst for its rich directive support that integrates seamlessly with Sphinx and allows for smoother
+   redirection.
 2. Choose a location depending on how visible you wish the page to be: ``docs/source`` or the project root.
 3. If the page is of paramount importance even to end users or people doing a read-through of the project, expand the README with a new section
    containing a summary and linking to the page on the bottom.
@@ -186,9 +191,3 @@ static badges in the readme::
 
 If the tests are failing, do not commit the badges, since reviewers would assume your PR is ready for merging when you do so, and may close the PR
 just because they don't appear with a passing status.
-
-.. note:: The above snippet requires the pytest-local-badge plugin, which should come packaged with the tests dependency group.
-
-The test ought to go in the test source file corresponding to the submodule from which the feature can be publicly imported, even if its
-implementation is spread across files, with the exceptions of the base and iterclasses submodules, whose tests I find inseparable with the logic for
-tests for :mod:`~asyncutils.iters`, compelling me to put them into ``tests/test_iters.py`` together.

@@ -130,11 +130,10 @@ YAML   .yaml, .yml    yaml        PyYAML
 JSONC  .jsonc         jsonc       json-with-comments
 JSON5  .json5         pyjson5     pyjson5
 Hjson  .hjson         hjson       hjson
-XML    .xml           xmltodict   xmltodict
 ====== ============== =========== ==================
 
 .. important::
-  To write the config in each format, adhere to the exact analogue of the nested dictionary structure shown in format.json5 in the chosen language.
+  To write the config in each format, structure the config as in format.json5 but translated to that format.
 
 .. tip::
   :collapsible:
@@ -151,6 +150,9 @@ XML    .xml           xmltodict   xmltodict
   To ensure all supported formats can be parsed, install the ``pconf`` group.
 
 INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
+
+.. version-changed:: 1.3.0
+  Support for XML was dropped for the same reason as above.
 
 It is currently possible to associate file extensions not shown above with other libraries providing a ``load`` function taking a file object and
 returning a dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.

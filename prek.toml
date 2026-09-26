@@ -25,10 +25,10 @@ hooks = [{id = "sphinx-lint"}]
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.7"
+rev = "v0.16.9"
 hooks = [{id = "ruff-check", args = ["--fix"]}]
 
 [[repos]]
 repo = "https://github.com/jonathandung/check-empty"
-rev = "v2.0.0"
+rev = "v3.0.0"
 hooks = [{id = "check-empty", files = '^asyncutils/py\.typed|tests/__init__\.py$'}]

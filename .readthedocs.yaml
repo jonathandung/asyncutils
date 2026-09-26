@@ -10,9 +10,7 @@ build:
     - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv pip install furo
     - scripts/generate.sh
     - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b html docs/source $READTHEDOCS_OUTPUT/html
-    - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b singlehtml docs/source $READTHEDOCS_OUTPUT/htmlzip
     - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -b latex docs/source $READTHEDOCS_OUTPUT/pdf
     - cd $READTHEDOCS_OUTPUT/pdf && latexmk -f -r latexmkrc -pdf -dvi- -ps- -jobname=asyncutils -interaction=nonstopmode
 formats:
-  - htmlzip
   - pdf

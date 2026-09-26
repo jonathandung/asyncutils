@@ -1,11 +1,9 @@
 '''
 | Provides asynchronous file-like interfaces to the following: coupled reader and writer, write-one-end-and-read-the-other pipes, and memory maps.
-| Does not depend on `aiofiles <https://pypi.org/p/aiofiles>`__ or any such library.
+| Does not depend on :mod:`!aiofiles` or any such library.
 | Executors of the type determined by the module configuration are used.
 
-.. note::
-  This library is not designed specifically for I/O, and the functionality in this submodule is far from comprehensive.
-  See `aiostream <https://aiostream.readthedocs.io/en/stable>`__ or similar for that.
+.. note:: This library is not designed specifically for I/O. Hence, the functionality in this submodule is far from comprehensive.
 '''
 from collections.abc import Buffer, Callable, Iterable
 from contextlib import AbstractAsyncContextManager

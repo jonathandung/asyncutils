@@ -1,7 +1,7 @@
 # asyncutils
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
-[![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/p/py-asyncutils)
+[![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/project/py-asyncutils)
 [![Coverage](https://codecov.io/gh/jonathandung/asyncutils/graph/badge.svg?token=PTRNW1RGXA)](https://codecov.io/gh/jonathandung/asyncutils)
 [![Build](https://github.com/jonathandung/asyncutils/actions/workflows/push.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/push.yaml)
 [![CodeQL](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/github-code-scanning/codeql)

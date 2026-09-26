@@ -6,23 +6,15 @@ hide-toc: true
 
 All notable changes to this project are and will be documented in this file.
 
-This project uses [Semantic Versioning](https://semver.org) when I feel like it.
+This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
-## Summary
-
-### Tests
-
-60% coverage, 97 tests
-
-## Versions
-
-### [1.3]
+## [1.3]
 
 ### [1.3.0] - 2026-09-22; newest
 
-Changed all extras to dependency groups.
+Changed all extras to dependency groups; removed XML config parsing since XML is not typed.
 
-### [1.2]
+## [1.2]
 
 ### [1.2.4] - 2026-09-06
 
@@ -30,7 +22,7 @@ Upgraded to Python 3.15.0rc2.
 
 ### [1.2.3] - 2026-08-31
 
-This changelog is getting frustrating to maintain.
+Refactors.
 
 ### [1.2.2] - 2026-08-29
 
@@ -44,9 +36,7 @@ Various workflows.
 
 Started using Zizmor.
 
-### [1.1]
-
-Breaking changes: There shouldn't be any, but I made a lot.
+## [1.1]
 
 ### [1.1.4] - 2026-08-18
 
@@ -58,679 +48,210 @@ Switched from detect-secrets to betterleaks; added `asyncutils bug` subcommand.
 
 ### [1.1.2] - 2026-08-03
 
-Some bug fixes and moves around submodules.
+Some bugfixes and moves around submodules.
 
-### [1.1.1] - skipped
-
-Switched from pre-commit to prek; removed pre-commit.ci step and replaced with a prek workflow.
-
-### [1.1.0] - 2026-07-11
-
-Semantic versioning be damned! No one uses this project anyway.
-
-### [1.0]
+## [1.0]
 
 Breaking changes:
 
 - Declared end of life for all beta versions.
 - Included all the symbols listed in the previous section in the public API.
 
-### [1.0.2] - skipped
-
-Added more tests; mangled private attributes in multiple classes; made some refactors; implemented `iters.group_from`, `iters.awindowed_complete`,
-`iters.aall_unique`, `iters.anth_product`, `iters.anth_permutation`, `iters.anth_combination_with_replacement`.
-
 ### [1.0.1] - 2026-06-30
 <!--cspell:disable-next-line-->
 Implemented `util.evaluate_and_return`, `iters.awrapf`, and `exceptions.ignore_warnings`; added `reject_cb` and `await_cb` parameters to
 `iters.aguessmax` and `iters.aguessmin`; added `yield_sentinel` keyword argument to `util.aiter_from_f`.
 
-#### [1.0.0] - 2026-06-26; first stable version
+### [1.0.0] - 2026-06-26; first stable version
 
 Added some tests; enabled some pydocstyle lint rules; refactored internal modules to avoid importing asyncio to show the help message and library
 version; moved warnings badge generation to slower test run; switched back to codecov due to pricing; integrated spelling checker.
 
-## Below versions are [unstable](https://semver.org/#spec-item-4)
-
-### [0.9]
+## [0.9]
 
 Breaking changes:
 
 - Declared end of life for all alpha versions.
 - Changed version shelving and unshelving schema.
-- Finalized the following top level objects:
 
-  Constants:
-  - \_\_version__
-  - \_\_hexversion__
-  - submodules_map
-  - preloaded_submodules
-  - console_preloaded_submodules
-
-  Functions:
-  - time_since_boot
-
-- Declared the following submodules and symbols as part of the public API:
-
-  - altlocks
-
-    Classes:
-    - CircuitBreaker
-    - DynamicThrottle
-    - Releasing
-    - ResourceGuard
-    - StatefulBarrier
-    - UniqueResourceGuard
-
-  - base
-
-    Classes:
-    - EventLoop (context manager)
-
-    Functions:
-    - adisembowel
-    - adisembowel_left
-    - aenumerate
-    - aiter_to_gen
-    - collect
-    - collect_into
-    - drop
-    - iter_to_agen
-    - safe_cancel_batch
-    - sleep_forever
-    - take
-
-    Awaitables:
-    - dummy_task
-    - yield_to_event_loop
-
-  - buckets
-
-    Classes:
-    - LeakyBucket
-    - TokenBucket
-
-  - channels
-
-    Classes:
-    - EventBus
-    - Observable
-    - Rendezvous
-
-  - cli
-
-    Functions:
-    - run
-
-  - compete
-
-    Functions:
-    - convert_to_coro_iter
-    - enhanced_gather
-    - enhanced_staggered_race
-    - first_completed
-    - multi_winner_race_with_callback
-    - race_with_callback
-
-  - config
-
-    Classes:
-    - Debugging
-    - Executor
-
-    Functions:
-    - get_past_logs
-    - set_logger_level
-
-    Configuration values:
-    - basic_repl
-    - debug
-    - loaded_all
-    - logging_to
-    - max_memory_errors
-    - pdb
-    - silent
-
-  - console
-
-    Classes:
-    - AsyncUtilsConsole
-    - ConsoleBase
-
-  - constants
-
-    Classes:
-    - SentinelBase
-
-    Constants:
-    - EXECUTORS_FROZENSET
-    - POSSIBLE_EXECUTORS
-    - RECIPROCAL_E
-
-    Sentinels:
-    - RAISE
-
-  - context
-
-    Classes:
-    - Context
-    - LocalContext (context manager)
-    - NonReusableLocalContext (context manager)
-
-    Constants:
-    - all_contextual_consts
-    - ... (every constant in the `all_contextual_consts` frozenset)
-
-    Functions:
-    - getcontext
-    - setcontext
-
-  - events
-
-    Classes:
-    - SingleWaiterEventWithValue
-    - EventWithValue
-
-  - exceptions:
-
-    Classes:
-    - ref
-    - IgnoreErrors
-    - WarningToError
-
-    Constants:
-    - CRITICAL
-
-    Context managers (ignore_*):
-    - ignore_all
-    - ignore_noncritical
-    - ignore_typical
-    - ignore_stop_iteration
-    - ignore_stop_async_iteration
-    - ignore_value_errors
-    - ignore_type_errors
-
-    Exception types:
-    - Critical
-    - StateCorrupted
-    - VersionError
-    - VersionConversionError
-    - VersionNormalizerMissing
-    - VersionCorrupted
-    - VersionValueError
-    - VersionNormalizerTypeError
-    - VersionNormalizerFault
-    - BulkheadError
-    - BulkheadFull
-    - BulkheadShutDown
-    - PoolError
-    - PoolFull
-    - PoolShutDown
-    - RateLimitExceeded
-    - BusError
-    - BusTimeout
-    - BusShutDown
-    - BusStatsErrors
-    - BusPublishingError
-    - CircuitBreakerError
-    - CircuitHalfOpen
-    - CircuitOpen
-    - EventValueError
-    - FutureCorrupted
-    - MaxIterationsError
-    - Deadlock
-    - ResourceBusy
-    - ItemsExhausted
-    - LockForceRequest
-    - PasswordQueueError
-    - PasswordRetrievalError
-    - GetPasswordRetrievalError
-    - PutPasswordRetrievalError
-    - ForbiddenOperation
-    - PasswordError
-    - WrongPassword
-    - WrongPasswordType
-    - PasswordMissing
-    - GetPasswordMissing
-    - PutPasswordMissing
-
-    Functions:
-    - unnest
-    - unnest_reverse
-    - potent_derive
-    - prepare_exception
-    - raise_exc
-    - exception_occurred
-    - wrap_exc
-    - unwrap_exc
-
-  - func
-
-    Classes:
-    - RateLimited
-
-    Functions:
-    - areduce
-    - discard_retval
-    - to_sync
-    - to_async
-    - to_sync_from_loop
-    - aiter_from_f
-    - afcopy
-    - iterf
-    - acompose
-    - every
-    - everymethod
-    - timer
-    - retry
-    - throttle
-    - debounce
-    - measure
-    - measure2
-    - benchmark
-    - star
-    - unstar
-
-  - futures
-
-    Classes:
-    - AsyncCallbacksFuture
-    - AsyncCallbacksTask
-    - TimeAwareAsyncCallbacksFuture
-    - TimeAwareAsyncCallbacksTask
-    - TimeAwareFuture
-    - TimeAwareTask
-    - TimeAwareUniqueCallbacksFuture
-    - TimeAwareUniqueCallbacksTask
-    - UniqueCallbacksFuture
-    - UniqueCallbacksTask
-
-  - iotools
-
-    Classes:
-    - AsyncReadWriteCouple
-    - MemoryMappedIOManager
-
-    Functions:
-    - double_ended_text_pipe
-    - double_ended_binary_pipe
-
-  - iterclasses
-
-    Classes:
-    - AChain
-    - APeekable
-    - ABucket
-
-  - iters
-
-    Functions:
-    - ... (There are too many of these, so just refer to the IDE autocomplete or read the stub)
-
-  - locks
-
-    Classes:
-    - AdvancedRateLimit
-    - DynamicBoundedSemaphore
-    - PrioritySemaphore
-    - KeyedCondition
-    - RLock
-    - PriorityLock
-    - PriorityRLock
-    - MultiCountDownLatch
-
-  - locksmiths
-
-    Classes:
-    - LocksmithBase
-
-    Enumerations:
-    - ForceResult
-    - RecognitionResult
-
-    Functions:
-    - succeeded
-
-  - misc
-
-    Classes:
-    - CallbackAccumulator
-    - StateMachine
-    - CacheWithBackgroundRefresh
-
-    Functions:
-    - gather_with_limited_concurrency
-
-  - mixins
-
-    Interfaces/Mixins:
-    - AwaitableMixin
-    - AsyncContextMixin
-    - ExecutorRequiredAsyncContextMixin
-    - LockMixin
-    - LockWithOwnerMixin
-    - EventMixin
-
-  - networking
-
-    Classes:
-    - LineProtocol
-    - LFProtocol
-    - CRLFProtocol
-    - CRProtocol
-    - SocketTransport
-
-  - pools
-
-    Classes:
-    - AdvancedPool
-    - ConnectionPool
-
-  - processors
-
-    Classes:
-    - BoundedBatchProcessor
-    - BatchProcessor
-    - Bulkhead
-
-  - properties
-
-    Classes:
-    - AsyncPropertyBase
-    - ConcurrentAsyncProperty
-    - LazyAsyncProperty
-    - RWLockedAsyncProperty
-
-    Enumerations:
-    - Deleters
-
-  - queues
-
-    Interfaces:
-    - PotentQueueBase
-
-    Classes:
-    - SmartQueue
-    - SmartLifoQueue
-    - SmartPriorityQueue
-    - UserPriorityQueue
-
-    Functions:
-    - password_queue
-
-    Context managers (ignore_*):
-    - ignore_qshutdown
-    - ignore_qempty
-    - ignore_qfull
-    - ignore_qerrs
-
-  - rwlocks
-
-    Classes:
-    - RWLock
-    - FairRWLock
-    - ReadPreferredRWLock
-    - WritePreferredRWLock
-    - PriorityRWLock
-    - FairPriorityRWLock
-    - WritePreferredPriorityRWLock
-    - AgingRWLock
-    - CoercedMethod
-
-  - signals
-
-    Functions:
-    - wait_for_signal
-
-  - tools
-
-    Functions:
-
-    - loadf
-    - cfg_to_argv
-    - cfg_to_argstr
-    - argv_to_cfg
-    - argstr_to_cfg
-    - get_cfg_json_format
-    - print_cfg_json_format
-    - get_cmd_help
-    - print_cmd_help
-
-  - util
-
-    Context managers (ignore_*):
-    - ignore_cancellation
-
-    Context manager classes:
-    - anullcontext
-
-    Functions:
-    - aawcmf2dcmf
-    - aawcmf2dcmff
-    - dcm
-    - get_future
-    - make_task_factory
-    - new_eager_tasks
-    - sync_await
-    - lockf
-    - done_evt
-    - done_fut
-    - locked_lock
-    - dualcontextmanager
-    - semaphore
-    - safe_cancel
-    - transient_block
-    - transient_block_from_loop
-    - wrap_in_coro
-    - atruthify
-    - afalsify
-    - anullify
-    - avalify
-
-  - version
-
-    Classes:
-    - VersionInfo
-    - VersionDelta
-
-    Functions:
-    - normalize
-    - normalize_allow_unimplemented
-    - register_normalizer
-    - unregister_normalizer
-    - dispatch_normalizer
-    - autogenerate_normalizers
-
-#### [0.9.16] - 2026-06-22
+### [0.9.16] - 2026-06-22
 
 Greatly improved futures and properties functionality.
 
-#### [0.9.15] - 2026-06-17
+### [0.9.15] - 2026-06-17
 
 Committed uv.lock to version control; replaced `AsyncGenerator` with `AsyncGeneratorType` and `Generator` with `GeneratorType` where appropriate.
 
-#### [0.9.14] - 2026-06-13
+### [0.9.14] - 2026-06-13
 
 Refactored `base.EventLoop`; improved submodule logging and `__dir__` method handling.
 
-#### [0.9.13] - 2026-06-12
+### [0.9.13] - 2026-06-12
 
 Reorganized the project structure; added a test; clarified documentation.
 
-#### [0.9.12] - 2026-06-10
+### [0.9.12] - 2026-06-10
 
 Fixed all warnings in Sphinx nitpicky builds; declared free-threaded support as standard; unpinned the exact beta of Python 3.15.
 
-#### [0.9.11] - 2026-06-04
+### [0.9.11] - 2026-06-04
 
 Upgraded to Python 3.15.0b2; added experimental GraalPy and free-threaded support.
 
-#### [0.9.10] - 2026-05-29
+### [0.9.10] - 2026-05-29
 
 Integrated CodeQL fully.
 
-#### [0.9.9] - 2026-05-26
+### [0.9.9] - 2026-05-26
 
 Added more tests and more badges to the readme; removed codecov upload step superseded by GitHub Code Quality.
 
-#### [0.9.8] - 2026-05-23
+### [0.9.8] - 2026-05-23
 
 Eliminated instances of bare `Any` used to annotate arguments.
 
-#### [0.9.7] - 2026-05-21
+### [0.9.7] - 2026-05-21
 
 Added `locksmiths` submodule.
 
-#### [0.9.6] - 2026-05-19
+### [0.9.6] - 2026-05-19
 
 Re-committed .markdownlint.json to version control; documentation nears completion; used GitHub Actions for page deployment.
 
-#### [0.9.5] - 2026-05-17
+### [0.9.5] - 2026-05-17
 
 Some bugfixes; began deployment to [GitHub Pages](https://jonathandung.github.io/asyncutils).
 
-#### [0.9.4] - 2026-05-15
+### [0.9.4] - 2026-05-15
 
 Fixed workflows once more and integrated uv more fully; migrated from mypy to ty, removing stubtest step.
 
-#### [0.9.3] - 2026-05-11
+### [0.9.3] - 2026-05-11
 
 Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
 sphinx-copybutton as an optional dependency.
 
-#### [0.9.2] - 2026-05-07
+### [0.9.2] - 2026-05-07
 
 Created symbolic links in docs directory linking to root .md files; fixed some bugs; respected some more environment variables and documented this
 behaviour; completed benchmarks; added myst_parser as an optional dependency; bumped some dependencies; added some examples.
 
-#### [0.9.1] - 2026-05-01
+### [0.9.1] - 2026-05-01
 
 Declared full support for python[ -m] asyncutils an entry point; patched function, method and class method signatures where appropriate; added
--P/--pdb option; switched to `furo` theme.
+`-P` / `--pdb` option; switched to `furo` theme.
 
-#### [0.9.0] - 2026-04-27
+### [0.9.0] - 2026-04-27
 
 Added some iteration, functional programming and context management utilities.
 
-## Below versions have reached [EOL](https://en.wikipedia.org/wiki/Software_release_life_cycle#End-of-life)
+## [0.8]
 
-### [0.8]
-
-Breaking changes:
-
-- Created [GitHub repository](https://github.com/jonathandung/asyncutils.git)
-
-#### [0.8.28] - 2026-04-24
+### [0.8.28] - 2026-04-24
 
 Rewrote submodules loading mechanism; removed fragile relative imports; compressed asyncio and sibling module imports to avoid overhead.
 
-#### [0.8.27] - 2026-04-21
+### [0.8.27] - 2026-04-21
 
 Added more tests and fixed stubtest errors; abolished slow markdownlint step in pre-commit; various API additions.
 
-#### [0.8.26] - 2026-04-18
+### [0.8.26] - 2026-04-18
 
 Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
 
-#### [0.8.25] - 2026-04-14
+### [0.8.25] - 2026-04-14
 
 Created issue templates.
 
-#### [0.8.24] - 2026-04-10
+### [0.8.24] - 2026-04-10
 
 Created AI_USAGE_POLICY.md.
 
-#### [0.8.23] - 2026-04-09
+### [0.8.23] - 2026-04-09
 
 Integrated pre-commit CI.
 
-#### [0.8.22] - 2026-04-05
+### [0.8.22] - 2026-04-05
 
 Created the audit events table.
 
-#### [0.8.21] - 2026-04-01
+### [0.8.21] - 2026-04-01
 
 Organized badges into table; started using mypy.
 
-#### [0.8.20] - 2026-03-29
+### [0.8.20] - 2026-03-29
 
 Started hosting documentation on Read the Docs.
 
-#### [0.8.19] - 2026-03-27
+### [0.8.19] - 2026-03-27
 
 Set up docs directory.
 
-#### [0.8.17] - 2026-03-24
+### [0.8.17] - 2026-03-24
 
 Started using detect-secrets.
 
-#### [0.8.16] - 2026-03-22
+### [0.8.16] - 2026-03-22
 
 Started using ruff; created py.typed.
 
-#### [0.8.14] - 2026-03-21
+### [0.8.14] - 2026-03-21
 
 Set up tests directory; started using pytest.
 
-#### [0.8.9] - 2026-03-14
+### [0.8.9] - 2026-03-14
 
 Created Dockerfile.
 
-#### [0.8.8] - 2026-03-12
+### [0.8.8] - 2026-03-12
 
 Created .editorconfig and .pre-commit-config.yaml.
 
-#### [0.8.6] - 2026-03-10
+### [0.8.6] - 2026-03-10
 
 Created ROADMAP.md.
 
-#### [0.8.4] - 2026-03-09
+### [0.8.4] - 2026-03-09
 
 Created SUPPORT.md and CHANGELOG.md.
 
-#### [0.8.2] - 2026-03-07
+### [0.8.2] - 2026-03-07
 
 Created CODE_OF_CONDUCT.md and CONTRIBUTING.md.
 
-#### [0.8.1] - 2026-03-06
+### [0.8.1] - 2026-03-06
 
 Created pyproject.toml and SECURITY.md.
 
-#### [0.8.0] - 2026-03-06
+### [0.8.0] - 2026-03-06
 
 Set up version control; added version submodule.
 
-## Below entries are [abridged](https://dictionary.cambridge.org/dictionary/english/abridged)
-
-### [0.7] - 2026-02-09
+## [0.7] - 2026-02-09
 
 Began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
 
-### [0.6] - 2026-01
+## [0.6] - 2026-01
 
 Completed migration from inline annotations to separated stubs; perfected `base.EventLoop` and lazy loading; added `console` and `cli` submodules.
 
-### [0.5] - 2025-12
+## [0.5] - 2025-12
 
 Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule;
 began separation of type annotations from .py into .pyi.
 
-### [0.4] - 2025-10
+## [0.4] - 2025-10
 
 Added more complicated patterns and procedures such as `channels.Observable` and `signals.wait_for_signal`.
 
-### [0.3] - 2025-08
+## [0.3] - 2025-08
 
 Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `misc.CacheWithBackgroundRefresh`.
 
-### [0.2] - 2025-07
+## [0.2] - 2025-07
 
 Began reorganizing single file containing all functions into submodules.
 
-### [0.1] - 2025-06
+## [0.1] - 2025-06
 
 Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `util.sync_await`.
-
-### [0.0] - 2025-05
-
-Development began. This can be classified as a passion project.

@@ -23,6 +23,7 @@ if __import__('os').getenv('READTHEDOCS') == 'True':
 else: html_theme = 'sphinx_book_theme'
 html_short_title = f'{project} {release} docs'
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None), 'anyio': ('https://anyio.readthedocs.io/en/stable', None), 'more-itertools': ('https://more-itertools.readthedocs.io/en/stable', None)}
+linkcheck_ignore = [r'https://stackoverflow\.com', r'https://github\.com/jonathandung/.*#.*']
 manpage_url = 'https://manpages.debian.org/{path}'
 maximum_signature_line_length = 120
 need_sphinx = '9.1.0'

@@ -10,7 +10,7 @@ contact_links:
     url: https://github.com/jonathandung/asyncutils/discussions
     about: Ask questions and share your ideas about asyncutils.
   - name: PyPI
-    url: https://pypi.org/p/asyncutils
+    url: https://pypi.org/project/asyncutils
     about: The Python Package Index page for asyncutils.
   - name: Creator's profile
     url: https://github.com/jonathandung

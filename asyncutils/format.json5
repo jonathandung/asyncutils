@@ -194,13 +194,13 @@ Some keys can have various types, as detailed by the comments attached. */
         default_put_from: "password"
       }
     },
-    rwlocks: { // cspell:disable
+    rwlocks: {
       aging_rwlock: {
         default_read_priority_factor: -1.0,
         default_write_priority_factor: -1.0
       },
       rwlock_default_prefer_writers: true
-    }, // cspell:enable
+    },
     signals: {wait_for_signals_default_signals: [2, 15]},
     util: {
       dual_context_manager: {

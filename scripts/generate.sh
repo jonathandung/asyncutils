@@ -13,8 +13,6 @@ exec >docs/source/bug-help.rst
 echo "Bug Reporting
 =============
 
-.. version-added:: 1.1.3
-
 .. highlight:: text
 
 The \`\`asyncutils bug\`\` command, which calls :func:\`~asyncutils.cli.bug\` under the hood, is used to assist ticket submission to the GitHub issue

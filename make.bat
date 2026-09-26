@@ -48,7 +48,7 @@ git clean -dxf
 goto :eof
 
 :docs
-powershell -ExecutionPolicy ByPass -File ".\scripts\generate.ps1" 2>nul
+powershell -ExecutionPolicy ByPass -File ".\scripts\generate.ps1"
 cd docs
 shift
 set "__O=%O%"

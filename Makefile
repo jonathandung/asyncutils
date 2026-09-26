@@ -33,7 +33,7 @@ clean:
 clean-all:
 	git clean -dxf
 docs:
-	. scripts/generate.sh 2>/dev/null
+	scripts/generate.sh
 	$(MAKE) -C docs html -W
 help:
 	cat assets/mkhelp.txt

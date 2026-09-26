@@ -3,8 +3,8 @@ from asyncutils.constants import *
 from asyncutils.constants import _NO_DEFAULT
 t = type(NO_COALESCE)
 def test_misc():
-    assert 1/math.e == RECIPROCAL_E # ruff: ignore[float-equality-comparison]
-    assert math.e == 1/RECIPROCAL_E # ruff: ignore[float-equality-comparison]
+    assert 1/math.e == RECIPROCAL_E
+    assert math.e == 1/RECIPROCAL_E
     assert EXECUTORS_FROZENSET.issuperset(POSSIBLE_EXECUTORS)
     assert EXECUTORS_FROZENSET.issubset(POSSIBLE_EXECUTORS)
     assert _NO_DEFAULT.is_private

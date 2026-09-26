@@ -1,0 +1,162 @@
+logging_to: STDERR
+no_log: false
+V: 0
+Q: 0
+executor: thread
+quiet: false
+basic_repl: false
+max_memory_errors: 3
+debug: false
+load_all: false
+seed:
+pdb: false
+next_config:
+context:
+  altlocks:
+    circuit_breaker:
+      default_max_fails: 3
+      default_max_half_open_calls: 5
+      default_reset: 30
+    dynamic_throttle:
+      default_jitter: 0.2
+      default_lbound: 0.25
+      default_lfactor: 0.75
+      default_max_rate: 100
+      default_min_rate: 0.01
+      default_ubound: 0.75
+      default_ufactor: 1.25
+      default_window: 100
+  base:
+    event_loop_base_flags: 0
+    aiter_to_gen:
+      default_allow_futures: true
+      default_strict: false
+    iter_to_agen:
+      default_may_create_executor: false
+      default_strict: false
+      default_use_existing_executor: false
+  buckets:
+    token_bucket_default_consume_tokens: 1
+    leaky_bucket:
+      adjmap:
+      - - 256
+        - - 0.15
+          - 1.1
+          - 0.85
+          - 0.9
+      - - 128
+        - - 0.23
+          - 1.2
+          - 0.77
+          - 0.81
+      - - 0
+        - - 0.3
+          - 1.4
+          - 0.7
+          - 0.73
+      default_acquire_tokens: 1
+      default_ext_can_set_factor: true
+      default_max_factor: 10
+      default_min_factor: 0.1
+      default_wait_for_tokens_tokens: 1
+      wait_for_tokens_tick: 0.1
+  channels:
+    event_bus:
+      default_max_concurrent: 64
+      publish_default_safe: true
+      stream_default_buffer_size: 100
+      stream_default_item_timeout: 3
+      stream_default_timeout: 5
+    observable_default_ntimes_n: 1
+    rendezvous_maintenance_interval: 30
+  compete:
+    convert_to_coro_iter_default_skip_invalid: true
+  events:
+    event_with_value:
+      default_max_hist: 128
+      default_recent: 5
+  func:
+    benchmark:
+      default_times: 3
+      default_warmup: 0
+    retry:
+      default_backoff: 2
+      default_delay: 0.5
+      default_jitter: 0.2
+      default_max_delay: 30
+      default_tries: 3
+    timer_default_precision: 7
+  io:
+    memory_mapped_io_manager:
+      default_checksum_alg:
+      default_minimize_writes: true
+  iters:
+    afreivalds_default_k: 2
+    aunzip:
+      default_fail_fast: true
+      default_max_qsize: 64
+      default_put_batch: 16
+    merge_default_max_qsize: 0
+    tee:
+      default_fail_fast: true
+      default_max_qsize: 64
+      default_put_batch: 16
+  locks:
+    advanced_rate_limit_default_tokens: 1
+    dynamic_bounded_semaphore_default_value: 1
+    priority_semaphore_default_value: 1
+  locksmiths:
+    locksmith_base_default_timeouts:
+    - 1
+    - 0.1
+    -
+  misc:
+    gather_with_limited_concurrency_default_max_concurrent: 8
+    background_refresh_cache:
+      default_refresh: 15
+      default_ttl: 60
+  networking:
+    line_protocol_default_buffer_size: 4096
+    socket_transport_limits:
+    - 2048
+    - 8192
+  pools:
+    advanced_pool:
+      default_max_workers: 5
+      default_min_workers: 1
+      threshold_hi: 1.5
+      threshold_lo: 0.5
+    connection_pool:
+      default_max_life: 3600
+      default_max_size: 10
+      default_min_size: 1
+      maintenance_interval: 30
+  processors:
+    batch_processor:
+      default_max_size: 128
+      default_max_time: 1
+    bounded_batch_processor:
+      default_batch_size: 10
+      default_max_concurrent: 5
+    bulkhead:
+      default_max_queue: 32
+      default_max_rej: -1
+  queues:
+    password_queue:
+      default_get_from: password
+      default_put_from: password
+  rwlocks:
+    aging_rwlock:
+      default_read_priority_factor: -1
+      default_write_priority_factor: -1
+    rwlock_default_prefer_writers: true
+  signals:
+    wait_for_signals_default_signals:
+    - 2
+    - 15
+  util:
+    dual_context_manager:
+      default_may_create_executor: false
+      default_strict: false
+      default_use_existing_executor: true
+    semaphore_default_value: 1

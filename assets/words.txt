@@ -74,7 +74,6 @@ ainput
 ainterleave
 aintersend
 aintersperse
-aiostream
 aisempty
 aislice
 aisprime
@@ -214,6 +213,7 @@ justseen
 lcls
 lfactor
 lifo
+linkcheck
 linux
 livelock
 loadf
@@ -259,6 +259,7 @@ regen
 rrange
 rrem
 rsrc
+rwlock
 rwlocks
 seealso
 shellcheck
