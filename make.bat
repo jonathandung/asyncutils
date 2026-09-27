@@ -100,7 +100,6 @@ goto :eof
 :setup
 call :.prek-stamp
 call :.uv-stamp
-uv venv
 uv sync
 goto :eof
 

@@ -52,7 +52,6 @@ release:
 	echo
 	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 setup: .prek-stamp .uv-stamp
-	uv venv
 	uv sync
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"

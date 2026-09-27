@@ -75,15 +75,18 @@ other installation pathways:
 ``asyncutils`` and ``autils`` will then be made available as entry points to the asyncutils CLI. The CLI can also be called with a typical and
 perhaps more familiar ``python3 -m asyncutils``.
 
+Optional dependencies
+---------------------
+
+The extras of this package are ``pconf``, a collection of libraries used to parse config files in various formats, and ``json5``, the Cython-backed
+JSON5 parser. The latter is included in the former.
+
 Dependency groups
 -----------------
 
 The :pep:`735` dependency groups of this package are listed below for reference:
 
-* dev: Packages one would want installed for development; superset of ``docs``, ``json5``, ``test``, and ``tools``.
-* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins
-* executors: All the libraries implementing executors this module supports, except `distributed <https://distributed.dask.org/en/stable>`__, since
-  that is much too specialized and heavy.
-* `json5 <https://pypi.org/project/pyjson5>`__: The Cython-accelerated JSON5 parser, specifically used to read format.json5 in tests.
-* pconf: Dependencies to parse configuration files in Hjson, JSONC, JSON5, and YAML formats
-* test: Test dependencies, including `pytest <https://docs.pytest.org/en/stable>`__ and related plugins; superset of ``json5``
+* dev: Packages one would want installed for development; superset of ``docs``, ``test``, and ``tools``.
+* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins.
+* executors: All the libraries implementing executors this module supports natively, except `distributed <https://distributed.dask.org/en/stable>`__.
+* test: Test dependencies, including `pytest <https://docs.pytest.org/en/stable>`__ and related plugins.

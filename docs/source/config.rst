@@ -121,19 +121,16 @@ to see detailed CLI usage.
 
 The config file can be written in the below formats, listed with the third-party libraries they require if any:
 
-====== ============== =========== ==================
-Format File extension Module name PyPI package name
-====== ============== =========== ==================
+====== ============== =========== ================== ============
+Format File extension Module name PyPI package name  Schema
+====== ============== =========== ================== ============
 JSON   .json          json
-TOML   .toml          tomllib
-YAML   .yaml, .yml    yaml        PyYAML
+TOML   .toml          tomllib                        format.toml
+YAML   .yaml, .yml    yaml        PyYAML             format.yaml
 JSONC  .jsonc         jsonc       json-with-comments
-JSON5  .json5         pyjson5     pyjson5
-Hjson  .hjson         hjson       hjson
-====== ============== =========== ==================
-
-.. important::
-  To write the config in each format, structure the config as in format.json5 but translated to that format.
+JSON5  .json5         pyjson5     pyjson5            format.json5
+Hjson  .hjson         hjson       hjson              format.hjson
+====== ============== =========== ================== ============
 
 .. tip::
   :collapsible:
@@ -147,7 +144,7 @@ Hjson  .hjson         hjson       hjson
 .. tip::
   :collapsible:
 
-  To ensure all supported formats can be parsed, install the ``pconf`` group.
+  To ensure all supported formats can be parsed, install the ``pconf`` extra.
 
 INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
 

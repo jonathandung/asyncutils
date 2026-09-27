@@ -27,9 +27,6 @@ Edit ``assets/words.txt`` and check for regressions with ``cspell .``.
 Bumping the version
 -------------------
 
-Using something like ``uv version --bump patch`` to increment the patch version may not work because the version as a string is hardcoded into
-certain locations, some of which are to be left untouched. Instead, follow these steps:
-
 1. Do a per-file find-and-replace in your preferred IDE after inspecting each instance to avoid unintended changes. :data:`~asyncutils.__version__`
    is already instantiated from a string to streamline this step.
 2. In pyproject.toml, there may be optional dependencies whose version coincides with the project's, so take care not to modify those as well.
@@ -49,13 +46,13 @@ certain locations, some of which are to be left untouched. Instead, follow these
 Cleaning artifacts and caches
 -----------------------------
 
-Safer: ``make clean``; more aggressive: ``make clean-all``
+Safer: ``make clean``; more aggressive: ``make clean-all``.
 
 Implementing a new utility
 --------------------------
 
 Add proper stubs for it in the .pyi file and include it in the appropriate ``<submodule>_all`` declaration in ``asyncutils/_internal/submodules.py``.
-Also add tests such that the coverage does not dip past a certain extent.
+Also add tests such that at least the required coverage is still met.
 
 Adding a new submodule
 ----------------------
