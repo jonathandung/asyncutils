@@ -112,6 +112,9 @@ complete the following:
 
   .. caution:: The option name should be lowercase, as opposed to being fully capitalized like how you are recommended to access it.
   .. attention:: Also remember to update the line numbers in the literalinclude directive referring to format.json5 in logging.rst.
+* asyncutils/format.hjson, asyncutils/format.toml, asyncutils/format.yaml
+
+  Update them accordingly.
 * asyncutils/context.pyi
 
   Be sure to update the contextual constant count:
