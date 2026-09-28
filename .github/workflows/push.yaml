@@ -45,7 +45,7 @@ jobs:
     - run: make audit
     - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482
     - run: pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
-    - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
+    - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
       with:
         flags: unittests
         name: codecov-umbrella
