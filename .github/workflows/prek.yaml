@@ -24,4 +24,4 @@ jobs:
           signoff: true
           title: Weekly prek hooks update
       - run: make pc
-    timeout-minutes: 3
+    timeout-minutes: 2

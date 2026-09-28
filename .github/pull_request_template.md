@@ -6,7 +6,7 @@
 - [] I have skimmed through the [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html) and followed relevant links.
 - [] All existing tests pass locally, according to `make test`.
 - [] No lints or type checker complaints have emerged as a direct consequence of my change.
-- [] All links I added or modified are valid.
+- [] I have run `../scripts/generate.sh && make linkcheck` in the docs directory to confirm that all links I added or modified are valid.
 
 #### PR Title
 
@@ -23,7 +23,7 @@
 
 - [] If this PR concerns a big architectural change or loosely related modifications, I have split them into smaller PRs tracked in an umbrella issue
      linked to in the Issue reference section without marking it as a resolution.
-- [] I have added passing tests such that the coverage did not decrease by over 0.5%.
+- [] I have added passing tests and the coverage has not decreased.
 - [] Status badges have been updated using `make badges`.
 - [] Documentation has been updated suitably.
 - [] The section corresponding to the next release in the changelog has been updated.
@@ -38,8 +38,8 @@
 Closes #<!--Replace this comment with the issue number or delete this section if there is no corresponding issue.-->.
 
 ## Additional context
-<!--Enter helpful context here. Include shell commands in a tripe-backtick-fenced code block with language "bash", or "console" if their output is
-included, Python code with language "python", and Python REPL content with language "pycon".-->
+<!--Enter helpful context here. Include shell commands in a code block fenced by triple backticks with language "bash", or "console" if their output
+is included, Python code with language "python", and Python REPL content with language "pycon".-->
 ### Screenshots
 
 ### Relevant Links

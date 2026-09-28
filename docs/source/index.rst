@@ -52,7 +52,6 @@ colourful command line interface.
   My homepage <https://jonathandung.github.io>
   Issue tracker <https://github.com/jonathandung/asyncutils/issues>
   PDF documentation <https://media.readthedocs.org/pdf/asyncutils/latest/asyncutils.pdf>
-  .zip archive of pages <https://asyncutils.readthedocs.io/_/downloads/en/latest/htmlzip/>
 
 .. note:: This project is being actively developed and maintained. It currently only fully supports CPython 3.12 or above.
 .. note::

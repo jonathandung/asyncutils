@@ -10,7 +10,11 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.0] - 2026-09-22; newest
+### [1.3.1] - 2026-09-28; newest
+
+Build process refactors; documentation fixes.
+
+### [1.3.0] - 2026-09-22
 
 Changed all extras to dependency groups; removed XML config parsing since XML is not typed.
 
