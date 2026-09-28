@@ -119,7 +119,8 @@ New options will likely be added in the future, but every current option is cons
 The above keys have a near one-to-one correspondence with the command line arguments, as the comments below each key explain. Use ``asyncutils -?``
 to see detailed CLI usage.
 
-The config file can be written in the below formats, listed with the third-party libraries they require if any:
+The config file can be written in the below formats, listed with the third-party libraries they require if any. The schemas shown are found in the
+source code directory; that is, ``asyncutils/``.
 
 ====== ============== =========== ================== ============
 Format File extension Module name PyPI package name  Schema
@@ -131,15 +132,6 @@ JSONC  .jsonc         jsonc       json-with-comments
 JSON5  .json5         pyjson5     pyjson5            format.json5
 Hjson  .hjson         hjson       hjson              format.hjson
 ====== ============== =========== ================== ============
-
-.. tip::
-  :collapsible:
-
-  The :func:`~json.dumps` function from the module corresponding to the format, if any (following the :mod:`json` API), may help you to obtain this
-  skeleton approximately.
-
-.. warning::
-  The exact parsing method used by this module may allow object nesting deviating from that shown, but you should still strictly adhere to it.
 
 .. tip::
   :collapsible:
@@ -161,8 +153,8 @@ Contextual "Constants"
 You can see that the json also includes many submodule names as keys; this is the second, contextual part of the configuration. It is thread-safe,
 async-safe and mutable, thanks to :mod:`contextvars`. The sheer magnitude of options makes them infeasible to include as command line arguments.
 
-By convention, they are called contextual constants since no code in this library is expected to change their values, only reading from them to
-determine things from dynamic default arguments to frequencies of background tasks and internal thresholds.
+No code in this library is expected to change their values. Different utilities read from them to determine things from dynamic default arguments to
+frequencies of background tasks and internal thresholds.
 
 One may find it useful to alter the context dynamically without creating a new context. This can be achieved by calling :meth:`Context.update`.
 

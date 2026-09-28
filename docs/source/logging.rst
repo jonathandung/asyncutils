@@ -18,7 +18,7 @@ repeat yourself) philosophy, meaning most audit events and logs are mutually exc
   If logging is still desired then, an audit hook that calls the logger iff the name of the event begins with 'asyncutils' should be added
   using :func:`sys.addaudithook`, but performance may take a hit.
 
-As to how the loquacity and output location of the logger can be altered, refer to the following snippets:
+The snippets below are pertinent to configuration of logging:
 
 .. literalinclude:: ../../asyncutils/config.pyi
   :language: python
@@ -29,7 +29,7 @@ As to how the loquacity and output location of the logger can be altered, refer 
 .. literalinclude:: ../../asyncutils/format.json5
   :language: json5
   :caption: json-based or command-line configuration
-  :lines: 4-13,18-20,27-30,212
+  :lines: 4-13,18-20,27-30,214
   :force:
 
 The format of each log message as printed is "<asctime> - asyncutils - <levelname> - <message>", where ``levelname`` is one of

@@ -88,5 +88,6 @@ The :pep:`735` dependency groups of this package are listed below for reference:
 
 * dev: Packages one would want installed for development; superset of ``docs``, ``test``, and ``tools``.
 * docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins.
+* furo: The `furo <https://pradyunsg.me/furo>`__ HTML theme for Sphinx.
 * executors: All the libraries implementing executors this module supports natively, except `distributed <https://distributed.dask.org/en/stable>`__.
 * test: Test dependencies, including `pytest <https://docs.pytest.org/en/stable>`__ and related plugins.
