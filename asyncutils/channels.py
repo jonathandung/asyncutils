@@ -12,9 +12,7 @@ from asyncutils.constants import _NO_DEFAULT
 class Observable(H.LoopMixinBase):
     __slots__ = '__d', '__e', '__l', '__q', '__r'
     @property
-    def idle(self): return self.__e.is_set()
-    @property
-    def notifying(self): return not self.idle
+    def notifying(self): return not self.__e.is_set()
     async def notify(self, *a, _ret_exc_=False, **k):
         if not self.__d: return
         async with self.__l:

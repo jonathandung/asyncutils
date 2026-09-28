@@ -18,7 +18,7 @@ class VersionInfo(str):
     def __new__(cls, /, *parts: IntCompatible) -> Self: '''With one argument, attempt to normalize it and return the corresponding instance. Otherwise, treat the arguments as `(major, minor, patch)`, zero-padding if required. Throw an appropriate exception if not possible.'''
     def __hash__(self) -> int:
         '''
-        | A perfect hash function for versions! May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
+        | A perfect hash function for versions. May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
         | Since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.
         '''
     def __iter__(self) -> Iterator[int]: '''Yield :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
@@ -70,9 +70,9 @@ class VersionInfo(str):
         * o, oct: ``'0o36602000'``
         * b, bin: ``'0b11110110000010000000000'``
         * d, dec: ``'8061952'``
-        * ``0``, major, maj: ``'123'``
-        * ``1``, minor, min: ``'4'``
-        * ``2``, patch: ``'0'``
+        * 0, major, maj: ``'123'``
+        * 1, minor, min: ``'4'``
+        * 2, patch: ``'0'``
         * s, short: ``'123.4'``
         * l, long: ``'asyncutils version 123.4.0'``
         * a, ascii: ``'{\x04\x00'``

@@ -33,4 +33,4 @@ def test_custom_sentinel():
     assert a.bound_to is None
     class qux: __slots__, ham = (), TestSentinel()
     assert f'{qux.ham.bound_to}.{qux.ham.back}'.endswith('qux.ham')
-    with pytest.raises(AttributeError) if sys.version_info < (3, 13) else pytest.raises(pickle.PicklingError, match="Can't pickle local object .*"): pickle.dumps(qux.ham)
+    with pytest.raises(AttributeError) if sys.version_info < (3, 13) or sys.implementation.name == 'graalpy' else pytest.raises(pickle.PicklingError, match="Can't pickle local object .*"): pickle.dumps(qux.ham)

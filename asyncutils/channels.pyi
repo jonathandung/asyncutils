@@ -16,9 +16,7 @@ class Observable[**P](LoopMixinBase):
     .. caution:: Use instances of this class as context managers only.
     '''
     @property
-    def idle(self) -> bool: '''Whether the observable is idle, that is, not currently notifying observers.'''
-    @property
-    def notifying(self) -> bool: '''The opposite of :attr:`idle`.'''
+    def notifying(self) -> bool: '''Whether the observable is currently notifying observers.'''
     @overload
     async def notify(self, *a: P.args, **k: P.kwargs) -> None: ...
     @overload
@@ -61,7 +59,7 @@ class Observable[**P](LoopMixinBase):
 class EventBus(LoopMixinBase):
     '''
     | A class abstracting the communication between notable events and asynchronous callbacks (an async auditing system), that can optionally be hooked up to sys.audit.
-    | Has extensive telemetry and middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers. Subscribers must be hashable!
+    | Has extensive middleware support, allowing data to be processed in a pipeline and eventually passed to subscribers. Subscribers must be hashable!
     | A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     | Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
 
