@@ -5,7 +5,7 @@ build:
   os: ubuntu-26.04
   commands:
     - curl -LsSf https://astral.sh/uv/install.sh | sh
-    - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv sync --python 3.15 --group docs --group furo
+    - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv sync --group docs --group furo
     - scripts/generate.sh
     - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -d _build/doctrees -b html docs/source $READTHEDOCS_OUTPUT/html
     - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -d _build/doctrees -b latex docs/source $READTHEDOCS_OUTPUT/latex

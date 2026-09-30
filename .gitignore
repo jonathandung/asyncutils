@@ -19,7 +19,6 @@
 .eggs/
 .env*
 .prek-stamp
-.python-version
 .uv-stamp
 .venv/
 .vscode/

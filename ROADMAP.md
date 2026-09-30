@@ -16,7 +16,6 @@ Current version: 1.3.1
 ## [3.0] - 2027-10 or before
 
 - Comprehensive bugfixes
-- Deprecate Python <=3.12 compatibility module
 - Increase coverage to 90%
 - Remove or supersede faulty patterns
 
@@ -25,17 +24,13 @@ Current version: 1.3.1
 - Major feature additions, with more focus on the low level
 - Publish docker images if there is demand
 
-## [4.0] - 2028-06
-
-- Deprecate Python <=3.13 compatibility module
-
 ## [4.3] - 2028-09
 
 - Set up funding
 
 ## [4.4] - 2028-10
 
-- Promise to support all non-EOL Python versions is met
+- Meet the promise to support all non-EOL Python versions
 
 ## [5.0] - 2029-02
 

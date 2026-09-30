@@ -234,6 +234,7 @@ modname
 myst
 ndigits
 noarch
+nologin
 noncritical
 ntimes
 pastebin

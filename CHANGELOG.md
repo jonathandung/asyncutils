@@ -10,9 +10,9 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.1] - 2026-09-30; newest
+### [1.3.1] - 2026-10-01; newest
 
-Build process refactors; documentation fixes.
+Build process refactors; documentation fixes; upgraded to Python 3.15.0.
 
 ### [1.3.0] - 2026-09-22
 

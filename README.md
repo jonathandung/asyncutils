@@ -29,9 +29,7 @@ Takes pride in:
 
 ## Setup
 
-Make sure you have CPython 3.12 or above; even a release candidate of 3.15 will do. GraalPy 25.0 or above is also acceptable. You should have at
-least one Python package manager you are comfortable with. CPython free-threaded and debug builds are also supported.
-
+Make sure you have CPython 3.12 or above. GraalPy 25.0 or above is also acceptable. CPython free-threaded and debug builds are also supported.
 No setup is needed after installation. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html) for more.
 
 ## Usage
