@@ -4,6 +4,8 @@
 *.egg-info/
 *.log
 *.md
+!AUTHORS.md
+!README.md
 *.mo
 *.pid
 *.po

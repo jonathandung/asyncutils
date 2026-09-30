@@ -5,7 +5,7 @@ hooks = [
   {id = "check-case-conflict"}, {id = "check-executables-have-shebangs"}, {id = "check-illegal-windows-names"},
   {id = "check-json"}, {id = "check-merge-conflict"}, {id = "check-shebang-scripts-are-executable"}, {id = "check-toml"},
   {id = "check-yaml"}, {id = "end-of-file-fixer"}, {id = "trailing-whitespace"},
-  {id = "file-contents-sorter", files = '^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py|assets/words\.txt|\..*ignore)$'}
+  {id = "file-contents-sorter", files = '^(\.github/CODEOWNERS|asyncutils/_internal/submodules\.py|assets/words\.txt)$'}
 ]
 
 [[repos]]
@@ -15,7 +15,7 @@ hooks = [{id = "validate-pyproject"}]
 
 [[repos]]
 repo = "https://github.com/betterleaks/betterleaks"
-rev = "v1.8.1"
+rev = "v1.9.0"
 hooks = [{id = "betterleaks"}]
 
 [[repos]]

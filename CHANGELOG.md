@@ -10,7 +10,7 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.1] - 2026-09-28; newest
+### [1.3.1] - 2026-09-30; newest
 
 Build process refactors; documentation fixes.
 

@@ -8,7 +8,7 @@ goto %1
 :.prek-stamp
 if exist .prek-stamp goto :eof
 where prek >nul 2>nul
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.3/prek-installer.ps1 | iex")
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.4/prek-installer.ps1 | iex")
 prek install
 type nul >.prek-stamp
 goto :eof
@@ -34,6 +34,10 @@ goto :eof
 
 :bug
 asyncutils bug --open %O%
+goto :eof
+
+:build
+docker build -t jonathandung/asyncutils:latest .
 goto :eof
 
 :clean
@@ -95,6 +99,10 @@ goto :eof
 choice /m "You are about to create a release. Are you sure?"
 if errorlevel 2 exit /b 1
 if errorlevel 1 gh release create
+goto :eof
+
+:run
+docker run --rm -it jonathandung/asyncutils:latest
 goto :eof
 
 :setup

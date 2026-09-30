@@ -52,8 +52,6 @@ Update your package installer, then try the following fixes:
 ```bash
 uv pip install -U py-asyncutils # Upgrade
 uv pip check # Check for dependency shenanigans
-uv pip tree # Pretty print the pip packages dependency tree
-uv tree # Show only the dependencies of this package
 uv pip uninstall py-asyncutils && uv pip install py-asyncutils # Clean install
 ```
 

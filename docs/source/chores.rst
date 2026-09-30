@@ -12,7 +12,7 @@ To start development, run the following::
 
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
-  make setup # installs the latest version of uv, prek 0.5.3 and the development dependencies and creates a virtual environment at .venv using uv
+  make setup # installs the latest version of uv, prek 0.5.4 and the development dependencies and creates a virtual environment at .venv using uv
   . .venv/bin/activate # or how you would normally activate the uv environment in your preferred shell
 
 A ready-to-use VS Code configuration file is included, which will prompt you to install extensions this project recommends and disable some others to

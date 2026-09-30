@@ -2,6 +2,7 @@ Available targets:
  audit     - Run a security audit on all optional dependencies using uv
  badges    - Run the test suite twice, exiting on any failure; generate static badges on success
  bug       - File a bug report in the browser
+ build     - Build the Docker image locally; tagged jonathandung/asyncutils:latest
  changelog - Generate a compact changelog from Git history and print it in the terminal with colour
  clean     - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
  clean-all - Equivalent to git clean -dxf
@@ -11,6 +12,7 @@ Available targets:
  lock      - Regenerate the project lockfile at uv.lock, updating dependencies
  pc        - Run prek hooks on all files, unlike the run before each commit which only runs on modified files
  release   - Make a release interactively; requires the GitHub CLI (gh)
+ run       - Run the Docker image
  setup     - Create a virtual environment, install the package in editable mode with development dependencies inside and install prek hooks
  test      - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
 Targets may be added on popular demand.
