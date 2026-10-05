@@ -15,7 +15,7 @@ hooks = [{id = "validate-pyproject"}]
 
 [[repos]]
 repo = "https://github.com/betterleaks/betterleaks"
-rev = "v1.9.0"
+rev = "v2.0.0-rc.1"
 hooks = [{id = "betterleaks"}]
 
 [[repos]]
@@ -25,7 +25,7 @@ hooks = [{id = "sphinx-lint"}]
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.16.9"
+rev = "v0.16.10"
 hooks = [{id = "ruff-check", args = ["--fix"]}]
 
 [[repos]]
