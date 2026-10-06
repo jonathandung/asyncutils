@@ -58,11 +58,10 @@ class VersionInfo(str): # ruff: ignore[subclass-builtin]
     def __reduce__(self): return __class__, self.parts
     def __iter__(self): return self.parts.__iter__()
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
-    def assert_valid(self, _=E.VersionCorrupted):
-        try:
+    def assert_valid(self, c=E.VersionCorrupted, i=E.IgnoreErrors(ValueError, TypeError, AttributeError)):
+        with i:
             if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
-        except (ValueError, TypeError, AttributeError): ...
-        raise _(self) # ty: ignore[invalid-argument-type]
+        raise c(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # ruff: ignore[unnecessary-collection-call,too-many-return-statements]
         match s := a(s := s.lower(), s):

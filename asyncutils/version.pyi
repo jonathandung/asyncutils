@@ -43,10 +43,7 @@ class VersionInfo(str):
     def __eq__(self, other: object, /) -> bool: '''Whether this version is the same as the other.'''
     def __ne__(self, other: object, /) -> bool: '''Whether this version is different than the other.'''
     def __reduce__(self) -> tuple[type[Self], tuple[int, int, int]]: '''Support for pickling.'''
-    @overload
-    def __round__(self, ndigits: int, /) -> NoReturn: ...
-    @overload
-    def __round__(self, ndigits: Literal[1, 2, 3]|None=..., /) -> Self: '''Support for rounding.'''
+    def __round__(self, ndigits: int|None=..., /) -> Self: '''Support for rounding.'''
     @overload
     def __add__(self, n: int, /) -> Self: ...
     @overload
