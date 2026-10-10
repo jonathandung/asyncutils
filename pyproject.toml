@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = ["uv_build>=0.12.19"]
+requires = ["uv_build>=0.13.0"]
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -60,7 +60,7 @@ skip_covered = true
 
 [tool.ruff]
 exclude = ["docs/source/conf.py"]
-required-version = ">=0.16.9"
+required-version = ">=0.17.0"
 target-version = "py312"
 
 [tool.ruff.lint]
@@ -129,10 +129,10 @@ rules = {redundant-condition-strict = "ignore"}
 
 [[tool.ty.overrides]]
 include = ["asyncutils/_internal/compat.py"]
-rules = {invalid-argument-type = "ignore"}
+rules = {invalid-argument-type = "ignore", truthiness-test-of-none-union = "ignore"}
 
 [tool.uv]
-required-version = ">=0.12.19"
+required-version = ">=0.13.0"
 
 [tool.uv.build-backend]
 module-name = "asyncutils"

@@ -58,9 +58,7 @@ class ref: # ruff: ignore[invalid-class-name]
     def __init_subclass__(cls): raise TypeError('cannot subclass asyncutils.exceptions.ref')
 @H.subscriptable
 class Critical(BaseException):
-    def __init__(self, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception): super().__init__(_m); self.__context__ = e.__context__ if isinstance(e, __class__) else _e() if e is None else e
-    @property
-    def __suppress_context__(self): return False # ruff: ignore[bad-dunder-method-name]
+    def __init__(self, e=None, /, _m='critical error occurred or user attempted to terminate the program', _e=exception): super().__init__(_m); self.__context__, self.__suppress_context__ = e.__context__ if isinstance(e, __class__) else _e() if e is None else e, False
     @property
     def exc(self): return self.__cause__ or self.__context__
 class StateCorrupted(BaseException):

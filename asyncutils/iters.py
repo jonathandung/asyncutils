@@ -470,8 +470,9 @@ async def to_deque(it, n=None):
     async for i in iter_to_agen(it): a(i)
     return d
 async def aconsume(it, n=None, _=H.check_methods):
-    if n == 0: return
-    if n: it = A.take(it, n, A.RAISE)
+    if isinstance(n, int):
+        if n == 0: return
+        it = A.take(it, n, A.RAISE)
     if _(it, '__iter__'): await H.get_loop_and_set().run_in_executor(H.create_executor(aconsume) if (E := getattr(aconsume, 'executor', None)) is None else E, deque, it, 0)
     else:
         async for _ in it: ...

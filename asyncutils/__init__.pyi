@@ -1,4 +1,4 @@
-# ruff: file-ignore[undefined-local-with-import-star] # cspell:disable
+# ruff: file-ignore[undefined-local-with-import-star]
 '''
 A feature-rich asynchronous utilities library with CLI and REPL support.
 
@@ -9,7 +9,7 @@ A feature-rich asynchronous utilities library with CLI and REPL support.
 .. autoapidata:: preloaded_submodules
 .. autoapidata:: submodules_map
 .. autoapifunction:: time_since_boot
-''' # cspell:enable
+'''
 __all__ = 'altlocks', 'base', 'buckets', 'channels', 'cli', 'compete', 'config', 'console', 'constants', 'context', 'events', 'exceptions', 'func', 'futures', 'iotools', 'iterclasses', 'iters', 'locks', 'locksmiths', 'misc', 'mixins', 'networking', 'pools', 'processors', 'properties', 'queues', 'rwlocks', 'signals', 'tools', 'util', 'version' # ruff: ignore[undefined-local-with-import-star-usage]
 from ._internal.prots import Submodule
 from .altlocks import *

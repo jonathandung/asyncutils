@@ -67,7 +67,7 @@ class AsyncPropertyBase[T, R](ABC):
     '''The docstring for this property, or ``None`` if it doesn't exist.'''
     __name__: str
     '''The name of this property, determined by the function it decorates.'''
-    __module__: str|None
+    __module__: str|None # ty: ignore[invalid-attribute-override]
     '''The module this property is defined in, determined by the function it decorates.'''
 class LazyAsyncProperty[T, R](AsyncPropertyBase[T, R]):
     '''A property that queues set and delete operations.'''

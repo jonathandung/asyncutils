@@ -4,20 +4,23 @@
 .SILENT:
 AUTILSTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
+PREK_INSTALL_DIR ?= %USERPROFILE%\.local\bin
+PREK_UV_SOURCE := none
 SHELL := /bin/bash
+UV_INSTALL_DIR ?= %USERPROFILE%\.local\bin
 .prek-stamp:
 	if command -v prek >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.4/prek-installer.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.4/prek-installer.sh | sh;\
+	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh;\
+	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh;\
 	else echo "curl or wget required to install prek" >&2; exit 1; fi
-	prek install
+	$(PREK_INSTALL_DIR)/prek install
 	touch .prek-stamp
 .uv-stamp:
 	if command -v uv >/dev/null 2>&1; then true;\
 	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://astral.sh/uv/install.sh | sh;\
 	elif command -v wget >/dev/null 2>&1; then wget -qO- https://astral.sh/uv/install.sh | sh;\
 	else echo "curl or wget required to install uv" >&2; exit 1; fi
-	(uv tool install ruff && uv tool install ty) 2>/dev/null
+	($(UV_INSTALL_DIR)/uv tool install ruff && $(UV_INSTALL_DIR)/uv tool install ty) 2>/dev/null
 	touch .uv-stamp
 audit: .uv-stamp
 	uv audit --preview-features audit-command
@@ -55,7 +58,7 @@ release:
 	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 run:
 	docker run --rm -it jonathandung/asyncutils:latest
-setup: .prek-stamp .uv-stamp
+setup: .uv-stamp .prek-stamp
 	uv sync
 test:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"

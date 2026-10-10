@@ -120,7 +120,8 @@ The above keys have a near one-to-one correspondence with the command line argum
 to see detailed CLI usage.
 
 The config file can be written in the below formats, listed with the third-party libraries they require if any. The schemas shown are found in the
-source code directory; that is, ``asyncutils/``.
+source code directory (for consistency; since format.json5 is read in tests and must be distributed with the source, I had to put the other formats
+in the same location); that is, ``asyncutils/``.
 
 ====== ============== =========== ================== ============
 Format File extension Module name PyPI package name  Schema
@@ -138,16 +139,16 @@ Hjson  .hjson         hjson       hjson              format.hjson
 
   To ensure all supported formats can be parsed, install the ``pconf`` extra.
 
-INI is not supported because it is outdated and lacks strong typing, meaning all values are interpreted as strings.
+INI is not supported because it is outdated.
 
-.. version-changed:: 1.3.0
-  Support for XML was dropped for the same reason as above.
+Besides being much too verbose, XML lacks strong typing without schemas, meaning all values are interpreted as strings. This consideration meant
+support for XML was always a bug and had to be dropped.
 
-It is currently possible to associate file extensions not shown above with other libraries providing a ``load`` function taking a file object and
+It is currently possible to associate file extensions not shown above with other libraries providing a ``loads`` function taking a string and
 returning a dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
-However, it is believed that the options offered are versatile enough to fit every individual need.
+However, it is believed that the options offered are versatile enough to fit every need.
 
-Contextual "Constants"
+Contextual "constants"
 ----------------------
 
 You can see that the json also includes many submodule names as keys; this is the second, contextual part of the configuration. It is thread-safe,

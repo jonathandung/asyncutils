@@ -57,7 +57,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
             return self.STATEMENT_FAILED
     def interact(self, banner=None, *, ps1='>>> ', _f=_f, _s=_s, _q=C.silent, _o=type('', (), {'write': lambda *_: None, 'flush': lambda _, /: None})(), p=g('PYTHONSTARTUP')): # ruff: ignore[function-call-in-default-argument]
         x = False; self.write_special(self.BANNER if banner is None else banner)
-        if p and not S.flags.ignore_environment: # pragma: no cover
+        if not (p is None or S.flags.ignore_environment): # pragma: no cover
             with __import__('tokenize').open(p) as f:
                 if _q: S.stdout, _o = _o, S.stdout
                 S.audit('cpython.run_startup', p); exec(compile(f.read(), p, 'exec'), self.locals) # ruff: ignore[exec-builtin]

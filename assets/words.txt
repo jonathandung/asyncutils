@@ -155,6 +155,8 @@ aunique
 aunzip
 autils
 autoapi
+autoapidata
+autoapifunction
 avalify
 awindowed
 awrap

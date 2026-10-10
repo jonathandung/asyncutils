@@ -10,7 +10,7 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.1] - 2026-10-01; newest
+### [1.3.1] - 2026-10-12; newest
 
 Build process refactors; documentation fixes; upgraded to Python 3.15.0.
 

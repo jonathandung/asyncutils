@@ -14,5 +14,5 @@ Available targets:
  release   - Make a release interactively; requires the GitHub CLI (gh)
  run       - Run the Docker image
  setup     - Create a virtual environment, install the package in editable mode with development dependencies inside and install prek hooks
- test      - Run tests, allowing up to AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
+ test      - Run tests, allowing up to $AUTILSTESTMAXFAIL failures (default 3) since any more would likely mean an obvious error
 Targets may be added on popular demand.

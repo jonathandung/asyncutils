@@ -5,13 +5,14 @@ from time import monotonic
 from asyncutils._internal.helpers import LoopMixinBase, fullname, subscriptable
 from asyncutils._internal.submodules import locks_all as __all__
 class DynamicBoundedSemaphore(I.BoundedSemaphore):
+    _waiters: deque
     def __init__(self, value=None): super().__init__(A.getcontext().DYNAMIC_BOUNDED_SEMAPHORE_DEFAULT_VALUE if value is None else value); self._waiters = deque()
     @property
     def bound(self): return self._bound_value
     @bound.setter
     def bound(self, value, /):
         if value < 0: raise ValueError('asyncutils.locks.DynamicBoundedSemaphore: bound must be non-negative')
-        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft # ty: ignore[unresolved-attribute]
+        d, self._bound_value, f = value-self._bound_value, value, (W := self._waiters).popleft
         while d and W:
             if not (w := f()).done(): w.set_result(None); d -= 1
 def d(m, /, _=__import__('functools').wraps):

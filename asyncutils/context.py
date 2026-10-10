@@ -21,8 +21,7 @@ class Context: # ruff: ignore[eq-without-hash]
             if (n := n.upper()) in _: D[n] = v
         return type(self)(**D)
     def update(self, d=None, _=all_contextual_consts, /, **k):
-        for m in (d, k):
-            if not m: continue
+        for m in filter(None, (d, k)):
             for n, v in m.items():
                 if (n := n.upper()) in _: setattr(self, n, v)
     def ascurctx(self, **k): return NonReusableLocalContext(self, **k)
