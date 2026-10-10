@@ -4,22 +4,16 @@
 .SILENT:
 AUTILSTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
-PREK_INSTALL_DIR ?= %USERPROFILE%\.local\bin
+PREK_INSTALL_DIR ?= $(HOME)/.local/bin
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
-UV_INSTALL_DIR ?= %USERPROFILE%\.local\bin
+UV_INSTALL_DIR ?= $(HOME)/.local/bin
 .prek-stamp:
-	if command -v prek >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh;\
-	else echo "curl or wget required to install prek" >&2; exit 1; fi
+	if command -v prek >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh; else echo "curl or wget required to install prek" >&2; exit 1; fi
 	$(PREK_INSTALL_DIR)/prek install
 	touch .prek-stamp
 .uv-stamp:
-	if command -v uv >/dev/null 2>&1; then true;\
-	elif command -v curl >/dev/null 2>&1; then curl -LsSf https://astral.sh/uv/install.sh | sh;\
-	elif command -v wget >/dev/null 2>&1; then wget -qO- https://astral.sh/uv/install.sh | sh;\
-	else echo "curl or wget required to install uv" >&2; exit 1; fi
+	if command -v uv >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://astral.sh/uv/install.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://astral.sh/uv/install.sh | sh; else echo "curl or wget required to install uv" >&2; exit 1; fi
 	($(UV_INSTALL_DIR)/uv tool install ruff && $(UV_INSTALL_DIR)/uv tool install ty) 2>/dev/null
 	touch .uv-stamp
 audit: .uv-stamp
