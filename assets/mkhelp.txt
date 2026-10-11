@@ -1,5 +1,4 @@
 Available targets:
- audit     - Run a security audit on all optional dependencies using uv
  badges    - Run the test suite twice, exiting on any failure; generate static badges on success
  bug       - File a bug report in the browser
  build     - Build the Docker image locally; tagged jonathandung/asyncutils:latest

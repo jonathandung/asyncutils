@@ -25,11 +25,6 @@ if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://astral
 type nul >.uv-stamp
 goto :eof
 
-:audit
-call :.uv-stamp
-uv audit --preview-features audit-command
-goto :eof
-
 :badges
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings

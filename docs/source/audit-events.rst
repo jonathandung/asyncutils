@@ -70,7 +70,7 @@ inspiration.
     - ``capacity``: :class:`float`, ``leak``: :class:`float`
     - Raised when :class:`buckets.LeakyBucket` is instantiated, with ``capacity`` being the maximum number of tokens and ``leak`` the leak rate.
   * - asyncutils.channels.Observable
-    - ``maxsize``: ``int|None``
+    - ``maxsize``: :type:`!int|None`
     - Raised when :class:`channels.Observable` is instantiated, with ``maxsize`` being the maximum number of subscribers or ``None`` if there is no such limit.
   * - asyncutils.channels.EventBus
     - ``name``: :class:`str`, ``addr``: :class:`int`
@@ -199,10 +199,10 @@ inspiration.
     - \
     - Raised when :class:`networking.SocketTransport` is instantiated.
   * - asyncutils.queues.password_queue
-    - ``get_from``: ``str|None``, ``put_from``: ``str|None``
+    - ``get_from``: :type:`!str|None`, ``put_from``: :type:`!str|None`
     - Raised when :func:`queues.password_queue` is called, with the names of the variables from which passwords for get and put operations will be retrieved in the caller scope if they are protected, or ``None`` if they are not protected. Of course, the audit hooks do not see the passwords themselves.
   * - asyncutils.queues.SmartQueue.push
-    - ``addr``: :class:`int`, ``pushed``: ``T``, ``popped``: ``T``
+    - ``addr``: :class:`int`, ``pushed``: :type:`!T`, ``popped``: :type:`!T`
     - Raised when the :meth:`~queues.PotentQueueBase.push` method of an exact instance of :class:`queues.SmartQueue` with items of type ``T`` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
   * - asyncutils.queues.SmartQueue.transaction/start
     - ``addr``: :class:`int`
@@ -223,7 +223,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~queues.PotentQueueBase.enumerate` method of an exact instance of :class:`queues.SmartQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.queues.SmartLifoQueue.push
-    - ``addr``: :class:`int`, ``pushed``: ``T``, ``popped``: ``T``
+    - ``addr``: :class:`int`, ``pushed``: :type:`!T`, ``popped``: :type:`!T`
     - Raised when the :meth:`~queues.PotentQueueBase.push` method of an exact instance of :class:`queues.SmartLifoQueue` with items of type ``T`` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
   * - asyncutils.queues.SmartLifoQueue.transaction/start
     - ``addr``: :class:`int`
@@ -244,7 +244,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~queues.PotentQueueBase.enumerate` method of an exact instance of :class:`queues.SmartLifoQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.queues.SmartPriorityQueue.push
-    - ``addr``: :class:`int`, ``pushed``: ``T``, ``popped``: ``T``
+    - ``addr``: :class:`int`, ``pushed``: :type:`!T`, ``popped``: :type:`!T`
     - Raised when the :meth:`~queues.PotentQueueBase.push` method of an exact instance of :class:`queues.SmartPriorityQueue` with items of type ``T`` is called and the queue is full, such that an item must be popped, to avoid data loss. ``addr`` is the memory address of the instance, ``pushed`` the item being pushed, and ``popped`` the item being popped.
   * - asyncutils.queues.SmartPriorityQueue.transaction/start
     - ``addr``: :class:`int`
@@ -265,7 +265,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~queues.PotentQueueBase.enumerate` method of an exact instance of :class:`queues.SmartPriorityQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.queues.UserPriorityQueue.push
-    - ``addr``: :class:`int`, ``pushed``: ``T``, ``popped``: ``T``
+    - ``addr``: :class:`int`, ``pushed``: :type:`!T`, ``popped``: :type:`!T`
     - Raised when the :meth:`~queues.PotentQueueBase.push` method of an exact instance of :class:`queues.UserPriorityQueue` with items of type ``T`` is called and the queue is full, such that an item must be popped, to avoid data loss.
   * - asyncutils.queues.UserPriorityQueue.transaction/start
     - ``addr``: :class:`int`
@@ -286,7 +286,7 @@ inspiration.
     - ``addr``: :class:`int`
     - Raised when the :meth:`~queues.PotentQueueBase.enumerate` method of an exact instance of :class:`queues.UserPriorityQueue` is called, with ``addr`` being the memory address of the instance.
   * - asyncutils.signals.wait_for_signal
-    - ``sigs``: ``set[int]``
+    - ``sigs``: :type:`!set[int]`
     - Raised when :func:`signals.wait_for_signal` is called on signal numbers ``sigs``. Audit hooks can modify the set, and the changes will be reflected.
   * - asyncutils.util.sync_await
     - ``atname``: :class:`str`

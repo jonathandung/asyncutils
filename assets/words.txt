@@ -5,6 +5,7 @@ ETYP
 FIPS
 FURB
 Freivalds
+Levenstein
 Mersenne
 Numberphile
 Peekable

@@ -1,4 +1,4 @@
-# ruff: file-ignore[function-call-in-default-argument,magic-value-comparison]
+# ruff: file-ignore[function-call-in-default-argument, magic-value-comparison]
 import asyncutils._internal.patch as P, asyncutils.exceptions as E
 from asyncutils._internal.helpers import check_methods
 from asyncutils._internal.submodules import version_all as __all__
@@ -21,7 +21,7 @@ class VersionDelta(tuple):
     def __new__(cls, major=0, minor=0, patch=0): return cls._make((major, minor, patch))
     def __neg__(self, _=int.__neg__): return __class__(*map(_, self))
 @a
-class VersionInfo(str): # ruff: ignore[subclass-builtin]
+class VersionInfo(str):
     DEFAULT_KEY = 416219; __slots__ = 'parts',
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))

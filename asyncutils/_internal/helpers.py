@@ -38,7 +38,7 @@ class RefTaskLoopMixin(LoopMixinBase):
     __slots__ = '_tasks',
     def _setup(self): self._tasks = set()
     def make(self, a, /): (r := super().make(a)).add_done_callback((t := self._tasks).discard); t.add(r); return r
-class Bag(dict): # ruff: ignore[subclass-builtin]
+class Bag(dict):
     __slots__, __setattr__, __delattr__ = (), dict.__setitem__, dict.__delitem__
     def __getattr__(self, k, /):
         try: return self[k]

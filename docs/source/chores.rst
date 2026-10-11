@@ -22,7 +22,7 @@ avoid conflicts. If you are using a different IDE, you may want to use an `.edit
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
 
-Edit ``assets/words.txt`` and check for regressions with ``cspell .``.
+Edit ``assets/words.txt`` and check for regressions by running ``cspell .``.
 
 Bumping the version
 -------------------

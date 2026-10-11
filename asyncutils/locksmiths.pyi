@@ -11,19 +11,33 @@ def succeeded(result: object, /) -> TypeIs[Literal[ForceResult.SUCCESS, ForceRes
 class ForceResult(IntEnum):
     '''The possible results of a force attempt.'''
     CANNOT_FORCE = 1
+    '''The lock failed preliminary verification (i.e. the lock is not recognized or not currently locked) and thus cannot be forced.'''
     NO_CURRENT_TASK = 2
+    '''The event loop has no current task for the force attempt to propagate into.'''
     OWNER_COMPLETED = 3
+    '''The task which owns the lock has already completed.'''
     ALREADY_BEING_FORCED = 4
+    '''Another locksmith is already forcing the lock.'''
     FAILURE = 5
+    '''The force attempt encountered a non-critical exception.'''
     RELEASED_WITH_FALSE = 6
+    '''The lock was released normally but the return value evaluated to ``False``.'''
     SUCCESS = 7
+    '''The lock was forced successfully.'''
     RELEASED = 8
+    '''The lock was released and needed not be forced.'''
 class RecognitionResult(IntEnum):
     '''The possible results of a recognition attempt.'''
     FAILED_PRELIM = 1
+    ''':meth:`~LocksmithBase.preliminary_check_lock`, which checks for the presence of required methods on a lock by default, returned ``False``.'''
     FAILED_ACK = 2
-    ALREADY_RECOGNIZED = 3
-    SUCCESS = 4
+    ''':meth:`!acknowledge_locksmith_lock_held` was present on the lock and returned ``False``.'''
+    ACK_RAISED = 3
+    ''':meth:`!acknowledge_locksmith_lock_held` was present on the lock and raised an exception.'''
+    ALREADY_RECOGNIZED = 4
+    '''The locksmith already recognizes the lock.'''
+    SUCCESS = 5
+    '''The locksmith successfully recognized the lock.'''
 class LocksmithBase:
     '''Instances can attempt to force specific locks asynchronously, and run cleanup or emergency tasks under it as soon as possible; this is especially useful in deadlock scenarios.'''
     handlers: ClassVar[dict[type[AsyncLockLike[Any]], Callable[[AsyncLockLike[Any]], Any]]]

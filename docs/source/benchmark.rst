@@ -3,11 +3,7 @@ Benchmarks
 
   "Statistics are like bikinis. What they reveal is suggestive, but what they conceal is vital."
 
-  .. cspell:disable
-
   -- Aaron Levenstein, 1951
-
-  .. cspell:enable
 
 When used as a REPL (Read-Eval-Print Loop), this module starts slow since it builds on the standard library :mod:`asyncio`, which loads all its
 submodules on import, and the event loop is quite difficult to implement. This is understandable but suboptimal. On the contrary, we focus on
@@ -17,12 +13,12 @@ you request them to be, thanks to cleanly separated submodules with somewhat sim
 because of its design goals and philosophy.
 
 The figures below are obtained by running each of the following sequentially with no warmup elevenfold in a fresh console session and discarding
-the first run (warmup):
+the first run, which is considered a warmup run:
 
 Environment
 -----------
 
-* ``python -VV`` gives: ``Python 3.15.0rc2 (main, Sep  1 2026, 14:36:35) [MSC v.1951 64 bit (AMD64)]``
+* ``python -VV`` gives: ``Python 3.15.0 (main, Oct  9 2026, 15:33:25) [MSC v.1951 64 bit (AMD64)]``
 * ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
 * ``__pycache__`` directories are persisted across runs
 
@@ -37,6 +33,8 @@ Baseline: asyncio
   python -SIqX importtime -c "import asyncio"
 
 Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49 ms; n = 10
+
+.. note:: 122.60 above is the mean and 10.14 is the standard deviation.
 
 asyncutils
 ----------

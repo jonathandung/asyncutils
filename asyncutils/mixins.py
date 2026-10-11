@@ -6,7 +6,7 @@ from asyncutils._internal.submodules import mixins_all as __all__
 @H.subscriptable
 class AwaitableMixin(metaclass=ABCMeta):
     __slots__ = ()
-    def __await__(self): yield from self.wait().__await__()
+    def __await__(self): return self.wait().__await__()
     @abstractmethod
     async def wait(self): raise NotImplementedError
 @H.subscriptable

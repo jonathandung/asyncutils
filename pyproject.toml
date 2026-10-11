@@ -6,7 +6,7 @@ requires = ["uv_build>=0.13.0"]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
 classifiers = ["Development Status :: 5 - Production/Stable", "Environment :: Console", "Framework :: AsyncIO", "Intended Audience :: Developers", "Natural Language :: English", "Operating System :: OS Independent", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Programming Language :: Python :: 3.15", "Programming Language :: Python :: Free Threading :: 3 - Stable", "Programming Language :: Python :: Implementation :: CPython", "Programming Language :: Python :: Implementation :: GraalPy", "Programming Language :: Unix Shell", "Topic :: Software Development :: Libraries :: Python Modules", "Topic :: Utilities", "Typing :: Typed"]
 description = "A library containing versatile tools to well complement the asyncio framework."
-keywords = ["asynchronous", "asyncio", "convenient", "fast", "feature-rich", "helpers", "io", "library", "light", "utilities"]
+keywords = ["async", "asynchronous", "asyncio", "convenient", "feature-rich", "helpers", "io", "library", "light", "patterns", "tools", "utilities"]
 license = "MIT"
 license-files = ["AUTHORS.md", "LICENSE"]
 maintainers = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -64,7 +64,7 @@ required-version = ">=0.17.0"
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["D1", "ambiguous-function-name", "ambiguous-variable-name", "async-function-with-timeout", "bad-exit-annotation", "bad-version-info-order", "blank-line-between-methods", "blank-lines-after-function-or-class", "blank-lines-before-nested-definition", "blank-lines-top-level", "boolean-positional-value-in-call", "boolean-default-value-positional-argument", "builtin-open", "constant-imported-as-non-constant", "docstring-in-stub", "docstring-missing-returns", "error-suffix-on-exception-name", "f-string-in-exception", "implicit-return", "import-outside-top-level", "import-private-name", "incorrect-blank-line-after-class", "incorrect-blank-line-before-class", "invalid-argument-name", "line-too-long", "lowercase-imported-as-non-lowercase", "missing-blank-line-after-summary", "missing-whitespace-around-arithmetic-operator", "missing-whitespace-around-bitwise-or-shift-operator", "missing-whitespace-around-modulo-operator", "missing-whitespace-around-parameter-equals", "multi-line-summary-first-line", "multiple-imports-on-one-line", "multiple-statements-on-one-line-colon", "multiple-statements-on-one-line-semicolon", "non-empty-init-module", "non-lowercase-variable-in-function", "overload-with-docstring", "private-member-access", "pytest-incorrect-pytest-import", "pytest-parametrize-values-wrong-type", "raise-vanilla-args", "raise-without-from-inside-except", "raw-string-in-exception", "too-few-spaces-before-inline-comment", "trailing-comma-on-bare-tuple", "triple-single-quotes", "try-consider-else", "unsorted-imports"]
+ignore = ["D1", "ambiguous-function-name", "ambiguous-variable-name", "async-function-with-timeout", "bad-exit-annotation", "bad-version-info-order", "blank-line-between-methods", "blank-lines-after-function-or-class", "blank-lines-before-nested-definition", "blank-lines-top-level", "boolean-positional-value-in-call", "boolean-default-value-positional-argument", "builtin-open", "constant-imported-as-non-constant", "docstring-in-stub", "docstring-missing-returns", "error-suffix-on-exception-name", "f-string-in-exception", "implicit-return", "import-outside-top-level", "import-private-name", "incorrect-blank-line-after-class", "incorrect-blank-line-before-class", "invalid-argument-name", "line-too-long", "lowercase-imported-as-non-lowercase", "missing-blank-line-after-summary", "missing-whitespace-around-arithmetic-operator", "missing-whitespace-around-bitwise-or-shift-operator", "missing-whitespace-around-modulo-operator", "missing-whitespace-around-parameter-equals", "multi-line-summary-first-line", "multiple-imports-on-one-line", "multiple-statements-on-one-line-colon", "multiple-statements-on-one-line-semicolon", "non-empty-init-module", "non-lowercase-variable-in-function", "overload-with-docstring", "private-member-access", "pytest-incorrect-pytest-import", "pytest-parametrize-values-wrong-type", "raise-vanilla-args", "raise-without-from-inside-except", "raw-string-in-exception", "subclass-builtin", "too-few-spaces-before-inline-comment", "trailing-comma-on-bare-tuple", "triple-single-quotes", "try-consider-else", "unsorted-imports"]
 logger-objects = ["asyncutils._internal.log"]
 preview = true
 select = ["ALL"]
@@ -132,6 +132,7 @@ include = ["asyncutils/_internal/compat.py"]
 rules = {invalid-argument-type = "ignore", truthiness-test-of-none-union = "ignore"}
 
 [tool.uv]
+preview-features = ["audit-command"]
 required-version = ">=0.13.0"
 
 [tool.uv.build-backend]

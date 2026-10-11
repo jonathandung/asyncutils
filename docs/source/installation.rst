@@ -18,13 +18,14 @@ The REPL starts with the following banner:
   You can use *await* statements directly instead of *asyncio.run* for quick testing.
   All the submodules of asyncutils are also loaded into the namespace.
 
-:mod:`asyncutils` injects itself into the globals and the import is automated visually. Afterwards, simply type Python code as you normally would,
-bearing in mind that ``await`` statements are magically supported:
+:mod:`asyncutils` injects itself into the globals. Afterwards, simply type Python code as you normally would, bearing in mind that ``await``
+statements are magically supported:
 
 .. code-block:: pycon
 
   >>> import asyncutils
   >>> from asyncutils import *
+  >>> # The above is automatically printed and executed
   >>> # Your code here
 
 For the normal installation pathway, many more package managers are supported.
