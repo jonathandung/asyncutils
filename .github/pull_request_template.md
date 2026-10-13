@@ -6,7 +6,7 @@
 - [] I have skimmed through the [contributing guidelines](https://asyncutils.readthedocs.io/en/latest/contributing.html) and followed relevant links.
 - [] All existing tests pass locally, according to `make test`.
 - [] No lints or type checker complaints have emerged as a direct consequence of my change.
-- [] I have run `../scripts/generate.sh && make linkcheck` in the docs directory to confirm that all links I added or modified are valid.
+- [] I have run `make links` to confirm that all links I added or modified are valid.
 
 #### PR Title
 

@@ -34,7 +34,7 @@ Baseline: asyncio
 
 Cumulative import time of asyncio: 122.60 ± 10.14 ms; max 138.83 ms, min 103.49 ms; n = 10
 
-.. note:: 122.60 above is the mean and 10.14 is the standard deviation.
+.. note:: Above, 122.60 ms is the mean and 10.14 ms is the standard deviation.
 
 asyncutils
 ----------

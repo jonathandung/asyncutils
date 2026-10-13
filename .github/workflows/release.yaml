@@ -39,4 +39,4 @@ jobs:
           push: true
           tags: ${{steps.m.outputs.tags}}
           labels: ${{steps.m.outputs.labels}}
-    timeout-minutes: 10
+    timeout-minutes: 5

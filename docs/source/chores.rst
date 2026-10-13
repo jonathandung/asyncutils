@@ -135,8 +135,8 @@ Updating config.pyi
 -------------------
 
 Special care must be taken, since the :doc:`logging` page depends on the exact line numbers at which specific symbols are declared here in the form
-of a literalinclude. The same applies for format.json5. Take a look at the current state of the site, and hopefully you can determine what the new
-line numbers should be accordingly.
+of a literalinclude. The same applies for format.json5 and friends. Take a look at the current state of the site, and hopefully you can determine
+what the new line numbers should be accordingly.
 
 Adding a documentation page
 ---------------------------

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: badges bug build clean clean-all docs help lint lock log pc release run setup test
+.PHONY: badges bug build clean clean-all docs help links lint lock log pc release run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTILSTESTMAXFAIL ?= 3
@@ -32,6 +32,9 @@ docs:
 	$(MAKE) -C docs html -W
 help:
 	cat assets/mkhelp.txt
+links:
+	scripts/generate.sh
+	$(MAKE) -C docs linkcheck -W
 lint: .uv-stamp
 	ruff check
 	ty check

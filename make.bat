@@ -55,6 +55,7 @@ cd docs
 shift
 set "__O=%O%"
 set "REST_ARGS="
+if not defined __B set "__B=html"
 :__l
 if "%~1"=="" goto __d
 set "REST_ARGS=!REST_ARGS! %1"
@@ -65,11 +66,16 @@ if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
 set "O=-W %REST_ARGS% %__O%"
 set "__O="
 set "REST_ARGS="
-make html
+make "%__B%"
 goto :eof
 
 :help
 type assets\mkhelp.txt
+goto :eof
+
+:links
+set __B=linkcheck
+call :docs
 goto :eof
 
 :lint
