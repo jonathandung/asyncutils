@@ -5,7 +5,7 @@ Available targets:
  changelog - Generate a compact changelog from Git history and print it in the terminal with colour
  clean     - Clean development artifacts and caches, including __pycache__/, build/, dist/, generated files, and coverage results
  clean-all - Equivalent to git clean -dxf
- docs      - Build a preview of the documentation in docs/build/html, exiting with a non-zero status on any warning; requires internet access
+ docs      - Build the documentation in HTML format in docs/build/html, exiting with a non-zero status on any warning; requires internet access
  help      - Show this help message; the default target
  links     - Check that links in the documents are valid using the linkcheck builder
  lint      - Run ruff and ty sequentially; likely the most useful target

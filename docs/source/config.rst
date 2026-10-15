@@ -87,11 +87,6 @@ Some arguments consumed by the Python interpreter are also taken into account by
   attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError` to be
   thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly, but that is not related to ``-S``.
 
-.. seealso::
-
-  :ref:`Miscellaneous command-line args <python:using-on-misc-options>`
-    authoritative source from the official Python docs
-
 Basic Customization
 -------------------
 
@@ -120,7 +115,7 @@ The above keys have a near one-to-one correspondence with the command line argum
 to see detailed CLI usage.
 
 The config file can be written in the below formats, listed with the third-party libraries they require if any. The schemas shown are found in the
-source code directory (for consistency; since format.json5 is read in tests and must be distributed with the source, I had to put the other formats
+source code directory for consistency (since format.json5 is read in tests and must be distributed with the source, I had to put the other formats
 in the same location); that is, ``asyncutils/``.
 
 ====== ============== =========== ================== ============
@@ -180,8 +175,6 @@ One may find it useful to alter the context dynamically without creating a new c
 
 It is even better to use :class:`NonReusableLocalContext`, which returns a one-time context manager, or the convenience method
 :meth:`Context.ascurctx` on context objects that wraps it.
-
-For more detailed documentation on context usage, see the :mod:`~asyncutils.context` page.
 
 .. tip::
   :collapsible:

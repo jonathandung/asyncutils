@@ -20,7 +20,6 @@ colourful command line interface.
   examples
   submodules
   api/index
-  glossary
 
 .. toctree::
   :caption: Development
