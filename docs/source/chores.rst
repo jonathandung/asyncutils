@@ -155,14 +155,14 @@ Changing help messages for command-line arguments
 -------------------------------------------------
 
 Remember not to indent the help strings when using multiline strings; keep them at the left margin such that they display correctly. Then run
-``make docs`` as a sanity check.
+``make docs``.
 
 Modifying the Makefile
 ----------------------
 
 Remember to sync up the Makefile with ``make.bat`` in the same directory, and vice versa. If you wish to remove a target, it must have exceeded a
-previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output. Then
-run ``make docs`` as a sanity check.
+previously declared deprecation period, and been moved into a special section with a "Deprecated targets" header in the ``make help`` output.
+Finally, run ``make docs``.
 
 Adding tests
 ------------

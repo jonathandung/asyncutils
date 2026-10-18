@@ -1,8 +1,11 @@
+from __future__ import annotations
 import asyncio as I, asyncutils as A, asyncutils._internal.helpers as H
 from functools import partial, wraps
 from sys import audit, exc_info
 from asyncutils._internal.patch import patch_function_signatures
 from asyncutils._internal.submodules import util_all as __all__
+TYPE_CHECKING = False
+if TYPE_CHECKING: from typing import Any
 def avalify(v):
     async def g(*_a, **_): return v # ruff: ignore[unused-async]
     return g
@@ -40,6 +43,7 @@ async def safe_cancel(t, /):
     finally: t.remove_done_callback(f)
 class DualContextManager:
     __slots__ = '_aentered', '_ce', '_entered', '_gen', '_st', '_ue'
+    _gen: Any
     def __init__(self, /, *_): self._gen, self._ce, self._ue, self._st = _; self._entered = self._aentered = False
     def __enter__(self):
         if self._aentered: raise RuntimeError('asyncutils.util.dualcontextmanager: context manager already entered asynchronously')

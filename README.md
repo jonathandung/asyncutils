@@ -39,7 +39,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.3.2.
+This is asyncutils v1.3.3.
 
 ## Configuration
 

@@ -26,7 +26,6 @@ Requires `docker <https://www.docker.com>`__:
 
 Requires `uv`_:
 
-* audit
 * lint (Also requires `ruff`_ and `ty`_)
 * lock
 * setup (Also pulls in `ruff`_ and `ty`_)
@@ -39,6 +38,7 @@ Requires `prek`_:
 Requires cURL 7.66.0+ on Unix (for parallel downloads):
 
 * docs
+* links
 
 All targets
 -----------

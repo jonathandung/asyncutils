@@ -10,9 +10,13 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.2] - 2026-10-14; newest
+### [1.3.3] - 2026-10-18; newest
 
-Upgraded to Python 3.15.0 and published first Docker image.
+Documentation corrections.
+
+### [1.3.2] - 2026-10-14; skipped
+
+Upgraded to Python 3.15.0.
 
 ### [1.3.1] - 2026-10-12
 
