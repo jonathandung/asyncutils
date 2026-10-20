@@ -21,7 +21,7 @@ def r(p, e=None, /):
     if type(f) is not dict: raise TypeError(f'asyncutils: incorrect configuration format at {p}; top-level structure should be an object/mapping')
     z = f'```{L}\n{z}\n```'; return f
 def m(m, a, /, _='see format.json5'): (e := TypeError(m%(c, a))).add_note(_); raise e
-if c := (E := __import__('os').environ).get(k := 'AUTILSCFGPATH', '').strip('"\' \t\r\n\v\f'):
+if c := (E := __import__('os').environ).get(k := 'AUCFGPATH', '').strip('"\' \t\r\n\v\f'):
     a('asyncutils/read_config', c)
     if isinstance(v := (d := r(c)).pop('next_config', c), str): a('asyncutils/set_next_config', c, v); E[k] = v
     elif v is None: a('asyncutils/discontinue_config', c); del E[k] # pragma: no cover

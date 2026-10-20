@@ -73,8 +73,8 @@ other installation pathways:
   python3 -m build # generate sdist and wheel in dist/
   python3 -m installer dist/*.whl # install from the wheel
 
-``asyncutils`` and ``autils`` will then be made available as entry points to the asyncutils CLI. The CLI can also be called with a typical and
-perhaps more familiar ``python3 -m asyncutils``.
+``asyncutils`` will then be made available as an entry point to the asyncutils CLI. The CLI can also be called with a typical and perhaps more
+familiar ``python3 -m asyncutils``.
 
 Optional dependencies
 ---------------------

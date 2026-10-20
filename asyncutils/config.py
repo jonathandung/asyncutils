@@ -5,7 +5,7 @@ from asyncutils._internal.submodules import config_all as __all__
 from asyncutils._internal.unparsed import N, c
 def __dir__(_=__all__): return _
 class FaultyConfig(BaseException):
-    def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUTILSCFGPATH is faulty: expected {', '.join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
+    def __init__(self, k, w, c, /): self.key, self.wrong, self.correct = k, w, c; super().__init__(f'asyncutils: configuration for key {k!r} from AUCFGPATH is faulty: expected {', '.join(c) if isinstance(c, tuple) else c.__name__}, got {w.__name__}')
 def f(e, _=__import__('_functools').partial(__import__, fromlist=('',)), f=frozenset(('thread', 'process', 'interpreter')), c='.', S=S): # ruff: ignore[complex-structure,function-call-in-default-argument,too-many-branches,too-many-return-statements] # pragma: no cover
     d, c, w = e.rpartition(c)
     if c:

@@ -1,7 +1,7 @@
 @echo off
 :: cspell:disable-next-line
 setlocal enabledelayedexpansion
-if "%AUTILSTESTMAXFAIL%" == "" set AUTILSTESTMAXFAIL=3
+if "%AUTESTMAXFAIL%" == "" set AUTESTMAXFAIL=3
 if "%1"=="" goto help
 goto %1
 
@@ -122,5 +122,5 @@ uv sync
 goto :eof
 
 :test
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTILSTESTMAXFAIL%
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail %AUTESTMAXFAIL%
 goto :eof

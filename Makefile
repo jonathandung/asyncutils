@@ -2,7 +2,7 @@
 .PHONY: badges bug build clean dclean docs help links lint lock log pc release run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
-AUTILSTESTMAXFAIL ?= 3
+AUTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
@@ -55,6 +55,6 @@ run:
 setup: .uv-stamp .prek-stamp
 	uv sync
 test:
-	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTILSTESTMAXFAIL)"
+	pytest -p asyncio-cooperative -p no:asyncio --no-cov --no-local-badge --maxfail "$(AUTESTMAXFAIL)"
 %::
 	true

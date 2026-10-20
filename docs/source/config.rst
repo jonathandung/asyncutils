@@ -8,11 +8,11 @@ Environment Variables
 
 The below environment variables directly affect what this library does, mostly in its console, and by extension, the command line:
 
-.. envvar:: AUTILSCFGPATH
+.. envvar:: AUCFGPATH
 
   Absolute path to a configuration file
 
-.. envvar:: AUTILSTESTMAXFAIL
+.. envvar:: AUTESTMAXFAIL
 
   Maximum number of failed tests before pytest exits early; default 3
 
@@ -93,9 +93,9 @@ Basic Customization
 An extensible, two-part configuration system is in place.
 
 The first, frozen part includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random
-number generation using :envvar:`AUTILSCFGPATH`.
+number generation using :envvar:`AUCFGPATH`.
 
-:envvar:`AUTILSCFGPATH` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown
+:envvar:`AUCFGPATH` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown
 as appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types, but you may
 see a raw :exc:`ModuleNotFoundError` if the library cannot be located or executed.
 

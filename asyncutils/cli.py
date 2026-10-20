@@ -49,7 +49,7 @@ def bug(args, timeout=6, paste=_, j=lambda p, y=S.stdin.buffer.read: print(end=p
         else: z = b''
     if not t.startswith(b := 'Bug: '): t = b+t
     if u and not ((r := p.urlsplit(u)).scheme and r.netloc): raise ValueError(f'asyncutils.cli.bug: invalid source link {u!r}')
-    S.audit('asyncutils.cli.bug', s := f'https://github.com/jonathandung/asyncutils/issues/new?{p.urlencode({'template': 'bug.yaml', 'title': t, 'auv': A.__version__.representation, 'pkv': v, 'pyv': f'Python {S.version} on {S.platform}', 'os': __import__('platform').platform(), 'link': u, 'logs': paste(g, timeout=timeout) if d else g, 'tb': paste(z, timeout=timeout) if d else z, 'cfg': A._internal.unparsed.z, 'env': '' if args.no_prefill_env else '\n'.join(f'{k}={h(k, '')}' for k in ('AUTILSCFGPATH', 'AUTILSTESTMAXFAIL', 'FORCE_COLOR', 'NO_COLOR', 'PYTHON_BASIC_REPL', 'PYTHONSTARTUP', 'TERM'))}, quote_via=p.quote)}') # cspell: disable-line
+    S.audit('asyncutils.cli.bug', s := f'https://github.com/jonathandung/asyncutils/issues/new?{p.urlencode({'template': 'bug.yaml', 'title': t, 'auv': A.__version__.representation, 'pkv': v, 'pyv': f'Python {S.version} on {S.platform}', 'os': __import__('platform').platform(), 'link': u, 'logs': paste(g, timeout=timeout) if d else g, 'tb': paste(z, timeout=timeout) if d else z, 'cfg': A._internal.unparsed.z, 'env': '' if args.no_prefill_env else '\n'.join(f'{k}={h(k, '')}' for k in ('AUCFGPATH', 'AUTESTMAXFAIL', 'FORCE_COLOR', 'NO_COLOR', 'PYTHON_BASIC_REPL', 'PYTHONSTARTUP', 'TERM'))}, quote_via=p.quote)}') # cspell: disable-line
     if o is NotImplemented: print(s); return 0
     import webbrowser as c; c.register_standard_browsers()
     if l == 1: print(f'Attempting to open link in {(x := 'default browser' if o is None else o)}')
@@ -63,7 +63,7 @@ def run(argv=None):
     I.parsed.p.parse_args(argv, n := I.unparsed.N)
     if n.pop('command') == 'bug': return bug(n)
     del n; I.initialize; S.audit('asyncutils.cli.run'); p = not A.pdb # ruff: ignore[useless-expression]
-    try: return A.AsyncUtilsConsole().run(suppress_asyncio_warnings=p, suppress_unawaited_coroutine_warnings=p, always_run_interactive=len(a := S.orig_argv) == 2 and a[0] == S.executable and a[1].endswith(('/bin/autils.exe', '/bin/asyncutils.exe', r'\Scripts\asyncutils.exe', r'\Scripts\autils.exe')))
+    try: return A.AsyncUtilsConsole().run(suppress_asyncio_warnings=p, suppress_unawaited_coroutine_warnings=p, always_run_interactive=len(a := S.orig_argv) == 2 and a[0] == S.executable and a[1].endswith(('/bin/asyncutils.exe', r'\Scripts\asyncutils.exe')))
     except BaseException as e:
         if p: raise
         t = e.__traceback__

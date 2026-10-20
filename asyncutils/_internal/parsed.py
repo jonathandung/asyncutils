@@ -9,7 +9,7 @@ Has CLI and coloured REPL support for quick development.
 On both Anaconda and PyPI as py-asyncutils.''', epilog='''Use @<filename> to insert command-line arguments from the file of that name at the exact position of this parameter.
 The file should have one argument per line; this format differs from that described below.
 
-Use the AUTILSCFGPATH environment variable to specify a path to a file of a supported type containing the default configuration.
+Use the AUCFGPATH environment variable to specify a path to a file of a supported type containing the default configuration.
 See the possible keys in format.json5, which can be accessed using tools.get_cfg_json_format().
 
 Note that the inner workings of this library is tightly coupled with the ever-evolving asyncio framework.

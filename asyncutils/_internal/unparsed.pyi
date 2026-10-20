@@ -1,5 +1,5 @@
 '''
-Automatically read the config from the file whose path is specified by :envvar:`AUTILSCFGPATH`.
+Automatically read the config from the file whose path is specified by :envvar:`AUCFGPATH`.
 
 .. important:: Values will be overwritten by command-line arguments when this module runs as a script.
 '''

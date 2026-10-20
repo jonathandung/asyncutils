@@ -32,7 +32,7 @@ def test_others(cfg_json, monkeypatch):
     assert type(mod.log).__module__ == 'logging'
     assert mod.running_console.get() is mod.running_console.unset() is None
     assert mod.submodules.cli_all == ('bug', 'run')
-    monkeypatch.setenv('AUTILSCFGPATH', cfg_json) # cspell:disable-line
+    monkeypatch.setenv('AUCFGPATH', cfg_json) # cspell:disable-line
     N = __import__('importlib').reload(mod.unparsed).N
     assert N.load_all
     assert N.V == 2

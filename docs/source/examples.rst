@@ -95,7 +95,6 @@ behavioural differences in typical environments, and the same arguments that the
 
   asyncutils # preferred
   python3 -m asyncutils # python -m on Windows
-  autils # shortened name for convenience
   python3 asyncutils
   python3 -m asyncutils.__main__
   python3 asyncutils/__main__.py

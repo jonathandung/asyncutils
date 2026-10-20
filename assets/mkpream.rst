@@ -14,7 +14,7 @@ You are strongly advised to develop in ``cmd.exe`` on Windows. There shouldn't b
 
 Certain executables, some of which are entry points to Python dependencies, will be on ``PATH`` once ``make setup`` has been run and the environment
 activated. In this step, `prek`_, `uv`_, `ruff`_, and `ty`_ will be automatically installed on your system if not present. For this to work, internet
-access is required, as well as `cURL <https://curl.se>`__ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix.
+access is required, as well as `cURL`_ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix.
 
 Target-specific dependencies
 ----------------------------
@@ -45,7 +45,7 @@ Requires `gh <https://cli.github.com>`__:
 
 * release
 
-Requires cURL 7.66.0+ on \*nix (for parallel downloads):
+Requires `cURL`_ 7.66.0+ on \*nix (for parallel downloads):
 
 * docs
 * links

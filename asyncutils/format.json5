@@ -1,4 +1,4 @@
-/* This file describes the intended format of the json files whose paths can be set as AUTILSCFGPATH to configure the behaviour of this module.
+/* This file describes the intended format of the json files whose paths can be set as AUCFGPATH to configure the behaviour of this module.
 The values associated with the keys are their defaults.
 Some keys can have various types, as detailed by the comments attached. */
 {
@@ -40,7 +40,7 @@ next_config: null,
 This key may be useful for temporary configurations that want to be automatically unset and replaced with a main configuration.
 If null, the environment variable is unset entirely after reading this config.
 Cycles can be created to switch between flags periodically.
-Ensure AUTILSCFGPATH is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
+Ensure AUCFGPATH is set to a valid file path if you keep encountering errors, since it could have been incorrectly set
 in a previous config. By that logic, you should also remember to update this correctly when the config file is moved. */
 context: { // configures individual submodules (contextual constants)
   /* Essentially maps submodule names to objects like {utility1: {key1: value1, key2: value2, ...}}, utility2: {...}};

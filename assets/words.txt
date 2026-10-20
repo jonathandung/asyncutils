@@ -1,6 +1,6 @@
 AFREIVALDS
-AUTILSCFGPATH
-AUTILSTESTMAXFAIL
+AUCFGPATH
+AUTESTMAXFAIL
 ETYP
 FIPS
 FURB
@@ -155,7 +155,6 @@ atriplewise
 atruthify
 aunique
 aunzip
-autils
 autoapi
 autoapidata
 autoapifunction
