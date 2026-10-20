@@ -32,7 +32,7 @@ class APeekable[T](LoopMixinBase):
     @overload
     async def __getitem__(self, idx: SupportsIndex, /) -> T: '''Slice or index access. Must be awaited.'''
 class ABucket[T, R](LoopMixinBase):
-    '''Async version of :func:`more_itertools.bucket`.'''
+    '''Async version of :class:`more_itertools.bucket`.'''
     def __init__(self, it: SupportsIteration[T], key: Callable[[T], R], validator: Callable[[R], bool]|None=...): '''Divide items from the (async) iterable ``it`` into child generators according to a ``key`` function.'''
     async def contains(self, key: R, /) -> bool: '''If ``validator`` returns ``False`` for ``key``, return ``False`` immediately. Otherwise, advance the iterable and store items until an item mapping to ``key`` under the key function is seen.'''
     def __aiter__(self) -> AsyncGeneratorType[T]: '''Yield the keys of all buckets. When this async generator is exhausted, the original iterable is fully consumed. Unlike the sync version, an exhausted bucket has no keys.'''

@@ -60,7 +60,7 @@ class VersionInfo(str):
     def __getitem__(self, i, /): return tuple.__getitem__(self.parts, i)
     def assert_valid(self, c=E.VersionCorrupted, i=E.IgnoreErrors(ValueError, TypeError, AttributeError)):
         with i:
-            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return
+            if isinstance(p := self.parts, tuple) and len(p) == 3 and all(isinstance(i, int) and i == j >= 0 for i, j in zip(map(int, self.split('.')), p, strict=True)): return # ty: ignore[unsupported-operator]
         raise c(self) # ty: ignore[invalid-argument-type]
     def replace_parts(self, *, _=('major', 'minor', 'patch'), **k): return __class__(*(getattr(self, _) if (v := k.pop(_, None)) is None else v for _ in _))
     def __format__(self, s, /, a=dict(x='hex', b='bin', o='oct', dec='d', major='0', minor='1', patch='2', maj='0', min='1', short='s', long='l', ascii='a', chars='c', tuple='t', hash='h', majmin='n').get): # ruff: ignore[unnecessary-collection-call,too-many-return-statements]
@@ -109,8 +109,8 @@ def normalize_allow_unimplemented(o, /, E=E, p=p, c=check_methods, s=frozenset((
     elif not c(o, '__iter__'): return None
     with E.IgnoreErrors(TypeError, ValueError): return p(o)
 def normalize(o, /, _=E.VersionNormalizerMissing):
-    if (r := normalize_allow_unimplemented(o)): return r
-    raise _(o)
+    if (r := normalize_allow_unimplemented(o)) is None: raise _(o)
+    return r
 def register_normalizer(o, n, /, _=t, f=N.setdefault): return f(_(o), n) is n
 def unregister_normalizer(o, /, _=t, f=N.pop): return f(_(o), None)
 def dispatch_normalizer(o, /, _=t, f=N.get): return f(_(o))

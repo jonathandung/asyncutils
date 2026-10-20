@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: badges bug build clean clean-all docs help links lint lock log pc release run setup test
+.PHONY: badges bug build clean dclean docs help links lint lock log pc release run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTILSTESTMAXFAIL ?= 3
@@ -7,7 +7,7 @@ O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
 .prek-stamp:
-	if command -v prek >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.sh | sh; else echo "curl or wget required to install prek" >&2; exit 1; fi
+	if command -v prek >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.sh | sh; else echo "curl or wget required to install prek" >&2; exit 1; fi
 	prek install
 	touch .prek-stamp
 .uv-stamp:
@@ -22,22 +22,25 @@ bug:
 build:
 	docker build -t jonathandung/asyncutils:latest .
 clean:
-	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
+	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/governance.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name '*.py[codz]' -delete
-clean-all:
+	find . -type f -name '*.py[co]' -delete
+dclean:
 	git clean -dxf
 docs:
 	scripts/generate.sh
-	$(MAKE) -C docs html -W
+	$(MAKE) -C docs html
 help:
 	cat assets/mkhelp.txt
 links:
 	scripts/generate.sh
-	$(MAKE) -C docs linkcheck -W
+	$(MAKE) -C docs linkcheck
 lint: .uv-stamp
+	echo "Running ruff..."
 	ruff check
+	echo "Running ty..."
 	ty check
+	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
 lock: .uv-stamp
 	uv lock -U
 log:
@@ -46,9 +49,7 @@ log:
 pc: .prek-stamp
 	prek run -a
 release:
-	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r
-	echo
-	if [[ $REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
+	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r; echo; if [[ $$REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 run:
 	docker run --rm -it jonathandung/asyncutils:latest
 setup: .uv-stamp .prek-stamp

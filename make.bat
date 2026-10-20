@@ -10,7 +10,7 @@ if exist .prek-stamp goto :eof
 where prek >nul 2>nul
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.5/prek-installer.ps1 | iex")
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.ps1 | iex")
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof
@@ -40,12 +40,12 @@ goto :eof
 
 :clean
 for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
-for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
+for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\governance.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
-del /s /q *.pyc *.pyo *.pyz 2>nul
+del /s /q *.pyc *.pyo 2>nul
 goto :eof
 
-:clean-all
+:dclean
 git clean -dxf
 goto :eof
 
@@ -63,7 +63,7 @@ shift
 goto __l
 :__d
 if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
-set "O=-W %REST_ARGS% %__O%"
+set "O=%REST_ARGS% %__O%"
 set "__O="
 set "REST_ARGS="
 make "%__B%"
@@ -80,8 +80,14 @@ goto :eof
 
 :lint
 call :.uv-stamp
+echo Running ruff...
 ruff check
+echo Running ty...
 ty check
+where cspell >nul 2>nul
+if %errorlevel% equ 0 (
+    echo Running cspell... && cspell .
+)
 goto :eof
 
 :lock

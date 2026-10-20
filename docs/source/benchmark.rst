@@ -18,12 +18,11 @@ the first run, which is considered a warmup run:
 Environment
 -----------
 
+Benchmarked on an old HP laptop running Windows 23H2.
+
 * ``python -VV`` gives: ``Python 3.15.0 (main, Oct  9 2026, 15:33:25) [MSC v.1951 64 bit (AMD64)]``
 * ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
 * ``__pycache__`` directories are persisted across runs
-
-It would be very nice if somebody could do the benchmarks on Ubuntu or other platforms and add a new section with the same structure detailing the
-results, since asyncio works drastically different on Windows than other systems.
 
 Baseline: asyncio
 -----------------

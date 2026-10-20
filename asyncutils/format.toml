@@ -42,9 +42,9 @@ token_bucket_default_consume_tokens = 1
 
 [context.buckets.leaky_bucket]
 adjmap = [
-[256, [0.15, 1.1, 0.85, 0.9]],
-[128, [0.23, 1.2, 0.77, 0.81]],
-[0, [0.3, 1.4, 0.7, 0.73]]
+  [256, [0.15, 1.1, 0.85, 0.9]],
+  [128, [0.23, 1.2, 0.77, 0.81]],
+  [0, [0.3, 1.4, 0.7, 0.73]]
 ]
 default_acquire_tokens = 1
 default_ext_can_set_factor = true

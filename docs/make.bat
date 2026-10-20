@@ -13,5 +13,5 @@ if errorlevel 9009 (
     echo https://www.sphinx-doc.org/en/master/usage/installation.html.
 	exit /b 1
 )
-%SPHINXBUILD% -M %1 source build %SPHINXOPTS% %O%
+%SPHINXBUILD% -M %1 source build -W %SPHINXOPTS% %O%
 popd

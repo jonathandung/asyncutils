@@ -66,7 +66,7 @@ def timer[T, **P](f: Callable[P, Awaitable[T]], /, *, precision: int=..., expect
     '''
     Convert the function that returns an awaitable object into an async function that returns a tuple ``(res_or_exc, elapsed)``.
 
-    * ``timer`` (default :func:`time.perf_counter`) is used to count ``elapsed``, the time required to execute the function.
+    * ``timer`` (default :func:`time.monotonic`) is used to count ``elapsed``, the time required to execute the function.
     * ``res_or_exc`` is the awaited result of the wrapped function, or the exception thrown as wrapped by :func:`~asyncutils.exceptions.wrap_exc`.
     * ``precision`` (default :const:`~asyncutils.context.Context.TIMER_DEFAULT_PRECISION`) is the number of digits after the decimal point to keep in the time in logging
     * If ``ns=True`` is passed, ``elapsed`` is in nanoseconds.

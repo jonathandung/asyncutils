@@ -10,7 +10,11 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.3] - 2026-10-18; newest
+### [1.3.4] - 2026-10-20; latest
+
+Updated linters and type checkers.
+
+### [1.3.3] - 2026-10-18
 
 Documentation corrections.
 
@@ -70,7 +74,7 @@ Breaking changes:
 - Included all the symbols listed in the previous section in the public API.
 
 ### [1.0.1] - 2026-06-30
-<!--cspell:disable-next-line-->
+
 Implemented `util.evaluate_and_return`, `iters.awrapf`, and `exceptions.ignore_warnings`; added `reject_cb` and `await_cb` parameters to
 `iters.aguessmax` and `iters.aguessmin`; added `yield_sentinel` keyword argument to `util.aiter_from_f`.
 

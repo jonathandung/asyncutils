@@ -1,5 +1,6 @@
 # asyncutils
 
+[![#StandWithPalestine](https://raw.githubusercontent.com/TheBSD/StandWithPalestine/main/badges/StandWithPalestine.svg)](https://github.com/TheBSD/StandWithPalestine/blob/main/docs/README.md)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
 [![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/project/py-asyncutils)
 [![Coverage](https://codecov.io/gh/jonathandung/asyncutils/graph/badge.svg?token=PTRNW1RGXA)](https://codecov.io/gh/jonathandung/asyncutils)
@@ -39,7 +40,7 @@ This package is very resourceful, containing everything from higher-order error 
 
 ## Version
 
-This is asyncutils v1.3.3.
+This is asyncutils v1.3.4.
 
 ## Configuration
 

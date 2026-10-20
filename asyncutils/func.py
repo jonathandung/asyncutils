@@ -1,10 +1,10 @@
-# ruff: file-ignore[bare-except,complex-structure,too-many-arguments] # ty: ignore[unresolved-attribute]
+# ruff: file-ignore[bare-except, complex-structure, too-many-arguments] # ty: ignore[unresolved-attribute]
 import asyncio as I, asyncutils as A
 from collections import deque, namedtuple
 from functools import partial, update_wrapper, wraps
 from itertools import count, repeat
 from sys import audit
-from time import perf_counter
+from time import monotonic
 from asyncutils._internal import helpers as H, log, patch as P
 from asyncutils._internal.submodules import func_all as __all__
 from asyncutils.config import _randinst
@@ -56,7 +56,7 @@ def star(f, /):
 def unstar(f, /):
     async def g(*a, **k): return await f(a, k)
     return wraps(f)(g)
-def every(interval, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.every: periodic coroutine %s reached the maximum of %d iterations'):
+def every(interval, /, *, stop_when=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=monotonic, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.every: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = H.get_loop_and_set()
     if supplied_kwargs is None: supplied_kwargs = {}
     def dec(f, /):
@@ -87,7 +87,7 @@ def every(interval, /, *, stop_when=None, count_f=True, verbose=False, stop_on_e
             if not q: return default
         return wraps(f)(g)
     return dec
-def everymethod(interval, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=perf_counter, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
+def everymethod(interval, /, *, stop_when_getter=None, count_f=True, verbose=False, stop_on_exc=True, wait_first=False, loop=None, max_iterations=None, timer=monotonic, supplied_args=(), supplied_kwargs=None, default=_NO_DEFAULT, default_fname='<name unknown>', _='func.everymethod: periodic coroutine %s reached the maximum of %d iterations'):
     if loop is None: loop = H.get_loop_and_set()
     if supplied_kwargs is None: supplied_kwargs = {}
     def dec(f, /):
@@ -117,7 +117,7 @@ def everymethod(interval, /, *, stop_when_getter=None, count_f=True, verbose=Fal
             if not q: return default
         return wraps(f)(g)
     return dec
-def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=perf_counter, ns=False, _='nano', c='func.timer: function %s finished in %.*f %sseconds.', d='func.timer: received expected error from function %s after %.*f %sseconds: %s'): # cspell:disable-line
+def timer(f, /, *, precision=None, expected=Exception, should_log=True, timer=monotonic, ns=False, _='nano', c='func.timer: function %s finished in %.*f %sseconds.', d='func.timer: received expected error from function %s after %.*f %sseconds: %s'): # cspell:disable-line
     if precision is None: precision = A.getcontext().TIMER_DEFAULT_PRECISION-ns*9
     async def g(*a, **k):
         s = timer()
@@ -153,7 +153,7 @@ def retry(tries=None, delay=None, *, max_delay=None, backoff=None, jitter=None, 
             return await f(*a, **k)
         return wraps(f)(g)
     return dec
-def throttle(lim, timer=perf_counter):
+def throttle(lim, timer=monotonic):
     l = 0.0
     def dec(f, /):
         async def g(*a, **k):
@@ -179,7 +179,7 @@ def iterf(n, /):
             return x
         return wraps(f)(g)
     return dec
-async def measure(f, /, *, timer=perf_counter): s = timer(); return await f(), timer()-s
+async def measure(f, /, *, timer=monotonic): s = timer(); return await f(), timer()-s
 async def measure2(f, /, **k): return (await measure(f, **k))[1]
 async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResult', 'min max total avg iterations', module='asyncutils.func'), *, sequential=None):
     c, g = A.getcontext(), measure2.__get__(f)
@@ -193,7 +193,7 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
 P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '__calls', '__ct', '__func', '__lock', '__period', '__raise', '__timer'
-    def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=perf_counter, lock_impl=None):
+    def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=monotonic, lock_impl=None):
         if period is None: return partial(cls, calls=f, period=calls, raise_=raise_, timer=timer, lock_impl=lock_impl)
         audit('asyncutils.func.RateLimited', H.fullname(f), calls, period); (_ := super().__new__(cls)).__func, _.__period, _.__ct, _.__lock, _.__calls, _.__raise, _.__timer = f, float(period), deque(), (I.Lock if lock_impl is None else lock_impl)(), int(calls), raise_, timer; return _
     async def __call__(self, *a, **k):
@@ -209,4 +209,4 @@ class RateLimited:
         return await f(*a, **k)
     def __repr__(self): return f'{H.fullname(self)}({self.__func!r}, {self.__calls}, {self.__period:.6f}, raise_={self.__raise}, timer={self.__timer!r}, lock_impl={H.fullname(self.__lock)})'
     P.patch_classmethod_signatures((__new__, 'f, /, calls, period=None, *, raise_=False, timer={}, lock_impl=None'))
-del _, perf_counter, P
+del _, monotonic, P

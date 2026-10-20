@@ -110,6 +110,6 @@ def aawcmf2dcmff(**d):
 def make_task_factory(tcls, eager=None):
     if eager is None: eager = A.getcontext().MAKE_TASK_FACTORY_DEFAULT_EAGER
     return lambda loop, coro, eager_start=eager, **k: tcls(coro, loop=loop, eager_start=eager_start, **k)
-dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], A.IgnoreErrors(I.CancelledError)
+dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], A.IgnoreErrors(I.CancelledError) # ty: ignore[not-subscriptable]
 patch_function_signatures((lockf, 'f, /, lf={}'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

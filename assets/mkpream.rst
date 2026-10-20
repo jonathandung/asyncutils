@@ -12,12 +12,12 @@ The Makefile is intended to be used by developers, not end users, and it obvious
 
 You are strongly advised to develop in ``cmd.exe`` on Windows. There shouldn't be a need to run ``scripts\generate.ps1`` manually.
 
+Certain executables, some of which are entry points to Python dependencies, will be on ``PATH`` once ``make setup`` has been run and the environment
+activated. In this step, `prek`_, `uv`_, `ruff`_, and `ty`_ will be automatically installed on your system if not present. For this to work, internet
+access is required, as well as `cURL <https://curl.se>`__ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix.
+
 Target-specific dependencies
 ----------------------------
-
-Besides some executables from Python dependencies that will be on ``PATH`` once ``make setup`` has been run and the environment is activated, the
-following executables  will be automatically installed on your system if not present. This implicit installation process requires internet access, as
-well as `cURL <https://curl.se>`__ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix (dependency-free on Windows):
 
 Requires `docker <https://www.docker.com>`__:
 
@@ -26,16 +26,26 @@ Requires `docker <https://www.docker.com>`__:
 
 Requires `uv`_:
 
-* lint (Also requires `ruff`_ and `ty`_)
+* lint
 * lock
-* setup (Also pulls in `ruff`_ and `ty`_)
+
+Requires `ruff`_:
+
+* lint
+
+Requires `ty`_:
+
+* lint
 
 Requires `prek`_:
 
 * pc
-* setup
 
-Requires cURL 7.66.0+ on Unix (for parallel downloads):
+Requires `gh <https://cli.github.com>`__:
+
+* release
+
+Requires cURL 7.66.0+ on \*nix (for parallel downloads):
 
 * docs
 * links

@@ -35,6 +35,7 @@ aconsume
 aconvolve
 acountdown
 acycle
+addgroup
 addopts
 aderangements
 adfs
@@ -176,6 +177,7 @@ corocheck
 coros
 currentmodule
 cursize
+dclean
 dcmf
 dcmff
 deadpool
@@ -217,14 +219,13 @@ lcls
 lfactor
 lifo
 linkcheck
+linters
 linux
 livelock
 loadf
 lockf
 loky
 lrem
-ludeeus
-luizm
 majmin
 maxfail
 maxhist
