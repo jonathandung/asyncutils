@@ -1,6 +1,7 @@
 # asyncutils
 
 [![#StandWithPalestine](https://raw.githubusercontent.com/TheBSD/StandWithPalestine/main/badges/StandWithPalestine.svg)](https://github.com/TheBSD/StandWithPalestine/blob/main/docs/README.md)
+
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/py-asyncutils)](https://www.python.org/downloads)
 [![PyPI version](https://badge.fury.io/py/py-asyncutils.svg)](https://pypi.org/project/py-asyncutils)
 [![Coverage](https://codecov.io/gh/jonathandung/asyncutils/graph/badge.svg?token=PTRNW1RGXA)](https://codecov.io/gh/jonathandung/asyncutils)
@@ -10,8 +11,8 @@
 [![GitHub Pages](https://github.com/jonathandung/asyncutils/actions/workflows/deploy.yaml/badge.svg)](https://jonathandung.github.io/asyncutils)
 [![Dependabot](https://github.com/jonathandung/asyncutils/actions/workflows/dependabot/update-graph/badge.svg)](https://github.com/jonathandung/asyncutils/security/dependabot)
 [![prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/jonathandung/asyncutils/actions/workflows/prek.yaml)
-[![AI ticket management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml)
-[![AI PR management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml)
+[![Spam ticket management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-issue.yaml)
+[![Spam PR management](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml/badge.svg)](https://github.com/jonathandung/asyncutils/actions/workflows/slop-pr.yaml)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13018/badge)](https://www.bestpractices.dev/projects/13018)
 [![Read the Docs: stable](https://img.shields.io/readthedocs/asyncutils/stable?logo=readthedocs&label=docs%20(stable))](https://asyncutils.readthedocs.io/en/stable)
 [![Read the Docs: latest](https://img.shields.io/readthedocs/asyncutils/latest?logo=readthedocs)](https://asyncutils.readthedocs.io/en)

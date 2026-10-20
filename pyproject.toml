@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = ["uv_build>=0.13.2"]
+requires = ["uv_build>=0.13.3"]
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -122,21 +122,15 @@ missing-override-decorator = "ignore"
 [tool.ty.src]
 include = ["asyncutils", "tests"]
 
-[[tool.ty.overrides]]
-include = ["**/*.py"]
-rules = {dynamic-function-decorator-return = "ignore", missing-type-argument = "ignore"}
-
-[[tool.ty.overrides]]
-include = ["asyncutils/console.py"]
-rules = {redundant-condition-strict = "ignore"}
-
-[[tool.ty.overrides]]
-include = ["asyncutils/_internal/compat.py"]
-rules = {invalid-argument-type = "ignore", truthiness-test-of-none-union = "ignore"}
-
+[tool.ty]
+overrides = [
+  {include = ["**/*.py"], rules = {dynamic-function-decorator-return = "ignore", missing-type-argument = "ignore"}},
+  {include = ["asyncutils/console.py"], rules = {redundant-condition-strict = "ignore"}},
+  {include = ["asyncutils/_internal/compat.py"], rules = {invalid-argument-type = "ignore", truthiness-test-of-none-union = "ignore"}}
+]
 [tool.uv]
 preview = true
-required-version = ">=0.13.2"
+required-version = ">=0.13.3"
 
 [tool.uv.build-backend]
 module-name = "asyncutils"
