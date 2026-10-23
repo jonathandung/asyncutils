@@ -7,7 +7,7 @@ from asyncutils._internal.submodules import util_all as __all__
 TYPE_CHECKING = False
 if TYPE_CHECKING: from typing import Any
 def avalify(v):
-    async def g(*_a, **_): return v # ruff: ignore[unused-async]
+    async def g(*a, **k): return v # ruff: ignore[unused-async, unused-function-argument]
     return g
 afalsify, atruthify, anullify = map(avalify, (False, True, None))
 anullcontext = object.__new__(type('anullcontext', (), {'__new__': lambda _, /: anullcontext, '__aenter__': anullify, '__aexit__': anullify}))

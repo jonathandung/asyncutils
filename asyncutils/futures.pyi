@@ -1,4 +1,4 @@
-'''Various implementations of future and task classes, eager, time-aware and supporting asynchronous and no-argument callbacks.'''
+'''Various implementations of future and task classes, eager, time-aware and supporting asynchronous and argumentless callbacks.'''
 from asyncio import AbstractEventLoop, Future, Task
 from collections.abc import Awaitable, Callable
 from contextvars import Context

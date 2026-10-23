@@ -6,14 +6,17 @@ AUTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
+define install
+	if command -v $(1) >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -sSf $(2) | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- $(2) | sh; else echo "curl or wget required to install $(1)" >&2; exit 1; fi
+endef
 .prek-stamp:
-	if command -v prek >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.sh | sh; else echo "curl or wget required to install prek" >&2; exit 1; fi
+	$(call install,prek,https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.sh)
 	prek install
-	touch .prek-stamp
+	touch "$@"
 .uv-stamp:
-	if command -v uv >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -LsSf https://astral.sh/uv/install.sh | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- https://astral.sh/uv/install.sh | sh; else echo "curl or wget required to install uv" >&2; exit 1; fi
+	$(call install,uv,https://releases.astral.sh/installers/uv/latest/uv-installer.sh)
 	uv tool install ruff && uv tool install ty 2>/dev/null
-	touch .uv-stamp
+	touch "$@"
 badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings

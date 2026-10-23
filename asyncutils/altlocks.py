@@ -10,25 +10,25 @@ from asyncutils._internal.submodules import altlocks_all as __all__
 from asyncutils.config import _randinst
 from asyncutils.constants import _NO_DEFAULT
 class Releasing:
-    __slots__ = '__lock',
-    def __init__(self, l, /): self.__lock = l
+    __slots__ = '__',
+    def __init__(self, l, /): self.__ = l
     async def __aenter__(self):
-        if not (l := self.__lock).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
+        if not (l := self.__).locked(): raise RuntimeError('asyncutils.altlocks.Releasing: lock is not acquired')
         if I.iscoroutine(r := l.release()): await r
-    async def __aexit__(self, *_): await self.__lock.acquire()
+    async def __aexit__(self, *_): await self.__.acquire()
 class Resource:
     __inc_cnt = count(1).__next__; __slots__ = '__',
     def __init__(self): self.__ = f'anonymous resource #{__class__.__inc_cnt()}'
     def __repr__(self): return self.__
 class ResourceGuard(A.AsyncContextMixin):
-    __slots__ = '__', '_t', '_u', 'action', 'guarded'
+    __slots__ = '__', '__t', '__u', 'action', 'guarded'
     def __new__(cls, rsrc=_NO_DEFAULT, *, action='using', _=Resource):
         if rsrc is _NO_DEFAULT: rsrc = _()
-        (s := object.__new__(cls)).__, s.action, s.guarded = rsrc, action, False; s._t = s._u = 0; return s
+        (s := object.__new__(cls)).__, s.action, s.guarded = rsrc, action, False; s.__t = s.__u = 0; return s
     def __enter__(self):
-        r = self.__; self._t += 1
+        r = self.__; self.__t += 1
         if self.guarded: raise A.ResourceBusy(f'another task is already {self.action} resource: {r!r}')
-        self.guarded = True; self._u += 1
+        self.guarded = True; self.__u += 1
     def __exit__(self, /, *_, e='asyncutils.altlocks.ResourceGuard: context manager used improperly'):
         if not self.guarded: raise RuntimeError(e)
         self.guarded = False
@@ -37,7 +37,7 @@ class ResourceGuard(A.AsyncContextMixin):
         if isinstance(r := self.__, _): raise TypeError('asyncutils.altlocks.ResourceGuard: yields_resource expected resource guard to have been instantiated with a resource')
         with self: yield r
     @property
-    def success_ratio(self): return u/self._t if (u := self._u) else 0.0
+    def success_ratio(self): return u/self.__t if (u := self.__u) else 0.0
     P.patch_method_signatures((__exit__, P.exit_sig), (yields_resource, ''), (__new__, "rsrc={0}, *, action='using'"))
 class UniqueResourceGuard(ResourceGuard):
     _cache = __import__('weakref').WeakValueDictionary(); __slots__ = '__weakref__',
@@ -55,7 +55,7 @@ class CircuitBreaker:
         f = None
         if callable(n) and (n := getattr(f := getattr(getattr(n, '__func__', n), '__wrapped__', n), '__qualname__', None)) is None is (n := getattr(f, '__name__', None)): n = _%cls.__inc_cnt()
         audit('asyncutils.altlocks.CircuitBreaker', n, max_fails); s, C = super().__new__(cls), A.getcontext(); s.name, s.__mf, s.__reset, s.__exc, s.__opened, s.__max_hoc, s.__unlock, s.__lock, s.state = n, C.CIRCUIT_BREAKER_DEFAULT_MAX_FAILS if max_fails is None else max_fails, C.CIRCUIT_BREAKER_DEFAULT_RESET if reset is None else reset, exc, float('-inf'), C.CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS if max_half_open_calls is None else max_half_open_calls, Releasing(l := I.Lock()), l, cls.State.CLOSED; s.fails = s.__hoc = 0; return s if f is None else s(f)
-    def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT):
+    def __call__(self, f, /, *, timer=monotonic, default=_NO_DEFAULT): # ruff: ignore[complex-structure]
         audit('asyncutils.altlocks.CircuitBreaker.__call__', self.name, fullname(f))
         async def g(*a, **k):
             C = self.State
@@ -75,6 +75,7 @@ class CircuitBreaker:
                     else: self.__opened, self.state, self.fails = timer(), C.OPEN, 0
                     if default is _NO_DEFAULT: raise
                     return default
+                except A.Critical: raise
                 except A.CRITICAL: raise A.Critical
                 except BaseException as e: raise A.CircuitBreakerError(f'asyncutils.altlocks.CircuitBreaker: unexpected {fullname(e)} in {fullname(f)} under breaker {self.name!r}') from e
         return wraps(f)(g)

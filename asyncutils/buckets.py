@@ -5,27 +5,27 @@ from asyncutils import AsyncContextMixin, getcontext
 from asyncutils._internal.helpers import LoopMixinBase, fullname
 from asyncutils._internal.submodules import buckets_all as __all__
 class TokenBucket:
-    __slots__ = '__c', '__lock', '__lu', '__rate', '__timer', '__tokens'
-    def __init__(self, rate, capacity, timer=monotonic): audit(fullname(self), rate, capacity); self.__c = self.__tokens = float(capacity); self.__rate, self.__lock, self.__lu, self.__timer = rate, Lock(), timer(), timer
+    __slots__ = '__c', '__lo', '__lu', '__ra', '__ti', '__to'
+    def __init__(self, rate, capacity, timer=monotonic): audit(fullname(self), rate, capacity); self.__c = self.__to = float(capacity); self.__ra, self.__lo, self.__lu, self.__ti = rate, Lock(), timer(), timer
     async def consume(self, tokens=None):
         if tokens is None: tokens = float(getcontext().TOKEN_BUCKET_DEFAULT_CONSUME_TOKENS)
-        async with self.__lock:
-            e, self.__lu = (n := self.__timer())-self.__lu, n; self.__tokens = d = min(self.__c, self.__tokens+e*self.__rate)
-            if (d := d-tokens) >= 0: self.__tokens = d
-            else: await sleep(-d/self.__rate); self.__tokens = 0
+        async with self.__lo:
+            e, self.__lu = (n := self.__ti())-self.__lu, n; self.__to = d = min(self.__c, self.__to+e*self.__ra)
+            if (d := d-tokens) >= 0: self.__to = d
+            else: await sleep(-d/self.__ra); self.__to = 0
     @property
     def capacity(self): return self.__c
 class LeakyBucket(AsyncContextMixin, LoopMixinBase):
-    __slots__ = '__c', '__dr', '__efs', '__factor', '__hf', '__last', '__leak', '__lf', '__timer', '__tokens'
-    def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit(fullname(self), capacity, leak); C = getcontext(); self.__leak, self.__last, self.__dr, self.__factor, self.__lf, self.__hf, self.__efs, self.__timer = leak, timer(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self.__c = self.__tokens = capacity
+    __slots__ = '__c', '__dr', '__efs', '__fa', '__hf', '__la', '__lf', '__lk', '__ti', '__to'
+    def __init__(self, capacity, leak, min_factor=None, max_factor=None, external_factor_settable=None, timer=monotonic): audit(fullname(self), capacity, leak); C = getcontext(); self.__lk, self.__la, self.__dr, self.__fa, self.__lf, self.__hf, self.__efs, self.__ti = leak, timer(), None, 1.0, C.LEAKY_BUCKET_DEFAULT_MIN_FACTOR if min_factor is None else min_factor, C.LEAKY_BUCKET_DEFAULT_MAX_FACTOR if max_factor is None else max_factor, C.LEAKY_BUCKET_DEFAULT_EXT_CAN_SET_FACTOR if external_factor_settable is None else external_factor_settable, timer; self.__c = self.__to = capacity
     def _adjust_from_params(self, a, b, c, d, /):
-        if (f := self.__factor) < abs((n := min(f*b, self.__hf) if (r := self.__tokens/self.__c) <= a else max(f*d, self.__lf) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self.__factor = n
+        if (f := self.__fa) < abs((n := min(f*b, self.__hf) if (r := self.__to/self.__c) <= a else max(f*d, self.__lf) if r >= c else min(f*1.05, 1) if f < 1 else f)-f)*100: self.__fa = n
     def _add_tokens(self, amount):
-        if (s := self.__tokens+amount) <= self.__c: self.__tokens = s; return True
+        if (s := self.__to+amount) <= self.__c: self.__to = s; return True
         return False
-    def _set_tokens(self): e, self.__last = (c := self.__timer())-self.__last, c; self.__tokens = max(0, self.__tokens-e*self.__leak*self.__factor)
+    def _set_tokens(self): e, self.__la = (c := self.__ti())-self.__la, c; self.__to = max(0, self.__to-e*self.__lk*self.__fa)
     async def _drain(self):
-        while True: self._set_tokens(); self._adjust(); await sleep(min(1/(self.__leak*self.__factor), 1))
+        while True: self._set_tokens(); self._adjust(); await sleep(min(1/(self.__lk*self.__fa), 1))
     async def acquire(self, amount=None): self._set_tokens(); return self._add_tokens(getcontext().LEAKY_BUCKET_DEFAULT_ACQUIRE_TOKENS if amount is None else amount)
     async def wait_for_tokens(self, amount=None):
         c = getcontext()
@@ -34,17 +34,17 @@ class LeakyBucket(AsyncContextMixin, LoopMixinBase):
         while True:
             self._set_tokens(); self._adjust()
             if self._add_tokens(amount): return w
-            await sleep(_ := min(m, (amount-self.__c+self.__tokens)/(self.__leak*self.__factor))); w += _
+            await sleep(_ := min(m, (amount-self.__c+self.__to)/(self.__lk*self.__fa))); w += _
     @property
     def capacity(self): return self.__c
     @property
-    def factor(self): return self.__factor
+    def factor(self): return self.__fa
     @factor.setter
     def factor(self, v, /):
-        if self.__efs: self.__factor = max(self.__lf, min(self.__hf, v))
+        if self.__efs: self.__fa = max(self.__lf, min(self.__hf, v))
         else: raise AttributeError(name='factor', obj=self)
     @factor.deleter
-    def factor(self): self.__factor = 1.0
+    def factor(self): self.__fa = 1.0
     def _adjust(self):
         c = self.__c
         for b, t in getcontext().LEAKY_BUCKET_ADJMAP:

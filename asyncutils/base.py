@@ -9,25 +9,25 @@ from asyncutils._internal.submodules import base_all as __all__
 from asyncutils.constants import _NO_DEFAULT, RAISE
 b, c = H.check_methods, H.fullname
 class EventLoop:
-    __reusable, Flags, State = [], E('Flags', ('FLIP_RELEASE_LOOP_ON_FINALIZATION', 'SILENT_ON_FINALIZE', 'NEVER_CLEAR_TASKS_ON_REUSE', 'CLOSE_EXISTING_ON_EXIT', 'SOMETIMES_CONTINUE_ON_EXIT', 'KEEP_CREATED_OPEN_ON_EXIT', 'CANCEL_ALL_TASKS', 'KEEP_LOOP', 'SUPPRESS_RUNTIME_ERRORS', 'FAIL_SILENT', 'DISALLOW_REUSE', 'NO_REUSE', 'NEVER_ENTER', 'ATTEMPT_AENTER', 'SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR', 'SUPPRESS_INNER_AEXIT_ON_RUNTIME_ERROR'), module=__name__), E('State', ('ENTERED', 'CREATED_LOOP', 'ENTERED_INNER', 'AENTERED_INNER'), module=__name__); __slots__ = '_flags', '_is', '_loop', '_state', '_task'
+    __reusable, Flags, State = [], E('Flags', ('FLIP_RELEASE_LOOP_ON_FINALIZATION', 'SILENT_ON_FINALIZE', 'NEVER_CLEAR_TASKS_ON_REUSE', 'CLOSE_EXISTING_ON_EXIT', 'SOMETIMES_CONTINUE_ON_EXIT', 'KEEP_CREATED_OPEN_ON_EXIT', 'CANCEL_ALL_TASKS', 'KEEP_LOOP', 'SUPPRESS_RUNTIME_ERRORS', 'FAIL_SILENT', 'DISALLOW_REUSE', 'NO_REUSE', 'NEVER_ENTER', 'ATTEMPT_AENTER', 'SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR', 'SUPPRESS_INNER_AEXIT_ON_RUNTIME_ERROR'), module=__name__), E('State', ('ENTERED', 'CREATED_LOOP', 'ENTERED_INNER', 'AENTERED_INNER'), module=__name__); __slots__ = '_fl', '_is', '_loop', '_st', '_task'
     def _get_unclosed_loop(self, factory=I.new_event_loop, _=A.IgnoreErrors(AttributeError)): # pragma: no cover
-        if self._flags&(c := self.Flags).NO_REUSE: return factory()
+        if self._fl&(c := self.Flags).NO_REUSE: return factory()
         p, L = (pool := self.__reusable).pop, None
         while pool and ((L := p()).is_closed() or L.is_running()): ...
         if L is None: return factory()
-        if not self._flags&c.NEVER_CLEAR_TASKS_ON_REUSE:
+        if not self._fl&c.NEVER_CLEAR_TASKS_ON_REUSE:
             with _: L._ready.clear()
             with _: L._scheduled.clear()
         return L
-    def factory_reset(self): self._flags = self.Flags(A.getcontext().EVENT_LOOP_BASE_FLAGS)
-    def clear_flags(self, mask_to_keep=0): self._flags &= mask_to_keep
-    def copy_flags(self): return self.from_flags(self._flags)
-    def __contains__(self, f, /): return bool(self._flags&(self.Flags[f.upper()] if isinstance(f, str) else f))
-    def flags_eq(self, o, /): return self._flags == (o if isinstance(o, int) else o._flags)
+    def factory_reset(self): self._fl = self.Flags(A.getcontext().EVENT_LOOP_BASE_FLAGS)
+    def clear_flags(self, mask_to_keep=0): self._fl &= mask_to_keep
+    def copy_flags(self): return self.from_flags(self._fl)
+    def __contains__(self, f, /): return bool(self._fl&(self.Flags[f.upper()] if isinstance(f, str) else f))
+    def flags_eq(self, o, /): return self._fl == (o if isinstance(o, int) else o._flags)
     @classmethod
     def from_flags(cls, flags, /, m=0x10000):
         if not 0 <= flags < m: raise OverflowError(f'asyncutils.base.EventLoop: flags value {flags:#x} has forbidden bits set')
-        r._flags, r._state, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.EventLoop at {id(r := object.__new__(cls)):#x}'; return r
+        r._fl, r._st, r._is = cls.Flags(flags), cls.State(0), f'asyncutils.base.EventLoop at {id(r := object.__new__(cls)):#x}'; return r
     def __new__(cls, /, **k):
         F, p = A.getcontext().EVENT_LOOP_BASE_FLAGS, k.pop
         for f, s in cls.Flags.__members__.items():
@@ -36,35 +36,37 @@ class EventLoop:
             else: F &= ~s
         if k: A.raise_exc(TypeError, 'asyncutils.base.EventLoop: got unexpected keyword arguments; shown below', notes=k) # pragma: no cover
         return cls.from_flags(F)
-    def __hash__(self): return self._flags
-    def __enter__(self, _='asyncutils.base.EventLoop: context already entered'):
-        q, S = (f := self._flags)&(c := self.Flags).FAIL_SILENT, self.State
-        if (s := self._state)&S.ENTERED: # pragma: no cover
+    def __hash__(self): return self._fl
+    def __enter__(self, _='asyncutils.base.EventLoop: context already entered'): # ruff: ignore[complex-structure]
+        q, S = (f := self._fl)&(c := self.Flags).FAIL_SILENT, self.State
+        if (s := self._st)&S.ENTERED: # pragma: no cover
             if q: return self._loop
             raise RuntimeError(_)
         if (l := I._get_running_loop()) is None: I.set_event_loop(l := self._get_unclosed_loop())
         else: s |= S.CREATED_LOOP
         if not f&c.NEVER_ENTER and callable(g := getattr(l, '__enter__', None)): # pragma: no cover
             try: g(); s |= S.ENTERED_INNER
+            except A.Critical: raise
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
                 if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __enter__ of associated event loop: {e}') from e
         if f&c.ATTEMPT_AENTER and callable(g := getattr(l, '__aenter__', None)):
             try: l.run_until_complete(g()); s |= S.AENTERED_INNER
+            except A.Critical: raise
             except A.CRITICAL: raise A.Critical
             except BaseException as e:
                 if not q: raise RuntimeError(f'{self._is}: exception occurred while calling __aenter__ of associated event loop: {e}') from e
-        self._loop, self._state = l, s+S.ENTERED; return l
+        self._loop, self._st = l, s+S.ENTERED; return l
     def __exit__(self, t, v, b, /, _m='%s context not entered', _n='%s context not entered with errors passed into __exit__', _i=A.IgnoreErrors(RuntimeError), _l=L): # ruff: ignore[complex-structure,too-many-branches,too-many-statements]
-        n, l, a, z, S = self._is, self._loop, not (f := self._flags)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS, self.State
-        if not (s := self._state)&S.ENTERED:
+        n, l, a, z, S = self._is, self._loop, not (f := self._fl)&(d := self.Flags).FAIL_SILENT, not f&d.SUPPRESS_RUNTIME_ERRORS, self.State
+        if not (s := self._st)&S.ENTERED:
             if a: raise RuntimeError(_m%n) if v is None else BaseExceptionGroup(_n%n, tuple(A.unnest_reverse(v))).with_traceback(b)
             return False
         if f&d.CANCEL_ALL_TASKS: self._task = l.create_task(safe_cancel_batch(I.all_tasks(l)))
         if not f&d.DISALLOW_REUSE: self.__reusable.append(l)
         if not ((c := s&S.CREATED_LOOP) and f&d.SOMETIMES_CONTINUE_ON_EXIT):
             with _i: l.stop()
-        q, r, self._state = t is not None and issubclass(t, RuntimeError), False, s-S.ENTERED
+        q, r, self._st = t is not None and issubclass(t, RuntimeError), False, s-S.ENTERED
         if s&S.ENTERED_INNER: # pragma: no cover
             if callable(g := getattr(l, '__exit__', None)):
                 try: r = g(None, None, None) if f&d.SUPPRESS_INNER_EXIT_ON_RUNTIME_ERROR and q else g(t, v, b)
@@ -90,15 +92,15 @@ class EventLoop:
         if not f&d.KEEP_LOOP: del self._loop
         return r or (q and not z)
     def __del__(self, _f=L.debug, _g=L.warning, _m='%s: garbage-collecting entered context; you are advised to refactor your code', _w='%s: cannot suppress exceptions from within destructor', _d='destroyed %s'): # pragma: no cover
-        b, n = not (f := self._flags)&(c := self.Flags).SILENT_ON_FINALIZE, self._is
-        if not self._state&self.State.ENTERED:
+        b, n = not (f := self._fl)&(c := self.Flags).SILENT_ON_FINALIZE, self._is
+        if not self._st&self.State.ENTERED:
             if b: _f(_d, n)
             return
         if b: _g(_m, n)
-        if f&c.FLIP_RELEASE_LOOP_ON_FINALIZATION: self._flags = f^c.DISALLOW_REUSE
+        if f&c.FLIP_RELEASE_LOOP_ON_FINALIZATION: self._fl = f^c.DISALLOW_REUSE
         if self.__exit__(*exc_info()) and b: _g(_w, n)
-    def __reduce__(self, /): return self.from_flags, (self._flags,)
-    def __repr__(self, _=c): return f'{_(self)}.from_flags({self._flags:#4x})'
+    def __reduce__(self, /): return self.from_flags, (self._fl,)
+    def __repr__(self, _=c): return f'{_(self)}.from_flags({self._fl:#4x})'
     P.patch_method_signatures((__enter__, ''), (__exit__, P.exit_sig), (__del__, ''), (_get_unclosed_loop, 'factory={}')); P.patch_classmethod_signatures((from_flags, 'flags, /'), (__new__, f'*, {'={0}, '.join(Flags._member_names_)}={{0}}'))
 def f(n):
     async def adisembowel(it, /):

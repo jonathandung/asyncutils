@@ -8,7 +8,10 @@ from ._internal.prots import ExcType, GeneratorCoroutine, Raise, SupportsIterati
 __all__ = 'EventLoop', 'adisembowel', 'adisembowel_left', 'aenumerate', 'aiter_to_gen', 'collect', 'collect_into', 'drop', 'dummy_task', 'iter_to_agen', 'safe_cancel_batch', 'sleep_forever', 'take', 'yield_to_event_loop'
 @final
 class EventLoop:
-    '''A context manager controlling lifecycles of native event loops. Has specialized handling for :mod:`asyncio` implementation details.'''
+    '''
+    A context manager controlling lifecycles of native event loops.
+    Has specialized handling for :mod:`asyncio` implementation details.
+    '''
     class Flags(IntFlag):
         '''An enumeration of all keyword arguments accepted by the constructor in order of the offset corresponding to the flag in the flags representation.'''
         FLIP_RELEASE_LOOP_ON_FINALIZATION = 1

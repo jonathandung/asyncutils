@@ -64,9 +64,11 @@ def run(argv=None):
     if n.pop('command') == 'bug': return bug(n)
     del n; I.initialize; S.audit('asyncutils.cli.run'); p = not A.pdb # ruff: ignore[useless-expression]
     try: return A.AsyncUtilsConsole().run(suppress_asyncio_warnings=p, suppress_unawaited_coroutine_warnings=p, always_run_interactive=len(a := S.orig_argv) == 2 and a[0] == S.executable and a[1].endswith(('/bin/asyncutils.exe', r'\Scripts\asyncutils.exe')))
+    except A.Critical: raise
+    except A.CRITICAL: raise A.Critical
     except BaseException as e:
         if p: raise
         t = e.__traceback__
-    __import__('_warnings').warn('asyncutils.cli.run: unprecedented exception with no traceback caught; cannot perform autopsy as requested', RuntimeWarning, 2) if t is None else __import__('pdb').post_mortem(t)
+    __import__('_warnings').warn('asyncutils.cli.run: exception with no traceback caught; cannot perform autopsy as requested', RuntimeWarning, 2) if t is None else __import__('pdb').post_mortem(t)
 I.patch.patch_function_signatures((bug, 'args, timeout=6, paste={}'))
 del _

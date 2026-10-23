@@ -10,7 +10,7 @@ if exist .prek-stamp goto :eof
 where prek >nul 2>nul
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.6/prek-installer.ps1 | iex")
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.ps1 | iex")
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof
@@ -19,7 +19,7 @@ goto :eof
 if exist .uv-stamp goto :eof
 where uv >nul 2>nul
 if not defined UV_INSTALL_DIR set UV_INSTALL_DIR=%USERPROFILE%\.local\bin
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex")
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://releases.astral.sh/installers/uv/latest/uv-installer.ps1 | iex")
 %UV_INSTALL_DIR%\uv.exe tool install ruff 2>nul
 %UV_INSTALL_DIR%\uv.exe tool install ty 2>nul
 type nul >.uv-stamp

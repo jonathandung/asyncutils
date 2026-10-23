@@ -28,15 +28,15 @@ def test_contextual_behaviour(ctx):
         assert c is not ctx
         assert isinstance(c, Context)
         evl = EventLoop(**{EventLoop.Flags(1)._name_.lower(): False})
-        assert evl._flags == 4
+        assert evl._fl == 4
         evl.clear_flags(3)
-        assert evl._flags == hash(evl) == 0
+        assert evl._fl == hash(evl) == 0
         evl.factory_reset()
-        assert evl._flags == 5
+        assert evl._fl == 5
         evl = evl.copy_flags()
-    assert evl._flags == 5
+    assert evl._fl == 5
     evl.factory_reset()
-    assert evl._flags == 0
+    assert evl._fl == 0
     assert ctx.EVENT_LOOP_BASE_FLAGS == 0
     with LocalContext(aItEr_To_GeN_dEfAuLt_StRiCt=True) as c:
         assert getcontext() is c

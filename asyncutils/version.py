@@ -13,8 +13,7 @@ def p(I, /, f=0 .__gt__, e=E.VersionValueError):
 def r(c, /, _='cannot subclass asyncutils.version.%s'): raise TypeError(_%c.__name__)
 def a(c, /, t=tuple(property(lambda o, _=i: o[_]) for i in range(3)), _=classmethod(r), f=('major', 'minor', 'patch')): c._fields, c._asdict = f, lambda self, _=f: dict(zip(_, self, strict=True)); c.major, c.minor, c.patch = t; c.__floor__ = c.__trunc__ = t[0].fget; c._replace = c.__replace__ = lambda self, **k: c(**self._asdict(), **k); c.__init_subclass__ = _; return c
 N, t, _ = {}, lambda o, /: o if isinstance(o, type) else type(o), 0xff
-def b(z): z <<= 1; return ~z if z < 0 else z
-def c(key, _=_, f=b): return (key := f(key))&_, (key>>9)&_, key>>17, key>>8&1
+def c(key, _=_, f=(b := lambda z: ~z if (z := z<<1) < 0 else z)): return (key := f(key))&_, (key>>9)&_, key>>17, key>>8&1
 @a
 class VersionDelta(tuple):
     __slots__ = (); _make = classmethod(tuple.__new__)
@@ -26,12 +25,12 @@ class VersionInfo(str):
     def __new__(cls, /, *a, p=p): object.__setattr__(s := super().__new__(cls, '.'.join(map(str, a := normalize(a[0]) if len(a) == 1 else p(a)))), 'parts', a); return s
     def _hash(self, _=lambda x, y, /: y*y+x if x < y else x*x+x+y, f=lambda n: (~n if n&1 else n)>>1): return f(_(_(*self[:2]), self[2]))
     def __hash__(self): return (x := self._hash())+(x > -2)
-    def shelve(self, path, /, key=DEFAULT_KEY, _=_, g=c):
-        x, h, y, l = g(key); y ^= self._hash()
+    def shelve(self, path, /, key=DEFAULT_KEY, _=_, c=c):
+        x, h, y, l = c(key); y ^= self._hash()
         with open(path, 'wb') as f: (w := f.write)(bytes((h,))); w(bytes((i-x)&_ for i in y.to_bytes((y.bit_length()>>3)+1, 'little' if l else 'big', signed=True)))
     @classmethod
-    def unshelve(cls, path, /, key=DEFAULT_KEY, _=_, g=c):
-        x, h, y, l = g(key)
+    def unshelve(cls, path, /, key=DEFAULT_KEY, _=_, c=c):
+        x, h, y, l = c(key)
         with open(path, 'rb') as f:
             if (r := f.read)(1)[0] != h: raise ValueError('asyncutils.version.VersionInfo.unshelve: bad key')
             return cls._unhash(int.from_bytes(((i+x)&_ for i in r()), 'little' if l else 'big', signed=True)^y)

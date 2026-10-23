@@ -4,7 +4,7 @@ sphinx:
 build:
   os: ubuntu-26.04
   commands:
-  - curl -LsSf https://astral.sh/uv/install.sh | sh
+  - curl -fsS https://releases.astral.sh/installers/uv/latest/uv-installer.sh | sh
   - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH $HOME/.local/bin/uv sync --group furo
   - scripts/generate.sh
   - $READTHEDOCS_VIRTUALENV_PATH/bin/python -m sphinx -TWj auto -d _build/doctrees -b html docs/source $READTHEDOCS_OUTPUT/html

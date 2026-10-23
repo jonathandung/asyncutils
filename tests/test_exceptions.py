@@ -12,7 +12,7 @@ def test_wrap_exc():
     assert exception_occurred(wrapper)
     with raises(IndexError, match='a'): raise_for(wrapper)
 def test_critical():
-    with raises(Critical, match='critical error occurred or user attempted to terminate the program', check=lambda e: e.__cause__ is None and e.exc is e.__context__ and isinstance(e.exc, KeyboardInterrupt) and e.exc.args == ('a',) and isinstance(e.exc, CRITICAL)): # ruff: ignore[pytest-raises-with-multiple-statements]
+    with raises(Critical, match='critical error occurred or user attempted to terminate the program', check=lambda e: (x := e.exc) is e.__cause__ and isinstance(x, KeyboardInterrupt) and x.args == ('a',) and isinstance(x, CRITICAL)): # ruff: ignore[pytest-raises-with-multiple-statements]
         try: raise KeyboardInterrupt('a')
         except: raise Critical # ruff: ignore[bare-except]
 def test_raise_exc():

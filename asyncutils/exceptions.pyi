@@ -57,14 +57,14 @@ def raise_for(e: ExceptionWrapper, /) -> NoReturn: ...
 @overload
 def raise_for[T: Not[ExceptionWrapper]](e: T, /) -> T: '''Raise the exception embedded in the wrapper if recognized and return the argument otherwise.'''
 class StateCorrupted(BaseException):
-    '''Raised when the module-internal state is corrupted. Should not be caught by users.'''
+    '''Raised when the module-internal state is corrupted. Do not catch.'''
     def __init__(self, adjective: str, details: str, /): ...
     @property
     def adjective(self) -> str: ...
     @property
     def details(self) -> str: ...
 class Critical[T: (SystemExit, SystemError, KeyboardInterrupt)](BaseException):
-    '''Raised when a critical error is encountered by exception-handling middleware.'''
+    '''Raised when a critical error is encountered by exception-handling middleware. Do not catch.'''
     @overload
     def __init__(self, exc: T): ...
     @overload
