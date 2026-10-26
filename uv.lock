@@ -710,14 +710,14 @@ wheels = [
 
 [[package]]
 name = "loky"
-version = "3.6.0"
+version = "3.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/22/278d945801da206ad49ec30686a9faa140f977afd07143c136252546af0d/loky-3.6.0.tar.gz", hash = "sha256:12c1655148c369dd1739a514a4f5b01b76538ffead916f9ad442ef6c0e9be896", size = 115338, upload-time = "2026-08-31T08:38:07.59Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/dd/c8c848bf610d7449c23e487f5992aed3c053eab748a5d8dfe1c7a413d7a7/loky-3.7.0.tar.gz", hash = "sha256:80928106fe18b5300c6f1b3a871d71e68a81dc9b2fe5c8ee4afe93bb9ba6424d", size = 120523, upload-time = "2026-09-29T10:49:12.131Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/f9/d9b7f7551d397c1a11b0aea666e8607fc95b7e3ba97b338d83b94e44a51e/loky-3.6.0-py3-none-any.whl", hash = "sha256:992365f32e034277a995b170f49549ad7d0ee62d9c91d190ef2c267f8339df17", size = 66017, upload-time = "2026-08-31T08:38:06.036Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/16/8affc9cd2226900f57c5626ae77fa17e349688610c18d8ec3d43f66f85db/loky-3.7.0-py3-none-any.whl", hash = "sha256:f8088c01e58a5bce4389dfc8d9affbe2480bef03863e0bc0d1aa08674e8a2974", size = 67734, upload-time = "2026-09-29T10:49:10.726Z" },
 ]
 
 [[package]]
