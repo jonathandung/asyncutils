@@ -678,7 +678,7 @@ async def alast(it, default=_NO_DEFAULT, _=H.check_methods):
         if default is _NO_DEFAULT: raise ValueError('asyncutils.iters.alast called on empty iterable without default value') from None
         return default
 def anth_or_last(it, n, default=_NO_DEFAULT): return alast(aislice(it, n+1), default)
-async def awrapf(it, before=None, after=None):
+async def wrapf(it, before=None, after=None):
     if before is not None:
         r = before()
         with A.ignore_type_errors: await r

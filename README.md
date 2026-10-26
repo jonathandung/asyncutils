@@ -31,13 +31,19 @@ Takes pride in:
 
 ## Setup
 
-Make sure you have CPython 3.12 or above. GraalPy 25.0 or above is also acceptable. CPython free-threaded and debug builds are also supported.
-No setup is needed after installation. See the [installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html) for more.
+Make sure you have CPython 3.12 or above. GraalPy 25.0 or above is also acceptable.
+CPython free-threaded and debug builds are also supported.
+
+No setup is needed after installation. See the
+[installation guide](https://asyncutils.readthedocs.io/en/stable/installation.html) for
+more.
 
 ## Usage
 
-This package is very resourceful, containing everything from higher-order error handling functions to network protocols. See the
-[usage guide](https://asyncutils.readthedocs.io/en/stable/examples.html) for some basic examples.
+This package is very resourceful, containing everything from higher-order error
+handling functions to network protocols. See the
+[usage guide](https://asyncutils.readthedocs.io/en/stable/examples.html) for some basic
+examples.
 
 ## Version
 
@@ -45,17 +51,19 @@ This is asyncutils v1.3.4.
 
 ## Configuration
 
-Besides using command line arguments to change console settings, the behaviour of this module as a library can be customized as well. See the
+Besides using command line arguments to change console settings, the behaviour of this
+module as a library can be customized as well. See the
 [configuration guide](https://asyncutils.readthedocs.io/en/stable/config.html).
 
 ## Remarks
 
-It is strongly recommended that you read the [asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using event loop and async
-generator related features, since their behaviours are central points of confusion and have troubled me greatly in the development of this library.
+It is strongly recommended that you read the
+[asyncio docs](https://docs.python.org/3/library/asyncio.html) thoroughly if using
+event loop and async generator related features.
 
 ## Resources
 
-Here are some resources if you're new to the world of async. They were of great assistance when I was learning async (I still am):
+Here are some resources if you're new to async:
 
 - [asyncio how-to](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html)
 - [Basic walkthrough](https://realpython.com/async-io-python)
@@ -66,8 +74,10 @@ Here are some resources if you're new to the world of async. They were of great 
 
 ## Contributing
 
-If you have suggestions for how asyncutils could be improved, or want to report a bug, do open an issue! All contributions are welcome.
-For more, check out the [contributing guide](https://asyncutils.readthedocs.io/en/stable/contributing.html).
+If you have suggestions for how asyncutils could be improved, or want to report a bug,
+do open an issue! All contributions are welcome.
+For more, check out the
+[contributing guide](https://asyncutils.readthedocs.io/en/stable/contributing.html).
 
 ## License
 

@@ -1,18 +1,17 @@
 # Support Guidelines
 
-Thank you for using asyncutils! This document outlines how to get help with this project.
+Thank you for using `asyncutils`! This document outlines how to get help with this
+project.
 
-Before jumping to seek support, do skim through [the readme](https://github.com/jonathandung/asyncutils#asyncutils).
+Before jumping to seek support, do skim through
+[the readme](https://github.com/jonathandung/asyncutils#asyncutils).
 
 ## Bug Reports
 
-If you've found a bug, please:
-
-1. Check if it's already reported in [Issues](https://github.com/jonathandung/asyncutils/issues)
-2. If so, participate meaningfully there
-3. Open a new issue otherwise, possibly using `make bug` to scrape environment information into the issue form
-4. Enter the remaining required information
-5. Await review and respond to questions
+If you've found a bug, please check if it's already reported in
+[Issues](https://github.com/jonathandung/asyncutils/issues). If so, participate
+meaningfully there; otherwise, use `make bug` to file a bug report. Please await review
+and try your best to respond to questions.
 
 ## Feature Requests
 
@@ -27,7 +26,8 @@ Have an idea? We'd love to hear it!
 ### Community Support
 
 - [GitHub Discussions](https://github.com/jonathandung/asyncutils/discussions)
-- [Stack Overflow](https://stackoverflow.com): Tag questions with `[python]` and `[asyncutils]`
+- [Stack Overflow](https://stackoverflow.com): Tag questions with `[python]` and
+  `[asyncutils]`
 
 ### Quick Questions
 
@@ -41,7 +41,8 @@ For quick questions, consider:
 
 **Never report security vulnerabilities publicly.**
 
-See [the security policy](https://asyncutils.readthedocs.io/en/stable/security.html) for details.
+See [the security policy](https://asyncutils.readthedocs.io/en/stable/security.html)
+for details.
 
 ## Common Issues & Solutions
 
@@ -84,8 +85,8 @@ If the package is not working with python, perform the steps below:
 ```bash
 # Check sys.path
 python3 -c "print(*__import__('sys').path, sep='\n')"
-# Check for package naming conflicts; following snippet should print altlocks, base, buckets, channels, cli, compete, config, console
-# constants, context, events, exceptions, ... separated by newlines
+# Check for package naming conflicts; following snippet should print altlocks, base,
+# buckets, channels, cli, compete, config, ... separated by newlines
 python3 -c "print(*__import__('asyncutils').__all__, sep='\n')"
 ```
 
@@ -98,8 +99,9 @@ As fast as I can; that is:
 - Security issues: 1 day
 - General questions: Community-driven
 
-I will try to make a post on the discussions page (e.g. hiatus announcement) and set my status to 'On vacation' or similar in case of inactivity
-such that I cannot fulfil these promises or meet other deadlines I set myself.
+I will try to make a post on the discussions page (e.g. hiatus announcement) and set my
+status to 'On vacation' or similar in case of inactivity such that I cannot fulfil
+these promises or meet other deadlines I set myself.
 
 ## Remarks
 

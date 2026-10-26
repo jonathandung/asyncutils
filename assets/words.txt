@@ -161,7 +161,6 @@ autoapifunction
 avalify
 awindowed
 awrap
-awrapf
 azip
 aziplongest
 backpressure
@@ -301,6 +300,7 @@ vecs
 viewcode
 wasi
 weakrefset
+wrapf
 xarr
 xfailed
 zizmor

@@ -5,23 +5,26 @@ if "%AUTESTMAXFAIL%" == "" set AUTESTMAXFAIL=3
 if "%1"=="" goto help
 goto %1
 
+:__i
+where "%1" >nul 2>nul
+if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm %2 | iex")
+goto :eof
+
 :.prek-stamp
 if exist .prek-stamp goto :eof
-where prek >nul 2>nul
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.ps1 | iex")
+call :__i prek https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.ps1
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof
 
 :.uv-stamp
 if exist .uv-stamp goto :eof
-where uv >nul 2>nul
 if not defined UV_INSTALL_DIR set UV_INSTALL_DIR=%USERPROFILE%\.local\bin
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm https://releases.astral.sh/installers/uv/latest/uv-installer.ps1 | iex")
-%UV_INSTALL_DIR%\uv.exe tool install ruff 2>nul
-%UV_INSTALL_DIR%\uv.exe tool install ty 2>nul
+call :__i uv https://releases.astral.sh/installers/uv/latest/uv-installer.ps1
+%UV_INSTALL_DIR%\uv.exe tool install ruff
+%UV_INSTALL_DIR%\uv.exe tool install ty
 type nul >.uv-stamp
 goto :eof
 
@@ -85,9 +88,7 @@ ruff check
 echo Running ty...
 ty check
 where cspell >nul 2>nul
-if %errorlevel% equ 0 (
-    echo Running cspell... && cspell .
-)
+if %errorlevel% equ 0 echo Running cspell... && cspell .
 goto :eof
 
 :lock

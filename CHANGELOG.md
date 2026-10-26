@@ -28,7 +28,8 @@ Build process refactors; documentation fixes; Makefile fixes.
 
 ### [1.3.0] - 2026-09-22
 
-Changed all extras to dependency groups; removed XML config parsing since XML is not typed.
+Changed all extras to dependency groups; removed XML config parsing since XML is not
+typed.
 
 ## [1.2]
 
@@ -75,13 +76,16 @@ Breaking changes:
 
 ### [1.0.1] - 2026-06-30
 
-Implemented `util.evaluate_and_return`, `iters.awrapf`, and `exceptions.ignore_warnings`; added `reject_cb` and `await_cb` parameters to
-`iters.aguessmax` and `iters.aguessmin`; added `yield_sentinel` keyword argument to `util.aiter_from_f`.
+Implemented `util.evaluate_and_return`, `iters.wrapf`, and `exceptions.ignore_warnings`;
+added `reject_cb` and `await_cb` parameters to `iters.aguessmax` and `iters.aguessmin`;
+added `yield_sentinel` keyword argument to `util.aiter_from_f`.
 
 ### [1.0.0] - 2026-06-26; first stable version
 
-Added some tests; enabled some pydocstyle lint rules; refactored internal modules to avoid importing asyncio to show the help message and library
-version; moved warnings badge generation to slower test run; switched back to codecov due to pricing; integrated spelling checker.
+Added some tests; enabled some pydocstyle lint rules; refactored internal modules to
+avoid importing asyncio to show the help message and library version; moved warnings
+badge generation to slower test run; switched back to codecov due to pricing;
+integrated spelling checker.
 
 ## [0.9]
 
@@ -96,7 +100,8 @@ Greatly improved futures and properties functionality.
 
 ### [0.9.15] - 2026-06-17
 
-Committed uv.lock to version control; replaced `AsyncGenerator` with `AsyncGeneratorType` and `Generator` with `GeneratorType` where appropriate.
+Committed uv.lock to version control; replaced `AsyncGenerator` with
+`AsyncGeneratorType` and `Generator` with `GeneratorType` where appropriate.
 
 ### [0.9.14] - 2026-06-13
 
@@ -108,7 +113,8 @@ Reorganized the project structure; added a test; clarified documentation.
 
 ### [0.9.12] - 2026-06-10
 
-Fixed all warnings in Sphinx nitpicky builds; declared free-threaded support as standard; unpinned the exact beta of Python 3.15.
+Fixed all warnings in Sphinx nitpicky builds; declared free-threaded support as
+standard; unpinned the exact beta of Python 3.15.
 
 ### [0.9.11] - 2026-06-04
 
@@ -120,7 +126,8 @@ Integrated CodeQL fully.
 
 ### [0.9.9] - 2026-05-26
 
-Added more tests and more badges to the readme; removed codecov upload step superseded by GitHub Code Quality.
+Added more tests and more badges to the readme; removed codecov upload step superseded
+by GitHub Code Quality.
 
 ### [0.9.8] - 2026-05-23
 
@@ -132,30 +139,37 @@ Added `locksmiths` submodule.
 
 ### [0.9.6] - 2026-05-19
 
-Re-committed .markdownlint.json to version control; documentation nears completion; used GitHub Actions for page deployment.
+Re-committed .markdownlint.json to version control; documentation nears completion;
+used GitHub Actions for page deployment.
 
 ### [0.9.5] - 2026-05-17
 
-Some bugfixes; began deployment to [GitHub Pages](https://jonathandung.github.io/asyncutils).
+Some bugfixes; began deployment to
+[GitHub Pages](https://jonathandung.github.io/asyncutils).
 
 ### [0.9.4] - 2026-05-15
 
-Fixed workflows once more and integrated uv more fully; migrated from mypy to ty, removing stubtest step.
+Fixed workflows once more and integrated uv more fully; migrated from mypy to ty,
+removing stubtest step.
 
 ### [0.9.3] - 2026-05-11
 
-Added some tests; changed symbolic links to a copy step in the Read the Docs build, which is more reliable; fixed codecov trigger; added
-sphinx-copybutton as an optional dependency.
+Added some tests; changed symbolic links to a copy step in the Read the Docs build,
+which is more reliable; fixed codecov trigger; added sphinx-copybutton as an optional
+dependency.
 
 ### [0.9.2] - 2026-05-07
 
-Created symbolic links in docs directory linking to root .md files; fixed some bugs; respected some more environment variables and documented this
-behaviour; completed benchmarks; added myst_parser as an optional dependency; bumped some dependencies; added some examples.
+Created symbolic links in docs directory linking to root .md files; fixed some bugs;
+respected some more environment variables and documented this behaviour; completed
+benchmarks; added myst_parser as an optional dependency; bumped some dependencies;
+added some examples.
 
 ### [0.9.1] - 2026-05-01
 
-Declared full support for python[ -m] asyncutils an entry point; patched function, method and class method signatures where appropriate; added
-`-P` / `--pdb` option; switched to `furo` theme.
+Declared full support for python[ -m] asyncutils an entry point; patched function,
+method and class method signatures where appropriate; added `-P` / `--pdb` option;
+switched to `furo` theme.
 
 ### [0.9.0] - 2026-04-27
 
@@ -165,15 +179,18 @@ Added some iteration, functional programming and context management utilities.
 
 ### [0.8.28] - 2026-04-24
 
-Rewrote submodules loading mechanism; removed fragile relative imports; compressed asyncio and sibling module imports to avoid overhead.
+Rewrote submodules loading mechanism; removed fragile relative imports; compressed
+asyncio and sibling module imports to avoid overhead.
 
 ### [0.8.27] - 2026-04-21
 
-Added more tests and fixed stubtest errors; abolished slow markdownlint step in pre-commit; various API additions.
+Added more tests and fixed stubtest errors; abolished slow markdownlint step in
+pre-commit; various API additions.
 
 ### [0.8.26] - 2026-04-18
 
-Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows; added more contextual constants.
+Squashed many bugs and stub inaccuracies; integrated stubtest; simplified workflows;
+added more contextual constants.
 
 ### [0.8.25] - 2026-04-14
 
@@ -245,24 +262,29 @@ Set up version control; added version submodule.
 
 ## [0.7] - 2026-02-09
 
-Began migration of implementation details into `_internal` subpackage; fixed initialization logic and command line.
+Began migration of implementation details into `_internal` subpackage; fixed
+initialization logic and command line.
 
 ## [0.6] - 2026-01
 
-Completed migration from inline annotations to separated stubs; perfected `base.EventLoop` and lazy loading; added `console` and `cli` submodules.
+Completed migration from inline annotations to separated stubs; perfected
+`base.EventLoop` and lazy loading; added `console` and `cli` submodules.
 
 ## [0.5] - 2025-12
 
-Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented preliminary lazy loading system; created `exceptions` submodule;
-began separation of type annotations from .py into .pyi.
+Added classes such as `altlocks.CircuitBreaker` and `channels.EventBus`; implemented
+preliminary lazy loading system; created `exceptions` submodule; began separation of
+type annotations from .py into .pyi.
 
 ## [0.4] - 2025-10
 
-Added more complicated patterns and procedures such as `channels.Observable` and `signals.wait_for_signal`.
+Added more complicated patterns and procedures such as `channels.Observable` and
+`signals.wait_for_signal`.
 
 ## [0.3] - 2025-08
 
-Basically completed refactoring; added more object-oriented patterns such as `altlocks.DynamicThrottle` and `misc.CacheWithBackgroundRefresh`.
+Basically completed refactoring; added more object-oriented patterns such as
+`altlocks.DynamicThrottle` and `misc.CacheWithBackgroundRefresh`.
 
 ## [0.2] - 2025-07
 
@@ -270,4 +292,5 @@ Began reorganizing single file containing all functions into submodules.
 
 ## [0.1] - 2025-06
 
-Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`, `base.iter_to_agen` and `util.sync_await`.
+Added basic but untested features such as `iters.tee`, `iters.merge`, `base.to_async`,
+`base.iter_to_agen` and `util.sync_await`.
