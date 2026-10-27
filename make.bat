@@ -28,6 +28,11 @@ call :__i uv https://releases.astral.sh/installers/uv/latest/uv-installer.ps1
 type nul >.uv-stamp
 goto :eof
 
+:audit
+uv audit
+for /f "delims=" %%i in ('gh auth token') do set "GH_TOKEN=%%i"
+zizmor .
+
 :badges
 pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
@@ -89,6 +94,10 @@ echo Running ty...
 ty check
 where cspell >nul 2>nul
 if %errorlevel% equ 0 echo Running cspell... && cspell .
+where markdownlint-cli2 >nul 2>nul
+if %errorlevel% equ 0 echo Running markdownlint-cli2... && markdownlint-cli2
+where sphinx-lint >nul 2>nul
+if %errorlevel% equ 0 echo Running sphinx-lint... && sphinx-lint docs
 goto :eof
 
 :lock

@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = ["uv_build>=0.13.3"]
+requires = ["uv_build>=0.13.6"]
 
 [project]
 authors = [{name = "Jonathan Dung", email = "jonathandung@yahoo.com"}]
@@ -59,7 +59,7 @@ skip_covered = true
 
 [tool.ruff]
 exclude = ["docs/source/conf.py"]
-required-version = ">=0.17.1"
+required-version = ">=0.17.3"
 target-version = "py312"
 
 [tool.ruff.lint]
@@ -130,7 +130,7 @@ overrides = [
 
 [tool.uv]
 preview = true
-required-version = ">=0.13.3"
+required-version = ">=0.13.6"
 
 [tool.uv.build-backend]
 module-name = "asyncutils"

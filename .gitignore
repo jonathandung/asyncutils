@@ -19,6 +19,8 @@
 .eggs/
 .env*
 .prek-stamp
+.pytest_cache/
+.ruff_cache/
 .uv-stamp
 .venv/
 .vscode/*

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: badges bug build clean dclean docs help links lint lock log pc release run setup test
+.PHONY: audit badges bug build clean dclean docs help links lint lock log pc release run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTESTMAXFAIL ?= 3
@@ -17,6 +17,9 @@ endef
 	$(call install,uv,https://releases.astral.sh/installers/uv/latest/uv-installer.sh)
 	uv tool install ruff && uv tool install ty 2>/dev/null
 	touch "$@"
+audit:
+	uv audit
+	GH_TOKEN="$(gh auth token)" zizmor .
 badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
@@ -26,7 +29,7 @@ build:
 	docker build -t jonathandung/asyncutils:latest .
 clean:
 	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/governance.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
 	find . -type f -name '*.py[co]' -delete
 dclean:
 	git clean -dxf
@@ -44,6 +47,8 @@ lint: .uv-stamp
 	echo "Running ty..."
 	ty check
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
+	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2
+	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint docs
 lock: .uv-stamp
 	uv lock -U
 log:
@@ -52,7 +57,7 @@ log:
 pc: .prek-stamp
 	prek run -a
 release:
-	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r; echo; if [[ $$REPLY =~ [Yy]$ ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
+	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r; echo; if [[ $$REPLY =~ ^[Yy] ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 run:
 	docker run --rm -it jonathandung/asyncutils:latest
 setup: .uv-stamp .prek-stamp

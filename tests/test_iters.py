@@ -11,9 +11,7 @@ from asyncutils.iters import *
 from tests.conftest import mk
 @fixture
 def bucket(): return ABucket((10, 20, 30, 11, 21, 31, 12, 22, 23, 33), 10 .__rfloordiv__)
-Set = IntEnum('Set', 'A B C D E F G H I J', module=__name__)
-l = list(Set)
-shuffle(l)
+shuffle(l := list(Set := IntEnum('Set', 'A B C D E F G H I J', module=__name__)))
 d = dict(zip(Set, l, strict=True))
 async def next_node(x): return d[x]  # ruff: ignore[unused-async]
 def test_aiter_to_gen(): assert all(i == j for i, j in zip(aiter_to_gen(arange(10)), range(10), strict=True))

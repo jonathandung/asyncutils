@@ -22,13 +22,12 @@ jobs:
         ref: ${{github.event.pull_request.head.sha || github.sha}}
     - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
       with:
-        activate-environment: true
         enable-cache: false
         python-version: "3.15"
-    - run: uv pip install sphinx-lint -e . --group test
+    - run: uv sync --group test
     - run: uvx ruff check --output-format github
     - run: uvx ty check --output-format github
-    - run: sphinx-lint docs
+    - run: uvx sphinx-lint docs
     - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
       with:
         globs: |

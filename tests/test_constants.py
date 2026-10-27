@@ -12,18 +12,18 @@ def test_misc():
     with pytest.raises(TypeError, match='cannot subclass the type of asyncutils-internal sentinels'): type('', (t,), {}) # ty: ignore[unsupported-dynamic-base]
 @pytest.mark.parametrize('s', (RAISE, NO_COALESCE))
 def test_public(s):
-    assert s.name == str(s) == f'asyncutils.constants.{s.back}'
+    assert s.name == str(s) == 'asyncutils.constants.'+s.back
     assert pickle.loads(pickle.dumps(s)) is s
     assert not s.is_private
 @pytest.mark.parametrize('cls', (SentinelBase, t))
 def test_sentinels(cls):
-    ctx = pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
-    with ctx: cls()
-    with ctx: cls('foo')
-    with ctx: cls('spam.bar')
-    with ctx:
+    c = pytest.raises(TypeError, match=r"cannot instantiate 'asyncutils\.constants\..*'")
+    with c: cls()
+    with c: cls('foo')
+    with c: cls('spam.bar')
+    with c:
         class Foo: __slots__, baz = (), cls()
-    with ctx:
+    with c:
         class Bar: __slots__, quux = (), cls('Bar.quux')
     assert not SentinelBase._can_instantiate # ty: ignore[unresolved-attribute]
     assert not t._can_instantiate # ty: ignore[unresolved-attribute]
