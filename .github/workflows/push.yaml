@@ -23,23 +23,17 @@ jobs:
     - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
       with:
         enable-cache: false
-        python-version: "3.15"
+        python-version: "3.15.2"
     - run: uv sync --group test
     - run: uvx ruff check --output-format github
     - run: uvx ty check --output-format github
     - run: uvx sphinx-lint docs
-    - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
-      with:
-        globs: |
-          *.md
-          .github/**/*.md
-    - uses: streetsidesoftware/cspell-action@ce1816e4ce36532956ac6e983737392774b6e169
-      with:
-        config: cspell.json
-        incremental_files_only: true
     - run: uv audit
+    - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+    - run: bunx markdownlint-cli2
+    - run: bunx cspell .
     - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e
-    - run: pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
+    - run: .venv/bin/pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
     - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
       with:
         flags: unittests
@@ -63,9 +57,10 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with:
         persist-credentials: false
+        ref: ${{github.event.pull_request.head.sha || github.sha}}
     - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
       with:
         python-version: ${{matrix.python-version}}
         enable-cache: false
     - run: uv run --group test pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
-    timeout-minutes: 3
+    timeout-minutes: 1

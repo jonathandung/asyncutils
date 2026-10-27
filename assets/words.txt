@@ -166,6 +166,7 @@ aziplongest
 backpressure
 betterleaks
 blake
+bunx
 cmpeq
 codz
 coeff

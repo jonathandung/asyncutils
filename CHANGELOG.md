@@ -10,7 +10,11 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.4] - 2026-10-20; latest
+### [1.3.5] - 2026-10-30; latest
+
+Updated tools and refactored toolchains.
+
+### [1.3.4] - 2026-10-20
 
 Updated linters and type checkers.
 
