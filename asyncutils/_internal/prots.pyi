@@ -446,7 +446,8 @@ type ExcType = type[BaseException]
 '''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__` methods.'''
 type CanExcept = TypeOrTuple[BaseException]
 '''The type of objects that may follow an except statement.'''
-type ValidSlice = slice[SupportsIndex|None, SupportsIndex|None, SupportsIndex|None]
+type SliceItem = SupportsIndex|None
+type ValidSlice = slice[SliceItem, SliceItem, SliceItem]
 '''A slice with start, stop and step being integers or ``None``, representing a slice that typical sequences supporting slicing should accept.'''
 type Timer = Callable[[], float]
 '''Type of functions that return the current time under some specification, such as :func:`time.monotonic`, :func:`time.process_time` and :func:`time.perf_counter`.'''

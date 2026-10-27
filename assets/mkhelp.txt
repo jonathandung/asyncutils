@@ -1,5 +1,5 @@
 Available targets:
- audit   - Run uv audit and zizmor sequentially
+ audit   - Run uv audit and zizmor (with online audits, getting token using gh auth token) sequentially
  badges  - Run the test suite twice, exiting on any failure; generate static badges on success
  bug     - File a bug report in the browser with prefilled environment information
  build   - Build the Docker image for the asyncutils CLI locally

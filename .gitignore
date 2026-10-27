@@ -32,7 +32,7 @@ __pypackages__/
 build/
 coverage.xml
 dist/
-docs/source/
+docs/source/*
 !docs/source/audit-events.rst
 !docs/source/benchmark.rst
 !docs/source/chores.rst

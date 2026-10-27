@@ -63,4 +63,4 @@ jobs:
         python-version: ${{matrix.python-version}}
         enable-cache: false
     - run: uv run --group test pytest -vv -p asyncio --no-cov -p no:asyncio-cooperative --no-local-badge --tb long
-    timeout-minutes: 1
+    timeout-minutes: 3

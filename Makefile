@@ -19,7 +19,7 @@ endef
 	touch "$@"
 audit:
 	uv audit
-	GH_TOKEN="$(gh auth token)" zizmor .
+	GH_TOKEN=${GH_TOKEN:-gh auth token} zizmor .
 badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
