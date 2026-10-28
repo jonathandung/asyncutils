@@ -1,7 +1,3 @@
----
-hide-toc: true
----
-
 # Changelog
 
 All notable changes to this project are and will be documented in this file.
@@ -12,7 +8,7 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ### [1.3.5] - 2026-10-30; latest
 
-Updated tools and refactored toolchains.
+Updated tools and refactored toolchain configs.
 
 ### [1.3.4] - 2026-10-20
 

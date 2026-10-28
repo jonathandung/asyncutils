@@ -6,15 +6,19 @@ AUTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
-define install
+define i
 	if command -v $(1) >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -sSf $(2) | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- $(2) | sh; else echo "curl or wget required to install $(1)" >&2; exit 1; fi
 endef
+define d
+	scripts/generate.sh
+	$(MAKE) -C docs $(1)
+endef
 .prek-stamp:
-	$(call install,prek,https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.sh)
+	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.sh)
 	prek install
 	touch "$@"
 .uv-stamp:
-	$(call install,uv,https://releases.astral.sh/installers/uv/latest/uv-installer.sh)
+	$(call i,uv,https://releases.astral.sh/installers/uv/latest/uv-installer.sh)
 	uv tool install ruff && uv tool install ty 2>/dev/null
 	touch "$@"
 audit:
@@ -34,21 +38,17 @@ clean:
 dclean:
 	git clean -dxf
 docs:
-	scripts/generate.sh
-	$(MAKE) -C docs html
+	$(call d,html)
 help:
 	cat assets/mkhelp.txt
 links:
-	scripts/generate.sh
-	$(MAKE) -C docs linkcheck
+	$(call d,linkcheck)
 lint: .uv-stamp
-	echo "Running ruff..."
-	ruff check
-	echo "Running ty..."
-	ty check
+	echo "Running ruff..." && ruff check
+	echo "Running ty..." && ty check
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
-	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2
-	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint docs
+	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2; fi
+	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint docs; fi
 lock: .uv-stamp
 	uv lock -U
 log:

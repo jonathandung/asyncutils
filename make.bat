@@ -30,7 +30,6 @@ goto :eof
 
 :audit
 uv audit
-if not defined GH_TOKEN set "GH_TOKEN="
 if "%GH_TOKEN%"=="" for /f "delims=" %%i in ('gh auth token') do set "GH_TOKEN=%%i"
 zizmor .
 goto :eof

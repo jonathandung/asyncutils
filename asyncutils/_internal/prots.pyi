@@ -292,19 +292,15 @@ class PartialInterfaceMeta(_ProtocolMeta):
 @type_check_only
 class PartialInterface(metaclass=PartialInterfaceMeta):
     '''
-    | Base class for partial interfaces.
+    | Type-check-time-only base class for partial interfaces.
     | If it is only known that a class implements an interface, static code analysis tools might emit diagnostics on unrecognized attributes that may actually exist on the object or class.
-    | This is a simplistic fix that makes type checkers assume those attributes always exist.
+    | This class makes type checkers assume those attributes always exist.
     '''
     def __init__(self, *a: object, **k: object): ...
     def __getattr__(self, name: str, /) -> Incomplete: ...
 @type_check_only
 class NullContextType:
-    '''
-    The type of :const:`~asyncutils.util.anullcontext`.
-
-    .. note:: This does not support the ``enter_result`` argument of :func:`contextlib.nullcontext`.
-    '''
+    '''The type of :const:`~asyncutils.util.anullcontext`.'''
     async def __aenter__(self) -> None: ...
     @overload
     async def __aexit__(self, exc_typ: ExcType, exc_val: BaseException, exc_tb: TracebackType, /) -> None: ...
@@ -336,7 +332,7 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     @property
     def gi_running(self) -> bool: ...
     @property
-    def gi_yieldfrom(self) -> Iterator[T]|None: ... # cspell:disable-line
+    def gi_yieldfrom(self) -> Iterator[T]|None: ...
     @property
     def gi_suspended(self) -> bool: ...
     @property
@@ -443,7 +439,7 @@ type SupportsIteration[T] = Iterable[T]|AsyncIterable[T]
 type SupportsRichComparison = SupportsLT|SupportsGT
 '''Objects implementing one of the operators < and >.'''
 type ExcType = type[BaseException]
-'''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__` methods.'''
+'''The type of ``exc_typ`` in :meth:`~object.__exit__` and :meth:`~object.__aexit__`.'''
 type CanExcept = TypeOrTuple[BaseException]
 '''The type of objects that may follow an except statement.'''
 type SliceItem = SupportsIndex|None

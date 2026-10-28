@@ -30,7 +30,7 @@ body:
   id: screenshots
   attributes:
     label: Screenshots
-    description: If applicable, add visual media to help explain your suggestion. GIFs are acceptable.
+    description: If applicable, attach visual media to help explain your suggestion. GIFs are acceptable.
 - type: textarea
   id: ctx
   attributes:

@@ -37,7 +37,7 @@ body:
   id: screenshots
   attributes:
     label: Screenshots
-    description: If applicable, such as when the CLI output appears malformed, add visual media to help explain your problem. GIFs are acceptable.
+    description: If applicable, such as when the CLI output appears malformed, attach visual media to help explain your problem. GIFs are acceptable.
 - type: input
   id: pyv
   attributes:

@@ -20,6 +20,7 @@
 .DS_Store
 .Python
 .coverage
+.cspell.json
 .cspellcache
 .dockerignore
 .editorconfig
@@ -30,7 +31,7 @@
 .github/
 .gitignore
 .mailmap
-.markdownlint.json
+.markdownlint-cli2.jsonc
 .prek-stamp
 .pytest_cache/
 .python-version
@@ -49,7 +50,6 @@ badges/
 build/
 codecov.yml
 coverage.xml
-cspell.json
 docs/
 eggs/
 env/

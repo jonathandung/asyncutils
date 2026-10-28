@@ -231,6 +231,7 @@ maxhist
 maxlife
 maxqsize
 maxtime
+minversion
 mkhelp
 mkpream
 modname
@@ -304,5 +305,6 @@ weakrefset
 wrapf
 xarr
 xfailed
+yieldfrom
 zizmor
 zizmorcore

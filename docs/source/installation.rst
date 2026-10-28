@@ -66,8 +66,7 @@ other installation pathways:
 .. sub-code-block::
 
   pipx install py-asyncutils==|version| # pipx
-  poetry add py-asyncutils@|version| # poetry
-  pdm add py-asyncutils==|version| # pdm
+  pdm add -g py-asyncutils==|version| # pdm (not exactly a conventional installation)
   pipenv install py-asyncutils==|version| # pipenv
   # no package manager (needs Python and the build and installer packages)
   python3 -m build # generate sdist and wheel in dist/
@@ -79,16 +78,33 @@ familiar ``python3 -m asyncutils``.
 Optional dependencies
 ---------------------
 
-The extras of this package are ``pconf``, a collection of libraries used to parse config files in various formats, and ``json5``, the Cython-backed
-JSON5 parser. The latter is included in the former.
+Below are the :pep:`508` optional dependencies this package provides, also known as "extras".
+
+* executors: All the libraries implementing executors this module supports natively, except `distributed <https://distributed.dask.org/en/stable>`__.
+  Recognized executors are listed as follows:
+
+  - `loky.ProcessPoolExecutor <https://loky.readthedocs.io/en/stable/API.html#loky.ProcessPoolExecutor>`__
+  - `distributed.Client <https://distributed.dask.org/en/stable/api.html#distributed.Client>`__
+  - `ipyparallel.ViewExecutor <https://ipyparallel.readthedocs.io/en/latest/api/ipyparallel.html#ipyparallel.ViewExecutor>`__
+  - `executorlib.executor.flux.FluxClusterExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.flux.FluxClusterExecutor.html#executorlib.executor.flux.FluxClusterExecutor>`__
+  - `executorlib.executor.flux.FluxJobExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.flux.FluxJobExecutor.html#executorlib.executor.flux.FluxJobExecutor>`__
+  - `executorlib.executor.slurm.SlurmClusterExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.slurm.SlurmClusterExecutor.html#executorlib.executor.slurm.SlurmClusterExecutor>`__
+  - `executorlib.executor.slurm.SlurmJobExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.slurm.SlurmJobExecutor.html#executorlib-executor-slurm-slurmjobexecutor>`__
+  - `executorlib.executor.single.SingleNodeExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.single.SingleNodeExecutor.html#executorlib.executor.single.SingleNodeExecutor>`__
+  - `pebble.ProcessPool <https://pebble.readthedocs.io/en/latest/#pebble.ProcessPool>`__
+  - `pebble.Thread <https://pebble.readthedocs.io/en/latest/#pebble.ThreadPool>`__
+  - `deadpool.Deadpool <https://github.com/cjrh/deadpool#deadpool>`__
+
+* json5: The Cython-backed JSON5 parser.
+* pconf: A collection of libraries used to parse config files in various formats.
 
 Dependency groups
 -----------------
 
 The :pep:`735` dependency groups of this package are listed below for reference:
 
-* dev: Packages one would want installed for development; superset of ``docs``, ``test``, and ``tools``.
-* docs: Documentation dependencies, including `Sphinx <https://www.sphinx-doc.org/en/master>`__ and some of its plugins.
+* dev: Union of ``sbt`` and ``test``.
+* docs: `Sphinx <https://www.sphinx-doc.org/en/master>`__ and plugins.
 * furo: The `furo <https://pradyunsg.me/furo>`__ HTML theme for Sphinx and everything in ``docs``.
-* executors: All the libraries implementing executors this module supports natively, except `distributed <https://distributed.dask.org/en/stable>`__.
-* test: Test dependencies, including `pytest <https://docs.pytest.org/en/stable>`__ and related plugins.
+* sbt: `sphinx-book-theme <https://sphinx-book-theme.readthedocs.io/en/stable>`__ and everything in ``docs``.
+* test: `pytest <https://docs.pytest.org/en/stable>`__ and plugins.

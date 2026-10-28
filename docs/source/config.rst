@@ -10,15 +10,15 @@ The below environment variables directly affect what this library does, mostly i
 
 .. envvar:: AUCFGPATH
 
-  Absolute path to a configuration file
+  Absolute path to a configuration file.
 
 .. envvar:: AUTESTMAXFAIL
 
-  Maximum number of failed tests before pytest exits early; default 3
+  Maximum number of failed tests before pytest exits early; default 3.
 
 .. envvar:: FORCE_COLOR
 
-  Force coloured output to be used; overrides ``TERM=dumb`` but emits a warning, since this is probably not meant
+  Force coloured output to be used; if :env:`TERM` is set to ``dumb``, emit a warning but still attempt to take effect.
 
   .. attention::
     The environment variables `FORCE_COLOR <https://force-color.org>`__, `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control
@@ -26,30 +26,23 @@ The below environment variables directly affect what this library does, mostly i
 
 .. envvar:: NO_COLOR
 
-  Force coloured output to be disabled; overrides :envvar:`FORCE_COLOR`
-
-  .. note:: The override is a Python convention. Related behaviour differs in other languages and frameworks.
+  Force coloured output to be disabled; overrides :envvar:`FORCE_COLOR`.
 
 .. ifconfig:: py313
 
   .. envvar:: PYTHON_BASIC_REPL
 
-    Use the pre-3.13 REPL if set and not empty, even if the newer REPL may be available
+    Use the pre-3.13 REPL if set and not empty, even if the newer REPL may be available.
 
     .. important:: The console will set this variable to "1" when it sees TERM=dumb as long as ``-E`` is not passed to the Python interpreter.
 
 .. envvar:: PYTHONSTARTUP
 
-  Decode the file here with :mod:`tokenize` and execute as a Python source file, making its symbols accessible from the console
+  Decode the file here with :mod:`tokenize` and execute it as a Python source file, making its symbols accessible from the console.
 
 .. envvar:: TERM
 
   Turn off smart terminal features, including ANSI colour sequences, when set to "dumb"
-
-.. note::
-
-  The argument parser does not consider :envvar:`PYTHON_COLORS`, but the coloured edition of the console, which uses :mod:`!_colorize` under the hood,
-  may. To avoid this inconsistency, do not use it to customize :mod:`asyncutils`'s colouring.
 
 .. note:: Below Python 3.14, the output of the REPL does not highlight language keywords, only the prompt.
 
@@ -71,21 +64,19 @@ Some arguments consumed by the Python interpreter are also taken into account by
 *
   .. ifconfig:: py313
 
-    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace and the query of :envvar:`PYTHON_BASIC_REPL`
+    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace and the query of :envvar:`PYTHON_BASIC_REPL`.
 
   .. ifconfig:: not py313
 
-    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace
+    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace.
 
-* ``-I`` - Implies ``-E`` (:data:`sys.flags` enforces this relationship out-of-the-box; documented here for completeness)
-* ``-i`` - Always make the console interactive even if standard input is not a TTY (not recommended)
-* ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``
+* ``-i`` - Always make the console interactive even if standard input is not a TTY. Not recommended.
+* ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``.
 
-.. tip::
-  Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and
-  ``license`` commands will still work as normal in the console since they are implemented natively, with the help of ``_sitebuiltins``. This is
-  attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError` to be
-  thrown. There is also a ``clear`` command to clear the terminal screen that will fail similarly, but that is not related to ``-S``.
+Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and
+``license`` commands will still work as normal in the console since they are implemented natively, with the help of ``_sitebuiltins``. This is
+attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError` to be
+thrown.
 
 Basic Customization
 -------------------
@@ -136,12 +127,10 @@ Hjson  .hjson         hjson       hjson              format.hjson
 
 INI is not supported because it is outdated.
 
-Besides being much too verbose, XML lacks strong typing without schemas, meaning all values are interpreted as strings. This consideration meant
-support for XML was always a bug and had to be dropped.
+Besides being much too verbose, XML lacks strong typing without schemas, meaning all values are interpreted as strings.
 
-It is currently possible to associate file extensions not shown above with other libraries providing a ``loads`` function taking a string and
-returning a dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
-However, it is believed that the options offered are versatile enough to fit every need.
+It is possible to associate file extensions not shown above with other libraries providing a ``loads`` function taking a string and returning a
+dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
 
 Contextual "constants"
 ----------------------
