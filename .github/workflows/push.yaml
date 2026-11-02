@@ -32,7 +32,7 @@ jobs:
     - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
     - run: bunx markdownlint-cli2
     - run: bunx cspell .
-    - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e
+    - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b
     - run: .venv/bin/pytest -vv -p asyncio -p no:asyncio-cooperative --no-local-badge --tb long --cov-report xml
     - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
       with:
