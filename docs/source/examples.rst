@@ -3,16 +3,21 @@ Usage Examples
 
 .. highlight:: pycon
 
-Below are some examples of how the asyncutils module can be used, demonstrated right in the tailor-made async-native asyncutils REPL console::
+Below are some examples of how the asyncutils module can be used, demonstrated right in
+the tailor-made async-native asyncutils REPL console::
 
-  >>> load_all() # A function that does the equivalent of the preprocessing done when asyncutils sees the -p/--load-all flag, fetching and executing\
-  all submodules immediately as opposed to finding and importing them on first attribute access; only call if testing the console out
-  >>> # all the code below will work regardless of the presence of the above line
   >>> # example 1: Rendezvous
   >>> import asyncio
-  >>> rdv = channels.Rendezvous[int]() # directly access the submodule object "channels" as a global
-  >>> # usually, types that make sense to be generic can be subscripted; see the exact parameters taken in the .pyi files
-  >>> (await asyncio.gather(*map(rdv.put, range(5, 10)), rdv.exchange(10), *map(rdv.exchange, range(1, 5)), *(rdv.get() for _ in range(5))))[-10:]
+  >>> rdv = channels.Rendezvous[int]() # access the submodule "channels" as a global
+  >>> # usually, types that make sense to be generic can be subscripted
+  >>> (
+  ...     await asyncio.gather(
+  ...         *map(rdv.put, range(5, 10)),
+  ...         rdv.exchange(10),
+  ...         *map(rdv.exchange, range(1, 5)),
+  ...         *(rdv.get() for _ in range(5))
+  ...     )
+  ... )[-10:]
   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   >>> task = asyncio.create_task(rdv.put(0))
   >>> rdv.state_snapshot()
@@ -28,7 +33,8 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   >>> task.cancelled()
   True
   >>> # example 2: version
-  >>> from .version import VersionInfo, normalize # relative imports work as if the root is asyncutils
+  >>> from .version import VersionInfo, normalize
+  >>> # relative imports work as if the root is asyncutils
   >>> print(VersionInfo(4, 2).representation)
   asyncutils v4.2.0
   >>> normalize('1.3.0')
@@ -41,7 +47,9 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   (1, 3, 5)
   >>> normalize(1.2+3.4j)
   (1, 3, 0)
-  >>> asyncutils.autogenerate_normalizers() # get and call a function defined in the version submodule on the parent module
+  >>> asyncutils.autogenerate_normalizers()\
+  ... # get and call a function defined in the version submodule on the parent module
+  ...
   True
   >>> normalize(Decimal('1.2345'))
   (1, 23, 45)
@@ -49,12 +57,14 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   (1, 3, 0)
   >>> # example 3: symbols
   >>> try:
-  ...     DynamicBoundedSemaphore # because the base class of the console implementation uses exec, which requires the namespace to be an exact
-  ...     # instance of dict, accessing most symbols as globals directly will fail
+  ...     DynamicBoundedSemaphore
+  ...     # because the base class of the console implementation uses exec, which
+  ...     # requires the namespace to be an exact instance of dict, accessing most
+  ...     # symbols as globals directly will fail
   ... except NameError as e: print(e)
   ...
   name 'DynamicBoundedSemaphore' is not defined
-  >>> clear # special command to clear the terminal if supported; not a symbol, but an instance of the primary prompt remains on display
+  >>> clear # clear the terminal
   >>> # example 4: accessing documentation
   >>> from asyncutils import find_help_url, open_help
   >>> find_help_url()
@@ -75,18 +85,27 @@ Below are some examples of how the asyncutils module can be used, demonstrated r
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/channels/index.html#asyncutils.channels.EventBus.audit_context'
   >>> find_help_url('CRLFProtocol.connection_lost')
   'https://asyncutils.readthedocs.io/en/stable/api/asyncutils/networking/index.html#asyncutils.networking.LineProtocol.connection_lost'
-  >>> open_help(open_help) # Opens the https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#asyncutils.tools.open_help\
-  ... # page in the system default browser using the standard webbrowser library and returns success
+  >>> open_help(open_help)\
+  ... # Opens https://asyncutils.readthedocs.io/en/stable/api/asyncutils/tools/index.html#asyncutils.tools.open_help
+  ...
   True
   >>> # example 5: context
-  >>> asyncutils.getcontext().update( # call the update method of the current context to modify in-place
-  ...   {'SOCKET_TRANSPORT_LIMITS': (1024, 16384)}, # can optionally pass in a dictionary as the first and only positional argument
-  ...   ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR=True, # fields go here; keyword arguments are accepted
-  ...   observable_default_ntimes_n=3, # lowercase or mixed-case is allowed but not recommended
-  ...   lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1, # fields do not have to be in order
-  ...   WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2] # list will be automatically converted into tuple
-  ... ) # check if a string `name` is a valid field name using `name.upper() in asyncutils.all_contextual_constants`
-  >>> # Due care must be exercised to avoid messing up other parts of your program relying on this context.
+  >>> asyncutils.getcontext().update(
+  ...   # call the update method of the current context to modify in-place
+  ...   {'SOCKET_TRANSPORT_LIMITS': (1024, 16384)},
+  ...   # can optionally pass in a dictionary as the first and only positional argument
+  ...   ITER_TO_AGEN_DEFAULT_USE_EXISTING_EXECUTOR=True,
+  ...   # fields go here; keyword arguments are accepted
+  ...   observable_default_ntimes_n=3,
+  ...   # lowercase or mixed-case is allowed but not recommended
+  ...   lEAky_BUckeT_WaiT_for_toKEnS_tick=0.1,
+  ...   # fields do not have to be in any particular order
+  ...   WAIT_FOR_SIGNAL_DEFAULT_SIGNALS=[2]
+  ...   # lists will be automatically converted into tuples
+  ... )
+  >>> name = 'rendezvous_maintenance_interval'
+  >>> name.upper() in asyncutils.all_contextual_constants # check for a valid field
+  True
 
 .. highlight:: bash
 

@@ -4,11 +4,12 @@
 | Neither this module nor any of its symbols exist at runtime.
 | Thus, we export nothing intentionally and prompt type checkers to emit errors when symbols here are used with ``from asyncutils._internal.prots import *``.
 
-.. note:: In the generated documentation, the instances of ``tyx`` represent `the ty_extensions module <https://github.com/astral-sh/ruff/blob/main/crates/ty_python_semantic/resources/mdtest/ty_extensions.md>`__. It is only available when ty is type checking the library.
+.. note::
+  In the generated documentation, the instances of ``tyx`` represent `the ty_extensions module <https://github.com/astral-sh/ruff/blob/main/crates/ty_python_semantic/resources/mdtest/ty_extensions.md>`__.
+  It is only available when ty is type checking the library.
 .. tip:: For inline type annotations, wrap the imports in ``if TYPE_CHECKING:`` blocks.
 .. tip::
-
-  Besides, run ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
+  Add ``from __future__ import annotations`` on the top of the file for Python 3.13 or below, so that the annotations need not be quoted
   even prior to the implementation of :pep:`563`, which introduced deferred annotation evaluation.
 '''
 import asyncio as a, concurrent.futures as c, sys as s, ty_extensions as tyx

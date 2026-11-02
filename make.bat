@@ -14,7 +14,7 @@ goto :eof
 if exist .prek-stamp goto :eof
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-call :__i prek https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.ps1
+call :__i prek https://github.com/j178/prek/releases/download/v0.5.10/prek-installer.ps1
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof

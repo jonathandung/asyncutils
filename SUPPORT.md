@@ -23,19 +23,8 @@ Have an idea? We'd love to hear it!
 
 ## Questions
 
-### Community Support
-
-- [GitHub Discussions](https://github.com/jonathandung/asyncutils/discussions)
-- [Stack Overflow](https://stackoverflow.com): Tag questions with `[python]` and
-  `[asyncutils]`
-
-### Quick Questions
-
-For quick questions, consider:
-
-- Checking existing issues/discussions
-- Reading the FAQ section below
-- Asking in community channels
+Read the FAQ below. If your question is not resolved, ask in
+[GitHub Discussions](https://github.com/jonathandung/asyncutils/discussions)
 
 ## Security Issues
 
@@ -98,10 +87,6 @@ As fast as I can; that is:
 - Feature requests: Reviewed biweekly
 - Security issues: 1 day
 - General questions: Community-driven
-
-I will try to make a post on the discussions page (e.g. hiatus announcement) and set my
-status to 'On vacation' or similar in case of inactivity such that I cannot fulfil
-these promises or meet other deadlines I set myself.
 
 ## Remarks
 

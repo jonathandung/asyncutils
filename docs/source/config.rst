@@ -6,7 +6,8 @@ Configuration
 Environment Variables
 ---------------------
 
-The below environment variables directly affect what this library does, mostly in its console, and by extension, the command line:
+The below environment variables directly affect what this library does, mostly in its
+console, and by extension, the command line:
 
 .. envvar:: AUCFGPATH
 
@@ -18,10 +19,12 @@ The below environment variables directly affect what this library does, mostly i
 
 .. envvar:: FORCE_COLOR
 
-  Force coloured output to be used; if :env:`TERM` is set to ``dumb``, emit a warning but still attempt to take effect.
+  Force coloured output to be used; if :envvar:`TERM` is set to ``dumb``, emit a
+  warning but still attempt to take effect.
 
   .. attention::
-    The environment variables `FORCE_COLOR <https://force-color.org>`__, `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control
+    The environment variables `FORCE_COLOR <https://force-color.org>`__,
+    `NO_COLOR <https://no-color.org>`__ and :manpage:`TERM <term(7)>` control
     both the argument parser and the PyREPL console.
 
 .. envvar:: NO_COLOR
@@ -32,23 +35,26 @@ The below environment variables directly affect what this library does, mostly i
 
   .. envvar:: PYTHON_BASIC_REPL
 
-    Use the pre-3.13 REPL if set and not empty, even if the newer REPL may be available.
+    Use the pre-3.13 REPL if set and not empty, even if the newer REPL may be
+    available.
 
-    .. important:: The console will set this variable to "1" when it sees TERM=dumb as long as ``-E`` is not passed to the Python interpreter.
+    .. important::
+      The console will set this variable to "1" when it sees TERM=dumb as long as
+      ``-E`` is not passed to the Python interpreter.
 
 .. envvar:: PYTHONSTARTUP
 
-  Decode the file here with :mod:`tokenize` and execute it as a Python source file, making its symbols accessible from the console.
+  Decode the file here with :mod:`tokenize` and execute it as a Python source file,
+  making its symbols accessible from the console.
 
 .. envvar:: TERM
 
   Turn off smart terminal features, including ANSI colour sequences, when set to "dumb"
 
-.. note:: Below Python 3.14, the output of the REPL does not highlight language keywords, only the prompt.
-
 .. envvar:: BROWSER
 
-  Queried implicitly by ``asyncutils bug --open`` to choose the browser to open the bug report in if the browser type is not appended, as well as
+  Queried implicitly by ``asyncutils bug --open`` to choose the browser to open the bug
+  report in if the browser type is not appended, as well as
   :func:`~asyncutils.tools.open_help` for the same purpose.
 
 .. seealso::
@@ -59,39 +65,46 @@ The below environment variables directly affect what this library does, mostly i
 Arguments to Python that are considered
 ---------------------------------------
 
-Some arguments consumed by the Python interpreter are also taken into account by the library:
+Some arguments consumed by the Python interpreter are also taken into account:
 
 *
   .. ifconfig:: py313
 
-    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace and the query of :envvar:`PYTHON_BASIC_REPL`.
+    ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace and
+    the query of :envvar:`PYTHON_BASIC_REPL`.
 
   .. ifconfig:: not py313
 
     ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace.
 
-* ``-i`` - Always make the console interactive even if standard input is not a TTY. Not recommended.
+* ``-i`` - Always make the console interactive even if standard input is not a TTY.
 * ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``.
 
-Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and
-``license`` commands will still work as normal in the console since they are implemented natively, with the help of ``_sitebuiltins``. This is
-attributable to a PyREPL quirk or feature. However, accessing them in any fashion other than a bare statement will cause :exc:`NameError` to be
-thrown.
+Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the
+``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and ``license`` commands will
+still work as normal in the console since they are implemented natively, with the help
+of ``_sitebuiltins``. However, accessing them in any fashion other than a bare
+statement will cause :exc:`NameError` to be thrown.
 
 Basic Customization
 -------------------
 
 An extensible, two-part configuration system is in place.
 
-The first, frozen part includes aspects such as where to output logging, customizing the underlying executor type used, and setting a seed for random
-number generation using :envvar:`AUCFGPATH`.
+The first, frozen part includes aspects such as where to output logging, customizing
+the underlying executor type used, and setting a seed for random number generation
+using :envvar:`AUCFGPATH`.
 
-:envvar:`AUCFGPATH` is read at the first import of this library, and the configuration is loaded and applied immediately. Errors will be thrown
-as appropriate if the file is not found or contains values of the incorrect type, after the library tries its best to coerce the types, but you may
-see a raw :exc:`ModuleNotFoundError` if the library cannot be located or executed.
+:envvar:`AUCFGPATH` is read at the first import of this library, and the configuration
+is loaded and applied immediately. Errors will be thrown as appropriate if the file is
+not found or contains values of the incorrect type, after the library tries its best to
+coerce the types, but you may see a raw :exc:`ModuleNotFoundError` if the library
+cannot be located or executed.
 
-Automatic discovery of config files, as in other libraries or command-line tools, is not supported, because there is no standard location for it and
-determining a precedence for the different allowed file extensions would be arbitrary, non-trivial and difficult to maintain.
+Automatic discovery of config files, as in other libraries or command-line tools, is
+not supported, because there is no standard location for it and determining a
+precedence for the different allowed file extensions would be arbitrary, non-trivial
+and difficult to maintain.
 
 The options are shown below, along with their default values and descriptions:
 
@@ -100,14 +113,15 @@ The options are shown below, along with their default values and descriptions:
   :caption: config file format
   :force:
 
-New options will likely be added in the future, but every current option is considered stable and has a corresponding default value.
+New options will likely be added in the future, but every current option is considered
+stable and has a corresponding default value.
 
-The above keys have a near one-to-one correspondence with the command line arguments, as the comments below each key explain. Use ``asyncutils -?``
-to see detailed CLI usage.
+The above keys have a near one-to-one correspondence with the command line arguments,
+as the comments below each key explain. ``asyncutils -?`` displays detailed CLI usage.
 
-The config file can be written in the below formats, listed with the third-party libraries they require if any. The schemas shown are found in the
-source code directory for consistency (since format.json5 is read in tests and must be distributed with the source, I had to put the other formats
-in the same location); that is, ``asyncutils/``.
+The config file can be written in the below formats, listed with the third-party
+libraries they require if any. The schemas shown are located in the source code
+directory.
 
 ====== ============== =========== ================== ============
 Format File extension Module name PyPI package name  Schema
@@ -120,28 +134,32 @@ JSON5  .json5         pyjson5     pyjson5            format.json5
 Hjson  .hjson         hjson       hjson              format.hjson
 ====== ============== =========== ================== ============
 
-.. tip::
-  :collapsible:
-
-  To ensure all supported formats can be parsed, install the ``pconf`` extra.
+.. note:: To ensure all supported formats can be parsed, install the ``pconf`` extra.
 
 INI is not supported because it is outdated.
 
-Besides being much too verbose, XML lacks strong typing without schemas, meaning all values are interpreted as strings.
+Besides being much too verbose, XML lacks strong typing without schemas, meaning all
+values are interpreted as strings.
 
-It is possible to associate file extensions not shown above with other libraries providing a ``loads`` function taking a string and returning a
-dictionary, by modifying the map from file extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
+It is possible to associate file extensions not shown above with other libraries
+providing a ``loads`` function taking a string and returning a dictionary, by modifying
+the map from file extensions to names of corresponding modules in
+``_internal/unparsed.py`` called ``Z``.
 
 Contextual "constants"
 ----------------------
 
-You can see that the json also includes many submodule names as keys; this is the second, contextual part of the configuration. It is thread-safe,
-async-safe and mutable, thanks to :mod:`contextvars`. The sheer magnitude of options makes them infeasible to include as command line arguments.
+You can see that the json also includes many submodule names as keys; this is the
+second, contextual part of the configuration. It is thread-safe, async-safe and
+mutable, thanks to :mod:`contextvars`. The sheer magnitude of options makes them
+infeasible to include as command line arguments.
 
-No code in this library is expected to change their values. Different utilities read from them to determine things from dynamic default arguments to
-frequencies of background tasks and internal thresholds.
+No code in this library is expected to change their values. Different utilities read
+from them to determine things from dynamic default arguments to frequencies of
+background tasks and internal thresholds.
 
-One may find it useful to alter the context dynamically without creating a new context. This can be achieved by calling :meth:`Context.update`.
+One may find it useful to alter the context dynamically without creating a new context.
+This can be achieved by calling :meth:`Context.update`.
 
 .. seealso::
 
@@ -156,17 +174,13 @@ One may find it useful to alter the context dynamically without creating a new c
 
 .. ifconfig:: py313
 
-  :meth:`~Context.__copy__` and :meth:`~object.__replace__` are also implemented to help :func:`copy.copy` and :func:`copy.replace` respectively.
+  :meth:`~Context.__copy__` and :meth:`~object.__replace__` are also implemented to
+  help :func:`copy.copy` and :func:`copy.replace` respectively.
 
 .. ifconfig:: not py313
 
   :meth:`Context.__copy__` is also implemented to help :func:`copy.copy`.
 
-It is even better to use :class:`NonReusableLocalContext`, which returns a one-time context manager, or the convenience method
-:meth:`Context.ascurctx` on context objects that wraps it.
-
-.. tip::
-  :collapsible:
-
-  You can think of the :class:`Context` class as similar to :class:`decimal.Context`, but with different methods and attributes
-  and customizing an entire module instead of quirks and traps of the operations of a single class.
+It is even better to use :class:`NonReusableLocalContext`, which returns a one-time
+context manager, or the convenience method :meth:`Context.ascurctx` on context objects
+that wraps it.

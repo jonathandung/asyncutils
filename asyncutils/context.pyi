@@ -16,9 +16,8 @@ class Context:
     | The order of the fields are kept in alphabetical order of submodule and in each submodule, and new fields may be added in the future.
     | For consistency, each field is named in all caps with words separated by underscores, and prefixed by the name of the utility it is used in, followed by a concise description of what it configures.
 
-    .. tip:: If you need to use any of the settings, you can find the documentation under the API reference for the utilities that use that setting.
+    .. note:: If you need to use any of the settings, you can find the documentation under the API reference for the utilities that use that setting.
     .. note:: Refer to :mod:`~asyncutils.config` for the factory default values of each setting.
-    .. note:: It is possible, but discouraged, to access these fields with attribute names that are not all uppercase.
     '''
     CIRCUIT_BREAKER_DEFAULT_MAX_FAILS: int = ...
     CIRCUIT_BREAKER_DEFAULT_MAX_HALF_OPEN_CALLS: int = ...

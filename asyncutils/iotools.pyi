@@ -82,7 +82,7 @@ class MemoryMappedIOManager(LoopMixinBase):
     '''
     An asynchronous object-oriented manager interface to memory-mapped I/O, that optimizes batch operations using an event loop.
 
-    .. tip:: One global instance of this is most likely enough.
+    .. note:: One global instance of this is most likely enough.
     '''
     def __init__(self, executor: Executor|None=...): '''Initialize the manager with the executor to be used for its operations.'''
     @property

@@ -10,10 +10,10 @@ from .mixins import AsyncContextMixin, AwaitableMixin
 __all__ = 'CircuitBreaker', 'DynamicThrottle', 'Releasing', 'ResourceGuard', 'StatefulBarrier', 'UniqueResourceGuard'
 class ResourceGuard[T](AsyncContextMixin[None]):
     '''
-    A sync- and async-compatible context manager, inspired by :class:`anyio.ResourceGuard`, which causes contention of a shared resource to fail fast.
+    | A sync- and async-compatible context manager, inspired by :class:`anyio.ResourceGuard`, which causes contention of a shared resource to fail fast.
+    | The guard is not held upon creation.
 
-    .. tip:: A strong reference to the object will be held for the lifetime of the guard.
-    .. note:: The guard is not held upon creation.
+    .. note:: A strong reference to the object will be held for the lifetime of the guard.
     '''
     @property
     def action(self) -> str: '''The action being attempted on the resource, as passed to the constructor. Should be a gerund.'''

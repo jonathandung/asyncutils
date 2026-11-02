@@ -852,7 +852,6 @@ async def acat(first=None):
     audit('asyncutils.iters.acat', first)
     while True: first = yield first
 async def aforever():
-    audit('asyncutils.iters.aforever')
     while True: yield
 async def _guess(I, l, K, d, e, C, c, a, x, _=_extreme, /): # ruff: ignore[too-many-arguments,too-many-positional-arguments]
     if l is None and (l := O.length_hint(I, -1)) < 0: raise ValueError('asyncutils.iters.aguessmax or asyncutils.iters.aguessmin called with no estlen argument on iterable not implementing length (hint)')

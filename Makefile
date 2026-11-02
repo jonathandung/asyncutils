@@ -14,7 +14,7 @@ define d
 	$(MAKE) -C docs $(1)
 endef
 .prek-stamp:
-	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.7/prek-installer.sh)
+	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.10/prek-installer.sh)
 	prek install
 	touch "$@"
 .uv-stamp:

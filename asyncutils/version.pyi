@@ -139,8 +139,8 @@ def normalize(o: object, /) -> tuple[int, int, int]:
     '''
     | Return a :class:`tuple` of three integers ``(major, minor, patch)`` from the information provided by the object as extracted by registered normalizers.
     | A normalizer can return ``None`` for an unnormalizable object, in which case the comparison operators against instances of :class:`VersionInfo` will delegate to the object itself.
-    | If the normalizer raises an exception or returns a non-iterable, it is removed from the registry and the error is propagated.
 
+    .. note:: If the normalizer raises an exception or returns a non-iterable, it is removed from the registry and the error is propagated.
     .. note::
       Normalization logic is hardcoded for exact instances of :class:`str`, :class:`complex`, :class:`int`, and :class:`float`.
       This takes precedence over any registered normalizers, but those can still be accessed with :func:`dispatch_normalizer`.

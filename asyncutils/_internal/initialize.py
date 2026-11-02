@@ -28,7 +28,7 @@ class Module:
         if (m := _m.get(_n := _n+n)) is None: p(_b, n); m = __import__(_n, fromlist=_f)
         else: p(_c, n)
         if d := getattr(_g(), 'locals', None): d[n] = m
-        _s[n], m.__dir__ = m, self.__dir__; return m # ty: ignore[invalid-assignment]
+        _s[n], m.__dir__ = m, self.__dir__; return m
     def __dir__(self): return self._c
     P.patch_classmethod_signatures((__new__, _ := 'name, /')); P.patch_method_signatures((load, ''), (__repr__, ''), (__getattr__, _)); del _
 f, b, r, c, n, (e := dir(L))[-1] = object.__new__, object.__setattr__, *Module.__slots__[:3], '__dir__'

@@ -32,7 +32,7 @@ class CallbackAccumulator[T, **P](deque[Callable[P, T]], ExecutorRequiredAsyncCo
     '''
     A utility class to store synchronous callbacks and call them sequentially in an executor when the context manager exits.
 
-    .. tip:: To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
+    .. note:: To iterate through the callbacks at this moment safely, use the :attr:`callbacks` attribute.
     .. admonition:: Implementation detail
 
       The fact that this class currently subclasses :class:`~collections.deque` is subject to change.

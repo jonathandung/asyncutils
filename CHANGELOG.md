@@ -6,9 +6,9 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.5] - 2026-10-30; latest
+### [1.3.5] - 2026-11-05; latest
 
-Updated tools and refactored toolchain configs.
+Updated tools and refactored toolchain configs; reformatted and refactored some code.
 
 ### [1.3.4] - 2026-10-20
 
@@ -28,8 +28,7 @@ Build process refactors; documentation fixes; Makefile fixes.
 
 ### [1.3.0] - 2026-09-22
 
-Changed all extras to dependency groups; removed XML config parsing since XML is not
-typed.
+Changed all extras to dependency groups.
 
 ## [1.2]
 
