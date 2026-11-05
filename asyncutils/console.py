@@ -10,14 +10,14 @@ from asyncutils._internal import log, patch as P, running_console as R
 from asyncutils._internal.helpers import fullname, get_loop_and_set
 from asyncutils._internal.submodules import console_all as __all__
 if not C.basic_repl:
-    try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[unresolved-import] # cspell: disable-line
+    try: from _pyrepl.console import InteractiveColoredConsole as B # ty: ignore[import-not-found] # cspell: disable-line
     except ImportError: C.basic_repl = True
 _s = object()
 _f = '',
 class ConsoleBase(B, metaclass=abc.ABCMeta):
     LOCALS_HANDLERS, interrupt_hooks, memory_error_hooks, disallow_subclass_msg = __import__('collections').ChainMap(), (), (lambda self, f=getattr(S, '_clear_type_cache' if S.version_info < (3, 13) else '_clear_internal_caches', None) if S.version_info < (3, 16) else None, g=__import__('gc').collect, d=log.debug: (None if f is None else f()) or self.write('MemoryError\n') or d('Emergency garbage collection after MemoryError: %s objects collected in total', g()),), 'cannot subclass %s'; default_local_exit = _unsubclassable = False
     if C.basic_repl: CAN_USE_PYREPL, STATEMENT_FAILED = False, None # pragma: no cover
-    else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[unresolved-import]
+    else: from _pyrepl.main import CAN_USE_PYREPL # ty: ignore[import-not-found]
     def __init__(self, mod=None, modname=None, *, context_factory=__import__('contextvars').copy_context, _f=_f, _s=_s, _m='cannot %s event loop within REPL', g=globals().get, _={'__cached__': 'cached', '__file__': 'origin', '__package__': 'parent', '__loader__': 'submodule_search_locations'}, _r=E.raise_exc): # ruff: ignore[mutable-argument-default]
         S.audit(fullname(type(self)), l := get_loop_and_set())
         if modname is None: modname = self.NAME
@@ -28,7 +28,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         def s(p=None, /, _=l.stop):
             if p is not _s: raise RuntimeError(_m%'stop')
             l.call_soon_threadsafe(_) # ty: ignore[invalid-argument-type]
-        l.close, l.stop, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = c, s, False, 0, l, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (v := S.version_info) >= (3, 13) else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__) # ty: ignore[invalid-assignment]
+        l.close, l.stop, self._internal_is_running, self.memory_errors, self._loop, self.context, self.exc, self._fut, (d := {})[modname] = c, s, False, 0, l, context_factory(), None, None, mod; super().__init__(d, '<stdin>', **({'local_exit': self.default_local_exit} if (v := S.version_info) >= (3, 13) else {})); self.compile.compiler.flags |= 0x2000; d.update(__name__='__main__', __doc__='A console with top-level await support, much like the asyncio REPL, and some preloaded names.', __spec__=__spec__, __annotations__={}, __builtins__=__builtins__)
         if v >= (3, 14): d['__annotate__'] = g('__annotate__')
         if v < (3, 15):
             for k in _: d[k] = g(k)
@@ -82,7 +82,7 @@ class ConsoleBase(B, metaclass=abc.ABCMeta):
         for _ in self.memory_error_hooks: _(self)
         self.refresh()
     def set_return_code(self, e, /, _=_s): self.exc = e if isinstance(e, SystemExit) else SystemExit(*(e.args if isinstance(e, BaseException) else (e,))); self._loop.stop(_)
-    def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memory_error_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
+    def __init_subclass__(cls, *, name=None, native_handler=None, default_local_exit=True, disallow_subclass_msg=None, other_handlers=None, additional_interrupt_hooks=(), additional_memory_error_hooks=(), template=f'%(name)s REPL (version %(version)s) running on {S.platform}\nType "help", "copyright", "credits" or "license" for more information, "clear" to\nclear the terminal, and "exit" or "quit" to exit.\n%(description)s\n', **k):
         if cls._unsubclassable: raise TypeError(cls.disallow_subclass_msg%fullname(cls))
         if name is None: name = cls.__qualname__.casefold().removesuffix('console')
         if other_handlers is None: other_handlers = {}
@@ -121,7 +121,7 @@ def _(d, /):
     def load_all(_=d, /):
         for k, v in _.items(): _[k] = v if (g := getattr(v, 'load', None)) is None else g()
     load_all.__qualname__, load_all.__module__, load_all.__text_signature__ = load_all.__name__, 'asyncutils', '()'; return load_all # ty: ignore[unresolved-attribute]
-class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilities library.\nYou can use *await* statements directly instead of *asyncio.run* for quick testing.\nAll the submodules of asyncutils are also loaded into the namespace.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
+class AsyncUtilsConsole(ConsoleBase, version=V, description='asyncutils is a multi-purpose and efficient asynchronous utilities library.\nYou can await awaitables directly. There is no need to call asyncio.run.\nAll the submodules of asyncutils are also loaded into the namespace.', native_handler=lambda d, /, v=V, _=_f, r=_: (u := d.update)(m := __import__('asyncutils._internal.initialize', fromlist=_).s) or u(__version__=v, load_all=r(m)), default_local_exit=True, disallow_subclass_msg='cannot subclass %s; subclass asyncutils.console.ConsoleBase instead'):
     def __repr__(self): return f'<{'running' if self.is_running else 'idle'} asyncutils console at {id(self):#x}>'
     @property
     def is_running(self):

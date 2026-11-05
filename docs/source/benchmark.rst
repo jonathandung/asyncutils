@@ -1,27 +1,27 @@
 Benchmarks
 ==========
 
-  "Statistics are like bikinis. What they reveal is suggestive, but what they conceal is vital."
+  "Statistics are like bikinis. What they reveal is suggestive, but what they conceal
+  is vital."
 
   -- Aaron Levenstein, 1951
 
-When used as a REPL (Read-Eval-Print Loop), this module starts slow since it builds on the standard library :mod:`asyncio`, which loads all its
-submodules on import, and the event loop is quite difficult to implement. This is understandable but suboptimal. On the contrary, we focus on
-simplifying boilerplate-heavy code and integrating and combining existing patterns seamlessly with a set of core utilities, so :mod:`asyncutils` is
-not at all heavy in terms of import time. In addition, you only pay for what you use; the parts of the code you don't call are not executed until
-you request them to be, thanks to cleanly separated submodules with somewhat simplistic dependency graphs. This module is overall fast and light
-because of its design goals and philosophy.
+When used as a REPL (Read-Eval-Print Loop), this module starts slow since it builds on
+the standard library :mod:`asyncio`, which loads all its submodules on import, and the
+event loop is quite difficult to implement.
 
-The figures below are obtained by running each of the following sequentially with no warmup elevenfold in a fresh console session and discarding
-the first run, which is considered a warmup run:
+The figures below are obtained by running each of the following sequentially with no
+warmup elevenfold in a fresh console session and discarding the first run, which is
+considered a warmup run:
 
 Environment
 -----------
 
 Benchmarked on an old HP laptop running Windows 23H2.
 
-* ``python -VV`` gives: ``Python 3.15.0 (main, Oct  9 2026, 15:33:25) [MSC v.1951 64 bit (AMD64)]``
-* ``python -m platform`` gives: ``Windows-11-10.0.26200-SP0``
+* ``python -VV`` gives:
+  ``Python 3.15.2 (main, Oct 26 2026, 14:23:21) [MSC v.1951 64 bit (AMD64)]``
+* ``python -m platform`` gives: ``Windows-11-10.0.22631-SP0``
 * ``__pycache__`` directories are persisted across runs
 
 Baseline: asyncio

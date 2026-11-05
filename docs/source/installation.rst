@@ -3,8 +3,10 @@ Installation
 
 .. highlight:: bash
 
-You can prototype async code quickly using the ``uv tool`` interface, if you need only the executable (that is, the CLI) and not the library. This
-can be helpful if you wish to decide how much this library suits your needs before committing to installation. Simply execute::
+You can prototype async code quickly using the ``uv tool`` interface, if you need only
+the executable (that is, the CLI) and not the library. This can be helpful if you wish
+to decide how much this library suits your needs before committing to installation.
+Simply execute::
 
   uvx --from py-asyncutils asyncutils
 
@@ -13,13 +15,15 @@ The REPL starts with the following banner:
 .. sub-code-block:: text
 
   asyncutils REPL (version |version|) running on linux
-  Type "help", "copyright", "credits" or "license" for more information, "clear" to clear the terminal, and "exit" or "quit" to exit.
+  Type "help", "copyright", "credits" or "license" for more information, "clear" to
+  clear the terminal, and "exit" or "quit" to exit.
   asyncutils is a multi-purpose and efficient asynchronous utilities library.
-  You can use *await* statements directly instead of *asyncio.run* for quick testing.
+  You can await awaitables directly. There is no need to call asyncio.run.
   All the submodules of asyncutils are also loaded into the namespace.
 
-:mod:`asyncutils` injects itself into the globals. Afterwards, simply type Python code as you normally would, bearing in mind that ``await``
-statements are magically supported:
+:mod:`asyncutils` injects itself into the globals. Afterwards, simply type Python code
+as you normally would, bearing in mind that ``await`` statements are magically
+supported:
 
 .. code-block:: pycon
 
@@ -30,7 +34,8 @@ statements are magically supported:
 
 For the normal installation pathway, many more package managers are supported.
 
-You are advised to ensure that your package manager is updated to the latest version as follows::
+You are advised to ensure that your package manager is updated to the latest version as
+follows::
 
   # uv (preferred for modernity, speed and compatibility with this project)
   uv self update # standalone installation of uv
@@ -50,10 +55,12 @@ Next, install ``py-asyncutils``:
 
   # recommended: uv
   uv pip install py-asyncutils==|version|
-  uv pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
+  uv pip install git+https://github.com/jonathandung/asyncutils.git
+  # directly from source
   # pip
   pip install py-asyncutils==|version|
-  pip install git+https://github.com/jonathandung/asyncutils.git # directly from source
+  pip install git+https://github.com/jonathandung/asyncutils.git
+  # directly from source
   # conda
   conda install -c conda-forge py-asyncutils=|version|
   # alternatively:
@@ -72,15 +79,17 @@ other installation pathways:
   python3 -m build # generate sdist and wheel in dist/
   python3 -m installer dist/*.whl # install from the wheel
 
-``asyncutils`` will then be made available as an entry point to the asyncutils CLI. The CLI can also be called with a typical and perhaps more
-familiar ``python3 -m asyncutils``.
+``asyncutils`` will then be made available as an entry point to the asyncutils CLI. The
+CLI can also be called with ``python3 -m asyncutils``.
 
 Optional dependencies
 ---------------------
 
-Below are the :pep:`508` optional dependencies this package provides, also known as "extras".
+Below are the :pep:`508` optional dependencies this package provides, also known as
+"extras".
 
-* executors: All the libraries implementing executors this module supports natively, except `distributed <https://distributed.dask.org/en/stable>`__.
+* executors: All the libraries implementing executors this module supports natively,
+  except `distributed <https://distributed.dask.org/en/stable>`__.
   Recognized executors are listed as follows:
 
   - `loky.ProcessPoolExecutor <https://loky.readthedocs.io/en/stable/API.html#loky.ProcessPoolExecutor>`__
@@ -105,6 +114,8 @@ The :pep:`735` dependency groups of this package are listed below for reference:
 
 * dev: Union of ``sbt`` and ``test``.
 * docs: `Sphinx <https://www.sphinx-doc.org/en/master>`__ and plugins.
-* furo: The `furo <https://pradyunsg.me/furo>`__ HTML theme for Sphinx and everything in ``docs``.
-* sbt: `sphinx-book-theme <https://sphinx-book-theme.readthedocs.io/en/stable>`__ and everything in ``docs``.
+* furo: The `furo <https://pradyunsg.me/furo>`__ HTML theme for Sphinx and everything
+  in ``docs``.
+* sbt: `sphinx-book-theme <https://sphinx-book-theme.readthedocs.io/en/stable>`__ and
+  everything in ``docs``.
 * test: `pytest <https://docs.pytest.org/en/stable>`__ and plugins.

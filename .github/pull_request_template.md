@@ -21,14 +21,11 @@ descriptions unedited.-->
 
 ### For documentation PRs
 
-- [] Local Sphinx build using `make docs` succeeds.
+- [] `make docs` succeeds.
 - [] As little modifications to `docs/source/conf.py` as possible were made.
 
 ### For big PRs
 
-- [] If this PR concerns a big architectural change or loosely related modifications, I
-  have split them into smaller PRs tracked in an umbrella issue
-  linked to in the Issue reference section without marking it as a resolution.
 - [] I have added passing tests and the coverage has not decreased.
 - [] Status badges have been updated using `make badges`.
 - [] Documentation has been updated suitably.
@@ -45,13 +42,10 @@ being implemented, whichever applies.-->
 change in sub-sections.-->
 ## Issue reference
 
-Closes #<!--Replace this comment with the issue number or delete this section if there
-is no corresponding issue.-->.
-
 ## Additional context
 <!--Enter helpful context here. Include shell commands in a code block fenced by triple
 backticks with language "bash", or "console" if their output is included, Python code
 with language "python", and Python REPL content with language "pycon".-->
 ### Screenshots
 
-### Relevant Links
+### Links
