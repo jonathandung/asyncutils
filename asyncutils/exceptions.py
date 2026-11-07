@@ -36,14 +36,14 @@ def raise_exc(e, /, *a, traceback=None, cause=None, context=None, suppress=False
     _a_('asyncutils.exceptions.raise_exc', e := prepare_exception(e, traceback=traceback, cause=cause, context=context, suppress=suppress, notes=notes)); raise e
 P.patch_function_signatures((unnest, s := 'group, /, *additional, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}'), (unnest_reverse, s), (prepare_exception, 'exc, /, *, traceback=None, cause=None, context=None, suppress=False, notes=()'), (raise_exc, 'exc, /, *args, traceback=None, cause=None, suppress=False, notes=(), **kwds'), (potent_derive, 'group, /, *groups, message={0}, ordered=False, predicate={0}, raise_critical=True, keep={0}, filter_out=(), predicate={0}, ack1={0}, ack2={0}, ack3={0}, notes=None, traceback=None, context=None, cause=None, suppress=False'))
 class ExceptionWrapper:
-    __slots__ = '__exc',
+    __slots__ = '__x',
     def __new__(cls, e, /):
         if isinstance(e, CRITICAL): raise e
-        (s := super().__new__(cls)).__exc = e; return s
-    def __getattr__(self, n, /): return getattr(self.__exc, n)
-    def __repr__(self): return f'ExceptionWrapper({self.__exc!r})'
+        (s := super().__new__(cls)).__x = e; return s
+    def __getattr__(self, n, /): return getattr(self.__x, n)
+    def __repr__(self): return f'ExceptionWrapper({self.__x!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
-exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__exc.__get__ # ty: ignore[unresolved-attribute]
+exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__x.__get__ # ty: ignore[unresolved-attribute]
 def raise_for(e, /):
     if exception_occurred(e): raise unwrap_exc(e)
     return e

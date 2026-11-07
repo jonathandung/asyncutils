@@ -55,53 +55,53 @@ class LFProtocol(LineProtocol): NEWLINE, __slots__ = b'\n', ()
 class CRLFProtocol(LineProtocol): NEWLINE, __slots__ = b'\r\n', ()
 class CRProtocol(LineProtocol): NEWLINE, __slots__ = b'\r', ()
 class SocketTransport(I.Transport):
-    __slots__ = '__buf', '__cl', '__lim', '__protocol', '__sock'; _h, ptc = A.IgnoreErrors(OSError), LineProtocol
+    __slots__ = '__b', '__c', '__l', '__p', '__s'; _h, ptc = A.IgnoreErrors(OSError), LineProtocol
     @property
-    def loop(self): return self.__protocol.loop
+    def loop(self): return self.__p.loop
     def __init__(self, sock=None):
-        audit(M.helpers.fullname(self)); self.__rx(); (p := self.ptc()).connection_made(self); self.__sock, self.__cl, self.__buf, self.__lim, self.__protocol = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
+        audit(M.helpers.fullname(self)); self.__rx(); (p := self.ptc()).connection_made(self); self.__s, self.__c, self.__b, self.__l, self.__p = sock, False, bytearray(), A.getcontext().SOCKET_TRANSPORT_LIMITS, p
         if sock is not None: self.connect_sock(sock)
     def __rx(self, _=('socket', 'sockname', 'peername')): super().__init__(dict.fromkeys(_))
     def __rr(self, sock, size=None):
-        try: self.__protocol.data_received(d) if (d := sock.recv(A.getcontext().LINE_PROTOCOL_DEFAULT_BUFFER_SIZE if size is None else size)) else (self.__protocol.eof_received() or self.close())
+        try: self.__p.data_received(d) if (d := sock.recv(A.getcontext().LINE_PROTOCOL_DEFAULT_BUFFER_SIZE if size is None else size)) else (self.__p.eof_received() or self.close())
         except OSError as e: M.log.warning('%s: read error', M.helpers.fullname(self)); self.close(e)
     def connect_sock(self, sock=None):
-        if sock is None and (sock := self.__sock) is None: return
+        if sock is None and (sock := self.__s) is None: return
         sock.setblocking(False); self.loop.add_reader(sock.fileno(), self.__rr, sock); (e := self._extra)['sockname'] = sock.getsockname()
         with self._h: e['peername'] = sock.getpeername()
     def disconnect_sock(self):
-        if (s := self.__sock) is None: return s
+        if (s := self.__s) is None: return s
         with self._h: s.close()
-        self.loop.remove_reader(s.fileno()); self.__sock = None; self.__rx(); return s
+        self.loop.remove_reader(s.fileno()); self.__s = None; self.__rx(); return s
     @A.dualcontextmanager
     def sock_context(self, sock):
         try: yield self.connect_sock(sock)
         finally: self.disconnect_sock()
     def __writer(self, data, bufsize=None):
-        if self.__cl: return
-        (b := self.__buf).extend(data)
+        if self.__c: return
+        (b := self.__b).extend(data)
         if bufsize is None: bufsize = A.getcontext().SOCKET_TRANSPORT_LIMITS[1]
-        if len(b) <= bufsize or (s := self.__sock) is None: return
+        if len(b) <= bufsize or (s := self.__s) is None: return
         try: s.sendall(b); b.clear()
         except OSError as e: M.log.warning('%s: write error', M.helpers.fullname(self)); self.close(e)
     def write(self, data): self.loop.call_soon(self.__writer, data)
-    def get_write_buffer_size(self): return len(self.__buf)
-    def get_write_buffer_limits(self): return self.__lim
+    def get_write_buffer_size(self): return len(self.__b)
+    def get_write_buffer_limits(self): return self.__l
     def set_write_buffer_limits(self, high=None, low=None):
-        l = self.__lim
+        l = self.__l
         if low is None: low = l[0]
         if high is None: high = l[1]
-        self.__lim = min(max(low, 0), high := min(high, A.getcontext().SOCKET_TRANSPORT_LIMITS[1])), high
+        self.__l = min(max(low, 0), high := min(high, A.getcontext().SOCKET_TRANSPORT_LIMITS[1])), high
     def write_eof(self):
-        if not (self.__cl or (s := self.__sock) is None):
+        if not (self.__c or (s := self.__s) is None):
             with self._h: s.shutdown(1)
     def can_write_eof(self): return True # ruff: ignore[no-self-use]
-    def is_closing(self): return self.__cl
+    def is_closing(self): return self.__c
     def close(self, e=None):
-        if self.__cl: return
-        self.__cl = True; self.__protocol.connection_lost(e); self.disconnect_sock()
-    def get_protocol(self): return self.__protocol
+        if self.__c: return
+        self.__c = True; self.__p.connection_lost(e); self.disconnect_sock()
+    def get_protocol(self): return self.__p
     def set_protocol(self, protocol):
         if not isinstance(protocol, LineProtocol): raise TypeError('asyncutils.networking.SocketTransport: protocol should be a LineProtocol')
-        self.__protocol.connection_lost(None); protocol.connection_made(self); self.__protocol = protocol; self.connect_sock()
+        self.__p.connection_lost(None); protocol.connection_made(self); self.__p = protocol; self.connect_sock()
     def abort(self): self.loop.call_soon(self.close)

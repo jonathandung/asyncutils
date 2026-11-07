@@ -13,8 +13,8 @@ def bug(args, timeout=6, paste=_, j=lambda p, y=S.stdin.buffer.read: print(end=p
     try: v = m.version('py-asyncutils')
     except m.PackageNotFoundError:
         if l > -1:
-            w('package py-asyncutils not installed\n')
-            if l: w("Falling back to filling package version field with 'Not installed'\n")
+            w('py-asyncutils package not found by importlib.metadata\n')
+            if l: w("Filling package version field with 'Not installed'\n")
         v = 'Not installed'
     if i:
         f = True

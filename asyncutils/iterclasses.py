@@ -7,51 +7,51 @@ from asyncutils._internal.submodules import iterclasses_all as __all__
 from asyncutils.constants import _NO_DEFAULT
 @H.subscriptable
 class AChain:
-    __slots__ = '__its',
+    __slots__ = '__i',
     @classmethod
     async def _flatten_it_of_its(cls, I, /):
         async for i in A.iter_to_agen(I):
             if isinstance(i, cls):
-                async for _ in cls._flatten_it_of_its(i.__its): yield _
+                async for _ in cls._flatten_it_of_its(i.__i): yield _
             else: yield i
     @classmethod
-    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__its = cls._flatten_it_of_its(it_of_its); return s
+    def from_iterable(cls, it_of_its): (s := super().__new__(cls)).__i = cls._flatten_it_of_its(it_of_its); return s
     def __new__(cls, *its): return cls.from_iterable(its)
     async def __aiter__(self):
-        async for i in self.__its:
+        async for i in self.__i:
             async for _ in i: yield _
 @H.subscriptable
 class APeekable(H.LoopMixinBase):
-    __slots__ = '__ca', '__it'
-    def __init__(self, it=()): self.__it, self.__ca = A.iter_to_agen(it), deque(); super().__init__()
+    __slots__ = '__c', '__i'
+    def __init__(self, it=()): self.__i, self.__c = A.iter_to_agen(it), deque(); super().__init__()
     def __aiter__(self): return self
     async def can_peek(self):
         try: await self.peek(); return True
         except StopAsyncIteration: return False
     async def peek(self, default=_NO_DEFAULT):
-        if not (c := self.__ca):
-            try: c.append(await anext(self.__it))
+        if not (c := self.__c):
+            try: c.append(await anext(self.__i))
             except StopAsyncIteration:
                 if default is _NO_DEFAULT: raise
                 return default
         return c[0]
-    def prepend(self, /, *i): self.__ca.extendleft(reversed(i))
+    def prepend(self, /, *i): self.__c.extendleft(reversed(i))
     async def __anext__(self):
-        if (c := self.__ca): return c.popleft()
-        return await anext(self.__it)
+        if (c := self.__c): return c.popleft()
+        return await anext(self.__i)
     async def __getitem__(self, i, /, _=~I):
-        f = (C := self.__ca).append
+        f = (C := self.__c).append
         if isinstance(i, slice):
             if (c := 1 if (s := i.step) is None else int(s)) > 0: a, b = 0 if (s := i.start) is None else int(s), I if (s := i.stop) is None else int(s)
             elif c < 0: a, b = -1 if (s := i.start) is None else int(s), _ if (s := i.stop) is None else int(s)
             else: raise ValueError('asyncutils.iterclasses.APeekable: slice step cannot be zero')
             if a < 0 or b < 0:
-                async for s in A.iter_to_agen(self.__it): f(s)
+                async for s in A.iter_to_agen(self.__i): f(s)
             elif (d := min(max(a, b)+1, I)-len(C)) >= 0:
-                async for s in A.take(self.__it, d): f(s)
+                async for s in A.take(self.__i, d): f(s)
             return tuple(C)[a:b:c]
         if (i := index(i)) < (l := len(C)): return C[i]
-        async for s in A.iter_to_agen(self.__it) if i < 0 else A.take(self.__it, i-l+1): f(s)
+        async for s in A.iter_to_agen(self.__i) if i < 0 else A.take(self.__i, i-l+1): f(s)
         return C[i]
     P.patch_method_signatures((__getitem__, 'idx, /'), (peek, 'default={}'))
 @H.subscriptable

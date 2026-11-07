@@ -8,7 +8,7 @@ from asyncutils.constants import _NO_DEFAULT
 ForceResult, RecognitionResult = E('ForceResult', 'CANNOT_FORCE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ACK_RAISED ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
 class LocksmithBase:
-    __slots__ = '__lock', '__loop', '__recognized'; handlers = {} # ruff: ignore[mutable-class-default]
+    __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # ruff: ignore[mutable-class-default]
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
         def register(t, H=cls.handlers, h=h):
@@ -18,12 +18,12 @@ class LocksmithBase:
             return t
         return register
     @property
-    def currently_recognized(self): return frozenset(self.__recognized)
-    def __init__(self, loop=None, lcls=I.Lock): self.__recognized, self.__loop, self.__lock = __import__('_weakrefset').WeakSet((l := lcls(),)), loop or get_loop_and_set(), l
+    def currently_recognized(self): return frozenset(self._recognized)
+    def __init__(self, loop=None, lcls=I.Lock): self._recognized, self._loop, self._lock = __import__('_weakrefset').WeakSet((l := lcls(),)), loop or get_loop_and_set(), l
     async def recognize_lock(self, l, /):
         if not self.preliminary_check_lock(l): return RecognitionResult.FAILED_PRELIM
-        async with self.__lock:
-            if l in (r := self.__recognized): return RecognitionResult.ALREADY_RECOGNIZED
+        async with self._lock:
+            if l in (r := self._recognized): return RecognitionResult.ALREADY_RECOGNIZED
             if callable(f := getattr(l, 'acknowledge_locksmith_lock_held', None)):
                 try: return RecognitionResult.SUCCESS if ((await f) if I.iscoroutine(f := f(self)) else f) else RecognitionResult.FAILED_ACK
                 except A.CRITICAL: raise A.Critical
@@ -31,7 +31,7 @@ class LocksmithBase:
             r.add(l); return RecognitionResult.SUCCESS
     async def force(self, l, /, info=_NO_DEFAULT, *, purge_waiters=True):
         audit('asyncutils.locksmiths.LocksmithBase.force', id(self), id(l))
-        async with self.__lock:
+        async with self._lock:
             if not self.can_force_lock_held(l): return ForceResult.CANNOT_FORCE
         if info is _NO_DEFAULT: info = await self.get_info(l)
         try:
@@ -42,7 +42,7 @@ class LocksmithBase:
         finally:
             if purge_waiters: await self.purge_waiters(l)
     async def _force_except(self, l, i, /):
-        if self.find_owner(l) is (o := I.current_task(self.__loop)) and (r := await self._force_is_owner(l, i, o)): return r
+        if self.find_owner(l) is (o := I.current_task(self._loop)) and (r := await self._force_is_owner(l, i, o)): return r
         try:
             if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
         except A.CRITICAL: raise A.Critical
@@ -50,7 +50,7 @@ class LocksmithBase:
     async def _force_is_owner(self, l, i, o, /):
         if o is None: return await self.throw_fallback(l)
         if (c := o.get_coro()) is None: return await self.eager_fallback(l)
-        E = A.LockForceRequest(self, (F := self.__loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
+        E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
         try: c.throw(E)
         except A.CRITICAL as e: return self.task_raised_critical(l, e)
         except A.LockForceRequest as e:
@@ -83,11 +83,11 @@ class LocksmithBase:
     def task_raised_other(self, l, e, /):
         if not isinstance(e, RuntimeError): L.error('error encountered in attempt to force %s at %#x', fullname(l), id(l), exc_info=e)
         return ForceResult.FAILURE
-    def wrap_task(self, a, /): return self.__loop.create_task(A.wrap_in_coro(a))
+    def wrap_task(self, a, /): return self._loop.create_task(A.wrap_in_coro(a))
     def patch_owner(self, t, l, /):
         if hasattr(l, '_owner'): l._owner = t
     def find_owner(self, l, /): return getattr(l, '_owner', None)
     def preliminary_check_lock(self, l, /): return check_methods(l, 'acquire', 'release', 'locked')
     def task_raised_critical(self, _, e, /): raise A.Critical(e) from None
-    def can_force_lock_held(self, l, /): return l in self.__recognized and l.locked()
+    def can_force_lock_held(self, l, /): return l in self._recognized and l.locked()
 del E

@@ -6,20 +6,20 @@ from asyncutils._internal import helpers as H, patch as P
 from asyncutils._internal.submodules import misc_all as __all__
 from asyncutils.constants import _NO_DEFAULT
 class StateMachine:
-    __slots__ = '__et', '__ex', '__lock', '__state', '__ts'
-    def __init__(self, state): self.__state, self.__ts, self.__et, self.__ex, self.__lock = intern(state), c.defaultdict(lambda: c.defaultdict(set)), {}, {}, I.Lock()
+    __slots__ = '__et', '__ex', '__lo', '__st', '__ts'
+    def __init__(self, state): self.__st, self.__ts, self.__et, self.__ex, self.__lo = intern(state), c.defaultdict(lambda: c.defaultdict(set)), {}, {}, I.Lock()
     def add(self, from_state, to_state, condition=None): self.__ts[intern(from_state)][intern(to_state)].add(condition)
     on_enter, on_exit = map(lambda attr: lambda self, state: lambda h, /: dict.__setitem__(getattr(self, attr), state, h) or h, __slots__[:2])
     async def transition(self, state):
-        state, s = intern(state), self.__state
-        async with self.__lock:
+        state, s = intern(state), self.__st
+        async with self.__lo:
             if None not in (S := self.__ts[s][state]):
                 for _ in S:
                     if await _(s, state): break
                 else: return False
-            await self._helper(1); self.__state = state; await self._helper(0); return True
+            await self._helper(1); self.__st = state; await self._helper(0); return True
     async def _helper(self, i, /, _=A.IgnoreErrors(KeyError), s=__slots__):
-        async with _: await getattr(self, s[i])[self.__state]()
+        async with _: await getattr(self, s[i])[self.__st]()
     P.patch_method_signatures((_helper, 'attr'))
 async def gather_with_limited_concurrency(n=None, *a, ret_exc=False):
     async def wrapped(c, s=I.Semaphore(A.getcontext().GATHER_WITH_LIMITED_CONCURRENCY_DEFAULT_MAX_CONCURRENT if n is None else n)): # ruff: ignore[function-call-in-default-argument]
@@ -42,56 +42,56 @@ class CallbackAccumulator(c.deque, A.ExecutorRequiredAsyncContextMixin):
             while self: yield p()
         else: yield from self.callbacks
 class CacheWithBackgroundRefresh(H.LoopMixinBase):
-    _executor = None; __slots__ = '__cache', '__evt', '__ld', '__lock', '__processor', '__refresh', '__timer', '__tk', '__ttl'
+    _executor = None; __slots__ = '__c', '__e', '__ld', '__lo', '__p', '__r', '__ti', '__tk', '__ttl'
     def __init__(self, ttl=None, refresh=None, *, processor=None, default_loader=None, timer=monotonic):
         C = A.getcontext()
         if ttl is None: ttl = C.BACKGROUND_REFRESH_CACHE_DEFAULT_TTL
         if refresh is None: refresh = C.BACKGROUND_REFRESH_CACHE_DEFAULT_REFRESH
-        audit(H.fullname(self), ttl, refresh); super().__init__(); self.__cache, self.__lock, self.__ld, self.__tk, self.__evt, self.__timer = {}, I.Lock(), c.defaultdict(lambda: default_loader), None, I.Event(), timer; self.configure(ttl, refresh, processor)
-    def __contains__(self, k, /): return k in self.__cache
+        audit(H.fullname(self), ttl, refresh); super().__init__(); self.__c, self.__lo, self.__ld, self.__tk, self.__e, self.__ti = {}, I.Lock(), c.defaultdict(lambda: default_loader), None, I.Event(), timer; self.configure(ttl, refresh, processor)
+    def __contains__(self, k, /): return k in self.__c
     def register_loader(self, key, loader): self.__ld[key] = loader
     def expired(self, key): return self.time_past(key) > self.__ttl
-    def should_refresh(self, key): return self.time_past(key) > self.__ttl-self.__refresh if key in self else False
-    def time_past(self, key): return self.__timer()-self.__cache[key].timestamp
-    def configure(self, ttl, refresh, processor=None, _=lambda *_: None): self.__ttl, self.__refresh, self.__processor = max(ttl, refresh), min(ttl, refresh), processor or getattr(self, '_processor', _)
+    def should_refresh(self, key): return self.time_past(key) > self.__ttl-self.__r if key in self else False
+    def time_past(self, key): return self.__ti()-self.__c[key].timestamp
+    def configure(self, ttl, refresh, processor=None, _=lambda *_: None): self.__ttl, self.__r, self.__p = max(ttl, refresh), min(ttl, refresh), processor or getattr(self, '_processor', _)
     def get_loader(self, key):
         if (k := self.__ld[key]) is None: raise LookupError(f'asyncutils.misc.CacheWithBackgroundRefresh: no loader registered for key {key!r}')
         return k
     async def _process_error(self, e, b, /):
         if (x := (c := type(self))._executor) is None: x = H.create_executor(c)
-        if I.iscoroutine(r := await self.loop.run_in_executor(x, self.__processor, e, b)): await r
+        if I.iscoroutine(r := await self.loop.run_in_executor(x, self.__p, e, b)): await r
     async def get(self, key, loader=None):
-        async with self.__lock:
+        async with self.__lo:
             if loader is not None: self.register_loader(key, loader)
             if self.should_refresh(key): await self.refresh_item(key)
-            if key not in self.__cache or self.expired(key): await self.load_item(key)
-            return self.__cache[key].value
+            if key not in self.__c or self.expired(key): await self.load_item(key)
+            return self.__c[key].value
     async def __aenter__(self):
-        if self.__tk is None: self.__evt.clear(); self.__tk = self.make(self.refresh_loop())
+        if self.__tk is None: self.__e.clear(); self.__tk = self.make(self.refresh_loop())
     async def __aexit__(self, /, *_):
-        if t := self.__tk: self.__evt.set(); await A.safe_cancel(t); self.__tk = None
+        if t := self.__tk: self.__e.set(); await A.safe_cancel(t); self.__tk = None
     async def load_item(self, key, _=c.namedtuple('CacheEntry', 'value timestamp loading', module='asyncutils.misc')):
-        _ = _(await self.get_loader(key)(key), self.__timer(), False)
-        async with self.__lock: self.__cache[key] = _
+        _ = _(await self.get_loader(key)(key), self.__ti(), False)
+        async with self.__lo: self.__c[key] = _
     async def refresh_item(self, key):
-        async with self.__lock:
-            if key not in self.__ld or (t := self.__cache.get(key)) is None or t.loading: return
+        async with self.__lo:
+            if key not in self.__ld or (t := self.__c.get(key)) is None or t.loading: return
             t.loading = True
         try: await self.load_item(key)
         except A.CRITICAL: raise A.Critical
         except BaseException as e: t.loading = False; await self._process_error(e, False)
     async def refresh_loop(self):
-        r, t = self.__refresh, []
+        r, t = self.__r, []
         while True:
             await I.sleep(r)
             try:
-                async with self.__lock: d, f = self.__timer()-self.__ttl+self.__refresh, self.refresh_item; t.extend(self.make(f(k)) for k, v in self.__cache.items() if not v.loading and d > v.timestamp)
+                async with self.__lo: d, f = self.__ti()-self.__ttl+self.__r, self.refresh_item; t.extend(self.make(f(k)) for k, v in self.__c.items() if not v.loading and d > v.timestamp)
                 if t: await I.gather(*t); t.clear()
             except A.CRITICAL: raise A.Critical
             except I.CancelledError: raise
             except BaseException as e: await self._process_error(e, True)
     async def invalidate(self, key):
-        async with self.__lock: return self.__cache.pop(key, None)
+        async with self.__lo: return self.__c.pop(key, None)
     async def clear(self):
-        async with self.__lock: self.__cache.clear()
+        async with self.__lo: self.__c.clear()
     P.patch_method_signatures((__init__, 'ttl=None, refresh=None, *, processor=None, default_loader=None, timer={}'), (configure, 'ttl, refresh, processor=None'), (load_item, 'key'))
