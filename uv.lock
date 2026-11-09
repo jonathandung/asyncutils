@@ -509,15 +509,15 @@ wheels = [
 
 [[package]]
 name = "executorlib"
-version = "1.10.3"
+version = "1.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
     { name = "pyzmq" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/43/22b9994a599df937f36417db1300fe5f213951d0dbce2d800da0fea2311e/executorlib-1.10.3.tar.gz", hash = "sha256:be98caf0c0dc7a1a6c27b30f518f81feaf65029caf130e4a62b94abc3abea1de", size = 63998, upload-time = "2026-09-11T09:42:10.917Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/69/81/ad3fd902aa57e8eb759262b0fcd550bd7e4a159d11021a1790462860d1e8/executorlib-1.11.0.tar.gz", hash = "sha256:b69b9cb6533cb2acb8be846179d0638ce4c1119ece1ced4747ebdc072f85d86e", size = 65010, upload-time = "2026-10-23T22:15:59.065Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/ab/151897856f83c047993b5220e82f30c9899f07aa242cb418df5575f414ea/executorlib-1.10.3-py3-none-any.whl", hash = "sha256:7caf873f50d6cf04267a37ea18116b3a1d9df6b65d72df77a666bc3376ac377a", size = 91093, upload-time = "2026-09-11T09:42:09.274Z" },
+    { url = "https://files.pythonhosted.org/packages/cb/1d/18d8ca0170dee5f7f41d944aa0b57eee180a7fcea5c91d58ef91a452a6f6/executorlib-1.11.0-py3-none-any.whl", hash = "sha256:1fb3b9e08e57675bff0f6548d824fdf55bfaca677439d8c1dfc3b268405e372d", size = 92182, upload-time = "2026-10-23T22:15:57.574Z" },
 ]
 
 [[package]]
