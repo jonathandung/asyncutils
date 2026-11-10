@@ -1,4 +1,4 @@
-# ty: ignore[unresolved-attribute]
+# ty: ignore[missing-attribute]
 import heapq as H
 __all__ = 'Placeholder', 'heapify', 'heappop', 'heappush', 'heappushpop', 'heapreplace', 'partial'
 heapify, heappop, heapreplace, Placeholder = H._heapify_max, H._heappop_max, H._heapreplace_max, object()

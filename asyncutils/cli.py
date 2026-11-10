@@ -53,7 +53,7 @@ def bug(args, timeout=6, paste=_, j=lambda p, y=S.stdin.buffer.read: print(end=p
     if o is NotImplemented: print(s); return 0
     import webbrowser as c; c.register_standard_browsers()
     if l == 1: print(f'Attempting to open link in {(x := 'default browser' if o is None else o)}')
-    if (c.get(o) if o is None or o in c._browsers else c.BackgroundBrowser(o)).open(s): return 0 # ty: ignore[unresolved-attribute]
+    if (c.get(o) if o is None or o in c._browsers else c.BackgroundBrowser(o)).open(s): return 0 # ty: ignore[missing-attribute]
     if args.print_on_fail:
         if l > -1: w(f'Failed to open link in {x}; printing link to console instead\n' if l else 'Could not open issue; link below\n') # ty: ignore[possibly-unresolved-reference]
         print(s)

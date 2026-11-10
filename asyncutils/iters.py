@@ -66,7 +66,7 @@ def _make_consumers(i, z, p, b, m, x, n, h, c=BaseConsumer, t='($self)'): # ruff
             if r is x: raise StopAsyncIteration
             if p: A.raise_for(r)
             return r
-        __anext__.__text_signature__ = t # ty: ignore[unresolved-attribute]
+        __anext__.__text_signature__ = t # ty: ignore[missing-attribute]
     return (Q := tuple(Consumer() for _ in repeat(None, n)))
 def _tee_helper(Q, i, /): return B.gather(*(q._q.put(i) for q in Q), return_exceptions=True)
 async def aunzip(it, *, fillvalue=_NO_DEFAULT, put_batch=None, maxqsize=None, fail_fast=None, _=_aunzip_put, f=FakeConsumer):
@@ -901,9 +901,9 @@ async def _aax(i, k, d, f, a): return (await f(aenumerate(amap(k, i, await_=a)),
 def aargmin(it, key=_identity, default=-1, *, await_key=False, _=_aax): return _(it, key, default, amin, await_key)
 def aargmax(it, key=_identity, default=-1, *, await_key=False, _=_aax): return _(it, key, default, amax, await_key)
 def aargminmax(it, key=_identity, default=(-1, -1), *, await_key=False, _=_aax): return _(it, key, default, aminmax_keyed, await_key)
-(FirstMisMatch := namedtuple('FirstMisMatch', 'i lrem rrem', module=__name__)).collect_left = (Shorter := namedtuple('Shorter', 'i lrem', module=__name__)).collect = lambda self: A.collect(self.lrem) # ty: ignore[unresolved-attribute]
-FirstMisMatch.collect_right = (Longer := namedtuple('Longer', 'i rrem', module=__name__)).collect = lambda self: A.collect(self.rrem) # ty: ignore[unresolved-attribute]
-FirstMisMatch.remainder = lambda self, strict=False: azip(self.lrem, self.rrem, strict=strict) # ty: ignore[unresolved-attribute]
+(FirstMisMatch := namedtuple('FirstMisMatch', 'i lrem rrem', module=__name__)).collect_left = (Shorter := namedtuple('Shorter', 'i lrem', module=__name__)).collect = lambda self: A.collect(self.lrem) # ty: ignore[missing-attribute]
+FirstMisMatch.collect_right = (Longer := namedtuple('Longer', 'i rrem', module=__name__)).collect = lambda self: A.collect(self.rrem) # ty: ignore[missing-attribute]
+FirstMisMatch.remainder = lambda self, strict=False: azip(self.lrem, self.rrem, strict=strict) # ty: ignore[missing-attribute]
 def longest_common_prefix(*i): return amap(_get0, atakewhile(aall_equal, azip(*i)))
 async def diff_with(*_, cmpeq=O.eq):
     i, j = map(iter_to_agen, _)

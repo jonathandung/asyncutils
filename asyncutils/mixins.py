@@ -22,7 +22,7 @@ class ExecutorRequiredAsyncContextMixin(metaclass=ABCMeta):
     @F.cached_property
     def runner(self):
         if (l := getattr(self, 'loop', None)) is None is (l := getattr(self, '_loop', None)): self.loop = l = H.get_loop_and_set()
-        return F.partial(l.run_in_executor, H.create_executor(self, False)) # ty: ignore[unresolved-attribute]
+        return F.partial(l.run_in_executor, H.create_executor(self, False)) # ty: ignore[missing-union-attribute]
     def __enter__(self): return self
     @abstractmethod
     def __exit__(self, /, *_): raise NotImplementedError

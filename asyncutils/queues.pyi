@@ -203,7 +203,7 @@ class UserPriorityQueue[T](SmartPriorityQueue[tuple[int, int, T]]):
     def __init__(self, maxsize: int=..., *, init_priority: int=..., init_items: SupportsIteration[T]): ...
     @overload
     def __init__(self, maxsize: int=..., *, init_priority: int=...): ...
-    def put_nowait(self, item: T, priority: int=...) -> None: ... # ty: ignore[invalid-method-override]
-    def get_nowait(self) -> T: ... # ty: ignore[invalid-method-override]
-    async def put(self, item: T, priority: int=...) -> None: ... # ty: ignore[invalid-method-override]
-    async def get(self) -> T: ... # ty: ignore[invalid-method-override]
+    def put_nowait(self, item: T, priority: int=...) -> None: ... # ty: ignore[incompatible-method-override]
+    def get_nowait(self) -> T: ... # ty: ignore[incompatible-method-override]
+    async def put(self, item: T, priority: int=...) -> None: ... # ty: ignore[incompatible-method-override]
+    async def get(self) -> T: ... # ty: ignore[incompatible-method-override]

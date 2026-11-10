@@ -206,7 +206,7 @@ class TaskFactory[T: a.Task[Any]](Protocol):
     def __call__(self, loop: a.AbstractEventLoop, coro: Coroutine[Any, Any, Any], *, name: str|None=..., context: Context|None=..., **k: object) -> T: ...
 @type_check_only
 class BugArgs(Protocol):
-    '''Things that :func:`~asyncutils.cli.bug` accepts as the first argument.'''
+    '''Protocol for things that :func:`~asyncutils.cli.bug` accepts as the first argument.'''
     @property
     def title(self) -> str: ...
     @property
@@ -325,7 +325,7 @@ class GeneratorCoroutine[T, S, R](Generator[T, S, R], Coroutine[T, S, R]):
     def throw(self, typ: ExcType, val: object=..., tb: TracebackType|None=..., /) -> T: ...
     @overload
     def throw(self, exc: BaseException, val: None=..., tb: TracebackType|None=..., /) -> T: ...
-    def close(self) -> R|None: ... # ty: ignore[invalid-method-override]
+    def close(self) -> R|None: ... # ty: ignore[incompatible-method-override]
     @property
     def gi_code(self) -> CodeType: ...
     @property
@@ -403,11 +403,11 @@ class MemoryMappedFile(LoopMixinBase):
 @type_check_only
 class Raise(SentinelBase):
     '''The type of :const:`~asyncutils.constants.RAISE`.'''
-    def __reduce__(self) -> Literal['RAISE']: ... # ty: ignore[invalid-method-override]
+    def __reduce__(self) -> Literal['RAISE']: ... # ty: ignore[incompatible-method-override]
 @type_check_only
 class NoCoalesce(SentinelBase):
     '''The type of :const:`~asyncutils.constants.NO_COALESCE`.'''
-    def __reduce__(self) -> Literal['NO_COALESCE']: ... # ty: ignore[invalid-method-override]
+    def __reduce__(self) -> Literal['NO_COALESCE']: ... # ty: ignore[incompatible-method-override]
 @final
 @type_check_only
 class WildcardType:

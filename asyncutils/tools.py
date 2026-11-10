@@ -36,7 +36,7 @@ def find_help_url(o=None, /, *, ver='stable', _=frozenset((None, 'asyncutils', A
         else: o = g(s)
     if isinstance(o, (classmethod, staticmethod)): o = o.__func__
     elif isinstance(o, property): o = o.fget
-    if h.ismodule(o): s, o = o.__name__, None # ty: ignore[unresolved-attribute]
+    if h.ismodule(o): s, o = o.__name__, None # ty: ignore[missing-union-attribute]
     elif callable(o): s, o = o.__module__, o.__qualname__
     elif s is None: raise TypeError(f'asyncutils.tools.find_help_url: expected a string, module, property, classmethod, staticmethod or callable; got {h.fullname(o)}')
     s = s.removeprefix('asyncutils.'); return f'https://asyncutils.readthedocs.io/en/{ver}/api/asyncutils/{(f'{o}/index.html' if o in M else f'index.html#asyncutils.{o}') if s == 'asyncutils' else f'{s}/index.html#{f'module-asyncutils.{s}' if o is None else f'asyncutils.{s}.{o}'}'}'

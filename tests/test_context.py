@@ -1,4 +1,4 @@
-# ty: ignore[unresolved-attribute]
+# ty: ignore[missing-attribute]
 import pytest
 from asyncutils import EventLoop
 from asyncutils.context import *

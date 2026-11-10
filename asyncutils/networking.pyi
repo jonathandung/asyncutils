@@ -21,7 +21,7 @@ class LineProtocol(Protocol, LoopMixinBase):
     def transport(self) -> WriteTransport|None: '''The transport associated with this protocol, or None if not connected.'''
     @property
     def connected_transport(self) -> WriteTransport: '''The transport associated with this protocol; raises :exc:`ConnectionError` if not connected.'''
-    def connection_made(self, transport: WriteTransport) -> None: '''Unlike the base class, this method does not take read-only transports.''' # ty: ignore[invalid-method-override]
+    def connection_made(self, transport: WriteTransport) -> None: '''Unlike the base class, this method does not take read-only transports.''' # ty: ignore[incompatible-method-override]
     def connection_lost(self, exc: Exception|None) -> None: '''Note the that connection has been lost.'''
     def close(self) -> bool: '''Close the transport and return success.'''
     def data_received(self, data: bytes, bufsize: int=...) -> None: '''Receive some data. ``data`` is a non-empty :class:`bytes` object containing it.'''

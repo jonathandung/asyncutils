@@ -324,7 +324,7 @@ class SmartLifoQueue(PotentQueueBase):
     def pushpop_nowait(self, item, raising=True): raise NotImplementedError
 class SmartPriorityQueue(PotentQueueBase):
     def __init__(self, maxsize=0, *, init_items=()): super().__init__(maxsize); self.make(self.start(maxsize, init_items))
-    async def start(self, maxsize, init_items): q = await A.collect(I := A.iter_to_agen(init_items), maxsize); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # ty: ignore[unresolved-attribute]
+    async def start(self, maxsize, init_items): q = await A.collect(I := A.iter_to_agen(init_items), maxsize); import heapq as H; H.heapify(q); self.__get, self.__put, self._unfinished_tasks, self.__queue = partial(H.heappop, q), partial(H.heappush, q), len(q), q; self._finished.clear(); await self.extend(I) # ty: ignore[missing-attribute]
     def _init(self, maxsize): ...
     def _get(self): return self.__get()
     def _put(self, item): self.__put(item)

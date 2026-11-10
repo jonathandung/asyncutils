@@ -25,8 +25,8 @@ def test_sentinels(cls):
         class Foo: __slots__, baz = (), cls()
     with c:
         class Bar: __slots__, quux = (), cls('Bar.quux')
-    assert not SentinelBase._can_instantiate # ty: ignore[unresolved-attribute]
-    assert not t._can_instantiate # ty: ignore[unresolved-attribute]
+    assert not SentinelBase._can_instantiate # ty: ignore[missing-attribute]
+    assert not t._can_instantiate # ty: ignore[missing-attribute]
 def test_custom_sentinel():
     class TestSentinel(SentinelBase): __slots__ = ()
     a = TestSentinel()

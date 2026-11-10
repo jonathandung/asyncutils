@@ -1,4 +1,4 @@
-# ruff: file-ignore[global-statement,redefined-loop-name] # ty: ignore[unresolved-attribute]
+# ruff: file-ignore[global-statement,redefined-loop-name] # ty: ignore[missing-attribute]
 import errno as E, os as O, sys as S, asyncutils as A
 from _functools import partial
 from asyncio import Lock, gather
@@ -47,7 +47,7 @@ class AsyncReadWriteCouple(H.LoopMixinBase):
     def seek(self, *_): self.__rx(E.ESPIPE, 'seek')
     def tell(self): self.__rx(E.ESPIPE, 'tell')
     def truncate(self, s=None, /): return self._run(self.writer.truncate, s)
-    async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self.__x.shutdown()
+    async def aclose(self): await gather(*map(self._run, (self.reader.close, self.writer.close))); self.__x.shutdown() # ty: ignore[missing-union-attribute]
     async def __aenter__(self):
         if self is stdcoup: raise RuntimeError('asyncutils.iotools.AsyncReadWriteCouple: cannot use stdcoup as an async context manager')
         return self

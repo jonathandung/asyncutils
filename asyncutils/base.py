@@ -169,7 +169,7 @@ async def iter_to_agen(it, sentinel=_NO_DEFAULT, *, use_existing_executor=None, 
                     yield l
     # ruff: enable[yield-in-context-manager-in-async-generator]
 def aiter_to_gen(ait, *, use_futures=None, loop=None, strict=None, a=c, b=b, g=H.get_loop_and_set): # ruff: ignore[complex-structure]
-    audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = A.getcontext(), I.futures._chain_future # ty: ignore[unresolved-attribute]
+    audit('asyncutils.base.aiter_to_gen', a(ait)); C, e = A.getcontext(), I.futures._chain_future # ty: ignore[missing-attribute]
     if b(ait, '__iter__') and not (C.AITER_TO_GEN_DEFAULT_STRICT if strict is None else strict): return (yield from ait) # ruff: ignore[return-in-generator]
     if not b(ait, '__aiter__'): raise TypeError(f'asyncutils.base.aiter_to_gen: cannot iterate over {ait!r} synchronously or asynchronously')
     d = b(ait := aiter(ait), 'asend', 'athrow', 'aclose')

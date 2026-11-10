@@ -139,7 +139,7 @@ class EventBus(H.LoopMixinBase): # ruff: ignore[too-many-public-methods]
     def is_auditing(self): return self.__au
     auditing = property(is_auditing, lambda self, v, /: (self.start_audit if v else self.stop_audit)())
     def start_audit(self):
-        if not (self.__au or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self.__au = a.added = True # ty: ignore[unresolved-attribute]
+        if not (self.__au or getattr(a := self.auditor, 'added', False)): audit('asyncutils.channels.EventBus.start_audit', id(self)); addaudithook(a); self.__au = a.added = True # ty: ignore[missing-attribute]
     def stop_audit(self): audit('asyncutils.channels.EventBus.stop_audit', id(self)); self.__au = False
     def add_middleware(self, middleware): r = len(m := self.__mw); m.append((middleware, None)); return r
     def remove_middleware(self, cookie, *, result=None, strict=False):

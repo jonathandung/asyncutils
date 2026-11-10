@@ -21,7 +21,7 @@ def test_helpers():
     assert not helpers.check_methods(_(), 'foo')
     assert not helpers.check_methods(o, 'foo')
 def test_submodules_lazy_loading():
-    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo # ruff: ignore[useless-expression] # ty: ignore[unresolved-attribute]
+    with raises(AttributeError, match="module 'asyncutils._internal' has no attribute 'foo'"): mod.foo # ruff: ignore[useless-expression] # ty: ignore[missing-attribute]
     module = mod.initialize.Module
     with raises(AttributeError, match="module 'asyncutils' has no attribute 'foo'"): module('foo')
     with raises(TypeError, match='asyncutils: cannot subclass the type of submodule objects'): type('', (module,), {}) # ty: ignore[subclass-of-final-class]
@@ -39,11 +39,11 @@ def test_others(cfg_json, monkeypatch):
 def test_patch():
     patch = mod.patch
     patch.patch_function_signatures((f := lambda _: None, 'foo, {}'))
-    assert f.__text_signature__ == '(foo, <unrepresentable>)' # ty: ignore[unresolved-attribute]
+    assert f.__text_signature__ == '(foo, <unrepresentable>)' # ty: ignore[missing-attribute]
     patch.patch_method_signatures((f, patch.exit_sig))
-    assert f.__text_signature__ == '($self, exc_typ, exc_val, exc_tb, /)' # ty: ignore[unresolved-attribute]
+    assert f.__text_signature__ == '($self, exc_typ, exc_val, exc_tb, /)' # ty: ignore[missing-attribute]
     patch.patch_classmethod_signatures((f, ''))
-    assert f.__text_signature__ == '($cls)' # ty: ignore[unresolved-attribute]
+    assert f.__text_signature__ == '($cls)' # ty: ignore[missing-attribute]
 @mark.skipif('sys.version_info >= (3, 13)')
 @mk
 async def test_py312():

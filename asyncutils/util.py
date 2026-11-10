@@ -106,7 +106,7 @@ def aawcmf2dcmff(**d):
             try: yield r
             finally: await h(c.__exit__, *exc_info())
         return _(g)
-    f.__text_signature__ = '(f, /)'; return f # ty: ignore[unresolved-attribute]
+    f.__text_signature__ = '(f, /)'; return f # ty: ignore[missing-attribute]
 def make_task_factory(tcls, eager=None):
     if eager is None: eager = A.getcontext().MAKE_TASK_FACTORY_DEFAULT_EAGER
     return lambda loop, coro, eager_start=eager, **k: tcls(coro, loop=loop, eager_start=eager_start, **k)

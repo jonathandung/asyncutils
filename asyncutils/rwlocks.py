@@ -1,4 +1,4 @@
-# ty: ignore[unresolved-attribute]
+# ty: ignore[missing-attribute]
 import abc
 from _collections import defaultdict, deque
 from asyncio import Condition, Lock, current_task

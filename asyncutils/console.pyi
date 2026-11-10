@@ -78,7 +78,7 @@ class ConsoleBase(InteractiveConsole, ABC):
         | ``no_traceback`` is a tuple of types of exceptions for which the traceback should not be shown if they are to occur.
         | ``threadsafe`` dictates whether to run the code in the event loop using :meth:`~asyncio.loop.call_soon_threadsafe` instead of :meth:`~asyncio.loop.call_soon`.
         '''
-    def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # ty: ignore[invalid-method-override]
+    def interact(self, banner: str|None=..., *, ps1: object=...) -> None: '''In the main thread, the run method is preferred.''' # ty: ignore[incompatible-method-override]
     def run(self, *, exit_message: str=..., thread_name: str=..., max_memory_errors: int=..., always_run_interactive: bool=..., always_install_completer: bool=..., suppress_asyncio_warnings: bool=..., suppress_unawaited_coroutine_warnings: bool=...) -> int:
         '''
         | Run the console and return the integer return code.

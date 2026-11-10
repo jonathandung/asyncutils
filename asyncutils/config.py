@@ -65,9 +65,9 @@ match logging_to := g('log_to'):
     case 'MEMORY':
         from _io import StringIO as J
         def get_past_logs(j=J, _=_):
-            if r := _.stream.getvalue(): _.setStream(j()) # ty: ignore[unresolved-attribute]
+            if r := _.stream.getvalue(): _.setStream(j()) # ty: ignore[missing-union-attribute]
             return r
-        get_past_logs.__text_signature__, s = '()', J(); del J # ty: ignore[unresolved-attribute]
+        get_past_logs.__text_signature__, s = '()', J(); del J # ty: ignore[missing-attribute]
     case 'STDOUT': s = S.stdout
     case 'STDERR': ...
     case 1 if o: s, logging_to = S.stdout, 'STDOUT'

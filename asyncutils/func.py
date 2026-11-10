@@ -1,4 +1,4 @@
-# ruff: file-ignore[bare-except, complex-structure, too-many-arguments] # ty: ignore[unresolved-attribute]
+# ruff: file-ignore[bare-except, complex-structure, too-many-arguments] # ty: ignore[missing-attribute]
 import asyncio as I, asyncutils as A
 from collections import deque, namedtuple
 from functools import partial, update_wrapper, wraps

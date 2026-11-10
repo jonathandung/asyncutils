@@ -43,7 +43,7 @@ class ExceptionWrapper:
     def __getattr__(self, n, /): return getattr(self.__x, n)
     def __repr__(self): return f'ExceptionWrapper({self.__x!r})'
     def __init_subclass__(cls): raise TypeError('cannot subclass the type of proxies to exceptions')
-exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__x.__get__ # ty: ignore[unresolved-attribute]
+exception_occurred, wrap_exc, unwrap_exc = ExceptionWrapper.__instancecheck__, ExceptionWrapper.__new__.__get__(ExceptionWrapper), ExceptionWrapper._ExceptionWrapper__x.__get__ # ty: ignore[missing-attribute]
 def raise_for(e, /):
     if exception_occurred(e): raise unwrap_exc(e)
     return e
@@ -131,7 +131,7 @@ class ForbiddenOperation(PasswordQueueError, TypeError):
 @H.subscriptable
 class PasswordError(PasswordQueueError):
     @property
-    def wrong_pwd(self): return self._rp() # ty: ignore[unresolved-attribute]
+    def wrong_pwd(self): return self._rp() # ty: ignore[missing-attribute]
 class WrongPassword(PasswordError, ValueError):
     def __init__(self, q, p, /, _='failure to modify queue because %r received incorrect password: %r'): self.qid, self._rp = id(q), ref(p); super().__init__(_%(q, p))
 class WrongPasswordType(PasswordError, TypeError):

@@ -31,7 +31,5 @@ def run(argv: Iterable[str]|None=...) -> int|None:
 
     Execute ``asyncutils -?``, or call :func:`~asyncutils.tools.get_cmd_help`, to see detailed command-line usage.
 
-    .. warning::
-      If you call this function manually, a daemon thread is spun up to execute the code in the console, which may still be kept alive by some internal mechanisms after the function returns.
-      Worse still, if you call this function within another console, its standard input may completely cease to work.
+    .. warning:: You are advised against calling this function manually.
     '''

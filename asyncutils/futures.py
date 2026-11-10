@@ -1,4 +1,4 @@
-# ty: ignore[unresolved-attribute]
+# ty: ignore[missing-attribute]
 from asyncio.futures import Future, _PyFuture  # ty: ignore[import-not-found]
 from asyncio.tasks import Task, _PyTask  # ty: ignore[import-not-found]
 from contextvars import copy_context

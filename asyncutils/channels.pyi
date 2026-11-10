@@ -10,9 +10,8 @@ from ._internal.prots import DualContextManager, ExcType, Middleware, Observer, 
 __all__ = 'EventBus', 'Observable', 'Rendezvous'
 class Observable[**P](LoopMixinBase):
     '''
-    A class representing an observable stream of data, that observers can subscribe to and receive notifications from.
+    A class representing an observable stream of data, that observers can subscribe to and receive notifications from. Observers must be hashable.
 
-    .. attention:: Observers must be hashable!
     .. caution:: Use instances of this class as context managers only.
     '''
     @property
@@ -63,7 +62,7 @@ class EventBus(LoopMixinBase):
     | A subscriber is a function that will be called every time data is published, with the corresponding data passed in. Publishing is thus the action of triggering these subscribers.
     | Wildcard subscribers should take the event type as the first argument, and the event data as the next; while specific subscribers should take the event data as the only argument.
 
-    .. caution:: Use instances as context managers only for proper setup and shutdown.
+    .. caution:: Use instances of this class as context managers only.
     '''
     WILDCARD: Final[WildcardType]
     '''Sentinel representing the event type of subscribers that accept any event name.'''

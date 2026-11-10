@@ -21,12 +21,12 @@ class VersionInfo(str):
         | A perfect hash function for versions. May produce larger integers than :meth:`__int__` in some cases, and may also produce negative integers.
         | Since :func:`hash` returns the output of :meth:`__hash__` modulo ``0x1FFFFFFFFFFFFFFF`` (largest Mersenne prime within 64 bits), the reasonable limit for versions that can be hashed and unhashed losslessly lies around ``VersionInfo(46340, 41707, 2147483645)``.
         '''
-    def __iter__(self) -> Iterator[int]: '''Yield :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[invalid-method-override]
+    def __iter__(self) -> Iterator[int]: '''Yield :attr:`major`, :attr:`minor`, :attr:`patch` sequentially.''' # ty: ignore[incompatible-method-override]
     def __len__(self) -> Literal[3]: '''``len((major, minor, patch)) == 3``.'''
     @overload
     def __getitem__(self, idx: Literal[0, 1, 2], /) -> int: ...
     @overload
-    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: # ty: ignore[invalid-method-override]
+    def __getitem__(self, idx: ValidSlice, /) -> tuple[int, ...]: # ty: ignore[incompatible-method-override]
         '''
         Return a property depending on the value of ``idx``.
 
@@ -47,7 +47,7 @@ class VersionInfo(str):
     @overload
     def __add__(self, n: int, /) -> Self: ...
     @overload
-    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by ``n`` patches or the delta ``delta``.''' # ty: ignore[invalid-method-override]
+    def __add__(self, delta: VersionDelta, /) -> Self: '''Return this version incremented by ``n`` patches or the delta ``delta``.''' # ty: ignore[incompatible-method-override]
     @overload
     def __radd__(self, n: int, /) -> Self: ...
     @overload
@@ -59,7 +59,7 @@ class VersionInfo(str):
     @overload
     def __sub__(self, other: Self, /) -> VersionDelta: '''Return this version decremented by ``n`` patches or the delta ``delta``, or the delta between ``self`` and ``other``.'''
     def __setattr__(self, name: str, value: object, /) -> NoReturn: '''Disallow modifying attributes of the object.'''
-    def __format__(self, format_spec: Literal['x', 'hex', 'o', 'oct', 'b', 'bin', 'd', 'dec', '0', 'major', 'maj', '1', 'minor', 'min', '2', 'patch', 's', 'short', 'l', 'long', 'a', 'ascii', 'c', 'chars', 't', 'tuple', 'h', 'hash', 'n', 'majmin'], /) -> str: # ty: ignore[invalid-method-override]
+    def __format__(self, format_spec: Literal['x', 'hex', 'o', 'oct', 'b', 'bin', 'd', 'dec', '0', 'major', 'maj', '1', 'minor', 'min', '2', 'patch', 's', 'short', 'l', 'long', 'a', 'ascii', 'c', 'chars', 't', 'tuple', 'h', 'hash', 'n', 'majmin'], /) -> str: # ty: ignore[incompatible-method-override]
         r'''
         Format the version. See the return values below, using version 123.4.0 as example.
 
