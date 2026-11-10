@@ -6,7 +6,11 @@ This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
 
 ## [1.3]
 
-### [1.3.6] - 2026-11-07; latest
+### [1.3.7] - 2026-11-10; latest
+
+Updated ty to 0.0.100.
+
+### [1.3.6] - 2026-11-07
 
 Some miscellaneous updates.
 

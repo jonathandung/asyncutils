@@ -50,7 +50,7 @@ examples.
 
 ## Version
 
-This is asyncutils v1.3.6.
+This is asyncutils v1.3.7.
 
 ## Configuration
 
