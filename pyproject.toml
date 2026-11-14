@@ -60,7 +60,7 @@ skip_covered = true
 
 [tool.ruff]
 exclude = ["docs/source/conf.py"]
-required-version = ">=0.17.3"
+required-version = ">=0.17.5"
 target-version = "py312"
 
 [tool.ruff.lint]

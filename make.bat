@@ -1,5 +1,4 @@
 @echo off
-:: cspell:disable-next-line
 setlocal enabledelayedexpansion
 if "%AUTESTMAXFAIL%" == "" set AUTESTMAXFAIL=3
 if "%1"=="" goto help
@@ -29,9 +28,21 @@ type nul >.uv-stamp
 goto :eof
 
 :audit
+echo Running uv audit...
 uv audit
-if "%GH_TOKEN%"=="" for /f "delims=" %%i in ('gh auth token') do set "GH_TOKEN=%%i"
-zizmor .
+where zizmor >nul 2>nul
+if %errorlevel% equ 0 (
+    if not defined GH_TOKEN (
+        where gh >nul 2>nul
+        if %errorlevel% equ 0 (
+            for /f "delims=" %%i in ('gh auth token') do set "GH_TOKEN=%%i"
+            echo Running zizmor...
+            zizmor .
+        )
+    ) else echo Running zizmor... && zizmor .
+)
+where betterleaks >nul 2>nul
+if %errorlevel% equ 0 echo Running betterleaks... && betterleaks git .
 goto :eof
 
 :badges
@@ -40,7 +51,7 @@ pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --lo
 goto :eof
 
 :bug
-asyncutils bug --open %O%
+asyncutils bug --open "%O%"
 goto :eof
 
 :build
@@ -51,7 +62,7 @@ goto :eof
 for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
 for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\governance.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
-del /s /q *.pyc *.pyo 2>nul
+del /s /f /q *.pyc *.pyo 2>nul
 goto :eof
 
 :dclean
@@ -98,7 +109,7 @@ if %errorlevel% equ 0 echo Running cspell... && cspell .
 where markdownlint-cli2 >nul 2>nul
 if %errorlevel% equ 0 echo Running markdownlint-cli2... && markdownlint-cli2
 where sphinx-lint >nul 2>nul
-if %errorlevel% equ 0 echo Running sphinx-lint... && sphinx-lint docs
+if %errorlevel% equ 0 echo Running sphinx-lint... && sphinx-lint -i docs\source\api docs\source
 goto :eof
 
 :lock
@@ -116,7 +127,7 @@ call :.prek-stamp
 prek run -a
 goto :eof
 
-:release
+:rel
 choice /m "You are about to create a release. Are you sure?"
 if errorlevel 2 exit /b 1
 if errorlevel 1 gh release create

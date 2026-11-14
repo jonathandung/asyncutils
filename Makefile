@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
-.PHONY: audit badges bug build clean dclean docs help links lint lock log pc release run setup test
+.PHONY: audit badges bug build clean dclean docs help links lint lock log pc rel run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTESTMAXFAIL ?= 3
-O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$(O)"
+O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$$(O)"
 PREK_UV_SOURCE := none
 SHELL := /bin/bash
 define i
@@ -22,8 +22,10 @@ endef
 	uv tool install ruff && uv tool install ty 2>/dev/null
 	touch "$@"
 audit:
+	echo "Running uv audit..."
 	uv audit
-	GH_TOKEN=${GH_TOKEN:-gh auth token} zizmor .
+	if command -v zizmor >/dev/null 2>&1; then if [ -z "$${GH_TOKEN+x}" ] && command -v gh >/dev/null 2>&1; then echo "Running zizmor..." && zizmor . --gh-token "$$(gh auth token)"; else echo "Running zizmor..." && zizmor .; fi; fi
+	if command -v betterleaks >/dev/null 2>&1; then echo "Running betterleaks..." && betterleaks git .; fi
 badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
@@ -48,7 +50,7 @@ lint: .uv-stamp
 	echo "Running ty..." && ty check
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
 	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2; fi
-	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint docs; fi
+	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint -i docs/source/api docs/source; fi
 lock: .uv-stamp
 	uv lock -U
 log:
@@ -56,7 +58,7 @@ log:
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 pc: .prek-stamp
 	prek run -a
-release:
+rel:
 	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r; echo; if [[ $$REPLY =~ ^[Yy] ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 run:
 	docker run --rm -it jonathandung/asyncutils:latest

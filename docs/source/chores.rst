@@ -9,7 +9,8 @@ library may need to complete in different recurring scenarios.
 Preliminaries
 -------------
 
-To start development, run the following::
+To start development, you must have `git <https://git-scm.com>`__ installed, since it
+is the version control system used for this project. Run the following::
 
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
@@ -20,8 +21,6 @@ To start development, run the following::
   . .venv/bin/activate # or how you would normally activate the uv environment in your
   # preferred shell
 
-If you are using an IDE outside of the VS Code family, you may want to use an
-`.editorconfig <https://editorconfig.org>`__ extension.
 
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
@@ -38,8 +37,8 @@ Bumping the version
    the project's, so take care not to modify those as well.
 3. Also exclude the ``CHANGELOG.md`` at the project root from the replace operation.
 4. A core developer will help you create a GitHub release with default release notes
-   using ``make release``. This will automatically trigger, among others, a stable Read
-   the Docs build, a push to PyPI and cause a conda-forge bot automerge.
+   using ``make rel``. This will automatically trigger, among others, a stable Read the
+   Docs build, a push to PyPI and cause a conda-forge bot automerge.
 5. If you include your desired remarks in the PR under a "Release Notes" section, those
    will be used as the release notes instead after said core developer tries their best
    to correct grammatical or spelling mistakes.

@@ -186,6 +186,7 @@ dunder
 dunders
 elem
 elib
+enabledelayedexpansion
 estlen
 evans
 everseen
@@ -267,6 +268,7 @@ rsrc
 rwlock
 rwlocks
 seealso
+setlocal
 shellcheck
 shfmt
 siftdown
