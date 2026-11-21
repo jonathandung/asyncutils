@@ -48,11 +48,7 @@ from typing import Final
 from ty_extensions import JustFloat
 def time_since_boot() -> JustFloat: '''Return the time since the module was imported or invoked in the command line in milliseconds.'''
 __version__: Final[VersionInfo] # ruff: ignore[undefined-local-with-import-star-usage]
-'''
-An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.
-
-.. note:: This library adheres to `Semantic Versioning 2.0.0 <https://semver.org/spec/v2.0.0.html>`__.
-'''
+'''An instance of :class:`version.VersionInfo` representing the current pip/conda version of this library.'''
 __hexversion__: Final[int]
 '''
 | An integer representing the current pip/conda version of this library. Comparison operators behave as expected.

@@ -2,8 +2,6 @@
 
 All notable changes to this project are and will be documented in this file.
 
-This project uses [Semantic Versioning](https://semver.org) since v1.3.1.
-
 ## [1.3]
 
 ### [1.3.8] - 2026-11-21; latest
@@ -29,10 +27,6 @@ Updated linters and type checkers.
 ### [1.3.3] - 2026-10-18
 
 Documentation corrections.
-
-### [1.3.2] - 2026-10-14; skipped
-
-Upgraded to Python 3.15.0.
 
 ### [1.3.1] - 2026-10-12
 
