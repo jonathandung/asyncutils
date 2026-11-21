@@ -16,25 +16,29 @@ class ConsoleBase(InteractiveConsole, ABC):
     '''A %-formattable string representing the template of the banner to be shown when the console starts.'''
     NAME: ClassVar[str]
     '''The name of the module implementing this console, detected from the class name if the keyword argument ``name`` is not provided to the subclass constructor.'''
-    if sys.version_info < (3, 13):
-        CAN_USE_PYREPL: ClassVar[Literal[False]]
-        '''PyREPL is only supported on Python 3.13 and above.'''
-    else:
+    if sys.version_info >= (3, 13):
         CAN_USE_PYREPL: ClassVar[bool]
         '''Whether :mod:`!_pyrepl` enhancements are available and allowed.'''
         STATEMENT_FAILED: ClassVar[object]
         '''This is present iff :class`!_pyrepl.console.InteractiveColoredConsole` is used as the parent of this class.''' # cspell: disable-line
+    else:
+        CAN_USE_PYREPL: ClassVar[Literal[False]]
+        '''PyREPL is only supported on Python 3.13 and above.'''
     LOCALS_HANDLERS: ClassVar[ChainMap[str, Callable[[dict[str, Any]], Any]|None]]
-    '''| Maps module names to a function taking locals of a console of the corresponding type. The return value is discarded.
-    | Add handlers for the module of your own console with ``native_handler`` and other modules with ``other_handlers``.'''
+    '''
+    | Maps module names to a function taking locals of a console of the corresponding type. The return value is discarded.
+    | Add handlers for the module of your own console with ``native_handler`` and other modules with ``other_handlers``.
+    '''
     interrupt_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
-    '''Functions called when :exc:`KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
-
-    .. note:: Add hooks using the ``additional_interrupt_hooks`` class construction parameter.'''
+    '''
+    | Functions called when :exc:`KeyboardInterrupt` occurs, in that order, besides essential hardcoded logic.
+    | Add hooks using the ``additional_interrupt_hooks`` class construction parameter.
+    '''
     memory_error_hooks: ClassVar[tuple[Callable[[Self], Any], ...]]
-    '''Functions called when a :exc:`MemoryError` occurs, in that order, besides essential hardcoded logic.
-
-    .. note:: Add hooks using the ``additional_memory_error_hooks`` class construction parameter.'''
+    '''
+    | Functions called when a :exc:`MemoryError` occurs, in that order, besides essential hardcoded logic.
+    | Add hooks using the ``additional_memory_error_hooks`` class construction parameter.
+    '''
     default_local_exit: ClassVar[bool]
     '''Whether Python should continue running after the console exits by default, as opposed to the console raising :exc:`SystemExit` directly.'''
     disallow_subclass_msg: ClassVar[str]

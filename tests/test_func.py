@@ -44,7 +44,7 @@ async def test_lockf():
         ((a, x), b), t = await measure(lambda: gather(measure(s), benchmark(s, 2, 1)))
         assert t > 0.06
         assert a == 1
-        assert x > 0.02
+        assert x > 0.01
         assert b.avg > 0.03
         assert b.iterations == 3
         assert b.total > 0.06

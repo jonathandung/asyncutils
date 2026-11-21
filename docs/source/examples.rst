@@ -3,8 +3,8 @@ Usage Examples
 
 .. highlight:: pycon
 
-Below are some examples of how the asyncutils module can be used, demonstrated right in
-the tailor-made async-native asyncutils REPL console::
+Below are some examples of how the asyncutils module can be used, demonstrated in the
+async-native REPL console::
 
   >>> # example 1: Rendezvous
   >>> import asyncio

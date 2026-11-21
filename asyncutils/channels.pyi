@@ -12,7 +12,7 @@ class Observable[**P](LoopMixinBase):
     '''
     A class representing an observable stream of data, that observers can subscribe to and receive notifications from. Observers must be hashable.
 
-    .. caution:: Use instances of this class as context managers only.
+    .. caution:: Use instances of this class as async context managers only.
     '''
     @property
     def notifying(self) -> bool: '''Whether the observable is currently notifying observers.'''

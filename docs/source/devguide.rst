@@ -21,8 +21,8 @@ is the version control system used for this project. Run the following::
   # installs prek v0.5.11, the latest version of uv, ruff and ty (as tools), then
   # creates a virtual environment at .venv using uv and installs asyncutils in editable
   # mode along with its development dependencies into the environment
-  . .venv/bin/activate # or how you would normally activate the uv environment in your
-  # preferred shell
+  . .venv/bin/activate
+  # or how you would normally activate the uv environment in your preferred shell
 
 If you are developing on Windows, be sure to navigate to System > Advanced > Terminal
 > Powershell in settings to change the execution policy to allow local Powershell
