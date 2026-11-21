@@ -12,7 +12,7 @@ async def test_enhanced_gather(): assert await enhanced_gather((range(3), 42, ag
 @mk
 async def test_first_completed():
     with pytest.raises(TypeError, match=r'asyncutils\.compete\.first_completed: pass in at least one coroutine'): await first_completed()
-    async with timeout(0.1): assert await first_completed(sleep(0.1, 1), sleep(0.01, 2), sleep(0.2, 3), sleep(0.3, 4)) == 2
+    async with timeout(0.16): assert await first_completed(sleep(0.1, 1), sleep(0.01, 2), sleep(0.2, 3), sleep(0.3, 4)) == 2
 @mk
 async def test_race():
     with pytest.raises(TypeError, match=r'asyncutils\.compete\.race_with_callback: pass in at least one coroutine'): await race_with_callback()

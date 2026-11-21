@@ -4,8 +4,8 @@ from collections.abc import Awaitable, Callable, Iterable, Mapping
 from types import AsyncGeneratorType, CoroutineType
 from typing import Any, Literal, Never, Self, overload
 from ty_extensions import JustFloat
-from ._internal.prots import AsyncContextManager, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryMethodRV, EveryRV, ExceptionWrapper, StarRV, SupportsIteration, Timer, ToSyncFromLoopRV
-__all__ = 'RateLimited', 'acompose', 'afcopy', 'aiter_from_f', 'areduce', 'benchmark', 'debounce', 'discard_retval', 'evaluate_and_return', 'every', 'everymethod', 'iterf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'to_async', 'to_sync', 'to_sync_from_loop', 'unstar'
+from ._internal.prots import AsyncContextManager, AsyncLockLike, BenchmarkResult, CanExcept, DecoratorFactoryRV, EveryMethodRV, EveryRV, ExceptionWrapper, StarRV, SupportsIteration, Timer, ToSyncFromLoopRV
+__all__ = 'RateLimited', 'acompose', 'afcopy', 'aiter_from_f', 'areduce', 'benchmark', 'debounce', 'discard_retval', 'evaluate_and_return', 'every', 'everymethod', 'iterf', 'lockf', 'measure', 'measure2', 'retry', 'star', 'throttle', 'timer', 'to_async', 'to_sync', 'to_sync_from_loop', 'unstar'
 def acompose(*functions: Callable[..., Any], wrap_last: bool=...) -> Callable[..., Any]: '''Compose multiple functions. If the result of a function is a coroutine, await it before passing it to the next. Begin from the rightmost function, which can take variadic parameters, and then pipe its return value through as a single argument.'''
 @overload
 async def areduce[T](f: Callable[..., object], it: SupportsIteration[Never], initial: T, *, await_: bool=...) -> T: ...
@@ -99,6 +99,7 @@ async def benchmark(f: Callable[[], Awaitable[Any]], /, times: int=..., warmup: 
 
     This function should only be used in very simple cases, because we recognize the inherent difficulty and abundance of noise in testing IO-bound code, and this library alone is by no means designed to solve that issue.
     '''
+def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by ``lf``, to a function ``f`` that returns an awaitable, also converting it to an async function.'''
 class RateLimited[T, **P]:
     '''The rate limiter pattern as a decorator (factory). See :class:`~asyncutils.locks.AdvancedRateLimit` for the async context manager version.'''
     @overload

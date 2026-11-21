@@ -180,6 +180,7 @@ dclean
 dcmf
 dcmff
 deadpool
+devguide
 docstrings
 dualcontextmanager
 dunder

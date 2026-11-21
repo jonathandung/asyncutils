@@ -25,9 +25,9 @@ class SingleWaiterEventWithValue(A.EventMixin):
 class EventWithValue(A.EventMixin):
     __slots__ = '__h', '__v', '__w'
     def __init__(self, *, maxhist=_NO_DEFAULT): self.__w, self.__v, self.__h = set(), None, deque(maxlen=A.getcontext().EVENT_WITH_VALUE_DEFAULT_MAX_HIST if maxhist is _NO_DEFAULT else maxhist)
-    def _record_hist(self): self.__h.append((monotonic(), A.ref(self.__v)))
+    def _rh(self): self.__h.append((monotonic(), A.ref(self.__v)))
     def set(self, value, *, strict=True):
-        if value != self.__v: self.__v = value; self._record_hist()
+        if value != self.__v: self.__v = value; self._rh()
         if value is None:
             if strict: raise A.EventValueError('asyncutils.events.EventWithValue: use clear instead')
         else:
@@ -56,14 +56,3 @@ class EventWithValue(A.EventMixin):
         x, I = monotonic()-duration, iter(self.__h)
         for t, _ in I:
             if t >= x: yield t, _; yield from I
-    async def wait_for_transition(self, old, new, timeout=None, *, force_transition=False, legacy=False):
-        x = new
-        try:
-            async with I.timeout(timeout):
-                while True:
-                    if legacy or x is not old: await self.wait_for_value(old)
-                    if new is (x := await self.wait_for_next()): return True
-        except TimeoutError:
-            if force_transition: o = self.get(None); (s := self.set)(old); s(new); s(o, strict=False)
-            return False
-    async def wait_for_transition_unordered(self, a, b, timeout=None, *, force_transition=False, legacy=False): return await next(iter((await I.wait(map(self.loop.create_task, (self.wait_for_transition(a, b, timeout, force_transition=force_transition, legacy=legacy), self.wait_for_transition(b, a, timeout, legacy=legacy))), return_when='FIRST_COMPLETED'))[0]))

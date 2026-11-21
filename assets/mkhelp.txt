@@ -11,7 +11,7 @@ Available targets:
  lint   - Run ruff and ty sequentially, followed by CSpell, markdownlint-cli2 and sphinx-lint if found
  lock   - Update dependencies and regenerate uv.lock
  log    - Print Git history with colour using less in the terminal
- pc     - Run prek hooks on all files, unlike the run before each commit which only runs on modified files
+ pc     - Run prek hooks on all files
  rel    - Make a release interactively using the GitHub CLI
  run    - Run the Docker image
  setup  - Create a virtual environment, install the package in editable mode with development dependencies inside and install prek hooks

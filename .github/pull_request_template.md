@@ -31,7 +31,7 @@ descriptions unedited.-->
 - [] Documentation has been updated suitably.
 - [] The section corresponding to the next release in the changelog has been updated.
 - [] I have read through
-  [the chores page](https://asyncutils.readthedocs.io/en/latest/chores.html) and
+  [the devguide](https://asyncutils.readthedocs.io/en/latest/devguide.html) and
   followed through with the relevant processes.
 
 ## Summary

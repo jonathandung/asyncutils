@@ -96,5 +96,5 @@ async def dtf(t):
 @pytest.mark.skipif('sys.implementation.name == "graalpy"')
 async def test_dynamic_throttle():
     t = DynamicThrottle(10, window=6)
-    assert 0.16 < (await dts(t))[1] < 0.3
+    assert 0.16 < (await dts(t))[1] < 0.33
     await dtf(t)

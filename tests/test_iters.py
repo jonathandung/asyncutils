@@ -4,7 +4,7 @@ from enum import IntEnum
 from operator import is_
 from random import choice, shuffle
 from pytest import fail, fixture, raises
-from asyncutils import iterf
+from asyncutils import ItemsExhausted, iterf
 from asyncutils.base import *
 from asyncutils.iterclasses import *
 from asyncutils.iters import *
@@ -115,6 +115,26 @@ async def test_aunzip():
     assert await anext(z) == 3
     assert await gather(anext(y), anext(z)) == [2, 6]
     assert await gather(anext(z), anext(y), anext(y)) == [9, 5, 8]
-    assert await aisempty(y)
-    assert await aisempty(z)
-    assert await aisempty(x)
+    assert await aall(amap(aisempty, (x, y, z), await_=True))
+@mk
+async def test_asample():
+    assert await asample_l(arange(3), 0) == []
+    with raises(ItemsExhausted): await asample_l(empty_agen(), 20)
+    assert await asample_l(range(3), 3) == [0, 1, 2]
+    assert len(frozenset(await asample_l(arange(15), 4))) == 4
+    assert await asample_weighted(((4, 1.0), (2, 0.0), (6, 0.0)), 1) == [4]
+@mk
+async def test_side_effects():
+    c = 0
+    async def f(_): # ruff: ignore[unused-async]
+        nonlocal c
+        c += 1
+    assert await vecs_eq(range(10), aside_effect(f, arange(10)))
+@mk
+async def test_peek():
+    p = APeekable(arange(5))
+    assert await p.peek() == 0
+    assert await p.can_peek()
+    p.prepend(-1)
+    assert await p.peek() == -1
+    assert await vecs_eq(p, range(-1, 5))

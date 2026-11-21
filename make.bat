@@ -6,14 +6,14 @@ goto %1
 
 :__i
 where "%1" >nul 2>nul
-if %errorlevel% neq 0 (powershell -ExecutionPolicy ByPass -c "irm %2 | iex")
+if %errorlevel% neq 0 (powershell -c "irm %2 | iex")
 goto :eof
 
 :.prek-stamp
 if exist .prek-stamp goto :eof
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-call :__i prek https://github.com/j178/prek/releases/download/v0.5.10/prek-installer.ps1
+call :__i prek https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.ps1
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof
@@ -46,7 +46,7 @@ if %errorlevel% equ 0 echo Running betterleaks... && betterleaks git .
 goto :eof
 
 :badges
-pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
+pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 20 --local-badge-generate duration skipped status xfailed
 pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 goto :eof
 
@@ -70,7 +70,7 @@ git clean -dxf
 goto :eof
 
 :docs
-powershell -ExecutionPolicy ByPass -File ".\scripts\generate.ps1"
+powershell -File ".\scripts\generate.ps1"
 cd docs
 shift
 set "__O=%O%"

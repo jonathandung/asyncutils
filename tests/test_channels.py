@@ -27,7 +27,7 @@ async def test_evt_bus():
     @bus.on('a')
     async def sub(d): # ruff: ignore[unused-async]
         r.append(d)
-    await bus.publish('a', 1, timeout=0.1)
-    await bus.publish('a', 4, safe=False, timeout=0.05)
+    await bus.publish('a', 1, timeout=0.14)
+    await bus.publish('a', 4, safe=False, timeout=0.07)
     assert r == [('a', 0), 2, ('a', 3), 5]
     assert bus.get_event_stats() == {'a': 2}

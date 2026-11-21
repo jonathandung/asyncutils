@@ -27,7 +27,7 @@ from Python's async quirks, and a colourful command line interface.
 
   contributing
   ai-use
-  chores
+  devguide
   makefile-usage
   benchmark
 

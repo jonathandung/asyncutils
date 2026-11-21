@@ -6,7 +6,7 @@ from types import CoroutineType, GeneratorType
 from typing import Any, Literal, Never, overload
 from ._internal.prots import AsyncLockLike, DualContextManager, EventProtocol, ExceptionWrapper, FutProtocol, IncompleteFut, NullContextType, StrictDualContextFactory, SupportsIteration, TaskFactory, TransientBlockFromLoopRV
 from .exceptions import IgnoreErrors
-__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'lockf', 'make_task_factory', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
+__all__ = 'aawcmf2dcmf', 'aawcmf2dcmff', 'afalsify', 'anullcontext', 'anullify', 'atruthify', 'avalify', 'dcm', 'done_evt', 'done_fut', 'dualcontextmanager', 'get_future', 'ignore_cancellation', 'locked_lock', 'make_task_factory', 'new_eager_tasks', 'safe_cancel', 'semaphore', 'sync_await', 'transient_block', 'transient_block_from_loop', 'wrap_in_coro'
 ignore_cancellation: IgnoreErrors
 '''Context manager to ignore :exc:`~asyncio.CancelledError`.'''
 async def wrap_in_coro[T](aw: Awaitable[T], /) -> T: '''Return a coroutine resolving to the result of the awaitable ``aw``, such that it can be passed to :func:`asyncio.create_task`.'''
@@ -50,7 +50,6 @@ def semaphore(bounded: Literal[False]=..., workers: int=...) -> Semaphore: ...
 def semaphore(bounded: Literal[True], workers: Literal[1]) -> Lock: ...
 @overload
 def semaphore(bounded: Literal[True], workers: int=...) -> BoundedSemaphore: '''Return a (bounded) semaphore of value ``workers``, defaulting to :const:`~asyncutils.context.Context.SEMAPHORE_DEFAULT_VALUE`.'''
-def lockf[T, **P](f: Callable[P, Awaitable[T]], /, lf: type[AsyncLockLike[Any]]=...) -> Callable[P, CoroutineType[Any, Any, T]]: '''Apply a lock that implements the async lock interface, as constructed and returned by ``lf``, to a function ``f`` that returns an awaitable, also converting it to an async function.'''
 async def safe_cancel(fut: Future[Any], /) -> None:
     '''
     | Cancel a single future and wait for the cancellation to complete asynchronously.

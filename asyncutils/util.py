@@ -28,11 +28,6 @@ def sync_await(aw, loop=None, *, never_block=True, timeout=None):
 def semaphore(bounded=False, workers=None):
     if workers is None: workers = A.getcontext().SEMAPHORE_DEFAULT_VALUE
     return (I.Lock() if workers == 1 else I.BoundedSemaphore(workers)) if bounded else I.Semaphore(workers)
-def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # ruff: ignore[function-call-in-default-argument]
-    if (l := _lc.get(f)) is None: _lc[f] = l = lf()
-    async def r(*a, **k):
-        async with l: return await f(*a, **k)
-    return wraps(f)(r)
 async def safe_cancel(t, /):
     F = t.get_loop().create_future()
     def f(_):
@@ -111,5 +106,5 @@ def make_task_factory(tcls, eager=None):
     if eager is None: eager = A.getcontext().MAKE_TASK_FACTORY_DEFAULT_EAGER
     return lambda loop, coro, eager_start=eager, **k: tcls(coro, loop=loop, eager_start=eager_start, **k)
 dcm, ignore_cancellation = (aawcmf2dcmf := aawcmf2dcmff()).__defaults__[0], A.IgnoreErrors(I.CancelledError) # ty: ignore[not-subscriptable]
-patch_function_signatures((lockf, 'f, /, lf={}'), (dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
+patch_function_signatures((dualcontextmanager, 'f=None, /, *, use_existing_executor=None, create_executor=None, strict=None'))
 del DualContextManager

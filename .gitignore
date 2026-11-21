@@ -35,10 +35,10 @@ dist/
 docs/source/*
 !docs/source/audit-events.rst
 !docs/source/benchmark.rst
-!docs/source/chores.rst
 !docs/source/compat.rst
 !docs/source/conf.py
 !docs/source/config.rst
+!docs/source/devguide.rst
 !docs/source/examples.rst
 !docs/source/index.rst
 !docs/source/installation.rst

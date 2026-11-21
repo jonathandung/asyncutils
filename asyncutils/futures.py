@@ -1,6 +1,6 @@
 # ty: ignore[missing-attribute]
-from asyncio.futures import Future, _PyFuture  # ty: ignore[import-not-found]
-from asyncio.tasks import Task, _PyTask  # ty: ignore[import-not-found]
+from asyncio.futures import Future, _PyFuture  # ty: ignore[missing-module-member]
+from asyncio.tasks import Task, _PyTask  # ty: ignore[missing-module-member]
 from contextvars import copy_context
 from sys import audit
 from time import monotonic_ns

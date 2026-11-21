@@ -260,9 +260,9 @@ class BenchmarkResult(NamedTuple):
     total: float
     '''The total execution time.'''
     avg: float
-    '''``br.avg == br.total/br.iterations``.'''
+    '''The average execution time for non-warmup calls.'''
     iterations: int
-    '''The ``times`` constructor parameter.'''
+    '''The total number of calls, including warmup.'''
 @type_check_only
 class CountItem[T, R](NamedTuple):
     '''Yielded by async generators returned by :func:`~asyncutils.iters.counts`.'''

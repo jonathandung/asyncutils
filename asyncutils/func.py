@@ -27,8 +27,8 @@ async def areduce(f, it, initial=_NO_DEFAULT, *, await_=True):
     else:
         async for i in it: initial = f(initial, i)
     return initial
-def afcopy(f, /):
-    if type(f) is type(print): raise TypeError('asyncutils.func.afcopy: cannot copy built-in function without messing up method binding behaviour')
+def afcopy(f, /, t=type(print)):
+    if type(f) is t: raise TypeError('asyncutils.func.afcopy: cannot copy built-in function without causing confusing method binding behaviour')
     return wraps(f)(lambda *a, **k: A.wrap_in_coro(f(*a, **k)))
 def to_sync(f, /, loop=None, *, timeout=None):
     if (f := getattr(f, '__sync__', f)) is not f: return f
@@ -186,11 +186,17 @@ async def benchmark(f, /, times=None, warmup=None, _f=namedtuple('BenchmarkResul
     if sequential is None: sequential = c.BENCHMARK_DEFAULT_SEQUENTIAL
     if times is None: times = c.BENCHMARK_DEFAULT_TIMES
     if warmup is None: warmup = c.BENCHMARK_DEFAULT_WARMUP
+    audit('asyncutils.func.benchmark', H.fullname(f), T := times+warmup)
     if sequential:
         async for _ in A.arepeat(None, warmup): await f()
     else: await I.gather(*(f() for _ in repeat(None, warmup)))
-    audit('asyncutils.func.benchmark', H.fullname(f), T := times+warmup); return _f(min(t := [await g() async for _ in A.arepeat(None, times)] if sequential else await I.gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
-P.patch_function_signatures((measure, _ := 'f, /, *, timer={}'), (measure, _), (benchmark, 'f, /, times=None, warmup=None'))
+    return _f(min(t := [await g() async for _ in A.arepeat(None, times)] if sequential else await I.gather(*(g() for _ in repeat(None, times)))), max(t), S := sum(t), S/times, T)
+def lockf(f, /, lf=I.Lock, _lc=__import__('weakref').WeakKeyDictionary()): # ruff: ignore[function-call-in-default-argument]
+    if (l := _lc.get(f)) is None: _lc[f] = l = lf()
+    async def r(*a, **k):
+        async with l: return await f(*a, **k)
+    return wraps(f)(r)
+P.patch_function_signatures((lockf, 'f, /, lf={}'), (measure, _ := 'f, /, *, timer={}'), (measure2, _), (benchmark, 'f, /, times=None, warmup=None'))
 class RateLimited:
     __slots__ = '__calls', '__ct', '__func', '__lock', '__period', '__raise', '__timer'
     def __new__(cls, f, /, calls, period=None, *, raise_=False, timer=monotonic, lock_impl=None):

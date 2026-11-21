@@ -1,10 +1,13 @@
-Development Chores
-==================
+Development Guide
+=================
 
 .. highlight:: bash
 
-This file aims to detail guidelines for some monotonous tasks contributors to this
-library may need to complete in different recurring scenarios.
+This page details things of note for contributors to this library.
+
+.. seealso::
+
+  :doc:`makefile-usage`
 
 Preliminaries
 -------------
@@ -15,12 +18,15 @@ is the version control system used for this project. Run the following::
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
   make setup
-  # installs prek v0.5.10, the latest version of uv, ruff and ty (as tools), then
+  # installs prek v0.5.11, the latest version of uv, ruff and ty (as tools), then
   # creates a virtual environment at .venv using uv and installs asyncutils in editable
   # mode along with its development dependencies into the environment
   . .venv/bin/activate # or how you would normally activate the uv environment in your
   # preferred shell
 
+If you are developing on Windows, be sure to navigate to System > Advanced > Terminal
+> Powershell in settings to change the execution policy to allow local Powershell
+scripts to run without signing.
 
 Adding words to the incorrect spelling whitelist
 ------------------------------------------------
@@ -60,7 +66,7 @@ Adding a new submodule
 
 1. Search for 'rwlocks' (without the quotes) across all files in the repository,
    excluding asyncutils/rwlocks.py, asyncutils/_internal/types.pyi and
-   docs/source/chores.rst. This should reveal all the locations where submodule names
+   docs/source/devguide.rst. This should reveal all the locations where submodule names
    are referenced. Still check each one to see if it is a correct place.
 2. Insert the new submodule name as a string in those occurrences, maintaining
    alphabetical order where applicable.

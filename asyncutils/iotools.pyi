@@ -15,7 +15,6 @@ from _typeshed import FileDescriptorOrPath
 from ._internal.helpers import LoopMixinBase
 from ._internal.prots import ExcType, HashAlgorithm, MemoryMappedFile, OpenFiles, OpenRV, PipePairCM, StdCoupType
 from .config import Executor
-
 __all__ = 'AsyncReadWriteCouple', 'MemoryMappedIOManager', 'ainput', 'double_ended_binary_pipe', 'double_ended_text_pipe', 'stdcoup'
 def double_ended_text_pipe(*, pipe_impl: Callable[[], tuple[int, int]]=...) -> PipePairCM[str]:
     '''

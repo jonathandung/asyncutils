@@ -97,13 +97,17 @@ def batch2[T](it: SupportsIteration[T], n: int|None, strict: Literal[False]=...)
 def aevery[T](it: SupportsIteration[T], n: int, *, skip_first: bool=...) -> AsyncGeneratorType[T]: '''Yield every ``n``-th item from an (async) iterable, optionally skipping the first item.'''
 def aevery_other[T](it: SupportsIteration[T], *, skip_first: bool=...) -> AsyncGeneratorType[T]: '''Yield every other item from an (async) iterable, optionally skipping the first item.'''
 @overload
-def aside_effect[T](f: Callable[[list[T]], object], it: SupportsIteration[T], /, *, size: int, before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGeneratorType[T]: ...
+def aside_effect[T](f: Callable[[list[T]], Awaitable[object]], it: SupportsIteration[T], /, size: int, *, await_: Literal[True]=...) -> AsyncGeneratorType[T]: ...
 @overload
-def aside_effect[T](f: Callable[[T], object], it: SupportsIteration[T], /, *, size: None=..., before: Callable[[], object]|None=..., after: Callable[[], object]|None=...) -> AsyncGeneratorType[T]:
+def aside_effect[T](f: Callable[[T], Awaitable[object]], it: SupportsIteration[T], /, size: None=..., *, await_: Literal[True]=...) -> AsyncGeneratorType[T]: ...
+@overload
+def aside_effect[T](f: Callable[[list[T]], object], it: SupportsIteration[T], /, size: int, *, await_: Literal[False]) -> AsyncGeneratorType[T]: ...
+@overload
+def aside_effect[T](f: Callable[[T], object], it: SupportsIteration[T], /, size: None=..., *, await_: Literal[False]) -> AsyncGeneratorType[T]:
     '''
     | Apply a side effect function ``f`` to each item in an (async) iterable ``it`` and yield the items unchanged in an async generator.
     | If ``size`` is specified, the side effect function is applied to batches of that size instead of individual items, but the items are still yielded separately.
-    | The ``before`` and ``after`` functions are called before and after the iteration, respectively, but ``after`` is not called if ``before`` fails.
+    | The ``before`` and ``after`` parameters from :mod:`more_itertools` are not supported; it is straightforward to simply call the functions.
     '''
 def asliced[T: SupportsSlicing[Any]](seq: T, n: int, strict: bool=...) -> AsyncGeneratorType[T]:
     '''

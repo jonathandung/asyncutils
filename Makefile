@@ -14,7 +14,7 @@ define d
 	$(MAKE) -C docs $(1)
 endef
 .prek-stamp:
-	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.10/prek-installer.sh)
+	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.sh)
 	prek install
 	touch "$@"
 .uv-stamp:
@@ -27,7 +27,7 @@ audit:
 	if command -v zizmor >/dev/null 2>&1; then if [ -z "$${GH_TOKEN+x}" ] && command -v gh >/dev/null 2>&1; then echo "Running zizmor..." && zizmor . --gh-token "$$(gh auth token)"; else echo "Running zizmor..." && zizmor .; fi; fi
 	if command -v betterleaks >/dev/null 2>&1; then echo "Running betterleaks..." && betterleaks git .; fi
 badges:
-	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 10 --local-badge-generate duration skipped status xfailed
+	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 20 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 bug:
 	asyncutils bug --open "$(O)"

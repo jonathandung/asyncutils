@@ -17,8 +17,6 @@ considered a warmup run:
 Environment
 -----------
 
-Benchmarked on an old HP laptop.
-
 * ``python -VV`` gives
   ``Python 3.15.2 (main, Oct 26 2026, 14:23:21) [MSC v.1951 64 bit (AMD64)]``
 * ``python -m platform`` gives ``Windows-11-10.0.26300-SP0``

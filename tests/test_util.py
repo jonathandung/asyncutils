@@ -1,5 +1,6 @@
 import asyncio, pytest
 from asyncutils.util import *
+from contextlib import contextmanager
 from tests.conftest import mk
 @mk
 async def test_basic():
@@ -30,10 +31,10 @@ def test_semaphore():
     s = semaphore(workers=3)
     assert s._value == 3
     s.release()
-@dualcontextmanager
-def dc(a):
+def _(a):
     try: yield 67
     finally: a.append(41)
+ac, dc = contextmanager(_), dualcontextmanager(_)
 @mk
 async def test_dualcontextmanager():
     a = []
@@ -41,8 +42,16 @@ async def test_dualcontextmanager():
         assert not a
         assert x == 67
     assert a.pop() == 41
-    async with dc(a=a) as x:
+    async with dc(a) as x:
         assert not a
         assert x == 67
     b, = a
     assert b == 41
+@mk
+async def test_aawcmf2dcmff():
+    async def f(x): return ac(x) # ruff: ignore[unused-async]
+    l = []
+    async with aawcmf2dcmff()(f)(l) as r:
+        assert r == 67
+        assert not l
+    assert l.pop() == 41

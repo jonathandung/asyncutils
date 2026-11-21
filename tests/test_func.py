@@ -1,4 +1,5 @@
-from asyncio import create_task, sleep
+from asyncio import create_task, gather, sleep, timeout
+from functools import partial
 from itertools import count
 from pytest import raises
 from asyncutils import acount, amap, arange, vecs_eq
@@ -36,3 +37,20 @@ async def test_star():
     assert await f(arange(16, 25, 4), {'e': 6, 'd': 8}) == 18
     g = unstar(f)
     assert await g(5, d=7) == -16
+@mk
+async def test_lockf():
+    async with timeout(0.3):
+        s = partial(lockf(sleep), 0.02, 1)
+        ((a, x), b), t = await measure(lambda: gather(measure(s), benchmark(s, 2, 1)))
+        assert t > 0.06
+        assert a == 1
+        assert x > 0.02
+        assert b.avg > 0.03
+        assert b.iterations == 3
+        assert b.total > 0.06
+        assert b.min < b.max
+        assert await measure2(s) < 0.04
+@mk
+async def test_copy():
+    assert await afcopy(sleep)(0, 1) == 1
+    assert to_async(to_sync(sleep)).__name__ == 'sleep' # ty: ignore[missing-attribute]

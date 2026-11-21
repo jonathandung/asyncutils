@@ -218,7 +218,7 @@ class PotentQueueBase(D.Queue, metaclass=ABCMeta): # ruff: ignore[too-many-publi
         with ignore_qempty:
             while True: self.get_nowait()
     @A.dualcontextmanager
-    def transaction(self, _=A.IgnoreErrors(TimeoutError)):
+    def transaction(self):
         audit((s := f'{H.fullname(self)}.transaction/%s')%'start', i := id(self)); q = self.peek_all()
         try: yield self
         except:
