@@ -15,7 +15,8 @@ async def wrap_in_coro(a, /):
     try: return await a
     except A.CRITICAL: raise A.Critical
 def done_evt(*, evtcls=I.Event): (E := evtcls()).set(); return E
-def done_fut(res=None, *, futcls=I.Future): F = futcls(); F.set_exception(A.unwrap_exc(res)) if A.exception_occurred(res) else F.set_result(res); return F
+def exc_fut(exc, *, futcls=I.Future): (F := futcls()).set_exception(exc); return F
+def done_fut(res=None, *, futcls=I.Future): (F := futcls()).set_result(res); return F
 async def locked_lock(*, lcls=I.Lock): await (l := lcls()).acquire(); return l
 def get_future(aw, loop=None): return (H.get_loop_and_set() if loop is None else loop).create_task(wrap_in_coro(aw))
 def new_eager_tasks(*aws): (l := H.get_loop_and_set()).set_task_factory(I.eager_task_factory); yield from map(partial(get_future, loop=l), aws)

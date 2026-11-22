@@ -1,14 +1,16 @@
 import asyncio, pytest
-from asyncutils import done_fut, locked_lock, wrap_exc
+from asyncutils import done_fut, exc_fut, locked_lock
 from asyncutils.locksmiths import *
 from tests.conftest import mk
 @mk
 async def test_force():
-    smith, lock = LocksmithBase(), await locked_lock()
-    task = smith.wrap_task(done_fut(67))
+    smith, lock = Locksmith(), await locked_lock()
+    assert len(smith.currently_recognized) == 1
+    assert not smith.handlers
+    task = smith.wrap_task(done_fut(4))
     assert isinstance(task, asyncio.Task)
-    assert await task == 67
-    with pytest.raises(RuntimeError, match='test'): await smith.wrap_task(done_fut(wrap_exc(RuntimeError('test'))))
+    assert await task == 4
+    with pytest.raises(RuntimeError, match='test'): await smith.wrap_task(exc_fut(RuntimeError('test')))
     res = await smith.force(lock)
     assert res == ForceResult.CANNOT_FORCE
     assert not succeeded(res)

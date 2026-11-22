@@ -30,5 +30,5 @@ async def test_task_usage():
     assert fut2.done()
     assert fut2.result() is None
     with pytest.raises(ValueError, match='foo'): fut3.result()
-    fut2.add_noargs_callback(partial(fut4.set_result, 67))
-    assert await fut4 == 67
+    fut2.add_noargs_callback(partial(fut4.set_result, 3))
+    assert await fut4 == 3

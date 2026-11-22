@@ -7,7 +7,7 @@ This page details things of note for contributors to this library.
 
 .. seealso::
 
-  :doc:`makefile-usage`
+  :doc:`makefile`
 
 Preliminaries
 -------------
@@ -18,7 +18,7 @@ is the version control system used for this project. Run the following::
   git clone https://github.com/jonathandung/asyncutils.git
   cd asyncutils
   make setup
-  # installs prek v0.5.11, the latest version of uv, ruff and ty (as tools), then
+  # installs prek v0.5.12, as well as the latest versions of uv, ruff, and ty, then
   # creates a virtual environment at .venv using uv and installs asyncutils in editable
   # mode along with its development dependencies into the environment
   . .venv/bin/activate
@@ -52,7 +52,7 @@ Bumping the version
 Cleaning artifacts and caches
 -----------------------------
 
-Safer: ``make clean``; more aggressive: ``make clean-all``.
+Safer: ``make clean``; more aggressive: ``make dclean``.
 
 Implementing a new utility
 --------------------------

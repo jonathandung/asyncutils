@@ -30,7 +30,7 @@ goto :eof
 if exist .prek-stamp goto :eof
 set PREK_UV_SOURCE=none
 if not defined PREK_INSTALL_DIR set PREK_INSTALL_DIR=%USERPROFILE%\.local\bin
-call :__i prek https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.ps1
+call :__i prek https://github.com/j178/prek/releases/download/v0.5.12/prek-installer.ps1
 %PREK_INSTALL_DIR%\prek.exe install
 type nul >.prek-stamp
 goto :eof
@@ -47,8 +47,10 @@ goto :eof
 :all
 make audit
 make lint
+echo Building docs...
 make docs
-make test
+echo Running tests...
+make badges
 goto :eof
 
 :audit
@@ -75,7 +77,7 @@ pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --lo
 goto :eof
 
 :bug
-asyncutils bug --open "%O%"
+asyncutils bug -o "%O%"
 goto :eof
 
 :build
@@ -84,13 +86,15 @@ goto :eof
 
 :clean
 for %%i in (.pytest_cache .ruff_cache build dist docs\build docs\source\api py_asyncutils.egg-info) do if exist "%%i" rmdir /s /q "%%i"
-for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug-help.rst docs\source\help.rst docs\source\makefile-usage.rst docs\source\ai-use.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\governance.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
+for %%i in (.coverage .cspellcache .prek-stamp .uv-stamp docs\source\bug.rst docs\source\help.rst docs\source\makefile.rst docs\source\ai.md docs\source\changelog.md docs\source\conduct.md docs\source\contributing.md docs\source\governance.md docs\source\roadmap.md docs\source\security.md docs\source\support.md) do if exist "%%i" del /q "%%i"
 for /d /r . %%d in (__pycache__) do if exist "%%d" rmdir /s /q "%%d"
 del /s /f /q *.pyc *.pyo 2>nul
 goto :eof
 
 :dclean
 git clean -dxf
+where docker >nul 2>nul
+if %errorlevel% equ 0 docker rmi -f jonathandung/asyncutils:latest
 goto :eof
 
 :docs
@@ -121,6 +125,8 @@ where markdownlint-cli2 >nul 2>nul
 if %errorlevel% equ 0 echo Running markdownlint-cli2... && markdownlint-cli2
 where sphinx-lint >nul 2>nul
 if %errorlevel% equ 0 echo Running sphinx-lint... && sphinx-lint -i docs\source\api docs\source
+where checkmake >nul 2>nul
+if %errorlevel% equ 0 echo Running checkmake... && checkmake Makefile
 goto :eof
 
 :lock
@@ -131,11 +137,6 @@ goto :eof
 :log
 :: cspell:disable-next-line
 git log --graph --pretty=format:"%%Cred%%h%%Creset -%%C(yellow)%%d%%Creset %%s %%Cgreen(%%cr) %%C(bold blue)<%%an>%%Creset" --abbrev-commit
-goto :eof
-
-:pc
-call :.prek-stamp
-prek run -a
 goto :eof
 
 :rel

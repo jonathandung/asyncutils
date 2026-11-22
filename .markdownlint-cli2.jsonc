@@ -34,7 +34,8 @@
     }
   },
   "globs": [
-    "**/*.md"
+    "*.md",
+    ".github/**/*.md"
   ],
   "gitignore": true
 }

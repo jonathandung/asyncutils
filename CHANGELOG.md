@@ -4,7 +4,11 @@ Notable changes to this project are and will be documented in this file.
 
 ## [1.3]
 
-### [1.3.8] - 2026-11-21; latest
+### [1.3.9] - 2026-11-24; latest
+
+Something went wrong with the GitHub Pages deployment in the last release.
+
+### [1.3.8] - 2026-11-21
 
 More tests and bugfixes.
 

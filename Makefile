@@ -1,10 +1,9 @@
 .DEFAULT_GOAL := help
-.PHONY: audit badges bug build clean dclean docs help links lint lock log pc rel run setup test
+.PHONY: all audit badges bug build clean dclean docs help links lint lock log rel run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$$(O)"
-PREK_UV_SOURCE := none
 SHELL := /bin/bash
 define i
 	if command -v $(1) >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -sSf $(2) | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- $(2) | sh; else echo "curl or wget required to install $(1)" >&2; exit 1; fi
@@ -14,7 +13,7 @@ define d
 	$(MAKE) -C docs $(1)
 endef
 .prek-stamp:
-	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.sh)
+	PREK_UV_SOURCE=none $(call i,prek,https://github.com/j178/prek/releases/download/v0.5.12/prek-installer.sh)
 	prek install
 	touch "$@"
 .uv-stamp:
@@ -24,8 +23,8 @@ endef
 all:
 	$(MAKE) audit
 	$(MAKE) lint
-	$(MAKE) docs
-	$(MAKE) test
+	echo "Building docs..." && $(MAKE) docs
+	echo "Running tests..." && $(MAKE) badges
 audit:
 	echo "Running uv audit..."
 	uv audit
@@ -35,15 +34,16 @@ badges:
 	pytest -p asyncio-cooperative -p no:asyncio --no-cov --local-badge-output-dir badges --local-badge-duration-max 20 --local-badge-generate duration skipped status xfailed
 	pytest -p asyncio -p no:asyncio-cooperative --local-badge-output-dir badges --local-badge-generate last-run warnings
 bug:
-	asyncutils bug --open "$(O)"
+	asyncutils bug -o "$(O)"
 build:
 	docker build -t jonathandung/asyncutils:latest .
 clean:
-	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug-help.rst docs/source/help.rst docs/source/makefile-usage.rst docs/source/ai-use.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/governance.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
+	rm -rf .coverage .cspellcache .prek-stamp .pytest_cache .ruff_cache .uv-stamp build dist docs/build docs/source/api docs/source/bug.rst docs/source/help.rst docs/source/makefile.rst docs/source/ai.md docs/source/changelog.md docs/source/conduct.md docs/source/contributing.md docs/source/governance.md docs/source/roadmap.md docs/source/security.md docs/source/support.md py_asyncutils.egg-info
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
 	find . -type f -name '*.py[co]' -delete
 dclean:
 	git clean -dxf
+	if command -v docker >/dev/null 2>&1; then docker rmi -f jonathandung/asyncutils:latest; fi
 docs:
 	$(call d,html)
 help:
@@ -51,18 +51,16 @@ help:
 links:
 	$(call d,linkcheck)
 lint: .uv-stamp
-	echo "Running ruff..." && ruff check
-	echo "Running ty..." && ty check
+	echo "Running ruff..." && ruff check && echo "Running ty..." && ty check
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
 	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2; fi
 	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint -i docs/source/api docs/source; fi
+	if command -v checkmake >/dev/null 2>&1; then echo "Running checkmake..." && checkmake Makefile
 lock: .uv-stamp
 	uv lock -U
 log:
 # cspell:disable-next-line
 	git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-pc: .prek-stamp
-	prek run -a
 rel:
 	read -p "You are about to create a release. Are you sure? (y/N) " -n 1 -r; echo; if [[ $$REPLY =~ ^[Yy] ]]; then gh release create; else echo "Release aborted." >&2; exit 1; fi
 run:

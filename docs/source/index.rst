@@ -14,10 +14,10 @@ from Python's async quirks, and a colourful command line interface.
 
   installation
   config
-  audit-events
+  audit
   logging
   help
-  bug-help
+  bug
   examples
   submodules
   api/index
@@ -26,9 +26,10 @@ from Python's async quirks, and a colourful command line interface.
   :caption: Development
 
   contributing
-  ai-use
+  ai
   devguide
-  makefile-usage
+  issue
+  makefile
   benchmark
 
 .. toctree::

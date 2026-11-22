@@ -1,5 +1,5 @@
 # ruff: file-ignore[no-self-use]
-import asyncio as I, asyncutils as A, asyncutils._internal.log as L
+import asyncio as I, asyncutils as A, asyncutils._internal.log as L, abc
 from enum import IntEnum as E
 from sys import audit
 from asyncutils._internal.helpers import check_methods, fullname, get_loop_and_set
@@ -7,8 +7,30 @@ from asyncutils._internal.submodules import locksmiths_all as __all__
 from asyncutils.constants import _NO_DEFAULT
 ForceResult, RecognitionResult = E('ForceResult', 'CANNOT_FORCE NO_CURRENT_TASK OWNER_COMPLETED ALREADY_BEING_FORCED FAILURE RELEASED_WITH_FALSE SUCCESS RELEASED', module=__name__), E('RecognitionResult', 'FAILED_PRELIM FAILED_ACK ACK_RAISED ALREADY_RECOGNIZED SUCCESS', module=__name__)
 succeeded = frozenset((ForceResult.SUCCESS, ForceResult.RELEASED, RecognitionResult.ALREADY_RECOGNIZED, RecognitionResult.SUCCESS)).__contains__
-class LocksmithBase:
+class LocksmithBase(metaclass=abc.ABCMeta):
     __slots__ = '_lock', '_loop', '_recognized'; handlers = {} # ruff: ignore[mutable-class-default]
+    async def _force_except(self, l, i, /):
+        if self.find_owner(l) is (o := I.current_task(self._loop)) and (r := await self._force_is_owner(l, i, o)): return r
+        try:
+            if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
+        except A.CRITICAL: raise A.Critical
+        return ForceResult.SUCCESS
+    async def _force_is_owner(self, l, i, o, /):
+        if o is None: return await self.throw_fallback(l)
+        if (c := o.get_coro()) is None: return await self.eager_fallback(l)
+        E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
+        try: c.throw(E)
+        except A.CRITICAL as e: return self.task_raised_critical(l, e)
+        except A.LockForceRequest as e:
+            if (r := e.requester) is not self: await self.lock_busy(l, r, {})
+            elif e is E: await self.task_propagated_request(l)
+            else: return await self.already_forcing(l)
+        except BaseException as e: return self.task_raised_other(l, e) # ruff: ignore[blind-except]
+        else: await self.answer_received(l, await F)
+    async def _wait_on(self, t, l, /):
+        try: return await t
+        finally:
+            if l.locked() and I.iscoroutine(a := l.release()): await a
     @classmethod
     def register_handler(cls, h, /, *, shadow=True):
         def register(t, H=cls.handlers, h=h):
@@ -41,24 +63,6 @@ class LocksmithBase:
         else: return await self.release_returned_false(l) if r is False else ForceResult.RELEASED
         finally:
             if purge_waiters: await self.purge_waiters(l)
-    async def _force_except(self, l, i, /):
-        if self.find_owner(l) is (o := I.current_task(self._loop)) and (r := await self._force_is_owner(l, i, o)): return r
-        try:
-            if callable(f := self.handlers.get(type(l))) and I.iscoroutine(r := f(l)): await r
-        except A.CRITICAL: raise A.Critical
-        return ForceResult.SUCCESS
-    async def _force_is_owner(self, l, i, o, /):
-        if o is None: return await self.throw_fallback(l)
-        if (c := o.get_coro()) is None: return await self.eager_fallback(l)
-        E = A.LockForceRequest(self, (F := self._loop.create_future()).set_result, l, i) # ty: ignore[invalid-argument-type]
-        try: c.throw(E)
-        except A.CRITICAL as e: return self.task_raised_critical(l, e)
-        except A.LockForceRequest as e:
-            if (r := e.requester) is not self: await self.lock_busy(l, r, {})
-            elif e is E: await self.task_propagated_request(l)
-            else: return await self.already_forcing(l)
-        except BaseException as e: return self.task_raised_other(l, e) # ruff: ignore[blind-except]
-        else: await self.answer_received(l, await F)
     async def purge_waiters(self, l, /):
         if w := getattr(l, '_waiters', None): await A.safe_cancel_batch(w, disembowel=True)
     async def host(self, t, l, /, *, timeout1=_NO_DEFAULT, timeout2=_NO_DEFAULT, timeout3=_NO_DEFAULT):
@@ -68,21 +72,24 @@ class LocksmithBase:
             try: await I.wait_for(a, T[1] if timeout2 is _NO_DEFAULT else timeout2)
             except TimeoutError: raise TimeoutError(f'{fullname(self)}.host: failed to acquire lock {l!r} within {timeout2} seconds') from None
         self.patch_owner(t := self.wrap_task(t), l); return await I.wait_for(self._wait_on(t, l), T[2] if timeout3 is _NO_DEFAULT else timeout3)
-    async def get_info(self, l, /): return f'potential deadlock situation involving {fullname(l)} at {id(l):#x}'
-    async def lock_busy(self, l, r, _, /): L.info('lock busy: %r; requesters: %r, %r', l, self, r)
-    async def task_propagated_request(self, l, /): L.warning('%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(l), id(l))
-    async def answer_received(self, l, a, /): L.info('%r received answer %r from %r', self, a, l)
-    async def throw_fallback(self, _, /): return ForceResult.NO_CURRENT_TASK
-    async def eager_fallback(self, _, /): return ForceResult.OWNER_COMPLETED
-    async def release_returned_false(self, _, /): return ForceResult.RELEASED_WITH_FALSE
-    async def already_forcing(self, _, /): return ForceResult.ALREADY_BEING_FORCED
-    async def _wait_on(self, t, l, /):
-        try: return await t
-        finally:
-            if l.locked() and I.iscoroutine(a := l.release()): await a
-    def task_raised_other(self, l, e, /):
-        if not isinstance(e, RuntimeError): L.error('error encountered in attempt to force %s at %#x', fullname(l), id(l), exc_info=e)
-        return ForceResult.FAILURE
+    @abc.abstractmethod
+    async def get_info(self, l, /): ...
+    @abc.abstractmethod
+    async def lock_busy(self, l, r, c, /): ...
+    @abc.abstractmethod
+    async def task_propagated_request(self, l, /): ...
+    @abc.abstractmethod
+    async def answer_received(self, l, a, /): ...
+    @abc.abstractmethod
+    async def throw_fallback(self, l, /): ...
+    @abc.abstractmethod
+    async def eager_fallback(self, l, /): ...
+    @abc.abstractmethod
+    async def release_returned_false(self, l, /): ...
+    @abc.abstractmethod
+    async def already_forcing(self, l, /): ...
+    @abc.abstractmethod
+    def task_raised_other(self, l, e, /): ...
     def wrap_task(self, a, /): return self._loop.create_task(A.wrap_in_coro(a))
     def patch_owner(self, t, l, /):
         if hasattr(l, '_owner'): l._owner = t
@@ -90,4 +97,16 @@ class LocksmithBase:
     def preliminary_check_lock(self, l, /): return check_methods(l, 'acquire', 'release', 'locked')
     def task_raised_critical(self, _, e, /): raise A.Critical(e) from None
     def can_force_lock_held(self, l, /): return l in self._recognized and l.locked()
+class Locksmith(LocksmithBase):
+    async def get_info(self, l): return f'potential deadlock situation involving {fullname(l)} at {id(l):#x}'
+    async def lock_busy(self, l, r, _, /): L.info('lock busy: %r; requesters: %r, %r', l, self, r)
+    async def task_propagated_request(self, l, /): L.warning('%s.force: running task did not handle request to release %s at %#x properly', fullname(self), fullname(l), id(l))
+    async def answer_received(self, l, a, /): L.info('%r received answer %r from %r', self, a, l)
+    def task_raised_other(self, l, e, /):
+        if not isinstance(e, RuntimeError): L.error('error encountered in attempt to force %s at %#x', fullname(l), id(l), exc_info=e)
+        return ForceResult.FAILURE
+    async def throw_fallback(self, _, /): return ForceResult.NO_CURRENT_TASK
+    async def eager_fallback(self, _, /): return ForceResult.OWNER_COMPLETED
+    async def already_forcing(self, _, /): return ForceResult.ALREADY_BEING_FORCED
+    async def release_returned_false(self, _, /): return ForceResult.RELEASED_WITH_FALSE
 del E

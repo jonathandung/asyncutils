@@ -2,12 +2,11 @@
 
 This file provides an overview of the direction towards which this project is heading.
 
-Current version: 1.3.8
+Current version: 1.3.9
 
 ## [1.x]
 
-- Enhance the test suite
-- Incorporate user feature requests
+- Increase coverage to 70%
 
 ## [2.x]
 
@@ -15,14 +14,7 @@ Current version: 1.3.8
 
 ## [3.0] - 2027-10 or before
 
-- Comprehensive bugfixes
 - Increase coverage to 90%
-- Remove or supersede faulty patterns
-
-## [3.x]
-
-- Major feature additions, with more focus on the low level
-- Publish docker images if there is demand
 
 ## [4.3] - 2028-09
 

@@ -1,0 +1,16 @@
+{
+  "terminal": {
+    "env": {
+      "AUTESTMAXFAIL": "3"
+    }
+  },
+  "languages": {
+    "Python": {
+      "language_servers": [
+        "ruff",
+        "ty",
+        "!basedpyright"
+      ]
+    }
+  }
+}

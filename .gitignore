@@ -33,7 +33,7 @@ build/
 coverage.xml
 dist/
 docs/source/*
-!docs/source/audit-events.rst
+!docs/source/audit.rst
 !docs/source/benchmark.rst
 !docs/source/compat.rst
 !docs/source/conf.py
@@ -42,6 +42,7 @@ docs/source/*
 !docs/source/examples.rst
 !docs/source/index.rst
 !docs/source/installation.rst
+!docs/source/issue.rst
 !docs/source/logging.rst
 !docs/source/submodules.rst
 eggs/

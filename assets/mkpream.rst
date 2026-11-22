@@ -17,10 +17,11 @@ You are strongly advised to develop in ``cmd.exe`` on Windows. There shouldn't b
 need to run ``scripts\generate.ps1`` manually.
 
 Certain executables, some of which are Python development tools, will be available on
-``PATH`` once ``make setup`` has been run and the environment activated. Also, `prek`_,
-`uv`_, `ruff`_, and `ty`_ will be automatically installed on your system if not
-present. For this to work, internet access is required, as well as `cURL`_ or
-`GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix.
+``PATH`` once ``make setup`` has been run and the environment activated. Also,
+`prek <https://prek.j178.dev>`__, `uv`_, `ruff`_, and `ty`_ will be automatically
+installed on your system if not present. Internet access is required for this, as well
+as `cURL`_ or `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on
+\*nix.
 
 Target-specific dependencies
 ----------------------------
@@ -28,6 +29,7 @@ Target-specific dependencies
 Requires `docker <https://docs.docker.com/engine>`__:
 
 * build
+* dclean
 * run
 
 Requires `uv`_:
@@ -46,10 +48,6 @@ Requires `ty`_:
 * all
 * lint
 
-Requires `prek`_:
-
-* pc
-
 Requires `gh`_:
 
 * rel
@@ -63,13 +61,14 @@ Requires `cURL`_ 7.66.0+ on \*nix (for parallel downloads):
 Optional target-specific dependencies
 -------------------------------------
 
-Some targets invoke executables only if they are found on the system. The ``all``
-target directly calls both of the below:
+Some targets invoke executables only if they are found on the system. Also, the ``all``
+target directly calls both targets below:
 
 * audit: `zizmor <https://zizmor.sh>`__ and  `betterleaks <https://betterleaks.com>`__
 * lint: `CSpell <https://cspell.org>`__,
-  `markdownlint-cli2 <https://github.com/DavidAnson/markdownlint-cli2>`__, and
-  `sphinx-lint <https://github.com/sphinx-contrib/sphinx-lint>`__ if found
+  `markdownlint-cli2 <https://github.com/DavidAnson/markdownlint-cli2>`__,
+  `sphinx-lint <https://github.com/sphinx-contrib/sphinx-lint>`__, and
+  `checkmake <https://github.com/checkmake/checkmake>`__
 
 All targets
 -----------

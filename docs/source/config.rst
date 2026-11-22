@@ -53,17 +53,17 @@ console, and by extension, the command line:
 
 .. envvar:: BROWSER
 
-  Queried implicitly by ``asyncutils bug --open`` to choose the browser to open the bug
-  report in if the browser type is not appended, as well as
-  :func:`~asyncutils.tools.open_help` for the same purpose.
+  Read by ``asyncutils bug -o`` to choose the browser to open the bug report in if the
+  browser type is not appended, as well as :func:`~asyncutils.tools.open_help` for the
+  same purpose.
 
 .. seealso::
 
   :ref:`Colour control <python:using-on-controlling-color>`
     detailing how Python itself handles the colour-related environment variables above
 
-Arguments to Python that are considered
----------------------------------------
+Python interpreter arguments
+----------------------------
 
 Some arguments consumed by the Python interpreter are also taken into account:
 
@@ -83,11 +83,11 @@ Some arguments consumed by the Python interpreter are also taken into account:
 Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the
 ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and ``license`` commands will
 still work as normal in the console since they are implemented natively, with the help
-of ``_sitebuiltins``. However, accessing them in any fashion other than a bare
+of :mod:`!_sitebuiltins`. However, accessing them in any fashion other than a bare
 statement will cause :exc:`NameError` to be thrown.
 
-Basic Customization
--------------------
+Customization
+-------------
 
 An extensible, two-part configuration system is in place.
 
@@ -126,30 +126,26 @@ directory.
 ====== ============== =========== ================== ============
 Format File extension Module name PyPI package name  Schema
 ====== ============== =========== ================== ============
-JSON   .json          json
+JSON   .json          json                           format.json5
+JSONC  .jsonc         jsonc       json-with-comments format.json5
+JSON5  .json5         pyjson5     pyjson5            format.json5
 TOML   .toml          tomllib                        format.toml
 YAML   .yaml, .yml    yaml        PyYAML             format.yaml
-JSONC  .jsonc         jsonc       json-with-comments
-JSON5  .json5         pyjson5     pyjson5            format.json5
 Hjson  .hjson         hjson       hjson              format.hjson
 ====== ============== =========== ================== ============
 
 .. note:: To ensure all supported formats can be parsed, install the ``pconf`` extra.
 
-INI is not supported because it is outdated.
+INI and XML are not supported since they are not typed.
 
-Besides being much too verbose, XML lacks strong typing without schemas, meaning all
-values are interpreted as strings.
+One may associate file extensions not shown above with a library providing a ``loads``
+function taking a string and returning a dictionary by modifying the map from file
+extensions to names of corresponding modules in ``_internal/unparsed.py`` called ``Z``.
 
-It is possible to associate file extensions not shown above with other libraries
-providing a ``loads`` function taking a string and returning a dictionary, by modifying
-the map from file extensions to names of corresponding modules in
-``_internal/unparsed.py`` called ``Z``.
+Contexts
+--------
 
-Contextual "constants"
-----------------------
-
-You can see that the json also includes many submodule names as keys; this is the
+You can see that the JSON also includes many submodule names as keys; this is the
 second, contextual part of the configuration. It is thread-safe, async-safe and
 mutable, thanks to :mod:`contextvars`. The sheer magnitude of options makes them
 infeasible to include as command line arguments.
