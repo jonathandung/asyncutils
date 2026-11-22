@@ -63,13 +63,14 @@ Requires `cURL`_ 7.66.0+ on \*nix (for parallel downloads):
 Optional target-specific dependencies
 -------------------------------------
 
-Some targets invoke executables only if they are found on the system. The ``all``
-target directly calls both of the below:
+Some targets invoke executables only if they are found on the system. Also, the ``all``
+target directly calls both targets below:
 
 * audit: `zizmor <https://zizmor.sh>`__ and  `betterleaks <https://betterleaks.com>`__
 * lint: `CSpell <https://cspell.org>`__,
-  `markdownlint-cli2 <https://github.com/DavidAnson/markdownlint-cli2>`__, and
-  `sphinx-lint <https://github.com/sphinx-contrib/sphinx-lint>`__ if found
+  `markdownlint-cli2 <https://github.com/DavidAnson/markdownlint-cli2>`__,
+  `sphinx-lint <https://github.com/sphinx-contrib/sphinx-lint>`__, and
+  `checkmake <https://github.com/checkmake/checkmake>`__
 
 All targets
 -----------

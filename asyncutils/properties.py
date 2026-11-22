@@ -19,8 +19,8 @@ class D(W):
     __set__, __delete__ = W.__setitem__, W.__delitem__
 @subscriptable
 class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.ABCMeta,), {'__prepare__': classmethod(lambda c, n, b, _=D, /, **k: (p := c.__base__.__prepare__(n, b, **k)).update(__doc__=_(None), __name__=_(n)) or p), '__new__': lambda m, n, b, d, _=D, /, **k: d.__setitem__('__module__', _('asyncutils.properties')) or m.__base__.__new__(m, n, b, d, **k)})):
-    __slots__ = '__ca', '__cls', '__deleted', '__hide', '__lock', '__mutable', '__q', '__strict', '__weakref__', 'fdel', 'fget', 'fset'; _repr_accessor = repr
-    def _init(self, f, /, fset=None, fdel=d, *, _='<unknown>', doc=None, strict=True, mutable=False, assert_modifiers_return_none=True, hide=False): self.fget, self.fset, self.fdel, self.__doc__, self.__module__, self.__deleted, self.__strict, self.__hide, self.__ca, self.__q, self.__lock, self.__mutable, self.__cls = f, fset, fdel, getattr(f, '__doc__', None) if doc is None else doc, getattr(f, '__module__', _), set(), strict, hide, assert_modifiers_return_none, deque(), type(self)._lock_factory(), mutable, None
+    __slots__ = '__ca', '__cl', '__de', '__hi', '__lo', '__mu', '__q', '__st', '__weakref__', 'fdel', 'fget', 'fset'; _repr_accessor = repr
+    def _init(self, f, /, fset=None, fdel=d, *, _='<unknown>', doc=None, strict=True, mutable=False, assert_modifiers_return_none=True, hide=False): self.fget, self.fset, self.fdel, self.__doc__, self.__module__, self.__de, self.__st, self.__hi, self.__ca, self.__q, self.__lo, self.__mu, self.__cl = f, fset, fdel, getattr(f, '__doc__', None) if doc is None else doc, getattr(f, '__module__', _), set(), strict, hide, assert_modifiers_return_none, deque(), type(self)._lock_factory(), mutable, None
     @a.abstractmethod
     def wrap_aw(self, _, /): raise NotImplementedError
     def __new__(cls, fget=None, *a, **k):
@@ -28,38 +28,38 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.AB
         (_ := object.__new__(cls))._init(fget, *a, **k); return _
     def __default_deleter(self, o, f, /):
         if f&Deleters.NO_DELETER: self.__raise('asyncutils.properties.AsyncPropertyBase: undeletable attribute', o, not f&Deleters.SILENT)
-        if o in (d := self.__deleted): return self.__raise('asyncutils.properties.AsyncPropertyBase: attribute was already deleted', o, not f&Deleters.CAN_DELETE_AGAIN)
+        if o in (d := self.__de): return self.__raise('asyncutils.properties.AsyncPropertyBase: attribute was already deleted', o, not f&Deleters.CAN_DELETE_AGAIN)
         d.add(o)
     async def __get__(self, o, _=None, /):
-        if self.__check_instance(o, not (h := self.__hide)): ...
-        elif self.fget is None: self.__raise('asyncutils.properties.AsyncPropertyBase: unreadable attribute', o, self.__strict or h)
-        elif o in self.__deleted:
+        if self.__check_instance(o, not (h := self.__hi)): ...
+        elif self.fget is None: self.__raise('asyncutils.properties.AsyncPropertyBase: unreadable attribute', o, self.__st or h)
+        elif o in self.__de:
             if type(d := self.fdel) is Deleters: self.__raise('asyncutils.properties.AsyncPropertyBase: attribute was deleted', o, not d&Deleters.NO_DELETER)
             else: raise A.StateCorrupted('async property internal', 'default deleter was called on property with proper deleter')
         else: return await self.__get(o)
         return self
     def __set__(self, o, v, /):
         if self.__check_instance(o): return
-        if (f := self.fset) is None: self.__raise('asyncutils.properties.AsyncPropertyBase: immutable attribute', o, self.__strict); return
-        if o in (s := self.__deleted): self.__raise('asyncutils.properties.AsyncPropertyBase: cannot set deleted attribute', o, type(d := self.fdel) is Deleters and d&Deleters.CANNOT_SET_AFTER_DELETE); s.discard(o)
+        if (f := self.fset) is None: self.__raise('asyncutils.properties.AsyncPropertyBase: immutable attribute', o, self.__st); return
+        if o in (s := self.__de): self.__raise('asyncutils.properties.AsyncPropertyBase: cannot set deleted attribute', o, type(d := self.fdel) is Deleters and d&Deleters.CANNOT_SET_AFTER_DELETE); s.discard(o)
         self.__helper(f, 'set', o, v)
     def __delete__(self, o, /):
         if not self.__check_instance(o): self.__default_deleter(o, f) if isinstance(f := self.fdel, Deleters) else self.__helper(f, 'delete', o)
-    def __set_name__(self, /, *_): self.__cls, self.__name__ = _
-    def __repr__(self): return f'asyncutils.properties.{type(self).__name__}({', '.join(map(type(self)._repr_accessor, (self.fget, self.fset, self.fdel)))}, doc={self.__doc__!r}, strict={self.__strict}, mutable={self.__mutable}, assert_modifiers_return_none={self.__ca}, hide={self.__hide})'
+    def __set_name__(self, /, *_): self.__cl, self.__name__ = _
+    def __repr__(self): return f'asyncutils.properties.{type(self).__name__}({', '.join(map(type(self)._repr_accessor, (self.fget, self.fset, self.fdel)))}, doc={self.__doc__!r}, strict={self.__st}, mutable={self.__mu}, assert_modifiers_return_none={self.__ca}, hide={self.__hi})'
     def __reduce__(self):
-        if self.__hide: raise TypeError('asyncutils.properties.AsyncPropertyBase: cannot pickle hidden property')
+        if self.__hi: raise TypeError('asyncutils.properties.AsyncPropertyBase: cannot pickle hidden property')
         return f'{self.__check_unbound().__name__}.{self.__name__}'
     def __check_unbound(self):
-        if (c := self.__cls) is None: raise TypeError(f'{self!r} is not bound to a class')
+        if (c := self.__cl) is None: raise TypeError(f'{self!r} is not bound to a class')
         return c
     def __check_instance(self, o, b=None, /):
         c = self.__check_unbound()
-        if o is None: self.__raise('asyncutils.properties.AsyncPropertyBase.__get__ called incorrectly', c, not (self.__mutable if b is None else b)); return True
+        if o is None: self.__raise('asyncutils.properties.AsyncPropertyBase.__get__ called incorrectly', c, not (self.__mu if b is None else b)); return True
         self.__raise('asyncutils.properties.AsyncPropertyBase.__get__ called incorrectly', o, not isinstance(o, c)); return False
     async def __get(self, o, /):
         p, b, r = (q := self.__q).popleft, self.__ca, self.__raise
-        async with self.__lock:
+        async with self.__lo:
             while q: r('asyncutils.properties.AsyncPropertyBase: setter or deleter returned non-None value', o, await p() is not None and b)
         return await self.fget(o)
     def __raise(self, m, o, c=True, /):
@@ -71,9 +71,9 @@ class AsyncPropertyBase(LoopMixinBase, metaclass=type('AsyncPropertyMeta', (a.AB
         except TypeError:
             if self.__ca: raise
         except BaseException as e: self.__raise(f'failed to {c} attribute due to {fullname(e)}: {e}', a[0]) # ruff: ignore[blind-except]
-    def getter(self, f, /): return type(self)(f, self.fset, self.fdel, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
-    def setter(self, f, /): return type(self)(self.fget, f, self.fdel, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
-    def deleter(self, f, /): return type(self)(self.fget, self.fset, f, doc=self.__doc__, strict=self.__strict, mutable=self.__mutable, assert_modifiers_return_none=self.__ca, hide=self.__hide)
+    def getter(self, f, /): return type(self)(f, self.fset, self.fdel, doc=self.__doc__, strict=self.__st, mutable=self.__mu, assert_modifiers_return_none=self.__ca, hide=self.__hi)
+    def setter(self, f, /): return type(self)(self.fget, f, self.fdel, doc=self.__doc__, strict=self.__st, mutable=self.__mu, assert_modifiers_return_none=self.__ca, hide=self.__hi)
+    def deleter(self, f, /): return type(self)(self.fget, self.fset, f, doc=self.__doc__, strict=self.__st, mutable=self.__mu, assert_modifiers_return_none=self.__ca, hide=self.__hi)
     def __getattr__(self, n, /):
         if (f := self.fget) is None: raise AttributeError('asyncutils.properties.AsyncPropertyBase: property has no getter to find attribute on', name=n, obj=self)
         return getattr(f, n)

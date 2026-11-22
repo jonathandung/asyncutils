@@ -167,6 +167,7 @@ backpressure
 betterleaks
 blake
 bunx
+checkmake
 cmpeq
 codz
 coeff

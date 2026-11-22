@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: audit badges bug build clean dclean docs help links lint lock log pc rel run setup test
+.PHONY: all audit badges bug build clean dclean docs help links lint lock log pc rel run setup test
 .SHELLFLAGS := -eo pipefail -c
 .SILENT:
 AUTESTMAXFAIL ?= 3
@@ -56,6 +56,7 @@ lint: .uv-stamp
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
 	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2; fi
 	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint -i docs/source/api docs/source; fi
+	if command -v checkmake >/dev/null 2>&1; then echo "Running checkmake..." && checkmake Makefile
 lock: .uv-stamp
 	uv lock -U
 log:

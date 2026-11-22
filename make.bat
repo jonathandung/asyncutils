@@ -121,6 +121,8 @@ where markdownlint-cli2 >nul 2>nul
 if %errorlevel% equ 0 echo Running markdownlint-cli2... && markdownlint-cli2
 where sphinx-lint >nul 2>nul
 if %errorlevel% equ 0 echo Running sphinx-lint... && sphinx-lint -i docs\source\api docs\source
+where checkmake >nul 2>nul
+if %errorlevel% equ 0 echo Running checkmake... && checkmake Makefile
 goto :eof
 
 :lock
