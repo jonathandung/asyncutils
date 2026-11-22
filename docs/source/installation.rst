@@ -34,8 +34,7 @@ supported:
 
 For the normal installation pathway, many more package managers are supported.
 
-You are advised to ensure that your package manager is updated to the latest version as
-follows::
+You are advised to ensure that your package manager is updated to the as follows::
 
   # uv (preferred for modernity, speed and compatibility with this project)
   uv self update # standalone installation of uv
@@ -94,15 +93,15 @@ Below are the :pep:`508` optional dependencies this package provides, also known
 
   - `loky.ProcessPoolExecutor <https://loky.readthedocs.io/en/stable/API.html#loky.ProcessPoolExecutor>`__
   - `distributed.Client <https://distributed.dask.org/en/stable/api.html#distributed.Client>`__
-  - `ipyparallel.ViewExecutor <https://ipyparallel.readthedocs.io/en/latest/api/ipyparallel.html#ipyparallel.ViewExecutor>`__
-  - `executorlib.executor.flux.FluxClusterExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.flux.FluxClusterExecutor.html#executorlib.executor.flux.FluxClusterExecutor>`__
-  - `executorlib.executor.flux.FluxJobExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.flux.FluxJobExecutor.html#executorlib.executor.flux.FluxJobExecutor>`__
-  - `executorlib.executor.slurm.SlurmClusterExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.slurm.SlurmClusterExecutor.html#executorlib.executor.slurm.SlurmClusterExecutor>`__
-  - `executorlib.executor.slurm.SlurmJobExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.slurm.SlurmJobExecutor.html#executorlib-executor-slurm-slurmjobexecutor>`__
-  - `executorlib.executor.single.SingleNodeExecutor <https://executorlib.readthedocs.io/en/latest/_autosummary/executorlib.executor.single.SingleNodeExecutor.html#executorlib.executor.single.SingleNodeExecutor>`__
-  - `pebble.ProcessPool <https://pebble.readthedocs.io/en/latest/#pebble.ProcessPool>`__
-  - `pebble.Thread <https://pebble.readthedocs.io/en/latest/#pebble.ThreadPool>`__
-  - `deadpool.Deadpool <https://github.com/cjrh/deadpool#deadpool>`__
+  - `ipyparallel.ViewExecutor <https://ipyparallel.readthedocs.io/en/stable/api/ipyparallel.html#ipyparallel.ViewExecutor>`__
+  - `executorlib.executor.flux.FluxClusterExecutor <https://executorlib.readthedocs.io/en/stable/_autosummary/executorlib.executor.flux.FluxClusterExecutor.html#executorlib.executor.flux.FluxClusterExecutor>`__
+  - `executorlib.executor.flux.FluxJobExecutor <https://executorlib.readthedocs.io/en/stable/_autosummary/executorlib.executor.flux.FluxJobExecutor.html#executorlib.executor.flux.FluxJobExecutor>`__
+  - `executorlib.executor.slurm.SlurmClusterExecutor <https://executorlib.readthedocs.io/en/stable/_autosummary/executorlib.executor.slurm.SlurmClusterExecutor.html#executorlib.executor.slurm.SlurmClusterExecutor>`__
+  - `executorlib.executor.slurm.SlurmJobExecutor <https://executorlib.readthedocs.io/en/stable/_autosummary/executorlib.executor.slurm.SlurmJobExecutor.html#executorlib-executor-slurm-slurmjobexecutor>`__
+  - `executorlib.executor.single.SingleNodeExecutor <https://executorlib.readthedocs.io/en/stable/_autosummary/executorlib.executor.single.SingleNodeExecutor.html#executorlib.executor.single.SingleNodeExecutor>`__
+  - `pebble.ProcessPool <https://pebble.readthedocs.io/en/stable/#pebble.ProcessPool>`__
+  - `pebble.Thread <https://pebble.readthedocs.io/en/stable/#pebble.ThreadPool>`__
+  - `deadpool.Deadpool <https://github.com/cjrh/deadpool>`__
 
 * json5: The Cython-backed JSON5 parser.
 * pconf: A collection of libraries used to parse config files in various formats.

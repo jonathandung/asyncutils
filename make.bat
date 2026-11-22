@@ -4,6 +4,23 @@ if "%AUTESTMAXFAIL%" == "" set AUTESTMAXFAIL=3
 if "%1"=="" goto help
 goto %1
 
+:__D
+powershell -File ".\scripts\generate.ps1"
+shift
+set "__O=%O%"
+set "REST_ARGS="
+:__l
+if "%~1"=="" goto __d
+set "REST_ARGS=!REST_ARGS! %1"
+shift
+goto __l
+:__d
+if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
+set "O=%REST_ARGS% %__O%"
+set "__O="
+set "REST_ARGS="
+exit /b
+
 :__i
 where "%1" >nul 2>nul
 if %errorlevel% neq 0 (powershell -c "irm %2 | iex")
@@ -25,6 +42,13 @@ call :__i uv https://releases.astral.sh/installers/uv/latest/uv-installer.ps1
 %UV_INSTALL_DIR%\uv.exe tool install ruff
 %UV_INSTALL_DIR%\uv.exe tool install ty
 type nul >.uv-stamp
+goto :eof
+
+:all
+make audit
+make lint
+make docs
+make test
 goto :eof
 
 :audit
@@ -70,23 +94,9 @@ git clean -dxf
 goto :eof
 
 :docs
-powershell -File ".\scripts\generate.ps1"
+call :__D
 cd docs
-shift
-set "__O=%O%"
-set "REST_ARGS="
-if not defined __B set "__B=html"
-:__l
-if "%~1"=="" goto __d
-set "REST_ARGS=!REST_ARGS! %1"
-shift
-goto __l
-:__d
-if defined REST_ARGS set "REST_ARGS=%REST_ARGS:~1%"
-set "O=%REST_ARGS% %__O%"
-set "__O="
-set "REST_ARGS="
-make "%__B%"
+make html
 goto :eof
 
 :help
@@ -94,8 +104,9 @@ type assets\mkhelp.txt
 goto :eof
 
 :links
-set __B=linkcheck
-call :docs
+call :__D
+cd docs
+make linkcheck
 goto :eof
 
 :lint

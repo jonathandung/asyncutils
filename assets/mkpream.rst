@@ -16,10 +16,10 @@ requires
 You are strongly advised to develop in ``cmd.exe`` on Windows. There shouldn't be a
 need to run ``scripts\generate.ps1`` manually.
 
-Certain executables, some of which are entry points to Python dependencies, will be on
-``PATH`` once ``make setup`` has been run and the environment activated. In this step,
-`prek`_, `uv`_, `ruff`_, and `ty`_ will be automatically installed on your system if
-not present. For this to work, internet access is required, as well as `cURL`_ or
+Certain executables, some of which are Python development tools, will be available on
+``PATH`` once ``make setup`` has been run and the environment activated. Also, `prek`_,
+`uv`_, `ruff`_, and `ty`_ will be automatically installed on your system if not
+present. For this to work, internet access is required, as well as `cURL`_ or
 `GNU wget <https://man7.org/linux/man-pages/man1/wget.1.html>`__ on \*nix.
 
 Target-specific dependencies
@@ -32,15 +32,18 @@ Requires `docker <https://docs.docker.com/engine>`__:
 
 Requires `uv`_:
 
+* all
 * lint
 * lock
 
 Requires `ruff`_:
 
+* all
 * lint
 
 Requires `ty`_:
 
+* all
 * lint
 
 Requires `prek`_:
@@ -53,13 +56,15 @@ Requires `gh`_:
 
 Requires `cURL`_ 7.66.0+ on \*nix (for parallel downloads):
 
+* all
 * docs
 * links
 
 Optional target-specific dependencies
 -------------------------------------
 
-Some targets invoke executables only if they are found on the system.
+Some targets invoke executables only if they are found on the system. The ``all``
+target directly calls both of the below:
 
 * audit: `zizmor <https://zizmor.sh>`__ and  `betterleaks <https://betterleaks.com>`__
 * lint: `CSpell <https://cspell.org>`__,

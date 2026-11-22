@@ -21,6 +21,11 @@ endef
 	$(call i,uv,https://releases.astral.sh/installers/uv/latest/uv-installer.sh)
 	uv tool install ruff && uv tool install ty 2>/dev/null
 	touch "$@"
+all:
+	$(MAKE) audit
+	$(MAKE) lint
+	$(MAKE) docs
+	$(MAKE) test
 audit:
 	echo "Running uv audit..."
 	uv audit

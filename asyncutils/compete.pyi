@@ -42,7 +42,7 @@ def convert_to_coro_iter(cfs: SupportsIteration[Any], *, loop: AbstractEventLoop
 async def enhanced_staggered_race(cfs: SupportsIteration[Any], delay: float|None=..., *, loop: AbstractEventLoop|None=...) -> tuple[Any, int|None, list[Exception|None]]: '''``asyncio.staggered.staggered_race``, but taking a larger variety of objects as the first argument using :func:`convert_to_coro_iter`.'''
 async def enhanced_gather(it: SupportsIteration[Any], return_exceptions: bool=False) -> list[Any]:
     '''
-    Version of :func:`asyncio.gather` that takes a larger variety of objects as the first argument, using :func:`convert_to_coro_iter` under the hood.
+    Enhanced version of :func:`asyncio.gather` that takes a larger variety of objects as the first argument and converts them using :func:`convert_to_coro_iter` as appropriate.
 
     .. seealso::
 

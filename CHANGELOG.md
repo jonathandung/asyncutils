@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project are and will be documented in this file.
+Notable changes to this project are and will be documented in this file.
 
 ## [1.3]
 

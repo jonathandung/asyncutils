@@ -78,7 +78,7 @@ Some arguments consumed by the Python interpreter are also taken into account:
     ``-E`` - Omit the execution of :envvar:`PYTHONSTARTUP` in the console namespace.
 
 * ``-i`` - Always make the console interactive even if standard input is not a TTY.
-* ``-q`` - To the REPL, ``python -q`` is equivalent to ``asyncutils -q``.
+* ``-q`` - ``python -q`` implies ``asyncutils -q``.
 
 Even if ``python -S`` is used, which indeed does not load :mod:`site` as normal, the
 ``exit``, ``quit``, ``help``, ``copyright``, ``credits`` and ``license`` commands will
