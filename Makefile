@@ -51,8 +51,7 @@ help:
 links:
 	$(call d,linkcheck)
 lint: .uv-stamp
-	echo "Running ruff..." && ruff check
-	echo "Running ty..." && ty check
+	echo "Running ruff..." && ruff check && echo "Running ty..." && ty check
 	if command -v cspell >/dev/null 2>&1; then echo "Running cspell..." && cspell .; fi
 	if command -v markdownlint-cli2 >/dev/null 2>&1; then echo "Running markdownlint..." && markdownlint-cli2; fi
 	if command -v sphinx-lint >/dev/null 2>&1; then echo "Running sphinx-lint..." && sphinx-lint -i docs/source/api docs/source; fi
