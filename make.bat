@@ -47,8 +47,10 @@ goto :eof
 :all
 make audit
 make lint
+echo Building docs...
 make docs
-make test
+echo Running tests...
+make badges
 goto :eof
 
 :audit
@@ -91,6 +93,8 @@ goto :eof
 
 :dclean
 git clean -dxf
+where docker >nul 2>nul
+if %errorlevel% equ 0 docker rmi -f jonathandung/asyncutils:latest
 goto :eof
 
 :docs

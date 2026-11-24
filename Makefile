@@ -4,7 +4,6 @@
 .SILENT:
 AUTESTMAXFAIL ?= 3
 O := "$(wordlist 2,$(words $(MAKECMDGOALS)), $(MAKECMDGOALS))" "$$(O)"
-PREK_UV_SOURCE := none
 SHELL := /bin/bash
 define i
 	if command -v $(1) >/dev/null 2>&1; then true; elif command -v curl >/dev/null 2>&1; then curl -sSf $(2) | sh; elif command -v wget >/dev/null 2>&1; then wget -qO- $(2) | sh; else echo "curl or wget required to install $(1)" >&2; exit 1; fi
@@ -14,7 +13,7 @@ define d
 	$(MAKE) -C docs $(1)
 endef
 .prek-stamp:
-	$(call i,prek,https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.sh)
+	PREK_UV_SOURCE=none $(call i,prek,https://github.com/j178/prek/releases/download/v0.5.11/prek-installer.sh)
 	prek install
 	touch "$@"
 .uv-stamp:
@@ -24,8 +23,8 @@ endef
 all:
 	$(MAKE) audit
 	$(MAKE) lint
-	$(MAKE) docs
-	$(MAKE) test
+	echo "Building docs..." && $(MAKE) docs
+	echo "Running tests..." && $(MAKE) badges
 audit:
 	echo "Running uv audit..."
 	uv audit
@@ -44,6 +43,7 @@ clean:
 	find . -type f -name '*.py[co]' -delete
 dclean:
 	git clean -dxf
+	if command -v docker >/dev/null 2>&1; then docker rmi -f jonathandung/asyncutils:latest; fi
 docs:
 	$(call d,html)
 help:

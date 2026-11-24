@@ -164,6 +164,7 @@ awrap
 azip
 aziplongest
 backpressure
+basedpyright
 betterleaks
 blake
 bunx

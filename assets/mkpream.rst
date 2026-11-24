@@ -28,6 +28,7 @@ Target-specific dependencies
 Requires `docker <https://docs.docker.com/engine>`__:
 
 * build
+* dclean
 * run
 
 Requires `uv`_:

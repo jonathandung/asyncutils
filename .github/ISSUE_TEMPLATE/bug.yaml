@@ -23,7 +23,7 @@ body:
   id: mre
   attributes:
     label: To reproduce
-    description: Include a minimal, self-contained, reproducible example as a Python snippet below.
+    description: A self-contained Python snippet to demonstrate the bug.
     render: python
     value: '# This bug is theoretical.'
   validations:
@@ -31,10 +31,10 @@ body:
 - type: textarea
   id: expected
   attributes:
-    label: Expected behavior
+    label: Expected behaviour
     description: A clear and concise description of what you expected to happen.
 - type: upload
-  id: screenshots
+  id: ss
   attributes:
     label: Screenshots
     description: If applicable, such as when the CLI output appears malformed, attach visual media to help explain your problem. GIFs are acceptable.
@@ -42,14 +42,14 @@ body:
   id: pyv
   attributes:
     label: Python version tag
-    description: The output of `python3 -VV`
+    description: The output of `python3 -VV`.
   validations:
     required: true
 - type: input
   id: auv
   attributes:
     label: asyncutils version
-    description: The output of `asyncutils -v`
+    description: The output of `asyncutils -v`.
   validations:
     required: true
 - type: input
@@ -70,7 +70,7 @@ body:
   id: tb
   attributes:
     label: Traceback
-    description: Paste the full error traceback here, or a [pastebin](https://pastebin.com) or [paste.rs](https://paste.rs) link if it is too long.
+    description: Paste the full error traceback here, or a [paste.rs](https://paste.rs) link if it is too long.
     render: python traceback
 - type: textarea
   id: cfg
@@ -85,7 +85,7 @@ body:
   id: logs
   attributes:
     label: Logs
-    description: Paste the relevant log output here, best in debug level, or a [pastebin](https://pastebin.com) or [paste.rs](https://paste.rs) link if it is too long.
+    description: Paste the relevant log output here, best in debug level, or a [paste.rs](https://paste.rs) link if it is too long.
     render: text
 - type: textarea
   id: env

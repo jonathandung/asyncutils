@@ -27,7 +27,7 @@ body:
     description: Write some code to demonstrate your feature here.
     render: python
 - type: upload
-  id: screenshots
+  id: ss
   attributes:
     label: Screenshots
     description: If applicable, attach visual media to help explain your suggestion. GIFs are acceptable.
